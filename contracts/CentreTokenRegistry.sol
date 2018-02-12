@@ -2,7 +2,11 @@ pragma solidity ^0.4.11;
 
 import './../lib/openzeppelin/contracts/ownership/Ownable.sol';
 
-contract Registry is Ownable {
+/**
+ * @title Centre Token Registry
+ * @dev Registry to store addresses and details of Centre-Approved tokens
+ */
+contract CentreTokenRegistry is Ownable {
 
     string constant public contract_version = "0.1._";
 
@@ -13,7 +17,7 @@ contract Registry is Ownable {
         bool isValid;       // trick to check if struct exists, "null" doesn't exist
     }
 
-    mapping(address => TokenInfo) public registry;
+    mapping(address => TokenInfo) public registry; 
 
     event TokenAdded(address token_address);
     event TokenRemoved(address token_address);
@@ -29,6 +33,14 @@ contract Registry is Ownable {
         _;
     }
 
+    /**
+    * @dev Function to add a token to the registry
+    * @param token_address The address of the token.
+    * @param approvedDate The date of the Centre approval. 
+    * @param latestAuditDate The date of the latest Centre audit.
+    * @param latestAuditHash The hash of the latest Centre audit document.
+    * @return the address of the added token
+    */
     function addToken(address token_address, string approvedDate, string latestAuditDate, bytes32 latestAuditHash) 
         doesNotExist(token_address)
         onlyOwner
@@ -41,6 +53,11 @@ contract Registry is Ownable {
         return token_address;
     }
 
+    /**
+    * @dev Function to remove a token from the registry
+    * @param token_address The address of the token.
+    * @return the address of the removed token
+    */
     function removeToken(address token_address) 
         doesExist(token_address)
         onlyOwner
@@ -53,7 +70,13 @@ contract Registry is Ownable {
         return token_address;
     }
 
-
+    /**
+    * @dev Function to update the audit information of a token
+    * @param token_address The address of the token.
+    * @param latestAuditDate The date of the latest Centre audit.
+    * @param latestAuditHash The hash of the latest Centre audit document.
+    * @return the address of the added token
+    */
     function updateAudit(address token_address, string latestAuditDate, bytes32 latestAuditHash) 
         doesExist(token_address)
         onlyOwner
@@ -68,6 +91,12 @@ contract Registry is Ownable {
         return token_address;
     }
 
+    /**
+    * @dev Function to correct the approvedDate of a token
+    * @param token_address The address of the token.
+    * @param approvedDate The date of the Centre approval. 
+    * @return the address of the added token
+    */
     function correctApprovedDate(address token_address, string approvedDate) 
         doesExist(token_address)
         onlyOwner
