@@ -87,7 +87,7 @@ contract('FiatToken', function (accounts) {
 
   });
 
-  it('should set fees and complete transferFrom tokens with fees', async function() {
+  it('should set fees and complete transferFrom with fees', async function() {
     fee = 12;
     feeBase = 100;
     await token.updateTransferFee(fee, feeBase);
@@ -109,7 +109,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(balanceFeeAccount, feeAmount);
   });
 
-  it('should set long-decimal fees and complete transferFrom tokens with fees', async function() {
+  it('should set long-decimal fees and complete transferFrom with fees', async function() {
     fee = 1235;
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
@@ -131,7 +131,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(balanceFeeAccount, feeAmount);
   });
 
-  it('should set fees and and fail to comlete transferFrom with insufficient balance to cover fees', async function() {
+  it('should set fees and and fail to complete transferFrom with insufficient balance to cover fees', async function() {
     fee = 1235;
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
@@ -156,7 +156,7 @@ contract('FiatToken', function (accounts) {
       }
   });
 
-  it('should set long-decimal fees and complete transfer tokens with fees', async function() {
+  it('should set long-decimal fees and complete transfer with fees', async function() {
     fee = 123589;
     feeBase = 1000000;
     await token.updateTransferFee(fee, feeBase);
@@ -178,7 +178,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(balanceFeeAccount, feeAmount);
   });
 
-  it('should set long-decimal fees and complete transfer tokens with fees from non-owner', async function() {
+  it('should set long-decimal fees and complete transfer with fees from non-owner', async function() {
     fee = 123589;
     feeBase = 1000000;
     await token.updateTransferFee(fee, feeBase);
