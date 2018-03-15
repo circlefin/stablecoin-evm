@@ -47,17 +47,13 @@ contract FiatToken is MintableToken {
    * @param _value uint256 the amount of tokens to be transferred
   */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    require(_to != address(0));
+    uint256 feeAmount;
+    uint256 totalAmount; 
+    (feeAmount, totalAmount) = prepareTransferFees(_from, _to, _value);
 
-    uint256 feeAmount = calculateTransferFee(_value);
-    uint256 totalAmount = _value.add(feeAmount);
-
-    require(totalAmount <= balances[_from]);
     require(totalAmount <= allowed[_from][msg.sender]);
 
-    balances[_from] = balances[_from].sub(totalAmount);
-    balances[_to] = balances[_to].add(_value);
-    balances[feeAccount] = balances[feeAccount].add(feeAmount);
+    doTransfer(_from, _to, _value, feeAmount, totalAmount);
     allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(totalAmount);
     Transfer(_from, _to, _value);
     return true;
@@ -69,19 +65,45 @@ contract FiatToken is MintableToken {
    * @param _value The amount to be transferred.
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
+    uint256 feeAmount;
+    uint256 totalAmount; 
+    (feeAmount, totalAmount) = prepareTransferFees(msg.sender, _to, _value);
+
+    doTransfer(msg.sender, _to, _value, feeAmount, totalAmount);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+
+  /**
+   * @dev calculates fees for transfer and validates sender, recipient, amount
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint256 the amount of tokens to be transferred
+  */
+  function prepareTransferFees(address _from, address _to, uint256 _value) internal view returns (uint256, uint256) {
     require(_to != address(0));
 
     uint256 feeAmount = calculateTransferFee(_value);
     uint256 totalAmount = _value.add(feeAmount);
 
-    require(totalAmount <= balances[msg.sender]);
+    require(totalAmount <= balances[_from]);
 
+    return (feeAmount, totalAmount);
+  }
+
+  /**
+   * @dev updates balances for sender, recipient, feeAccount in a transfer
+   * @param _from address The address which you want to send tokens from
+   * @param _to address The address which you want to transfer to
+   * @param _value uint256 the amount of tokens to be transferred
+   * @param _feeAmount uint256 the amount of tokens in transfer fees
+   * @param _totalAmount uint256 the amount of tokens to be transfered added to the transfer fees
+  */
+  function doTransfer(address _from, address _to, uint256 _value, uint256 _feeAmount, uint256 _totalAmount) internal {
     // SafeMath.sub will throw if there is not enough balance.
-    balances[msg.sender] = balances[msg.sender].sub(totalAmount);
+    balances[_from] = balances[_from].sub(_totalAmount);
     balances[_to] = balances[_to].add(_value);
-    balances[feeAccount] = balances[feeAccount].add(feeAmount);
-    Transfer(msg.sender, _to, _value);
-    return true;
+    balances[feeAccount] = balances[feeAccount].add(_feeAmount);
   }
 
 }
