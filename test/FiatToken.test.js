@@ -154,11 +154,11 @@ contract('FiatToken', function (accounts) {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
     await token.mint(accounts[0], 900);
-    await token.approve(accounts[3], 634);
+    await token.approve(accounts[3], 895);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 634);
+    assert.equal(allowed.c[0], 895);
     try {
-        transfer = await token.transferFrom(accounts[0], accounts[3], 634, {from: accounts[3]});
+        transfer = await token.transferFrom(accounts[0], accounts[3], 895, {from: accounts[3]});
         assert.fail()
       } catch(e) {
 
@@ -279,6 +279,50 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should test consistency of transfer(x) and approve(x) + transferFrom(x) with fees', async function() {
+    fee = 1235;
+    feeBase = 10000;
+    await token.updateTransferFee(fee, feeBase);
+    let allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 0);
+    let transferAmount = 650;
+    let feeAmount = calculateFeeAmount(transferAmount);
+    let totalAmount = transferAmount + feeAmount;
+    await token.mint(accounts[0], totalAmount);
+
+    let transfer = await token.transfer(accounts[3], transferAmount);
+    checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount, feeAmount);
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, totalAmount - transferAmount - feeAmount);
+    let balance3 = await token.balanceOf(accounts[3]);
+    assert.equal(balance3, transferAmount);
+    let balanceFeeAccount = await token.balanceOf(feeAccount);
+    assert.equal(balanceFeeAccount, feeAmount);
+
+    await token.allowance.call(accounts[1], accounts[4]);
+    assert.equal(allowed.c[0], 0);
+    await token.mint(accounts[1], totalAmount);
+
+    await token.approve(accounts[4], transferAmount, {from: accounts[1]});
+    allowed = await token.allowance.call(accounts[1], accounts[4]);
+    assert.equal(allowed.c[0], transferAmount);
+
+    transfer = await token.transferFrom(accounts[1], accounts[4], transferAmount, {from: accounts[4]});
+
+    checkTransferEvents(transfer, accounts[1], accounts[4], transferAmount, feeAmount);
+
+    let balance1 = await token.balanceOf(accounts[1]);
+    assert.equal(balance0, totalAmount - transferAmount - feeAmount);
+    let balance4 = await token.balanceOf(accounts[4]);
+    assert.equal(balance3, transferAmount);
+    let balanceFeeAccountNew = await token.balanceOf(feeAccount);
+    assert.equal(balanceFeeAccountNew.c[0], feeAmount + balanceFeeAccount.c[0]);
+  });
+
+
+/*Comments out approveWithFee/inreaseApprovalWithFee/decreaseApprovalWithFee tests*/
+/*
   it('should set long-decimal fees, approve transfer amount with fee, and complete transferFrom with fees', async function() {
     fee = 1235;
     feeBase = 10000;
@@ -306,8 +350,8 @@ contract('FiatToken', function (accounts) {
     let balanceFeeAccount = await token.balanceOf(feeAccount);
     assert.equal(balanceFeeAccount, feeAmount);
   });
-
-
+*/
+/*
   it('should set long-decimal fees, set approval amount with fee, complete transferFrom, increase approval with fees and complete transferFrom another with fees', async function() {
     fee = 1235;
     feeBase = 10000;
@@ -318,12 +362,12 @@ contract('FiatToken', function (accounts) {
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
     await token.mint(accounts[0], totalAmount);
+    console.log(totalAmount);
 
 
     await token.approveWithFee(accounts[3], transferAmount);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], totalAmount);
-
     transfer = await token.transferFrom(accounts[0], accounts[3], transferAmount, {from: accounts[3]});
 
     checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount, feeAmount);
@@ -359,7 +403,8 @@ contract('FiatToken', function (accounts) {
     balanceFeeAccount = await token.balanceOf(feeAccount);
     assert.equal(balanceFeeAccount, feeAmount + feeAmountOld);
   });
-
+*/
+/*
   it('should set approve transfer amount with fee, decrease approval amount with fee', async function() {
     fee = 1235;
     feeBase = 10000;
@@ -373,7 +418,7 @@ contract('FiatToken', function (accounts) {
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
   });
-
+*/
   it('should have correct name', async function () {
     let actual = await token.name.call();
     assert.equal(actual, name);
