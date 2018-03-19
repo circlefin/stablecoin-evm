@@ -1,8 +1,8 @@
 pragma solidity ^0.4.18;
 
-import './../lib/openzeppelin/contracts/token/ERC20/MintableToken.sol';
+import './FiatMintableToken.sol';
 
-contract FiatToken is MintableToken {
+contract FiatToken is FiatMintableToken {
   
   string public name;
   string public symbol;
@@ -14,7 +14,7 @@ contract FiatToken is MintableToken {
 
   event Fee(address from, address feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount) public {
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter) public {
     name = _name;
     symbol = _symbol;
     currency = _currency;
@@ -22,6 +22,7 @@ contract FiatToken is MintableToken {
     fee = _fee;
     feeBase = _feeBase;
     feeAccount = _feeAccount;
+    minter = _minter;
   }
 
   /**

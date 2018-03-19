@@ -9,6 +9,7 @@ var feeBase = 1000;
 contract('FiatToken', function (accounts) {
   let token;
   let feeAccount = accounts[8];
+  let minterAccount = accounts[9];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -25,8 +26,12 @@ contract('FiatToken', function (accounts) {
     assert.equal(transfer.logs[1].args.value, value);
   }
 
+  mint = function(address, amount) {
+    return token.mint(address, amount, {from: minterAccount});
+  }
+
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -42,7 +47,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should mint a given amount of tokens to a given address', async function () {
-    const result = await token.mint(accounts[0], 100);
+    const result = await mint(accounts[0], 100);
     assert.equal(result.logs[0].event, 'Mint');
     assert.equal(result.logs[0].args.to.valueOf(), accounts[0]);
     assert.equal(result.logs[0].args.amount.valueOf(), 100);
@@ -57,8 +62,8 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should add mutliple mints to a given address in address balance', async function () {
-    await token.mint(accounts[0], 100);
-    await token.mint(accounts[0], 200);
+    await mint(accounts[0], 100);
+    await mint(accounts[0], 200);
 
     let balance0 = await token.balanceOf(accounts[0]);
     assert.equal(balance0, 300);
@@ -67,18 +72,18 @@ contract('FiatToken', function (accounts) {
 
 
   it('should add mutliple mints to total supply', async function () {
-    await token.mint(accounts[0], 100);
-    await token.mint(accounts[0], 400);
-    await token.mint(accounts[1], 600);
+    await mint(accounts[0], 100);
+    await mint(accounts[0], 400);
+    await mint(accounts[1], 600);
 
     let totalSupply = await token.totalSupply();
     assert.equal(totalSupply, 1100);
   });
 
   it('should fail to mint from a non-owner call', async function () {
-     token.mint(accounts[0], 400);
+     await mint(accounts[0], 400);
      try {
-      await token.mint(accounts[0], 100, {from: accounts[1]});
+      await token.mint(accounts[0], 100, {from: accounts[0]});
       assert.fail();
     } catch (e) {
 
@@ -89,10 +94,10 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should fail to mint after call to finishMinting', async function () {
-    await token.finishMinting();
+    await token.finishMinting({from: minterAccount});
     assert.equal(await token.mintingFinished(), true);
     try {
-      await (token.mint(accounts[0], 100));
+      await mint(accounts[0], 100);
       assert.fail("Minting not stopped");
     } catch (e) {}
 
@@ -104,7 +109,7 @@ contract('FiatToken', function (accounts) {
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[0], 900);
+    await mint(accounts[0], 900);
     await token.approve(accounts[3], 634);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 634);
@@ -129,7 +134,7 @@ contract('FiatToken', function (accounts) {
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[0], 900);
+    await mint(accounts[0], 900);
     await token.approve(accounts[3], 634);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 634);
@@ -153,7 +158,7 @@ contract('FiatToken', function (accounts) {
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[0], 900);
+    await mint(accounts[0], 900);
     await token.approve(accounts[3], 895);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 895);
@@ -178,7 +183,7 @@ contract('FiatToken', function (accounts) {
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[0], 1900);
+    await mint(accounts[0], 1900);
     await token.approve(accounts[3], 1500);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 1500);
@@ -201,7 +206,7 @@ contract('FiatToken', function (accounts) {
     fee = 123589;
     feeBase = 1000000;
     await token.updateTransferFee(fee, feeBase);
-    await token.mint(accounts[2], 1900);
+    await mint(accounts[2], 1900);
 
     let transfer = await token.transfer(accounts[3], 1000, {from: accounts[2]});
 
@@ -219,7 +224,7 @@ contract('FiatToken', function (accounts) {
   it('should set allowance and balances before and after approved transfer', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[0], 500);
+    await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 100);
@@ -240,7 +245,7 @@ contract('FiatToken', function (accounts) {
   it('should fail on unauthorized approved transfer and not change balances', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[0], 500);
+    await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 100);
@@ -261,7 +266,7 @@ contract('FiatToken', function (accounts) {
   it('should fail on invalid approved transfer amount and not change balances', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[0], 500);
+    await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 100);
@@ -288,7 +293,7 @@ contract('FiatToken', function (accounts) {
     let transferAmount = 650;
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
-    await token.mint(accounts[0], totalAmount);
+    await mint(accounts[0], totalAmount);
 
     let transfer = await token.transfer(accounts[3], transferAmount);
     checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount, feeAmount);
@@ -302,7 +307,7 @@ contract('FiatToken', function (accounts) {
 
     await token.allowance.call(accounts[1], accounts[4]);
     assert.equal(allowed.c[0], 0);
-    await token.mint(accounts[1], totalAmount);
+    await mint(accounts[1], totalAmount);
 
     await token.approve(accounts[4], transferAmount, {from: accounts[1]});
     allowed = await token.allowance.call(accounts[1], accounts[4]);
@@ -332,7 +337,7 @@ contract('FiatToken', function (accounts) {
     let transferAmount = 650;
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
-    await token.mint(accounts[0], totalAmount);
+    await mint(accounts[0], totalAmount);
 
 
     await token.approveWithFee(accounts[3], transferAmount);
@@ -361,7 +366,7 @@ contract('FiatToken', function (accounts) {
     let transferAmount = 650;
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
-    await token.mint(accounts[0], totalAmount);
+    await mint(accounts[0], totalAmount);
     console.log(totalAmount);
 
 
@@ -386,7 +391,7 @@ contract('FiatToken', function (accounts) {
     transferAmount = 800;
     feeAmount = calculateFeeAmount(transferAmount);
     totalAmount = transferAmount + feeAmount;
-    await token.mint(accounts[0], totalAmount);
+    await mint(accounts[0], totalAmount);
 
     await token.increaseApprovalWithFee(accounts[3], transferAmount);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
