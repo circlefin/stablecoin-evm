@@ -18,7 +18,7 @@ contract FiatToken is FiatMintableToken, Upgradable {
   uint256 public feeBase;
   address public feeAccount;
 
-  event Fee(address from, address feeAccount, uint256 feeAmount);
+  event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
   function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _upgrader) public {
     name = _name;
