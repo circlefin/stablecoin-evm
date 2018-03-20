@@ -1,9 +1,15 @@
 pragma solidity ^0.4.18;
 
-import './FiatMintableToken.sol';
 
-contract FiatToken is FiatMintableToken {
-  
+import './FiatMintableToken.sol';
+import './MintableTokenByRole.sol';
+import './PausableTOkenByRole.sol';
+
+/**
+ * @title FiatToken 
+ * @dev ERC20 Token backed by fiat reserves
+ */
+contract FiatToken is MintableTokenByRole, PausableTokenByRole {  
   string public name;
   string public symbol;
   string public currency;
@@ -14,7 +20,7 @@ contract FiatToken is FiatMintableToken {
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter) public {
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser) public {
     name = _name;
     symbol = _symbol;
     currency = _currency;
@@ -23,6 +29,7 @@ contract FiatToken is FiatMintableToken {
     feeBase = _feeBase;
     feeAccount = _feeAccount;
     minter = _minter;
+    pauser = _pauser;
   }
 
   /**
@@ -33,6 +40,22 @@ contract FiatToken is FiatMintableToken {
   function updateTransferFee(uint256 _fee, uint256 _feeBase) public onlyOwner {
     fee = _fee;
     feeBase = _feeBase;
+  }
+
+  /**
+   * @dev Adds pausable condition to mint.
+   * @return True if the operation was successful.
+  */
+  function mint(address _to, uint256 _amount) whenNotPaused public returns (bool) {
+    return super.mint(_to, _amount);
+  }
+
+  /**
+   * @dev Adds pausable condition to finishMinting.
+   * @return True if the operation was successful.
+  */
+  function finishMinting() whenNotPaused public returns (bool) {
+    return super.finishMinting();
   }
 
   /**
