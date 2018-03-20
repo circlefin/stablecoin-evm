@@ -6,7 +6,7 @@ import './../lib/openzeppelin/contracts/token/ERC20/MintableToken.sol';
  * @title Mintable token
  * @dev Simple ERC20 Token example, with special "minter" role overriding the owner role
  */
-contract FiatMintableToken is MintableToken {
+contract MintableTokenByRole is MintableToken {
   
   address public minter;
 
