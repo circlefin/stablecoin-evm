@@ -613,6 +613,19 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should pause and should not be able to redeem', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await redeem(accounts[2], 500);
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
   it('should try to pause with non-pauser and fail to pause', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
