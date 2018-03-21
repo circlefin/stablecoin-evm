@@ -10,6 +10,8 @@ contract('FiatToken', function (accounts) {
   let token;
   let feeAccount = accounts[8];
   let minterAccount = accounts[9];
+  let pauserAccount = accounts[6];
+  let redeemerAccount = accounts[5];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -30,8 +32,100 @@ contract('FiatToken', function (accounts) {
     return token.mint(address, amount, {from: minterAccount});
   }
 
+  setLongDecimalFeesTransferWithFees = async function() {
+    fee = 123589;
+    feeBase = 1000000;
+    await token.updateTransferFee(fee, feeBase);
+    let allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 0);
+    await mint(accounts[0], 1900);
+    await token.approve(accounts[3], 1500);
+    allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 1500);
+
+    let transfer = await token.transfer(accounts[3], 1000, {from: accounts[0]});
+
+    let feeAmount = calculateFeeAmount(1000);
+    checkTransferEvents(transfer, accounts[0], accounts[3], 1000, feeAmount);
+
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 1900 - 1000 - feeAmount);
+    let balance3 = await token.balanceOf(accounts[3]);
+    assert.equal(balance3, 1000);
+    let balanceFeeAccount = await token.balanceOf(feeAccount);
+    assert.equal(balanceFeeAccount, feeAmount);
+  }
+
+  mintToGivenAddress = async function() {
+    const result = await mint(accounts[0], 100);
+    assert.equal(result.logs[0].event, 'Mint');
+    assert.equal(result.logs[0].args.to.valueOf(), accounts[0]);
+    assert.equal(result.logs[0].args.amount.valueOf(), 100);
+    assert.equal(result.logs[1].event, 'Transfer');
+    assert.equal(result.logs[1].args.from.valueOf(), 0x0);
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 100);
+
+    let totalSupply = await token.totalSupply();
+    assert.equal(totalSupply, 100);
+  }
+
+  failToMintAfterFinishMinting = async function() {
+    await token.finishMinting({from: minterAccount});
+    assert.equal(await token.mintingFinished(), true);
+    try {
+      await mint(accounts[0], 100);
+      assert.fail("Minting not stopped");
+    } catch (e) {}
+  }
+
+  transferFromWithFees = async function() {
+    fee = 1235;
+    feeBase = 10000;
+    await token.updateTransferFee(fee, feeBase);
+    let allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 0);
+    await mint(accounts[0], 900);
+    await token.approve(accounts[3], 634);
+    allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 634);
+
+    transfer = await token.transferFrom(accounts[0], accounts[3], 534, {from: accounts[3]});
+
+    let feeAmount = calculateFeeAmount(534);
+    checkTransferEvents(transfer, accounts[0], accounts[3], 534, feeAmount);
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 900 - 534 - feeAmount);
+    let balance3 = await token.balanceOf(accounts[3]);
+    assert.equal(balance3, 534);
+    let balanceFeeAccount = await token.balanceOf(feeAccount);
+    assert.equal(balanceFeeAccount, feeAmount);
+  }
+
+  approve = async function(to, amount, from) {
+    await token.approve(to, amount, {from: from});
+  }
+
+  increaseApproval = async function(to, amount, from) {
+    await token.increaseApproval(to, amount, {from: from});
+  }
+
+  decreaseApproval = async function(to, amount, from) {
+    await token.decreaseApproval(to, amount, {from: from});
+  }
+
+  redeem = async function(account, amount) {
+    let redeemResult = await token.redeem(account, amount, {from: redeemerAccount});
+    assert.equal(redeemResult.logs[0].event, 'Redeem');
+    assert.equal(redeemResult.logs[0].args.redeemedAddress, account);
+    assert.equal(redeemResult.logs[0].args.amount, amount);
+  }
+
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, pauserAccount, redeemerAccount);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -46,19 +140,16 @@ contract('FiatToken', function (accounts) {
     assert.equal(mintingFinished, false);
   });
 
-  it('should mint a given amount of tokens to a given address', async function () {
-    const result = await mint(accounts[0], 100);
-    assert.equal(result.logs[0].event, 'Mint');
-    assert.equal(result.logs[0].args.to.valueOf(), accounts[0]);
-    assert.equal(result.logs[0].args.amount.valueOf(), 100);
-    assert.equal(result.logs[1].event, 'Transfer');
-    assert.equal(result.logs[1].args.from.valueOf(), 0x0);
+  it('should add mutliple mints to a given address in address balance', async function () {
+    await mint(accounts[0], 100);
+    await mint(accounts[0], 200);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 100);
+    assert.equal(balance0, 300);
+  });
 
-    let totalSupply = await token.totalSupply();
-    assert.equal(totalSupply, 100);
+  it('should mint a given amount of tokens to a given address', async function () {
+    await mintToGivenAddress();
   });
 
   it('should add mutliple mints to a given address in address balance', async function () {
@@ -69,7 +160,6 @@ contract('FiatToken', function (accounts) {
     assert.equal(balance0, 300);
 
   });
-
 
   it('should add mutliple mints to total supply', async function () {
     await mint(accounts[0], 100);
@@ -94,62 +184,32 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should fail to mint after call to finishMinting', async function () {
-    await token.finishMinting({from: minterAccount});
-    assert.equal(await token.mintingFinished(), true);
-    try {
-      await mint(accounts[0], 100);
-      assert.fail("Minting not stopped");
-    } catch (e) {}
-
+    await failToMintAfterFinishMinting();
   });
 
   it('should set fees and complete transferFrom with fees', async function() {
-    fee = 12;
-    feeBase = 100;
-    await token.updateTransferFee(fee, feeBase);
-    let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 0);
-    await mint(accounts[0], 900);
-    await token.approve(accounts[3], 634);
-    allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 634);
+    await transferFromWithFees();
+  });
 
-    transfer = await token.transferFrom(accounts[0], accounts[3], 534, {from: accounts[3]});
+  it('should approve', async function() {
+    await approve(accounts[3], 100, accounts[2]);
+    assert.equal((await token.allowance(accounts[2], accounts[3])).c[0], 100);
+  });
 
-    let feeAmount = calculateFeeAmount(534);
-    checkTransferEvents(transfer, accounts[0], accounts[3], 534, feeAmount);
+  it('should increase approval', async function() {
+    await approve(accounts[3], 100, accounts[2]);
+    await increaseApproval(accounts[3], 50, accounts[2]);
+    assert.equal((await token.allowance(accounts[2], accounts[3])).c[0], 150);
+  });
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 900 - 534 - feeAmount);
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, 534);
-    let balanceFeeAccount = await token.balanceOf(feeAccount);
-    assert.equal(balanceFeeAccount, feeAmount);
-
+  it('should decrease approval', async function() {
+    await approve(accounts[3], 100, accounts[2]);
+    await decreaseApproval(accounts[3], 50, accounts[2]);
+    assert.equal((await token.allowance(accounts[2], accounts[3])).c[0], 50);
   });
 
   it('should set long-decimal fees and complete transferFrom with fees', async function() {
-    fee = 1235;
-    feeBase = 10000;
-    await token.updateTransferFee(fee, feeBase);
-    let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 0);
-    await mint(accounts[0], 900);
-    await token.approve(accounts[3], 634);
-    allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 634);
-
-    transfer = await token.transferFrom(accounts[0], accounts[3], 534, {from: accounts[3]});
-
-    let feeAmount = calculateFeeAmount(534);
-    checkTransferEvents(transfer, accounts[0], accounts[3], 534, feeAmount);
-
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 900 - 534 - feeAmount);
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, 534);
-    let balanceFeeAccount = await token.balanceOf(feeAccount);
-    assert.equal(balanceFeeAccount, feeAmount);
+    await transferFromWithFees();
   });
 
   it('should set fees and and fail to complete transferFrom with insufficient balance to cover fees', async function() {
@@ -178,28 +238,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should set long-decimal fees and complete transfer with fees', async function() {
-    fee = 123589;
-    feeBase = 1000000;
-    await token.updateTransferFee(fee, feeBase);
-    let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 0);
-    await mint(accounts[0], 1900);
-    await token.approve(accounts[3], 1500);
-    allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 1500);
-
-    let transfer = await token.transfer(accounts[3], 1000, {from: accounts[0]});
-
-    let feeAmount = calculateFeeAmount(1000);
-    checkTransferEvents(transfer, accounts[0], accounts[3], 1000, feeAmount);
-
-
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 1900 - 1000 - feeAmount);
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, 1000);
-    let balanceFeeAccount = await token.balanceOf(feeAccount);
-    assert.equal(balanceFeeAccount, feeAmount);
+    await setLongDecimalFeesTransferWithFees();  
   });
 
   it('should set long-decimal fees and complete transfer with fees from non-owner', async function() {
@@ -424,6 +463,157 @@ contract('FiatToken', function (accounts) {
     assert.equal(allowed.c[0], 0);
   });
 */
+
+  it('should pause and should not be able to transfer', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await transferFromWithFees();
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should pause and should not be able to transferFrom', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await setLongDecimalFeesTransferWithFees();
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+    it('should pause and should not be able to approve', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await approve(accounts[2], 50, accounts[3]);
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should pause and should not be able to increaseApproval', async function () {
+    await mint(accounts[2], 1900);
+    await approve(accounts[2], 50, accounts[3]);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await increaseApproval(accounts[2], 200, accounts[3]);
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should pause and should not be able to decreaseApproval', async function () {
+    await mint(accounts[2], 1900);
+    await approve(accounts[2], 50, accounts[3]);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await decreaseApproval(accounts[2], 20, accounts[3]);
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should pause and should not be able to transferFrom', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await setLongDecimalFeesTransferWithFees();
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+        it('should pause and should not be able to transferFrom', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await setLongDecimalFeesTransferWithFees();
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should pause and should not be able to mint', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await mintToGivenAddress();
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should pause and should not be able to finishMinting', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await failToMintAfterFinishMinting();
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should try to pause with non-pauser and fail to pause', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    try {
+      await token.pause({from: accounts[0]});
+      assert.fail();
+    } catch (e) {
+    } finally {
+      assert.equal(await token.paused.call(), false);
+    }
+  });  
+
+  it('should redeem tokens from account', async function () {
+    await mint(accounts[2], 1900);
+    await redeem(accounts[2], 1500);
+    assert.equal(await token.balanceOf(accounts[2]), 400);
+  });  
+
+  it('should fail to redeem tokens from account with non-redeemer account', async function () {
+    await mint(accounts[2], 1900);
+    try {
+      await token.redeem(accounts[2], 1500, {from: accounts[0]});
+      assert.fail();
+    } catch (e) {
+
+    } finally {
+      assert.equal(await token.balanceOf(accounts[2]), 1900);
+    }
+  });  
+
+
   it('should have correct name', async function () {
     let actual = await token.name.call();
     assert.equal(actual, name);
