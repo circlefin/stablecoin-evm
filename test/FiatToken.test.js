@@ -637,8 +637,10 @@ contract('FiatToken', function (accounts) {
 
   it('should redeem tokens from account', async function () {
     await mint(accounts[2], 1900);
+    let totalSupply = (await token.totalSupply()).c[0];
     await redeem(accounts[2], 1500);
     assert.equal(await token.balanceOf(accounts[2]), 400);
+    assert.equal((await token.totalSupply()).c[0], totalSupply - 1500);
   });  
 
   it('should fail to redeem tokens from account with non-redeemer account', async function () {
