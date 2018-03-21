@@ -531,32 +531,6 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-  it('should pause and should not be able to transferFrom', async function () {
-    await mint(accounts[2], 1900);
-    assert.equal(await token.paused.call(), false);
-    await token.pause({from: pauserAccount});
-    assert.equal(await token.paused.call(), true);
-
-    try {
-      await setLongDecimalFeesTransferWithFees();
-      assert.fail();
-    } catch (e) {
-    }
-  });
-
-  it('should pause and should not be able to transferFrom', async function () {
-    await mint(accounts[2], 1900);
-    assert.equal(await token.paused.call(), false);
-    await token.pause({from: pauserAccount});
-    assert.equal(await token.paused.call(), true);
-
-    try {
-      await setLongDecimalFeesTransferWithFees();
-      assert.fail();
-    } catch (e) {
-    }
-  });
-
   it('should pause and should not be able to mint', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
@@ -569,6 +543,49 @@ contract('FiatToken', function (accounts) {
     } catch (e) {
     }
   });
+
+  it('should pause and should not be able to finishMinting', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await failToMintAfterFinishMinting();
+      assert.fail();
+    } catch (e) {
+    }
+  });
+
+  it('should try to pause with non-pauser and fail to pause', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    try {
+      await token.pause({from: accounts[0]});
+      assert.fail();
+    } catch (e) {
+    } finally {
+      assert.equal(await token.paused.call(), false);
+    }
+  });  
+
+  it('should redeem tokens from account', async function () {
+    await mint(accounts[2], 1900);
+    await redeem(accounts[2], 1500);
+    assert.equal(await token.balanceOf(accounts[2]), 400);
+  });  
+
+  it('should fail to redeem tokens from account with non-redeemer account', async function () {
+    await mint(accounts[2], 1900);
+    try {
+      await token.redeem(accounts[2], 1500, {from: accounts[0]});
+      assert.fail();
+    } catch (e) {
+
+    } finally {
+      assert.equal(await token.balanceOf(accounts[2]), 1900);
+    }
+  });  
 
   it('should pause and should not be able to finishMinting', async function () {
     await mint(accounts[2], 1900);
