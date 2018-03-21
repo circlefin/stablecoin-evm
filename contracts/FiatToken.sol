@@ -63,6 +63,13 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, UpgradableByRole
   }
 
   /**
+   * @dev Adds pausable condition to redeem.
+  */
+  function redeem(address redeemAddress, uint amount) public whenNotPaused onlyRedeemer {
+    return super.redeem(redeemAddress, amount);
+  }
+
+  /**
    * @dev Transfer tokens from one address to another. The allowed amount includes the transfer value and transfer fee.
    * Validates that the totalAmount <= the allowed amount for the sender on the from account.
    * @param _from address The address which you want to send tokens from
