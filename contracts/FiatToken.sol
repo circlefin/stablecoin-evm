@@ -1,8 +1,13 @@
 pragma solidity ^0.4.18;
 
 import './FiatMintableToken.sol';
+import './Redeemable.sol';
 
-contract FiatToken is FiatMintableToken {
+/**
+ * @title FiatToken 
+ * @dev ERC20 Token backed by fiat reserves
+ */
+contract FiatToken is FiatMintableToken, RedeemableToken {
   
   string public name;
   string public symbol;
@@ -14,7 +19,7 @@ contract FiatToken is FiatMintableToken {
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter) public {
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _redeemer) public {
     name = _name;
     symbol = _symbol;
     currency = _currency;
@@ -23,6 +28,7 @@ contract FiatToken is FiatMintableToken {
     feeBase = _feeBase;
     feeAccount = _feeAccount;
     minter = _minter;
+    redeemer = _redeemer;
   }
 
   /**
