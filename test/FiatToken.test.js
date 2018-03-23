@@ -490,7 +490,7 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-    it('should pause and should not be able to approve', async function () {
+  it('should pause and should not be able to approve', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
     await token.pause({from: pauserAccount});
@@ -544,7 +544,7 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-        it('should pause and should not be able to transferFrom', async function () {
+  it('should pause and should not be able to transferFrom', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
     await token.pause({from: pauserAccount});
