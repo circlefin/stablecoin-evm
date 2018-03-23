@@ -6,10 +6,13 @@ var decimals = 2;
 var fee = 25;
 var feeBase = 1000;
 
+var nullAddress ='0x0000000000000000000000000000000000000000';
+
 contract('FiatToken', function (accounts) {
   let token;
   let feeAccount = accounts[8];
   let minterAccount = accounts[9];
+  let upgraderAccount = accounts[7];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -31,7 +34,7 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -424,6 +427,35 @@ contract('FiatToken', function (accounts) {
     assert.equal(allowed.c[0], 0);
   });
 */
+
+  it('should upgrade', async function () {
+    assert.equal(await token.upgradedAddress.call(), nullAddress);
+    assert.equal(await token.upgraded.call(), false);
+    let sampleNewContractAddress = accounts[2];
+    await token.upgrade(sampleNewContractAddress, {from: upgraderAccount});
+    assert.equal(await token.upgradedAddress.call(), sampleNewContractAddress);
+    assert.equal(await token.upgraded.call(), true);
+  });
+
+  it('should fail to upgrade with non-upgrader address', async function () {
+    assert.equal(await token.upgradedAddress.call(), nullAddress);
+    assert.equal(await token.upgraded.call(), false);
+    let sampleNewContractAddress = accounts[2];
+    try {
+      await token.upgrade(sampleNewContractAddress);
+      assert.fail();
+    } catch (e) {
+
+    } finally {
+      assert.equal(await token.upgradedAddress.call(), nullAddress);
+      assert.equal(await token.upgraded.call(), false);
+    }
+  });
+
+  it('should check upgrader correct address', async function () {
+    assert.equal(await token.upgrader.call(), upgraderAccount);
+  });
+
   it('should have correct name', async function () {
     let actual = await token.name.call();
     assert.equal(actual, name);
