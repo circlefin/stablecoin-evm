@@ -4,7 +4,7 @@ pragma solidity ^0.4.18;
  * @title Upgradable
  * @dev Creates "upgrader" role to upgrade a contract
  */
-contract Upgradable {
+contract UpgradableByRole {
   
   address public upgrader;
   bool public upgraded;
