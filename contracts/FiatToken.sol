@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './MintableTokenByRole.sol';
-import './PausableTOkenByRole.sol';
+import './PausableTokenByRole.sol';
 import './Redeemable.sol';
 
 /**
@@ -20,8 +20,8 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _depositCertifier) public {
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _redeemer) public {
     name = _name;
     symbol = _symbol;
     currency = _currency;
@@ -31,7 +31,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
     feeAccount = _feeAccount;
     minter = _minter;
     pauser = _pauser;
-    redeemer = _redeemer;
+    depositCertifier = _depositCertifier;
   }
 
   /**
@@ -58,13 +58,6 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
   */
   function finishMinting() whenNotPaused public returns (bool) {
     return super.finishMinting();
-  }
-
-  /**
-   * @dev Adds pausable condition to redeem.
-  */
-  function redeem(address redeemAddress, uint amount) public whenNotPaused onlyRedeemer {
-    return super.redeem(redeemAddress, amount);
   }
 
   /**
