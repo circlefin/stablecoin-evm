@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import './../lib/openzeppelin/contracts/token/ERC20/StandardToken.sol';
 
 /**
- * @title Upgradable
+ * @title Redeemable Token
  * @dev Creates "redeemer" role to redeem tokens
  */
 contract RedeemableToken is StandardToken {

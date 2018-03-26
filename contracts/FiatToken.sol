@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './FiatMintableToken.sol';
-import './Redeemable.sol';
+import './RedeemableToken.sol';
 
 /**
  * @title FiatToken 
