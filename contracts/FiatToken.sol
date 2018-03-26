@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import './MintableTokenByRole.sol';
 import './UpgradableByRole.sol';
 import './PausableTokenByRole.sol';
-import './Redeemable.sol';
+import './RedeemableToken.sol';
 
 
 /**
