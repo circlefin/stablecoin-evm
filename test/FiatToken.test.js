@@ -121,7 +121,7 @@ contract('FiatToken', function (accounts) {
   }
 
   redeem = async function(account, amount) {
-    let redeemResult = await token.redeem(account, amount, {from: redeemerAccount});
+    let redeemResult = await token.redeem(amount, {from: redeemerAccount});
     assert.equal(redeemResult.logs[0].event, 'Redeem');
     assert.equal(redeemResult.logs[0].args.redeemedAddress, account);
     assert.equal(redeemResult.logs[0].args.amount, amount);
