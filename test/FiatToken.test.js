@@ -14,7 +14,7 @@ contract('FiatToken', function (accounts) {
   let minterAccount = accounts[9];
   let upgraderAccount = accounts[7];
   let pauserAccount = accounts[6];
-  let redeemerAccount = accounts[5];
+  let depositCertifierAccount = accounts[5];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -121,14 +121,14 @@ contract('FiatToken', function (accounts) {
   }
 
   redeem = async function(account, amount) {
-    let redeemResult = await token.redeem(account, amount, {from: redeemerAccount});
+    let redeemResult = await token.redeem(amount, {from: account});
     assert.equal(redeemResult.logs[0].event, 'Redeem');
     assert.equal(redeemResult.logs[0].args.redeemedAddress, account);
     assert.equal(redeemResult.logs[0].args.amount, amount);
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount, pauserAccount, redeemerAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount, pauserAccount, depositCertifierAccount);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -610,19 +610,6 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-  it('should pause and should not be able to redeem', async function () {
-    await mint(accounts[2], 1900);
-    assert.equal(await token.paused.call(), false);
-    await token.pause({from: pauserAccount});
-    assert.equal(await token.paused.call(), true);
-
-    try {
-      await redeem(accounts[2], 500);
-      assert.fail();
-    } catch (e) {
-    }
-  });
-
   it('should try to pause with non-pauser and fail to pause', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
@@ -633,27 +620,71 @@ contract('FiatToken', function (accounts) {
     } finally {
       assert.equal(await token.paused.call(), false);
     }
-  });  
+  }); 
 
-  it('should redeem tokens from account', async function () {
-    await mint(accounts[2], 1900);
-    let totalSupply = (await token.totalSupply()).c[0];
-    await redeem(accounts[2], 1500);
-    assert.equal(await token.balanceOf(accounts[2]), 400);
-    assert.equal((await token.totalSupply()).c[0], totalSupply - 1500);
-  });  
+  it('should add and remove account to certified depositor list', async function() {
+    let addedDepositor = await token.addCertifiedDepositor(accounts[4], {from: depositCertifierAccount});
+    assert.equal(addedDepositor.logs[0].event, 'NewCertifiedDepositor');
+    let removedDepositor = await token.removeCertifiedDepositor(accounts[4], {from: depositCertifierAccount});
+    assert.equal(removedDepositor.logs[0].event, 'RemovedCertifiedDepositor');
+  });
 
-  it('should fail to redeem tokens from account with non-redeemer account', async function () {
-    await mint(accounts[2], 1900);
+  it('should fail to add and remove account to certified depositor list not using the depositCertifierAccount', async function() {
     try {
-      await token.redeem(accounts[2], 1500, {from: accounts[0]});
+      let addedDepositor = await token.addCertifiedDepositor(accounts[4], {from: accounts[2]});
+      assert.equal(addedDepositor.logs[0].event, 'NewCertifiedDepositor');
+      let removedDepositor = await token.removeCertifiedDepositor(accounts[4], {from: accounts[2]});
+      assert.equal(removedDepositor.logs[0].event, 'RemovedCertifiedDepositor');
+      assert.fail();
+    } catch (e) {
+
+    }
+  });
+
+  it('should redeem account in certified depositor list', async function() {
+    await mint(accounts[2], 1900);
+    let initialTotalSupply = await token.totalSupply();
+    let addedDepositor = await token.addCertifiedDepositor(accounts[2], {from: depositCertifierAccount});
+    await redeem(accounts[2], 600);
+    let balance = await token.balanceOf(accounts[2]);
+    assert.equal(balance, 1900 - 600);
+    let totalSupply = await token.totalSupply();
+    assert.equal(totalSupply.c[0] + 600, initialTotalSupply.c[0]);
+  });
+
+  it('should fail to redeem account not in certified depositor list', async function() {
+    await mint(accounts[2], 1900);
+    let initialTotalSupply = await token.totalSupply();
+    try {
+      await redeem(accounts[2], 600);
       assert.fail();
     } catch (e) {
 
     } finally {
-      assert.equal(await token.balanceOf(accounts[2]), 1900);
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance, 1900);
+       let totalSupply = await token.totalSupply();
+       assert.equal(totalSupply.c[0], initialTotalSupply.c[0]);
     }
-  });  
+  });
+
+  it('should fail to redeem account removed from certified depositor list', async function() {
+    await mint(accounts[2], 1900);
+    let initialTotalSupply = await token.totalSupply();
+    let addedDepositor = await token.addCertifiedDepositor(accounts[2], {from: depositCertifierAccount});
+    let removedDepositor = await token.removeCertifiedDepositor(accounts[2], {from: depositCertifierAccount});
+    try {
+      await redeem(accounts[2], 600);
+      assert.fail();
+    } catch (e) {
+
+    } finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance, 1900);
+       let totalSupply = await token.totalSupply();
+       assert.equal(totalSupply.c[0], initialTotalSupply.c[0]);
+    }
+  });
 
   it('should check upgrader correct address', async function () {
     assert.equal(await token.upgrader.call(), upgraderAccount);
