@@ -14,7 +14,7 @@ contract('FiatToken', function (accounts) {
   let minterAccount = accounts[9];
   let upgraderAccount = accounts[7];
   let pauserAccount = accounts[6];
-  let depositCertifierAccount = accounts[5];
+  let certifierAccount = accounts[5];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -128,7 +128,7 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount, pauserAccount, depositCertifierAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount, pauserAccount, certifierAccount);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -622,29 +622,29 @@ contract('FiatToken', function (accounts) {
     }
   }); 
 
-  it('should add and remove account to certified depositor list', async function() {
-    let addedDepositor = await token.addCertifiedDepositor(accounts[4], {from: depositCertifierAccount});
-    assert.equal(addedDepositor.logs[0].event, 'NewCertifiedDepositor');
-    let removedDepositor = await token.removeCertifiedDepositor(accounts[4], {from: depositCertifierAccount});
-    assert.equal(removedDepositor.logs[0].event, 'RemovedCertifiedDepositor');
+  it('should add and remove account to redeemer list', async function() {
+    let addedDepositor = await token.addRedeemer(accounts[4], {from: certifierAccount});
+    assert.equal(addedDepositor.logs[0].event, 'NewRedeemer');
+    let removedDepositor = await token.removeRedeemer(accounts[4], {from: certifierAccount});
+    assert.equal(removedDepositor.logs[0].event, 'RemovedRedeemer');
   });
 
-  it('should fail to add and remove account to certified depositor list not using the depositCertifierAccount', async function() {
+  it('should fail to add and remove account to redeemer list not using the certifierAccount', async function() {
     try {
-      let addedDepositor = await token.addCertifiedDepositor(accounts[4], {from: accounts[2]});
-      assert.equal(addedDepositor.logs[0].event, 'NewCertifiedDepositor');
-      let removedDepositor = await token.removeCertifiedDepositor(accounts[4], {from: accounts[2]});
-      assert.equal(removedDepositor.logs[0].event, 'RemovedCertifiedDepositor');
+      let addedDepositor = await token.addRedeemer(accounts[4], {from: accounts[2]});
+      assert.equal(addedDepositor.logs[0].event, 'NewRedeemer');
+      let removedDepositor = await token.removeRedeemer(accounts[4], {from: accounts[2]});
+      assert.equal(removedDepositor.logs[0].event, 'RemovedRedeemer');
       assert.fail();
     } catch (e) {
 
     }
   });
 
-  it('should redeem account in certified depositor list', async function() {
+  it('should redeem account in redeemer list', async function() {
     await mint(accounts[2], 1900);
     let initialTotalSupply = await token.totalSupply();
-    let addedDepositor = await token.addCertifiedDepositor(accounts[2], {from: depositCertifierAccount});
+    let addedDepositor = await token.addRedeemer(accounts[2], {from: certifierAccount});
     await redeem(accounts[2], 600);
     let balance = await token.balanceOf(accounts[2]);
     assert.equal(balance, 1900 - 600);
@@ -652,7 +652,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(totalSupply.c[0] + 600, initialTotalSupply.c[0]);
   });
 
-  it('should fail to redeem account not in certified depositor list', async function() {
+  it('should fail to redeem account not in redeemer list', async function() {
     await mint(accounts[2], 1900);
     let initialTotalSupply = await token.totalSupply();
     try {
@@ -668,11 +668,11 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-  it('should fail to redeem account removed from certified depositor list', async function() {
+  it('should fail to redeem account removed from redeemer list', async function() {
     await mint(accounts[2], 1900);
     let initialTotalSupply = await token.totalSupply();
-    let addedDepositor = await token.addCertifiedDepositor(accounts[2], {from: depositCertifierAccount});
-    let removedDepositor = await token.removeCertifiedDepositor(accounts[2], {from: depositCertifierAccount});
+    let addedDepositor = await token.addRedeemer(accounts[2], {from: certifierAccount});
+    let removedDepositor = await token.removeRedeemer(accounts[2], {from: certifierAccount});
     try {
       await redeem(accounts[2], 600);
       assert.fail();
