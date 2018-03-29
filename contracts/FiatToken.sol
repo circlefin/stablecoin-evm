@@ -1,7 +1,5 @@
 pragma solidity ^0.4.18;
 
-
-import './FiatMintableToken.sol';
 import './MintableTokenByRole.sol';
 import './PausableTOkenByRole.sol';
 
