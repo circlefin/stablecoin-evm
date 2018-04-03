@@ -1,13 +1,13 @@
 pragma solidity ^0.4.18;
 
-import './../lib/openzeppelin/contracts/token/ERC20/StandardToken.sol';
+import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
 import './UpgradedFiatToken.sol';
 
 /**
  * @title Upgradable
  * @dev Creates "upgrader" role to upgrade a contract
  */
-contract UpgradableTokenByRole is StandardToken {
+contract UpgradableTokenByRole is ERC20 {
   
   address public upgrader;
   bool public upgraded;
@@ -30,23 +30,6 @@ contract UpgradableTokenByRole is StandardToken {
   modifier whenNotUpgraded() {
     require(upgraded != true);
     _;
-  }
-
-  /**
-   * @dev Get account's local contract balance
-   * @param _account address The address of the account
-  */
-  function balanceOfLocal(address _account) public view returns (uint256) {
-    return balances[_account];
-  }
-
-  /**
-   * @dev Get account's local allowed amount
-   * @param _owner address The address of the account owner
-   * @param _spender address The address of the account spender
-  */
-  function allowanceLocal(address _owner, address _spender) public view returns (uint256) {
-    return allowed[_owner][_spender];
   }
 
   /**

@@ -4,13 +4,14 @@ import './MintableTokenByRole.sol';
 import './UpgradableTokenByRole.sol';
 import './PausableTokenByRole.sol';
 import './RedeemableToken.sol';
-
+import './StandardLazilyUpgradedToken.sol';
 
 /**
  * @title FiatToken 
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is MintableTokenByRole, PausableTokenByRole, UpgradableTokenByRole, RedeemableToken {
+
+contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken, StandardLazilyUpgradedToken {
   
   string public name;
   string public symbol;
@@ -22,7 +23,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, UpgradableTokenB
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _upgrader, address _pauser, address _accountCertifier) public {
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _upgrader, address _pauser, address _accountCertifier, address _deprecatedAddress) public {
     name = _name;
     symbol = _symbol;
     currency = _currency;
@@ -34,6 +35,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, UpgradableTokenB
     upgrader = _upgrader;
     pauser = _pauser;
     accountCertifier = _accountCertifier;
+    deprecatedAddress = _deprecatedAddress;
   }
 
 
@@ -45,65 +47,6 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, UpgradableTokenB
       return UpgradedFiatToken(upgradedAddress).totalSupply();
     }
     return super.totalSupply();
-  }
-
-  /**
-   * @dev Adds upgraded wrapper to balanceOf
-   * @param _owner The address to query the the balance of.
-  */
-  function balanceOf(address _owner) public view returns (uint256) {
-     if (upgraded) {
-      return UpgradedFiatToken(upgradedAddress).balanceOf(_owner);
-    }
-    return super.balanceOfLocal(_owner);
-  }
-
-  /**
-   * @dev Adds upgraded wrapper to approve
-   * @param _spender The address which will spend the funds.
-   * @param _value The amount of tokens to be spent.
-  */
-  function approve(address _spender, uint256 _value) public returns (bool) {
-    if (upgraded) {
-      return UpgradedFiatToken(upgradedAddress).approve(_spender, _value);
-    }
-    return super.approve(_spender, _value);
-  }
-
-  /** 
-   * @dev Adds upgraded wrapper to allowance
-   * @param _owner address The address which owns the funds.
-   * @param _spender address The address which will spend the funds.
-  */
-  function allowance(address _owner, address _spender) public view returns (uint256) {
-    if (upgraded) {
-      return UpgradedFiatToken(upgradedAddress).allowance(_owner, _spender);
-    }
-    return super.allowance(_owner, _spender);
-  }
-
-  /** 
-   * @dev Adds upgraded wrapper to increaseApproval
-   * @param _spender The address which will spend the funds.
-   * @param _addedValue The amount of tokens to increase the allowance by.
-  */
-  function increaseApproval(address _spender, uint _addedValue) public returns (bool) { 
-    if (upgraded) {
-      return UpgradedFiatToken(upgradedAddress).increaseApproval(_spender, _addedValue);
-    }
-    return super.increaseApproval(_spender, _addedValue);
-  }
-
-  /** 
-   * @dev Adds upgraded wrapper to decreaseApproval
-   * @param _spender The address which will spend the funds.
-   * @param _subtractedValue The amount of tokens to decrease the allowance by.
-  */
-  function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
-    if (upgraded) {
-      return UpgradedFiatToken(upgradedAddress).decreaseApproval(_spender, _subtractedValue);
-    }
-    return super.decreaseApproval(_spender, _subtractedValue);
   }
 
   /**
@@ -149,10 +92,11 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, UpgradableTokenB
     uint256 totalAmount; 
     (feeAmount, totalAmount) = getTransferFee(_value);
 
-    require(_value <= allowed[_from][msg.sender]);
+    uint256 allowed = allowance(_from, msg.sender);
+    require(_value <= allowed);
 
     doTransfer(_from, _to, _value, feeAmount, totalAmount);
-    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    setAllowed(_from, msg.sender, allowed.sub(_value));
     return true;
   }
 
@@ -198,12 +142,14 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, UpgradableTokenB
   */
   function doTransfer(address _from, address _to, uint256 _value, uint256 _feeAmount, uint256 _totalAmount) internal {
     require(_to != address(0));
-    require(_totalAmount <= balances[_from]);
+    uint256 fromBalance = balanceOf(_from);
+    require(_totalAmount <= fromBalance);
 
     // SafeMath.sub will throw if there is not enough balance.
-    balances[_from] = balances[_from].sub(_totalAmount);
-    balances[_to] = balances[_to].add(_value);
-    balances[feeAccount] = balances[feeAccount].add(_feeAmount);
+    setBalance(_from, fromBalance.sub(_totalAmount));
+    uint256 toBalance = balanceOf(_to);
+    setBalance(_to, toBalance.add(_value));
+    setBalance(feeAccount, balanceOf(feeAccount).add(_feeAmount));
     Fee(_from, feeAccount, _feeAmount);
     Transfer(_from, _to, _value);
   }
