@@ -1,12 +1,13 @@
 pragma solidity ^0.4.18;
 
 import './../lib/openzeppelin/contracts/token/ERC20/MintableToken.sol';
+import './LazilyUpgradedToken.sol';
 
 /**
  * @title Mintable token
  * @dev Simple ERC20 Token example, with special "minter" role overriding the owner role
  */
-contract MintableTokenByRole is MintableToken {
+contract MintableTokenByRole is MintableToken, LazilyUpgradedToken {
   
   address public minter;
 
@@ -26,7 +27,7 @@ contract MintableTokenByRole is MintableToken {
   */
   function mint(address _to, uint256 _amount) onlyMinter canMint public returns (bool) {
     totalSupply_ = totalSupply_.add(_amount);
-    balances[_to] = balances[_to].add(_amount);
+    setBalance(_to, balanceOfWithUpgrades(_to).add(_amount));
     Mint(_to, _amount);
     Transfer(address(0), _to, _amount);
     return true; 

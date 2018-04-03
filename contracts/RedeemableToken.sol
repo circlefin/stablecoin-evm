@@ -1,12 +1,13 @@
 pragma solidity ^0.4.18;
 
 import './../lib/openzeppelin/contracts/token/ERC20/StandardToken.sol';
+import './LazilyUpgradedToken.sol';
 
 /**
  * @title Redeemable Token
  * @dev Allows tokens to be redeemed by "redeemers" and "redeemers" list to be updated by accountCertifier
 */
-contract RedeemableToken is StandardToken {
+contract RedeemableToken is StandardToken, LazilyUpgradedToken {
   
   mapping (address => bool) internal redeemers;
   address accountCertifier;
@@ -54,10 +55,11 @@ contract RedeemableToken is StandardToken {
    * @param amount uint256 The amount of tokens to redeem
   */
   function redeem(uint amount) public onlyRedeemers {
-    require(balances[msg.sender] >= amount);
+    uint256 senderBalance = balanceOf(msg.sender);
+    require(senderBalance >= amount);
 
     totalSupply_ = totalSupply_.sub(amount);
-    balances[msg.sender] = balances[msg.sender].sub(amount);
+    setBalance(msg.sender, senderBalance.sub(amount));
     Redeem(msg.sender, amount);
   }
 }

@@ -128,7 +128,7 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount, pauserAccount, certifierAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount, pauserAccount, certifierAccount, nullAddress);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -155,13 +155,13 @@ contract('FiatToken', function (accounts) {
     await mintToGivenAddress();
   });
 
-  it('should add mutliple mints to a given address in address balance', async function () {
+  it('should add mutliple mints across two upgraded contracts to a given address in address balance', async function () {
     await mint(accounts[0], 100);
-    await mint(accounts[0], 200);
-
-    let balance0 = await token.balanceOf(accounts[0]);
+    let tokenAddress = token.address;
+    upgradedToken = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, upgraderAccount, pauserAccount, certifierAccount, tokenAddress);
+    await upgradedToken.mint(accounts[0], 200, {from: minterAccount});
+    let balance0 = await upgradedToken.balanceOf(accounts[0]);
     assert.equal(balance0, 300);
-
   });
 
   it('should add mutliple mints to total supply', async function () {
