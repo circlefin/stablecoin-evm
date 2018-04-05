@@ -12,6 +12,7 @@ contract('FiatToken', function (accounts) {
   let minterAccount = accounts[9];
   let pauserAccount = accounts[6];
   let certifierAccount = accounts[5];
+  let blacklisterAccount = accounts[4];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -30,6 +31,18 @@ contract('FiatToken', function (accounts) {
 
   mint = function(address, amount) {
     return token.mint(address, amount, {from: minterAccount});
+  }
+
+  blacklist = async function(account) {
+    let blacklist = await token.blacklist(account, {from: blacklisterAccount});
+    assert.equal(blacklist.logs[0].event, 'Blacklisted');
+    assert.equal(blacklist.logs[0].args._account, account);
+  }
+
+  unBlacklist = async function(account) {
+    let unblacklist = await token.unBlacklist(account, {from: blacklisterAccount});
+    assert.equal(unblacklist.logs[0].event, 'UnBlacklisted');
+    assert.equal(unblacklist.logs[0].args._account, account);
   }
 
   setLongDecimalFeesTransferWithFees = async function() {
@@ -125,7 +138,7 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, pauserAccount, certifierAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, pauserAccount, certifierAccount, blacklisterAccount);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -671,6 +684,184 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should blacklist and make transfer impossible', async function() {
+    await mint(accounts[2], 1900);
+    await blacklist(accounts[2]);
+    try {
+      await token.transfer(accounts[3], 600, {from: accounts[2]});
+      assert.fail();
+    } catch (e) {
+
+    } finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance, 1900);
+    }
+  });
+
+  it('should blacklist recipient and make transfer to recipient impossible', async function() {
+    await mint(accounts[2], 1900);
+    await mint(accounts[9], 1600);
+    await blacklist(accounts[2]);
+    try {
+      await token.transfer(accounts[2], 600, {from: accounts[9]});
+      assert.fail();
+    } catch (e) {
+
+    } finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance.c[0], 1900);
+       balance = await token.balanceOf(accounts[9]);
+       assert.equal(balance.c[0], 1600);
+    }
+  });
+
+  it('should blacklist and make transferFrom impossible with the approved transferer', async function() {
+    await mint(accounts[2], 1900);
+    await token.approve(accounts[1], 600, {from: accounts[2]});
+    await blacklist(accounts[2]);
+    try {
+      await token.transferFrom(accounts[2], accounts[3], 600, {from: accounts[1]});
+      assert.fail();
+    } catch (e) {
+
+    } 
+    finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance.c[0], 1900);
+    }
+  });
+
+  it('should make transferFrom impossible with the approved and blacklisted transferer', async function() {
+    await mint(accounts[2], 1900);
+    await token.approve(accounts[1], 600, {from: accounts[2]});
+    await blacklist(accounts[1]);
+    try {
+      await token.transferFrom(accounts[2], accounts[3], 600, {from: accounts[1]});
+      assert.fail();
+    } catch (e) {
+      
+    } 
+    finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance.c[0], 1900);
+    }
+  });
+
+  it('should blacklist and make approve impossible', async function() {
+    await mint(accounts[1], 1900);
+    await blacklist(accounts[1]);
+    try {
+      await token.approve(accounts[2], 600, {from: accounts[1]});
+    } catch (e) {
+      
+    } 
+    finally {
+       let approval = await token.allowance(accounts[1], accounts[2]);
+       assert.equal(approval.c[0], 0);
+    }
+  });
+
+  it('should make giving approval to blacklisted account impossible', async function() {
+    await mint(accounts[2], 1900);
+    await blacklist(accounts[1]);
+    try {
+      await token.approve(accounts[1], 600, {from: accounts[2]});
+    } catch (e) {
+      
+    } 
+    finally {
+       let approval = await token.allowance(accounts[2], accounts[1]);
+       assert.equal(approval.c[0], 0);
+    }
+  });
+
+  it('should blacklist and make increaseApproval impossible', async function() {
+    await mint(accounts[1], 1900);
+    await token.approve(accounts[2], 600, {from: accounts[1]});
+    await blacklist(accounts[1]);
+    try {
+      await token.increaseApproval(accounts[2], 600, {from: accounts[1]});
+    } catch (e) {
+      
+    } 
+    finally {
+       let approval = await token.allowance(accounts[1], accounts[2]);
+       assert.equal(approval.c[0], 600);
+    }
+  });
+
+  it('should make giving increaseApproval to blacklisted account impossible', async function() {
+    await mint(accounts[2], 1900);
+    await token.approve(accounts[1], 600, {from: accounts[2]});
+    await blacklist(accounts[1]);
+    try {
+      await token.increaseApproval(accounts[1], 600, {from: accounts[2]});
+    } catch (e) {
+      
+    } 
+    finally {
+       let approval = await token.allowance(accounts[2], accounts[1]);
+       assert.equal(approval.c[0], 600);
+    }
+  });
+
+  it('should blacklist and make decreaseApproval impossible', async function() {
+    await mint(accounts[1], 1900);
+    await token.approve(accounts[2], 600, {from: accounts[1]});
+    await blacklist(accounts[1]);
+    try {
+      await token.decreaseApproval(accounts[2], 600, {from: accounts[1]});
+    } catch (e) {
+      
+    } 
+    finally {
+       let approval = await token.allowance(accounts[1], accounts[2]);
+       assert.equal(approval.c[0], 600);
+    }
+  });
+
+  it('should make giving decreaseApproval to blacklisted account impossible', async function() {
+    await mint(accounts[2], 1900);
+    await token.approve(accounts[1], 600, {from: accounts[2]});
+    await blacklist(accounts[1]);
+    try {
+      await token.decreaseApproval(accounts[1], 600, {from: accounts[2]});
+    } catch (e) {
+      
+    } 
+    finally {
+       let approval = await token.allowance(accounts[2], accounts[1]);
+       assert.equal(approval.c[0], 600);
+    }
+  });
+
+  it('should blacklist then unblacklist to make a transfer possible', async function() {
+    await mint(accounts[2], 1900);
+    await blacklist(accounts[2]);
+    await unBlacklist(accounts[2]);
+    await token.transfer(accounts[3], 600, {from: accounts[2]});
+    let fee = calculateFeeAmount(600);
+    let balance = await token.balanceOf(accounts[2]);
+    assert.equal(balance.c[0], 1300 - fee);
+    balance = await token.balanceOf(accounts[3]);
+    assert.equal(balance.c[0], 600)
+  });
+
+  it('should fail to blacklist with non-blacklister account', async function() {
+    await mint(accounts[2], 1900);
+    try {
+      await token.blacklist(accounts[2], {from: pauserAccount});
+    } catch (e) {
+
+    } finally {
+      await token.transfer(accounts[3], 600, {from: accounts[2]});
+      let fee = calculateFeeAmount(600);
+      let balance = await token.balanceOf(accounts[2]);
+      assert.equal(balance.c[0], 1300 - fee);
+      balance = await token.balanceOf(accounts[3]);
+      assert.equal(balance.c[0], 600)
+    }
+  });
 
   it('should have correct name', async function () {
     let actual = await token.name.call();

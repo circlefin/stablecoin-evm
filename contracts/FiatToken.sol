@@ -3,12 +3,13 @@ pragma solidity ^0.4.18;
 import './MintableTokenByRole.sol';
 import './PausableTokenByRole.sol';
 import './RedeemableToken.sol';
+import './BlacklistableTokenByRole.sol';
 
 /**
  * @title FiatToken 
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken {
+contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken, BlacklistableTokenByRole {
   
   string public name;
   string public symbol;
@@ -20,7 +21,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier) public {
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister) public {
 
     name = _name;
     symbol = _symbol;
@@ -32,6 +33,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
     minter = _minter;
     pauser = _pauser;
     accountCertifier = _accountCertifier;
+    blacklister = _blacklister;
   }
 
   /**
@@ -61,6 +63,33 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
   }
 
   /**
+   * @dev Adds blacklisted check to approve
+   * @return True if the operation was successful.
+  */
+  function approve(address _spender, uint256 _value) notBlacklisted public returns (bool) {
+    require(isBlacklisted(_spender) == false);
+    return super.approve(_spender, _value);
+  }
+
+  /**
+   * @dev Adds blacklisted check to increaseApproval
+   * @return True if the operation was successful.
+  */
+  function increaseApproval(address _spender, uint256 _value) notBlacklisted public returns (bool) {
+    require(isBlacklisted(_spender) == false);
+    return super.increaseApproval(_spender, _value);
+  }
+
+  /**
+   * @dev Adds blacklisted check to decreaseApproval
+   * @return True if the operation was successful.
+  */
+  function decreaseApproval(address _spender, uint256 _value) notBlacklisted public returns (bool) {
+    require(isBlacklisted(_spender) == false);
+    return super.decreaseApproval(_spender, _value);
+  }
+
+  /**
    * @dev Transfer tokens from one address to another. The allowed amount includes the transfer value and transfer fee.
    * Validates that the totalAmount <= the allowed amount for the sender on the from account.
    * @param _from address The address which you want to send tokens from
@@ -68,7 +97,10 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
    * @param _value uint256 the amount of tokens to be transferred
    * @return bool success
   */
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) notBlacklisted public returns (bool) {
+    require(isBlacklisted(_from) == false);
+    require(isBlacklisted(_to) == false);
+
     uint256 feeAmount;
     uint256 totalAmount; 
     (feeAmount, totalAmount) = getTransferFee(_value);
@@ -86,7 +118,9 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken 
    * @param _value The amount to be transferred.
    * @return bool success
   */
-  function transfer(address _to, uint256 _value) public returns (bool) {
+  function transfer(address _to, uint256 _value) notBlacklisted public returns (bool) {
+    require(isBlacklisted(_to) == false);
+
     uint256 feeAmount;
     uint256 totalAmount; 
     (feeAmount, totalAmount) = getTransferFee(_value);
