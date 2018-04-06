@@ -1,14 +1,29 @@
 pragma solidity ^0.4.18;
 
-import './../lib/openzeppelin/contracts/token/ERC20/MintableToken.sol';
+import './../lib/openzeppelin/contracts/token/ERC20/StandardToken.sol';
 
 /**
  * @title Mintable token
  * @dev Simple ERC20 Token example, with special "minter" role overriding the owner role
  */
-contract MintableTokenByRole is MintableToken {
+contract MintableTokenByRole is StandardToken {
   
   address public minter;
+  address public reserver; 
+
+
+  event Mint(address indexed to, uint256 amount);
+  event MintFinished();
+
+  bool public mintingFinished = false;
+
+  /**
+   * @dev Throws if minting finished
+  */
+  modifier canMint() {
+    require(!mintingFinished);
+    _;
+  }
 
   /**
    * @dev Throws if called by any account other than the minter
@@ -20,15 +35,13 @@ contract MintableTokenByRole is MintableToken {
 
   /**
    * @dev Function to mint tokens
-   * @param _to The address that will receive the minted tokens.
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) onlyMinter canMint public returns (bool) {
+  function mint(uint256 _amount) onlyMinter canMint public returns (bool) {
     totalSupply_ = totalSupply_.add(_amount);
-    balances[_to] = balances[_to].add(_amount);
-    Mint(_to, _amount);
-    Transfer(address(0), _to, _amount);
+    balances[reserver] = balances[reserver].add(_amount);
+    Mint(reserver, _amount);
     return true; 
   }
 

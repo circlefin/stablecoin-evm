@@ -21,7 +21,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister) public {
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver) public {
 
     name = _name;
     symbol = _symbol;
@@ -33,6 +33,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
     minter = _minter;
     pauser = _pauser;
     accountCertifier = _accountCertifier;
+    reserver = _reserver;
     blacklister = _blacklister;
   }
 
@@ -50,8 +51,8 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
    * @dev Adds pausable condition to mint.
    * @return True if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) whenNotPaused public returns (bool) {
-    return super.mint(_to, _amount);
+  function mint(uint256 _amount) whenNotPaused public returns (bool) {
+    return super.mint(_amount);
   }
 
   /**
