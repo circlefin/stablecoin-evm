@@ -14,6 +14,7 @@ contract('FiatToken', function (accounts) {
   let pauserAccount = accounts[6];
   let certifierAccount = accounts[5];
   let blacklisterAccount = accounts[4];
+  let minterCertifier = accounts[3];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -149,7 +150,7 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, pauserAccount, certifierAccount, blacklisterAccount, reserverAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, pauserAccount, certifierAccount, blacklisterAccount, reserverAccount, minterCertifier);
     //Set up initial hot wallet reserves
     initialHotWalletAmount = 100000;
     await token.mint(initialHotWalletAmount, {from: minterAccount});
@@ -880,6 +881,35 @@ contract('FiatToken', function (accounts) {
       assert.equal(balance.c[0], 1300 - fee);
       balance = await token.balanceOf(accounts[3]);
       assert.equal(balance.c[0], 600)
+    }
+  });
+
+  it('should fail to change the minter with a non-minterCertifier account', async function() {
+    try {
+      await token.updateMinter(accounts[8]);
+    } catch (e) {
+
+    } finally {
+      let minter = await token.minter();
+      assert.equal(minterAccount, minter);
+    }
+  });
+
+  it('should change the minter and mint as well as fail to mint with the old minter', async function() {
+    let update = await token.updateMinter(accounts[8], {from: minterCertifier});
+    assert.equal(update.logs[0].event, 'MinterUpdate');
+    assert.equal(update.logs[0].args.newMinter, accounts[8]);
+    let initialBalanceReserveAccount = await token.balanceOf(reserverAccount);
+    await token.mint(100, {from: accounts[8]});
+    try {
+      await token.mint(200, {from: minterAccount});
+    } catch (e) {
+
+    } finally {
+      let minter = await token.minter();
+      assert.equal(accounts[8], minter);
+      let balance = await token.balanceOf(reserverAccount);
+      assert.equal(balance.c[0] - initialBalanceReserveAccount.c[0], 100);
     }
   });
 

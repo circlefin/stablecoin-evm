@@ -9,11 +9,12 @@ import './../lib/openzeppelin/contracts/token/ERC20/StandardToken.sol';
 contract MintableTokenByRole is StandardToken {
   
   address public minter;
-  address public reserver; 
-
+  address public reserver;
+  address public minterCertifier;
 
   event Mint(address indexed to, uint256 amount);
   event MintFinished();
+  event MinterUpdate(address newMinter);
 
   bool public mintingFinished = false;
 
@@ -22,6 +23,14 @@ contract MintableTokenByRole is StandardToken {
   */
   modifier canMint() {
     require(!mintingFinished);
+    _;
+  }
+
+  /**
+   * @dev Throws if called by any account other than the minterCertifier
+  */
+  modifier onlyMinterCertifier() {
+    require(msg.sender == minterCertifier);
     _;
   }
 
@@ -52,6 +61,17 @@ contract MintableTokenByRole is StandardToken {
   function finishMinting() onlyMinter canMint public returns (bool) {
     mintingFinished = true;
     MintFinished();
+    return true;
+  }
+
+  /**
+   * @dev Function to update the "minter" role
+   * @param newMinter The address of the new minter
+   * @return True if the operation was successful.
+  */
+  function updateMinter(address newMinter) onlyMinterCertifier public returns (bool) {
+    minter = newMinter;
+    MinterUpdate(newMinter);
     return true;
   }
 

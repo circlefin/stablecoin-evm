@@ -21,7 +21,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver) public {
+  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver, address _minterCertifier) public {
 
     name = _name;
     symbol = _symbol;
@@ -35,6 +35,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
     accountCertifier = _accountCertifier;
     reserver = _reserver;
     blacklister = _blacklister;
+    minterCertifier = _minterCertifier;
   }
 
   /**
