@@ -58,7 +58,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
 
   /**
    * @dev Adds pausable condition to mint.
-   * @return True if the operatfion was successful.
+   * @return True if the operation was successful.
   */
   function mint(uint256 _amount) whenNotPaused public returns (bool) {
     return super.mint(_amount);
