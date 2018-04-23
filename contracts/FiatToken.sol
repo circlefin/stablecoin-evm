@@ -1,16 +1,22 @@
 pragma solidity ^0.4.18;
 
+import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
+import './../lib/openzeppelin/contracts/ownership/Ownable.sol';
+import './../lib/openzeppelin/contracts/math/SafeMath.sol';
+
 import './MintableTokenByRole.sol';
 import './PausableTokenByRole.sol';
 import './RedeemableToken.sol';
 import './BlacklistableTokenByRole.sol';
+import './EternalStorageUpdater.sol';
 
 /**
  * @title FiatToken 
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken, BlacklistableTokenByRole {
-  
+contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, RedeemableToken, BlacklistableTokenByRole, Ownable {
+  using SafeMath for uint256;
+
   string public name;
   string public symbol;
   string public currency;
@@ -21,7 +27,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
 
   event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
 
-  function FiatToken(string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver, address _minterCertifier) public {
+  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver, address _minterCertifier) public {
 
     name = _name;
     symbol = _symbol;
@@ -36,6 +42,8 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
     reserver = _reserver;
     blacklister = _blacklister;
     minterCertifier = _minterCertifier;
+
+    contractStorage = EternalStorage(_storageContractAddress);
   }
 
   /**
@@ -50,7 +58,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
 
   /**
    * @dev Adds pausable condition to mint.
-   * @return True if the operation was successful.
+   * @return True if the operatfion was successful.
   */
   function mint(uint256 _amount) whenNotPaused public returns (bool) {
     return super.mint(_amount);
@@ -65,30 +73,37 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
   }
 
   /**
+   * @dev Get allowed amount for an account
+   * @param owner address The account owner
+   * @param spender address The account spender
+  */
+  function allowance(address owner, address spender) public view returns (uint256) {
+    return getAllowed(owner, spender);
+  }
+
+  /**
+   * @dev Get totalSupply of token
+  */
+  function totalSupply() public view returns (uint256) {
+    return getTotalSupply();
+  }
+
+  /**
+   * @dev Get token balance of an account
+   * @param account address The account
+  */
+  function balanceOf(address account) public view returns (uint256) {
+    return getBalance(account);
+  }
+
+  /**
    * @dev Adds blacklisted check to approve
    * @return True if the operation was successful.
   */
-  function approve(address _spender, uint256 _value) notBlacklisted public returns (bool) {
+  function approve(address _spender, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
     require(isBlacklisted(_spender) == false);
-    return super.approve(_spender, _value);
-  }
-
-  /**
-   * @dev Adds blacklisted check to increaseApproval
-   * @return True if the operation was successful.
-  */
-  function increaseApproval(address _spender, uint256 _value) notBlacklisted public returns (bool) {
-    require(isBlacklisted(_spender) == false);
-    return super.increaseApproval(_spender, _value);
-  }
-
-  /**
-   * @dev Adds blacklisted check to decreaseApproval
-   * @return True if the operation was successful.
-  */
-  function decreaseApproval(address _spender, uint256 _value) notBlacklisted public returns (bool) {
-    require(isBlacklisted(_spender) == false);
-    return super.decreaseApproval(_spender, _value);
+    setAllowed(msg.sender, _spender, _value);
+    Approval(msg.sender, _spender, _value);
   }
 
   /**
@@ -99,7 +114,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
    * @param _value uint256 the amount of tokens to be transferred
    * @return bool success
   */
-  function transferFrom(address _from, address _to, uint256 _value) notBlacklisted public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
     require(isBlacklisted(_from) == false);
     require(isBlacklisted(_to) == false);
 
@@ -107,10 +122,13 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
     uint256 totalAmount; 
     (feeAmount, totalAmount) = getTransferFee(_value);
 
-    require(_value <= allowed[_from][msg.sender]);
+    uint256 allowed;
+    allowed = getAllowed(_from, msg.sender);
+
+    require(_value <= allowed);
 
     doTransfer(_from, _to, _value, feeAmount, totalAmount);
-    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    setAllowed(_from, msg.sender, allowed.sub(_value));
     return true;
   }
 
@@ -120,7 +138,7 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
    * @param _value The amount to be transferred.
    * @return bool success
   */
-  function transfer(address _to, uint256 _value) notBlacklisted public returns (bool) {
+  function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
     require(isBlacklisted(_to) == false);
 
     uint256 feeAmount;
@@ -154,12 +172,14 @@ contract FiatToken is MintableTokenByRole, PausableTokenByRole, RedeemableToken,
   */
   function doTransfer(address _from, address _to, uint256 _value, uint256 _feeAmount, uint256 _totalAmount) internal {
     require(_to != address(0));
-    require(_totalAmount <= balances[_from]);
+    uint256 balance = getBalance(_from);
+
+    require(_totalAmount <= balance);
 
     // SafeMath.sub will throw if there is not enough balance.
-    balances[_from] = balances[_from].sub(_totalAmount);
-    balances[_to] = balances[_to].add(_value);
-    balances[feeAccount] = balances[feeAccount].add(_feeAmount);
+    setBalance(_from, balance.sub(_totalAmount));
+    setBalance(_to, getBalance(_to).add(_value));
+    setBalance(feeAccount, getBalance(feeAccount).add(_feeAmount));
     Fee(_from, feeAccount, _feeAmount);
     Transfer(_from, _to, _value);
   }

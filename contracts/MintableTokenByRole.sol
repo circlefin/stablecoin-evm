@@ -1,12 +1,12 @@
 pragma solidity ^0.4.18;
 
-import './../lib/openzeppelin/contracts/token/ERC20/StandardToken.sol';
+import './EternalStorageUpdater.sol';
 
 /**
  * @title Mintable token
  * @dev Simple ERC20 Token example, with special "minter" role overriding the owner role
  */
-contract MintableTokenByRole is StandardToken {
+contract MintableTokenByRole is EternalStorageUpdater {
   
   address public minter;
   address public reserver;
@@ -48,8 +48,8 @@ contract MintableTokenByRole is StandardToken {
    * @return A boolean that indicates if the operation was successful.
   */
   function mint(uint256 _amount) onlyMinter canMint public returns (bool) {
-    totalSupply_ = totalSupply_.add(_amount);
-    balances[reserver] = balances[reserver].add(_amount);
+    setTotalSupply(getTotalSupply().add(_amount));
+    setBalance(reserver, getBalance(reserver).add(_amount));
     Mint(reserver, _amount);
     return true; 
   }

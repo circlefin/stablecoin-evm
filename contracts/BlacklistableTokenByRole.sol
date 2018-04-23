@@ -1,15 +1,15 @@
 pragma solidity ^0.4.18;
 
 import './../lib/openzeppelin/contracts/token/ERC20/BasicToken.sol';
+import './EternalStorageUpdater.sol';
 
 /**
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
-contract BlacklistableTokenByRole is BasicToken {
+contract BlacklistableTokenByRole is EternalStorageUpdater {
 
   address blacklister;
-  mapping (address => bool) public blacklisted;
 
   event Blacklisted(address _account);
   event UnBlacklisted(address _account);
@@ -34,8 +34,8 @@ contract BlacklistableTokenByRole is BasicToken {
    * @dev Checks if account is blacklisted
    * @param _account The address to check
   */
-  function isBlacklisted(address _account) public constant returns (bool) {
-    return blacklisted[_account];
+  function isAccountBlacklisted(address _account) public constant returns (bool) {
+    return isBlacklisted(_account);
   }
 
   /**
@@ -43,7 +43,7 @@ contract BlacklistableTokenByRole is BasicToken {
    * @param _account The address to blacklist
   */
   function blacklist(address _account) public onlyBlacklister {
-    blacklisted[_account] = true;
+    setBlacklisted(_account, true);
     Blacklisted(_account);
   }
 
@@ -52,7 +52,7 @@ contract BlacklistableTokenByRole is BasicToken {
    * @param _account The address to remove from the blacklist
   */
   function unBlacklist(address _account) public onlyBlacklister {
-    blacklisted[_account] = false;
+    setBlacklisted(_account, false);
     UnBlacklisted(_account);
   }
 

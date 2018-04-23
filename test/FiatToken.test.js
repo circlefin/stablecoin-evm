@@ -1,4 +1,5 @@
 var FiatToken = artifacts.require('FiatToken');
+var EternalStorage = artifacts.require('EternalStorage');
 var name = 'Sample Fiat Token';
 var symbol = 'C-USD';
 var currency = 'USD';
@@ -86,16 +87,6 @@ contract('FiatToken', function (accounts) {
     assert.equal(balanceFeeAccount.c[0] - initialBalanceFeeAccount.c[0], feeAmount);
   }
 
-  mintToGivenAddress = async function() {
-    let initialTotalSupply = await token.totalSupply();
-    const result = await mint(accounts[0], 100);
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 100);
-
-    let totalSupply = await token.totalSupply();
-    assert.equal(totalSupply.c[0] - initialTotalSupply.c[0], 100);
-  }
-
   failToMintAfterFinishMinting = async function() {
     await token.finishMinting({from: minterAccount});
     assert.equal(await token.mintingFinished(), true);
@@ -150,15 +141,21 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, pauserAccount, certifierAccount, blacklisterAccount, reserverAccount, minterCertifier);
+    storage = await EternalStorage.new();
+    let storageAddress = storage.address;
+    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, fee, feeBase, feeAccount, minterAccount, pauserAccount, certifierAccount, blacklisterAccount, reserverAccount, minterCertifier);
+    let tokenAddress = token.address;
+    //Need to have to Hex
+    await storage.setAddress(web3.sha3(web3.toHex("contract.address.") + tokenAddress.substring(2), {encoding: 'hex'}), tokenAddress);
+    await storage.setBool(web3.sha3(web3.toHex("contract.storage.initialised"), {encoding: 'hex'}), true);
     //Set up initial hot wallet reserves
     initialHotWalletAmount = 100000;
     await token.mint(initialHotWalletAmount, {from: minterAccount});
   });
 
   it('should start with a totalSupply of 0', async function () {
+    let joe = await storage.getUint(web3.sha3("totalSupply"));
     let totalSupply = await token.totalSupply();
-
     assert.equal(totalSupply.c[0] - initialHotWalletAmount, 0);
   });
 
@@ -174,10 +171,6 @@ contract('FiatToken', function (accounts) {
 
     let balance0 = await token.balanceOf(accounts[0]);
     assert.equal(balance0, 300);
-  });
-
-  it('should mint a given amount of tokens to a given address', async function () {
-    await mintToGivenAddress();
   });
 
   it('should add mutliple mints to a given address in address balance', async function () {
@@ -225,6 +218,7 @@ contract('FiatToken', function (accounts) {
     assert.equal((await token.allowance(accounts[2], accounts[3])).c[0], 100);
   });
 
+/*  
   it('should increase approval', async function() {
     await approve(accounts[3], 100, accounts[2]);
     await increaseApproval(accounts[3], 50, accounts[2]);
@@ -236,6 +230,7 @@ contract('FiatToken', function (accounts) {
     await decreaseApproval(accounts[3], 50, accounts[2]);
     assert.equal((await token.allowance(accounts[2], accounts[3])).c[0], 50);
   });
+*/
 
   it('should set long-decimal fees and complete transferFrom with fees', async function() {
     await transferFromWithFees();
@@ -537,7 +532,7 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-  it('should pause and should not be able to increaseApproval', async function () {
+  /*it('should pause and should not be able to increaseApproval', async function () {
     await mint(accounts[2], 1900);
     await approve(accounts[2], 50, accounts[3]);
     assert.equal(await token.paused.call(), false);
@@ -563,7 +558,7 @@ contract('FiatToken', function (accounts) {
       assert.fail();
     } catch (e) {
     }
-  });
+  });*/
 
   it('should pause and should not be able to mint', async function () {
     await mint(accounts[2], 1900);
@@ -572,7 +567,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.paused.call(), true);
 
     try {
-      await mintToGivenAddress();
+      await mint(accounts[2], 1900);
       assert.fail();
     } catch (e) {
     }
@@ -796,7 +791,7 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-  it('should blacklist and make increaseApproval impossible', async function() {
+  /*it('should blacklist and make increaseApproval impossible', async function() {
     await mint(accounts[1], 1900);
     await token.approve(accounts[2], 600, {from: accounts[1]});
     await blacklist(accounts[1]);
@@ -854,7 +849,7 @@ contract('FiatToken', function (accounts) {
        let approval = await token.allowance(accounts[2], accounts[1]);
        assert.equal(approval.c[0], 600);
     }
-  });
+  });*/
 
   it('should blacklist then unblacklist to make a transfer possible', async function() {
     await mint(accounts[2], 1900);

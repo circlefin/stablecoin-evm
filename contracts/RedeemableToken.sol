@@ -1,14 +1,14 @@
 pragma solidity ^0.4.18;
 
 import './../lib/openzeppelin/contracts/token/ERC20/StandardToken.sol';
+import './EternalStorageUpdater.sol';
 
 /**
  * @title Redeemable Token
  * @dev Allows tokens to be redeemed by "redeemers" and "redeemers" list to be updated by accountCertifier
 */
-contract RedeemableToken is StandardToken {
+contract RedeemableToken is EternalStorageUpdater {
   
-  mapping (address => bool) internal redeemers;
   address accountCertifier;
 
   event Redeem(address indexed redeemedAddress, uint256 amount);
@@ -27,7 +27,7 @@ contract RedeemableToken is StandardToken {
    * @dev Throws if called by any non-redeemer
   */
   modifier onlyRedeemers() {
-    require(redeemers[msg.sender] == true);
+    require(isRedeemer(msg.sender) == true);
     _;
   }
 
@@ -36,7 +36,7 @@ contract RedeemableToken is StandardToken {
    * @param newRedeemer The address to add
   */
   function addRedeemer(address newRedeemer) public onlyAccountCertifier {
-    redeemers[newRedeemer] = true;
+    setRedeemer(newRedeemer, true);
     NewRedeemer(newRedeemer);
   } 
 
@@ -45,7 +45,7 @@ contract RedeemableToken is StandardToken {
    * @param redeemer The address to remove
   */
   function removeRedeemer(address redeemer) public onlyAccountCertifier {
-    redeemers[redeemer] = false;
+    setRedeemer(redeemer, false);
     RemovedRedeemer(redeemer);
   } 
 
@@ -54,10 +54,11 @@ contract RedeemableToken is StandardToken {
    * @param amount uint256 The amount of tokens to redeem
   */
   function redeem(uint amount) public onlyRedeemers {
-    require(balances[msg.sender] >= amount);
-
-    totalSupply_ = totalSupply_.sub(amount);
-    balances[msg.sender] = balances[msg.sender].sub(amount);
+    uint256 balance = getBalance(msg.sender);
+    require(balance >= amount);
+    
+    setTotalSupply(getTotalSupply().sub(amount));
+    setBalance(msg.sender, balance.sub(amount));
     Redeem(msg.sender, amount);
   }
 }
