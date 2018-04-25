@@ -21,21 +21,13 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
   string public symbol;
   string public currency;
   uint8 public decimals;
-  uint256 public fee;
-  uint256 public feeBase;
-  address public feeAccount;
 
-  event Fee(address indexed from, address indexed feeAccount, uint256 feeAmount);
-
-  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, uint256 _fee, uint256 _feeBase, address _feeAccount, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver, address _minterCertifier) public {
+  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver, address _minterCertifier) public {
 
     name = _name;
     symbol = _symbol;
     currency = _currency;
     decimals = _decimals;
-    fee = _fee;
-    feeBase = _feeBase;
-    feeAccount = _feeAccount;
     minter = _minter;
     pauser = _pauser;
     accountCertifier = _accountCertifier;
@@ -44,16 +36,6 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
     minterCertifier = _minterCertifier;
 
     contractStorage = EternalStorage(_storageContractAddress);
-  }
-
-  /**
-   * @dev Update transfer fee
-   * @param _fee uint256 The numerator of fee fraction
-   * @param _feeBase uint256 The denominator of fee fraction
-  */
-  function updateTransferFee(uint256 _fee, uint256 _feeBase) public onlyOwner {
-    fee = _fee;
-    feeBase = _feeBase;
   }
 
   /**
@@ -107,7 +89,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
   }
 
   /**
-   * @dev Transfer tokens from one address to another. The allowed amount includes the transfer value and transfer fee.
+   * @dev Transfer tokens from one address to another.
    * Validates that the totalAmount <= the allowed amount for the sender on the from account.
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
@@ -118,16 +100,12 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
     require(isBlacklisted(_from) == false);
     require(isBlacklisted(_to) == false);
 
-    uint256 feeAmount;
-    uint256 totalAmount; 
-    (feeAmount, totalAmount) = getTransferFee(_value);
-
     uint256 allowed;
     allowed = getAllowed(_from, msg.sender);
 
     require(_value <= allowed);
 
-    doTransfer(_from, _to, _value, feeAmount, totalAmount);
+    doTransfer(_from, _to, _value);
     setAllowed(_from, msg.sender, allowed.sub(_value));
     return true;
   }
@@ -141,46 +119,26 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
   function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
     require(isBlacklisted(_to) == false);
 
-    uint256 feeAmount;
-    uint256 totalAmount; 
-    (feeAmount, totalAmount) = getTransferFee(_value);
-
-    doTransfer(msg.sender, _to, _value, feeAmount, totalAmount);
+    doTransfer(msg.sender, _to, _value);
     return true;
   }
 
   /**
-   * @dev calculates fees for transfer and validates sender, recipient, amount.
-   * @param _value uint256 the amount of tokens to be transferred
-   * @return (uint256 feeAmount, uint256 totalAmount)
-  */
-  function getTransferFee(uint256 _value) internal view returns (uint256, uint256) {
-    uint256 feeAmount = _value.mul(fee).div(feeBase);
-    uint256 totalAmount = _value.add(feeAmount);
-
-    return (feeAmount, totalAmount);
-  }
-
-  /**
-   * @dev updates balances for sender, recipient, feeAccount in a transfer
+   * @dev updates balances for sender, recipient.
    * Validates that _to address exists, totalAmount <= balance of the from account.
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
-   * @param _feeAmount uint256 the amount of tokens in transfer fees
-   * @param _totalAmount uint256 the amount of tokens to be transfered added to the transfer fees
   */
-  function doTransfer(address _from, address _to, uint256 _value, uint256 _feeAmount, uint256 _totalAmount) internal {
+  function doTransfer(address _from, address _to, uint256 _value) internal {
     require(_to != address(0));
     uint256 balance = getBalance(_from);
 
-    require(_totalAmount <= balance);
+    require(_value <= balance);
 
     // SafeMath.sub will throw if there is not enough balance.
-    setBalance(_from, balance.sub(_totalAmount));
+    setBalance(_from, balance.sub(_value));
     setBalance(_to, getBalance(_to).add(_value));
-    setBalance(feeAccount, getBalance(feeAccount).add(_feeAmount));
-    Fee(_from, feeAccount, _feeAmount);
     Transfer(_from, _to, _value);
   }
 
