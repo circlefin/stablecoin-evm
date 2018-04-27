@@ -194,7 +194,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(mintingFinished, false);
   });
 
-  it('should add mutliple mints to a given address in address balance', async function () {
+  it('should add multiple mints to a given address in address balance', async function () {
     await mint(accounts[0], 100);
     await mint(accounts[0], 200);
 
@@ -202,7 +202,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(balance0, 300);
   });
 
-  it('should add mutliple mints to a given address in address balance', async function () {
+  it('should add multiple mints to a given address in address balance', async function () {
     await mint(accounts[0], 100);
     await mint(accounts[0], 200);
 
@@ -211,7 +211,7 @@ contract('FiatToken', function (accounts) {
 
   });
 
-  it('should add mutliple mints to total supply', async function () {
+  it('should add multiple mints to total supply', async function () {
     let initialTotalSupply = await token.totalSupply();
     await mint(accounts[0], 100);
     await mint(accounts[0], 400);
@@ -573,6 +573,22 @@ contract('FiatToken', function (accounts) {
        assert.equal(totalSupply.c[0], initialTotalSupply.c[0]);
     }
   });
+
+  it('should approve and fail to transfer more than balance', async function() {
+    await mint(accounts[2], 100);
+    await token.approve(accounts[1], 600, {from: accounts[2]});
+    try {
+      await token.transferFrom(accounts[2], accounts[1], 600, {from: accounts[1]});
+      assert.fail();
+    } catch (e) {
+
+    } 
+    finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance.c[0], 100);
+    }
+  });
+
 
   it('should blacklist and make transfer impossible', async function() {
     await mint(accounts[2], 1900);
