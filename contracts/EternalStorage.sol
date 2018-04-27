@@ -21,7 +21,7 @@ contract EternalStorage is Ownable {
     /*** Modifiers ************/
 
     /// @dev Only allow access from the latest version of a contract in the Rocket Pool network after deployment
-    modifier onlyLatestRocketNetworkContract() {
+    modifier onlyAuthorizedContracts() {
         // The owner is only allowed to set the storage upon deployment to register the initial contracts, afterwards their direct access is disabled
         if (msg.sender == owner) {
             require(boolStorage[keccak256("contract.storage.initialised")] == false);
@@ -69,32 +69,32 @@ contract EternalStorage is Ownable {
 
 
     /// @param _key The key for the record
-    function setAddress(bytes32 _key, address _value) onlyLatestRocketNetworkContract external {
+    function setAddress(bytes32 _key, address _value) onlyAuthorizedContracts external {
         addressStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setUint(bytes32 _key, uint _value) onlyLatestRocketNetworkContract external {
+    function setUint(bytes32 _key, uint _value) onlyAuthorizedContracts external {
         uIntStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setString(bytes32 _key, string _value) onlyLatestRocketNetworkContract external {
+    function setString(bytes32 _key, string _value) onlyAuthorizedContracts external {
         stringStorage[_key] = _value;
     }
 
     /// @param _key The key for the record
-    function setBytes(bytes32 _key, bytes _value) onlyLatestRocketNetworkContract external {
+    function setBytes(bytes32 _key, bytes _value) onlyAuthorizedContracts external {
         bytesStorage[_key] = _value;
     }
     
     /// @param _key The key for the record
-    function setBool(bytes32 _key, bool _value) onlyLatestRocketNetworkContract external {
+    function setBool(bytes32 _key, bool _value) onlyAuthorizedContracts external {
         boolStorage[_key] = _value;
     }
     
     /// @param _key The key for the record
-    function setInt(bytes32 _key, int _value) onlyLatestRocketNetworkContract external {
+    function setInt(bytes32 _key, int _value) onlyAuthorizedContracts external {
         intStorage[_key] = _value;
     }
 
@@ -102,32 +102,32 @@ contract EternalStorage is Ownable {
     /**** Delete Methods ***********/
     
     /// @param _key The key for the record
-    function deleteAddress(bytes32 _key) onlyLatestRocketNetworkContract external {
+    function deleteAddress(bytes32 _key) onlyAuthorizedContracts external {
         delete addressStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteUint(bytes32 _key) onlyLatestRocketNetworkContract external {
+    function deleteUint(bytes32 _key) onlyAuthorizedContracts external {
         delete uIntStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteString(bytes32 _key) onlyLatestRocketNetworkContract external {
+    function deleteString(bytes32 _key) onlyAuthorizedContracts external {
         delete stringStorage[_key];
     }
 
     /// @param _key The key for the record
-    function deleteBytes(bytes32 _key) onlyLatestRocketNetworkContract external {
+    function deleteBytes(bytes32 _key) onlyAuthorizedContracts external {
         delete bytesStorage[_key];
     }
     
     /// @param _key The key for the record
-    function deleteBool(bytes32 _key) onlyLatestRocketNetworkContract external {
+    function deleteBool(bytes32 _key) onlyAuthorizedContracts external {
         delete boolStorage[_key];
     }
     
     /// @param _key The key for the record
-    function deleteInt(bytes32 _key) onlyLatestRocketNetworkContract external {
+    function deleteInt(bytes32 _key) onlyAuthorizedContracts external {
         delete intStorage[_key];
     }
 
