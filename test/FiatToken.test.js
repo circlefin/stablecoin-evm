@@ -324,6 +324,44 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should fail on invalid transfer recipient (zero-account) and not change balances', async function() {
+
+    await mint(accounts[0], 500);
+    await token.approve(accounts[3], 100);
+    allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 100);
+
+    try {
+      await token.transferFrom(accounts[0], 0, 50, {from: accounts[3]});
+      assert.fail()
+    } catch(e) {
+
+    } finally {
+      let balance0 = await token.balanceOf(accounts[0]);
+      assert.equal(balance0, 500);
+    }
+
+  });
+
+  it('should fail on invalid transfer recipient (invalid address) and not change balances', async function() {
+
+    await mint(accounts[0], 500);
+    await token.approve(accounts[3], 100);
+    allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 100);
+
+    try {
+      await token.transferFrom(accounts[0], "invalid address", 50, {from: accounts[3]});
+      assert.fail()
+    } catch(e) {
+
+    } finally {
+      let balance0 = await token.balanceOf(accounts[0]);
+      assert.equal(balance0, 500);
+    }
+    
+  });
+
   it('should test consistency of transfer(x) and approve(x) + transferFrom(x)', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.equal(allowed.c[0], 0);
@@ -598,6 +636,23 @@ contract('FiatToken', function (accounts) {
        assert.equal(balance.c[0], 1900);
     }
   });
+
+  it('should blacklist recipient and make transfer to recipient using transferFrom impossible', async function() {
+    await mint(accounts[2], 1900);
+    await token.approve(accounts[3], 600, {from: accounts[2]});
+    await blacklist(accounts[3]);
+    try {
+      await token.transferFrom(accounts[2], accounts[3], 600, {from: accounts[2]});
+      assert.fail();
+    } catch (e) {
+      
+    } 
+    finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance.c[0], 1900);
+    }
+  });
+
 
   it('should blacklist and make approve impossible', async function() {
     await mint(accounts[1], 1900);
