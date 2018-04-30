@@ -194,7 +194,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(mintingFinished, false);
   });
 
-  it('should add mutliple mints to a given address in address balance', async function () {
+  it('should add multiple mints to a given address in address balance', async function () {
     await mint(accounts[0], 100);
     await mint(accounts[0], 200);
 
@@ -202,7 +202,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(balance0, 300);
   });
 
-  it('should add mutliple mints to a given address in address balance', async function () {
+  it('should add multiple mints to a given address in address balance', async function () {
     await mint(accounts[0], 100);
     await mint(accounts[0], 200);
 
@@ -211,7 +211,7 @@ contract('FiatToken', function (accounts) {
 
   });
 
-  it('should add mutliple mints to total supply', async function () {
+  it('should add multiple mints to total supply', async function () {
     let initialTotalSupply = await token.totalSupply();
     await mint(accounts[0], 100);
     await mint(accounts[0], 400);
@@ -322,6 +322,44 @@ contract('FiatToken', function (accounts) {
       let balance3 = await token.balanceOf(accounts[3]);
       assert.equal(balance3, 0);
     }
+  });
+
+  it('should fail on invalid transfer recipient (zero-account) and not change balances', async function() {
+
+    await mint(accounts[0], 500);
+    await token.approve(accounts[3], 100);
+    allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 100);
+
+    try {
+      await token.transferFrom(accounts[0], 0, 50, {from: accounts[3]});
+      assert.fail()
+    } catch(e) {
+
+    } finally {
+      let balance0 = await token.balanceOf(accounts[0]);
+      assert.equal(balance0, 500);
+    }
+
+  });
+
+  it('should fail on invalid transfer recipient (invalid address) and not change balances', async function() {
+
+    await mint(accounts[0], 500);
+    await token.approve(accounts[3], 100);
+    allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.equal(allowed.c[0], 100);
+
+    try {
+      await token.transferFrom(accounts[0], "invalid address", 50, {from: accounts[3]});
+      assert.fail()
+    } catch(e) {
+
+    } finally {
+      let balance0 = await token.balanceOf(accounts[0]);
+      assert.equal(balance0, 500);
+    }
+    
   });
 
   it('should test consistency of transfer(x) and approve(x) + transferFrom(x)', async function() {
@@ -536,6 +574,22 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should approve and fail to transfer more than balance', async function() {
+    await mint(accounts[2], 100);
+    await token.approve(accounts[1], 600, {from: accounts[2]});
+    try {
+      await token.transferFrom(accounts[2], accounts[1], 600, {from: accounts[1]});
+      assert.fail();
+    } catch (e) {
+
+    } 
+    finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance.c[0], 100);
+    }
+  });
+
+
   it('should blacklist and make transfer impossible', async function() {
     await mint(accounts[2], 1900);
     await blacklist(accounts[2]);
@@ -598,6 +652,23 @@ contract('FiatToken', function (accounts) {
        assert.equal(balance.c[0], 1900);
     }
   });
+
+  it('should blacklist recipient and make transfer to recipient using transferFrom impossible', async function() {
+    await mint(accounts[2], 1900);
+    await token.approve(accounts[3], 600, {from: accounts[2]});
+    await blacklist(accounts[3]);
+    try {
+      await token.transferFrom(accounts[2], accounts[3], 600, {from: accounts[2]});
+      assert.fail();
+    } catch (e) {
+      
+    } 
+    finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance.c[0], 1900);
+    }
+  });
+
 
   it('should blacklist and make approve impossible', async function() {
     await mint(accounts[1], 1900);
