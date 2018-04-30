@@ -1,6 +1,5 @@
 var FiatToken = artifacts.require('FiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
-var expect = require('chai').expect;
 var name = 'Sample Fiat Token';
 var symbol = 'C-USD';
 var currency = 'USD';
