@@ -109,10 +109,13 @@ contract('FiatToken', function (accounts) {
   failToMintAfterFinishMinting = async function() {
     await token.finishMinting({from: minterAccount});
     assert.equal(await token.mintingFinished(), true);
+
     try {
       await mint(accounts[0], 100);
       assert.fail("Minting not stopped");
-    } catch (e) {}
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
   }
 
   transferFromWithFees = async function() {
@@ -169,6 +172,11 @@ contract('FiatToken', function (accounts) {
     assert.equal(redeemResult.logs[0].args.amount, amount);
   }
 
+  checkFailureIsExpected = function(error) {
+    const revertFound = error.message.search('revert') >= 0;
+    assert(revertFound, `Expected "revert", got ${error} instead`);
+  }
+
   beforeEach(async function () {
     storage = await EternalStorage.new();
     let storageAddress = storage.address;
@@ -221,13 +229,13 @@ contract('FiatToken', function (accounts) {
     assert.equal(totalSupply.c[0] - initialTotalSupply.c[0], 1100);
   });
 
-  it('should fail to mint from a non-owner call', async function () {
+  it('should fail to mint from a non-minter call', async function () {
      await mint(accounts[0], 400);
      try {
-      await token.mint(accounts[0], 100, {from: accounts[0]});
+      await token.mint(100, {from: accounts[0]});
       assert.fail();
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 400);
@@ -294,7 +302,7 @@ contract('FiatToken', function (accounts) {
       await token.transferFrom(accounts[0], accounts[3], 50, {from: accounts[4]});
       assert.fail()
     } catch(e) {
-
+      checkFailureIsExpected(e);
     } finally {
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 500);
@@ -315,7 +323,7 @@ contract('FiatToken', function (accounts) {
       await token.transferFrom(accounts[0], accounts[3], 450, {from: accounts[3]});
       assert.fail()
     } catch(e) {
-
+      checkFailureIsExpected(e);
     } finally {
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 500);
@@ -366,7 +374,8 @@ contract('FiatToken', function (accounts) {
     try {
       await sampleTransferFrom();
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -379,7 +388,8 @@ contract('FiatToken', function (accounts) {
     try {
       await sampleTransfer();
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -392,7 +402,8 @@ contract('FiatToken', function (accounts) {
     try {
       await approve(accounts[2], 50, accounts[3]);
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -405,7 +416,8 @@ contract('FiatToken', function (accounts) {
     try {
       await mint(accounts[2], 1900);
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -418,7 +430,8 @@ contract('FiatToken', function (accounts) {
     try {
       await failToMintAfterFinishMinting();
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -428,7 +441,8 @@ contract('FiatToken', function (accounts) {
     try {
       await token.pause({from: accounts[0]});
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
       assert.equal(await token.paused.call(), false);
     }
@@ -443,7 +457,8 @@ contract('FiatToken', function (accounts) {
     try {
       await failToMintAfterFinishMinting();
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -456,7 +471,8 @@ contract('FiatToken', function (accounts) {
     try {
       await redeem(accounts[2], 500);
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -466,7 +482,8 @@ contract('FiatToken', function (accounts) {
     try {
       await token.pause({from: accounts[0]});
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
       assert.equal(await token.paused.call(), false);
     }
@@ -486,8 +503,8 @@ contract('FiatToken', function (accounts) {
       let removedDepositor = await token.removeRedeemer(accounts[4], {from: accounts[2]});
       assert.equal(removedDepositor.logs[0].event, 'RemovedRedeemer');
       assert.fail();
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -508,8 +525,8 @@ contract('FiatToken', function (accounts) {
     try {
       await redeem(accounts[2], 600);
       assert.fail();
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance, 1900);
@@ -526,8 +543,8 @@ contract('FiatToken', function (accounts) {
     try {
       await redeem(accounts[2], 600);
       assert.fail();
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance, 1900);
@@ -542,8 +559,8 @@ contract('FiatToken', function (accounts) {
     try {
       await token.transfer(accounts[3], 600, {from: accounts[2]});
       assert.fail();
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance, 1900);
@@ -557,8 +574,8 @@ contract('FiatToken', function (accounts) {
     try {
       await token.transfer(accounts[2], 600, {from: accounts[9]});
       assert.fail();
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance.c[0], 1900);
@@ -574,8 +591,8 @@ contract('FiatToken', function (accounts) {
     try {
       await token.transferFrom(accounts[2], accounts[3], 600, {from: accounts[1]});
       assert.fail();
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } 
     finally {
        let balance = await token.balanceOf(accounts[2]);
@@ -590,9 +607,9 @@ contract('FiatToken', function (accounts) {
     try {
       await token.transferFrom(accounts[2], accounts[3], 600, {from: accounts[1]});
       assert.fail();
-    } catch (e) {
-      
-    } 
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
     finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance.c[0], 1900);
@@ -604,9 +621,9 @@ contract('FiatToken', function (accounts) {
     await blacklist(accounts[1]);
     try {
       await token.approve(accounts[2], 600, {from: accounts[1]});
-    } catch (e) {
-      
-    } 
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
     finally {
        let approval = await token.allowance(accounts[1], accounts[2]);
        assert.equal(approval.c[0], 0);
@@ -618,9 +635,9 @@ contract('FiatToken', function (accounts) {
     await blacklist(accounts[1]);
     try {
       await token.approve(accounts[1], 600, {from: accounts[2]});
-    } catch (e) {
-      
-    } 
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
     finally {
        let approval = await token.allowance(accounts[2], accounts[1]);
        assert.equal(approval.c[0], 0);
@@ -747,7 +764,8 @@ contract('FiatToken', function (accounts) {
     try {
       await increaseApproval(accounts[2], 200, accounts[3]);
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -761,7 +779,8 @@ contract('FiatToken', function (accounts) {
     try {
       await decreaseApproval(accounts[2], 20, accounts[3]);
       assert.fail();
-    } catch (e) {
+    } catch(e) {
+      checkFailureIsExpected(e);
     }
   });
 
@@ -771,9 +790,9 @@ contract('FiatToken', function (accounts) {
     await blacklist(accounts[1]);
     try {
       await token.increaseApproval(accounts[2], 600, {from: accounts[1]});
-    } catch (e) {
-      
-    } 
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
     finally {
        let approval = await token.allowance(accounts[1], accounts[2]);
        assert.equal(approval.c[0], 600);
@@ -786,9 +805,9 @@ contract('FiatToken', function (accounts) {
     await blacklist(accounts[1]);
     try {
       await token.increaseApproval(accounts[1], 600, {from: accounts[2]});
-    } catch (e) {
-      
-    } 
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
     finally {
        let approval = await token.allowance(accounts[2], accounts[1]);
        assert.equal(approval.c[0], 600);
@@ -801,9 +820,9 @@ contract('FiatToken', function (accounts) {
     await blacklist(accounts[1]);
     try {
       await token.decreaseApproval(accounts[2], 600, {from: accounts[1]});
-    } catch (e) {
-      
-    } 
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
     finally {
        let approval = await token.allowance(accounts[1], accounts[2]);
        assert.equal(approval.c[0], 600);
@@ -816,9 +835,9 @@ contract('FiatToken', function (accounts) {
     await blacklist(accounts[1]);
     try {
       await token.decreaseApproval(accounts[1], 600, {from: accounts[2]});
-    } catch (e) {
-      
-    } 
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
     finally {
        let approval = await token.allowance(accounts[2], accounts[1]);
        assert.equal(approval.c[0], 600);
@@ -840,8 +859,8 @@ contract('FiatToken', function (accounts) {
     await mint(accounts[2], 1900);
     try {
       await token.blacklist(accounts[2], {from: pauserAccount});
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
       await token.transfer(accounts[3], 600, {from: accounts[2]});
       let balance = await token.balanceOf(accounts[2]);
@@ -854,8 +873,8 @@ contract('FiatToken', function (accounts) {
   it('should fail to change the minter with a non-minterCertifier account', async function() {
     try {
       await token.updateMinter(accounts[8]);
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
       let minter = await token.minter();
       assert.equal(minterAccount, minter);
@@ -870,8 +889,8 @@ contract('FiatToken', function (accounts) {
     await token.mint(100, {from: accounts[8]});
     try {
       await token.mint(200, {from: minterAccount});
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
       let minter = await token.minter();
       assert.equal(accounts[8], minter);
@@ -928,7 +947,7 @@ contract('FiatToken', function (accounts) {
         transfer = await token.transferFrom(accounts[0], accounts[3], 895, {from: accounts[3]});
         assert.fail()
       } catch(e) {
-
+        checkFailureIsExpected(e);
       } finally {
         let balance0 = await token.balanceOf(accounts[0]);
         assert.equal(balance0, 900);
@@ -1043,8 +1062,8 @@ contract('FiatToken', function (accounts) {
     await mint(accounts[2], 1900);
     try {
       await token.blacklist(accounts[2], {from: pauserAccount});
-    } catch (e) {
-
+    } catch(e) {
+      checkFailureIsExpected(e);
     } finally {
       await token.transfer(accounts[3], 600, {from: accounts[2]});
       let fee = calculateFeeAmount(600);
