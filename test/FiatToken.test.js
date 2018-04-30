@@ -408,6 +408,32 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should pause and should not be able to transfer, then unpause and be able to transfer', async function () {
+    await mint(accounts[2], 1900);
+    assert.equal(await token.paused.call(), false);
+    await token.pause({from: pauserAccount});
+    assert.equal(await token.paused.call(), true);
+
+    try {
+      await sampleTransferFrom();
+      assert.fail();
+    } catch (e) {
+    }
+
+    await token.unpause({from: pauserAccount});
+    assert.equal(await token.paused.call(), false);
+    await sampleTransferFrom();
+  });
+
+  it('should attempt to unpause when already unpaused and fail', async function () {
+    assert.equal(await token.paused.call(), false);
+    try {
+      await token.unpause({from: pauserAccount});
+      assert.fail();
+    } catch (e) {
+    }
+  })
+
   it('should pause and should not be able to transferFrom', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
@@ -574,6 +600,23 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should fail to redeem more tokens than balance', async function () {
+    await mint(accounts[2], 1900);
+    let initialTotalSupply = await token.totalSupply();
+    let addedDepositor = await token.addRedeemer(accounts[2], {from: certifierAccount});
+    try {
+      await redeem(accounts[2], 10000);
+      assert.fail();
+    } catch (e) {
+
+    } finally {
+       let balance = await token.balanceOf(accounts[2]);
+       assert.equal(balance, 1900);
+       let totalSupply = await token.totalSupply();
+       assert.equal(totalSupply.c[0], initialTotalSupply.c[0]);
+    }
+  });
+
   it('should approve and fail to transfer more than balance', async function() {
     await mint(accounts[2], 100);
     await token.approve(accounts[1], 600, {from: accounts[2]});
@@ -622,6 +665,9 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should blacklist and make transferFrom impossible with the approved transferer', async function() {
+    let isBlacklistedBefore = await token.isAccountBlacklisted(accounts[2])
+    assert.equal(isBlacklistedBefore, false);
+
     await mint(accounts[2], 1900);
     await token.approve(accounts[1], 600, {from: accounts[2]});
     await blacklist(accounts[2]);
@@ -635,6 +681,9 @@ contract('FiatToken', function (accounts) {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance.c[0], 1900);
     }
+
+    let isBlacklistedAfter = await token.isAccountBlacklisted(accounts[2]);
+    assert.equal(isBlacklistedAfter, true);
   });
 
   it('should make transferFrom impossible with the approved and blacklisted transferer', async function() {
