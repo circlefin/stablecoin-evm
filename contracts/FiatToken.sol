@@ -22,16 +22,15 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
   string public currency;
   uint8 public decimals;
 
-  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _minter, address _pauser, address _accountCertifier, address _blacklister, address _reserver, address _minterCertifier) public {
+  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _accountCertifier, address _blacklister, address _minterCertifier) public {
 
     name = _name;
     symbol = _symbol;
     currency = _currency;
     decimals = _decimals;
-    minter = _minter;
+    masterMinter = _masterMinter;
     pauser = _pauser;
     accountCertifier = _accountCertifier;
-    reserver = _reserver;
     blacklister = _blacklister;
     minterCertifier = _minterCertifier;
 
@@ -40,10 +39,12 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
 
   /**
    * @dev Adds pausable condition to mint.
+   * @param to address The recipient account
+   * @param amount uint256 The minting amount
    * @return True if the operation was successful.
   */
-  function mint(uint256 _amount) whenNotPaused public returns (bool) {
-    return super.mint(_amount);
+  function mint(address to, uint256 amount) whenNotPaused public returns (bool) {
+    return super.mint(to, amount);
   }
 
   /**

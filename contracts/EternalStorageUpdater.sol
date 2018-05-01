@@ -49,6 +49,22 @@ contract EternalStorageUpdater {
     contractStorage.setBool(keccak256("blacklisted.", _account), status);
   }
 
+  function isMinter(address _account) internal view returns (bool) {
+    return contractStorage.getBool(keccak256("minter.", _account));
+  }
+
+  function setMinter(address _account, bool status) internal {
+    return contractStorage.setBool(keccak256("minter.", _account), status);
+  }
+
+  function getMinterAllowed(address _minter) internal view returns (uint256) {
+    return contractStorage.getUint(keccak256("minter.allowed.", _minter));
+  }
+
+  function setMinterAllowed(address _minter, uint256 amount) internal {
+    contractStorage.setUint(keccak256("minter.allowed.", _minter), amount);
+  }
+
 }
 
 
