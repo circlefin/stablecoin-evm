@@ -8,8 +8,8 @@ var decimals = 2;
 contract('FiatToken', function (accounts) {
   let token;
   let feeAccount = accounts[8];
-  let minterAccount = accounts[9];
-  let reserverAccount = accounts[7];
+  let masterMinterAccount = accounts[9];
+  let minterAccount = accounts[7];
   let pauserAccount = accounts[6];
   let certifierAccount = accounts[5];
   let blacklisterAccount = accounts[4];
@@ -37,7 +37,45 @@ contract('FiatToken', function (accounts) {
     assert.equal(transfer.logs[0].args.value, value);
   }
 
-  mint = async function(address, amount) {
+  addMinter = async function(minter) {
+    let addMinter = await token.addMinter(minter, {from: masterMinterAccount});
+    let isAMinter = await token.isAccountMinter(minter);
+    assert.equal(addMinter.logs[0].event, 'MinterAdded');
+    assert.equal(addMinter.logs[0].args.newMinter, minter);
+    assert.equal(isAMinter, true);
+  }
+
+  setMinterAllowance = async function(minter, amount) {
+    let update = await token.updateMinterAllowance(minter, amount, {from: masterMinterAccount});
+    assert.equal(update.logs[0].event, 'MinterAllowanceUpdate');
+    assert.equal(update.logs[0].args.minter, minter);
+    assert.equal(update.logs[0].args.amount, amount);
+    let minterAllowance = await token.minterAllowance(minter);
+
+    assert.equal(minterAllowance, amount);
+  }
+
+  mint = async function(to, amount) {
+    minter = minterAccount;
+    await setMinterAllowance(minter, amount);
+    await mintRaw(to, amount, minter);
+  }
+
+  mintRaw = async function(to, amount, minter) {
+    let initialTotalSupply = await token.totalSupply();
+    let intialMinterAllowance = await token.minterAllowance(minter);
+    let minting = await token.mint(to, amount, {from: minter});
+    assert.equal(minting.logs[0].event, 'Mint');
+    assert.equal(minting.logs[0].args.minter, minter);
+    assert.equal(minting.logs[0].args.to, to);
+    assert.equal(minting.logs[0].args.amount, amount);
+    let totalSupply = await token.totalSupply();
+    assert.equal(totalSupply.c[0] - amount, initialTotalSupply.c[0]);
+    let minterAllowance = await token.minterAllowance(minter);
+    assert.equal(intialMinterAllowance.c[0] - amount, minterAllowance.c[0]);
+  }
+
+  mintToReserveAccount = async function(address, amount) {
     let minting = await token.mint(amount, {from: minterAccount});
     assert.equal(minting.logs[0].event, 'Mint');
     assert.equal(minting.logs[0].args.amount, amount);
@@ -107,7 +145,7 @@ contract('FiatToken', function (accounts) {
   }
 
   failToMintAfterFinishMinting = async function() {
-    await token.finishMinting({from: minterAccount});
+    await token.finishMinting({from: masterMinterAccount});
     assert.equal(await token.mintingFinished(), true);
 
     try {
@@ -180,20 +218,16 @@ contract('FiatToken', function (accounts) {
   beforeEach(async function () {
     storage = await EternalStorage.new();
     let storageAddress = storage.address;
-    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, minterAccount, pauserAccount, certifierAccount, blacklisterAccount, reserverAccount, minterCertifier);
+    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, certifierAccount, blacklisterAccount, minterCertifier);
     let tokenAddress = token.address;
     //Need to have to Hex
     await storage.setAddress(web3.sha3(web3.toHex("contract.address.") + tokenAddress.substring(2), {encoding: 'hex'}), tokenAddress);
     await storage.setBool(web3.sha3(web3.toHex("contract.storage.initialised"), {encoding: 'hex'}), true);
-    //Set up initial hot wallet reserves
-    initialHotWalletAmount = 100000;
-    await token.mint(initialHotWalletAmount, {from: minterAccount});
   });
 
   it('should start with a totalSupply of 0', async function () {
-    let joe = await storage.getUint(web3.sha3("totalSupply"));
     let totalSupply = await token.totalSupply();
-    assert.equal(totalSupply.c[0] - initialHotWalletAmount, 0);
+    assert.equal(totalSupply.c[0], 0);
   });
 
   it('should return mintingFinished false after construction', async function () {
@@ -232,7 +266,7 @@ contract('FiatToken', function (accounts) {
   it('should fail to mint from a non-minter call', async function () {
      await mint(accounts[0], 400);
      try {
-      await token.mint(100, {from: accounts[0]});
+      await token.mint(accounts[0], 100, {from: accounts[0]});
       assert.fail();
     } catch(e) {
       checkFailureIsExpected(e);
@@ -872,30 +906,31 @@ contract('FiatToken', function (accounts) {
 
   it('should fail to change the minter with a non-minterCertifier account', async function() {
     try {
-      await token.updateMinter(accounts[8]);
+      await token.updateMasterMinter(accounts[8]);
     } catch(e) {
       checkFailureIsExpected(e);
     } finally {
-      let minter = await token.minter();
-      assert.equal(minterAccount, minter);
+      let minter = await token.masterMinter();
+      assert.equal(masterMinterAccount, minter);
     }
   });
 
   it('should change the minter and mint as well as fail to mint with the old minter', async function() {
-    let update = await token.updateMinter(accounts[8], {from: minterCertifier});
-    assert.equal(update.logs[0].event, 'MinterUpdate');
-    assert.equal(update.logs[0].args.newMinter, accounts[8]);
-    let initialBalanceReserveAccount = await token.balanceOf(reserverAccount);
-    await token.mint(100, {from: accounts[8]});
+    update = await token.updateMinterAllowance(minterAccount, 0, {from: masterMinterAccount});
+    assert.equal(update.logs[0].event, 'MinterAllowanceUpdate');
+    assert.equal(update.logs[0].args.minter, minterAccount);
+    assert.equal(update.logs[0].args.amount, 0);
+    allowance = await token.updateMinterAllowance(accounts[3], 10000, {from: masterMinterAccount});
+    await token.mint(accounts[1], 100, {from: accounts[3]});
     try {
-      await token.mint(200, {from: minterAccount});
+      await token.mint(accounts[1], 200, {from: minterAccount});
     } catch(e) {
       checkFailureIsExpected(e);
     } finally {
-      let minter = await token.minter();
-      assert.equal(accounts[8], minter);
-      let balance = await token.balanceOf(reserverAccount);
-      assert.equal(balance.c[0] - initialBalanceReserveAccount.c[0], 100);
+      let isMinter = (await token.minterAllowance(minterAccount) > 0)
+      assert.equal(isMinter, false);
+      let balance = await token.balanceOf(accounts[1]);
+      assert.equal(balance, 100);
     }
   });
 
