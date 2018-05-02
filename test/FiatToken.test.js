@@ -57,7 +57,6 @@ contract('FiatToken', function (accounts) {
 
   mint = async function(to, amount) {
     minter = minterAccount;
-    await addMinter(minter);
     await setMinterAllowance(minter, amount);
     await mintRaw(to, amount, minter);
   }
@@ -917,10 +916,10 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should change the minter and mint as well as fail to mint with the old minter', async function() {
-    let update = await token.removeMinter(minterAccount, {from: masterMinterAccount});
-    assert.equal(update.logs[0].event, 'MinterRemoved');
-    assert.equal(update.logs[0].args.oldMinter, minterAccount);
-    update = await token.addMinter(accounts[3], {from: masterMinterAccount});
+    update = await token.updateMinterAllowance(minterAccount, 0, {from: masterMinterAccount});
+    assert.equal(update.logs[0].event, 'MinterAllowanceUpdate');
+    assert.equal(update.logs[0].args.minter, minterAccount);
+    assert.equal(update.logs[0].args.amount, 0);
     allowance = await token.updateMinterAllowance(accounts[3], 10000, {from: masterMinterAccount});
     await token.mint(accounts[1], 100, {from: accounts[3]});
     try {
@@ -928,7 +927,7 @@ contract('FiatToken', function (accounts) {
     } catch(e) {
       checkFailureIsExpected(e);
     } finally {
-      let isMinter = await token.isAccountMinter(minterAccount);
+      let isMinter = (await token.minterAllowance(minterAccount) > 0)
       assert.equal(isMinter, false);
       let balance = await token.balanceOf(accounts[1]);
       assert.equal(balance, 100);

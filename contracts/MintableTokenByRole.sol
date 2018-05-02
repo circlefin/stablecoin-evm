@@ -15,8 +15,6 @@ contract MintableTokenByRole is EternalStorageUpdater {
   event MintFinished();
   event MasterMinterUpdate(address newMasterMinter);
   event MinterAllowanceUpdate(address minter, uint256 amount);
-  event MinterAdded(address newMinter);
-  event MinterRemoved(address oldMinter);
 
   bool public mintingFinished = false;
 
@@ -45,19 +43,11 @@ contract MintableTokenByRole is EternalStorageUpdater {
   }
 
   /**
-   * @dev Throws if called by any account other than a minter
-  */
-  modifier onlyMinters() {
-    require(isMinter(msg.sender) == true);
-    _;
-  }
-
-  /**
    * @dev Function to mint tokens
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) onlyMinters canMint public returns (bool) {
+  function mint(address _to, uint256 _amount) canMint public returns (bool) {
     uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
     require(_amount <= mintingAllowedAmount);
 
@@ -87,14 +77,6 @@ contract MintableTokenByRole is EternalStorageUpdater {
   }
 
   /**
-   * @dev Function to check if an account is a minter
-   * @param account The address of the account
-  */
-  function isAccountMinter(address account) public view returns (bool) {
-    return isMinter(account);
-  }
-
-  /**
    * @dev Function update a minter allowance
    * @param minter The address of the minter
    * @param amount The allowed amount of the minter to udpate
@@ -103,28 +85,6 @@ contract MintableTokenByRole is EternalStorageUpdater {
   function updateMinterAllowance(address minter, uint256 amount) onlyMasterMinter public returns (bool) {
     setMinterAllowed(minter, amount);
     MinterAllowanceUpdate(minter, amount);
-    return true;
-  }
-
-  /**
-   * @dev Function to add a new minter
-   * @param newMinter The address of the new minter
-   * @return True if the operation was successful.
-  */
-  function addMinter(address newMinter) onlyMasterMinter public returns (bool) {
-    setMinter(newMinter, true);
-    MinterAdded(newMinter);
-    return true;
-  }
-
-  /**
-   * @dev Function to remove a minter
-   * @param minter The address of the minter to remove
-   * @return True if the operation was successful.
-  */
-  function removeMinter(address minter) onlyMasterMinter public returns (bool) {
-    setMinter(minter, false);
-    MinterRemoved(minter);
     return true;
   }
 
