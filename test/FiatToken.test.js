@@ -111,7 +111,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.mintingFinished(), true);
     try {
       await mint(accounts[0], 100);
-      assert.fail("Minting not stopped");
+      assert.fail('Minting not stopped');
     } catch (e) {}
   }
 
@@ -175,15 +175,15 @@ contract('FiatToken', function (accounts) {
     token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, minterAccount, pauserAccount, certifierAccount, blacklisterAccount, reserverAccount, minterCertifier);
     let tokenAddress = token.address;
     //Need to have to Hex
-    await storage.setAddress(web3.sha3(web3.toHex("contract.address.") + tokenAddress.substring(2), {encoding: 'hex'}), tokenAddress);
-    await storage.setBool(web3.sha3(web3.toHex("contract.storage.initialised"), {encoding: 'hex'}), true);
+    await storage.setAddress(web3.sha3(web3.toHex('contract.address.') + tokenAddress.substring(2), {encoding: 'hex'}), tokenAddress);
+    await storage.setBool(web3.sha3(web3.toHex('contract.storage.initialised'), {encoding: 'hex'}), true);
     //Set up initial hot wallet reserves
     initialHotWalletAmount = 100000;
     await token.mint(initialHotWalletAmount, {from: minterAccount});
   });
 
   it('should start with a totalSupply of 0', async function () {
-    let joe = await storage.getUint(web3.sha3("totalSupply"));
+    let joe = await storage.getUint(web3.sha3('totalSupply'));
     let totalSupply = await token.totalSupply();
     assert.equal(totalSupply.c[0] - initialHotWalletAmount, 0);
   });
@@ -351,7 +351,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(allowed.c[0], 100);
 
     try {
-      await token.transferFrom(accounts[0], "invalid address", 50, {from: accounts[3]});
+      await token.transferFrom(accounts[0], 'invalid address', 50, {from: accounts[3]});
       assert.fail()
     } catch(e) {
 
@@ -1019,6 +1019,105 @@ contract('FiatToken', function (accounts) {
     let actual = await token.currency.call();
     assert.equal(actual, currency);
   });
+
+  it('should setAddress and getAddress from storage, then deleteAddress', async function () {
+    testStorage = await EternalStorage.new();
+    let setterAddress = accounts[3];
+    var addressHex = web3.sha3(web3.toHex('contract.address.') + setterAddress.substring(2), {encoding: 'hex'})
+    
+    await testStorage.setAddress(addressHex, setterAddress);
+    addressGotten = await testStorage.getAddress(addressHex);
+    assert.equal(addressGotten, setterAddress);
+
+    await testStorage.deleteAddress(addressHex);
+    addressAfterDeletion = await testStorage.getAddress(addressHex);
+    assert.equal(addressAfterDeletion, '0x0000000000000000000000000000000000000000');
+  });
+
+  it('should setString and getString from storage, then deleteString', async function () {
+    testStorage = await EternalStorage.new();
+    let setterAddress = accounts[3];
+    await testStorage.setAddress(web3.sha3(web3.toHex('contract.address.') + setterAddress.substring(2), {encoding: 'hex'}), setterAddress);
+
+    await testStorage.setString('key', 'value', {from: setterAddress});
+    value = await testStorage.getString('key');
+    assert.equal(value, 'value');
+
+    await testStorage.deleteString('key', {from: setterAddress});
+    valueAfterDeletion = await testStorage.getString('key');
+    assert.equal(valueAfterDeletion, '');
+  });
+
+  it('should setBytes and getBytes from storage, then deleteBytes', async function () {
+    testStorage = await EternalStorage.new();
+    let setterAddress = accounts[3];
+    await testStorage.setAddress(web3.sha3(web3.toHex('contract.address.') + setterAddress.substring(2), {encoding: 'hex'}), setterAddress);
+
+    await testStorage.setBytes('key', 'value', {from: setterAddress});
+    value = await testStorage.getBytes('key');
+    assert.equal(value, web3.toHex(value));
+
+    await testStorage.deleteBytes('key', {from: setterAddress});
+    value = await testStorage.getBytes('key');
+    assert.equal(value, '0x');
+  })
+
+  it('should setInt and getInt from storage, then deleteInt', async function () {
+    testStorage = await EternalStorage.new();
+    let setterAddress = accounts[3];
+    await testStorage.setAddress(web3.sha3(web3.toHex('contract.address.') + setterAddress.substring(2), {encoding: 'hex'}), setterAddress);
+
+    await testStorage.setInt('key', 1, {from: setterAddress});
+    value = await testStorage.getInt('key');
+    assert.equal(value, 1);
+
+    await testStorage.deleteInt('key', {from: setterAddress});
+    value = await testStorage.getInt('key');
+    assert.equal(value.toNumber(), 0);
+  })
+
+  it('should setUint and getUint from storage, then deleteUint', async function () {
+    testStorage = await EternalStorage.new();
+    let setterAddress = accounts[3];
+    await testStorage.setAddress(web3.sha3(web3.toHex('contract.address.') + setterAddress.substring(2), {encoding: 'hex'}), setterAddress);
+
+    await testStorage.setUint('key', 1, {from: setterAddress});
+    value = await testStorage.getUint('key');
+    assert.equal(value.toNumber(), 1);
+
+    await testStorage.deleteUint('key', {from: setterAddress});
+    valueAfterDeletion = await testStorage.getUint('key');
+    assert.equal(valueAfterDeletion.toNumber(), 0);
+  })
+
+  it('should setBool and getBool from storage, then deleteBool', async function () {
+    testStorage = await EternalStorage.new();
+    let setterAddress = accounts[3];
+    await testStorage.setAddress(web3.sha3(web3.toHex('contract.address.') + setterAddress.substring(2), {encoding: 'hex'}), setterAddress);
+
+    await testStorage.setBool('key', true, {from: setterAddress});
+    value = await testStorage.getBool('key');
+    assert.equal(value, true);
+
+    await testStorage.deleteBool('key', {from: setterAddress});
+    valueAfterDeletion = await testStorage.getBool('key');
+    assert.equal(valueAfterDeletion, false)
+  })
+
+  it('should disallow owner from setting storage after deployment', async function () {
+    try {
+      await storage.setString('key', 'value');
+      assert.fail();
+    } catch (e) {}
+  })
+
+  it('should disallow an address not included in addressStorage from setting storage after deployment', async function () {
+    let disallowedSender = accounts[5];
+    try {
+      await storage.setString('key', 'value', {from: disallowedSender});
+      assert.fail();
+    } catch (e) {}
+  })
 
 /* Comments out tests with fees */
 /*
