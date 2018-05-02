@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/solidity-coverage"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/centrehq/centre-tokens#readme",
   "dependencies": {
+    "bignumber.js": "^7.0.1",
     "zeppelin-solidity": "1.8.0"
   },
   "devDependencies": {
