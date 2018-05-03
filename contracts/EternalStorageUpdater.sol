@@ -10,51 +10,51 @@ contract EternalStorageUpdater {
   EternalStorage contractStorage = EternalStorage(0);
 
   function getAllowed(address _from, address _spender) internal view returns (uint256) {
-    return contractStorage.getUint(keccak256("allowed.", _from, ".", _spender));
+    return contractStorage.getAllowed(_from, _spender);
   }
 
-  function setAllowed(address _from, address _spender, uint256 amount) internal {
-    contractStorage.setUint(keccak256("allowed.", _from, ".", _spender), amount);
+  function setAllowed(address _from, address _spender, uint256 _amount) internal {
+    contractStorage.setAllowed(_from,  _spender, _amount);
   }
 
   function getBalance(address _account) internal view returns (uint256) {
-    return contractStorage.getUint(keccak256("balance.", _account));
+    return contractStorage.getBalance(_account);
   }
 
-  function setBalance(address _account, uint256 amount) internal {
-    contractStorage.setUint(keccak256("balance.", _account), amount);
+  function setBalance(address _account, uint256 _amount) internal {
+    contractStorage.setBalance(_account, _amount);
   }
 
   function getTotalSupply() internal view returns (uint256) {
-    return contractStorage.getUint(keccak256("totalSupply"));
+    return contractStorage.getTotalSupply();
   }
 
-  function setTotalSupply(uint256 amount) internal {
-    contractStorage.setUint(keccak256("totalSupply"), amount);
+  function setTotalSupply(uint256 _amount) internal {
+    contractStorage.setTotalSupply(_amount);
   }
 
   function isRedeemer(address _account) internal view returns (bool) {
-    return contractStorage.getBool(keccak256("redeemer.", _account));
+    return contractStorage.isRedeemer(_account);
   }
 
-  function setRedeemer(address _account, bool status) internal {
-    contractStorage.setBool(keccak256("redeemer.", _account), status);
+  function setRedeemer(address _account, bool _status) internal {
+    contractStorage.setRedeemer(_account, _status);
   }
 
   function isBlacklisted(address _account) internal view returns (bool) {
-    return contractStorage.getBool(keccak256("blacklisted.", _account));
+    return contractStorage.isBlacklisted(_account);
   }
 
-  function setBlacklisted(address _account, bool status) internal {
-    contractStorage.setBool(keccak256("blacklisted.", _account), status);
+  function setBlacklisted(address _account, bool _status) internal {
+    contractStorage.setBlacklisted(_account, _status);
   }
 
   function getMinterAllowed(address _minter) internal view returns (uint256) {
-    return contractStorage.getUint(keccak256("minter.allowed.", _minter));
+    return contractStorage.getMinterAllowed(_minter);
   }
 
-  function setMinterAllowed(address _minter, uint256 amount) internal {
-    contractStorage.setUint(keccak256("minter.allowed.", _minter), amount);
+  function setMinterAllowed(address _minter, uint256 _amount) internal {
+    contractStorage.setMinterAllowed(_minter, _amount);
   }
 
 }
