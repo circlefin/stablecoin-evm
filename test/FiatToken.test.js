@@ -220,9 +220,9 @@ contract('FiatToken', function (accounts) {
     let storageAddress = storage.address;
     token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, certifierAccount, blacklisterAccount, minterCertifier);
     let tokenAddress = token.address;
-    //Need to have to Hex
-    await storage.setAddress(web3.sha3(web3.toHex("contract.address.") + tokenAddress.substring(2), {encoding: 'hex'}), tokenAddress);
-    await storage.setBool(web3.sha3(web3.toHex("contract.storage.initialised"), {encoding: 'hex'}), true);
+
+    await storage.setAccess(tokenAddress, true);
+    await storage.setInitialized(true);
   });
 
   it('should start with a totalSupply of 0', async function () {

@@ -7,15 +7,15 @@ import './../lib/openzeppelin/contracts/ownership/Ownable.sol';
 
 contract EternalStorage is Ownable {
 
+    mapping(address => bool) private access;
+    bool private initialized = false;
 
-    /**** Storage Types *******/
-
-    mapping(bytes32 => uint256)    private uIntStorage;
-    mapping(bytes32 => string)     private stringStorage;
-    mapping(bytes32 => address)    private addressStorage;
-    mapping(bytes32 => bytes)      private bytesStorage;
-    mapping(bytes32 => bool)       private boolStorage;
-    mapping(bytes32 => int256)     private intStorage;
+    mapping(address => uint256) private balances;
+    mapping(address => mapping(address => uint256)) private allowed;
+    uint256 private totalSupply = 0;
+    mapping(address => bool) private redeemers;
+    mapping(address => bool) private blacklisted;
+    mapping(address => uint256) private minterAllowed;
 
 
     /*** Modifiers ************/
@@ -24,111 +24,81 @@ contract EternalStorage is Ownable {
     modifier onlyAuthorizedContracts() {
         // The owner is only allowed to set the storage upon deployment to register the initial contracts, afterwards their direct access is disabled
         if (msg.sender == owner) {
-            require(boolStorage[keccak256("contract.storage.initialised")] == false);
+            require(initialized == false);
         } else {
             // Make sure the access is permitted to only contracts in our Dapp
-            require(addressStorage[keccak256("contract.address.", msg.sender)] != 0x0);
+            require(access[msg.sender] != false);
         }
         _;
     }
 
     /**** Get Methods ***********/
 
-    /// @param _key The key for the record
-    function getAddress(bytes32 _key) external view returns (address) {
-        return addressStorage[_key];
+    function getInitialized() external view returns (bool) {
+        return initialized;
     }
 
-    /// @param _key The key for the record
-    function getUint(bytes32 _key) external view returns (uint) {
-        return uIntStorage[_key];
+    function getAccess(address _address) external view returns (bool) {
+        return access[_address];
     }
 
-    /// @param _key The key for the record
-    function getString(bytes32 _key) external view returns (string) {
-        return stringStorage[_key];
+    function getAllowed(address _from, address _spender) external view returns (uint256) {
+        return allowed[_from][_spender];
     }
 
-    /// @param _key The key for the record
-    function getBytes(bytes32 _key) external view returns (bytes) {
-        return bytesStorage[_key];
+    function getBalance(address _account) external view returns (uint256) {
+        return balances[_account];
     }
 
-    /// @param _key The key for the record
-    function getBool(bytes32 _key) external view returns (bool) {
-        return boolStorage[_key];
+    function getTotalSupply() external view returns (uint256) {
+        return totalSupply;
     }
 
-    /// @param _key The key for the record
-    function getInt(bytes32 _key) external view returns (int) {
-        return intStorage[_key];
+    function isRedeemer(address _account) external view returns (bool) {
+        return redeemers[_account];
+    }
+
+    function isBlacklisted(address _account) external view returns (bool) {
+        return blacklisted[_account];
+    }
+
+    function getMinterAllowed(address _minter) external view returns (uint256) {
+        return minterAllowed[_minter];
     }
 
 
     /**** Set Methods ***********/
 
-
-    /// @param _key The key for the record
-    function setAddress(bytes32 _key, address _value) onlyAuthorizedContracts external {
-        addressStorage[_key] = _value;
+    function setInitialized(bool _status) onlyAuthorizedContracts external {
+        initialized = _status;
     }
 
-    /// @param _key The key for the record
-    function setUint(bytes32 _key, uint _value) onlyAuthorizedContracts external {
-        uIntStorage[_key] = _value;
+    function setAccess(address _address, bool _status) onlyAuthorizedContracts external {
+        access[_address] = _status;
     }
 
-    /// @param _key The key for the record
-    function setString(bytes32 _key, string _value) onlyAuthorizedContracts external {
-        stringStorage[_key] = _value;
+    function setAllowed(address _from, address _spender, uint256 _amount) onlyAuthorizedContracts external {
+        allowed[_from][_spender] = _amount;
     }
 
-    /// @param _key The key for the record
-    function setBytes(bytes32 _key, bytes _value) onlyAuthorizedContracts external {
-        bytesStorage[_key] = _value;
-    }
-    
-    /// @param _key The key for the record
-    function setBool(bytes32 _key, bool _value) onlyAuthorizedContracts external {
-        boolStorage[_key] = _value;
-    }
-    
-    /// @param _key The key for the record
-    function setInt(bytes32 _key, int _value) onlyAuthorizedContracts external {
-        intStorage[_key] = _value;
+    function setBalance(address _account, uint256 _amount) onlyAuthorizedContracts external {
+        balances[_account] = _amount;
     }
 
-
-    /**** Delete Methods ***********/
-    
-    /// @param _key The key for the record
-    function deleteAddress(bytes32 _key) onlyAuthorizedContracts external {
-        delete addressStorage[_key];
+    function setTotalSupply(uint256 _totalSupply) onlyAuthorizedContracts external {
+        totalSupply = _totalSupply;
     }
 
-    /// @param _key The key for the record
-    function deleteUint(bytes32 _key) onlyAuthorizedContracts external {
-        delete uIntStorage[_key];
+    function setRedeemer(address _account, bool _status) onlyAuthorizedContracts external {
+        redeemers[_account] = _status;
     }
 
-    /// @param _key The key for the record
-    function deleteString(bytes32 _key) onlyAuthorizedContracts external {
-        delete stringStorage[_key];
+    function setBlacklisted(address _account, bool status) onlyAuthorizedContracts external {
+        blacklisted[_account] = status;
     }
 
-    /// @param _key The key for the record
-    function deleteBytes(bytes32 _key) onlyAuthorizedContracts external {
-        delete bytesStorage[_key];
-    }
-    
-    /// @param _key The key for the record
-    function deleteBool(bytes32 _key) onlyAuthorizedContracts external {
-        delete boolStorage[_key];
-    }
-    
-    /// @param _key The key for the record
-    function deleteInt(bytes32 _key) onlyAuthorizedContracts external {
-        delete intStorage[_key];
+    function setMinterAllowed(address _minter, uint256 _amount) onlyAuthorizedContracts external {
+        minterAllowed[_minter] = _amount;
     }
 
 }
