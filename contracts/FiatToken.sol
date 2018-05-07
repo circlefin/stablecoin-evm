@@ -9,12 +9,14 @@ import './PausableTokenByRole.sol';
 import './RedeemableToken.sol';
 import './BlacklistableTokenByRole.sol';
 import './EternalStorageUpdater.sol';
+import './Upgradable.sol';
+import './UpgradedContract.sol';
 
 /**
  * @title FiatToken 
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, RedeemableToken, BlacklistableTokenByRole, Ownable {
+contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, RedeemableToken, BlacklistableTokenByRole, Ownable, Upgradable {
   using SafeMath for uint256;
 
   string public name;
@@ -22,7 +24,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
   string public currency;
   uint8 public decimals;
 
-  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _accountCertifier, address _blacklister, address _minterCertifier) public {
+  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _accountCertifier, address _blacklister, address _minterCertifier, address _upgrader) public {
 
     name = _name;
     symbol = _symbol;
@@ -33,6 +35,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
     accountCertifier = _accountCertifier;
     blacklister = _blacklister;
     minterCertifier = _minterCertifier;
+    upgrader = _upgrader;
 
     contractStorage = EternalStorage(_storageContractAddress);
   }
@@ -61,6 +64,9 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
    * @param spender address The account spender
   */
   function allowance(address owner, address spender) public view returns (uint256) {
+    if (isUpgraded()) {
+      return UpgradedContract(upgradedAddress).allowance(owner, spender);
+    } 
     return getAllowed(owner, spender);
   }
 
@@ -68,6 +74,9 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
    * @dev Get totalSupply of token
   */
   function totalSupply() public view returns (uint256) {
+    if (isUpgraded()) {
+      return UpgradedContract(upgradedAddress).totalSupply();
+    } 
     return getTotalSupply();
   }
 
@@ -76,6 +85,9 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
    * @param account address The account
   */
   function balanceOf(address account) public view returns (uint256) {
+    if (isUpgraded()) {
+      return UpgradedContract(upgradedAddress).balanceOf(account);
+    } 
     return getBalance(account);
   }
 
@@ -84,6 +96,9 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
    * @return True if the operation was successful.
   */
   function approve(address _spender, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
+    if (isUpgraded()) {
+      return UpgradedContract(upgradedAddress).approve(_spender, _value);
+    } 
     require(isBlacklisted(_spender) == false);
     setAllowed(msg.sender, _spender, _value);
     Approval(msg.sender, _spender, _value);
@@ -98,6 +113,9 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
    * @return bool success
   */
   function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
+    if (isUpgraded()) {
+      return UpgradedContract(upgradedAddress).transferFrom(_from, _to, _value);
+    } 
     require(isBlacklisted(_from) == false);
     require(isBlacklisted(_to) == false);
 
@@ -118,6 +136,9 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
    * @return bool success
   */
   function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
+    if (isUpgraded()) {
+      return UpgradedContract(upgradedAddress).transfer(_to, _value);
+    } 
     require(isBlacklisted(_to) == false);
 
     doTransfer(msg.sender, _to, _value);
