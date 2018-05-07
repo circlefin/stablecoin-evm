@@ -1139,8 +1139,9 @@ contract('FiatToken', function (accounts) {
 
     try {
       await testStorage.setAccess(setterAddress, true);
+    } catch (e) {
       checkFailureIsExpected(e);
-    } catch (e) {}
+    }
   });
 
   it('should return true from getInitialized on an initialized contract', async function () {
