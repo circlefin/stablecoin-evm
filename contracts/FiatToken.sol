@@ -6,7 +6,6 @@ import './../lib/openzeppelin/contracts/math/SafeMath.sol';
 
 import './MintableTokenByRole.sol';
 import './PausableTokenByRole.sol';
-import './RedeemableToken.sol';
 import './BlacklistableTokenByRole.sol';
 import './EternalStorageUpdater.sol';
 import './Upgradable.sol';
@@ -16,7 +15,7 @@ import './UpgradedContract.sol';
  * @title FiatToken 
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, RedeemableToken, BlacklistableTokenByRole, Ownable, Upgradable {
+contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, BlacklistableTokenByRole, Ownable, Upgradable {
   using SafeMath for uint256;
 
   string public name;
@@ -24,7 +23,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
   string public currency;
   uint8 public decimals;
 
-  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _accountCertifier, address _blacklister, address _minterCertifier, address _upgrader) public {
+  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _minterCertifier, address _upgrader) public {
 
     name = _name;
     symbol = _symbol;
@@ -32,7 +31,6 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Redeemabl
     decimals = _decimals;
     masterMinter = _masterMinter;
     pauser = _pauser;
-    accountCertifier = _accountCertifier;
     blacklister = _blacklister;
     minterCertifier = _minterCertifier;
     upgrader = _upgrader;
