@@ -14,6 +14,7 @@ contract('FiatToken', function (accounts) {
   let certifierAccount = accounts[5];
   let blacklisterAccount = accounts[4];
   let minterCertifier = accounts[3];
+  let upgraderAccount = accounts[2];
 
   calculateFeeAmount = function(amount) {
     return Math.floor((fee / feeBase) * amount);
@@ -218,7 +219,7 @@ contract('FiatToken', function (accounts) {
   beforeEach(async function () {
     storage = await EternalStorage.new();
     let storageAddress = storage.address;
-    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, certifierAccount, blacklisterAccount, minterCertifier);
+    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, certifierAccount, blacklisterAccount, minterCertifier, upgraderAccount);
     let tokenAddress = token.address;
     await storage.setAccess(tokenAddress, true);
     await storage.setInitialized(true);
