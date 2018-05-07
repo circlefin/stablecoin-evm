@@ -283,7 +283,6 @@ contract('FiatToken', function (accounts) {
     await sampleTransferFrom();
   });
 
-
   it('should approve', async function() {
     await approve(accounts[3], 100, accounts[2]);
     assert.equal((await token.allowance(accounts[2], accounts[3])).c[0], 100);
@@ -376,31 +375,11 @@ contract('FiatToken', function (accounts) {
       await token.transferFrom(accounts[0], 0, 50, {from: accounts[3]});
       assert.fail()
     } catch(e) {
-
+      checkFailureIsExpected(e);
     } finally {
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 500);
     }
-
-  });
-
-  it('should fail on invalid transfer recipient (invalid address) and not change balances', async function() {
-
-    await mint(accounts[0], 500);
-    await token.approve(accounts[3], 100);
-    allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.equal(allowed.c[0], 100);
-
-    try {
-      await token.transferFrom(accounts[0], 'invalid address', 50, {from: accounts[3]});
-      assert.fail()
-    } catch(e) {
-
-    } finally {
-      let balance0 = await token.balanceOf(accounts[0]);
-      assert.equal(balance0, 500);
-    }
-    
   });
 
   it('should test consistency of transfer(x) and approve(x) + transferFrom(x)', async function() {
@@ -460,6 +439,7 @@ contract('FiatToken', function (accounts) {
       await sampleTransferFrom();
       assert.fail();
     } catch (e) {
+      checkFailureIsExpected(e);
     }
 
     await token.unpause({from: pauserAccount});
@@ -473,6 +453,7 @@ contract('FiatToken', function (accounts) {
       await token.unpause({from: pauserAccount});
       assert.fail();
     } catch (e) {
+      checkFailureIsExpected(e);
     }
   })
 
@@ -658,7 +639,7 @@ contract('FiatToken', function (accounts) {
       await redeem(accounts[2], 10000);
       assert.fail();
     } catch (e) {
-
+      checkFailureIsExpected(e);
     } finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance, 1900);
@@ -674,7 +655,7 @@ contract('FiatToken', function (accounts) {
       await token.transferFrom(accounts[2], accounts[1], 600, {from: accounts[1]});
       assert.fail();
     } catch (e) {
-
+      checkFailureIsExpected(e);
     } 
     finally {
        let balance = await token.balanceOf(accounts[2]);
@@ -760,14 +741,13 @@ contract('FiatToken', function (accounts) {
       await token.transferFrom(accounts[2], accounts[3], 600, {from: accounts[2]});
       assert.fail();
     } catch (e) {
-      
+      checkFailureIsExpected(e);
     } 
     finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance.c[0], 1900);
     }
   });
-
 
   it('should blacklist and make approve impossible', async function() {
     await mint(accounts[1], 1900);
@@ -1161,7 +1141,6 @@ contract('FiatToken', function (accounts) {
       await testStorage.setAccess(setterAddress, true);
       checkFailureIsExpected(e);
     } catch (e) {}
-  
   });
 
   it('should return true from getInitialized on an initialized contract', async function () {
