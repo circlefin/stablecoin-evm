@@ -20,3 +20,6 @@ testrpc must be running first
 
 then run the tests via truffle:
 ```truffle test```
+
+to generate test coverage run:
+```npm test```
