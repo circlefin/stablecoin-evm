@@ -1,6 +1,5 @@
 pragma solidity ^0.4.18;
 
-import './../lib/openzeppelin/contracts/token/ERC20/BasicToken.sol';
 import './EternalStorageUpdater.sol';
 
 /**
