@@ -907,6 +907,7 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+/* TODO: Update with global roleAddressChangerAccount
   it('should fail to change the minter with a non-minterCertifier account', async function() {
     try {
       await token.updateMasterMinter(accounts[8]);
@@ -949,13 +950,14 @@ contract('FiatToken', function (accounts) {
       assert.equal(balance, 100);
     }
   });
+*/
 
   it('should fail to updateMinterAllowance from non-masterMinter', async function() {
     let minterAllowanceBefore = await token.minterAllowance(minterAccount)
     assert.equal(minterAllowanceBefore, 0);
 
     try {
-      update = await token.updateMinterAllowance(minterAccount, 100, {from: minterCertifier});
+      update = await token.updateMinterAllowance(minterAccount, 100, {from: roleAddressChangerAccount});
     } catch(e) {
       checkFailureIsExpected(e);
     } finally {

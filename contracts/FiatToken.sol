@@ -24,7 +24,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   address roleAddressChanger;
 
   event Burn(address indexed burner, uint256 amount);
-  event RoleAddressChange(string indexed role, address indexed oldAddress, address indexed _newAddress);
+  event RoleAddressChange(bytes32 indexed roleHash, address indexed newAddress);
 
   function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
 
