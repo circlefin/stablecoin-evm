@@ -1,12 +1,11 @@
 pragma solidity ^0.4.18;
 
-import './../lib/openzeppelin/contracts/ownership/Ownable.sol';
-
 /// @title The primary persistent storage for Rocket Pool
 /// @author David Rugendyke with modifications by CENTRE. 
 
-contract EternalStorage is Ownable {
+contract EternalStorage {
 
+    address owner;
     mapping(address => bool) private access;
     bool private initialized = false;
 
@@ -17,10 +16,13 @@ contract EternalStorage is Ownable {
     mapping(address => bool) private blacklisted;
     mapping(address => uint256) private minterAllowed;
 
+    function EternalStorage() public {
+        owner = msg.sender;
+    }
 
     /*** Modifiers ************/
 
-    /// @dev Only allow access from the latest version of a contract in the Rocket Pool network after deployment
+    /// @dev Only allow access from the latest version contract after initialization
     modifier onlyAuthorizedContracts() {
         // The owner is only allowed to set the storage upon deployment to register the initial contracts, afterwards their direct access is disabled
         if (msg.sender == owner) {
