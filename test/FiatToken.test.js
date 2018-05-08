@@ -11,7 +11,6 @@ contract('FiatToken', function (accounts) {
   let masterMinterAccount = accounts[9];
   let minterAccount = accounts[7];
   let pauserAccount = accounts[6];
-  let certifierAccount = accounts[5];
   let blacklisterAccount = accounts[4];
   let minterCertifier = accounts[3];
   let upgraderAccount = accounts[2];
@@ -219,7 +218,7 @@ contract('FiatToken', function (accounts) {
   beforeEach(async function () {
     storage = await EternalStorage.new();
     let storageAddress = storage.address;
-    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, certifierAccount, blacklisterAccount, minterCertifier, upgraderAccount);
+    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, minterCertifier, upgraderAccount);
     let tokenAddress = token.address;
     await storage.setAccess(tokenAddress, true);
     await storage.setInitialized(true);
@@ -541,20 +540,6 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-  it('should pause and should not be able to redeem', async function () {
-    await mint(accounts[2], 1900);
-    assert.equal(await token.paused.call(), false);
-    await token.pause({from: pauserAccount});
-    assert.equal(await token.paused.call(), true);
-
-    try {
-      await redeem(accounts[2], 500);
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    }
-  });
-
   it('should try to pause with non-pauser and fail to pause', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
@@ -568,87 +553,6 @@ contract('FiatToken', function (accounts) {
     }
   }); 
 
-  it('should add and remove account to redeemer list', async function() {
-    let addedDepositor = await token.addRedeemer(accounts[4], {from: certifierAccount});
-    assert.equal(addedDepositor.logs[0].event, 'NewRedeemer');
-    let removedDepositor = await token.removeRedeemer(accounts[4], {from: certifierAccount});
-    assert.equal(removedDepositor.logs[0].event, 'RemovedRedeemer');
-  });
-
-  it('should fail to add and remove account to redeemer list not using the certifierAccount', async function() {
-    try {
-      let addedDepositor = await token.addRedeemer(accounts[4], {from: accounts[2]});
-      assert.equal(addedDepositor.logs[0].event, 'NewRedeemer');
-      let removedDepositor = await token.removeRedeemer(accounts[4], {from: accounts[2]});
-      assert.equal(removedDepositor.logs[0].event, 'RemovedRedeemer');
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    }
-  });
-
-  it('should redeem account in redeemer list', async function() {
-    await mint(accounts[2], 1900);
-    let initialTotalSupply = await token.totalSupply();
-    let addedDepositor = await token.addRedeemer(accounts[2], {from: certifierAccount});
-    await redeem(accounts[2], 600);
-    let balance = await token.balanceOf(accounts[2]);
-    assert.equal(balance, 1900 - 600);
-    let totalSupply = await token.totalSupply();
-    assert.equal(totalSupply.c[0] + 600, initialTotalSupply.c[0]);
-  });
-
-  it('should fail to redeem account not in redeemer list', async function() {
-    await mint(accounts[2], 1900);
-    let initialTotalSupply = await token.totalSupply();
-    try {
-      await redeem(accounts[2], 600);
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-       let balance = await token.balanceOf(accounts[2]);
-       assert.equal(balance, 1900);
-       let totalSupply = await token.totalSupply();
-       assert.equal(totalSupply.c[0], initialTotalSupply.c[0]);
-    }
-  });
-
-  it('should fail to redeem account removed from redeemer list', async function() {
-    await mint(accounts[2], 1900);
-    let initialTotalSupply = await token.totalSupply();
-    let addedDepositor = await token.addRedeemer(accounts[2], {from: certifierAccount});
-    let removedDepositor = await token.removeRedeemer(accounts[2], {from: certifierAccount});
-    try {
-      await redeem(accounts[2], 600);
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-       let balance = await token.balanceOf(accounts[2]);
-       assert.equal(balance, 1900);
-       let totalSupply = await token.totalSupply();
-       assert.equal(totalSupply.c[0], initialTotalSupply.c[0]);
-    }
-  });
-
-  it('should fail to redeem more tokens than balance', async function () {
-    await mint(accounts[2], 1900);
-    let initialTotalSupply = await token.totalSupply();
-    let addedDepositor = await token.addRedeemer(accounts[2], {from: certifierAccount});
-    try {
-      await redeem(accounts[2], 10000);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-       let balance = await token.balanceOf(accounts[2]);
-       assert.equal(balance, 1900);
-       let totalSupply = await token.totalSupply();
-       assert.equal(totalSupply.c[0], initialTotalSupply.c[0]);
-    }
-  });
-
   it('should approve and fail to transfer more than balance', async function() {
     await mint(accounts[2], 100);
     await token.approve(accounts[1], 600, {from: accounts[2]});
@@ -661,9 +565,8 @@ contract('FiatToken', function (accounts) {
     finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance.c[0], 100);
-    }
+    }  
   });
-
 
   it('should blacklist and make transfer impossible', async function() {
     await mint(accounts[2], 1900);
