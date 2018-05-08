@@ -24,7 +24,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   address roleAddressChanger;
 
   event Burn(address indexed burner, uint256 amount);
-  event RoleAddressChange(bytes32 indexed roleHash, address indexed newAddress);
+  event RoleAddressChange(string indexed role, address indexed newAddress);
 
   function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
 
@@ -193,25 +193,30 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
    * @dev updates a role's address with the roleAddressChanger
    * Validates that caller is the roleAddressChanger
    * @param _newAddress uint256 The new role address
-   * @param _roleHash bytes32 The role to udpdate
+   * @param _role string The role to udpdate
   */
-  function updateRoleAddress(address _newAddress, bytes32 _roleHash) onlyRoleAddressChanger public {
-    if (_roleHash == keccak256('masterMinter')) {
+  function updateRoleAddress(address _newAddress, string _role) onlyRoleAddressChanger public {
+    bytes32 roleHash = keccak256(_role);
+    if (roleHash == keccak256('masterMinter')) {
       masterMinter = _newAddress;
+      RoleAddressChange(_role, _newAddress);
     }
-    if (_roleHash == keccak256('blacklister')) {
+    if (roleHash == keccak256('blacklister')) {
       blacklister = _newAddress;
+      RoleAddressChange(_role, _newAddress);
     }
-    if (_roleHash == keccak256('pauser')) {
+    if (roleHash == keccak256('pauser')) {
       pauser = _newAddress;
+      RoleAddressChange(_role, _newAddress);
     }
-    if (_roleHash == keccak256('upgrader')) {
+    if (roleHash == keccak256('upgrader')) {
       upgrader = _newAddress;
+      RoleAddressChange(_role, _newAddress);
     }
-    if (_roleHash == keccak256('roleAddressChanger')) {
+    if (roleHash == keccak256('roleAddressChanger')) {
       roleAddressChanger = _newAddress;
+      RoleAddressChange(_role, _newAddress);
     }
-    RoleAddressChange(_roleHash, _newAddress);
   }
 
 }
