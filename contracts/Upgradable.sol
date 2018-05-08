@@ -1,10 +1,12 @@
 pragma solidity ^0.4.18;
 
+import './EternalStorage.sol';
+
 /**
  * @title Upgrdable Contract
  * @dev Allows accounts to be upgraded by an "upgader" role
 */
-contract Upgradable {
+contract Upgradable is EternalStorageUpdater {
 
   address upgrader;
   address upgradedAddress;
@@ -31,6 +33,8 @@ contract Upgradable {
   */
   function upgrade(address _contractAddress) onlyUpgrader public {
     upgradedAddress = _contractAddress;
+    contractStorage.setAccess(_contractAddress, true);
+    contractStorage.setAccess(address(this), false);
     Upgraded(upgradedAddress);
   }
 
