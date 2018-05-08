@@ -9,11 +9,9 @@ import './EternalStorageUpdater.sol';
 contract MintableTokenByRole is EternalStorageUpdater {
   
   address public masterMinter;
-  address public minterCertifier;
 
   event Mint(address indexed minter, address indexed to, uint256 amount);
   event MintFinished();
-  event MasterMinterUpdate(address newMasterMinter);
   event MinterAllowanceUpdate(address minter, uint256 amount);
 
   bool public mintingFinished = false;
@@ -23,14 +21,6 @@ contract MintableTokenByRole is EternalStorageUpdater {
   */
   modifier canMint() {
     require(!mintingFinished);
-    _;
-  }
-
-  /**
-   * @dev Throws if called by any account other than the minterCertifier
-  */
-  modifier onlyMinterCertifier() {
-    require(msg.sender == minterCertifier);
     _;
   }
 
@@ -85,17 +75,6 @@ contract MintableTokenByRole is EternalStorageUpdater {
   function updateMinterAllowance(address minter, uint256 amount) onlyMasterMinter public returns (bool) {
     setMinterAllowed(minter, amount);
     MinterAllowanceUpdate(minter, amount);
-    return true;
-  }
-
-  /**
-   * @dev Function to update the "minter" role
-   * @param newMinter The address of the new minter
-   * @return True if the operation was successful.
-  */
-  function updateMasterMinter(address newMinter) onlyMinterCertifier public returns (bool) {
-    masterMinter = newMinter;
-    MasterMinterUpdate(newMinter);
     return true;
   }
 

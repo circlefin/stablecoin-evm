@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import './EternalStorage.sol';
+import './EternalStorageUpdater.sol';
 
 /**
  * @title Upgrdable Contract

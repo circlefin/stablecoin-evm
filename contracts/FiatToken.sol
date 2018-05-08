@@ -21,10 +21,12 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   string public symbol;
   string public currency;
   uint8 public decimals;
+  address roleAddressChanger;
 
   event Burn(address indexed burner, uint256 amount);
+  event RoleAddressChange(string indexed role, address indexed oldAddress, address indexed _newAddress);
 
-  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _minterCertifier, address _upgrader) public {
+  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
 
     name = _name;
     symbol = _symbol;
@@ -33,10 +35,18 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
     masterMinter = _masterMinter;
     pauser = _pauser;
     blacklister = _blacklister;
-    minterCertifier = _minterCertifier;
     upgrader = _upgrader;
+    roleAddressChanger = _roleAddressChanger;
 
     contractStorage = EternalStorage(_storageContractAddress);
+  }
+
+  /**
+   * @dev Throws if called by any account other than the roleAddressChanger
+  */
+  modifier onlyRoleAddressChanger() {
+    require(msg.sender == roleAddressChanger);
+    _;
   }
 
   /**
@@ -177,6 +187,31 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
     setTotalSupply(getTotalSupply().sub(_amount));
     setBalance(msg.sender, balance.sub(_amount));
     Burn(msg.sender, _amount);
+  }
+
+  /**
+   * @dev updates a role's address with the roleAddressChanger
+   * Validates that caller is the roleAddressChanger
+   * @param _newAddress uint256 The new role address
+   * @param _roleHash bytes32 The role to udpdate
+  */
+  function updateRoleAddress(address _newAddress, bytes32 _roleHash) onlyRoleAddressChanger public {
+    if (_roleHash == keccak256('masterMinter')) {
+      masterMinter = _newAddress;
+    }
+    if (_roleHash == keccak256('blacklister')) {
+      blacklister = _newAddress;
+    }
+    if (_roleHash == keccak256('pauser')) {
+      pauser = _newAddress;
+    }
+    if (_roleHash == keccak256('upgrader')) {
+      upgrader = _newAddress;
+    }
+    if (_roleHash == keccak256('roleAddressChanger')) {
+      roleAddressChanger = _newAddress;
+    }
+    RoleAddressChange(_roleHash, _newAddress);
   }
 
 }
