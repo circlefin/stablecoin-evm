@@ -565,7 +565,7 @@ contract('FiatToken', function (accounts) {
     finally {
        let balance = await token.balanceOf(accounts[2]);
        assert.equal(balance.c[0], 100);
-    }
+    }  
   });
 
   it('should blacklist and make transfer impossible', async function() {

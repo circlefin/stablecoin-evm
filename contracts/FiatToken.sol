@@ -1,7 +1,6 @@
 pragma solidity ^0.4.18;
 
 import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
-import './../lib/openzeppelin/contracts/ownership/Ownable.sol';
 import './../lib/openzeppelin/contracts/math/SafeMath.sol';
 
 import './MintableTokenByRole.sol';
@@ -15,13 +14,15 @@ import './UpgradedContract.sol';
  * @title FiatToken 
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, BlacklistableTokenByRole, Ownable, Upgradable {
+contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
   using SafeMath for uint256;
 
   string public name;
   string public symbol;
   string public currency;
   uint8 public decimals;
+
+  event Burn(address indexed burner, uint256 amount);
 
   function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _minterCertifier, address _upgrader) public {
 
@@ -160,6 +161,22 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
     setBalance(_from, balance.sub(_value));
     setBalance(_to, getBalance(_to).add(_value));
     Transfer(_from, _to, _value);
+  }
+
+  /**
+   * @dev allows a minter to burn some of its own tokens
+   * Validates that caller is a minter and that 
+   * amount is less than or equal to the minter's account balance
+   * @param _amount uint256 the amount of tokens to be burned
+  */
+  function burn(uint _amount) public {
+    require(getMinterAllowed(msg.sender) > 0);
+    uint256 balance = getBalance(msg.sender);
+    require(balance >= _amount);
+    
+    setTotalSupply(getTotalSupply().sub(_amount));
+    setBalance(msg.sender, balance.sub(_amount));
+    Burn(msg.sender, _amount);
   }
 
 }
