@@ -174,12 +174,20 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   }
 
   /**
+   * @dev Adds pausable condition to updateMasterMinter
+   * @return True if the operation was successful.
+  */
+  function updateMinterAllowance(address minter, uint256 amount) whenNotPaused public returns (bool) {
+    return super.updateMinterAllowance(minter, amount);
+  }
+
+  /**
    * @dev allows a minter to burn some of its own tokens
    * Validates that caller is a minter and that 
    * amount is less than or equal to the minter's account balance
    * @param _amount uint256 the amount of tokens to be burned
   */
-  function burn(uint _amount) public {
+  function burn(uint _amount) whenNotPaused public {
     require(getMinterAllowed(msg.sender) > 0);
     uint256 balance = getBalance(msg.sender);
     require(balance >= _amount);
