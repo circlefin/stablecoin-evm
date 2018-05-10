@@ -69,7 +69,7 @@ contract MintableTokenByRole is EternalStorageUpdater {
   /**
    * @dev Function update a minter allowance
    * @param minter The address of the minter
-   * @param amount The allowed amount of the minter to udpate
+   * @param amount The allowed amount of the minter to update
    * @return True if the operation was successful.
   */
   function updateMinterAllowance(address minter, uint256 amount) onlyMasterMinter public returns (bool) {
