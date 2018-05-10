@@ -37,13 +37,14 @@ contract('FiatToken', function (accounts) {
     assert.equal(transfer.logs[0].args.value, value);
   }
 
-  addMinter = async function(minter) {
+  // "adding" minters is done through token.updateMinterAllowance
+  /* addMinter = async function(minter) {
     let addMinter = await token.addMinter(minter, {from: masterMinterAccount});
     let isAMinter = await token.isAccountMinter(minter);
     assert.equal(addMinter.logs[0].event, 'MinterAdded');
     assert.equal(addMinter.logs[0].args.newMinter, minter);
     assert.equal(isAMinter, true);
-  }
+  } */
 
   setMinterAllowance = async function(minter, amount) {
     let update = await token.updateMinterAllowance(minter, amount, {from: masterMinterAccount});
@@ -63,7 +64,7 @@ contract('FiatToken', function (accounts) {
 
   mintRaw = async function(to, amount, minter) {
     let initialTotalSupply = await token.totalSupply();
-    let intialMinterAllowance = await token.minterAllowance(minter);
+    let initialMinterAllowance = await token.minterAllowance(minter);
     let minting = await token.mint(to, amount, {from: minter});
     assert.equal(minting.logs[0].event, 'Mint');
     assert.equal(minting.logs[0].args.minter, minter);
@@ -72,7 +73,7 @@ contract('FiatToken', function (accounts) {
     let totalSupply = await token.totalSupply();
     assert.equal(totalSupply.c[0] - amount, initialTotalSupply.c[0]);
     let minterAllowance = await token.minterAllowance(minter);
-    assert.equal(intialMinterAllowance.c[0] - amount, minterAllowance.c[0]);
+    assert.equal(initialMinterAllowance.c[0] - amount, minterAllowance.c[0]);
   }
 
   mintToReserveAccount = async function(address, amount) {
@@ -1026,7 +1027,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(isAccessStillGranted, false);
   });
 
-  it('should fail to setRedeemer from an address which has not been authorized', async function () {
+  it('should fail to setAccess from an address which has not been given access', async function () {
     testStorage = await EternalStorage.new();
     let illegalSetter = accounts[3];
 
@@ -1034,10 +1035,9 @@ contract('FiatToken', function (accounts) {
       await testStorage.setAccess(illegalSetter, true, {from: illegalSetter});
       checkFailureIsExpected(e);
     } catch (e) {}
-
   });
 
-  it('should fail to setRedeemer from owner on an initialized contract', async function () {
+  it('should fail to setAccess from owner on an initialized contract', async function () {
     testStorage = await EternalStorage.new();
     let setterAddress = accounts[3];
 
@@ -1063,6 +1063,142 @@ contract('FiatToken', function (accounts) {
     let isStorageInitialized = await testStorage.getInitialized();
 
     assert.equal(isStorageInitialized, false);
+  });
+
+  it('should setRedeemer and check using isRedeemer', async function () {
+    testStorage = await EternalStorage.new();
+    let redeemerAddress = accounts[3];
+
+    let isRedeemerBefore = await testStorage.isRedeemer(redeemerAddress);
+    assert.equal(isRedeemerBefore, false);
+
+    await testStorage.setRedeemer(redeemerAddress, true);
+    let isRedeemerAfter = await testStorage.isRedeemer(redeemerAddress);
+
+    assert.equal(isRedeemerAfter, true);
+  });
+
+  it('should mint and burn tokens', async function () {
+    let burnerAddress = accounts[3];
+    let amount = 500;
+    setMinterAllowance(burnerAddress, amount);
+    let totalSupply = await token.totalSupply();
+    let minterBalance = await token.balanceOf(burnerAddress);
+    assert.equal(totalSupply.c[0], 0);
+    assert.equal(minterBalance.c[0], 0);
+
+    // mint tokens to burnerAddress
+    await mint(burnerAddress, amount);
+    let totalSupply1 = await token.totalSupply();
+    let minterBalance1 = await token.balanceOf(burnerAddress); 
+    assert.equal(totalSupply1.c[0], totalSupply + amount);
+    assert.equal(minterBalance1.c[0], minterBalance + amount)
+
+    // burn tokens
+    await token.burn(amount, {from: burnerAddress});
+    let totalSupply2 = await token.totalSupply();
+    assert.equal(totalSupply2.c[0], totalSupply1 - amount);
+
+    // check that minter's balance has been reduced
+    let minterBalance2 = await token.balanceOf(burnerAddress);
+    assert.equal(minterBalance2.c[0], minterBalance1 - amount);
+  });
+
+  it('should try to burn tokens from a non-minter and fail', async function () {
+    let burnerAddress = accounts[3];
+    let amount = 1000;
+    setMinterAllowance(burnerAddress, 0);
+    try {
+      await token.burn(amount, {from: burnerAddress});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
+  });
+
+  it('should try to burn more tokens than balance and fail', async function () {
+    let burnerAddress = accounts[3];
+    let amount = 500;
+    setMinterAllowance(burnerAddress, 250);
+    mint(burnerAddress, 100);
+    try {
+      await token.burn(amount, {from: burnerAddress});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
+  });
+
+  it('should updateRoleAddress for masterMinter', async function () {
+    let address1 = accounts[7];
+    let address2 = accounts[6];
+    await token.updateRoleAddress(address1, "masterMinter", {from: roleAddressChangerAccount});
+    let masterMinter1 = await token.masterMinter();
+    assert.equal(masterMinter1, address1);
+
+    await token.updateRoleAddress(address2, "masterMinter", {from: roleAddressChangerAccount});
+    let masterMinter2 = await token.masterMinter();
+    assert.equal(masterMinter2, address2);
+  });
+
+  it('should updateRoleAddress for blacklister', async function () {
+    let address1 = accounts[7];
+    let address2 = accounts[6];
+    await token.updateRoleAddress(address1, "blacklister", {from: roleAddressChangerAccount});
+    let blacklister1 = await token.blacklister();
+    assert.equal(blacklister1, address1);
+
+    await token.updateRoleAddress(address2, "blacklister", {from: roleAddressChangerAccount});
+    let blacklister2 = await token.blacklister();
+    assert.equal(blacklister2, address2);
+  });
+
+  it('should updateRoleAddress for pauser', async function () {
+    let address1 = accounts[7];
+    let address2 = accounts[6];
+    await token.updateRoleAddress(address1, "pauser", {from: roleAddressChangerAccount});
+    let pauser1 = await token.pauser();
+    assert.equal(pauser1, address1);
+
+    await token.updateRoleAddress(address2, "pauser", {from: roleAddressChangerAccount});
+    let pauser2 = await token.pauser();
+    assert.equal(pauser2, address2);
+  });
+
+  it('should updateRoleAddress for upgrader', async function () {
+    let address1 = accounts[7];
+    let address2 = accounts[6];
+    await token.updateRoleAddress(address1, "upgrader", {from: roleAddressChangerAccount});
+    let upgrader1 = await token.upgrader();
+    assert.equal(upgrader1, address1);
+
+    await token.updateRoleAddress(address2, "upgrader", {from: roleAddressChangerAccount});
+    let upgrader2 = await token.upgrader();
+    assert.equal(upgrader2, address2);
+  });
+
+  it('should updateRoleAddress for roleAddressChanger', async function () {
+    let address1 = accounts[7];
+    let address2 = accounts[6];
+    await token.updateRoleAddress(address1, "roleAddressChanger", {from: roleAddressChangerAccount});
+    let roleAddressChanger1 = await token.roleAddressChanger();
+    assert.equal(roleAddressChanger1, address1);
+
+    await token.updateRoleAddress(address2, "roleAddressChanger", {from: address1});
+    let roleAddressChanger2 = await token.roleAddressChanger();
+    assert.equal(roleAddressChanger2, address2);
+  });
+
+  it('should fail to updateRoleAddress from a non-roleAddressChanger', async function () {
+    let nonRoleAddressChanger = accounts[2];
+    let address1 = accounts[7];
+
+    try {
+      await token.updateRoleAddress(address1, "masterMinter", {from: nonRoleAddressChanger});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
   });
 
 /* Comments out tests with fees */
