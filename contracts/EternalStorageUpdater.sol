@@ -33,14 +33,6 @@ contract EternalStorageUpdater {
     contractStorage.setTotalSupply(_amount);
   }
 
-  function isRedeemer(address _account) internal view returns (bool) {
-    return contractStorage.isRedeemer(_account);
-  }
-
-  function setRedeemer(address _account, bool _status) internal {
-    contractStorage.setRedeemer(_account, _status);
-  }
-
   function isBlacklisted(address _account) internal view returns (bool) {
     return contractStorage.isBlacklisted(_account);
   }
