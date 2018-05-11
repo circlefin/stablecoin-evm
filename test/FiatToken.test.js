@@ -144,18 +144,6 @@ contract('FiatToken', function (accounts) {
     assert.equal(balance3, 1000);
   }
 
-  failToMintAfterFinishMinting = async function() {
-    await token.finishMinting({from: masterMinterAccount});
-    assert.equal(await token.mintingFinished(), true);
-
-    try {
-      await mint(accounts[0], 100);
-      assert.fail("Minting not stopped");
-    } catch(e) {
-      checkFailureIsExpected(e);
-    }
-  }
-
   transferFromWithFees = async function() {
     fee = 1235;
     feeBase = 10000;
@@ -229,12 +217,6 @@ contract('FiatToken', function (accounts) {
     assert.equal(totalSupply.c[0], 0);
   });
 
-  it('should return mintingFinished false after construction', async function () {
-    let mintingFinished = await token.mintingFinished();
-
-    assert.equal(mintingFinished, false);
-  });
-
   it('should add multiple mints to a given address in address balance', async function () {
     await mint(accounts[0], 100);
     await mint(accounts[0], 200);
@@ -273,10 +255,6 @@ contract('FiatToken', function (accounts) {
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 400);
     }
-  });
-
-  it('should fail to mint after call to finishMinting', async function () {
-    await failToMintAfterFinishMinting();
   });
 
   it('should complete transferFrom', async function() {
@@ -499,20 +477,6 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-  it('should pause and should not be able to finishMinting', async function () {
-    await mint(accounts[2], 1900);
-    assert.equal(await token.paused.call(), false);
-    await token.pause({from: pauserAccount});
-    assert.equal(await token.paused.call(), true);
-
-    try {
-      await failToMintAfterFinishMinting();
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    }
-  });
-
   it('should try to pause with non-pauser and fail to pause', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
@@ -525,20 +489,6 @@ contract('FiatToken', function (accounts) {
       assert.equal(await token.paused.call(), false);
     }
   });   
-
-  it('should pause and should not be able to finishMinting', async function () {
-    await mint(accounts[2], 1900);
-    assert.equal(await token.paused.call(), false);
-    await token.pause({from: pauserAccount});
-    assert.equal(await token.paused.call(), true);
-
-    try {
-      await failToMintAfterFinishMinting();
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    }
-  });
 
   it('should try to pause with non-pauser and fail to pause', async function () {
     await mint(accounts[2], 1900);

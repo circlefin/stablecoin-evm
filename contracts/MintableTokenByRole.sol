@@ -11,18 +11,7 @@ contract MintableTokenByRole is EternalStorageUpdater {
   address public masterMinter;
 
   event Mint(address indexed minter, address indexed to, uint256 amount);
-  event MintFinished();
   event MinterAllowanceUpdate(address minter, uint256 amount);
-
-  bool public mintingFinished = false;
-
-  /**
-   * @dev Throws if minting finished
-  */
-  modifier canMint() {
-    require(!mintingFinished);
-    _;
-  }
 
   /**
    * @dev Throws if called by any account other than the masterMinter
@@ -37,7 +26,7 @@ contract MintableTokenByRole is EternalStorageUpdater {
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) canMint public returns (bool) {
+  function mint(address _to, uint256 _amount) public returns (bool) {
     uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
     require(_amount <= mintingAllowedAmount);
 
@@ -46,16 +35,6 @@ contract MintableTokenByRole is EternalStorageUpdater {
     setMinterAllowed(msg.sender, mintingAllowedAmount.sub(_amount));
     Mint(msg.sender, _to, _amount);
     return true; 
-  }
-
-  /**
-   * @dev Function to stop minting new tokens.
-   * @return True if the operation was successful.
-  */
-  function finishMinting() onlyMasterMinter canMint public returns (bool) {
-    mintingFinished = true;
-    MintFinished();
-    return true;
   }
 
   /**
