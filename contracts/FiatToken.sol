@@ -50,13 +50,19 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   }
 
   /**
-   * @dev Adds pausable condition to mint.
-   * @param to address The recipient account
-   * @param amount uint256 The minting amount
-   * @return True if the operation was successful.
+   * @dev Function to mint tokens
+   * @param _amount The amount of tokens to mint.
+   * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address to, uint256 amount) whenNotPaused public returns (bool) {
-    return super.mint(to, amount);
+  function mint(address _to, uint256 _amount) whenNotPaused public returns (bool) {
+    uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
+    require(_amount <= mintingAllowedAmount);
+
+    setTotalSupply(getTotalSupply().add(_amount));
+    setBalance(_to, getBalance(_to).add(_amount));
+    setMinterAllowed(msg.sender, mintingAllowedAmount.sub(_amount));
+    Mint(msg.sender, _to, _amount);
+    return true; 
   }
 
   /**
@@ -166,11 +172,15 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   }
 
   /**
-   * @dev Adds pausable condition to updateMasterMinter
+   * @dev Function update a minter allowance
+   * @param minter The address of the minter
+   * @param amount The allowed amount of the minter to udpate
    * @return True if the operation was successful.
   */
-  function updateMinterAllowance(address minter, uint256 amount) whenNotPaused public returns (bool) {
-    return super.updateMinterAllowance(minter, amount);
+  function updateMinterAllowance(address minter, uint256 amount) whenNotPaused onlyMasterMinter public returns (bool) {
+    setMinterAllowed(minter, amount);
+    MinterAllowanceUpdate(minter, amount);
+    return true;
   }
 
   /**
