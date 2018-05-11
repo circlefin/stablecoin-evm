@@ -60,14 +60,6 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   }
 
   /**
-   * @dev Adds pausable condition to finishMinting.
-   * @return True if the operation was successful.
-  */
-  function finishMinting() whenNotPaused public returns (bool) {
-    return super.finishMinting();
-  }
-
-  /**
    * @dev Get allowed amount for an account
    * @param owner address The account owner
    * @param spender address The account spender
