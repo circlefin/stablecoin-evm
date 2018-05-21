@@ -3,7 +3,6 @@ pragma solidity ^0.4.18;
 import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
 import './../lib/openzeppelin/contracts/math/SafeMath.sol';
 
-import './MintableTokenByRole.sol';
 import './PausableTokenByRole.sol';
 import './BlacklistableTokenByRole.sol';
 import './EternalStorageUpdater.sol';
@@ -14,7 +13,7 @@ import './UpgradedContract.sol';
  * @title FiatToken 
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
+contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
   using SafeMath for uint256;
 
   string public name;
@@ -22,7 +21,10 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   string public currency;
   uint8 public decimals;
   address public roleAddressChanger;
+  address public masterMinter;
 
+  event Mint(address indexed minter, address indexed to, uint256 amount);
+  event MinterAllowanceUpdate(address minter, uint256 amount);  
   event Burn(address indexed burner, uint256 amount);
   event RoleAddressChange(string role, address indexed newAddress);
 
@@ -50,14 +52,37 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   }
 
   /**
-   * @dev Adds pausable condition to mint.
-   * @param to address The recipient account
-   * @param amount uint256 The minting amount
-   * @return True if the operation was successful.
+   * @dev Function to mint tokens
+   * @param _amount The amount of tokens to mint.
+   * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address to, uint256 amount) whenNotPaused public returns (bool) {
-    return super.mint(to, amount);
+  function mint(address _to, uint256 _amount) whenNotPaused public returns (bool) {
+    uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
+    require(_amount <= mintingAllowedAmount);
+
+    setTotalSupply(getTotalSupply().add(_amount));
+    setBalance(_to, getBalance(_to).add(_amount));
+    setMinterAllowed(msg.sender, mintingAllowedAmount.sub(_amount));
+    Mint(msg.sender, _to, _amount);
+    return true; 
   }
+
+  /**
+   * @dev Throws if called by any account other than the masterMinter
+  */
+  modifier onlyMasterMinter() {
+    require(msg.sender == masterMinter);
+    _;
+  }
+
+  /**
+   * @dev Function to get minter allowance
+   * @param minter The address of the minter
+  */
+  function minterAllowance(address minter) public view returns (uint256) {
+    return getMinterAllowed(minter);
+  }
+
 
   /**
    * @dev Get allowed amount for an account
@@ -166,11 +191,15 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
   }
 
   /**
-   * @dev Adds pausable condition to updateMasterMinter
+   * @dev Function update a minter allowance
+   * @param minter The address of the minter
+   * @param amount The allowed amount of the minter to udpate
    * @return True if the operation was successful.
   */
-  function updateMinterAllowance(address minter, uint256 amount) whenNotPaused public returns (bool) {
-    return super.updateMinterAllowance(minter, amount);
+  function updateMinterAllowance(address minter, uint256 amount) whenNotPaused onlyMasterMinter public returns (bool) {
+    setMinterAllowed(minter, amount);
+    MinterAllowanceUpdate(minter, amount);
+    return true;
   }
 
   /**
@@ -179,7 +208,7 @@ contract FiatToken is ERC20, MintableTokenByRole, PausableTokenByRole, Blacklist
    * amount is less than or equal to the minter's account balance
    * @param _amount uint256 the amount of tokens to be burned
   */
-  function burn(uint _amount) whenNotPaused public {
+  function burn(uint256 _amount) whenNotPaused public {
     require(getMinterAllowed(msg.sender) > 0);
     uint256 balance = getBalance(msg.sender);
     require(balance >= _amount);
