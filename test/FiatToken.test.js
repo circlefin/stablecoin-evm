@@ -205,12 +205,12 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-      storage = await EternalStorage.new();
-      let storageAddress = storage.address;
-      token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
-      let tokenAddress = token.address;
-      await storage.setAccess(tokenAddress, true);
-      await storage.setInitialized(true);
+    storage = await EternalStorage.new();
+    let storageAddress = storage.address;
+    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenAddress = token.address;
+    await storage.setAccess(tokenAddress, true);
+    await storage.setInitialized(true);
   });
 
   it('should start with a totalSupply of 0', async function () {
