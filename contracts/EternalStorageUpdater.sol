@@ -41,6 +41,14 @@ contract EternalStorageUpdater {
     contractStorage.setBlacklisted(_account, _status);
   }
 
+  function isMinter(address _account) internal view returns (bool) {
+    return contractStorage.isMinter(_account);
+  }
+
+  function setMinter(address _account, bool _status) internal {
+    return contractStorage.setMinter(_account, _status);
+  }
+
   function getMinterAllowed(address _minter) internal view returns (uint256) {
     return contractStorage.getMinterAllowed(_minter);
   }

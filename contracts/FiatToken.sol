@@ -27,6 +27,8 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   event MinterAllowanceUpdate(address minter, uint256 amount);  
   event Burn(address indexed burner, uint256 amount);
   event RoleAddressChange(string role, address indexed newAddress);
+  event MinterAdded(address newMinter);
+  event MinterRemoved(address oldMinter);
 
   function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
 
@@ -52,11 +54,19 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   }
 
   /**
+   * @dev Throws if called by any account other than a minter
+  */
+  modifier onlyMinters() {
+    require(isMinter(msg.sender) == true);
+    _;
+  }
+
+  /**
    * @dev Function to mint tokens
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) whenNotPaused public returns (bool) {
+  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters public returns (bool) {
     uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
     require(_amount <= mintingAllowedAmount);
 
@@ -199,6 +209,36 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function updateMinterAllowance(address minter, uint256 amount) whenNotPaused onlyMasterMinter public returns (bool) {
     setMinterAllowed(minter, amount);
     MinterAllowanceUpdate(minter, amount);
+    return true;
+  }
+
+  /**
+   * @dev Function to check if an account is a minter
+   * @param account The address of the account
+  */
+  function isAccountMinter(address account) public view returns (bool) {
+    return isMinter(account);
+  }
+
+  /**
+   * @dev Function to add a new minter
+   * @param newMinter The address of the new minter
+   * @return True if the operation was successful.
+  */
+  function addMinter(address newMinter) onlyMasterMinter public returns (bool) {
+    setMinter(newMinter, true);
+    MinterAdded(newMinter);
+    return true;
+  }
+
+  /**
+   * @dev Function to remove a minter
+   * @param minter The address of the minter to remove
+   * @return True if the operation was successful.
+  */
+  function removeMinter(address minter) onlyMasterMinter public returns (bool) {
+    setMinter(minter, false);
+    MinterRemoved(minter);
     return true;
   }
 

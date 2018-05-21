@@ -37,14 +37,13 @@ contract('FiatToken', function (accounts) {
     assert.equal(transfer.logs[0].args.value, value);
   }
 
-  // "adding" minters is done through token.updateMinterAllowance
-  /* addMinter = async function(minter) {
+  addMinter = async function(minter) {
     let addMinter = await token.addMinter(minter, {from: masterMinterAccount});
     let isAMinter = await token.isAccountMinter(minter);
     assert.equal(addMinter.logs[0].event, 'MinterAdded');
     assert.equal(addMinter.logs[0].args.newMinter, minter);
     assert.equal(isAMinter, true);
-  } */
+  }
 
   setMinterAllowance = async function(minter, amount) {
     let update = await token.updateMinterAllowance(minter, amount, {from: masterMinterAccount});
@@ -58,6 +57,7 @@ contract('FiatToken', function (accounts) {
 
   mint = async function(to, amount) {
     minter = minterAccount;
+    await addMinter(minter);
     await setMinterAllowance(minter, amount);
     await mintRaw(to, amount, minter);
   }
@@ -205,12 +205,12 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    storage = await EternalStorage.new();
-    let storageAddress = storage.address;
-    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
-    let tokenAddress = token.address;
-    await storage.setAccess(tokenAddress, true);
-    await storage.setInitialized(true);
+      storage = await EternalStorage.new();
+      let storageAddress = storage.address;
+      token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+      let tokenAddress = token.address;
+      await storage.setAccess(tokenAddress, true);
+      await storage.setInitialized(true);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -882,8 +882,12 @@ contract('FiatToken', function (accounts) {
       assert.equal(await token.mintingFinished(), true);
     }
   });
-
+*/
   it('should change the minter and mint as well as fail to mint with the old minter', async function() {
+    let update = await token.removeMinter(minterAccount, {from: masterMinterAccount});
+    assert.equal(update.logs[0].event, 'MinterRemoved');
+    assert.equal(update.logs[0].args.oldMinter, minterAccount);
+    update = await token.addMinter(accounts[3], {from: masterMinterAccount});
     update = await token.updateMinterAllowance(minterAccount, 0, {from: masterMinterAccount});
     assert.equal(update.logs[0].event, 'MinterAllowanceUpdate');
     assert.equal(update.logs[0].args.minter, minterAccount);
@@ -895,13 +899,12 @@ contract('FiatToken', function (accounts) {
     } catch(e) {
       checkFailureIsExpected(e);
     } finally {
-      let isMinter = (await token.minterAllowance(minterAccount) > 0)
+      let isMinter = await token.isAccountMinter(minterAccount);
       assert.equal(isMinter, false);
       let balance = await token.balanceOf(accounts[1]);
       assert.equal(balance, 100);
     }
   });
-*/
 
   it('should fail to updateMinterAllowance from non-masterMinter', async function() {
     let minterAllowanceBefore = await token.minterAllowance(minterAccount)
@@ -1057,7 +1060,7 @@ contract('FiatToken', function (accounts) {
   it('should try to burn tokens from a non-minter and fail', async function () {
     let burnerAddress = accounts[3];
     let amount = 1000;
-    setMinterAllowance(burnerAddress, 0);
+    await setMinterAllowance(burnerAddress, 0);
     try {
       await token.burn(amount, {from: burnerAddress});
       assert.fail();
@@ -1069,8 +1072,8 @@ contract('FiatToken', function (accounts) {
   it('should try to burn more tokens than balance and fail', async function () {
     let burnerAddress = accounts[3];
     let amount = 500;
-    setMinterAllowance(burnerAddress, 250);
-    mint(burnerAddress, 100);
+    await setMinterAllowance(burnerAddress, 250);
+    await mint(burnerAddress, 100);
     try {
       await token.burn(amount, {from: burnerAddress});
       assert.fail();
