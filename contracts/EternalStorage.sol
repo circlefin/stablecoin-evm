@@ -71,6 +71,7 @@ contract EternalStorage {
 
     /**** Set Methods ***********/
 
+
     function setInitialized(bool _status) onlyAuthorizedContracts external {
         initialized = _status;
     }
