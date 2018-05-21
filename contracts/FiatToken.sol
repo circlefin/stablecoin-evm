@@ -20,7 +20,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   string public symbol;
   string public currency;
   uint8 public decimals;
-  address roleAddressChanger;
+  address public roleAddressChanger;
   address public masterMinter;
 
   event Mint(address indexed minter, address indexed to, uint256 amount);
