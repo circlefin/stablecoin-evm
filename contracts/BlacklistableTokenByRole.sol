@@ -8,7 +8,7 @@ import './EternalStorageUpdater.sol';
 */
 contract BlacklistableTokenByRole is EternalStorageUpdater {
 
-  address blacklister;
+  address public blacklister;
 
   event Blacklisted(address _account);
   event UnBlacklisted(address _account);

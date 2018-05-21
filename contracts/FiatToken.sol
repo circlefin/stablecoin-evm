@@ -26,7 +26,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   event Mint(address indexed minter, address indexed to, uint256 amount);
   event MinterAllowanceUpdate(address minter, uint256 amount);  
   event Burn(address indexed burner, uint256 amount);
-  event RoleAddressChange(string indexed role, address indexed newAddress);
+  event RoleAddressChange(string role, address indexed newAddress);
 
   function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
 
@@ -222,7 +222,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @dev updates a role's address with the roleAddressChanger
    * Validates that caller is the roleAddressChanger
    * @param _newAddress uint256 The new role address
-   * @param _role string The role to udpdate
+   * @param _role string The role to update
   */
   function updateRoleAddress(address _newAddress, string _role) onlyRoleAddressChanger public {
     bytes32 roleHash = keccak256(_role);

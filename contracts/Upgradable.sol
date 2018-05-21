@@ -8,8 +8,8 @@ import './EternalStorageUpdater.sol';
 */
 contract Upgradable is EternalStorageUpdater {
 
-  address upgrader;
-  address upgradedAddress;
+  address public upgrader;
+  address public upgradedAddress;
   event Upgraded(address newContractAddress);
 
   /**
