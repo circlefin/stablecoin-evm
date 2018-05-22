@@ -24,10 +24,9 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   address public masterMinter;
 
   event Mint(address indexed minter, address indexed to, uint256 amount);
-  event MinterAllowanceUpdate(address minter, uint256 amount);  
   event Burn(address indexed burner, uint256 amount);
   event RoleAddressChange(string role, address indexed newAddress);
-  event MinterAdded(address newMinter);
+  event MinterConfigured(address minter, uint256 minterAllowedAmount);
   event MinterRemoved(address oldMinter);
 
   function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
@@ -92,7 +91,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function minterAllowance(address minter) public view returns (uint256) {
     return getMinterAllowed(minter);
   }
-
 
   /**
    * @dev Get allowed amount for an account
@@ -201,18 +199,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   }
 
   /**
-   * @dev Function update a minter allowance
-   * @param minter The address of the minter
-   * @param amount The allowed amount of the minter to udpate
-   * @return True if the operation was successful.
-  */
-  function updateMinterAllowance(address minter, uint256 amount) whenNotPaused onlyMasterMinter public returns (bool) {
-    setMinterAllowed(minter, amount);
-    MinterAllowanceUpdate(minter, amount);
-    return true;
-  }
-
-  /**
    * @dev Function to check if an account is a minter
    * @param account The address of the account
   */
@@ -221,13 +207,15 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   }
 
   /**
-   * @dev Function to add a new minter
-   * @param newMinter The address of the new minter
+   * @dev Function to add/update a new minter
+   * @param minter The address of the minter
+   * @param minterAllowedAmount The minting amount allowed for the minter
    * @return True if the operation was successful.
   */
-  function addMinter(address newMinter) onlyMasterMinter public returns (bool) {
-    setMinter(newMinter, true);
-    MinterAdded(newMinter);
+  function configureMinter(address minter, uint256 minterAllowedAmount) whenNotPaused onlyMasterMinter public returns (bool) {
+    setMinter(minter, true);
+    setMinterAllowed(minter, minterAllowedAmount);
+    MinterConfigured(minter, minterAllowedAmount);
     return true;
   }
 
@@ -236,8 +224,9 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param minter The address of the minter to remove
    * @return True if the operation was successful.
   */
-  function removeMinter(address minter) onlyMasterMinter public returns (bool) {
+  function removeMinter(address minter) whenNotPaused onlyMasterMinter public returns (bool) {
     setMinter(minter, false);
+    setMinterAllowed(minter, 0);
     MinterRemoved(minter);
     return true;
   }
