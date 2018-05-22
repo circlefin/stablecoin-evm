@@ -26,8 +26,8 @@ contract EternalStorage {
     /// @dev Only allow access from the latest version contract after initialization
     modifier onlyAuthorizedContracts() {
         // The owner is only allowed to set the storage upon deployment to register the initial contracts, afterwards their direct access is disabled
-        if (msg.sender == owner) {
-            require(initialized == false);
+        if (initialized == false) {
+            require(msg.sender == owner);
         } else {
             // Make sure the access is permitted to only contracts in our Dapp
             require(access[msg.sender] != false);
