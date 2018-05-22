@@ -24,9 +24,10 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   address public masterMinter;
 
   event Mint(address indexed minter, address indexed to, uint256 amount);
-  event MinterAllowanceUpdate(address minter, uint256 amount);  
   event Burn(address indexed burner, uint256 amount);
   event RoleAddressChange(string role, address indexed newAddress);
+  event MinterConfigured(address minter, uint256 minterAllowedAmount);
+  event MinterRemoved(address oldMinter);
 
   function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
 
@@ -52,11 +53,19 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   }
 
   /**
+   * @dev Throws if called by any account other than a minter
+  */
+  modifier onlyMinters() {
+    require(isMinter(msg.sender) == true);
+    _;
+  }
+
+  /**
    * @dev Function to mint tokens
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) whenNotPaused public returns (bool) {
+  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters public returns (bool) {
     uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
     require(_amount <= mintingAllowedAmount);
 
@@ -82,7 +91,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function minterAllowance(address minter) public view returns (uint256) {
     return getMinterAllowed(minter);
   }
-
 
   /**
    * @dev Get allowed amount for an account
@@ -191,14 +199,35 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   }
 
   /**
-   * @dev Function update a minter allowance
+   * @dev Function to check if an account is a minter
+   * @param account The address of the account
+  */
+  function isAccountMinter(address account) public view returns (bool) {
+    return isMinter(account);
+  }
+
+  /**
+   * @dev Function to add/update a new minter
    * @param minter The address of the minter
-   * @param amount The allowed amount of the minter to udpate
+   * @param minterAllowedAmount The minting amount allowed for the minter
    * @return True if the operation was successful.
   */
-  function updateMinterAllowance(address minter, uint256 amount) whenNotPaused onlyMasterMinter public returns (bool) {
-    setMinterAllowed(minter, amount);
-    MinterAllowanceUpdate(minter, amount);
+  function configureMinter(address minter, uint256 minterAllowedAmount) whenNotPaused onlyMasterMinter public returns (bool) {
+    setMinter(minter, true);
+    setMinterAllowed(minter, minterAllowedAmount);
+    MinterConfigured(minter, minterAllowedAmount);
+    return true;
+  }
+
+  /**
+   * @dev Function to remove a minter
+   * @param minter The address of the minter to remove
+   * @return True if the operation was successful.
+  */
+  function removeMinter(address minter) whenNotPaused onlyMasterMinter public returns (bool) {
+    setMinter(minter, false);
+    setMinterAllowed(minter, 0);
+    MinterRemoved(minter);
     return true;
   }
 
@@ -208,8 +237,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * amount is less than or equal to the minter's account balance
    * @param _amount uint256 the amount of tokens to be burned
   */
-  function burn(uint256 _amount) whenNotPaused public {
-    require(getMinterAllowed(msg.sender) > 0);
+  function burn(uint256 _amount) whenNotPaused onlyMinters public {
     uint256 balance = getBalance(msg.sender);
     require(balance >= _amount);
     
