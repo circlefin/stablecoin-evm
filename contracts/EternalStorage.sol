@@ -14,6 +14,7 @@ contract EternalStorage {
     uint256 private totalSupply = 0;
     mapping(address => bool) private redeemers;
     mapping(address => bool) private blacklisted;
+    mapping(address => bool) private minters;
     mapping(address => uint256) private minterAllowed;
 
     function EternalStorage() public {
@@ -25,8 +26,8 @@ contract EternalStorage {
     /// @dev Only allow access from the latest version contract after initialization
     modifier onlyAuthorizedContracts() {
         // The owner is only allowed to set the storage upon deployment to register the initial contracts, afterwards their direct access is disabled
-        if (msg.sender == owner) {
-            require(initialized == false);
+        if (initialized == false) {
+            require(msg.sender == owner);
         } else {
             // Make sure the access is permitted to only contracts in our Dapp
             require(access[msg.sender] != false);
@@ -68,6 +69,10 @@ contract EternalStorage {
         return minterAllowed[_minter];
     }
 
+    function isMinter(address _account) external view returns (bool) {
+        return minters[_account];
+    }
+
 
     /**** Set Methods ***********/
 
@@ -95,12 +100,16 @@ contract EternalStorage {
         redeemers[_account] = _status;
     }
 
-    function setBlacklisted(address _account, bool status) onlyAuthorizedContracts external {
-        blacklisted[_account] = status;
+    function setBlacklisted(address _account, bool _status) onlyAuthorizedContracts external {
+        blacklisted[_account] = _status;
     }
 
     function setMinterAllowed(address _minter, uint256 _amount) onlyAuthorizedContracts external {
         minterAllowed[_minter] = _amount;
+    }
+
+    function setMinter(address _account, bool _status) onlyAuthorizedContracts external {
+        minters[_account] = _status;
     }
 
 }
