@@ -32,6 +32,7 @@ contract Upgradable is EternalStorageUpdater {
    * @param _contractAddress address The address of the new contract
   */
   function upgrade(address _contractAddress) onlyUpgrader public {
+    require(isUpgraded() == false);
     upgradedAddress = _contractAddress;
     contractStorage.setAccess(_contractAddress, true);
     contractStorage.setAccess(address(this), false);
