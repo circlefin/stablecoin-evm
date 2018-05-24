@@ -218,6 +218,50 @@ contract('FiatToken', function (accounts) {
     assert.equal(balance0, 300);
   });
 
+  it('should fail to mint to a null address', async function () {
+    let initialTotalSupply = await token.totalSupply();
+    try {
+      await mint("0x0", 100);
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let totalSupply = await token.totalSupply();
+      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    }
+
+    try {
+      await mint(0x0, 100);
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let totalSupply = await token.totalSupply();
+      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    }
+
+    try {
+      await mint("0x0000000000000000000000000000000000000000", 100);
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let totalSupply = await token.totalSupply();
+      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    }
+
+    try {
+      await mint(0x0000000000000000000000000000000000000000, 100);
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let totalSupply = await token.totalSupply();
+      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    }
+  });
+
+
   it('should add multiple mints to a given address in address balance', async function () {
     await mint(accounts[0], 100);
     await mint(accounts[0], 200);
