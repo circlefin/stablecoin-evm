@@ -66,6 +66,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @return A boolean that indicates if the operation was successful.
   */
   function mint(address _to, uint256 _amount) whenNotPaused onlyMinters public returns (bool) {
+    require(_to != address(0));
     uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
     require(_amount <= mintingAllowedAmount);
 
