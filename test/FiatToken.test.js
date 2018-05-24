@@ -1145,6 +1145,26 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should fail to upgrade twice', async function () {
+    await mint(accounts[2], 200);
+    tokenNew = await FiatToken.new(storage.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    await token.upgrade(tokenNew.address, {from: upgraderAccount});
+    let oldBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(oldBalance)).isEqualTo(new BigNumber(200)));
+    tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
+    tokenNew.mint(accounts[2], 200, {from: minterAccount});
+    let balance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
+
+    tokenNewSecond = await FiatToken.new(storage.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    try {
+        await token.upgrade(tokenNewSecond.address, {from: upgraderAccount});
+        assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    }
+  });
+
   it('should updateRoleAddress for masterMinter', async function () {
     let address1 = accounts[7];
     let address2 = accounts[6];
