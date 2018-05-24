@@ -1008,19 +1008,6 @@ contract('FiatToken', function (accounts) {
     assert.equal(isStorageInitialized, false);
   });
 
-  it('should setRedeemer and check using isRedeemer', async function () {
-    testStorage = await EternalStorage.new();
-    let redeemerAddress = accounts[3];
-
-    let isRedeemerBefore = await testStorage.isRedeemer(redeemerAddress);
-    assert.equal(isRedeemerBefore, false);
-
-    await testStorage.setRedeemer(redeemerAddress, true);
-    let isRedeemerAfter = await testStorage.isRedeemer(redeemerAddress);
-
-    assert.equal(isRedeemerAfter, true);
-  });
-
   it('should mint and burn tokens', async function () {
     let burnerAddress = accounts[3];
     let amount = 500;
