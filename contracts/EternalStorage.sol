@@ -12,7 +12,6 @@ contract EternalStorage {
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) private allowed;
     uint256 private totalSupply = 0;
-    mapping(address => bool) private redeemers;
     mapping(address => bool) private blacklisted;
     mapping(address => bool) private minters;
     mapping(address => uint256) private minterAllowed;
@@ -57,10 +56,6 @@ contract EternalStorage {
         return totalSupply;
     }
 
-    function isRedeemer(address _account) external view returns (bool) {
-        return redeemers[_account];
-    }
-
     function isBlacklisted(address _account) external view returns (bool) {
         return blacklisted[_account];
     }
@@ -94,10 +89,6 @@ contract EternalStorage {
 
     function setTotalSupply(uint256 _totalSupply) onlyAuthorizedContracts external {
         totalSupply = _totalSupply;
-    }
-
-    function setRedeemer(address _account, bool _status) onlyAuthorizedContracts external {
-        redeemers[_account] = _status;
     }
 
     function setBlacklisted(address _account, bool _status) onlyAuthorizedContracts external {
