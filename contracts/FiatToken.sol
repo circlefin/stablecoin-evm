@@ -224,7 +224,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param minter The address of the minter to remove
    * @return True if the operation was successful.
   */
-  function removeMinter(address minter) whenNotPaused onlyMasterMinter public returns (bool) {
+  function removeMinter(address minter) onlyMasterMinter public returns (bool) {
     setMinter(minter, false);
     setMinterAllowed(minter, 0);
     MinterRemoved(minter);

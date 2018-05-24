@@ -896,6 +896,16 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should remove a minter even if the contract is paused', async function() {
+    await token.configureMinter(accounts[3], 200, {from: masterMinterAccount});
+    let isAccountMinter = await token.isAccountMinter(accounts[3]);
+    assert.equal(isAccountMinter, true);
+    await token.pause({from: pauserAccount});
+    await token.removeMinter(accounts[3], {from: masterMinterAccount});
+    isAccountMinter = await token.isAccountMinter(accounts[3]);
+    assert.equal(isAccountMinter, false);
+  });
+
   it('should fail to updateMinterAllowance from non-masterMinter', async function() {
     let minterAllowanceBefore = await token.minterAllowance(minterAccount)
     assert.equal(minterAllowanceBefore, 0);
