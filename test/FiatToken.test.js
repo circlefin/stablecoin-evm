@@ -1150,11 +1150,11 @@ contract('FiatToken', function (accounts) {
     tokenNew = await FiatToken.new(storage.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     await token.upgrade(tokenNew.address, {from: upgraderAccount});
     let oldBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.equal(oldBalance, 200);
+    assert.isTrue((new BigNumber(oldBalance)).isEqualTo(new BigNumber(200)));
     tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
     tokenNew.mint(accounts[2], 200, {from: minterAccount});
     let balance = await tokenNew.balanceOf(accounts[2]);
-    assert.equal(balance, 400);
+    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
 
     tokenNewSecond = await FiatToken.new(storage.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     try {
