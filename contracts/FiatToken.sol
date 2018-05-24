@@ -65,7 +65,11 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters public returns (bool) {
+
+  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted public returns (bool) {
+    require(_to != address(0));
+    require(isBlacklisted(_to) == false);
+
     uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
     require(_amount <= mintingAllowedAmount);
 
@@ -237,7 +241,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * amount is less than or equal to the minter's account balance
    * @param _amount uint256 the amount of tokens to be burned
   */
-  function burn(uint256 _amount) whenNotPaused onlyMinters public {
+  function burn(uint256 _amount) whenNotPaused onlyMinters notBlacklisted public {
     uint256 balance = getBalance(msg.sender);
     require(balance >= _amount);
     
