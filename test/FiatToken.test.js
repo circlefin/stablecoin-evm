@@ -280,6 +280,33 @@ contract('FiatToken', function (accounts) {
     assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(initialTotalSupply)).isEqualTo(new BigNumber(1100)));
   });
 
+  it('should fail to mint from blacklisted minter', async function () {
+     await setMinter(accounts[2], 200);
+     await blacklist(accounts[2]);
+     try {
+      await token.mint(accounts[0], 100, {from: accounts[2]});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let balance0 = await token.balanceOf(accounts[0]);
+      assert.equal(balance0, 0);
+    }
+  });
+
+  it('should fail to mint to blacklisted address', async function () {
+     await blacklist(accounts[3]);
+     try {
+      await mint(accounts[3], 100);
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let balance0 = await token.balanceOf(accounts[0]);
+      assert.equal(balance0, 0);
+    }
+  });
+
   it('should fail to mint from a non-minter call', async function () {
      await mint(accounts[0], 400);
      try {
@@ -1086,6 +1113,22 @@ contract('FiatToken', function (accounts) {
       assert.fail();
     } catch(e) {
       checkFailureIsExpected(e);
+    }
+  });
+
+  it('should fail to burn from a blacklisted address', async function () {
+     let burnerAddress = accounts[3];
+     await setMinter(burnerAddress, 200);
+     await mint(burnerAddress, 200);
+     await blacklist(burnerAddress);
+     try {
+      await token.burn(100, {from: burnerAddress});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let balance0 = await token.balanceOf(burnerAddress);
+      assert.equal(balance0, 200);
     }
   });
 
