@@ -1,5 +1,6 @@
-var FiatToken = artifacts.require('FiatToken');
+var FiatToken = artifacts.require('FiatTokenWithStorage');
 var EternalStorage = artifacts.require('EternalStorage');
+var UpgradedFiatToken = artifacts.require('FiatTokenExistingStorage');
 var name = 'Sample Fiat Token';
 var symbol = 'C-USD';
 var currency = 'USD';
@@ -197,12 +198,8 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    storage = await EternalStorage.new();
-    let storageAddress = storage.address;
-    token = await FiatToken.new(storageAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    token = await FiatToken.new(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     let tokenAddress = token.address;
-    await storage.setAccess(tokenAddress, true);
-    await storage.setInitialized(true);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -1028,19 +1025,6 @@ contract('FiatToken', function (accounts) {
     assert.equal(totalSupply, 100);
   });
 
-  it('should setAccess and getAccess for an address', async function () {
-    testStorage = await EternalStorage.new();
-    let accessorAddress = accounts[3];
-
-    await testStorage.setAccess(accessorAddress, true);
-    let isAccessGranted = await testStorage.getAccess(accessorAddress);
-    assert.equal(isAccessGranted, true);
-
-    await testStorage.setAccess(accessorAddress, false);
-    let isAccessStillGranted = await testStorage.getAccess(accessorAddress);
-    assert.equal(isAccessStillGranted, false);
-  });
-
   it('should fail to setAccess from an address which has not been given access', async function () {
     testStorage = await EternalStorage.new();
     let illegalSetter = accounts[3];
@@ -1049,34 +1033,6 @@ contract('FiatToken', function (accounts) {
       await testStorage.setAccess(illegalSetter, true, {from: illegalSetter});
       checkFailureIsExpected(e);
     } catch (e) {}
-  });
-
-  it('should fail to setAccess from owner on an initialized contract', async function () {
-    testStorage = await EternalStorage.new();
-    let setterAddress = accounts[3];
-
-    await testStorage.setInitialized(true);
-
-    try {
-      await testStorage.setAccess(setterAddress, true);
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-  });
-
-  it('should return true from getInitialized on an initialized contract', async function () {
-    testStorage = await EternalStorage.new();
-    await testStorage.setInitialized(true);
-    let isStorageInitialized = await storage.getInitialized();
-
-    assert.equal(isStorageInitialized, true);
-  });
-
-  it('should return false from getInitialized on an uninitialized contract', async function () {
-    testStorage = await EternalStorage.new();
-    let isStorageInitialized = await testStorage.getInitialized();
-
-    assert.equal(isStorageInitialized, false);
   });
 
   it('should mint and burn tokens', async function () {
@@ -1145,18 +1101,36 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should upgrade and preserve data', async function () {
+    await mint(accounts[2], 200);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    tokenNew = await UpgradedFiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    await token.upgrade(tokenNew.address, {from: upgraderAccount});
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+    tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
+    tokenNew.mint(accounts[2], 200, {from: minterAccount});
+    let balance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
+  });
+
   it('should fail to upgrade twice', async function () {
     await mint(accounts[2], 200);
-    tokenNew = await FiatToken.new(storage.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    tokenNew = await UpgradedFiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     await token.upgrade(tokenNew.address, {from: upgraderAccount});
-    let oldBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(oldBalance)).isEqualTo(new BigNumber(200)));
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
     tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
     tokenNew.mint(accounts[2], 200, {from: minterAccount});
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
 
-    tokenNewSecond = await FiatToken.new(storage.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     try {
         await token.upgrade(tokenNewSecond.address, {from: upgraderAccount});
         assert.fail();

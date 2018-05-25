@@ -29,21 +29,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   event MinterConfigured(address minter, uint256 minterAllowedAmount);
   event MinterRemoved(address oldMinter);
 
-  function FiatToken(address _storageContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
-
-    name = _name;
-    symbol = _symbol;
-    currency = _currency;
-    decimals = _decimals;
-    masterMinter = _masterMinter;
-    pauser = _pauser;
-    blacklister = _blacklister;
-    upgrader = _upgrader;
-    roleAddressChanger = _roleAddressChanger;
-
-    contractStorage = EternalStorage(_storageContractAddress);
-  }
-
   /**
    * @dev Throws if called by any account other than the roleAddressChanger
   */
@@ -58,6 +43,13 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   modifier onlyMinters() {
     require(isMinter(msg.sender) == true);
     _;
+  }
+
+  /**
+   * @dev Throws if called by any account other than a minter
+  */
+  function getDataContractAddress() external view returns (address) {
+    return address(contractStorage);
   }
 
   /**
