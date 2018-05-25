@@ -1,13 +1,8 @@
 pragma solidity ^0.4.18;
 
-/// @title The primary persistent storage for Rocket Pool
-/// @author David Rugendyke with modifications by CENTRE. 
+import './../lib/openzeppelin/contracts/ownership/Ownable.sol';
 
-contract EternalStorage {
-
-    address owner;
-    mapping(address => bool) private access;
-    bool private initialized = false;
+contract EternalStorage is Ownable {
 
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) private allowed;
@@ -16,33 +11,9 @@ contract EternalStorage {
     mapping(address => bool) private minters;
     mapping(address => uint256) private minterAllowed;
 
-    function EternalStorage() public {
-        owner = msg.sender;
-    }
-
-    /*** Modifiers ************/
-
-    /// @dev Only allow access from the latest version contract after initialization
-    modifier onlyAuthorizedContracts() {
-        // The owner is only allowed to set the storage upon deployment to register the initial contracts, afterwards their direct access is disabled
-        if (initialized == false) {
-            require(msg.sender == owner);
-        } else {
-            // Make sure the access is permitted to only contracts in our Dapp
-            require(access[msg.sender] != false);
-        }
-        _;
-    }
 
     /**** Get Methods ***********/
 
-    function getInitialized() external view returns (bool) {
-        return initialized;
-    }
-
-    function getAccess(address _address) external view returns (bool) {
-        return access[_address];
-    }
 
     function getAllowed(address _from, address _spender) external view returns (uint256) {
         return allowed[_from][_spender];
@@ -71,35 +42,28 @@ contract EternalStorage {
 
     /**** Set Methods ***********/
 
-    function setInitialized(bool _status) onlyAuthorizedContracts external {
-        initialized = _status;
-    }
 
-    function setAccess(address _address, bool _status) onlyAuthorizedContracts external {
-        access[_address] = _status;
-    }
-
-    function setAllowed(address _from, address _spender, uint256 _amount) onlyAuthorizedContracts external {
+    function setAllowed(address _from, address _spender, uint256 _amount) onlyOwner external {
         allowed[_from][_spender] = _amount;
     }
 
-    function setBalance(address _account, uint256 _amount) onlyAuthorizedContracts external {
+    function setBalance(address _account, uint256 _amount) onlyOwner external {
         balances[_account] = _amount;
     }
 
-    function setTotalSupply(uint256 _totalSupply) onlyAuthorizedContracts external {
+    function setTotalSupply(uint256 _totalSupply) onlyOwner external {
         totalSupply = _totalSupply;
     }
 
-    function setBlacklisted(address _account, bool _status) onlyAuthorizedContracts external {
+    function setBlacklisted(address _account, bool _status) onlyOwner external {
         blacklisted[_account] = _status;
     }
 
-    function setMinterAllowed(address _minter, uint256 _amount) onlyAuthorizedContracts external {
+    function setMinterAllowed(address _minter, uint256 _amount) onlyOwner external {
         minterAllowed[_minter] = _amount;
     }
 
-    function setMinter(address _account, bool _status) onlyAuthorizedContracts external {
+    function setMinter(address _account, bool _status) onlyOwner external {
         minters[_account] = _status;
     }
 
