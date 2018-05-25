@@ -4,7 +4,7 @@ import './FiatToken.sol';
 
 /**
  * @title FiatTokenWithStorage 
- * @dev ERC20 Token backed by fiat reserves that deploys storage contract as well
+ * @dev ERC20 Token backed by fiat reserves that uses and also deploys a data storage contract
  */
 contract FiatTokenWithStorage is FiatToken {
 

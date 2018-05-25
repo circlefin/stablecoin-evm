@@ -4,7 +4,7 @@ import './FiatToken.sol';
 
 /**
  * @title FiatTokenExistingStorage 
- * @dev Upgraded ERC20 Token backed by fiat reserves that sets storage contract address explicitly in constructor
+ * @dev Upgraded ERC20 Token backed by fiat reserves that uses an existing data storage contract
  */
 contract FiatTokenExistingStorage is FiatToken {
 

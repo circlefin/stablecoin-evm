@@ -46,7 +46,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   }
 
   /**
-   * @dev Throws if called by any account other than a minter
+   * @dev Function to get address of data contract
   */
   function getDataContractAddress() external view returns (address) {
     return address(contractStorage);
