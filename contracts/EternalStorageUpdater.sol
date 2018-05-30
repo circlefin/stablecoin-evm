@@ -21,8 +21,17 @@ contract EternalStorageUpdater {
     return contractStorage.getBalance(_account);
   }
 
+  function getBalances(address _firstAccount, address _secondAccount) internal view returns (uint256, uint256) {
+    return contractStorage.getBalances(_firstAccount, _secondAccount);
+  }
+
   function setBalance(address _account, uint256 _amount) internal {
     contractStorage.setBalance(_account, _amount);
+  }
+
+  function setBalances(address _firstAccount, uint256 _firstAmount,
+                      address _secondAccount, uint256 _secondAmount) internal {
+    contractStorage.setBalances(_firstAccount, _firstAmount, _secondAccount, _secondAmount);
   }
 
   function getTotalSupply() internal view returns (uint256) {
@@ -36,6 +45,11 @@ contract EternalStorageUpdater {
   function isBlacklisted(address _account) internal view returns (bool) {
     return contractStorage.isBlacklisted(_account);
   }
+
+  function isAnyBlacklisted(address _account1, address _account2) internal view returns (bool) {
+    return contractStorage.isAnyBlacklisted(_account1, _account2);
+  }
+
 
   function setBlacklisted(address _account, bool _status) internal {
     contractStorage.setBlacklisted(_account, _status);
@@ -58,6 +72,3 @@ contract EternalStorageUpdater {
   }
 
 }
-
-
-

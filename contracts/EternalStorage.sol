@@ -23,12 +23,20 @@ contract EternalStorage is Ownable {
         return balances[_account];
     }
 
+    function getBalances(address _firstAccount, address _secondAccount) external view returns (uint256, uint256) {
+        return (balances[_firstAccount], balances[_secondAccount]);
+    }
+
     function getTotalSupply() external view returns (uint256) {
         return totalSupply;
     }
 
     function isBlacklisted(address _account) external view returns (bool) {
         return blacklisted[_account];
+    }
+
+    function isAnyBlacklisted(address _account1, address _account2) external view returns (bool) {
+      return blacklisted[_account1] || blacklisted[_account2];
     }
 
     function getMinterAllowed(address _minter) external view returns (uint256) {
@@ -49,6 +57,12 @@ contract EternalStorage is Ownable {
 
     function setBalance(address _account, uint256 _amount) onlyOwner external {
         balances[_account] = _amount;
+    }
+
+    function setBalances(address _firstAccount, uint256 _firstAmount,
+                        address _secondAccount, uint256 _secondAmount) onlyOwner external {
+        balances[_firstAccount] = _firstAmount;
+        balances[_secondAccount] = _secondAmount;
     }
 
     function setTotalSupply(uint256 _totalSupply) onlyOwner external {
