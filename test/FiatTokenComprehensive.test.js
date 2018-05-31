@@ -6,6 +6,9 @@ var currency = 'USD';
 var decimals = 2;
 var BigNumber = require('bignumber.js');
 var bigZero = new BigNumber(0);
+// used as arbitrary number
+var bigHundred = new BigNumber(100);
+// TODO: test really big numbers
 
 contract('FiatToken', function (accounts) {
   let token;
@@ -143,31 +146,31 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.name.call(), expectedState['name']);
     assert.equal(await token.symbol.call(), expectedState['symbol']);
     assert.equal(await token.currency.call(), expectedState['currency']);
-    assert.isTrue(new BigNumber(await token.decimals.call()).isEqualTo(expectedState['decimals']));
+    assert.isTrue(new BigNumber(await token.decimals.call()).equals(expectedState['decimals']));
     assert.equal(await token.roleAddressChanger.call(), expectedState['roleAddressChanger']);
     assert.equal(await token.masterMinter.call(), expectedState['masterMinter']);
 
     //TODO contractStorage
 
     //balances
-    assert.isTrue(new BigNumber(await token.balanceOf(arbitraryAccount)).isEqualTo(expectedState['balances']['arbitraryAccount']))
-    assert.isTrue(new BigNumber(await token.balanceOf(masterMinterAccount)).isEqualTo(expectedState['balances']['masterMinterAccount']))
-    assert.isTrue(new BigNumber(await token.balanceOf(minterAccount)).isEqualTo(expectedState['balances']['minterAccount']))
-    assert.isTrue(new BigNumber(await token.balanceOf(pauserAccount)).isEqualTo(expectedState['balances']['pauserAccount']))
-    assert.isTrue(new BigNumber(await token.balanceOf(blacklisterAccount)).isEqualTo(expectedState['balances']['blacklisterAccount']))
-    assert.isTrue(new BigNumber(await token.balanceOf(roleAddressChangerAccount)).isEqualTo(expectedState['balances']['roleAddressChangerAccount']))
-    assert.isTrue(new BigNumber(await token.balanceOf(upgraderAccount)).isEqualTo(expectedState['balances']['upgraderAccount']))
+    assert.isTrue(new BigNumber(await token.balanceOf(arbitraryAccount)).equals(expectedState['balances']['arbitraryAccount']))
+    assert.isTrue(new BigNumber(await token.balanceOf(masterMinterAccount)).equals(expectedState['balances']['masterMinterAccount']))
+    assert.isTrue(new BigNumber(await token.balanceOf(minterAccount)).equals(expectedState['balances']['minterAccount']))
+    assert.isTrue(new BigNumber(await token.balanceOf(pauserAccount)).equals(expectedState['balances']['pauserAccount']))
+    assert.isTrue(new BigNumber(await token.balanceOf(blacklisterAccount)).equals(expectedState['balances']['blacklisterAccount']))
+    assert.isTrue(new BigNumber(await token.balanceOf(roleAddressChangerAccount)).equals(expectedState['balances']['roleAddressChangerAccount']))
+    assert.isTrue(new BigNumber(await token.balanceOf(upgraderAccount)).equals(expectedState['balances']['upgraderAccount']))
 
     // allowance
-    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, masterMinterAccount)).isEqualTo(expectedState['allowance']['arbitraryAccount']['masterMinterAccount']));
-    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, minterAccount)).isEqualTo(expectedState['allowance']['arbitraryAccount']['minterAccount']));
-    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, pauserAccount)).isEqualTo(expectedState['allowance']['arbitraryAccount']['pauserAccount']));
-    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, blacklisterAccount)).isEqualTo(expectedState['allowance']['arbitraryAccount']['blacklisterAccount']));
-    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, roleAddressChangerAccount)).isEqualTo(expectedState['allowance']['arbitraryAccount']['roleAddressChangerAccount']));
-    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, upgraderAccount)).isEqualTo(expectedState['allowance']['arbitraryAccount']['upgraderAccount']));
+    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, masterMinterAccount)).equals(expectedState['allowance']['arbitraryAccount']['masterMinterAccount']));
+    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, minterAccount)).equals(expectedState['allowance']['arbitraryAccount']['minterAccount']));
+    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, pauserAccount)).equals(expectedState['allowance']['arbitraryAccount']['pauserAccount']));
+    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, blacklisterAccount)).equals(expectedState['allowance']['arbitraryAccount']['blacklisterAccount']));
+    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, roleAddressChangerAccount)).equals(expectedState['allowance']['arbitraryAccount']['roleAddressChangerAccount']));
+    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, upgraderAccount)).equals(expectedState['allowance']['arbitraryAccount']['upgraderAccount']));
     // TODO: write assert statements for the rest of the 42 combinations of possible spenders and destination addresses. (Will slow down tests.)
 
-    assert.isTrue(new BigNumber(await token.totalSupply.call()).isEqualTo(expectedState['totalSupply']));
+    assert.isTrue(new BigNumber(await token.totalSupply.call()).equals(expectedState['totalSupply']));
 
     //blacklisted
     assert.equal(await token.isAccountBlacklisted(arbitraryAccount), expectedState['isAccountBlacklisted']['arbitraryAccount'])
@@ -188,13 +191,13 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.isAccountMinter(upgraderAccount), expectedState['isAccountMinter']['upgraderAccount'])
 
     //minterAllowance
-    assert.isTrue(new BigNumber(await token.minterAllowance(arbitraryAccount)).isEqualTo(expectedState['minterAllowance']['arbitraryAccount']))
-    assert.isTrue(new BigNumber(await token.minterAllowance(masterMinterAccount)).isEqualTo(expectedState['minterAllowance']['masterMinterAccount']))
-    assert.isTrue(new BigNumber(await token.minterAllowance(minterAccount)).isEqualTo(expectedState['minterAllowance']['minterAccount']))
-    assert.isTrue(new BigNumber(await token.minterAllowance(pauserAccount)).isEqualTo(expectedState['minterAllowance']['pauserAccount']))
-    assert.isTrue(new BigNumber(await token.minterAllowance(blacklisterAccount)).isEqualTo(expectedState['minterAllowance']['blacklisterAccount']))
-    assert.isTrue(new BigNumber(await token.minterAllowance(roleAddressChangerAccount)).isEqualTo(expectedState['minterAllowance']['roleAddressChangerAccount']))
-    assert.isTrue(new BigNumber(await token.minterAllowance(upgraderAccount)).isEqualTo(expectedState['minterAllowance']['upgraderAccount']))
+    assert.isTrue(new BigNumber(await token.minterAllowance(arbitraryAccount)).equals(expectedState['minterAllowance']['arbitraryAccount']))
+    assert.isTrue(new BigNumber(await token.minterAllowance(masterMinterAccount)).equals(expectedState['minterAllowance']['masterMinterAccount']))
+    assert.isTrue(new BigNumber(await token.minterAllowance(minterAccount)).equals(expectedState['minterAllowance']['minterAccount']))
+    assert.isTrue(new BigNumber(await token.minterAllowance(pauserAccount)).equals(expectedState['minterAllowance']['pauserAccount']))
+    assert.isTrue(new BigNumber(await token.minterAllowance(blacklisterAccount)).equals(expectedState['minterAllowance']['blacklisterAccount']))
+    assert.isTrue(new BigNumber(await token.minterAllowance(roleAddressChangerAccount)).equals(expectedState['minterAllowance']['roleAddressChangerAccount']))
+    assert.isTrue(new BigNumber(await token.minterAllowance(upgraderAccount)).equals(expectedState['minterAllowance']['upgraderAccount']))
 
     assert.equal(await token.blacklister.call(), expectedState['blacklister']);
     assert.equal(await token.pauser.call(), expectedState['pauser']);
@@ -304,4 +307,10 @@ contract('FiatToken', function (accounts) {
       await token.unpause({from: pauserAccount});
       await checkVariables({'paused': false});
   });
+
+  it('should approve a spend and set allowed', async function () {
+    await token.approve(arbitraryAccount, bigHundred, {from: minterAccount});
+    customVars = {'allowance.arbitraryAccount.minterAccount': bigHundred}
+    checkVariables(customVars)
+  })
 });
