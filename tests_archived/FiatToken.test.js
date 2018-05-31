@@ -1,3 +1,5 @@
+// these tests are for reference. Do not run. Use npm test
+
 var FiatToken = artifacts.require('FiatTokenWithStorage');
 var EternalStorage = artifacts.require('EternalStorage');
 var UpgradedFiatToken = artifacts.require('FiatTokenExistingStorage');
