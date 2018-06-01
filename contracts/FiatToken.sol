@@ -41,7 +41,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     upgrader = _upgrader;
     roleAddressChanger = _roleAddressChanger;
 
-    if(_contractStorageAddress != 0x0) {
+    if(_contractStorageAddress != address(0x0)) {
       contractStorage = EternalStorage(_contractStorageAddress);
     } else {
       contractStorage = new EternalStorage();
