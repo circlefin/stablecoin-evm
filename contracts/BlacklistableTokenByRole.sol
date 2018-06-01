@@ -26,7 +26,7 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
    * @param _secondAccount An additional account to check
   */
   modifier notBlacklisted(address _secondAccount) {
-    require(isAnyBlacklisted(msg.sender, _secondAccount) != true);
+    require(isAnyBlacklisted(msg.sender, _secondAccount) == false);
     _;
   }
 
@@ -34,7 +34,7 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
    * @dev Throws if called by an account that is blacklisted
   */
   modifier senderNotBlacklisted() {
-    require(isBlacklisted(msg.sender) != true);
+    require(isBlacklisted(msg.sender) == false);
     _;
   }
   /**
