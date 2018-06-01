@@ -31,6 +31,13 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
   }
 
   /**
+   * @dev Throws if called by an account that is blacklisted
+  */
+  modifier senderNotBlacklisted() {
+    require(isBlacklisted(msg.sender) != true);
+    _;
+  }
+  /**
    * @dev Checks if account is blacklisted
    * @param _account The address to check
   */

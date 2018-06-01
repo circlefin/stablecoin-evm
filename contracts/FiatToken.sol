@@ -234,7 +234,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * amount is less than or equal to the minter's account balance
    * @param _amount uint256 the amount of tokens to be burned
   */
-  function burn(uint256 _amount) whenNotPaused onlyMinters notBlacklisted(0x0) public {
+  function burn(uint256 _amount) whenNotPaused onlyMinters senderNotBlacklisted public {
     uint256 balance = getBalance(msg.sender);
     require(balance >= _amount);
 
