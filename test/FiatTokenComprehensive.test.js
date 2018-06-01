@@ -24,7 +24,7 @@ contract('FiatToken', function (accounts) {
 
   // For testing variance of specific variables from their default values.
   // customVars is an array of objects of the form,
-  // {'variable': (name of variable), 'expectedValue': (expected value after modification)}
+  // {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
   // to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
   checkVariables = async function (customVars) {
     // set each variable's default value
@@ -141,10 +141,14 @@ contract('FiatToken', function (accounts) {
   
     // for each item in customVars, set the item in expectedState
     for (i = 0; i < customVars.length; ++i) {
-      _.set(expectedState, customVars[i].variable, customVars[i].expectedValue)
+      if (_.has(expectedState, customVars[i].variable)) {
+        _.set(expectedState, customVars[i].variable, customVars[i].expectedValue);
+      } else {
+        throw "variable " + customVars[i].variable + " not found in expectedState";
+      }
     }
 
-    // console.log(util.inspect(expectedState, {showHidden: false, depth: null}))
+    console.log(util.inspect(expectedState, {showHidden: false, depth: null}))
 
     // check each value in expectedState against contract state
     assert.equal(await token.name.call(), expectedState['name']);
@@ -209,11 +213,48 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.paused.call(), expectedState['paused']);
   }
 
+  setMinter = async function(minter, amount) {
+    let update = await token.configureMinter(minter, amount, {from: masterMinterAccount});
+    assert.equal(update.logs[0].event, 'MinterConfigured');
+    assert.equal(update.logs[0].args.minter, minter);
+    assert.equal(update.logs[0].args.minterAllowedAmount, amount);
+    let minterAllowance = await token.minterAllowance(minter);
+
+    assert.equal(minterAllowance, amount);
+  }
+
+  mint = async function(to, amount) {
+    minter = minterAccount;
+    await setMinter(minter, amount);
+    await mintRaw(to, amount, minter);
+  }
+
+  mintRaw = async function(to, amount, minter) {
+    let initialTotalSupply = await token.totalSupply();
+    let initialMinterAllowance = await token.minterAllowance(minter);
+    let minting = await token.mint(to, amount, {from: minter});
+    assert.equal(minting.logs[0].event, 'Mint');
+    assert.equal(minting.logs[0].args.minter, minter);
+    assert.equal(minting.logs[0].args.to, to);
+    assert.equal(minting.logs[0].args.amount, amount);
+    let totalSupply = await token.totalSupply();
+    assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(amount)).equals(new BigNumber(initialTotalSupply)));
+    let minterAllowance = await token.minterAllowance(minter);
+    assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).equals(new BigNumber(minterAllowance)));
+  }
+
   beforeEach(async function checkBefore() {
       token = await FiatToken.new(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
       let tokenAddress = token.address;
       await checkVariables([]);
     });
+
+  // Test template
+  /*  it('<DESCRIPTION>', async function () {
+    let actual = await token.<FUNCTION>();
+    customVars = [{'variable': '<VARIABLE NAME>', 'expectedValue': actual}];
+    await checkVariables(customVars);
+  }); */
 
 //  it('should have correct contractStorage after contract initialization', async function () {
 //    let actual = await token.getDataContractAddress();
@@ -278,9 +319,46 @@ contract('FiatToken', function (accounts) {
     await checkVariables(customVars);
   });
 
-  it('should approve a spend and set allowed', async function () {
+  it('should approve a spend and set allowed amount', async function () {
     await token.approve(minterAccount, 100, {from: arbitraryAccount});
     customVars = [{'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': bigHundred}];
     await checkVariables(customVars)
+  })
+
+  it('should blacklist and set blacklisted to true', async function () {
+    await token.blacklist(arbitraryAccount, {from: blacklisterAccount});
+    customVars = [{'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}]
+    await checkVariables(customVars)
+  })
+
+  it('should burn amount of tokens and reduce balance and total supply by amount', async function () {
+    amount = 100;
+
+    // mint tokens to arbitraryAccount
+    await mint(minterAccount, amount);
+    customVars = [
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true}
+    ]
+    await checkVariables(customVars);
+    
+    await token.burn(amount, {from: minterAccount});
+
+    customVars = [{'variable': 'isAccountMinter.minterAccount', 'expectedValue': true}]
+    // (tests that totalSupply and balance are returned to defaults after burn)
+    await checkVariables(customVars);
+  });
+
+  it('should configureMinter, setting the minter to true and mintingAllowance to amount', async function () {
+    amount = 100;
+
+    // configure minter
+    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': amount}
+    ]
+    await checkVariables(customVars);
   })
 });
