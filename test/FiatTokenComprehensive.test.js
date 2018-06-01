@@ -1,3 +1,5 @@
+const util = require('util');
+var _ = require('lodash');
 var FiatToken = artifacts.require('FiatTokenWithStorage');
 var EternalStorage = artifacts.require('EternalStorage');
 var name = 'Sample Fiat Token';
@@ -20,8 +22,10 @@ contract('FiatToken', function (accounts) {
   let roleAddressChangerAccount = accounts[3];
   let upgraderAccount = accounts[2];
 
-  // for testing variance of specific variables from their default values,
-  // pass in an object with keys of those specific variables' names, and values of their expected values
+  // For testing variance of specific variables from their default values.
+  // customVars is an array of objects of the form,
+  // {'variable': (name of variable), 'expectedValue': (expected value after modification)}
+  // to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
   checkVariables = async function (customVars) {
     // set each variable's default value
     expectedState = {
@@ -134,13 +138,13 @@ contract('FiatToken', function (accounts) {
       'upgrader': upgraderAccount,
       'paused': false
     };
-
-    // set the new expected variables passed in
-    for (key in customVars) {
-      console.log('key', key);
-      console.log('value', customVars[key]);
-      expectedState[key] = customVars[key]
+  
+    // for each item in customVars, set the item in expectedState
+    for (i = 0; i < customVars.length; ++i) {
+      _.set(expectedState, customVars[i].variable, customVars[i].expectedValue)
     }
+
+    // console.log(util.inspect(expectedState, {showHidden: false, depth: null}))
 
     // check each value in expectedState against contract state
     assert.equal(await token.name.call(), expectedState['name']);
@@ -208,109 +212,75 @@ contract('FiatToken', function (accounts) {
   beforeEach(async function checkBefore() {
       token = await FiatToken.new(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
       let tokenAddress = token.address;
-      await checkVariables({});
+      await checkVariables([]);
     });
 
-  it('should have correct name after contract initialization', async function checkName() {
-      let actual = await token.name.call();
-      var customVars = {'name': actual};
-      await checkVariables(customVars);
-  });
-
-  it('should have correct symbol after contract initialization', async function checkSymbol() {
-      let actual = await token.symbol.call();
-      var customVars = {'symbol': actual};
-      await checkVariables(customVars);
-  });
-
-  it('should have correct currency after contract initialization', async function checkCurrency() {
-      let actual = await token.currency.call();
-      var customVars = {'currency': actual};
-      await checkVariables(customVars);
-  });
-
-  it('should have correct decimals after contract initialization', async function checkDecimals() {
-      let actual = await token.decimals.call();
-      var customVars = {'decimals': actual};
-      await checkVariables(customVars);
-  });
-
-  it('should have correct roleAddressChanger after contract initialization', async function checkRoleAddressChanger() {
-    let actual = await token.roleAddressChanger.call();
-    var customVars = {'roleAddressChanger': actual};
-    await checkVariables(customVars);
-  });
-
-  it('should have correct masterMinter after contract initialization', async function checkMasterMinter() {
-    let actual = await token.masterMinter.call();
-    var customVars = {'masterMinter': actual};
-    await checkVariables(customVars);
-  });
-
-/*  it('should have correct contractStorage after contract initialization', async function () {
-    let actual = await token.getDataContractAddress();
-    var customVars = {'contractStorage': actual};
-    await checkVariables(customVars);
-  });
-*/
+//  it('should have correct contractStorage after contract initialization', async function () {
+//    let actual = await token.getDataContractAddress();
+//    var customVars = {'contractStorage': actual};
+//    await checkVariables(customVars);
+//  });
 
   it('should have correct blacklister after contract initialization', async function checkBlacklister() {
     let actual = await token.blacklister.call();
-    var customVars = {'blacklister': actual};
+    customVars = [{'variable': 'blacklister', 'expectedValue': actual}];
     await checkVariables(customVars);
   });
 
   it('should have correct pauser after contract initialization', async function checkPauser() {
     let actual = await token.pauser.call();
-    var customVars = {'pauser': actual};
+    customVars = [{'variable': 'pauser', 'expectedValue': actual}];
     await checkVariables(customVars);
   });
 
   it('should have correct upgrader after contract initialization', async function checkUpgrader() {
     let actual = await token.upgrader.call();
-    var customVars = {'upgrader': actual};
+    customVars = [{'variable': 'upgrader', 'expectedValue': actual}];
     await checkVariables(customVars);
   });
 
   it('should have correct roleAddressChanger after updateRoleAddress', async function checkRoleAddressChanger() {
     await token.updateRoleAddress(arbitraryAccount, 'roleAddressChanger', {from: roleAddressChangerAccount});
-    var customVars = {'roleAddressChanger': arbitraryAccount};
+    customVars = [{'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount}];
     await checkVariables(customVars);
   });
 
   it('should have correct blacklister after updateRoleAddress', async function () {
     await token.updateRoleAddress(arbitraryAccount, 'blacklister', {from: roleAddressChangerAccount});
-    var customVars = {'blacklister': arbitraryAccount};
+    customVars = [{'variable': 'blacklister', 'expectedValue': arbitraryAccount}];
     await checkVariables(customVars);
   })
 
   it('should have correct pauser after updateRoleAddress', async function () {
     await token.updateRoleAddress(arbitraryAccount, 'pauser', {from: roleAddressChangerAccount});
-    var customVars = {'pauser': arbitraryAccount};
+    customVars = [{'variable': 'pauser', 'expectedValue': arbitraryAccount}];
     await checkVariables(customVars);
   });
 
   it('should have correct upgrader after updateRoleAddress', async function () {
     await token.updateRoleAddress(arbitraryAccount, 'upgrader', {from: roleAddressChangerAccount});
-    var customVars = {'upgrader': arbitraryAccount};
+    customVars = [{'variable': 'upgrader', 'expectedValue': arbitraryAccount}];
     await checkVariables(customVars);
   });
 
   it('should pause and set paused to true', async function () {
-      await token.pause({from: pauserAccount});
-    await checkVariables({'paused': true});
+    await token.pause({from: pauserAccount});
+    customVars = [{'variable': 'paused', 'expectedValue': true}];
+    await checkVariables(customVars);
   });
 
   it('should unpause and set paused to false', async function () {
-      await token.pause({from: pauserAccount});
-      await checkVariables({'paused': true});
-      await token.unpause({from: pauserAccount});
-      await checkVariables({'paused': false});
+    await token.pause({from: pauserAccount});
+    customVars = [{'variable': 'paused', 'expectedValue': true}];
+    await checkVariables(customVars);
+    await token.unpause({from: pauserAccount});
+    customVars = [{'variable': 'paused', 'expectedValue': false}];
+    await checkVariables(customVars);
   });
 
   it('should approve a spend and set allowed', async function () {
-    await token.approve(arbitraryAccount, bigHundred, {from: minterAccount});
-    customVars = {'allowance.arbitraryAccount.minterAccount': bigHundred}
-    checkVariables(customVars)
+    await token.approve(minterAccount, 100, {from: arbitraryAccount});
+    customVars = [{'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': bigHundred}];
+    await checkVariables(customVars)
   })
 });
