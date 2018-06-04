@@ -12,6 +12,9 @@ var bigZero = new BigNumber(0);
 var bigHundred = new BigNumber(100);
 // TODO: test really big numbers
 
+// set to true to enable verbose logging in the tests
+var debugLogging = false;
+
 contract('FiatToken', function (accounts) {
   let token;
   let arbitraryAccount = accounts[8];
@@ -138,7 +141,7 @@ contract('FiatToken', function (accounts) {
       'upgrader': upgraderAccount,
       'paused': false
     };
-  
+
     // for each item in customVars, set the item in expectedState
     for (i = 0; i < customVars.length; ++i) {
       if (_.has(expectedState, customVars[i].variable)) {
@@ -148,7 +151,9 @@ contract('FiatToken', function (accounts) {
       }
     }
 
-    console.log(util.inspect(expectedState, {showHidden: false, depth: null}))
+    if( debugLogging ) {
+      console.log(util.inspect(expectedState, {showHidden: false, depth: null}))
+    }
 
     // check each value in expectedState against contract state
     assert.equal(await token.name.call(), expectedState['name']);
