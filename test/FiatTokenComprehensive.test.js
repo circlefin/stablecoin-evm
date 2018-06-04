@@ -1,6 +1,6 @@
 const util = require('util');
 var _ = require('lodash');
-var FiatToken = artifacts.require('FiatTokenWithStorage');
+var FiatToken = artifacts.require('FiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
 var name = 'Sample Fiat Token';
 var symbol = 'C-USD';
@@ -244,7 +244,7 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function checkBefore() {
-      token = await FiatToken.new(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+      token = await FiatToken.new(0, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
       let tokenAddress = token.address;
       await checkVariables([]);
     });
