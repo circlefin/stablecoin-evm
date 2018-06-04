@@ -33,6 +33,8 @@ contract Upgradable is EternalStorageUpdater {
   */
   function upgrade(address _contractAddress) onlyUpgrader public {
     require(isUpgraded() == false);
+    require(_contractAddress != address(0));
+
     upgradedAddress = _contractAddress;
     contractStorage.transferOwnership(_contractAddress);
     Upgraded(upgradedAddress);
