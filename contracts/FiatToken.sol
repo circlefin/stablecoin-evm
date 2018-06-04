@@ -86,7 +86,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     setTotalSupply(getTotalSupply().add(_amount));
     setBalance(_to, getBalance(_to).add(_amount));
     setMinterAllowed(msg.sender, mintingAllowedAmount.sub(_amount));
-    Mint(msg.sender, _to, _amount);
+    emit Mint(msg.sender, _to, _amount);
     return true;
   }
 
@@ -148,7 +148,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
       return UpgradedContract(upgradedAddress).approve(_spender, _value);
     }
     setAllowed(msg.sender, _spender, _value);
-    Approval(msg.sender, _spender, _value);
+    emit Approval(msg.sender, _spender, _value);
   }
 
   /**
@@ -211,7 +211,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
 
     // SafeMath.sub will throw if there is not enough balance.
     setBalances(_from, balance.sub(_value), _to, toBalance.add(_value));
-    Transfer(_from, _to, _value);
+    emit Transfer(_from, _to, _value);
   }
 
   /**
@@ -231,7 +231,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function configureMinter(address minter, uint256 minterAllowedAmount) whenNotPaused onlyMasterMinter public returns (bool) {
     setMinter(minter, true);
     setMinterAllowed(minter, minterAllowedAmount);
-    MinterConfigured(minter, minterAllowedAmount);
+    emit MinterConfigured(minter, minterAllowedAmount);
     return true;
   }
 
@@ -243,7 +243,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function removeMinter(address minter) onlyMasterMinter public returns (bool) {
     setMinter(minter, false);
     setMinterAllowed(minter, 0);
-    MinterRemoved(minter);
+    emit MinterRemoved(minter);
     return true;
   }
 
@@ -259,7 +259,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
 
     setTotalSupply(getTotalSupply().sub(_amount));
     setBalance(msg.sender, balance.sub(_amount));
-    Burn(msg.sender, _amount);
+    emit Burn(msg.sender, _amount);
   }
 
   /**
@@ -272,23 +272,23 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     bytes32 roleHash = keccak256(_role);
     if (roleHash == keccak256('masterMinter')) {
       masterMinter = _newAddress;
-      RoleAddressChange(_role, _newAddress);
+      emit RoleAddressChange(_role, _newAddress);
     }
     if (roleHash == keccak256('blacklister')) {
       blacklister = _newAddress;
-      RoleAddressChange(_role, _newAddress);
+      emit RoleAddressChange(_role, _newAddress);
     }
     if (roleHash == keccak256('pauser')) {
       pauser = _newAddress;
-      RoleAddressChange(_role, _newAddress);
+      emit RoleAddressChange(_role, _newAddress);
     }
     if (roleHash == keccak256('upgrader')) {
       upgrader = _newAddress;
-      RoleAddressChange(_role, _newAddress);
+      emit RoleAddressChange(_role, _newAddress);
     }
     if (roleHash == keccak256('roleAddressChanger')) {
       roleAddressChanger = _newAddress;
-      RoleAddressChange(_role, _newAddress);
+      emit RoleAddressChange(_role, _newAddress);
     }
   }
 
