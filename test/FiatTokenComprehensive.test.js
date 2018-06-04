@@ -1,18 +1,22 @@
-const util = require('util');
-var _ = require('lodash');
-var FiatToken = artifacts.require('FiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
-var name = 'Sample Fiat Token';
-var symbol = 'C-USD';
-var currency = 'USD';
-var decimals = 2;
-var BigNumber = require('bignumber.js');
-var bigZero = new BigNumber(0);
-// used as arbitrary number
-var bigHundred = new BigNumber(100);
-// TODO: test really big numbers
 
 contract('FiatToken', function (accounts) {
+  const util = require('util');
+  var _ = require('lodash');
+  var FiatToken = artifacts.require('FiatToken');
+  var EternalStorage = artifacts.require('EternalStorage');
+  var name = 'Sample Fiat Token';
+  var symbol = 'C-USD';
+  var currency = 'USD';
+  var decimals = 2;
+  var BigNumber = require('bignumber.js');
+  var bigZero = new BigNumber(0);
+// used as arbitrary number
+  var bigHundred = new BigNumber(100);
+// TODO: test really big numbers
+
+// set to true to enable verbose logging in the tests
+  var debugLogging = false;
+
   let token;
   let arbitraryAccount = accounts[8];
   let masterMinterAccount = accounts[9];
@@ -26,7 +30,7 @@ contract('FiatToken', function (accounts) {
   // customVars is an array of objects of the form,
   // {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
   // to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
-  checkVariables = async function (customVars) {
+  let checkVariables = async function (customVars) {
     // set each variable's default value
     expectedState = {
       'name': name,
@@ -138,7 +142,7 @@ contract('FiatToken', function (accounts) {
       'upgrader': upgraderAccount,
       'paused': false
     };
-  
+
     // for each item in customVars, set the item in expectedState
     for (i = 0; i < customVars.length; ++i) {
       if (_.has(expectedState, customVars[i].variable)) {
@@ -148,7 +152,9 @@ contract('FiatToken', function (accounts) {
       }
     }
 
-    console.log(util.inspect(expectedState, {showHidden: false, depth: null}))
+    if( debugLogging ) {
+      console.log(util.inspect(expectedState, {showHidden: false, depth: null}))
+    }
 
     // check each value in expectedState against contract state
     assert.equal(await token.name.call(), expectedState['name']);
@@ -213,7 +219,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.paused.call(), expectedState['paused']);
   }
 
-  setMinter = async function(minter, amount) {
+  let setMinter = async function(minter, amount) {
     let update = await token.configureMinter(minter, amount, {from: masterMinterAccount});
     assert.equal(update.logs[0].event, 'MinterConfigured');
     assert.equal(update.logs[0].args.minter, minter);
@@ -223,13 +229,13 @@ contract('FiatToken', function (accounts) {
     assert.equal(minterAllowance, amount);
   }
 
-  mint = async function(to, amount) {
+  let mint = async function(to, amount) {
     minter = minterAccount;
     await setMinter(minter, amount);
     await mintRaw(to, amount, minter);
   }
 
-  mintRaw = async function(to, amount, minter) {
+  let mintRaw = async function(to, amount, minter) {
     let initialTotalSupply = await token.totalSupply();
     let initialMinterAllowance = await token.minterAllowance(minter);
     let minting = await token.mint(to, amount, {from: minter});
