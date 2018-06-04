@@ -10,7 +10,7 @@ import './Upgradable.sol';
 import './UpgradedContract.sol';
 
 /**
- * @title FiatToken 
+ * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
 contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
@@ -28,6 +28,25 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   event RoleAddressChange(string role, address indexed newAddress);
   event MinterConfigured(address minter, uint256 minterAllowedAmount);
   event MinterRemoved(address oldMinter);
+
+  function FiatToken(address _contractStorageAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
+
+    name = _name;
+    symbol = _symbol;
+    currency = _currency;
+    decimals = _decimals;
+    masterMinter = _masterMinter;
+    pauser = _pauser;
+    blacklister = _blacklister;
+    upgrader = _upgrader;
+    roleAddressChanger = _roleAddressChanger;
+
+    if(_contractStorageAddress != address(0x0)) {
+      contractStorage = EternalStorage(_contractStorageAddress);
+    } else {
+      contractStorage = new EternalStorage();
+    }
+  }
 
   /**
    * @dev Throws if called by any account other than the roleAddressChanger
@@ -57,9 +76,9 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted public returns (bool) {
+  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted(_to) public returns (bool) {
     require(_to != address(0));
-    require(isBlacklisted(_to) == false);
+
 
     uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
     require(_amount <= mintingAllowedAmount);
@@ -68,7 +87,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     setBalance(_to, getBalance(_to).add(_amount));
     setMinterAllowed(msg.sender, mintingAllowedAmount.sub(_amount));
     Mint(msg.sender, _to, _amount);
-    return true; 
+    return true;
   }
 
   /**
@@ -95,7 +114,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function allowance(address owner, address spender) public view returns (uint256) {
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).allowance(owner, spender);
-    } 
+    }
     return getAllowed(owner, spender);
   }
 
@@ -105,7 +124,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function totalSupply() public view returns (uint256) {
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).totalSupply();
-    } 
+    }
     return getTotalSupply();
   }
 
@@ -116,7 +135,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function balanceOf(address account) public view returns (uint256) {
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).balanceOf(account);
-    } 
+    }
     return getBalance(account);
   }
 
@@ -124,11 +143,10 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @dev Adds blacklisted check to approve
    * @return True if the operation was successful.
   */
-  function approve(address _spender, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
+  function approve(address _spender, uint256 _value) whenNotPaused notBlacklisted(_spender) public returns (bool) {
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).approve(_spender, _value);
-    } 
-    require(isBlacklisted(_spender) == false);
+    }
     setAllowed(msg.sender, _spender, _value);
     Approval(msg.sender, _spender, _value);
   }
@@ -141,11 +159,11 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _value uint256 the amount of tokens to be transferred
    * @return bool success
   */
-  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted(_from) public returns (bool) {
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).transferFrom(_from, _to, _value);
-    } 
-    require(isBlacklisted(_from) == false);
+    }
+
     require(isBlacklisted(_to) == false);
 
     uint256 allowed;
@@ -164,11 +182,11 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _value The amount to be transferred.
    * @return bool success
   */
-  function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted public returns (bool) {
+  function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted(_to) public returns (bool) {
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).transfer(_to, _value);
-    } 
-    require(isBlacklisted(_to) == false);
+    }
+
 
     doTransfer(msg.sender, _to, _value);
     return true;
@@ -183,13 +201,16 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   */
   function doTransfer(address _from, address _to, uint256 _value) internal {
     require(_to != address(0));
-    uint256 balance = getBalance(_from);
+
+    uint256 balance;
+    uint256 toBalance;
+
+    (balance, toBalance) = getBalances(_from, _to);
 
     require(_value <= balance);
 
     // SafeMath.sub will throw if there is not enough balance.
-    setBalance(_from, balance.sub(_value));
-    setBalance(_to, getBalance(_to).add(_value));
+    setBalances(_from, balance.sub(_value), _to, toBalance.add(_value));
     Transfer(_from, _to, _value);
   }
 
@@ -228,14 +249,14 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
 
   /**
    * @dev allows a minter to burn some of its own tokens
-   * Validates that caller is a minter and that 
+   * Validates that caller is a minter and that
    * amount is less than or equal to the minter's account balance
    * @param _amount uint256 the amount of tokens to be burned
   */
-  function burn(uint256 _amount) whenNotPaused onlyMinters notBlacklisted public {
+  function burn(uint256 _amount) whenNotPaused onlyMinters senderNotBlacklisted public {
     uint256 balance = getBalance(msg.sender);
     require(balance >= _amount);
-    
+
     setTotalSupply(getTotalSupply().sub(_amount));
     setBalance(msg.sender, balance.sub(_amount));
     Burn(msg.sender, _amount);
