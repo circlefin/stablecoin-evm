@@ -1,8 +1,7 @@
 // these tests are for reference. Do not run. Use npm test
 
-var FiatToken = artifacts.require('FiatTokenWithStorage');
+var FiatToken = artifacts.require('FiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
-var UpgradedFiatToken = artifacts.require('FiatTokenExistingStorage');
 var name = 'Sample Fiat Token';
 var symbol = 'C-USD';
 var currency = 'USD';
@@ -200,7 +199,7 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function () {
-    token = await FiatToken.new(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     let tokenAddress = token.address;
   });
 
@@ -1142,12 +1141,16 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    tokenNew = await UpgradedFiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
     await token.upgrade(tokenNew.address, {from: upgraderAccount});
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
     tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
-    tokenNew.mint(accounts[2], 200, {from: minterAccount});
+    await tokenNew.mint(accounts[2], 200, {from: minterAccount});
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
   });
@@ -1157,16 +1160,20 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    tokenNew = await UpgradedFiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
     await token.upgrade(tokenNew.address, {from: upgraderAccount});
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
     tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
-    tokenNew.mint(accounts[2], 200, {from: minterAccount});
+    await tokenNew.mint(accounts[2], 200, {from: minterAccount});
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
 
-    tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNewSecond = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     try {
         await token.upgrade(tokenNewSecond.address, {from: upgraderAccount});
         assert.fail();
