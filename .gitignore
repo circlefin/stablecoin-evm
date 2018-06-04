@@ -1,1 +1,6 @@
 build/
+node_modules/
+coverage/
+coverage.json
+package-lock.json
+.idea/
