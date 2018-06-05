@@ -200,11 +200,12 @@ contract('FiatToken', function (accounts) {
 
   beforeEach(async function () {
     token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenAddress = token.address;
   });
 
   it('should start with a totalSupply of 0', async function () {
     let totalSupply = await token.totalSupply();
-    assert.isTrue((new BigNumber(totalSupply)).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(0)));
   });
 
   it('should add multiple mints to a given address in address balance', async function () {
