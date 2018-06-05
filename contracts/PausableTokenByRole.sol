@@ -23,7 +23,7 @@ contract PausableTokenByRole {
   /**
    * @dev called by the pauser to pause, triggers stopped state
   */
-  function pause() onlyPauser whenNotPaused public {
+  function pause() onlyPauser public {
     paused = true;
     Pause();
   }
@@ -31,7 +31,7 @@ contract PausableTokenByRole {
   /**
    * @dev called by the pauser to unpause, returns to normal state
   */
-  function unpause() onlyPauser whenPaused public {
+  function unpause() onlyPauser public {
     paused = false;
     Unpause();
   }
@@ -41,14 +41,6 @@ contract PausableTokenByRole {
   */
   modifier whenNotPaused() {
     require(!paused);
-    _;
-  }
-
-  /**
-   * @dev Modifier to make a function callable only when the contract is paused.
-   */
-  modifier whenPaused() {
-    require(paused);
     _;
   }
 

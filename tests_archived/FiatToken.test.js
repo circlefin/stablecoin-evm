@@ -200,12 +200,11 @@ contract('FiatToken', function (accounts) {
 
   beforeEach(async function () {
     token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
-    let tokenAddress = token.address;
   });
 
   it('should start with a totalSupply of 0', async function () {
     let totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(0)));
+    assert.isTrue((new BigNumber(totalSupply)).isEqualTo(new BigNumber(0)));
   });
 
   it('should add multiple mints to a given address in address balance', async function () {
@@ -486,16 +485,6 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.paused.call(), false);
     await sampleTransferFrom();
   });
-
-  it('should attempt to unpause when already unpaused and fail', async function () {
-    assert.equal(await token.paused.call(), false);
-    try {
-      await token.unpause({from: pauserAccount});
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-  })
 
   it('should pause and should not be able to transferFrom', async function () {
     await mint(accounts[2], 1900);
