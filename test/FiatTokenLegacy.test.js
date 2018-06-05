@@ -1,14 +1,15 @@
 // these tests are for reference. Do not run. Use npm test
 
-var FiatToken = artifacts.require('FiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
-var name = 'Sample Fiat Token';
-var symbol = 'C-USD';
-var currency = 'USD';
-var decimals = 2;
-var BigNumber = require('bignumber.js');
-
 contract('FiatToken', function (accounts) {
+
+  var FiatToken = artifacts.require('FiatToken');
+  var EternalStorage = artifacts.require('EternalStorage');
+  var name = 'Sample Fiat Token';
+  var symbol = 'C-USD';
+  var currency = 'USD';
+  var decimals = 2;
+  var BigNumber = require('bignumber.js');
+
   let token;
   let feeAccount = accounts[8];
   let masterMinterAccount = accounts[9];
@@ -40,7 +41,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(transfer.logs[0].args.value, value);
   }
 
-  setMinter = async function(minter, amount) {
+  let setMinter = async function(minter, amount) {
     let update = await token.configureMinter(minter, amount, {from: masterMinterAccount});
     assert.equal(update.logs[0].event, 'MinterConfigured');
     assert.equal(update.logs[0].args.minter, minter);
@@ -50,13 +51,13 @@ contract('FiatToken', function (accounts) {
     assert.equal(minterAllowance, amount);
   }
 
-  mint = async function(to, amount) {
+  let mint = async function(to, amount) {
     minter = minterAccount;
     await setMinter(minter, amount);
     await mintRaw(to, amount, minter);
   }
 
-  mintRaw = async function(to, amount, minter) {
+  let mintRaw = async function(to, amount, minter) {
     let initialTotalSupply = await token.totalSupply();
     let initialMinterAllowance = await token.minterAllowance(minter);
     let minting = await token.mint(to, amount, {from: minter});
@@ -65,12 +66,12 @@ contract('FiatToken', function (accounts) {
     assert.equal(minting.logs[0].args.to, to);
     assert.equal(minting.logs[0].args.amount, amount);
     let totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(amount)).isEqualTo(new BigNumber(initialTotalSupply)));
+    assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(amount)).equals(new BigNumber(initialTotalSupply)));
     let minterAllowance = await token.minterAllowance(minter);
-    assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).isEqualTo(new BigNumber(minterAllowance)));
+    assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).equals(new BigNumber(minterAllowance)));
   }
 
-  mintToReserveAccount = async function(address, amount) {
+  let mintToReserveAccount = async function(address, amount) {
     let minting = await token.mint(amount, {from: minterAccount});
     assert.equal(minting.logs[0].event, 'Mint');
     assert.equal(minting.logs[0].args.amount, amount);
@@ -81,30 +82,30 @@ contract('FiatToken', function (accounts) {
     assert.equal(mintTransfer.logs[0].args.value, amount);
   }
 
-  blacklist = async function(account) {
+  let blacklist = async function(account) {
     let blacklist = await token.blacklist(account, {from: blacklisterAccount});
     assert.equal(blacklist.logs[0].event, 'Blacklisted');
     assert.equal(blacklist.logs[0].args._account, account);
   }
 
-  unBlacklist = async function(account) {
+  let unBlacklist = async function(account) {
     let unblacklist = await token.unBlacklist(account, {from: blacklisterAccount});
     assert.equal(unblacklist.logs[0].event, 'UnBlacklisted');
     assert.equal(unblacklist.logs[0].args._account, account);
   }
 
-  setLongDecimalFeesTransferWithFees = async function() {
+  let setLongDecimalFeesTransferWithFees = async function() {
     fee = 123589;
     feeBase = 1000000;
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 1900);
     let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
 
     await token.approve(accounts[3], 1500);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(1500)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(1500)));
 
     let transfer = await token.transfer(accounts[3], 1000, {from: accounts[0]});
 
@@ -117,17 +118,17 @@ contract('FiatToken', function (accounts) {
     let balance3 = await token.balanceOf(accounts[3]);
     assert.equal(balance3, 1000);
     let balanceFeeAccount = await token.balanceOf(feeAccount);
-    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(feeAmount)));
+    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
   }
 
-  sampleTransfer = async function() {
+  let sampleTransfer = async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 1900);
 
     await token.approve(accounts[3], 1500);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(1500)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(1500)));
 
     let transfer = await token.transfer(accounts[3], 1000, {from: accounts[0]});
 
@@ -139,17 +140,17 @@ contract('FiatToken', function (accounts) {
     assert.equal(balance3, 1000);
   }
 
-  transferFromWithFees = async function() {
+  let transferFromWithFees = async function() {
     fee = 1235;
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 900);
     let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
     await token.approve(accounts[3], 634);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(634)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(634)));
 
     transfer = await token.transferFrom(accounts[0], accounts[3], 534, {from: accounts[3]});
 
@@ -157,43 +158,43 @@ contract('FiatToken', function (accounts) {
     checkTransferEvents(transfer, accounts[0], accounts[3], 534, feeAmount);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BigNumber(balance0).isEqualTo(new BigNumber(900).minus(new BigNumber(534)).minus(new BigNumber(feeAmount))));
+    assert.isTrue(new BigNumber(balance0).equals(new BigNumber(900).minus(new BigNumber(534)).minus(new BigNumber(feeAmount))));
     let balance3 = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance3).isEqualTo(new BigNumber(534)));
+    assert.isTrue(new BigNumber(balance3).equals(new BigNumber(534)));
     let balanceFeeAccount = await token.balanceOf(feeAccount);
-    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(feeAmount)));
+    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
   }
 
-  sampleTransferFrom = async function() {
+  let sampleTransferFrom = async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 900);
     await token.approve(accounts[3], 634);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(634)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(634)));
 
     transfer = await token.transferFrom(accounts[0], accounts[3], 534, {from: accounts[3]});
 
     checkTransferEvents(transfer, accounts[0], accounts[3], 534);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BigNumber(balance0).isEqualTo(new BigNumber(900).minus(new BigNumber(534))));
+    assert.isTrue(new BigNumber(balance0).equals(new BigNumber(900).minus(new BigNumber(534))));
     let balance3 = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance3).isEqualTo(new BigNumber(534)));
+    assert.isTrue(new BigNumber(balance3).equals(new BigNumber(534)));
   }
 
-  approve = async function(to, amount, from) {
+  let approve = async function(to, amount, from) {
     await token.approve(to, amount, {from: from});
   }
 
-  redeem = async function(account, amount) {
+  let redeem = async function(account, amount) {
     let redeemResult = await token.redeem(amount, {from: account});
     assert.equal(redeemResult.logs[0].event, 'Redeem');
     assert.equal(redeemResult.logs[0].args.redeemedAddress, account);
     assert.equal(redeemResult.logs[0].args.amount, amount);
   }
 
-  checkFailureIsExpected = function(error) {
+  let checkFailureIsExpected = function(error) {
     const revertFound = error.message.search('revert') >= 0;
     assert(revertFound, `Expected "revert", got ${error} instead`);
   }
@@ -205,7 +206,7 @@ contract('FiatToken', function (accounts) {
 
   it('should start with a totalSupply of 0', async function () {
     let totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(0)));
   });
 
   it('should add multiple mints to a given address in address balance', async function () {
@@ -225,7 +226,7 @@ contract('FiatToken', function (accounts) {
       checkFailureIsExpected(e);
     } finally {
       let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
     }
 
     try {
@@ -235,7 +236,7 @@ contract('FiatToken', function (accounts) {
       checkFailureIsExpected(e);
     } finally {
       let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
     }
 
     try {
@@ -245,7 +246,7 @@ contract('FiatToken', function (accounts) {
       checkFailureIsExpected(e);
     } finally {
       let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
     }
 
     try {
@@ -255,7 +256,7 @@ contract('FiatToken', function (accounts) {
       checkFailureIsExpected(e);
     } finally {
       let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
     }
   });
 
@@ -265,7 +266,7 @@ contract('FiatToken', function (accounts) {
     await mint(accounts[0], 200);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BigNumber(balance0).isEqualTo(new BigNumber(300)));
+    assert.isTrue(new BigNumber(balance0).equals(new BigNumber(300)));
   });
 
   it('should add multiple mints to total supply', async function () {
@@ -275,7 +276,7 @@ contract('FiatToken', function (accounts) {
     await mint(accounts[1], 600);
 
     let totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(initialTotalSupply)).isEqualTo(new BigNumber(1100)));
+    assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(initialTotalSupply)).equals(new BigNumber(1100)));
   });
 
   it('should fail to mint from blacklisted minter', async function () {
@@ -325,7 +326,7 @@ contract('FiatToken', function (accounts) {
   it('should approve', async function() {
     await approve(accounts[3], 100, accounts[2]);
     let allowance = await token.allowance(accounts[2], accounts[3]);
-    assert.isTrue(new BigNumber(allowance).isEqualTo(new BigNumber(100)));
+    assert.isTrue(new BigNumber(allowance).equals(new BigNumber(100)));
   });
 
   it('should complete sample transfer', async function() {
@@ -346,29 +347,29 @@ contract('FiatToken', function (accounts) {
 
   it('should set allowance and balances before and after approved transfer', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
 
     let transfer = await token.transferFrom(accounts[0], accounts[3], 50, {from: accounts[3]});
 
     checkTransferEvents(transfer, accounts[0], accounts[3], 50);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BigNumber(balance0).isEqualTo(new BigNumber(450)));
+    assert.isTrue(new BigNumber(balance0).equals(new BigNumber(450)));
     let balance3 = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance3).isEqualTo(new BigNumber(50)));
+    assert.isTrue(new BigNumber(balance3).equals(new BigNumber(50)));
   });
 
   it('should fail on unauthorized approved transfer and not change balances', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
 
     try {
       await token.transferFrom(accounts[0], accounts[3], 50, {from: accounts[4]});
@@ -385,11 +386,11 @@ contract('FiatToken', function (accounts) {
 
   it('should fail on invalid approved transfer amount and not change balances', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
 
     try {
       await token.transferFrom(accounts[0], accounts[3], 450, {from: accounts[3]});
@@ -409,7 +410,7 @@ contract('FiatToken', function (accounts) {
     await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
 
     try {
       await token.transferFrom(accounts[0], 0, 50, {from: accounts[3]});
@@ -424,7 +425,7 @@ contract('FiatToken', function (accounts) {
 
   it('should test consistency of transfer(x) and approve(x) + transferFrom(x)', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     let transferAmount = 650;
     let totalAmount = transferAmount;
     await mint(accounts[0], totalAmount);
@@ -438,12 +439,12 @@ contract('FiatToken', function (accounts) {
     assert.equal(balance3, transferAmount);
 
     await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[1], totalAmount);
 
     await token.approve(accounts[4], transferAmount, {from: accounts[1]});
     allowed = await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(transferAmount)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(transferAmount)));
 
     transfer = await token.transferFrom(accounts[1], accounts[4], transferAmount, {from: accounts[4]});
 
@@ -566,7 +567,7 @@ contract('FiatToken', function (accounts) {
     } 
     finally {
        let balance = await token.balanceOf(accounts[2]);
-       assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(100)));
+       assert.isTrue(new BigNumber(balance).equals(new BigNumber(100)));
     }  
   });
 
@@ -595,9 +596,9 @@ contract('FiatToken', function (accounts) {
       checkFailureIsExpected(e);
     } finally {
        let balance = await token.balanceOf(accounts[2]);
-       assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+       assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
        balance = await token.balanceOf(accounts[9]);
-       assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1600)));
+       assert.isTrue(new BigNumber(balance).equals(new BigNumber(1600)));
     }
   });
 
@@ -616,7 +617,7 @@ contract('FiatToken', function (accounts) {
     } 
     finally {
        let balance = await token.balanceOf(accounts[2]);
-       assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+       assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
     }
 
     let isBlacklistedAfter = await token.isAccountBlacklisted(accounts[2]);
@@ -635,7 +636,7 @@ contract('FiatToken', function (accounts) {
     }
     finally {
        let balance = await token.balanceOf(accounts[2]);
-       assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+       assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
     }
   });
 
@@ -651,7 +652,7 @@ contract('FiatToken', function (accounts) {
     } 
     finally {
        let balance = await token.balanceOf(accounts[2]);
-       assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+       assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
     }
   });
 
@@ -665,7 +666,7 @@ contract('FiatToken', function (accounts) {
     }
     finally {
        let approval = await token.allowance(accounts[1], accounts[2]);
-       assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
+       assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
     }
   });
 
@@ -679,7 +680,7 @@ contract('FiatToken', function (accounts) {
     }
     finally {
        let approval = await token.allowance(accounts[2], accounts[1]);
-       assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
+       assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
     }
   });
 
@@ -690,14 +691,14 @@ contract('FiatToken', function (accounts) {
     await approve(accounts[3], 100, accounts[2]);
     await increaseApproval(accounts[3], 50, accounts[2]);
     let allowance = await token.allowance(accounts[2], accounts[3]);
-    assert.isTrue(new BigNumber(allowance).isEqualTo(new BigNumber(150)));
+    assert.isTrue(new BigNumber(allowance).equals(new BigNumber(150)));
   });
 
   it('should decrease approval', async function() {
     await approve(accounts[3], 100, accounts[2]);
     await decreaseApproval(accounts[3], 50, accounts[2]);
     let allowance = await token.allowance(accounts[2], accounts[3]);
-    assert.isTrue(new BigNumber(allowance).isEqualTo(new BigNumber(50)));
+    assert.isTrue(new BigNumber(allowance).equals(new BigNumber(50)));
   });
 
   it('should set long-decimal fees, approve transfer amount with fee, and complete transferFrom with fees', async function() {
@@ -705,7 +706,7 @@ contract('FiatToken', function (accounts) {
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     let transferAmount = 650;
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
@@ -714,7 +715,7 @@ contract('FiatToken', function (accounts) {
 
     await token.approveWithFee(accounts[3], transferAmount);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(totalAmount)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(totalAmount)));
 
     transfer = await token.transferFrom(accounts[0], accounts[3], transferAmount, {from: accounts[3]});
 
@@ -734,7 +735,7 @@ contract('FiatToken', function (accounts) {
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     let transferAmount = 650;
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
@@ -744,7 +745,7 @@ contract('FiatToken', function (accounts) {
 
     await token.approveWithFee(accounts[3], transferAmount);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(totalAmount)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(totalAmount)));
     transfer = await token.transferFrom(accounts[0], accounts[3], transferAmount, {from: accounts[3]});
 
     checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount, feeAmount);
@@ -767,7 +768,7 @@ contract('FiatToken', function (accounts) {
 
     await token.increaseApprovalWithFee(accounts[3], transferAmount);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(totalAmount)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(totalAmount)));
 
     transfer = await token.transferFrom(accounts[0], accounts[3], transferAmount, {from: accounts[3]});
 
@@ -786,13 +787,13 @@ contract('FiatToken', function (accounts) {
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     let transferAmount = 650;
 
     await token.approveWithFee(accounts[3], transferAmount);
     await token.decreaseApprovalWithFee(accounts[3], transferAmount);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
   });
 
   it('should pause and should not be able to increaseApproval', async function () {
@@ -836,7 +837,7 @@ contract('FiatToken', function (accounts) {
     }
     finally {
        let approval = await token.allowance(accounts[1], accounts[2]);
-       assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
+       assert.isTrue(new BigNumber(approval).equals(new BigNumber(600)));
     }
   });
 
@@ -851,7 +852,7 @@ contract('FiatToken', function (accounts) {
     }
     finally {
        let approval = await token.allowance(accounts[2], accounts[1]);
-        assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
+        assert.isTrue(new BigNumber(approval).equals(new BigNumber(600)));
     }
   });
 
@@ -866,7 +867,7 @@ contract('FiatToken', function (accounts) {
     }
     finally {
        let approval = await token.allowance(accounts[1], accounts[2]);
-        assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
+        assert.isTrue(new BigNumber(approval).equals(new BigNumber(600)));
     }
   });
 
@@ -881,7 +882,7 @@ contract('FiatToken', function (accounts) {
     }
     finally {
        let approval = await token.allowance(accounts[2], accounts[1]);
-       assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
+       assert.isTrue(new BigNumber(approval).equals(new BigNumber(600)));
     }
   });*/
 
@@ -891,9 +892,9 @@ contract('FiatToken', function (accounts) {
     await unBlacklist(accounts[2]);
     await token.transfer(accounts[3], 600, {from: accounts[2]});
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1300)));
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300)));
     balance = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(600)));
 
   });
 
@@ -906,9 +907,9 @@ contract('FiatToken', function (accounts) {
     } finally {
       await token.transfer(accounts[3], 600, {from: accounts[2]});
       let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1300)));
+      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300)));
       balance = await token.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
+      assert.isTrue(new BigNumber(balance).equals(new BigNumber(600)));
     }
   });
 
@@ -1042,24 +1043,24 @@ contract('FiatToken', function (accounts) {
     await setMinter(burnerAddress, amount);
     let totalSupply = await token.totalSupply();
     let minterBalance = await token.balanceOf(burnerAddress);
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(0)));
-    assert.isTrue(new BigNumber(minterBalance).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(0)));
+    assert.isTrue(new BigNumber(minterBalance).equals(new BigNumber(0)));
 
     // mint tokens to burnerAddress
     await mint(burnerAddress, amount);
     let totalSupply1 = await token.totalSupply();
     let minterBalance1 = await token.balanceOf(burnerAddress); 
-    assert.isTrue(new BigNumber(totalSupply1).isEqualTo(new BigNumber(totalSupply).plus(new BigNumber(amount))));
-    assert.isTrue(new BigNumber(minterBalance1).isEqualTo(new BigNumber(minterBalance).plus(new BigNumber(amount))));
+    assert.isTrue(new BigNumber(totalSupply1).equals(new BigNumber(totalSupply).plus(new BigNumber(amount))));
+    assert.isTrue(new BigNumber(minterBalance1).equals(new BigNumber(minterBalance).plus(new BigNumber(amount))));
 
     // burn tokens
     await token.burn(amount, {from: burnerAddress});
     let totalSupply2 = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply2).isEqualTo(new BigNumber(totalSupply1).minus(new BigNumber(amount))));
+    assert.isTrue(new BigNumber(totalSupply2).equals(new BigNumber(totalSupply1).minus(new BigNumber(amount))));
 
     // check that minter's balance has been reduced
     let minterBalance2 = await token.balanceOf(burnerAddress);
-    assert.isTrue(new BigNumber(minterBalance2).isEqualTo(new BigNumber(minterBalance1).minus(new BigNumber(amount))));
+    assert.isTrue(new BigNumber(minterBalance2).equals(new BigNumber(minterBalance1).minus(new BigNumber(amount))));
   });
 
   it('should try to burn tokens from a non-minter and fail', async function () {
@@ -1129,7 +1130,7 @@ contract('FiatToken', function (accounts) {
     it('should upgrade and preserve data', async function () {
     await mint(accounts[2], 200);
     let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
     tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
@@ -1138,17 +1139,17 @@ contract('FiatToken', function (accounts) {
 
     await token.upgrade(tokenNew.address, {from: upgraderAccount});
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
     tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
     await tokenNew.mint(accounts[2], 200, {from: minterAccount});
     let balance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
+    assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
   });
 
   it('should fail to upgrade twice', async function () {
     await mint(accounts[2], 200);
     let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
     tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
@@ -1157,11 +1158,11 @@ contract('FiatToken', function (accounts) {
 
     await token.upgrade(tokenNew.address, {from: upgraderAccount});
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
     tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
     await tokenNew.mint(accounts[2], 200, {from: minterAccount});
     let balance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
+    assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
 
     tokenNewSecond = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     try {
@@ -1262,12 +1263,12 @@ contract('FiatToken', function (accounts) {
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 900);
     let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
     await token.approve(accounts[3], 895);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(895)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(895)));
     try {
         transfer = await token.transferFrom(accounts[0], accounts[3], 895, {from: accounts[3]});
         assert.fail()
@@ -1279,7 +1280,7 @@ contract('FiatToken', function (accounts) {
         let balance3 = await token.balanceOf(accounts[3]);
         assert.equal(balance3, 0);
         let balanceFeeAccount = await token.balanceOf(feeAccount);
-        assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(0)));
+        assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(0)));
       }
   });
 
@@ -1304,16 +1305,16 @@ contract('FiatToken', function (accounts) {
     let balance3 = await token.balanceOf(accounts[3]);
     assert.equal(balance3, 1000);
     let balanceFeeAccount = await token.balanceOf(feeAccount);
-    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(0)));
   });
 
   it('should set allowance and balances before and after approved transfer', async function() {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[0], 500);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
     let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
 
     let transfer = await token.transferFrom(accounts[0], accounts[3], 50, {from: accounts[3]});
@@ -1326,7 +1327,7 @@ contract('FiatToken', function (accounts) {
     let balance3 = await token.balanceOf(accounts[3]);
     assert.equal(balance3, 50);
     let balanceFeeAccount = await token.balanceOf(feeAccount);
-    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(feeAmount)));
+    assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
   });
 
   it('should test consistency of transfer(x) and approve(x) + transferFrom(x) with fees', async function() {
@@ -1334,7 +1335,7 @@ contract('FiatToken', function (accounts) {
     feeBase = 10000;
     await token.updateTransferFee(fee, feeBase);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     let transferAmount = 650;
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
@@ -1352,13 +1353,13 @@ contract('FiatToken', function (accounts) {
     assert.equal(balanceFeeAccount - initialBalanceFeeAccount, feeAmount);
 
     await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     await mint(accounts[1], totalAmount);
     initialBalanceFeeAccount = await token.balanceOf(feeAccount);
 
     await token.approve(accounts[4], transferAmount, {from: accounts[1]});
     allowed = await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(transferAmount)));
+    assert.isTrue(new BigNumber(allowed).equals(new BigNumber(transferAmount)));
 
     transfer = await token.transferFrom(accounts[1], accounts[4], transferAmount, {from: accounts[4]});
 
@@ -1369,7 +1370,7 @@ contract('FiatToken', function (accounts) {
     let balance4 = await token.balanceOf(accounts[4]);
     assert.equal(balance3, transferAmount);
     let balanceFeeAccountNew = await token.balanceOf(feeAccount);
-    assert.isTrue(new BigNumber(balanceFeeAccountNew).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(feeAmount)));
+    assert.isTrue(new BigNumber(balanceFeeAccountNew).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
   });
 
   it('should blacklist then unblacklist to make a transfer possible', async function() {
@@ -1378,9 +1379,9 @@ contract('FiatToken', function (accounts) {
     await unBlacklist(accounts[2]);
     await token.transfer(accounts[3], 600, {from: accounts[2]});
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1300).minus(new BigNumber(fee)));
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300).minus(new BigNumber(fee)));
     balance = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(600)));
   });
 
   it('should fail to blacklist with non-blacklister account', async function() {
@@ -1393,9 +1394,9 @@ contract('FiatToken', function (accounts) {
       await token.transfer(accounts[3], 600, {from: accounts[2]});
       let fee = calculateFeeAmount(600);
       let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1300) - new BigNumber(fee)));
+      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300) - new BigNumber(fee)));
       balance = await token.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
+      assert.isTrue(new BigNumber(balance).equals(new BigNumber(600)));
     }
   });
 */
