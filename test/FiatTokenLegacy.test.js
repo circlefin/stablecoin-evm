@@ -1120,31 +1120,31 @@ contract('FiatToken', function (accounts) {
     }
   });
 
-    it('should fail to upgrade to 0x0', async function () {
-        let dataContractAddress = await token.getDataContractAddress();
+  it('should fail to upgrade to 0x0', async function () {
+      let dataContractAddress = await token.getDataContractAddress();
 
-        // make sure token isn't already upgraded
-        assert.isFalse(await token.isUpgraded.call());
+      // make sure token isn't already upgraded
+      assert.isFalse(await token.isUpgraded.call());
 
-        let storage = EternalStorage.at(dataContractAddress);
+      let storage = EternalStorage.at(dataContractAddress);
 
-        let storageOwner = await storage.owner.call();
-        // make sure data contract owned by the token contract
-        assert.equal(storageOwner, token.address);
+      let storageOwner = await storage.owner.call();
+      // make sure data contract owned by the token contract
+      assert.equal(storageOwner, token.address);
 
-        try {
-            // upgrade to null
-            await token.upgrade("0x0", {from: upgraderAccount});
-            assert.fail();
-        } catch(e) {
-            checkFailureIsExpected(e);
-        }
+      try {
+          // upgrade to null
+          await token.upgrade("0x0", {from: upgraderAccount});
+          assert.fail();
+      } catch(e) {
+          checkFailureIsExpected(e);
+      }
 
-        // make sure the data contracts owner is unchanged
-        assert.equal(await storage.owner.call(), token.address);
-    });
+      // make sure the data contracts owner is unchanged
+      assert.equal(await storage.owner.call(), token.address);
+  });
 
-    it('should upgrade and preserve data', async function () {
+  it('should upgrade and preserve data', async function () {
     await mint(accounts[2], 200);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
@@ -1161,6 +1161,50 @@ contract('FiatToken', function (accounts) {
     await tokenNew.mint(accounts[2], 200, {from: minterAccount});
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
+  });
+
+  it('should upgrade and fail to upadate data from old contract', async function () {
+    await mint(accounts[2], 200);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, {from: upgraderAccount});
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
+    await tokenNew.mint(accounts[2], 200, {from: minterAccount});
+    let balance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
+
+    try {
+      await token.mint(accounts[2], 200, {from: minterAccount});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+       let balance1 = await tokenNew.balanceOf(accounts[2]);
+       assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
+       let balance2 = await token.balanceOf(accounts[2]);
+       assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
+    }
+
+    try {
+      await token.transfer(accounts[7], 200, {from: accounts[2]});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+       let balance1 = await tokenNew.balanceOf(accounts[2]);
+       assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
+       let balance2 = await token.balanceOf(accounts[2]);
+       assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
+    }
+
   });
 
   it('should fail to upgrade twice', async function () {
@@ -1226,16 +1270,54 @@ contract('FiatToken', function (accounts) {
     assert.equal(pauser2, address2);
   });
 
-  it('should updateRoleAddress for upgrader', async function () {
+  it('should updateRoleAddress for upgrader and fail as upgrader is updated separately', async function () {
     let address1 = accounts[7];
     let address2 = accounts[6];
     await token.updateRoleAddress(address1, "upgrader", {from: roleAddressChangerAccount});
-    let upgrader1 = await token.upgrader();
-    assert.equal(upgrader1, address1);
+    let upgrader = await token.upgrader();
+    assert.notEqual(upgrader, address1);
+  });
 
-    await token.updateRoleAddress(address2, "upgrader", {from: roleAddressChangerAccount});
-    let upgrader2 = await token.upgrader();
-    assert.equal(upgrader2, address2);
+  it('should updateUpgraderAddress for upgrader', async function () {
+    let upgrader = await token.upgrader();
+    assert.equal(upgraderAccount, upgrader);
+    let address1 = accounts[7];
+    let updated = await token.updateUpgraderAddress(address1, {from: upgraderAccount});
+    upgrader = await token.upgrader();
+    assert.equal(upgrader, address1);
+
+    //Test upgrade with new upgrader account
+    await mint(accounts[2], 200);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, {from: address1});
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    tokenNew.configureMinter(minterAccount, 500, {from: masterMinterAccount});
+    await tokenNew.mint(accounts[2], 200, {from: minterAccount});
+    let balance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
+  });
+
+  it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
+    let upgrader = await token.upgrader();
+    assert.equal(upgraderAccount, upgrader);
+    let address1 = accounts[7];
+    try {
+      await token.updateUpgraderAddress(address1, {from: pauserAccount});
+      assert.fail();
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      upgrader = await token.upgrader();
+      assert.equal(upgraderAccount, upgrader);
+    }
   });
 
   it('should updateRoleAddress for roleAddressChanger', async function () {

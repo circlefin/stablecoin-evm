@@ -263,9 +263,19 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   }
 
   /**
+   * @dev updates the upgrader address
+   * Validates that caller is the upgrader
+   * @param _newAddress address The new upgrader address
+  */
+  function updateUpgraderAddress(address _newAddress) onlyUpgrader public {
+      upgrader = _newAddress;
+      RoleAddressChange('upgrader', _newAddress);
+  }
+
+  /**
    * @dev updates a role's address with the roleAddressChanger
    * Validates that caller is the roleAddressChanger
-   * @param _newAddress uint256 The new role address
+   * @param _newAddress address The new role address
    * @param _role string The role to update
   */
   function updateRoleAddress(address _newAddress, string _role) onlyRoleAddressChanger public {
@@ -280,10 +290,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     }
     if (roleHash == keccak256('pauser')) {
       pauser = _newAddress;
-      emit RoleAddressChange(_role, _newAddress);
-    }
-    if (roleHash == keccak256('upgrader')) {
-      upgrader = _newAddress;
       emit RoleAddressChange(_role, _newAddress);
     }
     if (roleHash == keccak256('roleAddressChanger')) {
