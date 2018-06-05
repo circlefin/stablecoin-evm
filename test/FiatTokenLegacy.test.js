@@ -923,6 +923,23 @@ contract('FiatToken', function (accounts) {
     }
   });
 
+  it('should fail to unblacklist when paused', async function() {
+    await mint(accounts[2], 1900);
+    await token.blacklist(accounts[2], {from: blacklisterAccount});
+    await token.unBlacklist(accounts[2], {from: blacklisterAccount});
+    await token.blacklist(accounts[2], {from: blacklisterAccount});
+    await token.pause({from: pauserAccount});
+    try {
+      await token.unBlacklist(accounts[2], {from: blacklisterAccount});
+    } catch(e) {
+      checkFailureIsExpected(e);
+    } finally {
+      let balance = await token.balanceOf(accounts[2]);
+      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
+    }
+  });
+
+
 /* TODO: Update with global roleAddressChangerAccount
   it('should fail to change the minter with a non-minterCertifier account', async function() {
     try {
