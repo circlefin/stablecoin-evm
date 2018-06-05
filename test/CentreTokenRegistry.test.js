@@ -50,10 +50,10 @@ contract('CentreTokenRegistry', function (accounts) {
     let auditHash = web3.sha3('hello world');
     let storedTokenAddress = await registry.addToken(tokenAddress, approvedDate, auditDate, auditHash);
 
-    tokenAddress2 = accounts[9];
-    approvedDate2 = '1-12-18';
-    auditDate2 = '1-12-18';
-    auditHash2 = web3.sha3('disney world');
+    var tokenAddress2 = accounts[9];
+    var approvedDate2 = '1-12-18';
+    var auditDate2 = '1-12-18';
+    var auditHash2 = web3.sha3('disney world');
 
     try {
       storedTokenAddress = await registry.addToken(tokenAddress, approvedDate, auditDate, auditHash);
@@ -115,7 +115,7 @@ contract('CentreTokenRegistry', function (accounts) {
   it('should fail to remove non-existent token', async function () {
     let tokenAddress = accounts[9];
     try {
-      storedTokenAddress = await registry.removeToken(tokenAddress);
+      var storedTokenAddress = await registry.removeToken(tokenAddress);
       assert.fail();
     } catch(e) {
 

@@ -13,3 +13,9 @@ module.exports = {
     }
   }
 };
+
+require('babel-register');
+require('babel-polyfill');
+require('babel-register')({
+ ignore: /node_modules\/(?!zeppelin-solidity)/
+});
