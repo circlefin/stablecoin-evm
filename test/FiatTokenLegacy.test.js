@@ -1121,27 +1121,27 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should fail to upgrade to 0x0', async function () {
-      let dataContractAddress = await token.getDataContractAddress();
+    let dataContractAddress = await token.getDataContractAddress();
 
-      // make sure token isn't already upgraded
-      assert.isFalse(await token.isUpgraded.call());
+    // make sure token isn't already upgraded
+    assert.isFalse(await token.isUpgraded.call());
 
-      let storage = EternalStorage.at(dataContractAddress);
+    let storage = EternalStorage.at(dataContractAddress);
 
-      let storageOwner = await storage.owner.call();
-      // make sure data contract owned by the token contract
-      assert.equal(storageOwner, token.address);
+    let storageOwner = await storage.owner.call();
+    // make sure data contract owned by the token contract
+    assert.equal(storageOwner, token.address);
 
-      try {
-          // upgrade to null
-          await token.upgrade("0x0", {from: upgraderAccount});
-          assert.fail();
-      } catch(e) {
-          checkFailureIsExpected(e);
-      }
+    try {
+        // upgrade to null
+        await token.upgrade("0x0", {from: upgraderAccount});
+        assert.fail();
+    } catch(e) {
+        checkFailureIsExpected(e);
+    }
 
-      // make sure the data contracts owner is unchanged
-      assert.equal(await storage.owner.call(), token.address);
+    // make sure the data contracts owner is unchanged
+    assert.equal(await storage.owner.call(), token.address);
   });
 
   it('should upgrade and preserve data', async function () {
