@@ -25,7 +25,7 @@ contract PausableTokenByRole {
   */
   function pause() onlyPauser public {
     paused = true;
-    Pause();
+    emit Pause();
   }
 
   /**
@@ -33,7 +33,7 @@ contract PausableTokenByRole {
   */
   function unpause() onlyPauser public {
     paused = false;
-    Unpause();
+    emit Unpause();
   }
 
   /**

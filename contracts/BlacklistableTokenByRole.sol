@@ -51,7 +51,7 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
   */
   function blacklist(address _account) public onlyBlacklister {
     setBlacklisted(_account, true);
-    Blacklisted(_account);
+    emit Blacklisted(_account);
   }
 
   /**
@@ -60,7 +60,7 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
   */
   function unBlacklist(address _account) public onlyBlacklister {
     setBlacklisted(_account, false);
-    UnBlacklisted(_account);
+    emit UnBlacklisted(_account);
   }
 
 }
