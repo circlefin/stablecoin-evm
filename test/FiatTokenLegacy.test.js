@@ -488,16 +488,6 @@ contract('FiatToken', function (accounts) {
     await sampleTransferFrom();
   });
 
-  it('should attempt to unpause when already unpaused and fail', async function () {
-    assert.equal(await token.paused.call(), false);
-    try {
-      await token.unpause({from: pauserAccount});
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-  })
-
   it('should pause and should not be able to transferFrom', async function () {
     await mint(accounts[2], 1900);
     assert.equal(await token.paused.call(), false);
