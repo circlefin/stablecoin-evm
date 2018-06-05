@@ -1,12 +1,13 @@
 pragma solidity ^0.4.18;
 
+import './PausableTokenByRole.sol';
 import './EternalStorageUpdater.sol';
 
 /**
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
-contract BlacklistableTokenByRole is EternalStorageUpdater {
+contract BlacklistableTokenByRole is PausableTokenByRole, EternalStorageUpdater {
 
   address public blacklister;
 
@@ -58,7 +59,7 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
    * @dev Removes account from blacklist
    * @param _account The address to remove from the blacklist
   */
-  function unBlacklist(address _account) public onlyBlacklister {
+  function unBlacklist(address _account) public whenNotPaused onlyBlacklister {
     setBlacklisted(_account, false);
     emit UnBlacklisted(_account);
   }
