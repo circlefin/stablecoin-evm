@@ -11,6 +11,9 @@ install truffle:
 install testrpc:
 ```npm install -g ethereumjs-testrpc```
 
+install project npm dependencies:
+```npm install```
+
 install submodules:
 ```git submodule update --init```
 
