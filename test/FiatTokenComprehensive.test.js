@@ -12,6 +12,11 @@ var bigZero = new BigNumber(0);
 var bigHundred = new BigNumber(100);
 // TODO: test really big numbers
 
+const should = require('chai')
+  .use(require('chai-as-promised'))
+  .use(require('chai-bignumber')(BigNumber))
+  .should()
+
 contract('FiatToken', function (accounts) {
   let token;
   let arbitraryAccount = accounts[8];
@@ -37,7 +42,6 @@ contract('FiatToken', function (accounts) {
       'masterMinter': masterMinterAccount,
       // contractStorage is not deterministic for FiatTokenWithStorage
       //'contractStorage': storageAddress,
-      'owner': accounts[0],
       'balances': {
         'arbitraryAccount': bigZero,
         'masterMinterAccount': bigZero,
@@ -155,7 +159,11 @@ contract('FiatToken', function (accounts) {
     assert.equal(await token.name.call(), expectedState['name']);
     assert.equal(await token.symbol.call(), expectedState['symbol']);
     assert.equal(await token.currency.call(), expectedState['currency']);
-    assert.isTrue(new BigNumber(await token.decimals.call()).equals(expectedState['decimals']));
+
+    // CHAI:
+    let decimalsCount = await token.decimals.call();
+    decimalsCount.should.be.bignumber.equal(expectedState['decimals'])
+
     assert.equal(await token.roleAddressChanger.call(), expectedState['roleAddressChanger']);
     assert.equal(await token.masterMinter.call(), expectedState['masterMinter']);
 
@@ -172,6 +180,11 @@ contract('FiatToken', function (accounts) {
 
     // allowance
     assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, masterMinterAccount)).equals(expectedState['allowance']['arbitraryAccount']['masterMinterAccount']));
+
+    // CHAI:
+    let allowanceAmount = await token.allowance(arbitraryAccount, minterAccount);
+    allowanceAmount.should.be.bignumber.equal(expectedState['allowance']['arbitraryAccount']['minterAccount']);
+    
     assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, minterAccount)).equals(expectedState['allowance']['arbitraryAccount']['minterAccount']));
     assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, pauserAccount)).equals(expectedState['allowance']['arbitraryAccount']['pauserAccount']));
     assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, blacklisterAccount)).equals(expectedState['allowance']['arbitraryAccount']['blacklisterAccount']));
@@ -245,9 +258,14 @@ contract('FiatToken', function (accounts) {
   }
 
   beforeEach(async function checkBefore() {
-      token = await FiatToken.new(0, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
-      let tokenAddress = token.address;
-      await checkVariables([]);
+    token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenAddress = token.address;
+
+    let dataContractAddress = await token.getDataContractAddress();
+    let storage = EternalStorage.at(dataContractAddress);
+    assert.equal(await storage.owner.call(), tokenAddress)
+
+    await checkVariables([]);
   });
 
   // Test template
@@ -329,6 +347,16 @@ contract('FiatToken', function (accounts) {
   it('should blacklist and set blacklisted to true', async function () {
     await token.blacklist(arbitraryAccount, {from: blacklisterAccount});
     customVars = [{'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}]
+    await checkVariables(customVars)
+  });
+
+  it('should blacklist and set blacklisted to true, then unblacklist and set blacklisted to false', async function () {
+    await token.blacklist(arbitraryAccount, {from: blacklisterAccount});
+    customVars = [{'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}]
+    await checkVariables(customVars)
+
+    await token.unBlacklist(arbitraryAccount, {from: blacklisterAccount});
+    customVars = [{'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': false}]
     await checkVariables(customVars)
   });
 
@@ -474,5 +502,9 @@ contract('FiatToken', function (accounts) {
     ]
     await checkVariables(customVars);
   })
+
+  /*it('should upgrade, setting transferring ownership to new address and upgradedAddress as new address', async function () {
+
+  })*/
 
 });
