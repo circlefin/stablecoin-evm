@@ -503,8 +503,4 @@ contract('FiatToken', function (accounts) {
     await checkVariables(customVars);
   })
 
-  /*it('should upgrade, setting transferring ownership to new address and upgradedAddress as new address', async function () {
-
-  })*/
-
 });
