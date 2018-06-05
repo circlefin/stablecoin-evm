@@ -5,6 +5,9 @@ Fiat and non-fiat tokens part of the CENTRE network.
 Tests need node v8.0.0 or higher, as they depend on async/await functionality. Interacting with eth is very async-y so await makes it much easier to write tests.
 Depends on truffle and testrpc for testing.
 
+install npm locally
+```npm install```
+
 install truffle:
 ```npm install -g truffle```
 
