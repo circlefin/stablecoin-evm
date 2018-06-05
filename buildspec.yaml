@@ -3,15 +3,18 @@ version: 0.2
 phases:
   install:
     commands:
-      - npm install -g ganache-cli
-      - npm install -g truffle
+      - npm install -g truffle@^4.1.8
   build:
     commands:
       - echo Build started on `date`
       - npm install
-      - truffle compile 2>&1 | tee build/compile.log
-      - npm test 2>&1 | tee build/test.log
+      - mkdir -p build/logs
+      - truffle compile 2>&1 | tee build/logs/truffle-compile.log
+      - npm test 2>&1 | tee build/logs/test.log
 
 artifacts:
   files:
-    - build/**/*
+    - build/contracts/*
+    - build/logs/*.log
+    - coverage/**/*
+    
