@@ -1133,11 +1133,11 @@ contract('FiatToken', function (accounts) {
     assert.equal(storageOwner, token.address);
 
     try {
-        // upgrade to null
-        await token.upgrade("0x0", {from: upgraderAccount});
-        assert.fail();
+      // upgrade to null
+      await token.upgrade("0x0", {from: upgraderAccount});
+      assert.fail();
     } catch(e) {
-        checkFailureIsExpected(e);
+      checkFailureIsExpected(e);
     }
 
     // make sure the data contracts owner is unchanged
