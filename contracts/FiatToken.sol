@@ -269,7 +269,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   */
   function updateUpgraderAddress(address _newAddress) onlyUpgrader public {
       upgrader = _newAddress;
-      RoleAddressChange('upgrader', _newAddress);
+      emit RoleAddressChange('upgrader', _newAddress);
   }
 
   /**
