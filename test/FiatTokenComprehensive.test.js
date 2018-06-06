@@ -289,7 +289,8 @@ contract('FiatToken', function (accounts) {
     var notAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'paused', 'expectedValue': false },
+      { 'variable': 'totalSupply', 'expectedValue': 0 }
     ]
     await checkVariables(notAMinter);
 
@@ -297,7 +298,8 @@ contract('FiatToken', function (accounts) {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var isAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
+      { 'variable': 'totalSupply', 'expectedValue': 0 }
     ]
     // verify it worked
     await checkVariables(isAMinter);
@@ -340,6 +342,54 @@ contract('FiatToken', function (accounts) {
 
     // state should be unchanged
     await checkVariables(notAMinter)
+  });
+
+  it('configureMinter when masterMinter is blacklisted', async function () {
+    // set up pre-conditions
+    let amount = 11;
+    await token.blacklist(masterMinterAccount, { from: blacklisterAccount });
+    var setup = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    await checkVariables(setup);
+
+    // now configure minter
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var result = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    // verify it worked
+    await checkVariables(result);
+  });
+
+  it('configureMinter when minter is blacklisted', async function () {
+    // set up pre-conditions
+    let amount = 11;
+    await token.blacklist(minterAccount, { from: blacklisterAccount });
+    var setup = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    await checkVariables(setup);
+
+    // now configure minter
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var result = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    // verify it worked
+    await checkVariables(result);
   });
 
   it('removeMinter', async function () {
