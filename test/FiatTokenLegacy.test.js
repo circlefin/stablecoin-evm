@@ -35,6 +35,7 @@ import {
 contract('FiatToken', function (accounts) {
 
   var FiatToken = artifacts.require('FiatToken');
+  var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
   var EternalStorage = artifacts.require('EternalStorage');
 
   var name = 'Sample Fiat Token';
@@ -996,7 +997,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    var tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);
@@ -1015,7 +1016,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);
@@ -1039,19 +1040,6 @@ contract('FiatToken', function (accounts) {
       let balance2 = await token.balanceOf(accounts[2]);
       assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
     }
-
-    try {
-      await token.transfer(accounts[7], 200, { from: accounts[2] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance1 = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
-      let balance2 = await token.balanceOf(accounts[2]);
-      assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
-    }
-
   });
 
   it('should fail to upgrade twice', async function () {
@@ -1059,7 +1047,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);
@@ -1072,7 +1060,8 @@ contract('FiatToken', function (accounts) {
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
 
-    let tokenNewSecond = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     try {
       await token.upgrade(tokenNewSecond.address, { from: upgraderAccount });
       assert.fail();
@@ -1138,7 +1127,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await FiatToken.new(dataContractAddress, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);

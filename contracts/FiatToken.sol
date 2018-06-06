@@ -145,8 +145,9 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   */
   function approve(address _spender, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _spender) public returns (bool) {
     if (isUpgraded()) {
-      return UpgradedContract(upgradedAddress).approve(_spender, _value);
+      return UpgradedContract(upgradedAddress).approveViaPriorContract(msg.sender, _spender, _value);
     }
+    
     setAllowed(msg.sender, _spender, _value);
     emit Approval(msg.sender, _spender, _value);
   }
@@ -161,7 +162,8 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   */
   function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _from) public returns (bool) {
     if (isUpgraded()) {
-      return UpgradedContract(upgradedAddress).transferFrom(_from, _to, _value);
+      return UpgradedContract(upgradedAddress).transferFromViaPriorContract(msg.sender, _from, _to, _value);
+
     }
 
     require(isBlacklisted(_to) == false);
@@ -184,7 +186,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   */
   function transfer(address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _to) public returns (bool) {
     if (isUpgraded()) {
-      return UpgradedContract(upgradedAddress).transfer(_to, _value);
+      return UpgradedContract(upgradedAddress).transferViaPriorContract(msg.sender, _to, _value);
     }
 
 
@@ -199,7 +201,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
   */
-  function doTransfer(address _from, address _to, uint256 _value) internal {
+  function doTransfer(address _from, address _to, uint256 _value) private {
     require(_to != address(0));
 
     uint256 balance;
