@@ -14,6 +14,8 @@ import {
   roleAddressChangerAccount, upgraderAccount, owner, token
 } from './TokenTestUtils';
 
+import expectThrow from '../node_modules/zeppelin-solidity/test/helpers/expectThrow';
+
 contract('FiatToken', function (accounts) {
   const util = require('util');
   var _ = require('lodash');
@@ -279,6 +281,128 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(50) }
     ]
     await checkVariables(customVars);
+  });
+
+  it('configureMinter', async function () {
+    // make sure not a minter and set up pre-conditions
+    let amount = 11;
+    var notAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    await checkVariables(notAMinter);
+
+    // now make into a minter
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var isAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount }
+    ]
+    // verify it worked
+    await checkVariables(isAMinter);
+  });
+
+  it('configureMinter whilePaused', async function () {
+    let amount = 6;
+
+    // pause contract and make sure not a minter
+    await token.pause({ from: pauserAccount })
+    var notAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+    await checkVariables(notAMinter);
+
+    // now make into a minter - this will throw
+    await expectThrow(token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
+
+    // state should be unchanged
+    await checkVariables(notAMinter)
+  });
+
+  it('configureMinter from bad masterMinter', async function () {
+    let amount = 6;
+
+    // make sure not a minter, and sender is not a masterMinter
+    var notAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'paused', 'expectedValue': false },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount }
+    ]
+    assert.isFalse(arbitraryAccount == masterMinterAccount)
+    await checkVariables(notAMinter);
+
+    // now make into a minter - this will throw
+    await expectThrow(token.configureMinter(minterAccount, amount, { from: arbitraryAccount }));
+
+    // state should be unchanged
+    await checkVariables(notAMinter)
+  });
+
+  it('removeMinter', async function () {
+    // set up pre-conditions
+    let amount = 11;
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var isAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    await checkVariables(isAMinter);
+
+    // now remove minter
+    await token.removeMinter(minterAccount, { from: masterMinterAccount });
+    var notAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    // verify it worked
+    await checkVariables(notAMinter);
+  });
+
+  it('removeMinter whilePaused', async function () {
+    // set up pre-conditions
+    let amount = 6;
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.pause({ from: pauserAccount })
+    var isAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+    await checkVariables(isAMinter);
+
+    // now remove minter
+    await token.removeMinter(minterAccount, { from: masterMinterAccount });
+    var notAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+    // verify it worked
+    await checkVariables(notAMinter);
+  });
+
+  it('removeMinter from bad masterMinter', async function () {
+    // set up pre-conditions
+    let amount = 11;
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var isAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
+      { 'variable': 'paused', 'expectedValue': false }
+    ]
+    await checkVariables(isAMinter);
+
+    // now remove minter - this will throw
+    await expectThrow(token.removeMinter(minterAccount, { from: arbitraryAccount }));
+
+    // state should be unchanged
+    await checkVariables(isAMinter)
   });
 
 });
