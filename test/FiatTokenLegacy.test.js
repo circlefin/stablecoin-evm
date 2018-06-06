@@ -997,7 +997,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);
@@ -1016,7 +1016,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);
@@ -1047,7 +1047,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);
@@ -1061,7 +1061,7 @@ contract('FiatToken', function (accounts) {
     assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
 
 
-    tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     try {
       await token.upgrade(tokenNewSecond.address, { from: upgraderAccount });
       assert.fail();
@@ -1127,7 +1127,7 @@ contract('FiatToken', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
-    tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
     let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
     assert.isTrue(upgradedDataContractAddress == dataContractAddress);
