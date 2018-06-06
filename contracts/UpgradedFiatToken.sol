@@ -58,7 +58,7 @@ contract UpgradedFiatToken is FiatToken, UpgradedContract {
    * @param _spender address The address approve
    * @param _value uint256 The amount to approve
   */
-  function doApprove(address _from, address _spender, uint256 _value) whenNotPaused notBlacklisted(_spender) private returns (bool) {
+  function doApprove(address _from, address _spender, uint256 _value) whenNotPaused notBlacklistedBoth(_from, _spender) private returns (bool) {
     setAllowed(_from, _spender, _value);
     emit Approval(_from, _spender, _value);
   }
@@ -145,7 +145,7 @@ contract UpgradedFiatToken is FiatToken, UpgradedContract {
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
   */
-  function doTransfer(address _from, address _to, uint256 _value) private whenNotPaused notBlacklisted(_from) notBlacklisted(_to)  {
+  function doTransfer(address _from, address _to, uint256 _value) private whenNotPaused notBlacklistedBoth(_from, _to)  {
     require(_to != address(0));
 
     uint256 balance;
