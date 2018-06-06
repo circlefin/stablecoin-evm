@@ -414,6 +414,32 @@ contract('FiatToken', function (accounts) {
     await checkVariables(notAMinter);
   });
 
+  it('removeMinter does not affect totalSupply or balances', async function () {
+    // set up pre-conditions
+    let amount = 11;
+    let totalSupply = 10;
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.mint(minterAccount, totalSupply, { from: minterAccount })
+    var isAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount - totalSupply },
+      { 'variable': 'balances.minterAccount', 'expectedValue': totalSupply },
+      { 'variable': 'totalSupply', 'expectedValue': totalSupply }
+    ]
+    await checkVariables(isAMinter);
+
+    // now remove minter
+    await token.removeMinter(minterAccount, { from: masterMinterAccount });
+    var notAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
+      { 'variable': 'balances.minterAccount', 'expectedValue': totalSupply },
+      { 'variable': 'totalSupply', 'expectedValue': totalSupply }
+    ]
+    // verify it worked
+    await checkVariables(notAMinter);
+  });
+
   it('removeMinter whilePaused', async function () {
     // set up pre-conditions
     let amount = 6;
