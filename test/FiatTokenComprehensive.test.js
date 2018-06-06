@@ -1,4 +1,3 @@
-
 import {
   setupAccountsFromTestRPC,
   setToken,
@@ -13,6 +12,10 @@ import {
   arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount,
   roleAddressChangerAccount, upgraderAccount, owner, token
 } from './TokenTestUtils';
+
+import {
+  masterMinterRole, blacklisterRole, pauserRole, roleAddressChangerRole
+} from './TokenTestUtils'
 
 import expectThrow from '../node_modules/zeppelin-solidity/test/helpers/expectThrow';
 
