@@ -14,8 +14,15 @@ install truffle:
 install testrpc:
 ```npm install -g ethereumjs-testrpc```
 
+install project npm dependencies:
+```npm install```
+
 install submodules:
 ```git submodule update --init```
+
+install chai
+```npm install --save-dev chai```
+```npm install chai-as-promised```
 
 install babel modules to allow javascript function import/export
 npm install babel-polyfill
