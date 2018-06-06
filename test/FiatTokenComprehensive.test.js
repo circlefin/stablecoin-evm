@@ -322,12 +322,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(customVars);
   });
 
-  it('should have correct upgrader after updateRoleAddress', async function () {
-    await token.updateRoleAddress(arbitraryAccount, 'upgrader', {from: roleAddressChangerAccount});
-    customVars = [{'variable': 'upgrader', 'expectedValue': arbitraryAccount}];
-    await checkVariables(customVars);
-  });
-
   it('should pause and set paused to true', async function () {
     await token.pause({from: pauserAccount});
     customVars = [{'variable': 'paused', 'expectedValue': true}];
