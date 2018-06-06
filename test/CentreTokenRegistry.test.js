@@ -29,9 +29,9 @@ contract('CentreTokenRegistry', function (accounts) {
     let auditDate = '1-12-18';
     let auditHash = web3.sha3('hello world');
     try {
-      storedTokenAddress = await registry.addToken(tokenAddress, approvedDate, auditDate, auditHash, {from: accounts[1]});
+      storedTokenAddress = await registry.addToken(tokenAddress, approvedDate, auditDate, auditHash, { from: accounts[1] });
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);
@@ -58,7 +58,7 @@ contract('CentreTokenRegistry', function (accounts) {
     try {
       storedTokenAddress = await registry.addToken(tokenAddress, approvedDate, auditDate, auditHash);
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);
@@ -98,9 +98,9 @@ contract('CentreTokenRegistry', function (accounts) {
     assert.equal(storedTokenAddress.logs[0].event, 'TokenAdded');
 
     try {
-      storedTokenAddress = await registry.removeToken(tokenAddress, {from: accounts[1]});
+      storedTokenAddress = await registry.removeToken(tokenAddress, { from: accounts[1] });
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);
@@ -117,7 +117,7 @@ contract('CentreTokenRegistry', function (accounts) {
     try {
       var storedTokenAddress = await registry.removeToken(tokenAddress);
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);
@@ -163,9 +163,9 @@ contract('CentreTokenRegistry', function (accounts) {
     let auditHashNew = web3.sha3('disney world');
 
     try {
-      storedTokenAddress = await registry.updateAudit(tokenAddress, auditDateNew, auditHashNew, {from: accounts[1]});
+      storedTokenAddress = await registry.updateAudit(tokenAddress, auditDateNew, auditHashNew, { from: accounts[1] });
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);
@@ -183,7 +183,7 @@ contract('CentreTokenRegistry', function (accounts) {
     try {
       storedTokenAddress = await registry.updateAudit(tokenAddress, auditDateNew, auditHashNew);
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);
@@ -226,9 +226,9 @@ contract('CentreTokenRegistry', function (accounts) {
 
     let approvedDateNew = '3-12-18';
     try {
-      storedTokenAddress = await registry.correctApprovedDate(tokenAddress, approvedDateNew, {from: accounts[1]});
+      storedTokenAddress = await registry.correctApprovedDate(tokenAddress, approvedDateNew, { from: accounts[1] });
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);
@@ -243,10 +243,10 @@ contract('CentreTokenRegistry', function (accounts) {
   it('should fail to update token approval date for non-existent token', async function () {
     let tokenAddress = accounts[9];
     let approvedDateNew = '3-12-18';
-    try {    
+    try {
       storedTokenAddress = await registry.correctApprovedDate(tokenAddress, approvedDateNew);
       assert.fail();
-    } catch(e) {
+    } catch (e) {
 
     } finally {
       let tokenEntry = await registry.registry.call(tokenAddress);

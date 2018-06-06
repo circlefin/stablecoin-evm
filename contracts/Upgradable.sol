@@ -37,7 +37,7 @@ contract Upgradable is EternalStorageUpdater {
 
     upgradedAddress = _contractAddress;
     contractStorage.transferOwnership(_contractAddress);
-    Upgraded(upgradedAddress);
+    emit Upgraded(upgradedAddress);
   }
 
 }

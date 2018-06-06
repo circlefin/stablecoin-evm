@@ -48,7 +48,7 @@ contract CentreTokenRegistry is Ownable {
         returns (address)
     {
         registry[token_address] = TokenInfo(approvedDate, latestAuditDate, latestAuditHash, true);
-        TokenAdded(token_address);
+        emit TokenAdded(token_address);
 
         return token_address;
     }
@@ -65,7 +65,7 @@ contract CentreTokenRegistry is Ownable {
         returns (address)
     {
         delete registry[token_address];
-        TokenRemoved(token_address);
+        emit TokenRemoved(token_address);
 
         return token_address;
     }
@@ -84,9 +84,9 @@ contract CentreTokenRegistry is Ownable {
         returns (address)
     {
         registry[token_address].latestAuditDate = latestAuditDate;
-        registry[token_address].latestAuditHash = latestAuditHash;  
+        registry[token_address].latestAuditHash = latestAuditHash;
 
-        TokenUpdated(token_address);
+        emit TokenUpdated(token_address);
 
         return token_address;
     }
@@ -104,8 +104,8 @@ contract CentreTokenRegistry is Ownable {
         returns (address)
     {
         registry[token_address].approvedDate = approvedDate;
-        
-        TokenUpdated(token_address);
+
+        emit TokenUpdated(token_address);
 
         return token_address;
     }
