@@ -36,6 +36,13 @@ export {
   token
 };
 
+// string role names to send to updateRoleAddress()  
+var masterMinterRole = 'masterMinter';
+var blacklisterRole = 'blacklister';
+var pauserRole = 'pauser';
+var roleAddressChangerRole = 'roleAddressChanger';
+export { masterMinterRole, blacklisterRole, pauserRole, roleAddressChangerRole };
+
 const should = require('chai')
   .use(require('chai-as-promised'))
   .use(require('chai-bignumber')(BigNumber))
