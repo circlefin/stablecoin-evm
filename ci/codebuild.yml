@@ -23,7 +23,7 @@ Parameters:
     Description: Github branch
 
   ECRBuildImage:
-    Default: "514563129364.dkr.ecr.us-east-1.amazonaws.com/circle-ops/circle-codebuild-dockerspec:latest"
+    Default: "aws/codebuild/nodejs:8.11.0"
     Type: String
     Description: The ECR image to use in the Codebuild project
 
@@ -33,7 +33,7 @@ Resources:
   CodeBuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Sub "centre/centre-tokens"
+      Name: "centre-tokens"
       Description: !Sub "Codebuild project from stack ${AWS::StackName}"
       Artifacts:
         Type: NO_ARTIFACTS
@@ -47,7 +47,7 @@ Resources:
           - Name: AWS_ACCOUNT_ID
             Value: !Ref AWS::AccountId
           - Name: IMAGE_REPO_PREFIX
-            Value: !Sub "cenre/centre-tokens"
+            Value: !Sub "centre/centre-tokens"
           - Name: AWS_REGION
             Value: !Ref AWS::Region
       ServiceRole: !Ref CodeBuildServiceRole
@@ -83,20 +83,4 @@ Resources:
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource:
-                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/blockchain-${CurrencyFamily}:log-stream:*"
-              - Effect: "Allow"
-                Action:
-                  - "ecr:BatchCheckLayerAvailability"
-                  - "ecr:CompleteLayerUpload"
-                  - "ecr:InitiateLayerUpload"
-                  - "ecr:PutImage"
-                  - "ecr:UploadLayerPart"
-                Resource: !Sub "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/blockchain/${CurrencyFamily}/*"
-              - Effect: "Allow"
-                Action:
-                  - "ecr:GetAuthorizationToken"
-                Resource: "*"
-              - Effect: "Allow"
-                Action:
-                  - "s3:Get*"
-                Resource: "arn:aws:s3:::circle-artifacts-124945441934/tools/python/packages/*"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/centre-tokens:log-stream:*"
