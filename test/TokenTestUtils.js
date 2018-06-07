@@ -1,8 +1,5 @@
 const util = require('util');
 var _ = require('lodash');
-
-
-
 var name = 'Sample Fiat Token';
 var symbol = 'C-USD';
 var currency = 'USD';
@@ -12,52 +9,15 @@ var bigZero = new BigNumber(0);
 var bigHundred = new BigNumber(100);
 // TODO: test really big numbers
 
-// set to true to enable verbose logging in the tests
-var debugLogging = false;
-
-// Initialize using 0x00 address
-// Need to call setupAccountsFromTestRPC(accounts) to
-// get values from testrpc
-var arbitraryAccount = 0x00;
-var masterMinterAccount = 0x00;
-var minterAccount = 0x00;
-var pauserAccount = 0x00;
-var blacklisterAccount = 0x00;
-var roleAddressChangerAccount = 0x00;
-var upgraderAccount = 0x00;
-var owner = 0x00;
-
-var token = 0x00;
-
-export {
-  name, symbol, currency, decimals, bigZero, bigHundred, debugLogging,
-  arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount,
-  roleAddressChangerAccount, upgraderAccount, owner,
-  token
-};
-
 const should = require('chai')
   .use(require('chai-as-promised'))
   .use(require('chai-bignumber')(BigNumber))
-  .should()
+  .should();
 
+var BigNumber = require('bignumber.js');
 
-var accounts = []
-function setupAccountsFromTestRPC(rpcAccounts) {
-  accounts = rpcAccounts
-  owner = rpcAccounts[0]
-  arbitraryAccount = rpcAccounts[8];
-  masterMinterAccount = rpcAccounts[9];
-  minterAccount = rpcAccounts[7];
-  pauserAccount = rpcAccounts[6];
-  blacklisterAccount = rpcAccounts[4];
-  roleAddressChangerAccount = rpcAccounts[3];
-  upgraderAccount = rpcAccounts[2];
-}
-
-function setToken(newToken) {
-  token = newToken;
-}
+// set to true to enable verbose logging in the tests
+var debugLogging = false;
 
 function calculateFeeAmount(amount) {
   return Math.floor((fee / feeBase) * amount);
@@ -81,12 +41,11 @@ function checkTransferEvents(transfer, from, to, value) {
   assert.equal(transfer.logs[0].args.value, value);
 }
 
-
 // For testing variance of specific variables from their default values.
 // customVars is an array of objects of the form,
 // {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
 // to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
-async function checkVariables(customVars) {
+async function checkVariables(token, customVars) {
   // set each variable's default value
   var expectedState = {
     'name': name,
@@ -248,11 +207,19 @@ async function checkVariables(customVars) {
   assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, pauserAccount)).equals(expectedState['allowance']['arbitraryAccount']['pauserAccount']));
   assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, blacklisterAccount)).equals(expectedState['allowance']['arbitraryAccount']['blacklisterAccount']));
   assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, roleAddressChangerAccount)).equals(expectedState['allowance']['arbitraryAccount']['roleAddressChangerAccount']));
+
+
+  let allowanceArbitaryUpgrader = await token.allowance(arbitraryAccount, upgraderAccount);
+  allowanceArbitaryUpgrader.should.be.bignumber.equal(expectedState['allowance']['arbitraryAccount']['upgraderAccount']);
+
+/*
   assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, upgraderAccount)).equals(expectedState['allowance']['arbitraryAccount']['upgraderAccount']));
+*/
+
   // TODO: write assert statements for the rest of the 42 combinations of possible spenders and destination addresses. (Will slow down tests.)
 }
 
-async function setMinter(minter, amount) {
+async function setMinter(token, minter, amount) {
   let update = await token.configureMinter(minter, amount, { from: masterMinterAccount });
   assert.equal(update.logs[0].event, 'MinterConfigured');
   assert.equal(update.logs[0].args.minter, minter);
@@ -262,13 +229,13 @@ async function setMinter(minter, amount) {
   assert.equal(minterAllowance, amount);
 }
 
-async function mint(to, amount) {
+async function mint(token, to, amount) {
   let minter = minterAccount;
-  await setMinter(minter, amount);
-  await mintRaw(to, amount, minter);
+  await setMinter(token, minter, amount);
+  await mintRaw(token, to, amount, minter);
 }
 
-async function mintRaw(to, amount, minter) {
+async function mintRaw(token, to, amount, minter) {
   let initialTotalSupply = await token.totalSupply();
   let initialMinterAllowance = await token.minterAllowance(minter);
   let minting = await token.mint(to, amount, { from: minter });
@@ -282,7 +249,7 @@ async function mintRaw(to, amount, minter) {
   assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).equals(new BigNumber(minterAllowance)));
 }
 
-async function mintToReserveAccount(address, amount) {
+async function mintToReserveAccount(token, address, amount) {
   let minting = await token.mint(amount, { from: minterAccount });
   assert.equal(minting.logs[0].event, 'Mint');
   assert.equal(minting.logs[0].args.amount, amount);
@@ -293,25 +260,25 @@ async function mintToReserveAccount(address, amount) {
   assert.equal(mintTransfer.logs[0].args.value, amount);
 }
 
-async function blacklist(account) {
+async function blacklist(token, account) {
   let blacklist = await token.blacklist(account, { from: blacklisterAccount });
   assert.equal(blacklist.logs[0].event, 'Blacklisted');
   assert.equal(blacklist.logs[0].args._account, account);
 }
 
-async function unBlacklist(account) {
+async function unBlacklist(token, account) {
   let unblacklist = await token.unBlacklist(account, { from: blacklisterAccount });
   assert.equal(unblacklist.logs[0].event, 'UnBlacklisted');
   assert.equal(unblacklist.logs[0].args._account, account);
 }
 
-async function setLongDecimalFeesTransferWithFees() {
+async function setLongDecimalFeesTransferWithFees(token) {
   fee = 123589;
   feeBase = 1000000;
   await token.updateTransferFee(fee, feeBase);
   let allowed = await token.allowance.call(accounts[0], accounts[3]);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(accounts[0], 1900);
+  await mint(token, accounts[0], 1900);
   let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
 
   await token.approve(accounts[3], 1500);
@@ -332,10 +299,10 @@ async function setLongDecimalFeesTransferWithFees() {
   assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
 }
 
-async function sampleTransfer() {
+async function sampleTransfer(token) {
   let allowed = await token.allowance.call(accounts[0], accounts[3]);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(accounts[0], 1900);
+  await mint(token, accounts[0], 1900);
 
   await token.approve(accounts[3], 1500);
   allowed = await token.allowance.call(accounts[0], accounts[3]);
@@ -351,13 +318,13 @@ async function sampleTransfer() {
   assert.equal(balance3, 1000);
 }
 
-async function transferFromWithFees() {
+async function transferFromWithFees(token) {
   fee = 1235;
   feeBase = 10000;
   await token.updateTransferFee(fee, feeBase);
   let allowed = await token.allowance.call(accounts[0], accounts[3]);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(accounts[0], 900);
+  await mint(token, accounts[0], 900);
   let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
   await token.approve(accounts[3], 634);
   allowed = await token.allowance.call(accounts[0], accounts[3]);
@@ -376,10 +343,10 @@ async function transferFromWithFees() {
   assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
 }
 
-async function sampleTransferFrom() {
+async function sampleTransferFrom(token) {
   let allowed = await token.allowance.call(accounts[0], accounts[3]);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(accounts[0], 900);
+  await mint(token, accounts[0], 900);
   await token.approve(accounts[3], 634);
   allowed = await token.allowance.call(accounts[0], accounts[3]);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(634)));
@@ -394,11 +361,11 @@ async function sampleTransferFrom() {
   assert.isTrue(new BigNumber(balance3).equals(new BigNumber(534)));
 }
 
-async function approve(to, amount, from) {
+async function approve(token, to, amount, from) {
   await token.approve(to, amount, { from: from });
 }
 
-async function redeem(account, amount) {
+async function redeem(token, account, amount) {
   let redeemResult = await token.redeem(amount, { from: account });
   assert.equal(redeemResult.logs[0].event, 'Redeem');
   assert.equal(redeemResult.logs[0].args.redeemedAddress, account);
@@ -410,28 +377,29 @@ async function checkFailureIsExpected(error) {
   assert(revertFound, `Expected "revert", got ${error} instead`);
 }
 
-
-export {
-  setupAccountsFromTestRPC,
-  setToken,
-
-  calculateFeeAmount,
-  checkTransferEventsWithFee,
-  checkTransferEvents,
-
-  checkVariables,
-
-  setMinter,
-  mint,
-  mintRaw,
-  mintToReserveAccount,
-  blacklist,
-  unBlacklist,
-  setLongDecimalFeesTransferWithFees,
-  sampleTransfer,
-  transferFromWithFees,
-  sampleTransferFrom,
-  approve,
-  redeem,
-  checkFailureIsExpected
+module.exports = {
+  name: name,
+  symbol: symbol,
+  currency: currency,
+  decimals: decimals,
+  bigZero: bigZero,
+  bigHundred: bigHundred,
+  debugLogging: debugLogging,
+  calculateFeeAmount: calculateFeeAmount,
+  checkTransferEventsWithFee: checkTransferEventsWithFee,
+  checkTransferEvents: checkTransferEvents,
+  checkVariables: checkVariables,
+  setMinter: setMinter,
+  mint: mint,
+  mintRaw: mintRaw,
+  mintToReserveAccount: mintToReserveAccount,
+  blacklist: blacklist,
+  unBlacklist: unBlacklist,
+  setLongDecimalFeesTransferWithFees: setLongDecimalFeesTransferWithFees,
+  sampleTransfer: sampleTransfer,
+  transferFromWithFees: transferFromWithFees,
+  sampleTransferFrom: sampleTransferFrom,
+  approve: approve,
+  redeem: redeem,
+  checkFailureIsExpected: checkFailureIsExpected
 };

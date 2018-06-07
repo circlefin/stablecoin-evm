@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "lite-server",
     "test": "./node_modules/.bin/solidity-coverage",
-    "build": "babel input.js -o compiled.js"
+/*    "build": "babel input.js -o compiled.js"*/
   },
   "repository": {
     "type": "git",
