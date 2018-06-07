@@ -8,6 +8,7 @@
     "test": "test"
   },
   "scripts": {
+    "start": "babel-node index.js",
     "dev": "lite-server",
     "test": "./node_modules/.bin/solidity-coverage",
     "build": "babel input.js -o compiled.js"
@@ -24,8 +25,10 @@
   },
   "homepage": "https://github.com/centrehq/centre-tokens#readme",
   "dependencies": {
+    "@std/esm": "^0.26.0",
     "babel-polyfill": "^6.26.0",
     "bignumber.js": "git+https://github.com/debris/bignumber.js.git#94d7146671b9719e00a09c29b01a691bc85048c2",
+    "esm": "^3.0.48",
     "g": "^2.0.1",
     "ganache-cli": "^6.1.0",
     "lodash": "^4.17.10",
