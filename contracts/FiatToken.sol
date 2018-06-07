@@ -163,7 +163,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
   function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _from) public returns (bool) {
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).transferFromViaPriorContract(msg.sender, _from, _to, _value);
-
     }
 
     require(isBlacklisted(_to) == false);
@@ -188,7 +187,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).transferViaPriorContract(msg.sender, _to, _value);
     }
-
 
     doTransfer(msg.sender, _to, _value);
     return true;
