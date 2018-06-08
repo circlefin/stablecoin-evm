@@ -149,6 +149,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     }
     setAllowed(msg.sender, _spender, _value);
     emit Approval(msg.sender, _spender, _value);
+    return true
   }
 
   /**
@@ -186,7 +187,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     if (isUpgraded()) {
       return UpgradedContract(upgradedAddress).transfer(_to, _value);
     }
-
 
     doTransfer(msg.sender, _to, _value);
     return true;
