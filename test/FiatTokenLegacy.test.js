@@ -1,54 +1,40 @@
-import {
-  setupAccountsFromTestRPC,
-  setToken,
-
-  calculateFeeAmount,
-  checkTransferEventsWithFee,
-  checkTransferEvents,
-
-  checkVariables,
-
-  setMinter,
-  mint,
-  mintRaw,
-  mintToReserveAccount,
-  blacklist,
-  unBlacklist,
-  setLongDecimalFeesTransferWithFees,
-  sampleTransfer,
-  transferFromWithFees,
-  sampleTransferFrom,
-  approve,
-  redeem,
-  checkFailureIsExpected
-} from './TokenTestUtils';
-
-import {
-  name, symbol, currency, decimals, bigZero, bigHundred, debugLogging,
-  arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount,
-  roleAddressChangerAccount, upgraderAccount, owner, token
-} from './TokenTestUtils';
+var FiatToken = artifacts.require('FiatToken');
+var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
+var EternalStorage = artifacts.require('EternalStorage');
+var tokenUtils = require('./TokenTestUtils');
+var name = tokenUtils.name;
+var symbol = tokenUtils.symbol;
+var currency = tokenUtils.currency;
+var decimals = tokenUtils.decimals
+var BigNumber = require('bignumber.js');
+var bigZero = tokenUtils.bigZero;
+var bigHundred = tokenUtils.bigHundred;
+var mint = tokenUtils.mint;
+var setMinter = tokenUtils.setMinter;
+var expectRevert = tokenUtils.expectRevert;
+var blacklist = tokenUtils.blacklist;
+var sampleTransferFrom = tokenUtils.sampleTransferFrom;
+var approve = tokenUtils.approve;
+var unBlacklist = tokenUtils.unBlacklist;
+var sampleTransfer = tokenUtils.sampleTransfer;
+var checkTransferEvents = tokenUtils.checkTransferEvents;
 
 
-// these tests are for reference. Do not run. Use npm test
 
+// these tests are for reference and do not track side effects on all variables
 contract('FiatToken', function (accounts) {
+  owner = accounts[0]
+  feeAccount = accounts[8];
+  masterMinterAccount = accounts[9];
+  minterAccount = accounts[7];
+  pauserAccount = accounts[6];
+  blacklisterAccount = accounts[4];
+  roleAddressChangerAccount = accounts[3];
+  upgraderAccount = accounts[2];
 
-  var FiatToken = artifacts.require('FiatToken');
-  var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
-  var EternalStorage = artifacts.require('EternalStorage');
-
-  var name = 'Sample Fiat Token';
-
-  var BigNumber = require('bignumber.js');
-
-  let feeAccount = accounts[8];
-
-  setupAccountsFromTestRPC(accounts);
 
   beforeEach(async function () {
-    var aToken = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
-    setToken(aToken);
+    token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     let tokenAddress = token.address;
   });
 
@@ -58,8 +44,8 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should add multiple mints to a given address in address balance', async function () {
-    await mint(accounts[0], 100);
-    await mint(accounts[0], 200);
+    await mint(token, accounts[0], 100, minterAccount);
+    await mint(token, accounts[0], 200, minterAccount);
 
     let balance0 = await token.balanceOf(accounts[0]);
     assert.equal(balance0, 300);
@@ -67,51 +53,31 @@ contract('FiatToken', function (accounts) {
 
   it('should fail to mint to a null address', async function () {
     let initialTotalSupply = await token.totalSupply();
-    try {
-      await mint("0x0", 100);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
-    }
 
-    try {
-      await mint(0x0, 100);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
-    }
+    await expectRevert(mint(token, "0x0", 100, minterAccount));
 
-    try {
-      await mint("0x0000000000000000000000000000000000000000", 100);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
-    }
+    totalSupply = await token.totalSupply();
+    assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
 
-    try {
-      await mint(0x0000000000000000000000000000000000000000, 100);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let totalSupply = await token.totalSupply();
-      assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
-    }
+    await expectRevert(mint(token, 0x0, 100, minterAccount));
+
+    totalSupply = await token.totalSupply();
+    assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
+
+    await expectRevert(mint(token, "0x0000000000000000000000000000000000000000", 100, minterAccount));
+
+    totalSupply = await token.totalSupply();
+    assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
+
+    await expectRevert(mint(token, 0x0000000000000000000000000000000000000000, 100, minterAccount));
+
+    totalSupply = await token.totalSupply();
+    assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(initialTotalSupply)));
   });
 
-
   it('should add multiple mints to a given address in address balance', async function () {
-    await mint(accounts[0], 100);
-    await mint(accounts[0], 200);
+    await mint(token, accounts[0], 100, minterAccount);
+    await mint(token, accounts[0], 200, minterAccount);
 
     let balance0 = await token.balanceOf(accounts[0]);
     assert.isTrue(new BigNumber(balance0).equals(new BigNumber(300)));
@@ -119,70 +85,58 @@ contract('FiatToken', function (accounts) {
 
   it('should add multiple mints to total supply', async function () {
     let initialTotalSupply = await token.totalSupply();
-    await mint(accounts[0], 100);
-    await mint(accounts[0], 400);
-    await mint(accounts[1], 600);
+    await mint(token, accounts[0], 100, minterAccount);
+    await mint(token, accounts[0], 400, minterAccount);
+    await mint(token, accounts[1], 600, minterAccount);
 
     let totalSupply = await token.totalSupply();
     assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(initialTotalSupply)).equals(new BigNumber(1100)));
   });
 
   it('should fail to mint from blacklisted minter', async function () {
-    await setMinter(accounts[2], 200);
-    await blacklist(accounts[2]);
-    try {
-      await token.mint(accounts[0], 100, { from: accounts[2] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance0 = await token.balanceOf(accounts[0]);
-      assert.equal(balance0, 0);
-    }
+    await setMinter(token, accounts[2], 200);
+    await blacklist(token, accounts[2]);
+
+    await expectRevert(token.mint(accounts[0], 100, { from: accounts[2] }));
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 0);
   });
 
   it('should fail to mint to blacklisted address', async function () {
-    await blacklist(accounts[3]);
-    try {
-      await mint(accounts[3], 100);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance0 = await token.balanceOf(accounts[0]);
-      assert.equal(balance0, 0);
-    }
+    await blacklist(token, accounts[3]);
+
+    await expectRevert(mint(token, accounts[3], 100, minterAccount))
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 0);
   });
 
   it('should fail to mint from a non-minter call', async function () {
-    await mint(accounts[0], 400);
-    try {
-      await token.mint(accounts[0], 100, { from: accounts[0] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance0 = await token.balanceOf(accounts[0]);
-      assert.equal(balance0, 400);
-    }
+    await mint(token, accounts[0], 400, minterAccount);
+
+    await expectRevert(token.mint(accounts[0], 100, { from: accounts[0] }))
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 400);
   });
 
   it('should complete transferFrom', async function () {
-    await sampleTransferFrom();
+    await sampleTransferFrom(token, owner, feeAccount, minterAccount);
   });
 
   it('should approve', async function () {
-    await approve(accounts[3], 100, accounts[2]);
+    await approve(token, accounts[3], 100, accounts[2]);
     let allowance = await token.allowance(accounts[2], accounts[3]);
     assert.isTrue(new BigNumber(allowance).equals(new BigNumber(100)));
   });
 
   it('should complete sample transfer', async function () {
-    await sampleTransfer();
+    await sampleTransfer(token, owner, feeAccount, minterAccount);
   });
 
   it('should complete transfer from non-owner', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     let transfer = await token.transfer(accounts[3], 1000, { from: accounts[2] });
 
     checkTransferEvents(transfer, accounts[2], accounts[3], 1000);
@@ -196,7 +150,7 @@ contract('FiatToken', function (accounts) {
   it('should set allowance and balances before and after approved transfer', async function () {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-    await mint(accounts[0], 500);
+    await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
@@ -214,61 +168,47 @@ contract('FiatToken', function (accounts) {
   it('should fail on unauthorized approved transfer and not change balances', async function () {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-    await mint(accounts[0], 500);
+    await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
 
-    try {
-      await token.transferFrom(accounts[0], accounts[3], 50, { from: accounts[4] });
-      assert.fail()
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance0 = await token.balanceOf(accounts[0]);
-      assert.equal(balance0, 500);
-      let balance3 = await token.balanceOf(accounts[3]);
-      assert.equal(balance3, 0);
-    }
+    await expectRevert(token.transferFrom(accounts[0], accounts[3], 50, { from: accounts[4] }));
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 500);
+    let balance3 = await token.balanceOf(accounts[3]);
+    assert.equal(balance3, 0); 
   });
 
   it('should fail on invalid approved transfer amount and not change balances', async function () {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-    await mint(accounts[0], 500);
+    await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
 
-    try {
-      await token.transferFrom(accounts[0], accounts[3], 450, { from: accounts[3] });
-      assert.fail()
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance0 = await token.balanceOf(accounts[0]);
-      assert.equal(balance0, 500);
-      let balance3 = await token.balanceOf(accounts[3]);
-      assert.equal(balance3, 0);
-    }
+    await expectRevert(token.transferFrom(accounts[0], accounts[3], 450, { from: accounts[3] }));
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 500);
+    let balance3 = await token.balanceOf(accounts[3]);
+    assert.equal(balance3, 0);
+
   });
 
   it('should fail on invalid transfer recipient (zero-account) and not change balances', async function () {
 
-    await mint(accounts[0], 500);
+    await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
 
-    try {
-      await token.transferFrom(accounts[0], 0, 50, { from: accounts[3] });
-      assert.fail()
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance0 = await token.balanceOf(accounts[0]);
-      assert.equal(balance0, 500);
-    }
+    await expectRevert(token.transferFrom(accounts[0], 0, 50, { from: accounts[3] }));
+
+    let balance0 = await token.balanceOf(accounts[0]);
+    assert.equal(balance0, 500);
   });
 
   it('should test consistency of transfer(x) and approve(x) + transferFrom(x)', async function () {
@@ -276,7 +216,7 @@ contract('FiatToken', function (accounts) {
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
     let transferAmount = 650;
     let totalAmount = transferAmount;
-    await mint(accounts[0], totalAmount);
+    await mint(token, accounts[0], totalAmount, minterAccount);
 
     let transfer = await token.transfer(accounts[3], transferAmount);
     checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount);
@@ -288,7 +228,7 @@ contract('FiatToken', function (accounts) {
 
     await token.allowance.call(accounts[1], accounts[4]);
     assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-    await mint(accounts[1], totalAmount);
+    await mint(token, accounts[1], totalAmount, minterAccount);
 
     await token.approve(accounts[4], transferAmount, { from: accounts[1] });
     allowed = await token.allowance.call(accounts[1], accounts[4]);
@@ -305,235 +245,166 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should pause and should not be able to transfer', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     assert.equal(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    try {
-      await sampleTransferFrom();
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await expectRevert(sampleTransferFrom(token, owner, feeAccount, minterAccount));
   });
 
   it('should pause and should not be able to transfer, then unpause and be able to transfer', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     assert.equal(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    try {
-      await sampleTransferFrom();
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await expectRevert(sampleTransferFrom(token, owner, feeAccount, minterAccount));
 
     await token.unpause({ from: pauserAccount });
     assert.equal(await token.paused.call(), false);
-    await sampleTransferFrom();
+    await sampleTransferFrom(token, owner, feeAccount, minterAccount);
   });
 
   it('should pause and should not be able to transferFrom', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     assert.equal(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    try {
-      await sampleTransfer();
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await expectRevert(sampleTransfer(token, owner, feeAccount, minterAccount));
   });
 
   it('should pause and should not be able to approve', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     assert.equal(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    try {
-      await approve(accounts[2], 50, accounts[3]);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await expectRevert(approve(token, accounts[2], 50, accounts[3]));
   });
 
   it('should pause and should not be able to mint', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     assert.equal(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    try {
-      await mint(accounts[2], 1900);
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await expectRevert(mint(token, accounts[2], 1900, minterAccount));
   });
 
   it('should try to pause with non-pauser and fail to pause', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     assert.equal(await token.paused.call(), false);
-    try {
-      await token.pause({ from: accounts[0] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      assert.equal(await token.paused.call(), false);
-    }
+
+    await expectRevert(token.pause({ from: accounts[0] }));
+
+    assert.equal(await token.paused.call(), false);
   });
 
   it('should try to pause with non-pauser and fail to pause', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     assert.equal(await token.paused.call(), false);
-    try {
-      await token.pause({ from: accounts[0] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      assert.equal(await token.paused.call(), false);
-    }
+
+    await expectRevert(token.pause({ from: accounts[0] }));
+
+    assert.equal(await token.paused.call(), false);
   });
 
   it('should approve and fail to transfer more than balance', async function () {
-    await mint(accounts[2], 100);
+    await mint(token, accounts[2], 100, minterAccount);
     await token.approve(accounts[1], 600, { from: accounts[2] });
-    try {
-      await token.transferFrom(accounts[2], accounts[1], 600, { from: accounts[1] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(100)));
-    }
+
+    await expectRevert(token.transferFrom(accounts[2], accounts[1], 600, { from: accounts[1] }));
+
+    let balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(100)));
   });
 
   it('should blacklist and make transfer impossible', async function () {
-    await mint(accounts[2], 1900);
-    await blacklist(accounts[2]);
-    try {
-      await token.transfer(accounts[3], 600, { from: accounts[2] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance = await token.balanceOf(accounts[2]);
-      assert.equal(balance, 1900);
-    }
+    await mint(token, accounts[2], 1900, minterAccount);
+    await blacklist(token, accounts[2]);
+
+    await expectRevert(token.transfer(accounts[3], 600, { from: accounts[2] }));
+
+    let balance = await token.balanceOf(accounts[2]);
+    assert.equal(balance, 1900);
   });
 
   it('should blacklist recipient and make transfer to recipient impossible', async function () {
-    await mint(accounts[2], 1900);
-    await mint(accounts[9], 1600);
-    await blacklist(accounts[2]);
-    try {
-      await token.transfer(accounts[2], 600, { from: accounts[9] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
-      balance = await token.balanceOf(accounts[9]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1600)));
-    }
+    await mint(token, accounts[2], 1900, minterAccount);
+    await mint(token, accounts[9], 1600, minterAccount);
+    await blacklist(token, accounts[2]);
+
+    await expectRevert(token.transfer(accounts[2], 600, { from: accounts[9] }));
+
+    let balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
+    balance = await token.balanceOf(accounts[9]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1600)));
   });
 
   it('should blacklist and make transferFrom impossible with the approved transferer', async function () {
     let isBlacklistedBefore = await token.isAccountBlacklisted(accounts[2])
     assert.equal(isBlacklistedBefore, false);
 
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     await token.approve(accounts[1], 600, { from: accounts[2] });
-    await blacklist(accounts[2]);
-    try {
-      await token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
-    }
+    await blacklist(token, accounts[2]);
+
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] }));
+
+    let balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
 
     let isBlacklistedAfter = await token.isAccountBlacklisted(accounts[2]);
     assert.equal(isBlacklistedAfter, true);
   });
 
   it('should make transferFrom impossible with the approved and blacklisted transferer', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     await token.approve(accounts[1], 600, { from: accounts[2] });
-    await blacklist(accounts[1]);
-    try {
-      await token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
-    }
+    await blacklist(token, accounts[1]);
+
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] }));
+
+    let balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
+    
   });
 
   it('should blacklist recipient and make transfer to recipient using transferFrom impossible', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     await token.approve(accounts[3], 600, { from: accounts[2] });
-    await blacklist(accounts[3]);
-    try {
-      await token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[2] });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
-    }
+    await blacklist(token, accounts[3]);
+
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[2] }));
+
+    let balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
   });
 
   it('should blacklist and make approve impossible', async function () {
-    await mint(accounts[1], 1900);
-    await blacklist(accounts[1]);
-    try {
-      await token.approve(accounts[2], 600, { from: accounts[1] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let approval = await token.allowance(accounts[1], accounts[2]);
-      assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
-    }
+    await mint(token, accounts[1], 1900, minterAccount);
+    await blacklist(token, accounts[1]);
+
+    await expectRevert(token.approve(accounts[2], 600, { from: accounts[1] }));
+    let approval = await token.allowance(accounts[1], accounts[2]);
+    assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
   });
 
   it('should make giving approval to blacklisted account impossible', async function () {
-    await mint(accounts[2], 1900);
-    await blacklist(accounts[1]);
-    try {
-      await token.approve(accounts[1], 600, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let approval = await token.allowance(accounts[2], accounts[1]);
-      assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
-    }
+    await mint(token, accounts[2], 1900, minterAccount);
+    await blacklist(token, accounts[1]);
+
+    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
+
+    let approval = await token.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
   });
 
   it('should approve on old contract', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -553,7 +424,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should fail to approve on old contract when new contract is paused', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -567,19 +438,14 @@ contract('FiatToken', function (accounts) {
     assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
     await tokenNew.pause({from: pauserAccount});
 
-    try {
-      await token.approve(accounts[1], 600, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-      assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
-    }
+    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
+
+    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
   });
 
   it('should fail to approve on old contract when from account is blacklisted', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -593,19 +459,14 @@ contract('FiatToken', function (accounts) {
     assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
     await tokenNew.blacklist(accounts[2], {from: blacklisterAccount});
 
-    try {
-      await token.approve(accounts[1], 600, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-      assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
-    }
+    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
+
+    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
   });
 
   it('should fail to approve on old contract when spender account is blacklisted', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -619,19 +480,14 @@ contract('FiatToken', function (accounts) {
     assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
     await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
 
-    try {
-      await token.approve(accounts[1], 600, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-      assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
-    }
+    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
+
+    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
   });
 
   it('should fail to approve using priorContract method when caller is not prior contract', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -644,19 +500,14 @@ contract('FiatToken', function (accounts) {
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
 
-    try {
-      await tokenNew.approveViaPriorContract(accounts[2], accounts[1], 600, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-      assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
-    }
+    await expectRevert(tokenNew.approveViaPriorContract(accounts[2], accounts[1], 600, { from: accounts[2] }));
+
+    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BigNumber(approval).equals(new BigNumber(0)));
   });
 
   it('should transfer on old contract', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -679,7 +530,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should fail to transfer on old contract when new contract is paused', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -694,22 +545,17 @@ contract('FiatToken', function (accounts) {
 
     await tokenNew.pause({from: pauserAccount});
 
-    try {
-      await token.transfer(accounts[1], 200, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
-    }
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
   });
 
   it('should fail to transfer on old contract when from account is blacklisted', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -724,22 +570,17 @@ contract('FiatToken', function (accounts) {
 
     await tokenNew.blacklist(accounts[2], {from: blacklisterAccount});
 
-    try {
-      await token.transfer(accounts[1], 200, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
-    }
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
   });
 
   it('should fail to transfer on old contract when to account is blacklisted', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -754,22 +595,17 @@ contract('FiatToken', function (accounts) {
 
     await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
 
-    try {
-      await token.transfer(accounts[1], 200, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
-    }
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
   });
 
   it('should fail to transfer using priorContract method when caller is not prior contract', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -784,22 +620,17 @@ contract('FiatToken', function (accounts) {
 
     await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
 
-    try {
-      await tokenNew.transferViaPriorContract(accounts[2], accounts[1], 200, { from: accounts[2] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(tokenNew.transferViaPriorContract(accounts[2], accounts[1], 200, { from: accounts[2] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
-    }
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
   });
 
     it('should transferFrom on old contract', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -825,7 +656,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should fail to transferFrom on old contract when new contract is paused', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -840,25 +671,20 @@ contract('FiatToken', function (accounts) {
     await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
     await tokenNew.pause({from: pauserAccount});
 
-    try {
-      await token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
 
-      let balanceThird = await tokenNew.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
-    }
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+
+    let balanceThird = await tokenNew.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
   });
 
   it('should fail to transferFrom on old contract when from account is blacklisted', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -873,25 +699,20 @@ contract('FiatToken', function (accounts) {
     await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
     await tokenNew.blacklist(accounts[2], {from: blacklisterAccount});
 
-    try {
-      await token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
 
-      let balanceThird = await tokenNew.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
-    }
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+
+    let balanceThird = await tokenNew.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
   });
 
   it('should fail to transfer on old contract when to account is blacklisted', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -906,25 +727,20 @@ contract('FiatToken', function (accounts) {
     await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
     await tokenNew.blacklist(accounts[3], {from: blacklisterAccount});
 
-    try {
-      await token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
 
-      let balanceThird = await tokenNew.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
-    }
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+
+    let balanceThird = await tokenNew.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
   });
 
   it('should fail to transfer on old contract when sender account is blacklisted', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -939,25 +755,20 @@ contract('FiatToken', function (accounts) {
     await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
     await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
 
-    try {
-      await token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
 
-      let balanceThird = await tokenNew.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
-    }
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+
+    let balanceThird = await tokenNew.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
   });
 
   it('should fail to transferFrom using priorContract method when caller is not prior contract', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -971,35 +782,30 @@ contract('FiatToken', function (accounts) {
     assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
     await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
 
-    try {
-      await tokenNew.transferFromViaPriorContract(accounts[1], accounts[2], accounts[3], 200, { from: accounts[1] });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
-    finally {
-      let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-      assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+    await expectRevert(tokenNew.transferFromViaPriorContract(accounts[1], accounts[2], accounts[3], 200, { from: accounts[1] }));
 
-      let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
 
-      let balanceThird = await tokenNew.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
-    }
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+
+    let balanceThird = await tokenNew.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
   });
 
   /* Comments out increase/decrease approval tests */
   /* 
 
   it('should increase approval', async function() {
-    await approve(accounts[3], 100, accounts[2]);
+    await approve(token, accounts[3], 100, accounts[2]);
     await increaseApproval(accounts[3], 50, accounts[2]);
     let allowance = await token.allowance(accounts[2], accounts[3]);
     assert.isTrue(new BigNumber(allowance).equals(new BigNumber(150)));
   });
 
   it('should decrease approval', async function() {
-    await approve(accounts[3], 100, accounts[2]);
+    await approve(token, accounts[3], 100, accounts[2]);
     await decreaseApproval(accounts[3], 50, accounts[2]);
     let allowance = await token.allowance(accounts[2], accounts[3]);
     assert.isTrue(new BigNumber(allowance).equals(new BigNumber(50)));
@@ -1014,7 +820,7 @@ contract('FiatToken', function (accounts) {
     let transferAmount = 650;
     let feeAmount = calculateFeeAmount(transferAmount);
     let totalAmount = transferAmount + feeAmount;
-    await mint(accounts[0], totalAmount);
+    await mint(token, accounts[0], totalAmount, minterAccount);
 
 
     await token.approveWithFee(accounts[3], transferAmount);
@@ -1043,7 +849,7 @@ contract('FiatToken', function (accounts) {
       let transferAmount = 650;
       let feeAmount = calculateFeeAmount(transferAmount);
       let totalAmount = transferAmount + feeAmount;
-      await mint(accounts[0], totalAmount);
+      await mint(token, accounts[0], totalAmount, minterAccount);
       console.log(totalAmount);
   
   
@@ -1068,7 +874,7 @@ contract('FiatToken', function (accounts) {
       transferAmount = 800;
       feeAmount = calculateFeeAmount(transferAmount);
       totalAmount = transferAmount + feeAmount;
-      await mint(accounts[0], totalAmount);
+      await mint(token, accounts[0], totalAmount, minterAccount);
   
       await token.increaseApprovalWithFee(accounts[3], transferAmount);
       allowed = await token.allowance.call(accounts[0], accounts[3]);
@@ -1101,8 +907,8 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should pause and should not be able to increaseApproval', async function () {
-      await mint(accounts[2], 1900);
-      await approve(accounts[2], 50, accounts[3]);
+      await mint(token, accounts[2], 1900, minterAccount);
+      await approve(token, accounts[2], 50, accounts[3]);
       assert.equal(await token.paused.call(), false);
       await token.pause({from: pauserAccount});
       assert.equal(await token.paused.call(), true);
@@ -1116,8 +922,8 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should pause and should not be able to decreaseApproval', async function () {
-      await mint(accounts[2], 1900);
-      await approve(accounts[2], 50, accounts[3]);
+      await mint(token, accounts[2], 1900, minterAccount);
+      await approve(token, accounts[2], 50, accounts[3]);
       assert.equal(await token.paused.call(), false);
       await token.pause({from: pauserAccount});
       assert.equal(await token.paused.call(), true);
@@ -1131,9 +937,9 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should blacklist and make increaseApproval impossible', async function() {
-      await mint(accounts[1], 1900);
+      await mint(token, accounts[1], 1900, minterAccount);
       await token.approve(accounts[2], 600, {from: accounts[1]});
-      await blacklist(accounts[1]);
+      await blacklist(token, accounts[1]);
       try {
         await token.increaseApproval(accounts[2], 600, {from: accounts[1]});
       } catch(e) {
@@ -1146,9 +952,9 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should make giving increaseApproval to blacklisted account impossible', async function() {
-      await mint(accounts[2], 1900);
+      await mint(token, accounts[2], 1900, minterAccount);
       await token.approve(accounts[1], 600, {from: accounts[2]});
-      await blacklist(accounts[1]);
+      await blacklist(token, accounts[1]);
       try {
         await token.increaseApproval(accounts[1], 600, {from: accounts[2]});
       } catch(e) {
@@ -1161,9 +967,9 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should blacklist and make decreaseApproval impossible', async function() {
-      await mint(accounts[1], 1900);
+      await mint(token, accounts[1], 1900, minterAccount);
       await token.approve(accounts[2], 600, {from: accounts[1]});
-      await blacklist(accounts[1]);
+      await blacklist(token, accounts[1]);
       try {
         await token.decreaseApproval(accounts[2], 600, {from: accounts[1]});
       } catch(e) {
@@ -1176,9 +982,9 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should make giving decreaseApproval to blacklisted account impossible', async function() {
-      await mint(accounts[2], 1900);
+      await mint(token, accounts[2], 1900, minterAccount);
       await token.approve(accounts[1], 600, {from: accounts[2]});
-      await blacklist(accounts[1]);
+      await blacklist(token, accounts[1]);
       try {
         await token.decreaseApproval(accounts[1], 600, {from: accounts[2]});
       } catch(e) {
@@ -1191,46 +997,39 @@ contract('FiatToken', function (accounts) {
     });*/
 
   it('should blacklist then unblacklist to make a transfer possible', async function () {
-    await mint(accounts[2], 1900);
-    await blacklist(accounts[2]);
-    await unBlacklist(accounts[2]);
+    await mint(token, accounts[2], 1900, minterAccount);
+    await blacklist(token, accounts[2]);
+    await unBlacklist(token, accounts[2]);
     await token.transfer(accounts[3], 600, { from: accounts[2] });
     let balance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300)));
     balance = await token.balanceOf(accounts[3]);
     assert.isTrue(new BigNumber(balance).equals(new BigNumber(600)));
-
   });
 
   it('should fail to blacklist with non-blacklister account', async function () {
-    await mint(accounts[2], 1900);
-    try {
-      await token.blacklist(accounts[2], { from: pauserAccount });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await token.transfer(accounts[3], 600, { from: accounts[2] });
-      let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300)));
-      balance = await token.balanceOf(accounts[3]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(600)));
-    }
+    await mint(token, accounts[2], 1900, minterAccount);
+
+    await expectRevert(token.blacklist(accounts[2], { from: pauserAccount }));
+
+    await token.transfer(accounts[3], 600, { from: accounts[2] });
+    let balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300)));
+    balance = await token.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(600)));
   });
 
   it('should fail to unblacklist when paused', async function () {
-    await mint(accounts[2], 1900);
+    await mint(token, accounts[2], 1900, minterAccount);
     await token.blacklist(accounts[2], { from: blacklisterAccount });
     await token.unBlacklist(accounts[2], { from: blacklisterAccount });
     await token.blacklist(accounts[2], { from: blacklisterAccount });
     await token.pause({ from: pauserAccount });
-    try {
-      await token.unBlacklist(accounts[2], { from: blacklisterAccount });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance = await token.balanceOf(accounts[2]);
-      assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
-    }
+
+    await expectRevert(token.unBlacklist(accounts[2], { from: blacklisterAccount }));
+
+    let balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balance).equals(new BigNumber(1900)));
   });
 
 
@@ -1263,18 +1062,15 @@ contract('FiatToken', function (accounts) {
     let update = await token.removeMinter(minterAccount, { from: masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterRemoved');
     assert.equal(update.logs[0].args.oldMinter, minterAccount);
-    update = await setMinter(accounts[3], 10000, { from: masterMinterAccount });
+    update = await setMinter(token, accounts[3], 10000, { from: masterMinterAccount });
     await token.mint(accounts[1], 100, { from: accounts[3] });
-    try {
-      await token.mint(accounts[1], 200, { from: minterAccount });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let isMinter = await token.isAccountMinter(minterAccount);
-      assert.equal(isMinter, false);
-      let balance = await token.balanceOf(accounts[1]);
-      assert.equal(balance, 100);
-    }
+
+    await expectRevert(token.mint(accounts[1], 200, { from: minterAccount }));
+
+    let isMinter = await token.isAccountMinter(minterAccount);
+    assert.equal(isMinter, false);
+    let balance = await token.balanceOf(accounts[1]);
+    assert.equal(balance, 100);
   });
 
   it('should remove a minter even if the contract is paused', async function () {
@@ -1291,14 +1087,10 @@ contract('FiatToken', function (accounts) {
     let minterAllowanceBefore = await token.minterAllowance(minterAccount)
     assert.equal(minterAllowanceBefore, 0);
 
-    try {
-      update = await token.configureMinter(minterAccount, 100, { from: roleAddressChangerAccount });
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let minterAllowanceAfter = await token.minterAllowance(minterAccount)
-      assert.equal(minterAllowanceAfter, 0);
-    }
+    await expectRevert(token.configureMinter(minterAccount, 100, { from: roleAddressChangerAccount }));
+
+    let minterAllowanceAfter = await token.minterAllowance(minterAccount)
+    assert.equal(minterAllowanceAfter, 0);
   });
 
   it('should have correct name', async function () {
@@ -1348,27 +1140,17 @@ contract('FiatToken', function (accounts) {
     assert.equal(totalSupply, 100);
   });
 
-  it('should fail to setAccess from an address which has not been given access', async function () {
-    let testStorage = await EternalStorage.new();
-    let illegalSetter = accounts[3];
-
-    try {
-      await testStorage.setAccess(illegalSetter, true, { from: illegalSetter });
-      checkFailureIsExpected(e);
-    } catch (e) { }
-  });
-
   it('should mint and burn tokens', async function () {
     let burnerAddress = accounts[3];
     let amount = 500;
-    await setMinter(burnerAddress, amount);
+    await setMinter(token, burnerAddress, amount);
     let totalSupply = await token.totalSupply();
     let minterBalance = await token.balanceOf(burnerAddress);
     assert.isTrue(new BigNumber(totalSupply).equals(new BigNumber(0)));
     assert.isTrue(new BigNumber(minterBalance).equals(new BigNumber(0)));
 
     // mint tokens to burnerAddress
-    await mint(burnerAddress, amount);
+    await mint(token, burnerAddress, amount, minterAccount);
     let totalSupply1 = await token.totalSupply();
     let minterBalance1 = await token.balanceOf(burnerAddress);
     assert.isTrue(new BigNumber(totalSupply1).equals(new BigNumber(totalSupply).plus(new BigNumber(amount))));
@@ -1387,41 +1169,28 @@ contract('FiatToken', function (accounts) {
   it('should try to burn tokens from a non-minter and fail', async function () {
     let burnerAddress = accounts[3];
     let amount = 1000;
-    try {
-      await token.burn(amount, { from: burnerAddress });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+
+    await expectRevert(token.burn(amount, { from: burnerAddress }));
   });
 
   it('should fail to burn from a blacklisted address', async function () {
     let burnerAddress = accounts[3];
-    await setMinter(burnerAddress, 200);
-    await mint(burnerAddress, 200);
-    await blacklist(burnerAddress);
-    try {
-      await token.burn(100, { from: burnerAddress });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance0 = await token.balanceOf(burnerAddress);
-      assert.equal(balance0, 200);
-    }
+    await setMinter(token, burnerAddress, 200);
+    await mint(token, burnerAddress, 200, minterAccount);
+    await blacklist(token, burnerAddress);
+
+    await expectRevert(token.burn(100, { from: burnerAddress }));
+    let balance0 = await token.balanceOf(burnerAddress);
+    assert.equal(balance0, 200);
   });
 
   it('should try to burn more tokens than balance and fail', async function () {
     let burnerAddress = accounts[3];
     let amount = 500;
-    await setMinter(burnerAddress, 250);
-    await mint(burnerAddress, 100);
-    try {
-      await token.burn(amount, { from: burnerAddress });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await setMinter(token, burnerAddress, 250);
+    await mint(token, burnerAddress, 100, minterAccount);
+
+    await expectRevert(token.burn(amount, { from: burnerAddress }));
   });
 
   it('should fail to upgrade to 0x0', async function () {
@@ -1436,20 +1205,14 @@ contract('FiatToken', function (accounts) {
     // make sure data contract owned by the token contract
     assert.equal(storageOwner, token.address);
 
-    try {
-      // upgrade to null
-      await token.upgrade("0x0", { from: upgraderAccount });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await expectRevert(token.upgrade("0x0", { from: upgraderAccount }));
 
     // make sure the data contracts owner is unchanged
     assert.equal(await storage.owner.call(), token.address);
   });
 
   it('should upgrade and preserve data', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -1467,8 +1230,8 @@ contract('FiatToken', function (accounts) {
     assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
   });
 
-  it('should upgrade and fail to upadate data from old contract', async function () {
-    await mint(accounts[2], 200);
+  it('should upgrade and fail to update data from old contract', async function () {
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -1485,21 +1248,23 @@ contract('FiatToken', function (accounts) {
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
 
-    try {
-      await token.mint(accounts[2], 200, { from: minterAccount });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      let balance1 = await tokenNew.balanceOf(accounts[2]);
-      assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
-      let balance2 = await token.balanceOf(accounts[2]);
-      assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
-    }
+    await expectRevert(token.mint(accounts[2], 200, { from: minterAccount }));
+
+    let balance1 = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance1)).equals(new BigNumber(400)));
+    let balance2 = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance2)).equals(new BigNumber(400)));
+
+    token.transfer(accounts[7], 200, { from: accounts[2] });
+
+    balance1 = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance1)).equals(new BigNumber(200)));
+    balance2 = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(balance2)).equals(new BigNumber(200)));
   });
 
   it('should fail to upgrade twice', async function () {
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -1516,14 +1281,9 @@ contract('FiatToken', function (accounts) {
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).equals(new BigNumber(400)));
 
-
     let tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
-    try {
-      await token.upgrade(tokenNewSecond.address, { from: upgraderAccount });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    
+    await expectRevert(token.upgrade(tokenNewSecond.address, { from: upgraderAccount }));
   });
 
   it('should updateRoleAddress for masterMinter', async function () {
@@ -1579,7 +1339,7 @@ contract('FiatToken', function (accounts) {
     assert.equal(upgrader, address1);
 
     //Test upgrade with new upgrader account
-    await mint(accounts[2], 200);
+    await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
     let dataContractAddress = await token.getDataContractAddress();
@@ -1601,15 +1361,11 @@ contract('FiatToken', function (accounts) {
     let upgrader = await token.upgrader();
     assert.equal(upgraderAccount, upgrader);
     let address1 = accounts[7];
-    try {
-      await token.updateUpgraderAddress(address1, { from: pauserAccount });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    } finally {
-      upgrader = await token.upgrader();
-      assert.equal(upgraderAccount, upgrader);
-    }
+
+    await expectRevert(token.updateUpgraderAddress(address1, { from: pauserAccount }));
+
+    upgrader = await token.upgrader();
+    assert.equal(upgraderAccount, upgrader);
   });
 
   it('should updateRoleAddress for roleAddressChanger', async function () {
@@ -1628,12 +1384,7 @@ contract('FiatToken', function (accounts) {
     let nonRoleAddressChanger = accounts[2];
     let address1 = accounts[7];
 
-    try {
-      await token.updateRoleAddress(address1, "masterMinter", { from: nonRoleAddressChanger });
-      assert.fail();
-    } catch (e) {
-      checkFailureIsExpected(e);
-    }
+    await expectRevert(token.updateRoleAddress(address1, "masterMinter", { from: nonRoleAddressChanger }));
   });
 
   /* Comments out tests with fees */
@@ -1642,11 +1393,11 @@ contract('FiatToken', function (accounts) {
     var feeBase = 1000;
   
     it('should set fees and complete transferFrom with fees', async function() {
-      await sampleTransferFrom();
+      await sampleTransferFrom(token, owner, feeAccount, minterAccount);
     });
   
     it('should set long-decimal fees and complete transferFrom with fees', async function() {
-      await sampleTransferFrom();
+      await sampleTransferFrom(token, owner, feeAccount, minterAccount);
     });
   
     it('should set fees and and fail to complete transferFrom with insufficient balance to cover fees', async function() {
@@ -1655,7 +1406,7 @@ contract('FiatToken', function (accounts) {
       await token.updateTransferFee(fee, feeBase);
       let allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-      await mint(accounts[0], 900);
+      await mint(token, accounts[0], 900, minterAccount);
       let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
       await token.approve(accounts[3], 895);
       allowed = await token.allowance.call(accounts[0], accounts[3]);
@@ -1676,14 +1427,14 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should set long-decimal fees and complete transfer with fees', async function() {
-      await sampleTransfer();  
+      await sampleTransfer(token, owner, feeAccount, minterAccount);  
     });
   
     it('should set long-decimal fees and complete transfer with fees from non-owner', async function() {
       fee = 123589;
       feeBase = 1000000;
       await token.updateTransferFee(fee, feeBase);
-      await mint(accounts[2], 1900);
+      await mint(token, accounts[2], 1900, minterAccount);
       let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
   
       let transfer = await token.transfer(accounts[3], 1000, {from: accounts[2]});
@@ -1702,7 +1453,7 @@ contract('FiatToken', function (accounts) {
     it('should set allowance and balances before and after approved transfer', async function() {
       let allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-      await mint(accounts[0], 500);
+      await mint(token, accounts[0], 500, minterAccount);
       await token.approve(accounts[3], 100);
       allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).equals(new BigNumber(100)));
@@ -1730,7 +1481,7 @@ contract('FiatToken', function (accounts) {
       let transferAmount = 650;
       let feeAmount = calculateFeeAmount(transferAmount);
       let totalAmount = transferAmount + feeAmount;
-      await mint(accounts[0], totalAmount);
+      await mint(token, accounts[0], totalAmount, minterAccount);
       let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
   
       let transfer = await token.transfer(accounts[3], transferAmount);
@@ -1745,7 +1496,7 @@ contract('FiatToken', function (accounts) {
   
       await token.allowance.call(accounts[1], accounts[4]);
       assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-      await mint(accounts[1], totalAmount);
+      await mint(token, accounts[1], totalAmount, minterAccount);
       initialBalanceFeeAccount = await token.balanceOf(feeAccount);
   
       await token.approve(accounts[4], transferAmount, {from: accounts[1]});
@@ -1765,9 +1516,9 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should blacklist then unblacklist to make a transfer possible', async function() {
-      await mint(accounts[2], 1900);
-      await blacklist(accounts[2]);
-      await unBlacklist(accounts[2]);
+      await mint(token, accounts[2], 1900, minterAccount);
+      await blacklist(token, accounts[2]);
+      await unBlacklist(token, accounts[2]);
       await token.transfer(accounts[3], 600, {from: accounts[2]});
       let balance = await token.balanceOf(accounts[2]);
       assert.isTrue(new BigNumber(balance).equals(new BigNumber(1300).minus(new BigNumber(fee)));
@@ -1776,7 +1527,7 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should fail to blacklist with non-blacklister account', async function() {
-      await mint(accounts[2], 1900);
+      await mint(token, accounts[2], 1900, minterAccount);
       try {
         await token.blacklist(accounts[2], {from: pauserAccount});
       } catch(e) {
