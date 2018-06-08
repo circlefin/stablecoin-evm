@@ -179,17 +179,22 @@ async function checkVariables(token, customVars) {
     console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
   }
 
-  // check each value in expectedState against contract state
-  assert.equal(await token.name.call(), expectedState['name']);
-  assert.equal(await token.symbol.call(), expectedState['symbol']);
-  assert.equal(await token.currency.call(), expectedState['currency']);
+  // check that variables were set by constructor correctly
+  let tokenName = await token.name.call();
+  tokenName.should.equal(expectedState['name']);
 
-  // CHAI:
-  let decimalsCount = await token.decimals.call();
-  decimalsCount.should.be.bignumber.equal(expectedState['decimals'])
+  let tokenSymbol = await token.symbol.call();
+  tokenSymbol.should.equal(expectedState['symbol']);
+
+  let tokenCurrency = await token.currency.call();
+  tokenCurrency.should.equal(expectedState['currency']);
+
+  let tokenDecimals = await token.decimals.call();
+  tokenDecimals.should.be.bignumber.equal(expectedState['decimals']); 
 
   assert.equal(await token.roleAddressChanger.call(), expectedState['roleAddressChanger']);
   assert.equal(await token.masterMinter.call(), expectedState['masterMinter']);
+  // TODO add the other roles
 
   //TODO contractStorage
 
