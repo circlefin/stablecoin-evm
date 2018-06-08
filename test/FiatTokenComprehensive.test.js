@@ -679,14 +679,12 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
 
     // change masterMinter role address
-    console.log("read to updateRoleAddress: " + arbitraryAccount + ", " + masterMinterRole + "," + roleAddressChangerRole)
     await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
     var result = [
       { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
     ]
     // verify it worked
-    console.log("verifying")
     await checkVariables(token, result);
   });
 
