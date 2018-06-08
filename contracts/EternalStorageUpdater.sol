@@ -60,7 +60,7 @@ contract EternalStorageUpdater {
   }
 
   function setMinter(address _account, bool _status) internal {
-    return contractStorage.setMinter(_account, _status);
+    contractStorage.setMinter(_account, _status);
   }
 
   function getMinterAllowed(address _minter) internal view returns (uint256) {

@@ -10,10 +10,10 @@ var bigHundred = new BigNumber(100);
 // TODO: test really big numbers
 
 // string role names to send to updateRoleAddress()  
-/*var masterMinterRole = 'masterMinter';
+var masterMinterRole = 'masterMinter';
 var blacklisterRole = 'blacklister';
 var pauserRole = 'pauser';
-var roleAddressChangerRole = 'roleAddressChanger';*/
+var roleAddressChangerRole = 'roleAddressChanger';
 
 const should = require('chai')
   .use(require('chai-as-promised'))
@@ -223,9 +223,9 @@ async function checkVariables(token, customVars) {
   let allowanceArbitaryUpgrader = await token.allowance(arbitraryAccount, upgraderAccount);
   allowanceArbitaryUpgrader.should.be.bignumber.equal(expectedState['allowance']['arbitraryAccount']['upgraderAccount']);
 
-/*
-  assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, upgraderAccount)).equals(expectedState['allowance']['arbitraryAccount']['upgraderAccount']));
-*/
+  /*
+    assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, upgraderAccount)).equals(expectedState['allowance']['arbitraryAccount']['upgraderAccount']));
+  */
 
   // TODO: write assert statements for the rest of the 42 combinations of possible spenders and destination addresses. (Will slow down tests.)
 }
@@ -422,8 +422,8 @@ module.exports = {
   approve: approve,
   redeem: redeem,
   expectRevert: expectRevert,
-  /*masterMinterRole: masterMinterRole,
+  masterMinterRole: masterMinterRole,
   blacklisterRole: blacklisterRole,
   pauserRole: pauserRole,
-  roleAddressChangerRole: roleAddressChangerRole*/
+  roleAddressChangerRole: roleAddressChangerRole
 };

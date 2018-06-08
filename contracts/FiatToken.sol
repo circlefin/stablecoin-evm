@@ -76,7 +76,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
   */
-  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted(_to) public returns (bool) {
+  function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklistedBoth(msg.sender, _to) public returns (bool) {
     require(_to != address(0));
 
 
@@ -143,12 +143,14 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @dev Adds blacklisted check to approve
    * @return True if the operation was successful.
   */
-  function approve(address _spender, uint256 _value) whenNotPaused notBlacklisted(_spender) public returns (bool) {
+  function approve(address _spender, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _spender) public returns (bool) {
     if (isUpgraded()) {
-      return UpgradedContract(upgradedAddress).approve(_spender, _value);
+      return UpgradedContract(upgradedAddress).approveViaPriorContract(msg.sender, _spender, _value);
     }
+    
     setAllowed(msg.sender, _spender, _value);
     emit Approval(msg.sender, _spender, _value);
+    return true;
   }
 
   /**
@@ -159,9 +161,9 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _value uint256 the amount of tokens to be transferred
    * @return bool success
   */
-  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted(_from) public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _from) public returns (bool) {
     if (isUpgraded()) {
-      return UpgradedContract(upgradedAddress).transferFrom(_from, _to, _value);
+      return UpgradedContract(upgradedAddress).transferFromViaPriorContract(msg.sender, _from, _to, _value);
     }
 
     require(isBlacklisted(_to) == false);
@@ -182,11 +184,10 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _value The amount to be transferred.
    * @return bool success
   */
-  function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted(_to) public returns (bool) {
+  function transfer(address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _to) public returns (bool) {
     if (isUpgraded()) {
-      return UpgradedContract(upgradedAddress).transfer(_to, _value);
+      return UpgradedContract(upgradedAddress).transferViaPriorContract(msg.sender, _to, _value);
     }
-
 
     doTransfer(msg.sender, _to, _value);
     return true;
@@ -199,7 +200,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
   */
-  function doTransfer(address _from, address _to, uint256 _value) internal {
+  function doTransfer(address _from, address _to, uint256 _value) private {
     require(_to != address(0));
 
     uint256 balance;
@@ -249,11 +250,11 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
 
   /**
    * @dev allows a minter to burn some of its own tokens
-   * Validates that caller is a minter and that
+   * Validates that caller is a minter and that sender is not blacklisted
    * amount is less than or equal to the minter's account balance
    * @param _amount uint256 the amount of tokens to be burned
   */
-  function burn(uint256 _amount) whenNotPaused onlyMinters senderNotBlacklisted public {
+  function burn(uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) public {
     uint256 balance = getBalance(msg.sender);
     require(balance >= _amount);
 
