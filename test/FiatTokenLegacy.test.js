@@ -794,6 +794,156 @@ contract('FiatToken', function (accounts) {
     assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
   });
 
+  it('should fail to approve using priorContract when disablePriorContract has been called', async function () {
+    await mint(token, accounts[2], 200, minterAccount);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, { from: upgraderAccount });
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    await tokenNew.disablePriorContract({from: pauserAccount});
+    
+    await expectRevert(token.approve(accounts[1], 200, { from: accounts[2] }));
+
+    let allowance = await tokenNew.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BigNumber(allowance).equals(new BigNumber(0)));
+  });
+
+  it('should fail to transfer using priorContract when disablePriorContract has been called', async function () {
+    await mint(token, accounts[2], 200, minterAccount);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, { from: upgraderAccount });
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    await tokenNew.disablePriorContract({from: pauserAccount});
+    
+    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
+
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+  });
+
+  it('should fail to transferFrom using priorContract when disablePriorContract has been called', async function () {
+    await mint(token, accounts[2], 200, minterAccount);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, { from: upgraderAccount });
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
+    await tokenNew.disablePriorContract({from: pauserAccount});
+
+    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
+
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(200)));
+
+    let balanceThird = await tokenNew.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(0)));
+  });
+
+
+ it('should approve using priorContract when disablePriorContract is called with non-pauser', async function () {
+    await mint(token, accounts[2], 200, minterAccount);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, { from: upgraderAccount });
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    await expectRevert(tokenNew.disablePriorContract({from: minterAccount}));
+    
+    token.approve(accounts[1], 200, { from: accounts[2] });
+
+    let allowance = await tokenNew.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BigNumber(allowance).equals(new BigNumber(200)));
+  });
+
+  it('should transfer using priorContract when disablePriorContract is called with non-pauser', async function () {
+    await mint(token, accounts[2], 200, minterAccount);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, { from: upgraderAccount });
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    await expectRevert(tokenNew.disablePriorContract({from: minterAccount}));
+    
+    token.transfer(accounts[1], 200, { from: accounts[2] });
+
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(200)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(0)));
+  });
+
+  it('should transferFrom using priorContract when disablePriorContract has been called with non-pauser account', async function () {
+    await mint(token, accounts[2], 200, minterAccount);
+    let initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(initialBalance)).equals(new BigNumber(200)));
+    let dataContractAddress = await token.getDataContractAddress();
+    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
+
+    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
+    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+
+    await token.upgrade(tokenNew.address, { from: upgraderAccount });
+    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue((new BigNumber(upgradedBalance)).equals(new BigNumber(200)));
+    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
+    await expectRevert(tokenNew.disablePriorContract({from: minterAccount}));
+
+    token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
+
+    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
+    assert.isTrue(new BigNumber(balanceFirst).equals(new BigNumber(0)));
+
+    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
+    assert.isTrue(new BigNumber(balanceSecond).equals(new BigNumber(0)));
+
+    let balanceThird = await tokenNew.balanceOf(accounts[3]);
+    assert.isTrue(new BigNumber(balanceThird).equals(new BigNumber(200)));
+  });
+
+
+
+
   /* Comments out increase/decrease approval tests */
   /* 
 

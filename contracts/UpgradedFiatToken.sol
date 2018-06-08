@@ -24,6 +24,14 @@ contract UpgradedFiatToken is FiatToken, UpgradedContract {
     _;
   }
 
+  /**   
+   * @dev Disable forwarding of prior contract's ERC20 functions
+   * Validates that only the pauser may call the function
+  */
+  function disablePriorContract() public onlyPauser {
+    priorContractAddress = address(0);
+  }
+
   /**
    * @dev Approve an address as a spender
    * @param _spender address The address approve
