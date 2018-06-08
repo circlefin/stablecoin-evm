@@ -10,10 +10,10 @@ var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
 var expectRevert = tokenUtils.expectRevert;
-/*var masterMinterRole = tokenUtils.masterMinterRole;
-var blacklisterRole = tokensUtils.blacklisterRole;
-var pauserRole = tokensUtils.pauserRole;
-var roleAddressChangerRole = tokensUtils.roleAddressChangerRole;*/
+var masterMinterRole = tokenUtils.masterMinterRole;
+var blacklisterRole = tokenUtils.blacklisterRole;
+var pauserRole = tokenUtils.pauserRole;
+var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
 
@@ -667,6 +667,278 @@ contract('FiatToken', function (accounts) {
 
     // state should be unchanged
     await checkVariables(token, setup)
+  });
+
+  it('updateRoleAddress masterMinter', async function () {
+    // initial
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
+    ]
+    assert.notEqual(masterMinterAccount, arbitraryAccount)
+    await checkVariables(token, setup);
+
+    // change masterMinter role address
+    console.log("read to updateRoleAddress: " + arbitraryAccount + ", " + masterMinterRole + "," + roleAddressChangerRole)
+    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
+    ]
+    // verify it worked
+    console.log("verifying")
+    await checkVariables(token, result);
+  });
+
+  it('updateRoleAddress blacklister', async function () {
+    // initial
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'blacklister', 'expectedValue': blacklisterAccount },
+    ]
+    assert.notEqual(blacklisterAccount, arbitraryAccount)
+    await checkVariables(token, setup);
+
+    // change masterMinter role address
+    await token.updateRoleAddress(arbitraryAccount, blacklisterRole, { from: roleAddressChangerAccount });
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
+    ]
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('updateRoleAddress pauser', async function () {
+    // initial
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'pauser', 'expectedValue': pauserAccount },
+    ]
+    assert.notEqual(pauserAccount, arbitraryAccount)
+    await checkVariables(token, setup);
+
+    // change masterMinter role address
+    await token.updateRoleAddress(arbitraryAccount, pauserRole, { from: roleAddressChangerAccount });
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
+    ]
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('updateRoleAddress roleAddressChanger', async function () {
+    // initial
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount }
+    ]
+    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
+    await checkVariables(token, setup);
+
+    // change masterMinter role address
+    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
+    ]
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  // while paused
+  it('updateRoleAddress while paused', async function () {
+    // initial
+    await token.pause({ from: pauserAccount });
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
+    await checkVariables(token, setup);
+
+    // change masterMinter role address
+    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
+    ]
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('updateRoleAddress old roleAddressChanger disabled', async function () {
+    // initial
+    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
+    ]
+    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
+    assert.notEqual(masterMinterAccount, arbitraryAccount);
+    await checkVariables(token, setup);
+
+    // try change roleAddressChanger role address
+    await expectRevert(token.updateRoleAddress(masterMinterAccount, roleAddressChangerRole, { from: roleAddressChangerAccount }))
+
+    // verify it no changes
+    await checkVariables(token, setup);
+  });
+
+  it('updateRoleAddress new roleAddressChanger can update', async function () {
+    // switch roleAddressChanger
+    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount }
+    ]
+    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
+    assert.notEqual(masterMinterAccount, arbitraryAccount)
+    await checkVariables(token, setup);
+
+    // arbitraryAccount will try to make himself masterMinter
+    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: arbitraryAccount });
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
+    ]
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  // fake role
+  it('updateRoleAddress fake role', async function () {
+    // switch roleAddressChanger
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+    ]
+    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
+    await checkVariables(token, setup);
+
+    // Try to send fake role. Should not throw.
+    await token.updateRoleAddress(arbitraryAccount, 'fakeRoleName', { from: roleAddressChangerAccount });
+
+    // verify nothing changed
+    await checkVariables(token, setup);
+  });
+
+  it('updateRoleAddress user is 0x00', async function () {
+    let bigZero = 0x0000000000000000000000000000000000000000;
+    let smallZero = 0x00;
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
+      { 'variable': 'pauser', 'expectedValue': pauserAccount },
+    ]
+    assert.notEqual(bigZero, masterMinterAccount)
+    assert.notEqual(smallZero, pauserAccount)
+    await checkVariables(token, setup);
+
+    // Set masterMinter and pauser to zero-addresss
+    await token.updateRoleAddress(bigZero, masterMinterRole, { from: roleAddressChangerAccount });
+    await token.updateRoleAddress(smallZero, pauserRole, { from: roleAddressChangerAccount });
+
+    // verify updates to zero
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': bigZero },
+      { 'variable': 'pauser', 'expectedValue': smallZero }
+    ]
+    await checkVariables(token, result);
+  });
+
+  it('updateRoleAddress user is roleAddressChanger', async function () {
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount }
+    ]
+    await checkVariables(token, setup);
+
+    // Set roleAddressChanger to self
+    await token.updateRoleAddress(roleAddressChangerAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+
+    // verify no changes
+    await checkVariables(token, setup);
+  });
+
+  it('updateRoleAddress user is blacklisted', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ]
+    assert.notEqual(masterMinterAccount, arbitraryAccount);
+    await checkVariables(token, setup);
+
+    // updated masterMinter to blacklisted account
+    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+
+    // verify
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ]
+    await checkVariables(token, result);
+  });
+
+  it('updateRoleAddress roleAddressChanger is blacklisted', async function () {
+    await token.blacklist(roleAddressChangerAccount, { from: blacklisterAccount });
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
+      { 'variable': 'isAccountBlacklisted.roleAddressChangerAccount', 'expectedValue': true }
+    ]
+    assert.notEqual(masterMinterAccount, arbitraryAccount);
+    await checkVariables(token, setup);
+
+    // updated masterMinter to blacklisted account
+    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+
+    // verify
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.roleAddressChangerAccount', 'expectedValue': true }
+    ]
+    await checkVariables(token, result);
+  });
+
+  // bad sender
+  it('updateRoleAddress msg.sender is not roleAddressChanger', async function () {
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount }
+    ]
+    assert.notEqual(roleAddressChangerAccount, arbitraryAccount);
+    assert.notEqual(masterMinterAccount, arbitraryAccount);
+    await checkVariables(token, setup);
+
+    // try to update masterMinter
+    await expectRevert(token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: arbitraryAccount }));
+
+    // ensure nothing changed
+    await checkVariables(token, setup);
+  });
+
+  // while paused
+  it('updateRoleAddress while paused', async function () {
+    await token.pause({ from: pauserAccount });
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+    assert.notEqual(masterMinterAccount, arbitraryAccount);
+    await checkVariables(token, setup);
+
+    // updated masterMinter to blacklisted account
+    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+
+    // verify
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+    await checkVariables(token, result);
   });
 
 });
