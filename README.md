@@ -25,7 +25,7 @@ install chai
 ```npm install chai-as-promised```
 
 install babel modules to allow javascript function import/export
-npm install babel-polyfill
+```npm install babel-polyfill```
 ```npm install --save-dev babel-preset-stage-2```
 ```npm install --save-dev babel-cli babel-preset-es2015```
 ```npm install babel-preset-env```

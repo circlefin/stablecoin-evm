@@ -9,7 +9,7 @@ var bigZero = tokenUtils.bigZero;
 var BigNumber = require('bignumber.js');
 
 var checkVariables = tokenUtils.checkVariables;
-var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
+var expectRevert = tokenUtils.expectRevert;
 
 contract('FiatToken', function (accounts) {
   owner = accounts[0]
@@ -45,7 +45,10 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, []);
   });
 
-  it('should fail to mint when paused', async function () {    
+  it('should fail to mint when paused', async function () {
+
+    // await token.pause({from: pauserAccount});
+
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
@@ -53,26 +56,19 @@ contract('FiatToken', function (accounts) {
     ]
 
     await token.pause({from: pauserAccount});
+
+    await expectRevert(token.mint(arbitraryAccount, 50, {from: minterAccount}));
     
-    try {
-      await token.mint(arbitraryAccount, 50, {from: minterAccount});
-      assert.fail();
-      } catch(e) {
-        checkFailureIsExpected(e);
-      } finally {
-        await checkVariables(token, customVars);
-    }
+    await checkVariables(token, customVars);
+
   })
 
   it('should fail to mint when message sender is not a minter', async function () {
-    try {
-      await token.mint(arbitraryAccount, 50, {from: minterAccount});
-      assert.fail();
-      } catch(e) {
-        checkFailureIsExpected(e);
-      } finally {
-        await checkVariables(token, []);
-    }
+
+    await expectRevert(token.mint(arbitraryAccount, 50, {from: minterAccount}));
+
+    await checkVariables(token, []);
+
   })
 
   it('should fail to mint when message sender is blacklisted', async function () {
@@ -84,14 +80,9 @@ contract('FiatToken', function (accounts) {
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
 
-    try {
-      await token.mint(arbitraryAccount, 50, {from: minterAccount});
-      assert.fail();
-      } catch(e) {
-        checkFailureIsExpected(e);
-      } finally {
-        await checkVariables(token, customVars);
-    }
+    await expectRevert(token.mint(arbitraryAccount, 50, {from: minterAccount}));
+
+    await checkVariables(token, customVars);
 
   })
 
@@ -104,15 +95,9 @@ contract('FiatToken', function (accounts) {
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
 
-    try {
-      await token.mint(arbitraryAccount, 50, {from: minterAccount});
-      assert.fail();
-      } catch(e) {
-        checkFailureIsExpected(e);
-      } finally {
-        await checkVariables(token, customVars);
-    }
+    await expectRevert(token.mint(arbitraryAccount, 50, {from: minterAccount}));
 
+    await checkVariables(token, customVars);
   })
 
   it('should fail to mint when allowance of minter is less than amount', async function () {
@@ -122,14 +107,9 @@ contract('FiatToken', function (accounts) {
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
 
-    try {
-      await token.mint(arbitraryAccount, amount, {from: minterAccount});
-      assert.fail();
-      } catch(e) {
-        checkFailureIsExpected(e);
-      } finally {
-        await checkVariables(token, customVars);
-    }
+    await expectRevert(token.mint(arbitraryAccount, amount, {from: minterAccount}));
+
+    await checkVariables(token, customVars);
   })
 
   it('should fail to mint to 0x0 address', async function () {
@@ -140,34 +120,20 @@ contract('FiatToken', function (accounts) {
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
 
-    try {
-      await token.mint("0x0", amount, {from: minterAccount});
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await checkVariables(token, customVars);
-    }
+    await expectRevert(token.mint("0x0", amount, {from: minterAccount}));
 
-    try {
-      await token.mint("0x0000000000000000000000000000000000000000", amount, {from: minterAccount});
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await checkVariables(token, customVars);
-    }
+    await checkVariables(token, customVars);
 
-    try {
-      await token.mint("0x0000000000000000000000000000000000000000", amount, {from: minterAccount});
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await checkVariables(token, customVars);
-    }
+    await expectRevert(token.mint(0x0000000000000000000000000000000000000000, amount, {from: minterAccount}));
 
-  })
+    await checkVariables(token, customVars);
+
+    // TODO: figure out what this test is actually supposed to be
+    /*await expectRevert(token.mint("0x0000000000000000000000000000000000000000", amount, {from: minterAccount}));
+
+    await checkVariables(token, customVars);*/
+
+  });
 
   /*
     SUCCESSFUL APPROVE
@@ -182,43 +148,29 @@ contract('FiatToken', function (accounts) {
 
   })
 
+
   it('should fail to approve when spender is blacklisted', async function () {
     await token.blacklist(minterAccount, {from: blacklisterAccount});
 
-    try {
-      await token.approve(minterAccount, 100, {from: arbitraryAccount});
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await checkVariables(token, [])
-    }
+    await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
+
+    await checkVariables(token, []);
   })
 
   it('should fail to approve when msg.sender is blacklisted', async function () {
     await token.blacklist(arbitraryAccount, {from: blacklisterAccount});
 
-    try {
-      await token.approve(minterAccount, 100, {from: arbitraryAccount});
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await checkVariables(token, [])
-    }
+    await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
+
+    await checkVariables(token, []);
   })
 
   it('should fail to approve when contract is paused', async function () {
     await token.pause({from: pauserAccount});
 
-    try {
-      await token.approve(minterAccount, 100, {from: arbitraryAccount});
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await checkVariables(token, [])
-    }
+    await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
+
+    await checkVariables(token, []);
   })
 
   /*it('should fail to approve when contract is not owner', async function () {
@@ -295,7 +247,7 @@ contract('FiatToken', function (accounts) {
       await token.transferFrom(arbitraryAccount, "0x0", 50, {from: upgraderAccount})
       assert.fail();
     } catch(e) {
-      checkFailureIsExpected(e);
+      await expectRevert(e);
     } finally {
       await checkVariables(token, customVars)
     }
@@ -379,14 +331,9 @@ contract('FiatToken', function (accounts) {
       {'variable': 'paused', 'expectedValue': true}
     ]
 
-    try {
-      await token.transferFrom(arbitraryAccount, "0x0", 50, {from: upgraderAccount})
-      assert.fail();
-    } catch(e) {
-      checkFailureIsExpected(e);
-    } finally {
-      await checkVariables(token, customVars)
-    }
+    await expectRevert(token.transferFrom(arbitraryAccount, "0x0", 50, {from: upgraderAccount}));
+
+    await checkVariables(token, customVars);
   })
 
   /*it('should fail to transferFrom when contract is not owner', async function () {
