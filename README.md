@@ -8,8 +8,8 @@ Depends on truffle and testrpc for testing.
 install truffle:
 ```npm install -g truffle```
 
-install testrpc:
-```npm install -g ethereumjs-testrpc```
+install ganache-cli:
+```npm install -g ganache-cli```
 
 install project npm dependencies:
 ```npm install```
@@ -18,8 +18,8 @@ install submodules:
 ```git submodule update --init```
 
 # Testing
-testrpc must be running first
-```testrpc```
+ganache-cli (Ethereum RPC client) must be running first
+```ganache-cli --defaultBalanceEther 1000000```
 
 then run the tests via truffle:
 ```truffle test```
