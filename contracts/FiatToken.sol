@@ -150,7 +150,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     
     setAllowed(msg.sender, _spender, _value);
     emit Approval(msg.sender, _spender, _value);
-    return true
+    return true;
   }
 
   /**
