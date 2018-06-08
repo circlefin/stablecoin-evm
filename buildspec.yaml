@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install -g truffle@^4.1.8
+      - npm install
+  build:
+    commands:
+      - echo Build started on `date`
+      - mkdir -p build/logs
+      - truffle compile 2>&1 | tee build/logs/truffle-compile.log
+      - npm test 2>&1 | tee build/logs/test.log
+
+artifacts:
+  files:
+    - build/contracts/*
+    - build/logs/*.log
+    - coverage/**/*
+    

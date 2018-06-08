@@ -23,21 +23,24 @@ contract BlacklistableTokenByRole is PausableTokenByRole, EternalStorageUpdater 
   }
 
   /**
-   * @dev Throws if called by any account that is blacklisted, or if the address passed in is blacklisted
+   * @dev Throws if either argument account is blacklisted
+   * @param _secondAccount An account to check
    * @param _secondAccount An additional account to check
   */
-  modifier notBlacklisted(address _secondAccount) {
-    require(isAnyBlacklisted(msg.sender, _secondAccount) == false);
+  modifier notBlacklistedBoth(address _firstAccount, address _secondAccount) {
+    require(isAnyBlacklisted(_firstAccount, _secondAccount) == false);
     _;
   }
 
   /**
-   * @dev Throws if called by an account that is blacklisted
+   * @dev Throws if argument account is blacklisted
+   * @param _account An additional account to check
   */
-  modifier senderNotBlacklisted() {
-    require(isBlacklisted(msg.sender) == false);
+  modifier notBlacklisted(address _account) {
+    require(isBlacklisted(_account) == false);
     _;
   }
+
   /**
    * @dev Checks if account is blacklisted
    * @param _account The address to check

@@ -4,3 +4,5 @@ coverage/
 coverage.json
 package-lock.json
 .idea/
+#local codebuild results
+artifacts/
