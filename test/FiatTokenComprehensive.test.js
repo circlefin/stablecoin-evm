@@ -25,6 +25,7 @@ const should = require('chai')
 contract('FiatToken', function (accounts) {
   owner = accounts[0]
   arbitraryAccount = accounts[8];
+  arbitraryAccount2 = accounts[1];
   masterMinterAccount = accounts[9];
   minterAccount = accounts[7];
   pauserAccount = accounts[6];
@@ -937,6 +938,47 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'paused', 'expectedValue': true }
     ]
     await checkVariables(token, result);
+  });
+
+  // while upgraded
+  it('updateRoleAddress after upgrade', async function () {
+    // create new token with same DataConract but arbitraryAddress in all the roles
+    let dataContractAddress = await token.getDataContractAddress();
+    let newToken = await FiatToken.new(dataContractAddress,
+      name, symbol, currency, decimals, arbitraryAccount, arbitraryAccount, arbitraryAccount,
+      arbitraryAccount, arbitraryAccount);
+    var newTokenSetup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount },
+      { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
+      { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
+    ]
+    await checkVariables(newToken, newTokenSetup);
+
+    //upgrade the token contract
+    await token.upgrade(newToken.address, { from: upgraderAccount });
+    var setup = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+    assert.notEqual(masterMinterAccount, arbitraryAccount2);
+    await checkVariables(token, setup);
+
+    // updateRoleAddress
+    await token.updateRoleAddress(arbitraryAccount2, masterMinterRole, { from: roleAddressChangerAccount });
+
+    // verify
+    var result = [
+      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount2 },
+      { 'variable': 'paused', 'expectedValue': true }
+    ]
+
+    // check only old token has changed
+    await checkVariables(token, result);
+    await checkVariables(newToken, newTokenSetup);
   });
 
 });
