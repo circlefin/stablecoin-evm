@@ -168,7 +168,11 @@ async function checkVariables(token, customVars) {
   var i;
   for (i = 0; i < customVars.length; ++i) {
     if (_.has(expectedState, customVars[i].variable)) {
-      _.set(expectedState, customVars[i].variable, customVars[i].expectedValue);
+      if (expectedState[customVars[i].variable] == customVars[i].expectedValue) {
+        throw new Error("variable " + customVars[i].variable + " to test has same default state as expected state");
+      } else {
+        _.set(expectedState, customVars[i].variable, customVars[i].expectedValue);
+      }
     } else {
       // TODO: test the error 
       throw new Error("variable " + customVars[i].variable + " not found in expectedState");
