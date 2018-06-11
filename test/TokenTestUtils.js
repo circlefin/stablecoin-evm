@@ -15,6 +15,17 @@ var blacklisterRole = 'blacklister';
 var pauserRole = 'pauser';
 var roleAddressChangerRole = 'roleAddressChanger';
 
+var ownerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
+var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
+var upgraderAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+var roleAddressChangerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
+var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4]
+var arbitraryAccount2 = "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc"; // accounts[5]
+var masterMinterAccount = "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9"; // accounts[6]
+var minterAccount = "0x28a8746e75304c0780e011bed21c72cd78cd535e"; // accounts[7]
+var pauserAccount = "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e"; // accounts[8]
+var blacklisterAccount = "0x1df62f291b2e969fb0849d99d9ce41e2f137006e"; // accounts[9]
+
 const should = require('chai')
   .use(require('chai-as-promised'))
   .use(require('chai-bignumber')(BigNumber))
@@ -62,7 +73,7 @@ async function checkVariables(token, customVars) {
     'masterMinter': masterMinterAccount,
     // contractStorage is not deterministic for FiatTokenWithStorage
     //'contractStorage': storageAddress,
-    'owner': owner,
+    'ownerAccount': ownerAccount,
     'balances': {
       'arbitraryAccount': bigZero,
       'masterMinterAccount': bigZero,
@@ -183,17 +194,24 @@ async function checkVariables(token, customVars) {
     console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
   }
 
-  // check each value in expectedState against contract state
-  assert.equal(await token.name.call(), expectedState['name']);
-  assert.equal(await token.symbol.call(), expectedState['symbol']);
-  assert.equal(await token.currency.call(), expectedState['currency']);
+  // check that variables were set by constructor correctly
+  let tokenName = await token.name.call();
+  tokenName.should.equal(expectedState['name']);
 
-  // CHAI:
-  let decimalsCount = await token.decimals.call();
-  decimalsCount.should.be.bignumber.equal(expectedState['decimals'])
+  let tokenSymbol = await token.symbol.call();
+  tokenSymbol.should.equal(expectedState['symbol']);
+
+  let tokenCurrency = await token.currency.call();
+  tokenCurrency.should.equal(expectedState['currency']);
+
+  let tokenDecimals = await token.decimals.call();
+  tokenDecimals.should.be.bignumber.equal(expectedState['decimals']); 
+
+
 
   assert.equal(await token.roleAddressChanger.call(), expectedState['roleAddressChanger']);
   assert.equal(await token.masterMinter.call(), expectedState['masterMinter']);
+  // TODO add the other roles
 
   //TODO contractStorage
 
@@ -225,6 +243,8 @@ async function checkVariables(token, customVars) {
   /*
     assert.isTrue(new BigNumber(await token.allowance(arbitraryAccount, upgraderAccount)).equals(expectedState['allowance']['arbitraryAccount']['upgraderAccount']));
   */
+
+  // TODO: add missing assert statements. (isAccountMinter, minterAllowance, isAccountBlacklisted, etc.). Might exist in old version, or just rewrite
 
   // TODO: write assert statements for the rest of the 42 combinations of possible spenders and destination addresses. (Will slow down tests.)
 }
@@ -281,26 +301,26 @@ async function unBlacklist(token, account) {
   assert.equal(unblacklist.logs[0].args._account, account);
 }
 
-async function setLongDecimalFeesTransferWithFees(token, owner, arbitraryAccount) {
+async function setLongDecimalFeesTransferWithFees(token, ownerAccount, arbitraryAccount) {
   fee = 123589;
   feeBase = 1000000;
   await token.updateTransferFee(fee, feeBase);
-  let allowed = await token.allowance.call(owner, arbitraryAccount);
+  let allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(token, owner, 1900);
+  await mint(token, ownerAccount, 1900);
   let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
 
   await token.approve(arbitraryAccount, 1500);
-  allowed = await token.allowance.call(owner, arbitraryAccount);
+  allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(1500)));
 
-  let transfer = await token.transfer(arbitraryAccount, 1000, { from: owner });
+  let transfer = await token.transfer(arbitraryAccount, 1000, { from: ownerAccount });
 
   let feeAmount = calculateFeeAmount(1000);
-  checkTransferEvents(transfer, owner, arbitraryAccount, 1000, feeAmount);
+  checkTransferEvents(transfer, ownerAccount, arbitraryAccount, 1000, feeAmount);
 
 
-  let balance0 = await token.balanceOf(owner);
+  let balance0 = await token.balanceOf(ownerAccount);
   assert.equal(balance0, 1900 - 1000 - feeAmount);
   let balance3 = await token.balanceOf(arbitraryAccount);
   assert.equal(balance3, 1000);
@@ -308,43 +328,43 @@ async function setLongDecimalFeesTransferWithFees(token, owner, arbitraryAccount
   assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
 }
 
-async function sampleTransfer(token, owner, arbitraryAccount, minter) {
-  let allowed = await token.allowance.call(owner, arbitraryAccount);
+async function sampleTransfer(token, ownerAccount, arbitraryAccount, minter) {
+  let allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(token, owner, 1900, minter);
+  await mint(token, ownerAccount, 1900, minter);
 
   await token.approve(arbitraryAccount, 1500);
-  allowed = await token.allowance.call(owner, arbitraryAccount);
+  allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(1500)));
 
-  let transfer = await token.transfer(arbitraryAccount, 1000, { from: owner });
+  let transfer = await token.transfer(arbitraryAccount, 1000, { from: ownerAccount });
 
-  checkTransferEvents(transfer, owner, arbitraryAccount, 1000);
+  checkTransferEvents(transfer, ownerAccount, arbitraryAccount, 1000);
 
-  let balance0 = await token.balanceOf(owner);
+  let balance0 = await token.balanceOf(ownerAccount);
   assert.equal(balance0, 1900 - 1000);
   let balance3 = await token.balanceOf(arbitraryAccount);
   assert.equal(balance3, 1000);
 }
 
-async function transferFromWithFees(token, owner, arbitraryAccount, minter) {
+async function transferFromWithFees(token, ownerAccount, arbitraryAccount, minter) {
   fee = 1235;
   feeBase = 10000;
   await token.updateTransferFee(fee, feeBase);
-  let allowed = await token.allowance.call(owner, arbitraryAccount);
+  let allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(token, owner, 900, minter);
+  await mint(token, ownerAccount, 900, minter);
   let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
   await token.approve(arbitraryAccount, 634);
-  allowed = await token.allowance.call(owner, arbitraryAccount);
+  allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(634)));
 
-  transfer = await token.transferFrom(owner, arbitraryAccount, 534, { from: arbitraryAccount });
+  transfer = await token.transferFrom(ownerAccount, arbitraryAccount, 534, { from: arbitraryAccount });
 
   let feeAmount = calculateFeeAmount(534);
-  checkTransferEvents(transfer, owner, arbitraryAccount, 534, feeAmount);
+  checkTransferEvents(transfer, ownerAccount, arbitraryAccount, 534, feeAmount);
 
-  let balance0 = await token.balanceOf(owner);
+  let balance0 = await token.balanceOf(ownerAccount);
   assert.isTrue(new BigNumber(balance0).equals(new BigNumber(900).minus(new BigNumber(534)).minus(new BigNumber(feeAmount))));
   let balance3 = await token.balanceOf(arbitraryAccount);
   assert.isTrue(new BigNumber(balance3).equals(new BigNumber(534)));
@@ -352,19 +372,19 @@ async function transferFromWithFees(token, owner, arbitraryAccount, minter) {
   assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).equals(new BigNumber(feeAmount)));
 }
 
-async function sampleTransferFrom(token, owner, arbitraryAccount, minter) {
-  let allowed = await token.allowance.call(owner, arbitraryAccount); // TODO not this
+async function sampleTransferFrom(token, ownerAccount, arbitraryAccount, minter) {
+  let allowed = await token.allowance.call(ownerAccount, arbitraryAccount); // TODO not this
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(0)));
-  await mint(token, owner, 900, minter); // TODO maybe this
+  await mint(token, ownerAccount, 900, minter); // TODO maybe this
   await token.approve(arbitraryAccount, 634); // TODO not this
-  allowed = await token.allowance.call(owner, arbitraryAccount); // TODO not this
+  allowed = await token.allowance.call(ownerAccount, arbitraryAccount); // TODO not this
   assert.isTrue(new BigNumber(allowed).equals(new BigNumber(634)));
 
-  let transfer = await token.transferFrom(owner, arbitraryAccount, 534, { from: arbitraryAccount }); // TODO not this
+  let transfer = await token.transferFrom(ownerAccount, arbitraryAccount, 534, { from: arbitraryAccount }); // TODO not this
 
-  checkTransferEvents(transfer, owner, arbitraryAccount, 534);
+  checkTransferEvents(transfer, ownerAccount, arbitraryAccount, 534);
 
-  let balance0 = await token.balanceOf(owner);
+  let balance0 = await token.balanceOf(ownerAccount);
   assert.isTrue(new BigNumber(balance0).equals(new BigNumber(900).minus(new BigNumber(534))));
   let balance3 = await token.balanceOf(arbitraryAccount);
   assert.isTrue(new BigNumber(balance3).equals(new BigNumber(534)));
@@ -424,5 +444,15 @@ module.exports = {
   masterMinterRole: masterMinterRole,
   blacklisterRole: blacklisterRole,
   pauserRole: pauserRole,
-  roleAddressChangerRole: roleAddressChangerRole
+  roleAddressChangerRole: roleAddressChangerRole,
+  ownerAccount: ownerAccount,
+  arbitraryAccount: arbitraryAccount,
+  upgraderAccount: upgraderAccount,
+  roleAddressChangerAccount: roleAddressChangerAccount,
+  blacklisterAccount: blacklisterAccount,
+  arbitraryAccount2: arbitraryAccount2,
+  masterMinterAccount: masterMinterAccount,
+  minterAccount: minterAccount,
+  pauserAccount: pauserAccount,
+  blacklisterAccount: blacklisterAccount,
 };
