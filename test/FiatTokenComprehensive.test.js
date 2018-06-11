@@ -16,6 +16,16 @@ var pauserRole = tokenUtils.pauserRole;
 var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
+var ownerAccount = tokenUtils.ownerAccount;
+var arbitraryAccount = tokenUtils.arbitraryAccount;
+var upgraderAccount = tokenUtils.upgraderAccount;
+var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
+var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+var masterMinterAccount = tokenUtils.masterMinterAccount;
+var minterAccount = tokenUtils.minterAccount;
+var pauserAccount = tokenUtils.pauserAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 const should = require('chai')
   .use(require('chai-as-promised'))
@@ -23,16 +33,6 @@ const should = require('chai')
   .should();
 
 contract('FiatToken', function (accounts) {
-  owner = accounts[0]
-  arbitraryAccount = accounts[8];
-  arbitraryAccount2 = accounts[1];
-  masterMinterAccount = accounts[9];
-  minterAccount = accounts[7];
-  pauserAccount = accounts[6];
-  blacklisterAccount = accounts[4];
-  roleAddressChangerAccount = accounts[3];
-  upgraderAccount = accounts[2];
-
   beforeEach(async function checkBefore() {
     token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 

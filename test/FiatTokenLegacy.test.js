@@ -18,12 +18,20 @@ var approve = tokenUtils.approve;
 var unBlacklist = tokenUtils.unBlacklist;
 var sampleTransfer = tokenUtils.sampleTransfer;
 var checkTransferEvents = tokenUtils.checkTransferEvents;
-
-
+var ownerAccount = tokenUtils.ownerAccount;
+var arbitraryAccount = tokenUtils.arbitraryAccount;
+var upgraderAccount = tokenUtils.upgraderAccount;
+var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
+var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+var masterMinterAccount = tokenUtils.masterMinterAccount;
+var minterAccount = tokenUtils.minterAccount;
+var pauserAccount = tokenUtils.pauserAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 // these tests are for reference and do not track side effects on all variables
 contract('FiatToken', function (accounts) {
-  owner = accounts[0]
+/*  ownerAccount = accounts[0]
   feeAccount = accounts[8];
   masterMinterAccount = accounts[9];
   minterAccount = accounts[7];
@@ -31,7 +39,7 @@ contract('FiatToken', function (accounts) {
   blacklisterAccount = accounts[4];
   roleAddressChangerAccount = accounts[3];
   upgraderAccount = accounts[2];
-
+*/
 
   beforeEach(async function () {
     token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
@@ -122,7 +130,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should complete transferFrom', async function () {
-    await sampleTransferFrom(token, owner, feeAccount, minterAccount);
+    await sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should approve', async function () {
@@ -132,7 +140,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('should complete sample transfer', async function () {
-    await sampleTransfer(token, owner, feeAccount, minterAccount);
+    await sampleTransfer(token, ownerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should complete transfer from non-owner', async function () {
@@ -250,7 +258,7 @@ contract('FiatToken', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransferFrom(token, owner, feeAccount, minterAccount));
+    await expectRevert(sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount));
   });
 
   it('should pause and should not be able to transfer, then unpause and be able to transfer', async function () {
@@ -259,11 +267,11 @@ contract('FiatToken', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransferFrom(token, owner, feeAccount, minterAccount));
+    await expectRevert(sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount));
 
     await token.unpause({ from: pauserAccount });
     assert.equal(await token.paused.call(), false);
-    await sampleTransferFrom(token, owner, feeAccount, minterAccount);
+    await sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should pause and should not be able to transferFrom', async function () {
@@ -272,7 +280,7 @@ contract('FiatToken', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransfer(token, owner, feeAccount, minterAccount));
+    await expectRevert(sampleTransfer(token, ownerAccount, arbitraryAccount2, minterAccount));
   });
 
   it('should pause and should not be able to approve', async function () {
@@ -1543,11 +1551,11 @@ contract('FiatToken', function (accounts) {
     var feeBase = 1000;
   
     it('should set fees and complete transferFrom with fees', async function() {
-      await sampleTransferFrom(token, owner, feeAccount, minterAccount);
+      await sampleTransferFrom(token, ownerAccount, feeAccount, minterAccount);
     });
   
     it('should set long-decimal fees and complete transferFrom with fees', async function() {
-      await sampleTransferFrom(token, owner, feeAccount, minterAccount);
+      await sampleTransferFrom(token, ownerAccount, feeAccount, minterAccount);
     });
   
     it('should set fees and and fail to complete transferFrom with insufficient balance to cover fees', async function() {
@@ -1577,7 +1585,7 @@ contract('FiatToken', function (accounts) {
     });
   
     it('should set long-decimal fees and complete transfer with fees', async function() {
-      await sampleTransfer(token, owner, feeAccount, minterAccount);  
+      await sampleTransfer(token, ownerAccount, feeAccount, minterAccount);  
     });
   
     it('should set long-decimal fees and complete transfer with fees from non-owner', async function() {
