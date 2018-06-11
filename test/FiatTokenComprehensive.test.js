@@ -16,6 +16,16 @@ var pauserRole = tokenUtils.pauserRole;
 var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
+var ownerAccount = tokenUtils.ownerAccount;
+var arbitraryAccount = tokenUtils.arbitraryAccount;
+var upgraderAccount = tokenUtils.upgraderAccount;
+var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
+var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+var masterMinterAccount = tokenUtils.masterMinterAccount;
+var minterAccount = tokenUtils.minterAccount;
+var pauserAccount = tokenUtils.pauserAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 const should = require('chai')
   .use(require('chai-as-promised'))
@@ -23,16 +33,6 @@ const should = require('chai')
   .should();
 
 contract('FiatToken', function (accounts) {
-  owner = accounts[0]
-  arbitraryAccount = accounts[8];
-  arbitraryAccount2 = accounts[1];
-  masterMinterAccount = accounts[9];
-  minterAccount = accounts[7];
-  pauserAccount = accounts[6];
-  blacklisterAccount = accounts[4];
-  roleAddressChangerAccount = accounts[3];
-  upgraderAccount = accounts[2];
-
   beforeEach(async function checkBefore() {
     token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
 
@@ -41,8 +41,6 @@ contract('FiatToken', function (accounts) {
     let dataContractAddress = await token.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
     assert.equal(await storage.owner.call(), tokenAddress)
-
-    await checkVariables(token, []);
   });
 
   // Test template
@@ -51,6 +49,10 @@ contract('FiatToken', function (accounts) {
     customVars = [{'variable': '<VARIABLE NAME>', 'expectedValue': actual}];
     await checkVariables(token, customVars);
   }); */
+
+  it('should check that default variable values are correct', async function () {
+    await checkVariables(token, []);
+  });
 
   it('should pause and set paused to true', async function () {
     await token.pause({ from: pauserAccount });
@@ -63,8 +65,7 @@ contract('FiatToken', function (accounts) {
     var customVars = [{ 'variable': 'paused', 'expectedValue': true }];
     await checkVariables(token, customVars);
     await token.unpause({ from: pauserAccount });
-    customVars = [{ 'variable': 'paused', 'expectedValue': false }];
-    await checkVariables(token, customVars);
+    await checkVariables(token, []);
   });
 
   it('should approve a spend and set allowed amount', async function () {
@@ -234,9 +235,7 @@ contract('FiatToken', function (accounts) {
     let amount = 11;
     var notAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'paused', 'expectedValue': false },
-      { 'variable': 'totalSupply', 'expectedValue': 0 }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 }
     ]
     await checkVariables(token, notAMinter);
 
@@ -244,8 +243,7 @@ contract('FiatToken', function (accounts) {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var isAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
-      { 'variable': 'totalSupply', 'expectedValue': 0 }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount }
     ]
     // verify it worked
     await checkVariables(token, isAMinter);
@@ -277,8 +275,6 @@ contract('FiatToken', function (accounts) {
     var notAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'paused', 'expectedValue': false },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount }
     ]
     assert.isFalse(arbitraryAccount == masterMinterAccount)
     await checkVariables(token, notAMinter);
@@ -297,8 +293,7 @@ contract('FiatToken', function (accounts) {
     var setup = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true }
     ]
     await checkVariables(token, setup);
 
@@ -307,8 +302,7 @@ contract('FiatToken', function (accounts) {
     var result = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
-      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true }
     ]
     // verify it worked
     await checkVariables(token, result);
@@ -321,8 +315,7 @@ contract('FiatToken', function (accounts) {
     var setup = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true }
     ]
     await checkVariables(token, setup);
 
@@ -331,8 +324,7 @@ contract('FiatToken', function (accounts) {
     var result = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
-      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true }
     ]
     // verify it worked
     await checkVariables(token, result);
@@ -344,8 +336,7 @@ contract('FiatToken', function (accounts) {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var isAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount }
     ]
     await checkVariables(token, isAMinter);
 
@@ -353,8 +344,7 @@ contract('FiatToken', function (accounts) {
     await token.removeMinter(minterAccount, { from: masterMinterAccount });
     var notAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 }
     ]
     // verify it worked
     await checkVariables(token, notAMinter);
@@ -415,8 +405,7 @@ contract('FiatToken', function (accounts) {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var isAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount }
     ]
     await checkVariables(token, isAMinter);
 
@@ -435,8 +424,7 @@ contract('FiatToken', function (accounts) {
     var setup = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
-      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true }
     ]
     await checkVariables(token, setup);
 
@@ -444,8 +432,7 @@ contract('FiatToken', function (accounts) {
     await token.removeMinter(minterAccount, { from: masterMinterAccount });
     var notAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 }
     ]
     // verify it worked
     await checkVariables(token, notAMinter);
@@ -459,8 +446,7 @@ contract('FiatToken', function (accounts) {
     var setup = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount },
-      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true }
     ]
     await checkVariables(token, setup);
 
@@ -468,8 +454,7 @@ contract('FiatToken', function (accounts) {
     await token.removeMinter(minterAccount, { from: masterMinterAccount });
     var notAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 }
     ]
     // verify it worked
     await checkVariables(token, notAMinter);
@@ -484,8 +469,7 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount },
-      { 'variable': 'totalSupply', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false },
+      { 'variable': 'totalSupply', 'expectedValue': amount }
     ]
     await checkVariables(token, setup);
 
@@ -495,11 +479,8 @@ contract('FiatToken', function (accounts) {
     var afterBurn = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'balances.minterAccount', 'expectedValue': 0 },
-      { 'variable': 'totalSupply', 'expectedValue': 0 },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'balances.minterAccount', 'expectedValue': 0 }
     ]
-
     // state should be unchanged
     await checkVariables(token, afterBurn)
   });
@@ -514,8 +495,7 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount },
-      { 'variable': 'totalSupply', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'totalSupply', 'expectedValue': amount }
     ]
     await checkVariables(token, setup);
 
@@ -526,8 +506,7 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount - burnAmount },
-      { 'variable': 'totalSupply', 'expectedValue': amount - burnAmount },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'totalSupply', 'expectedValue': amount - burnAmount }
     ]
 
     // state should be unchanged
@@ -544,8 +523,7 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount },
-      { 'variable': 'totalSupply', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'totalSupply', 'expectedValue': amount }
     ]
     await checkVariables(token, setup);
 
@@ -566,8 +544,7 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount },
-      { 'variable': 'totalSupply', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'totalSupply', 'expectedValue': amount }
     ]
     await checkVariables(token, setup);
 
@@ -588,8 +565,7 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount },
-      { 'variable': 'totalSupply', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false }
+      { 'variable': 'totalSupply', 'expectedValue': amount }
     ]
     await checkVariables(token, setup);
 
@@ -634,7 +610,6 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false },
       { 'variable': 'totalSupply', 'expectedValue': amount },
       { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
     ]
@@ -658,8 +633,7 @@ contract('FiatToken', function (accounts) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': 0 },
       { 'variable': 'balances.minterAccount', 'expectedValue': amount },
-      { 'variable': 'totalSupply', 'expectedValue': amount },
-      { 'variable': 'paused', 'expectedValue': false },
+      { 'variable': 'totalSupply', 'expectedValue': amount }
     ]
     await checkVariables(token, setup);
 
@@ -671,18 +645,10 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateRoleAddress masterMinter', async function () {
-    // initial
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
-    ]
-    assert.notEqual(masterMinterAccount, arbitraryAccount)
-    await checkVariables(token, setup);
 
     // change masterMinter role address
     await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
     ]
     // verify it worked
@@ -690,18 +656,10 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateRoleAddress blacklister', async function () {
-    // initial
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'blacklister', 'expectedValue': blacklisterAccount },
-    ]
-    assert.notEqual(blacklisterAccount, arbitraryAccount)
-    await checkVariables(token, setup);
 
     // change masterMinter role address
     await token.updateRoleAddress(arbitraryAccount, blacklisterRole, { from: roleAddressChangerAccount });
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
     ]
     // verify it worked
@@ -709,18 +667,10 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateRoleAddress pauser', async function () {
-    // initial
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'pauser', 'expectedValue': pauserAccount },
-    ]
-    assert.notEqual(pauserAccount, arbitraryAccount)
-    await checkVariables(token, setup);
 
     // change masterMinter role address
     await token.updateRoleAddress(arbitraryAccount, pauserRole, { from: roleAddressChangerAccount });
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
     ]
     // verify it worked
@@ -728,12 +678,6 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateRoleAddress roleAddressChanger', async function () {
-    // initial
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount }
-    ]
-    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
-    await checkVariables(token, setup);
 
     // change masterMinter role address
     await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
@@ -749,10 +693,8 @@ contract('FiatToken', function (accounts) {
     // initial
     await token.pause({ from: pauserAccount });
     var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ]
-    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
     await checkVariables(token, setup);
 
     // change masterMinter role address
@@ -770,8 +712,6 @@ contract('FiatToken', function (accounts) {
     var setup = [
       { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
     ]
-    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
-    assert.notEqual(masterMinterAccount, arbitraryAccount);
     await checkVariables(token, setup);
 
     // try change roleAddressChanger role address
@@ -785,11 +725,9 @@ contract('FiatToken', function (accounts) {
     // switch roleAddressChanger
     await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
     var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount }
+      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
     ]
-    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
-    assert.notEqual(masterMinterAccount, arbitraryAccount)
+
     await checkVariables(token, setup);
 
     // arbitraryAccount will try to make himself masterMinter
@@ -804,31 +742,16 @@ contract('FiatToken', function (accounts) {
 
   // fake role
   it('updateRoleAddress fake role', async function () {
-    // switch roleAddressChanger
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-    ]
-    assert.notEqual(roleAddressChangerAccount, arbitraryAccount)
-    await checkVariables(token, setup);
-
     // Try to send fake role. Should not throw.
     await token.updateRoleAddress(arbitraryAccount, 'fakeRoleName', { from: roleAddressChangerAccount });
 
     // verify nothing changed
-    await checkVariables(token, setup);
+    await checkVariables(token, []);
   });
 
   it('updateRoleAddress user is 0x00', async function () {
     let bigZero = 0x0000000000000000000000000000000000000000;
     let smallZero = 0x00;
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
-      { 'variable': 'pauser', 'expectedValue': pauserAccount },
-    ]
-    assert.notEqual(bigZero, masterMinterAccount)
-    assert.notEqual(smallZero, pauserAccount)
-    await checkVariables(token, setup);
 
     // Set masterMinter and pauser to zero-addresss
     await token.updateRoleAddress(bigZero, masterMinterRole, { from: roleAddressChangerAccount });
@@ -836,7 +759,6 @@ contract('FiatToken', function (accounts) {
 
     // verify updates to zero
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'masterMinter', 'expectedValue': bigZero },
       { 'variable': 'pauser', 'expectedValue': smallZero }
     ]
@@ -844,26 +766,18 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateRoleAddress user is roleAddressChanger', async function () {
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount }
-    ]
-    await checkVariables(token, setup);
-
     // Set roleAddressChanger to self
     await token.updateRoleAddress(roleAddressChangerAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
 
     // verify no changes
-    await checkVariables(token, setup);
+    await checkVariables(token, []);
   });
 
   it('updateRoleAddress user is blacklisted', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ]
-    assert.notEqual(masterMinterAccount, arbitraryAccount);
     await checkVariables(token, setup);
 
     // updated masterMinter to blacklisted account
@@ -871,7 +785,6 @@ contract('FiatToken', function (accounts) {
 
     // verify
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ]
@@ -881,11 +794,8 @@ contract('FiatToken', function (accounts) {
   it('updateRoleAddress roleAddressChanger is blacklisted', async function () {
     await token.blacklist(roleAddressChangerAccount, { from: blacklisterAccount });
     var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
       { 'variable': 'isAccountBlacklisted.roleAddressChangerAccount', 'expectedValue': true }
     ]
-    assert.notEqual(masterMinterAccount, arbitraryAccount);
     await checkVariables(token, setup);
 
     // updated masterMinter to blacklisted account
@@ -893,7 +803,6 @@ contract('FiatToken', function (accounts) {
 
     // verify
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.roleAddressChangerAccount', 'expectedValue': true }
     ]
@@ -902,38 +811,27 @@ contract('FiatToken', function (accounts) {
 
   // bad sender
   it('updateRoleAddress msg.sender is not roleAddressChanger', async function () {
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount }
-    ]
-    assert.notEqual(roleAddressChangerAccount, arbitraryAccount);
-    assert.notEqual(masterMinterAccount, arbitraryAccount);
-    await checkVariables(token, setup);
 
     // try to update masterMinter
     await expectRevert(token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: arbitraryAccount }));
 
     // ensure nothing changed
-    await checkVariables(token, setup);
+    await checkVariables(token, []);
   });
 
   // while paused
   it('updateRoleAddress while paused', async function () {
     await token.pause({ from: pauserAccount });
     var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ]
-    assert.notEqual(masterMinterAccount, arbitraryAccount);
-    await checkVariables(token, setup);
+    await checkVariables(token, []);
 
     // updated masterMinter to blacklisted account
     await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
 
     // verify
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ]
@@ -959,11 +857,8 @@ contract('FiatToken', function (accounts) {
     //upgrade the token contract
     await token.upgrade(newToken.address, { from: upgraderAccount });
     var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ]
-    assert.notEqual(masterMinterAccount, arbitraryAccount2);
     await checkVariables(token, setup);
 
     // updateRoleAddress
@@ -971,7 +866,6 @@ contract('FiatToken', function (accounts) {
 
     // verify
     var result = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount2 },
       { 'variable': 'paused', 'expectedValue': true }
     ]
