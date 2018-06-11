@@ -19,7 +19,7 @@ install submodules:
 
 # Testing
 ganache-cli (Ethereum RPC client) must be running first
-```ganache-cli --defaultBalanceEther 1000000```
+```ganache-cli --defaultBalanceEther 1000000 --deterministic```
 
 then run the tests via truffle:
 ```truffle test```
