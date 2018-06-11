@@ -13,12 +13,11 @@ phases:
     commands:
       - echo Build started on `date`
       - mkdir -p build/logs
-      - truffle compile 2>&1 | tee build/logs/truffle-compile.log
-      - npm test 2>&1 | tee build/logs/test.log
+      - truffle compile
+      - npm test
 
 artifacts:
   files:
     - build/contracts/*
-    - build/logs/*.log
     - coverage/**/*
     
