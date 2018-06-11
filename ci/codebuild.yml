@@ -36,20 +36,15 @@ Resources:
       Name: "centre-tokens"
       Description: !Sub "Codebuild project from stack ${AWS::StackName}"
       Artifacts:
-        Type: NO_ARTIFACTS
+        Type: S3
+        Location: !Ref CodeBuildBucket
+        Name: artifacts
+        NamespaceType: BUILD_ID
       BadgeEnabled: True
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
         Image: !Ref ECRBuildImage
-        PrivilegedMode: True
-        EnvironmentVariables:
-          - Name: AWS_ACCOUNT_ID
-            Value: !Ref AWS::AccountId
-          - Name: IMAGE_REPO_PREFIX
-            Value: !Sub "centre/centre-tokens"
-          - Name: AWS_REGION
-            Value: !Ref AWS::Region
       ServiceRole: !Ref CodeBuildServiceRole
       Source:
         Type: GITHUB
@@ -59,6 +54,14 @@ Resources:
           Type: OAUTH
         GitCloneDepth: 1
       TimeoutInMinutes: 10
+
+  CodeBuildBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: "Private"
+      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration:
+        Status: Enabled
 
   CodeBuildServiceRole:
     Type: "AWS::IAM::Role"
@@ -77,10 +80,16 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Effect: "Allow"
+              - Sid: "AllowToCreateLogs"
+                Effect: "Allow"
                 Action:
                   - "logs:CreateLogGroup"
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource:
                   - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/centre-tokens:log-stream:*"
+              - Sid: "AllowPutToBucket"
+                Effect: "Allow"
+                Action:
+                  - "s3:PutObject*"
+                Resource: !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-${AWS::Region}*"
