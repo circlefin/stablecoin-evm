@@ -32,4 +32,4 @@ to generate test coverage run:
 
 
 # Submodules
-Open Zeppelin is included as a submodule, however AWS codebuild doesn't paly nice with submodules so we have to include the specific commit in `buildspec.yaml` as well. Whenever we update the sumbodule we also have to update the hash in `buildspec.yaml` for the build to pick it up. Hopeully amazon will support submodules at some point in the near future.
+Open Zeppelin is included as a submodule, however AWS codebuild doesn't play nice with submodules so we have to include the specific commit in `buildspec.yaml` as well. Whenever we update the sumbodule we also have to update the hash in `buildspec.yaml` for the build to pick it up. Hopeully amazon will support submodules at some point in the near future.
