@@ -10,18 +10,22 @@ var BigNumber = require('bignumber.js');
 
 var checkVariables = tokenUtils.checkVariables;
 var expectRevert = tokenUtils.expectRevert;
+<<<<<<< HEAD
 var blacklist = tokenUtils.blacklist
+=======
+var ownerAccount = tokenUtils.ownerAccount;
+var arbitraryAccount = tokenUtils.arbitraryAccount;
+var upgraderAccount = tokenUtils.upgraderAccount;
+var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
+var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+var masterMinterAccount = tokenUtils.masterMinterAccount;
+var minterAccount = tokenUtils.minterAccount;
+var pauserAccount = tokenUtils.pauserAccount;
+var blacklisterAccount = tokenUtils.blacklisterAccount;
+>>>>>>> 01d3001b1400ad291b72d24e9e56f6af0324586a
 
 contract('FiatToken', function (accounts) {
-  owner = accounts[0]
-  arbitraryAccount = accounts[8];
-  masterMinterAccount = accounts[9];
-  minterAccount = accounts[7];
-  pauserAccount = accounts[6];
-  blacklisterAccount = accounts[4];
-  roleAddressChangerAccount = accounts[3];
-  upgraderAccount = accounts[2];
-
   var amount = 100;
 
   beforeEach(async function checkBefore() {
@@ -126,13 +130,17 @@ contract('FiatToken', function (accounts) {
     await expectRevert(token.mint("0x0", amount, {from: minterAccount}));
     await checkVariables(token, customVars);
 
+<<<<<<< HEAD
     await expectRevert(token.mint(0x0000000000000000000000000000000000000000, amount, {from: minterAccount}));
+=======
+    await expectRevert(token.mint("0x0000000000000000000000000000000000000000", amount, {from: minterAccount}));
+
+>>>>>>> 01d3001b1400ad291b72d24e9e56f6af0324586a
     await checkVariables(token, customVars);
 
-    // TODO: figure out what this test is actually supposed to be
-    /*await expectRevert(token.mint("0x0000000000000000000000000000000000000000", amount, {from: minterAccount}));
+    await expectRevert(token.mint(0x0000000000000000000000000000000000000000, amount, {from: minterAccount}));
 
-    await checkVariables(token, customVars);*/
+    await checkVariables(token, customVars);
 
   });
 
@@ -234,6 +242,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, customVars);
   })*/
 
+<<<<<<< HEAD
   it('should fail to transferFrom to 0x0 address', async function () {
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [
@@ -312,6 +321,15 @@ contract('FiatToken', function (accounts) {
       {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
     ]
     await checkVariables(token, customVars);
+=======
+  /*it('should fail to transferFrom to 0x0 address', async function () {
+
+  })*/
+
+  /*it('should fail to transferFrom an amount greater than balance', async function () {
+    
+  })*/
+>>>>>>> 01d3001b1400ad291b72d24e9e56f6af0324586a
 
     await token.approve(pauserAccount, 50, {from: upgraderAccount});
     customVars = [
