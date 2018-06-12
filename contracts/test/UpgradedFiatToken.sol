@@ -1,9 +1,10 @@
 pragma solidity ^0.4.22;
 
-import './FiatToken.sol';
-import './UpgradedContract.sol';
+import '../FiatToken.sol';
+import '../UpgradedContract.sol';
 
 /**
+ * Only used for testing the upgrade path at this point in time.
  * @title UpgradedFiatToken
  * @dev UpgradedERC20 Token backed by fiat reserves
  */
