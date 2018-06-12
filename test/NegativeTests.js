@@ -94,6 +94,7 @@ contract('FiatToken', function (accounts) {
 
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [
+      {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true},
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
@@ -163,7 +164,7 @@ contract('FiatToken', function (accounts) {
 
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
 
-    await checkVariables(token, [{'variable': 'blacklisted.arbitraryAccount', 'expectedValue': true}]);
+    await checkVariables(token, [{'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}]);
   })
 
   it('should fail to approve when contract is paused', async function () {
