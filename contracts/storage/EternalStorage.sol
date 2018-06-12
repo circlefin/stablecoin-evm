@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import './../../lib/openzeppelin/contracts/ownership/Ownable.sol';
+import './../util/Ownable.sol';
 
 contract EternalStorage is Ownable {
 
