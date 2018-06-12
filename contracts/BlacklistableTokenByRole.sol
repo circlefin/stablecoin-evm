@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './PausableTokenByRole.sol';
-import './EternalStorageUpdater.sol';
+import "./storage/EternalStorageUpdater.sol";
 
 /**
  * @title Blacklistable Token
