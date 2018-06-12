@@ -11,7 +11,7 @@ contract UpgradedFiatToken is FiatToken, UpgradedContract {
   
     address public priorContractAddress;
 
-    constructor(address _contractStorageAddress, address _priorContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) FiatToken(_contractStorageAddress, _name, _symbol, _currency, _decimals, _masterMinter, _pauser, _blacklister, _upgrader, _roleAddressChanger) {
+    constructor(address _contractStorageAddress, address _priorContractAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public FiatToken(_contractStorageAddress, _name, _symbol, _currency, _decimals, _masterMinter, _pauser, _blacklister, _upgrader, _roleAddressChanger) {
 
     priorContractAddress = _priorContractAddress;
   }
