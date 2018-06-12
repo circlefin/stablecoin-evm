@@ -40,7 +40,7 @@ contract('FiatToken', function (accounts) {
 
     let dataContractAddress = await token.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
-    assert.equal(await storage.owner.call(), tokenAddress)
+    assert.equal(await storage.owner.call(), tokenAddress);
   });
 
   // Test template
@@ -897,5 +897,24 @@ contract('FiatToken', function (accounts) {
     }
     assert.equal(true, success);
   });
+
+  it('updateUpgraderAddress', async function () {
+    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
+    customVars = [
+      { 'variable': 'upgraderAccount', 'expectedValue': arbitraryAccount }
+    ];
+    checkVariables(token, customVars);
+  });
+
+  it('updateUpgraderAddress should fail with bad sender', async function () {
+    expectRevert(token.updateUpgraderAddress(arbitraryAccount, { from: roleAddressChangerAccount }));
+    checkVariables(token, []);
+  });
+
+  it('updateUpgraderAddress should fail with bad new Value', async function () {
+    expectRevert(token.updateUpgraderAddress(0x00, { from: roleAddressChangerAccount }));
+    checkVariables(token, []);
+  });
+
 
 });
