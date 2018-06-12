@@ -788,7 +788,7 @@ contract('FiatToken', function (accounts) {
     await token.pause({from: pauserAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': amount- 50},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': amount - 50},
       {'variable': 'balances.minterAccount', 'expectedValue': 50},
       {'variable': 'totalSupply', 'expectedValue': 50},
       {'variable': 'paused', 'expectedValue': true}
