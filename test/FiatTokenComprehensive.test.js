@@ -635,16 +635,7 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateRoleAddress masterMinter', async function () {
-/*    // initial
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': roleAddressChangerAccount },
-      { 'variable': 'masterMinter', 'expectedValue': masterMinterAccount },
-    ]
-    assert.notEqual(masterMinterAccount, arbitraryAccount)
-    await checkVariables(token, setup);
-
-    // change masterMinter role address
-*/  await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
     var result = [
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
     ]
@@ -754,7 +745,6 @@ contract('FiatToken', function (accounts) {
     await token.updateRoleAddress(bigZero, masterMinterRole, { from: roleAddressChangerAccount });
     await token.updateRoleAddress(smallZero, pauserRole, { from: roleAddressChangerAccount });
 
-    // verify updates to zero
     // Note: bigZero and smallZero both resolve to 0x0000000000000000000000000000000000000000
     var result = [
       { 'variable': 'masterMinter', 'expectedValue': "0x0000000000000000000000000000000000000000" },

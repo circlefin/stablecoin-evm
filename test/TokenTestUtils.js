@@ -309,8 +309,6 @@ async function checkVariables(token, customVars) {
   };
 
   assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
-
-  // TODO: track all 42 combinations of allowances (spenders and destination addresses) if deemed necessary; will slow down tests
 }
 
 async function setMinter(token, minter, amount) {
@@ -336,6 +334,7 @@ async function mintRaw(token, to, amount, minter) {
   assert.equal(minting.logs[0].args.minter, minter);
   assert.equal(minting.logs[0].args.to, to);
   assert.equal(minting.logs[0].args.amount, amount);
+  // TODO revisit this
 /*  let totalSupply = await token.totalSupply();
   totalSupply.should.be.bignumber.equal(initialTotalSupply);
   let minterAllowance = await token.minterAllowance(minter);
