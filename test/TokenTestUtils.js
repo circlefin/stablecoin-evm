@@ -205,7 +205,7 @@ async function checkVariables(token, customVars) {
   tokenCurrency.should.equal(expectedState['currency']);
 
   let tokenDecimals = await token.decimals.call();
-  tokenDecimals.should.be.bignumber.equal(expectedState['decimals']); 
+  tokenDecimals.should.be.bignumber.equal(expectedState['decimals']);
 
 
 
@@ -402,7 +402,6 @@ async function redeem(token, account, amount) {
 }
 
 async function expectRevert(contractPromise) {
-
   try {
     await contractPromise;
   } catch (error) {

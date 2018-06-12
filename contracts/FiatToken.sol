@@ -5,7 +5,6 @@ import './../lib/openzeppelin/contracts/math/SafeMath.sol';
 
 import './PausableTokenByRole.sol';
 import './BlacklistableTokenByRole.sol';
-import './EternalStorageUpdater.sol';
 import './Upgradable.sol';
 import './UpgradedContract.sol';
 
