@@ -51,12 +51,13 @@ contract('FiatToken', function (accounts) {
     // await token.pause({from: pauserAccount});
 
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    await token.pause({from: pauserAccount});
+
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'paused', 'expectedValue': true}
     ]
-
-    await token.pause({from: pauserAccount});
 
     await expectRevert(token.mint(arbitraryAccount, 50, {from: minterAccount}));
     
@@ -77,6 +78,7 @@ contract('FiatToken', function (accounts) {
 
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [
+      {'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true},
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
@@ -105,7 +107,7 @@ contract('FiatToken', function (accounts) {
     await token.configureMinter(minterAccount, amount - 1, {from: masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 1)}
     ]
 
     await expectRevert(token.mint(arbitraryAccount, amount, {from: minterAccount}));
@@ -144,17 +146,16 @@ contract('FiatToken', function (accounts) {
   });
   */
 
-  it('should fail to mint when contract is not owner', async function () {
+  /*it('should fail to mint when contract is not owner', async function () {
 
-  })
-
+  })*/
 
   it('should fail to approve when spender is blacklisted', async function () {
     await token.blacklist(minterAccount, {from: blacklisterAccount});
 
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
 
-    await checkVariables(token, []);
+    await checkVariables(token, [{'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true}]);
   })
 
   it('should fail to approve when msg.sender is blacklisted', async function () {
@@ -162,7 +163,7 @@ contract('FiatToken', function (accounts) {
 
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
 
-    await checkVariables(token, []);
+    await checkVariables(token, [{'variable': 'blacklisted.arbitraryAccount', 'expectedValue': true}]);
   })
 
   it('should fail to approve when contract is paused', async function () {
@@ -170,7 +171,7 @@ contract('FiatToken', function (accounts) {
 
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
 
-    await checkVariables(token, []);
+    await checkVariables(token, [{'variable': 'paused', 'expectedValue': true}]);
   })
 
   /*it('should fail to approve when contract is not owner', async function () {
