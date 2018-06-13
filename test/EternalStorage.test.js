@@ -45,7 +45,7 @@ const should = require('chai')
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-contract('Eternal Storage', function (accounts) {
+contract('Eternal Storage Tests', function (accounts) {
     beforeEach(async function checkBefore() {
         storage = await EternalStorage.new(ownerAccount);
         storageOwner = ownerAccount;
