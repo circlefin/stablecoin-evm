@@ -22,7 +22,7 @@ var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 
-contract('FiatToken', function (accounts) {
+contract('Negative Tests', function (accounts) {
   var amount = 100;
 
   beforeEach(async function checkBefore() {
