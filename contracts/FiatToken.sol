@@ -13,7 +13,6 @@ import './UpgradedContract.sol';
  * @dev ERC20 Token backed by fiat reserves
  */
 contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
-
     using SafeMath for uint256;
 
     string public name;
@@ -41,11 +40,11 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
         upgrader = _upgrader;
         roleAddressChanger = _roleAddressChanger;
 
-        if(_contractStorageAddress != address(0x0)) {
+        if (_contractStorageAddress != address(0x0)) {
             contractStorage = EternalStorage(_contractStorageAddress);
         } else {
             contractStorage = new EternalStorage();
-        } 
+        }
     }
 
     /**
