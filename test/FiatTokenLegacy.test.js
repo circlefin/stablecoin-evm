@@ -1167,14 +1167,18 @@ contract('FiatToken', function (accounts) {
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
   });
 
-  it('should fail to unblacklist when paused', async function () {
+  it('should unblacklist when paused', async function () {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.blacklist(accounts[2], { from: blacklisterAccount });
-    await token.unBlacklist(accounts[2], { from: blacklisterAccount });
-    await token.blacklist(accounts[2], { from: blacklisterAccount });
+    let blacklisted = await token.isAccountBlacklisted(accounts[2]);
+    assert.isTrue(blacklisted);
+
     await token.pause({ from: pauserAccount });
 
-    await expectRevert(token.unBlacklist(accounts[2], { from: blacklisterAccount }));
+    await token.unBlacklist(accounts[2], { from: blacklisterAccount });
+
+    blacklisted = await token.isAccountBlacklisted(accounts[2]);
+    assert.isFalse(blacklisted);
 
     let balance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));

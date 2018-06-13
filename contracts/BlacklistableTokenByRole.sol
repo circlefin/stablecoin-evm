@@ -7,7 +7,7 @@ import "./storage/EternalStorageUpdater.sol";
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
-contract BlacklistableTokenByRole is PausableTokenByRole, EternalStorageUpdater {
+contract BlacklistableTokenByRole is EternalStorageUpdater {
 
     address public blacklister;
 
@@ -62,7 +62,7 @@ contract BlacklistableTokenByRole is PausableTokenByRole, EternalStorageUpdater 
      * @dev Removes account from blacklist
      * @param _account The address to remove from the blacklist
     */
-    function unBlacklist(address _account) public whenNotPaused onlyBlacklister {
+    function unBlacklist(address _account) public onlyBlacklister {
         setBlacklisted(_account, false);
         emit UnBlacklisted(_account);
     }
