@@ -1454,11 +1454,11 @@ contract('Legacy Tests', function (accounts) {
   it('should updateRoleAddress for masterMinter', async function () {
     let address1 = accounts[7];
     let address2 = accounts[6];
-    await token.updateRoleAddress(address1, "masterMinter", { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(address1, { from: roleAddressChangerAccount });
     let masterMinter1 = await token.masterMinter();
     assert.equal(masterMinter1, address1);
 
-    await token.updateRoleAddress(address2, "masterMinter", { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(address2, { from: roleAddressChangerAccount });
     let masterMinter2 = await token.masterMinter();
     assert.equal(masterMinter2, address2);
   });
@@ -1466,11 +1466,11 @@ contract('Legacy Tests', function (accounts) {
   it('should updateRoleAddress for blacklister', async function () {
     let address1 = accounts[7];
     let address2 = accounts[6];
-    await token.updateRoleAddress(address1, "blacklister", { from: roleAddressChangerAccount });
+    await token.updateBlacklister(address1, { from: roleAddressChangerAccount });
     let blacklister1 = await token.blacklister();
     assert.equal(blacklister1, address1);
 
-    await token.updateRoleAddress(address2, "blacklister", { from: roleAddressChangerAccount });
+    await token.updateBlacklister(address2, { from: roleAddressChangerAccount });
     let blacklister2 = await token.blacklister();
     assert.equal(blacklister2, address2);
   });
@@ -1478,11 +1478,11 @@ contract('Legacy Tests', function (accounts) {
   it('should updateRoleAddress for pauser', async function () {
     let address1 = accounts[7];
     let address2 = accounts[6];
-    await token.updateRoleAddress(address1, "pauser", { from: roleAddressChangerAccount });
+    await token.updatePauser(address1, { from: roleAddressChangerAccount });
     let pauser1 = await token.pauser();
     assert.equal(pauser1, address1);
 
-    await token.updateRoleAddress(address2, "pauser", { from: roleAddressChangerAccount });
+    await token.updatePauser(address2, { from: roleAddressChangerAccount });
     let pauser2 = await token.pauser();
     assert.equal(pauser2, address2);
   });
@@ -1490,7 +1490,7 @@ contract('Legacy Tests', function (accounts) {
   it('should updateRoleAddress for upgrader and fail as upgrader is updated separately', async function () {
     let address1 = accounts[7];
     let address2 = accounts[6];
-    await token.updateRoleAddress(address1, "upgrader", { from: roleAddressChangerAccount });
+    expectRevert(token.updateUpgraderAddress(address1, { from: roleAddressChangerAccount }));
     let upgrader = await token.upgrader();
     assert.notEqual(upgrader, address1);
   });
@@ -1536,12 +1536,12 @@ contract('Legacy Tests', function (accounts) {
   it('should updateRoleAddress for roleAddressChanger', async function () {
     let address1 = accounts[7];
     let address2 = accounts[6];
-    await token.updateRoleAddress(address1, "roleAddressChanger", { from: roleAddressChangerAccount });
-    let roleAddressChanger1 = await token.roleAddressChanger();
+    await token.transferOwnership(address1, { from: roleAddressChangerAccount });
+    let roleAddressChanger1 = await token.owner();
     assert.equal(roleAddressChanger1, address1);
 
-    await token.updateRoleAddress(address2, "roleAddressChanger", { from: address1 });
-    let roleAddressChanger2 = await token.roleAddressChanger();
+    await token.transferOwnership(address2, { from: address1 });
+    let roleAddressChanger2 = await token.owner();
     assert.equal(roleAddressChanger2, address2);
   });
 
@@ -1549,7 +1549,7 @@ contract('Legacy Tests', function (accounts) {
     let nonRoleAddressChanger = accounts[2];
     let address1 = accounts[7];
 
-    await expectRevert(token.updateRoleAddress(address1, "masterMinter", { from: nonRoleAddressChanger }));
+    await expectRevert(token.updateMasterMinter(address1, { from: nonRoleAddressChanger }));
   });
 
   /* Comments out tests with fees */

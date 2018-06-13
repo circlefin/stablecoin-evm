@@ -207,7 +207,7 @@ async function checkVariables(token, customVars) {
     'pauser': await token.pauser.call(),
     'blacklister': await token.blacklister.call(),
     'upgrader': await token.upgrader.call(),
-    'roleAddressChanger': await token.roleAddressChanger.call(),
+    'roleAddressChanger': await token.owner.call(),
     // contractStorage is not deterministic for FiatTokenWithStorage
     //'contractStorage': storageAddress,
     // 'owner': await token.owner.call(),

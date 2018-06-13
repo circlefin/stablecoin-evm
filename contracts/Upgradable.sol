@@ -12,6 +12,7 @@ contract Upgradable is EternalStorageUpdater {
     address public upgradedAddress;
 
     event Upgraded(address newContractAddress);
+    event UpgraderChanged(address indexed newUpgrader);
 
     constructor(address _upgrader) public {
         upgrader = _upgrader;
@@ -44,5 +45,16 @@ contract Upgradable is EternalStorageUpdater {
         contractStorage.transferOwnership(_contractAddress);
         emit Upgraded(upgradedAddress);
     }
+
+    /**
+     * @dev updates the upgrader address
+     * Validates that caller is the upgrader
+     * @param _newAddress address The new upgrader address
+    */
+    function updateUpgraderAddress(address _newAddress) onlyUpgrader public {
+        upgrader = _newAddress;
+        emit UpgraderChanged(upgrader);
+    }
+
 
 }

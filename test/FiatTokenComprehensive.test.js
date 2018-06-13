@@ -635,7 +635,8 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateRoleAddress masterMinter', async function () {
-    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+    // change masterMinter role address
+    await token.updateMasterMinter(arbitraryAccount, { from: roleAddressChangerAccount });
     var result = [
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
     ];
@@ -645,7 +646,7 @@ contract('FiatToken', function (accounts) {
 
   it('updateRoleAddress blacklister', async function () {
     // change masterMinter role address
-    await token.updateRoleAddress(arbitraryAccount, blacklisterRole, { from: roleAddressChangerAccount });
+    await token.updateBlacklister(arbitraryAccount, { from: roleAddressChangerAccount });
     var result = [
       { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
     ];
@@ -656,7 +657,7 @@ contract('FiatToken', function (accounts) {
   it('updateRoleAddress pauser', async function () {
 
     // change masterMinter role address
-    await token.updateRoleAddress(arbitraryAccount, pauserRole, { from: roleAddressChangerAccount });
+    await token.updatePauser(arbitraryAccount, { from: roleAddressChangerAccount });
     var result = [
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
     ];
@@ -667,7 +668,7 @@ contract('FiatToken', function (accounts) {
   it('updateRoleAddress roleAddressChanger', async function () {
 
     // change masterMinter role address
-    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    await token.transferOwnership(arbitraryAccount, { from: roleAddressChangerAccount });
     var result = [
       { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
     ];
@@ -685,7 +686,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
 
     // change masterMinter role address
-    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    await token.transferOwnership(arbitraryAccount, { from: roleAddressChangerAccount });
     var result = [
       { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount },
       { 'variable': 'paused', 'expectedValue': true }
@@ -696,14 +697,14 @@ contract('FiatToken', function (accounts) {
 
   it('updateRoleAddress old roleAddressChanger disabled', async function () {
     // initial
-    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    await token.transferOwnership(arbitraryAccount, { from: roleAddressChangerAccount });
     var setup = [
       { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
     ];
     await checkVariables(token, setup);
 
     // try change roleAddressChanger role address
-    await expectRevert(token.updateRoleAddress(masterMinterAccount, roleAddressChangerRole, { from: roleAddressChangerAccount }))
+    await expectRevert(token.transferOwnership(masterMinterAccount, { from: roleAddressChangerAccount }))
 
     // verify it no changes
     await checkVariables(token, setup);
@@ -711,7 +712,7 @@ contract('FiatToken', function (accounts) {
 
   it('updateRoleAddress new roleAddressChanger can update', async function () {
     // switch roleAddressChanger
-    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    await token.transferOwnership(arbitraryAccount, { from: roleAddressChangerAccount });
     var setup = [
       { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
     ];
@@ -719,7 +720,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
 
     // arbitraryAccount will try to make himself masterMinter
-    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: arbitraryAccount });
+    await token.updateMasterMinter(arbitraryAccount, { from: arbitraryAccount });
     var result = [
       { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount },
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
@@ -728,22 +729,13 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  // fake role
-  it('updateRoleAddress fake role', async function () {
-    // Try to send fake role. Should not throw.
-    await token.updateRoleAddress(arbitraryAccount, 'fakeRoleName', { from: roleAddressChangerAccount });
-
-    // verify nothing changed
-    await checkVariables(token, []);
-  });
-
   it('updateRoleAddress user is 0x00', async function () {
     let bigZero = 0x0000000000000000000000000000000000000000; // TODO rename variable
     let smallZero = 0x00;
 
     // Set masterMinter and pauser to zero-addresss
-    await token.updateRoleAddress(bigZero, masterMinterRole, { from: roleAddressChangerAccount });
-    await token.updateRoleAddress(smallZero, pauserRole, { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(bigZero, { from: roleAddressChangerAccount });
+    await token.updatePauser(smallZero, { from: roleAddressChangerAccount });
 
     // Note: bigZero and smallZero both resolve to 0x0000000000000000000000000000000000000000
     var result = [
@@ -756,7 +748,7 @@ contract('FiatToken', function (accounts) {
 
   it('updateRoleAddress user is roleAddressChanger', async function () {
     // Set roleAddressChanger to self
-    await token.updateRoleAddress(roleAddressChangerAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
+    await token.transferOwnership(roleAddressChangerAccount, { from: roleAddressChangerAccount });
 
     // verify no changes
     await checkVariables(token, []);
@@ -770,7 +762,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
 
     // updated masterMinter to blacklisted account
-    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(arbitraryAccount, { from: roleAddressChangerAccount });
 
     // verify
     var result = [
@@ -788,7 +780,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
 
     // updated masterMinter to blacklisted account
-    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(arbitraryAccount, { from: roleAddressChangerAccount });
 
     // verify
     var result = [
@@ -802,7 +794,7 @@ contract('FiatToken', function (accounts) {
   it('updateRoleAddress msg.sender is not roleAddressChanger', async function () {
 
     // try to update masterMinter
-    await expectRevert(token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: arbitraryAccount }));
+    await expectRevert(token.updateMasterMinter(arbitraryAccount, { from: arbitraryAccount }));
 
     // ensure nothing changed
     await checkVariables(token, []);
@@ -817,7 +809,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
 
     // updated masterMinter to blacklisted account
-    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(arbitraryAccount, { from: roleAddressChangerAccount });
 
     // verify
     var result = [
@@ -849,7 +841,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, []);
 
     // updateRoleAddress
-    await token.updateRoleAddress(arbitraryAccount2, masterMinterRole, { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(arbitraryAccount2, { from: roleAddressChangerAccount });
 
     // verify
     var result = [
