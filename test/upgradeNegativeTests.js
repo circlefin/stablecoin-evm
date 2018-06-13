@@ -20,7 +20,7 @@ var upgraderAccount = tokenUtils.upgraderAccount;
 //var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 //var minterAccount = tokenUtils.minterAccount;
-//var pauserAccount = tokenUtils.pauserAccount;
+var pauserAccount = tokenUtils.pauserAccount;
 //var blacklisterAccount = tokenUtils.blacklisterAccount;
 //var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
 
@@ -28,7 +28,7 @@ contract('FiatToken', function (accounts) {
   var amount = 100;
 
   beforeEach(async function checkBefore() {
-    token = await FiatToken.new(
+    oldToken = await FiatToken.new(
       "0x0",
       name,
       symbol,
@@ -40,11 +40,26 @@ contract('FiatToken', function (accounts) {
       upgraderAccount,
       roleAddressChangerAccount);
 
-    let tokenAddress = token.address;
-
-    let dataContractAddress = await token.getDataContractAddress();
+    let dataContractAddress = await oldToken.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
-    assert.equal(await storage.owner.call(), tokenAddress);
+    assert.equal(await storage.owner.call(), oldToken.address);
+
+    await checkVariables(oldToken, []);
+
+    token = await UpgradedFiatToken.new(
+      dataContractAddress,
+      oldToken.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      roleAddressChangerAccount);
+    await(oldToken.upgrade(token.address, {from: upgraderAccount}));
+    assert.equal(await storage.owner.call(), token.address);
 
     await checkVariables(token, []);
   });
@@ -269,5 +284,4 @@ contract('FiatToken', function (accounts) {
   it('should fail to disablePriorContract when sender is not pauser', async function () {
     helpers.shouldFailToDisablePriorContractWhenSenderIsNotPauser(token);
   });
-
 })
