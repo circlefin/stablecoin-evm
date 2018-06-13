@@ -61,14 +61,6 @@ contract('FiatToken', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    await token.pause({from: pauserAccount});
-    var customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'paused', 'expectedValue': true}
-    ]
-    await checkVariables(token, customVars);
-
     await expectRevert(token.mint(arbitraryAccount, 50, {from: minterAccount}));
     await checkVariables(token, customVars);
   })

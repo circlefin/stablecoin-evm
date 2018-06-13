@@ -317,19 +317,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('configureMinter -1', async function () {
-    let amount = -1;
-    // now make into a minter
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    var isAMinter = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount }
-    ]
-    // verify it worked
-    await checkVariables(token, isAMinter);
-  });
-
-
   it('removeMinter', async function () {
     // set up pre-conditions
     let amount = 11;
