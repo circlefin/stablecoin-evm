@@ -13,6 +13,10 @@ contract Upgradable is EternalStorageUpdater {
 
     event Upgraded(address newContractAddress);
 
+    constructor(address _upgrader) public {
+        upgrader = _upgrader;
+    }
+
     /**
      * @dev Throws if called by any account other than the upgrader
     */

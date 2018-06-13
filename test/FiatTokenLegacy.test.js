@@ -30,7 +30,7 @@ var pauserAccount = tokenUtils.pauserAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 // these tests are for reference and do not track side effects on all variables
-contract('FiatToken', function (accounts) {
+contract('Legacy Tests', function (accounts) {
   beforeEach(async function () {
     token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
     let tokenAddress = token.address;
@@ -176,7 +176,7 @@ contract('FiatToken', function (accounts) {
     let balance0 = await token.balanceOf(accounts[0]);
     assert.equal(balance0, 500);
     let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, 0); 
+    assert.equal(balance3, 0);
   });
 
   it('should fail on invalid approved transfer amount and not change balances', async function () {
@@ -368,7 +368,7 @@ contract('FiatToken', function (accounts) {
 
     let balance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
-    
+
   });
 
   it('should blacklist recipient and make transfer to recipient using transferFrom impossible', async function () {
@@ -434,7 +434,7 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.pause({from: pauserAccount});
+    await tokenNew.pause({ from: pauserAccount });
 
     await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
 
@@ -455,7 +455,7 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.blacklist(accounts[2], {from: blacklisterAccount});
+    await tokenNew.blacklist(accounts[2], { from: blacklisterAccount });
 
     await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
 
@@ -476,7 +476,7 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
+    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
 
     await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
 
@@ -541,7 +541,7 @@ contract('FiatToken', function (accounts) {
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
 
-    await tokenNew.pause({from: pauserAccount});
+    await tokenNew.pause({ from: pauserAccount });
 
     await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
 
@@ -566,7 +566,7 @@ contract('FiatToken', function (accounts) {
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
 
-    await tokenNew.blacklist(accounts[2], {from: blacklisterAccount});
+    await tokenNew.blacklist(accounts[2], { from: blacklisterAccount });
 
     await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
 
@@ -591,7 +591,7 @@ contract('FiatToken', function (accounts) {
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
 
-    await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
+    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
 
     await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
 
@@ -616,7 +616,7 @@ contract('FiatToken', function (accounts) {
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
 
-    await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
+    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
 
     await expectRevert(tokenNew.transferViaPriorContract(accounts[2], accounts[1], 200, { from: accounts[2] }));
 
@@ -627,7 +627,7 @@ contract('FiatToken', function (accounts) {
     assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
   });
 
-    it('should transferFrom on old contract', async function () {
+  it('should transferFrom on old contract', async function () {
     await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
@@ -640,7 +640,7 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
     await token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
 
     let balanceFirst = await tokenNew.balanceOf(accounts[1]);
@@ -666,8 +666,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
-    await tokenNew.pause({from: pauserAccount});
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
+    await tokenNew.pause({ from: pauserAccount });
 
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
@@ -694,8 +694,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
-    await tokenNew.blacklist(accounts[2], {from: blacklisterAccount});
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
+    await tokenNew.blacklist(accounts[2], { from: blacklisterAccount });
 
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
@@ -722,8 +722,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
-    await tokenNew.blacklist(accounts[3], {from: blacklisterAccount});
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
+    await tokenNew.blacklist(accounts[3], { from: blacklisterAccount });
 
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
@@ -750,8 +750,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
-    await tokenNew.blacklist(accounts[1], {from: blacklisterAccount});
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
+    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
 
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
@@ -778,7 +778,7 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
 
     await expectRevert(tokenNew.transferFromViaPriorContract(accounts[1], accounts[2], accounts[3], 200, { from: accounts[1] }));
 
@@ -805,8 +805,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.disablePriorContract({from: pauserAccount});
-    
+    await tokenNew.disablePriorContract({ from: pauserAccount });
+
     await expectRevert(token.approve(accounts[1], 200, { from: accounts[2] }));
 
     let allowance = await tokenNew.allowance(accounts[2], accounts[1]);
@@ -826,8 +826,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.disablePriorContract({from: pauserAccount});
-    
+    await tokenNew.disablePriorContract({ from: pauserAccount });
+
     await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
 
     let balanceFirst = await tokenNew.balanceOf(accounts[1]);
@@ -850,8 +850,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
-    await tokenNew.disablePriorContract({from: pauserAccount});
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
+    await tokenNew.disablePriorContract({ from: pauserAccount });
 
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
 
@@ -866,7 +866,7 @@ contract('FiatToken', function (accounts) {
   });
 
 
- it('should approve using priorContract when disablePriorContract is called with non-pauser', async function () {
+  it('should approve using priorContract when disablePriorContract is called with non-pauser', async function () {
     await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
@@ -879,8 +879,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await expectRevert(tokenNew.disablePriorContract({from: minterAccount}));
-    
+    await expectRevert(tokenNew.disablePriorContract({ from: minterAccount }));
+
     token.approve(accounts[1], 200, { from: accounts[2] });
 
     let allowance = await tokenNew.allowance(accounts[2], accounts[1]);
@@ -900,8 +900,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await expectRevert(tokenNew.disablePriorContract({from: minterAccount}));
-    
+    await expectRevert(tokenNew.disablePriorContract({ from: minterAccount }));
+
     token.transfer(accounts[1], 200, { from: accounts[2] });
 
     let balanceFirst = await tokenNew.balanceOf(accounts[1]);
@@ -924,8 +924,8 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, {from: accounts[2]});
-    await expectRevert(tokenNew.disablePriorContract({from: minterAccount}));
+    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
+    await expectRevert(tokenNew.disablePriorContract({ from: minterAccount }));
 
     token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
 
@@ -1389,7 +1389,7 @@ contract('FiatToken', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+    await tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
     await tokenNew.mint(accounts[2], 200, { from: minterAccount });
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
@@ -1447,7 +1447,7 @@ contract('FiatToken', function (accounts) {
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
 
     let tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, roleAddressChangerAccount);
-    
+
     await expectRevert(token.upgrade(tokenNewSecond.address, { from: upgraderAccount }));
   });
 
