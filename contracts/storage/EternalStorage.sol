@@ -36,7 +36,7 @@ contract EternalStorage is Ownable {
     }
 
     function isAnyBlacklisted(address _account1, address _account2) external view returns (bool) {
-        return blacklisted[_account1] || blacklisted[_account2];
+      return blacklisted[_account1] || blacklisted[_account2];
     }
 
     function getMinterAllowed(address _minter) external view returns (uint256) {
@@ -60,7 +60,7 @@ contract EternalStorage is Ownable {
     }
 
     function setBalances(address _firstAccount, uint256 _firstAmount,
-        address _secondAccount, uint256 _secondAmount) onlyOwner external {
+                        address _secondAccount, uint256 _secondAmount) onlyOwner external {
         balances[_firstAccount] = _firstAmount;
         balances[_secondAccount] = _secondAmount;
     }
