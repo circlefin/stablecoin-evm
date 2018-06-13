@@ -900,7 +900,7 @@ contract('FiatToken', function (accounts) {
 
     it('updateUpgraderAddress', async function () {
         await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
-        customVars = [
+        var customVars = [
             { 'variable': 'upgraderAccount', 'expectedValue': arbitraryAccount }
         ];
         checkVariables(token, customVars);
@@ -919,7 +919,7 @@ contract('FiatToken', function (accounts) {
     it('updateUpgraderAddress should fail with old upgrader', async function () {
         await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
         expectRevert(token.updateUpgraderAddress(upgraderAccount, { from: upgraderAccount }));
-        customVars = [
+        var customVars = [
             { 'variable': 'upgraderAccount', 'expectedValue': arbitraryAccount }
         ];
         checkVariables(token, customVars);
