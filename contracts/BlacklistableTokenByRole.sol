@@ -14,6 +14,10 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
     event Blacklisted(address _account);
     event UnBlacklisted(address _account);
 
+    constructor(address _blacklister) public {
+        blacklister = _blacklister;
+    }
+
     /**
      * @dev Throws if called by any account other than the blacklister
     */
