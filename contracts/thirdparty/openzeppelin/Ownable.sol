@@ -3,13 +3,14 @@ pragma solidity ^0.4.23;
 
 /**
  * @title Ownable
- * @dev The Ownable contract has an owner address, and provides basic authorization control
- * functions, this simplifies the implementation of "user permissions".
+ * @dev The Ownable contract from openzeppelin tag: v1.10.0 commit: feb665136c0dae9912e08397c1a21c4af3651ef3 modified to:
+ * 1) Remove renounceOwnership function
+ * 2) Remove OwnershipRenounced event
+ * Date of modification: 6/13/18
  */
 contract Ownable {
     address public owner;
 
-    event OwnershipRenounced(address indexed previousOwner);
     event OwnershipTransferred(
         address indexed previousOwner,
         address indexed newOwner
@@ -30,14 +31,6 @@ contract Ownable {
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
-    }
-
-    /**
-     * @dev Allows the current owner to relinquish control of the contract.
-    */
-    function renounceOwnership() public onlyOwner {
-        emit OwnershipRenounced(owner);
-        owner = address(0);
     }
 
     /**
