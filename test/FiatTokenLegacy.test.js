@@ -30,7 +30,7 @@ var pauserAccount = tokenUtils.pauserAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 // these tests are for reference and do not track side effects on all variables
-contract('FiatToken', function (accounts) {
+contract('Legacy Tests', function (accounts) {
 /*  ownerAccount = accounts[0]
   feeAccount = accounts[8];
   masterMinterAccount = accounts[9];
