@@ -317,6 +317,19 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
+  it('configureMinter -1', async function () {
+    let amount = -1;
+    // now make into a minter
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var isAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': amount }
+    ]
+    // verify it worked
+    await checkVariables(token, isAMinter);
+  });
+
+
   it('removeMinter', async function () {
     // set up pre-conditions
     let amount = 11;
@@ -860,4 +873,15 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
     await checkVariables(newToken, newTokenSetup);
   });
+
+  it('no payable function', async function () {
+    var success = false;
+    try {
+      await web3.eth.sendTransaction({ from: arbitraryAccount, to: token.address, value: 1 })
+    } catch (e) {
+      success = true;
+    }
+    assert.equal(true, success);
+  });
+
 });

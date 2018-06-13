@@ -196,8 +196,8 @@ async function checkVariables(token, customVars) {
     console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
   }
 
-    // build up actualState object to compare to expectedState object
-    var actualState = {
+  // build up actualState object to compare to expectedState object
+  var actualState = {
     'name': await token.name.call(),
     'symbol': await token.symbol.call(),
     'currency': await token.currency.call(),
@@ -465,7 +465,6 @@ async function redeem(token, account, amount) {
 }
 
 async function expectRevert(contractPromise) {
-
   try {
     await contractPromise;
   } catch (error) {
