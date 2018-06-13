@@ -12,6 +12,9 @@ contract PausableTokenByRole {
     event Pause();
     event Unpause();
 
+    constructor(address _pauser) public {
+        pauser = _pauser;
+    }
     /**
      * @dev throws if called by any account other than the pauser
     */
