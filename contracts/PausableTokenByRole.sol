@@ -46,7 +46,7 @@ contract PausableTokenByRole {
 
     /**
      * @dev Modifier to make a function callable only when the contract is paused.
-    xwww*/
+    */
     modifier whenPaused() {
         require(paused);
         _;
