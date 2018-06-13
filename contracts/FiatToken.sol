@@ -28,7 +28,21 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     event MinterConfigured(address minter, uint256 minterAllowedAmount);
     event MinterRemoved(address oldMinter);
 
-    constructor(address _contractStorageAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
+    constructor(
+        address _contractStorageAddress,
+        string _name,
+        string _symbol,
+        string _currency,
+        uint8 _decimals,
+        address _masterMinter,
+        address _pauser,
+        address _blacklister,
+        address _upgrader,
+        address _roleAddressChanger
+    )
+        EternalStorageUpdater(_contractStorageAddress)
+        public
+    {
 
         name = _name;
         symbol = _symbol;
@@ -39,12 +53,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
         blacklister = _blacklister;
         upgrader = _upgrader;
         roleAddressChanger = _roleAddressChanger;
-
-        if (_contractStorageAddress != address(0x0)) {
-            contractStorage = EternalStorage(_contractStorageAddress);
-        } else {
-            contractStorage = new EternalStorage();
-        }
     }
 
     /**

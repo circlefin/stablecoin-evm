@@ -7,7 +7,15 @@ import './EternalStorage.sol';
 contract EternalStorageUpdater {
     using SafeMath for uint256;
 
-    EternalStorage internal contractStorage = EternalStorage(0);
+    EternalStorage internal contractStorage;
+
+    constructor(address _contractStorage) public {
+        if (_contractStorage != address(0x0)) {
+            contractStorage = EternalStorage(_contractStorage);
+        } else {
+            contractStorage = new EternalStorage();
+        }
+    }
 
     function getAllowed(address _from, address _spender) internal view returns (uint256) {
         return contractStorage.getAllowed(_from, _spender);
