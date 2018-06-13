@@ -42,6 +42,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     )
         EternalStorageUpdater(_contractStorageAddress)
         PausableTokenByRole(_pauser)
+        Upgradable(_upgrader)
         public
     {
 
@@ -51,7 +52,6 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
         decimals = _decimals;
         masterMinter = _masterMinter;
         blacklister = _blacklister;
-        upgrader = _upgrader;
         roleAddressChanger = _roleAddressChanger;
     }
 
