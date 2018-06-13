@@ -52,13 +52,8 @@ contract('Negative Tests', function (accounts) {
   it('should fail to mint when paused', async function () {
     //Configure minter
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    var customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
-    ]
-    await checkVariables(token, customVars);
-
     await token.pause({from: pauserAccount});
+
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)},
@@ -81,6 +76,7 @@ contract('Negative Tests', function (accounts) {
 
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [
+      {'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true},
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
@@ -95,6 +91,7 @@ contract('Negative Tests', function (accounts) {
 
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [
+      {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true},
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
     ]
@@ -169,7 +166,7 @@ contract('Negative Tests', function (accounts) {
 
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
 
-    await checkVariables(token, []);
+    await checkVariables(token, [{'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true}]);
   })
 
   it('should fail to approve when msg.sender is blacklisted', async function () {
@@ -177,7 +174,7 @@ contract('Negative Tests', function (accounts) {
 
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
 
-    await checkVariables(token, []);
+    await checkVariables(token, [{'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}]);
   })
 
   it('should fail to approve when contract is paused', async function () {
@@ -185,7 +182,7 @@ contract('Negative Tests', function (accounts) {
 
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
 
-    await checkVariables(token, []);
+    await checkVariables(token, [{'variable': 'paused', 'expectedValue': true}]);
   })
 
   it('should fail to approve when contract is not owner', async function () {
