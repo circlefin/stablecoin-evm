@@ -17,6 +17,7 @@ var roleAddressChangerRole = 'roleAddressChanger';
 
 var ownerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
+var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
 var upgraderAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
 var roleAddressChangerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
 var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4]
@@ -454,4 +455,6 @@ module.exports = {
   minterAccount: minterAccount,
   pauserAccount: pauserAccount,
   blacklisterAccount: blacklisterAccount,
+
+  arbitraryAccountPrivateKey
 };
