@@ -21,7 +21,7 @@ var ownerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
 var upgraderAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
-var roleAddressChangerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
+var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
 var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4]
 var arbitraryAccount2 = "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc"; // accounts[5]
 var masterMinterAccount = "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9"; // accounts[6]
@@ -76,7 +76,7 @@ async function checkVariables(token, customVars) {
     'pauser': pauserAccount,
     'blacklister': blacklisterAccount,
     'upgrader': upgraderAccount,
-    'roleAddressChanger': roleAddressChangerAccount,
+    'tokenOwner': tokenOwnerAccount,
     // contractStorage is not deterministic for FiatTokenWithStorage
     //'contractStorage': storageAddress,
     // 'owner': ownerAccount,
@@ -86,7 +86,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': bigZero,
       'pauserAccount': bigZero,
       'blacklisterAccount': bigZero,
-      'roleAddressChangerAccount': bigZero,
+      'tokenOwnerAccount': bigZero,
       'upgraderAccount': bigZero
     },
     'allowance': {
@@ -95,7 +95,7 @@ async function checkVariables(token, customVars) {
         'minterAccount': bigZero,
         'pauserAccount': bigZero,
         'blacklisterAccount': bigZero,
-        'roleAddressChangerAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
         'upgraderAccount': bigZero
       },
       'masterMinterAccount': {
@@ -103,7 +103,7 @@ async function checkVariables(token, customVars) {
         'minterAccount': bigZero,
         'pauserAccount': bigZero,
         'blacklisterAccount': bigZero,
-        'roleAddressChangerAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
         'upgraderAccount': bigZero
       },
       'minterAccount': {
@@ -111,7 +111,7 @@ async function checkVariables(token, customVars) {
         'masterMinterAccount': bigZero,
         'pauserAccount': bigZero,
         'blacklisterAccount': bigZero,
-        'roleAddressChangerAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
         'upgraderAccount': bigZero
       },
       'pauserAccount': {
@@ -119,7 +119,7 @@ async function checkVariables(token, customVars) {
         'masterMinterAccount': bigZero,
         'minterAccount': bigZero,
         'blacklisterAccount': bigZero,
-        'roleAddressChangerAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
         'upgraderAccount': bigZero
       },
       'blacklisterAccount': {
@@ -127,10 +127,10 @@ async function checkVariables(token, customVars) {
         'masterMinterAccount': bigZero,
         'minterAccount': bigZero,
         'pauserAccount': bigZero,
-        'roleAddressChangerAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
         'upgraderAccount': bigZero
       },
-      'roleAddressChangerAccount': {
+      'tokenOwnerAccount': {
         'arbitraryAccount': bigZero,
         'masterMinterAccount': bigZero,
         'minterAccount': bigZero,
@@ -144,7 +144,7 @@ async function checkVariables(token, customVars) {
         'minterAccount': bigZero,
         'pauserAccount': bigZero,
         'blacklisterAccount': bigZero,
-        'roleAddressChangerAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
       }
     },
     'totalSupply': bigZero,
@@ -154,7 +154,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': false,
       'pauserAccount': false,
       'blacklisterAccount': false,
-      'roleAddressChangerAccount': false,
+      'tokenOwnerAccount': false,
       'upgraderAccount': false
     },
     'isAccountMinter': {
@@ -163,7 +163,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': false,
       'pauserAccount': false,
       'blacklisterAccount': false,
-      'roleAddressChangerAccount': false,
+      'tokenOwnerAccount': false,
       'upgraderAccount': false
     },
     'minterAllowance': {
@@ -172,7 +172,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': bigZero,
       'pauserAccount': bigZero,
       'blacklisterAccount': bigZero,
-      'roleAddressChangerAccount': bigZero,
+      'tokenOwnerAccount': bigZero,
       'upgraderAccount': bigZero
     },
     'paused': false
@@ -207,7 +207,7 @@ async function checkVariables(token, customVars) {
     'pauser': await token.pauser.call(),
     'blacklister': await token.blacklister.call(),
     'upgrader': await token.upgrader.call(),
-    'roleAddressChanger': await token.owner.call(),
+    'tokenOwner': await token.owner.call(),
     // contractStorage is not deterministic for FiatTokenWithStorage
     //'contractStorage': storageAddress,
     // 'owner': await token.owner.call(),
@@ -217,7 +217,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': await token.balanceOf(minterAccount),
       'pauserAccount': await token.balanceOf(pauserAccount),
       'blacklisterAccount': await token.balanceOf(blacklisterAccount),
-      'roleAddressChangerAccount': await token.balanceOf(roleAddressChangerAccount),
+      'tokenOwnerAccount': await token.balanceOf(tokenOwnerAccount),
       'upgraderAccount': await token.balanceOf(upgraderAccount)
     },
     'allowance': {
@@ -226,7 +226,7 @@ async function checkVariables(token, customVars) {
         'minterAccount': await token.allowance(arbitraryAccount, minterAccount),
         'pauserAccount': await token.allowance(arbitraryAccount, pauserAccount),
         'blacklisterAccount': await token.allowance(arbitraryAccount, blacklisterAccount),
-        'roleAddressChangerAccount': await token.allowance(arbitraryAccount, roleAddressChangerAccount),
+        'tokenOwnerAccount': await token.allowance(arbitraryAccount, tokenOwnerAccount),
         'upgraderAccount': await token.allowance(arbitraryAccount, upgraderAccount)
       },
       'masterMinterAccount': {
@@ -234,7 +234,7 @@ async function checkVariables(token, customVars) {
         'minterAccount': await token.allowance(masterMinterAccount, minterAccount),
         'pauserAccount': await token.allowance(masterMinterAccount, pauserAccount),
         'blacklisterAccount': await token.allowance(masterMinterAccount, blacklisterAccount),
-        'roleAddressChangerAccount': await token.allowance(masterMinterAccount, roleAddressChangerAccount),
+        'tokenOwnerAccount': await token.allowance(masterMinterAccount, tokenOwnerAccount),
         'upgraderAccount': await token.allowance(masterMinterAccount, upgraderAccount)
       },
       'minterAccount': {
@@ -242,7 +242,7 @@ async function checkVariables(token, customVars) {
         'masterMinterAccount': await token.allowance(minterAccount, masterMinterAccount),
         'pauserAccount': await token.allowance(minterAccount, pauserAccount),
         'blacklisterAccount': await token.allowance(minterAccount, blacklisterAccount),
-        'roleAddressChangerAccount': await token.allowance(minterAccount, roleAddressChangerAccount),
+        'tokenOwnerAccount': await token.allowance(minterAccount, tokenOwnerAccount),
         'upgraderAccount': await token.allowance(minterAccount, upgraderAccount)
       },
       'pauserAccount': {
@@ -250,7 +250,7 @@ async function checkVariables(token, customVars) {
         'masterMinterAccount': await token.allowance(pauserAccount, masterMinterAccount),
         'minterAccount': await token.allowance(pauserAccount, minterAccount),
         'blacklisterAccount': await token.allowance(pauserAccount, blacklisterAccount),
-        'roleAddressChangerAccount': await token.allowance(pauserAccount, roleAddressChangerAccount),
+        'tokenOwnerAccount': await token.allowance(pauserAccount, tokenOwnerAccount),
         'upgraderAccount': await token.allowance(pauserAccount, upgraderAccount)
       },
       'blacklisterAccount': {
@@ -258,16 +258,16 @@ async function checkVariables(token, customVars) {
         'masterMinterAccount': await token.allowance(blacklisterAccount, masterMinterAccount),
         'minterAccount': await token.allowance(blacklisterAccount, minterAccount),
         'pauserAccount': await token.allowance(blacklisterAccount, pauserAccount),
-        'roleAddressChangerAccount': await token.allowance(blacklisterAccount, roleAddressChangerAccount),
+        'tokenOwnerAccount': await token.allowance(blacklisterAccount, tokenOwnerAccount),
         'upgraderAccount': await token.allowance(blacklisterAccount, upgraderAccount)
       },
-      'roleAddressChangerAccount': {
-        'arbitraryAccount': await token.allowance(roleAddressChangerAccount, arbitraryAccount),
-        'masterMinterAccount': await token.allowance(roleAddressChangerAccount, masterMinterAccount),
-        'minterAccount': await token.allowance(roleAddressChangerAccount, minterAccount),
-        'pauserAccount': await token.allowance(roleAddressChangerAccount, pauserAccount),
-        'blacklisterAccount': await token.allowance(roleAddressChangerAccount, blacklisterAccount),
-        'upgraderAccount': await token.allowance(roleAddressChangerAccount, upgraderAccount)
+      'tokenOwnerAccount': {
+        'arbitraryAccount': await token.allowance(tokenOwnerAccount, arbitraryAccount),
+        'masterMinterAccount': await token.allowance(tokenOwnerAccount, masterMinterAccount),
+        'minterAccount': await token.allowance(tokenOwnerAccount, minterAccount),
+        'pauserAccount': await token.allowance(tokenOwnerAccount, pauserAccount),
+        'blacklisterAccount': await token.allowance(tokenOwnerAccount, blacklisterAccount),
+        'upgraderAccount': await token.allowance(tokenOwnerAccount, upgraderAccount)
       },
       'upgraderAccount': {
         'arbitraryAccount': await token.allowance(upgraderAccount, arbitraryAccount),
@@ -275,7 +275,7 @@ async function checkVariables(token, customVars) {
         'minterAccount': await token.allowance(upgraderAccount, minterAccount),
         'pauserAccount': await token.allowance(upgraderAccount, pauserAccount),
         'blacklisterAccount': await token.allowance(upgraderAccount, blacklisterAccount),
-        'roleAddressChangerAccount': await token.allowance(upgraderAccount, roleAddressChangerAccount),
+        'tokenOwnerAccount': await token.allowance(upgraderAccount, tokenOwnerAccount),
       }
     },
     'totalSupply': await token.totalSupply(),
@@ -285,7 +285,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': await token.isAccountBlacklisted(minterAccount),
       'pauserAccount': await token.isAccountBlacklisted(pauserAccount),
       'blacklisterAccount': await token.isAccountBlacklisted(blacklisterAccount),
-      'roleAddressChangerAccount': await token.isAccountBlacklisted(roleAddressChangerAccount),
+      'tokenOwnerAccount': await token.isAccountBlacklisted(tokenOwnerAccount),
       'upgraderAccount': await token.isAccountBlacklisted(upgraderAccount)
     },
     'isAccountMinter': {
@@ -294,7 +294,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': await token.isAccountMinter(minterAccount),
       'pauserAccount': await token.isAccountMinter(pauserAccount),
       'blacklisterAccount': await token.isAccountMinter(blacklisterAccount),
-      'roleAddressChangerAccount': await token.isAccountMinter(roleAddressChangerAccount),
+      'tokenOwnerAccount': await token.isAccountMinter(tokenOwnerAccount),
       'upgraderAccount': await token.isAccountMinter(upgraderAccount)
     },
     'minterAllowance': {
@@ -303,7 +303,7 @@ async function checkVariables(token, customVars) {
       'minterAccount': await token.minterAllowance(minterAccount),
       'pauserAccount': await token.minterAllowance(pauserAccount),
       'blacklisterAccount': await token.minterAllowance(blacklisterAccount),
-      'roleAddressChangerAccount': await token.minterAllowance(roleAddressChangerAccount),
+      'tokenOwnerAccount': await token.minterAllowance(tokenOwnerAccount),
       'upgraderAccount': await token.minterAllowance(upgraderAccount)
     },
     'paused': await token.paused()
@@ -511,7 +511,7 @@ module.exports = {
   ownerAccount: ownerAccount,
   arbitraryAccount: arbitraryAccount,
   upgraderAccount: upgraderAccount,
-  roleAddressChangerAccount: roleAddressChangerAccount,
+  tokenOwnerAccount: tokenOwnerAccount,
   blacklisterAccount: blacklisterAccount,
   arbitraryAccount2: arbitraryAccount2,
   masterMinterAccount: masterMinterAccount,
