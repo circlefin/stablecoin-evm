@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 /**
  * @title Pausable fiat token
@@ -12,6 +12,9 @@ contract PausableTokenByRole {
     event Pause();
     event Unpause();
 
+    constructor(address _pauser) public {
+        pauser = _pauser;
+    }
     /**
      * @dev throws if called by any account other than the pauser
     */
@@ -23,7 +26,7 @@ contract PausableTokenByRole {
     /**
      * @dev called by the pauser to pause, triggers stopped state
     */
-    function pause() onlyPauser whenNotPaused public {
+    function pause() onlyPauser public {
         paused = true;
         emit Pause();
     }
@@ -31,7 +34,7 @@ contract PausableTokenByRole {
     /**
      * @dev called by the pauser to unpause, returns to normal state
     */
-    function unpause() onlyPauser whenPaused public {
+    function unpause() onlyPauser public {
         paused = false;
         emit Unpause();
     }
@@ -46,12 +49,11 @@ contract PausableTokenByRole {
 
     /**
      * @dev Modifier to make a function callable only when the contract is paused.
-     */
+    */
     modifier whenPaused() {
         require(paused);
         _;
     }
-
 }
 
 

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 import './PausableTokenByRole.sol';
 import "./storage/EternalStorageUpdater.sol";
@@ -7,12 +7,16 @@ import "./storage/EternalStorageUpdater.sol";
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
-contract BlacklistableTokenByRole is PausableTokenByRole, EternalStorageUpdater {
+contract BlacklistableTokenByRole is EternalStorageUpdater {
 
     address public blacklister;
 
     event Blacklisted(address _account);
     event UnBlacklisted(address _account);
+
+    constructor(address _blacklister) public {
+        blacklister = _blacklister;
+    }
 
     /**
      * @dev Throws if called by any account other than the blacklister
@@ -62,7 +66,7 @@ contract BlacklistableTokenByRole is PausableTokenByRole, EternalStorageUpdater 
      * @dev Removes account from blacklist
      * @param _account The address to remove from the blacklist
     */
-    function unBlacklist(address _account) public whenNotPaused onlyBlacklister {
+    function unBlacklist(address _account) public onlyBlacklister {
         setBlacklisted(_account, false);
         emit UnBlacklisted(_account);
     }

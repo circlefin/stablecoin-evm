@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 import "./storage/EternalStorageUpdater.sol";
 
@@ -12,6 +12,10 @@ contract Upgradable is EternalStorageUpdater {
     address public upgradedAddress;
 
     event Upgraded(address newContractAddress);
+
+    constructor(address _upgrader) public {
+        upgrader = _upgrader;
+    }
 
     /**
      * @dev Throws if called by any account other than the upgrader

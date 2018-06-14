@@ -45,15 +45,14 @@ contract('FiatToken', function (accounts) {
 
     let dataContractAddress = await token.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
-    assert.equal(await storage.owner.call(), tokenAddress);
-    var assertDiff = require('assert-diff');
-    assertDiff.options.strict = true;
-
-    await checkVariables(token, []);
+    assert.equal(await storage.owner.call(), tokenAddress)
   });
 
-  //Begin mint tests
+  it('should check variable defaults are correct for negative tests', async function () {
+    await checkVariables(token, []);
+  })
 
+  //Begin mint tests
   it('should fail to mint when paused', async function () {
     await helpers.fail_mint_paused(token);
   });
