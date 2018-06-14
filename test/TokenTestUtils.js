@@ -199,9 +199,6 @@ async function checkVariables(token, customVars) {
   }
 
   let actualState = await getActualState(token);
-  console.log('log actualState return value!')
-  console.log(actualState)
-
   assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
 }
 
@@ -393,7 +390,7 @@ async function getActualState(token) {
           'pauserAccount': balancesP,
           'blacklisterAccount': balancesB,
           'roleAddressChangerAccount': balancesRAC,
-          'upgraderAccount': balancesU, 
+          'upgraderAccount': balancesU
         },
         'allowance': {
           'arbitraryAccount': {
@@ -402,39 +399,39 @@ async function getActualState(token) {
             'pauserAccount': allowanceAtoP,
             'blacklisterAccount': allowanceAtoB,
             'roleAddressChangerAccount': allowanceAtoRAC,
-            'upgraderAccount': allowanceAtoU 
+            'upgraderAccount': allowanceAtoU
           },
           'masterMinterAccount': {
             'arbitraryAccount': allowanceMMtoA,
             'minterAccount': allowanceMMtoM,
-            'pauserAccount': allowanceMMtoP, 
-            'blacklisterAccount': allowanceMMtoB, 
-            'roleAddressChangerAccount': allowanceMMtoRAC, 
-            'upgraderAccount': allowanceMMtoU, 
+            'pauserAccount': allowanceMMtoP,
+            'blacklisterAccount': allowanceMMtoB,
+            'roleAddressChangerAccount': allowanceMMtoRAC,
+            'upgraderAccount': allowanceMMtoU
           },
           'minterAccount': {
-            'arbitraryAccount': allowanceMtoA, 
-            'masterMinterAccount': allowanceMtoMM, 
-            'pauserAccount': allowanceMtoP, 
-            'blacklisterAccount': allowanceMtoB, 
-            'roleAddressChangerAccount': allowanceMtoRAC, 
-            'upgraderAccount': allowanceMtoU, 
+            'arbitraryAccount': allowanceMtoA,
+            'masterMinterAccount': allowanceMtoMM,
+            'pauserAccount': allowanceMtoP,
+            'blacklisterAccount': allowanceMtoB,
+            'roleAddressChangerAccount': allowanceMtoRAC,
+            'upgraderAccount': allowanceMtoU
           },
           'pauserAccount': {
-            'arbitraryAccount': allowancePtoA, 
+            'arbitraryAccount': allowancePtoA,
             'masterMinterAccount': allowancePtoMM,
             'minterAccount': allowancePtoM,
             'blacklisterAccount': allowancePtoB,
             'roleAddressChangerAccount': allowancePtoRAC,
-            'upgraderAccount': allowancePtoU,
+            'upgraderAccount': allowancePtoU
           },
           'blacklisterAccount': {
-            'arbitraryAccount': allowanceBtoA, 
-            'masterMinterAccount': allowanceBtoMM, 
-            'minterAccount': allowanceBtoM, 
+            'arbitraryAccount': allowanceBtoA,
+            'masterMinterAccount': allowanceBtoMM,
+            'minterAccount': allowanceBtoM,
             'pauserAccount': allowanceBtoP,
-            'roleAddressChangerAccount': allowanceBtoRAC, 
-            'upgraderAccount': allowanceBtoU, 
+            'roleAddressChangerAccount': allowanceBtoRAC,
+            'upgraderAccount': allowanceBtoU
           },
           'roleAddressChangerAccount': {
             'arbitraryAccount': allowanceRACtoA, 
@@ -450,27 +447,27 @@ async function getActualState(token) {
             'minterAccount': allowanceUtoM, 
             'pauserAccount': allowanceUtoP, 
             'blacklisterAccount': allowanceUtoB, 
-            'roleAddressChangerAccount': allowanceUtoRAC 
+            'roleAddressChangerAccount': allowanceUtoRAC
           }
         },
         'totalSupply': totalSupply,
         'isAccountBlacklisted': {
-          'arbitraryAccount': isAccountBlacklistedA, 
-          'masterMinterAccount': isAccountBlacklistedMM, 
-          'minterAccount': isAccountBlacklistedM, 
-          'pauserAccount': isAccountBlacklistedP, 
-          'blacklisterAccount': isAccountBlacklistedB, 
-          'roleAddressChangerAccount': isAccountBlacklistedRAC, 
-          'upgraderAccount': isAccountBlacklistedU 
+          'arbitraryAccount': isAccountBlacklistedA,
+          'masterMinterAccount': isAccountBlacklistedMM,
+          'minterAccount': isAccountBlacklistedM,
+          'pauserAccount': isAccountBlacklistedP,
+          'blacklisterAccount': isAccountBlacklistedB,
+          'roleAddressChangerAccount': isAccountBlacklistedRAC,
+          'upgraderAccount': isAccountBlacklistedU
         },
         'isAccountMinter': {
-          'arbitraryAccount': isAccountMinterA, 
-          'masterMinterAccount': isAccountMinterMM, 
-          'minterAccount': isAccountMinterM, 
-          'pauserAccount': isAccountMinterP, 
-          'blacklisterAccount': isAccountMinterB, 
-          'roleAddressChangerAccount': isAccountMinterRAC, 
-          'upgraderAccount': isAccountMinterU 
+          'arbitraryAccount': isAccountMinterA,
+          'masterMinterAccount': isAccountMinterMM,
+          'minterAccount': isAccountMinterM,
+          'pauserAccount': isAccountMinterP,
+          'blacklisterAccount': isAccountMinterB,
+          'roleAddressChangerAccount': isAccountMinterRAC,
+          'upgraderAccount': isAccountMinterU
         },
         'minterAllowance': {
           'arbitraryAccount': minterAllowanceA,
@@ -481,9 +478,8 @@ async function getActualState(token) {
           'roleAddressChangerAccount': minterAllowanceRAC,
           'upgraderAccount': minterAllowanceU
         },
-        'paused': paused 
+        'paused': paused
       };
-//      console.log(util.inspect(actualState, { showHidden: false, depth: null }))
       return actualState;
     })
 }
