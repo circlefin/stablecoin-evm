@@ -11,6 +11,7 @@ import "./Ownable.sol";
  * Modifications:
  * 1) Added pauser role, switched pause/unpause to be onlyPauser
  * 2) Removed whenNotPause/whenPaused from pause/unpause
+ * 3) Removed whenPaused
  */
 contract Pausable is Ownable {
   event Pause();
@@ -31,14 +32,6 @@ contract Pausable is Ownable {
    */
   modifier whenNotPaused() {
     require(!paused);
-    _;
-  }
-
-  /**
-   * @dev Modifier to make a function callable only when the contract is paused.
-   */
-  modifier whenPaused() {
-    require(paused);
     _;
   }
 
