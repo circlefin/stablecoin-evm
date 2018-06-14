@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
 import './../lib/openzeppelin/contracts/math/SafeMath.sol';
@@ -287,7 +287,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
      * @param _role string The role to update
     */
     function updateRoleAddress(address _newAddress, string _role) onlyRoleAddressChanger public {
-        bytes32 roleHash = keccak256(_role);
+        bytes32 roleHash = keccak256(abi.encodePacked(_role));
         if (roleHash == keccak256('masterMinter')) {
             masterMinter = _newAddress;
             emit RoleAddressChange(_role, _newAddress);
