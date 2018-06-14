@@ -248,10 +248,6 @@ contract('FiatToken', function (accounts) {
     await helpers.fail_unblacklist_senderNotBlacklister(token);
   });
 
-  it('should fail to unblacklist when paused', async function () {
-    await helpers.fail_unblacklist_paused(token);
-  });
-
   //Begin upgrade tests
 
   it('should fail to upgrade when sender is not upgrader', async function () {

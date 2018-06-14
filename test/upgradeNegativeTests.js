@@ -47,8 +47,6 @@ contract('UpgradedFiatToken', function (accounts) {
     let storage = EternalStorage.at(dataContractAddress);
     assert.equal(await storage.owner.call(), oldToken.address);
 
-    await checkVariables(oldToken, []);
-
     token = await UpgradedFiatToken.new(
       dataContractAddress,
       oldToken.address,
@@ -64,8 +62,11 @@ contract('UpgradedFiatToken', function (accounts) {
     await(oldToken.upgrade(token.address, {from: upgraderAccount}));
     assert.equal(await storage.owner.call(), token.address);
 
-    await checkVariables(token, []);
   });
+
+  it('should check variable defaults are correct for negative tests', async function () {
+    await checkVariables(token, []);
+  })
 
   //Begin mint tests
 

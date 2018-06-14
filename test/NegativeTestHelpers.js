@@ -233,8 +233,8 @@ async function fail_transferFrom_messageSenderBlacklisted(token) {
     {'variable': 'allowance.upgraderAccount.arbitraryAccount', 'expectedValue': new BigNumber(50)},
     {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
   ]
-  await checkVariables(token, customVars);
   expectRevert(token.transferFrom(upgraderAccount, pauserAccount, 50, {from: arbitraryAccount}));
+  await checkVariables(token, customVars);
 }
 
 async function fail_transferFrom_fromBlacklisted(token) {
@@ -705,17 +705,6 @@ async function fail_unblacklist_senderNotBlacklister(token) {
   await checkVariables(token, customVars);
 }
 
-async function fail_unblacklist_paused(token) {
-  await token.blacklist(arbitraryAccount, {from: blacklisterAccount});
-  await token.pause({from: pauserAccount});
-  customVars = [
-    {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true},
-    {'variable': 'paused', 'expectedValue': true}
-  ]
-  await expectRevert(token.unBlacklist(arbitraryAccount, {from: blacklisterAccount}));
-  await checkVariables(token, customVars);
-}
-
 //Begin upgrade test helpers
 
 async function fail_upgrade_senderNotUpgrader(token) {
@@ -800,7 +789,6 @@ module.exports = {
   fail_unpause_senderNotPauser: fail_unpause_senderNotPauser,
   fail_blacklist_senderNotBlacklister: fail_blacklist_senderNotBlacklister,
   fail_unblacklist_senderNotBlacklister: fail_unblacklist_senderNotBlacklister,
-  fail_unblacklist_paused: fail_unblacklist_paused,
   fail_upgrade_senderNotUpgrader: fail_upgrade_senderNotUpgrader,
   fail_upgrade_upgradedAddressIsNotZeroAddress: fail_upgrade_upgradedAddressIsNotZeroAddress,
   fail_upgrade_newAddressIsZeroAddress: fail_upgrade_newAddressIsZeroAddress,
