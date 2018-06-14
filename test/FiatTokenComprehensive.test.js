@@ -247,36 +247,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, isAMinter);
   });
 
-<<<<<<< HEAD
-=======
-  it('configureMinter whilePaused', async function () {
-    let amount = 6;
-
-    // pause contract and make sure not a minter
-    await token.pause({ from: pauserAccount })
-    var afterPause = [
-      { 'variable': 'paused', 'expectedValue': true }
-    ]
-    await checkVariables(token, afterPause);
-
-    // now make into a minter - this will throw
-    await expectRevert(token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
-
-    // state should be unchanged
-    await checkVariables(token, afterPause);
-  });
-
-  it('configureMinter from bad masterMinter', async function () {
-    let amount = 6;
-
-    // now make into a minter - this will throw
-    await expectRevert(token.configureMinter(minterAccount, amount, { from: arbitraryAccount }));
-
-    // state should be unchanged
-    await checkVariables(token, [])
-  });
-
->>>>>>> 5d5af563aa4348845e44a16b64feb6e7d0d4825f
   it('configureMinter when masterMinter is blacklisted', async function () {
     // set up pre-conditions
     let amount = 11;
@@ -388,26 +358,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, notAMinter);
   });
 
-<<<<<<< HEAD
-=======
-  it('removeMinter from bad masterMinter', async function () {
-    // set up pre-conditions
-    let amount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    var isAMinter = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
-    ]
-    await checkVariables(token, isAMinter);
-
-    // now remove minter - this will throw
-    await expectRevert(token.removeMinter(minterAccount, { from: arbitraryAccount }));
-
-    // state should be unchanged
-    await checkVariables(token, isAMinter)
-  });
-
->>>>>>> 5d5af563aa4348845e44a16b64feb6e7d0d4825f
   it('removeMinter when masterMinter is blacklisted', async function () {
     // set up pre-conditions
     let amount = 11;
@@ -508,140 +458,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, afterBurn)
   });
 
-<<<<<<< HEAD
-=======
-  it('burn too many', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 12;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ]
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn -1', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = -1;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ]
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn sender is mallory', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = -1;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ]
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: arbitraryAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn while paused', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    await token.pause({ from: pauserAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'paused', 'expectedValue': true }
-    ]
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn while minter blacklisted', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    await token.blacklist(minterAccount, { from: blacklisterAccount })
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
-    ]
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn after removeMinter', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    await token.removeMinter(minterAccount, { from: masterMinterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ]
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
->>>>>>> 5d5af563aa4348845e44a16b64feb6e7d0d4825f
   it('updateRoleAddress masterMinter', async function () {
     await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
     var result = [
