@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.23;
 
 import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
 import './../lib/openzeppelin/contracts/math/SafeMath.sol';
@@ -17,8 +17,8 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
 
     string public name;
     string public symbol;
-    string public currency;
     uint8 public decimals;
+    string public currency;
     address public roleAddressChanger;
     address public masterMinter;
 
@@ -28,23 +28,31 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
     event MinterConfigured(address minter, uint256 minterAllowedAmount);
     event MinterRemoved(address oldMinter);
 
-    constructor(address _contractStorageAddress, string _name, string _symbol, string _currency, uint8 _decimals, address _masterMinter, address _pauser, address _blacklister, address _upgrader, address _roleAddressChanger) public {
+    constructor(
+        address _contractStorageAddress,
+        string _name,
+        string _symbol,
+        string _currency,
+        uint8 _decimals,
+        address _masterMinter,
+        address _pauser,
+        address _blacklister,
+        address _upgrader,
+        address _roleAddressChanger
+    )
+        EternalStorageUpdater(_contractStorageAddress)
+        PausableTokenByRole(_pauser)
+        BlacklistableTokenByRole(_blacklister)
+        Upgradable(_upgrader)
+        public
+    {
 
         name = _name;
         symbol = _symbol;
         currency = _currency;
         decimals = _decimals;
         masterMinter = _masterMinter;
-        pauser = _pauser;
-        blacklister = _blacklister;
-        upgrader = _upgrader;
         roleAddressChanger = _roleAddressChanger;
-
-        if (_contractStorageAddress != address(0x0)) {
-            contractStorage = EternalStorage(_contractStorageAddress);
-        } else {
-            contractStorage = new EternalStorage();
-        }
     }
 
     /**
@@ -279,7 +287,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
      * @param _role string The role to update
     */
     function updateRoleAddress(address _newAddress, string _role) onlyRoleAddressChanger public {
-        bytes32 roleHash = keccak256(_role);
+        bytes32 roleHash = keccak256(abi.encodePacked(_role));
         if (roleHash == keccak256('masterMinter')) {
             masterMinter = _newAddress;
             emit RoleAddressChange(_role, _newAddress);

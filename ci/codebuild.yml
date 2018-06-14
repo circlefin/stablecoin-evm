@@ -53,7 +53,7 @@ Resources:
         Auth:
           Type: OAUTH
         GitCloneDepth: 1
-      TimeoutInMinutes: 10
+      TimeoutInMinutes: 30
 
   CodeBuildBucket:
     Type: "AWS::S3::Bucket"
