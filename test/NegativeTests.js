@@ -248,7 +248,7 @@ contract('FiatToken', function (accounts) {
     await helpers.fail_unblacklist_senderNotBlacklister(token);
   });
 
-  it('should fail to unBlacklist when paused', async function () {
+  it('should fail to unblacklist when paused', async function () {
     await helpers.fail_unblacklist_paused(token);
   });
 

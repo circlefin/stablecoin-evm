@@ -359,26 +359,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, notAMinter);
   });
 
-<<<<<<< HEAD
-=======
-  it('removeMinter from bad masterMinter', async function () {
-    // set up pre-conditions
-    let amount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    var isAMinter = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
-    ];
-    await checkVariables(token, isAMinter);
-
-    // now remove minter - this will throw
-    await expectRevert(token.removeMinter(minterAccount, { from: arbitraryAccount }));
-
-    // state should be unchanged
-    await checkVariables(token, isAMinter)
-  });
-
->>>>>>> 8b8534c8308ebeaef09869031c4b97162966df5e
   it('removeMinter when masterMinter is blacklisted', async function () {
     // set up pre-conditions
     let amount = 11;
@@ -479,140 +459,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, afterBurn)
   });
 
-<<<<<<< HEAD
-=======
-  it('burn too many', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 12;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ];
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn -1', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = -1;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ];
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn sender is mallory', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = -1;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ];
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: arbitraryAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn while paused', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    await token.pause({ from: pauserAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'paused', 'expectedValue': true }
-    ];
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn while minter blacklisted', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    await token.blacklist(minterAccount, { from: blacklisterAccount })
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
-    ];
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
-  it('burn after removeMinter', async function () {
-    // set up pre-conditions
-    var amount = 11;
-    var burnAmount = 11;
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(minterAccount, amount, { from: minterAccount });
-    await token.removeMinter(minterAccount, { from: masterMinterAccount });
-    var setup = [
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
-      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount) },
-    ];
-    await checkVariables(token, setup);
-
-    // now burn the tokens
-    await expectRevert(token.burn(burnAmount, { from: minterAccount }))
-
-    // state should be unchanged
-    await checkVariables(token, setup)
-  });
-
->>>>>>> 8b8534c8308ebeaef09869031c4b97162966df5e
   it('updateRoleAddress masterMinter', async function () {
     await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
     var result = [
@@ -673,24 +519,6 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-<<<<<<< HEAD
-=======
-  it('updateRoleAddress old roleAddressChanger disabled', async function () {
-    // initial
-    await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
-    var setup = [
-      { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount }
-    ];
-    await checkVariables(token, setup);
-
-    // try change roleAddressChanger role address
-    await expectRevert(token.updateRoleAddress(masterMinterAccount, roleAddressChangerRole, { from: roleAddressChangerAccount }))
-
-    // verify it no changes
-    await checkVariables(token, setup);
-  });
-
->>>>>>> 8b8534c8308ebeaef09869031c4b97162966df5e
   it('updateRoleAddress new roleAddressChanger can update', async function () {
     // switch roleAddressChanger
     await token.updateRoleAddress(arbitraryAccount, roleAddressChangerRole, { from: roleAddressChangerAccount });
@@ -843,33 +671,10 @@ contract('FiatToken', function (accounts) {
     assert.equal(true, success);
   });
 
-<<<<<<< HEAD
-});
-=======
   it('updateUpgraderAddress', async function () {
     await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
     var result = [{ 'variable': 'upgrader', 'expectedValue': arbitraryAccount }];
     await checkVariables(token, result);
   });
 
-  it('updateUpgraderAddress should fail with bad sender', async function () {
-    await expectRevert(token.updateUpgraderAddress(arbitraryAccount, { from: roleAddressChangerAccount }));
-    await checkVariables(token, []);
-  });
-
-  it('updateUpgraderAddress should fail with bad new Value', async function () {
-    await expectRevert(token.updateUpgraderAddress(0x00, { from: roleAddressChangerAccount }));
-    await checkVariables(token, []);
-  });
-
-  it('updateUpgraderAddress should fail with old upgrader', async function () {
-    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
-    await expectRevert(token.updateUpgraderAddress(upgraderAccount, { from: upgraderAccount }));
-    var result = [
-      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount }
-    ];
-    await checkVariables(token, result);
-  });
-
 });
->>>>>>> 8b8534c8308ebeaef09869031c4b97162966df5e
