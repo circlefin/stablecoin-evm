@@ -7,7 +7,7 @@ phases:
       - npm install
       - git clone -n https://github.com/OpenZeppelin/zeppelin-solidity.git lib/openzeppelin
       - cd lib/openzeppelin
-      - git checkout 0541347034a1401af0eca447f0b4acc29cbad56b
+      - git checkout feb665136c0dae9912e08397c1a21c4af3651ef3
       - cd ../..
   build:
     commands:
