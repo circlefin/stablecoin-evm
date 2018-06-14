@@ -10,6 +10,7 @@ import "./Ownable.sol";
  * Based on openzeppelin tag v1.10.0 commit: feb665136c0dae9912e08397c1a21c4af3651ef3
  * Modifications:
  * 1) Added pauser role, switched pause/unpause to be onlyPauser
+ * 2) Removed whenNotPause/whenPaused from pause/unpause
  */
 contract Pausable is Ownable {
   event Pause();
@@ -52,7 +53,7 @@ contract Pausable is Ownable {
   /**
    * @dev called by the owner to pause, triggers stopped state
    */
-  function pause() onlyPauser whenNotPaused public {
+  function pause() onlyPauser public {
     paused = true;
     emit Pause();
   }
@@ -60,7 +61,7 @@ contract Pausable is Ownable {
   /**
    * @dev called by the owner to unpause, returns to normal state
    */
-  function unpause() onlyPauser whenPaused public {
+  function unpause() onlyPauser public {
     paused = false;
     emit Unpause();
   }
