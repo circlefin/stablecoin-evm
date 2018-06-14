@@ -1,6 +1,7 @@
 var FiatToken = artifacts.require('FiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');
+var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
@@ -631,9 +632,20 @@ contract('FiatToken', function (accounts) {
   it('updateRoleAddress after upgrade', async function () {
     // create new token with same DataConract but arbitraryAddress in all the roles
     let dataContractAddress = await token.getDataContractAddress();
-    let newToken = await FiatToken.new(dataContractAddress,
-      name, symbol, currency, decimals, arbitraryAccount, arbitraryAccount, arbitraryAccount,
-      arbitraryAccount, arbitraryAccount);
+    let storage = EternalStorage.at(dataContractAddress);
+    assert.equal(await storage.owner.call(), token.address);
+    let newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      arbitraryAccount,
+      arbitraryAccount,
+      arbitraryAccount,
+      arbitraryAccount,
+      arbitraryAccount);
     var newTokenSetup = [
       { 'variable': 'roleAddressChanger', 'expectedValue': arbitraryAccount },
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
@@ -643,8 +655,8 @@ contract('FiatToken', function (accounts) {
     ]
     await checkVariables(newToken, newTokenSetup);
 
-    //upgrade the token contract
-    await token.upgrade(newToken.address, { from: upgraderAccount });
+    await(token.upgrade(newToken.address, {from: upgraderAccount}));
+    assert.equal(await storage.owner.call(), newToken.address);
 
     await checkVariables(token, []);
 
