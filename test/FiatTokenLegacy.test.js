@@ -368,7 +368,6 @@ contract('Legacy Tests', function (accounts) {
 
     let balance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
-
   });
 
   it('should blacklist recipient and make transfer to recipient using transferFrom impossible', async function () {
