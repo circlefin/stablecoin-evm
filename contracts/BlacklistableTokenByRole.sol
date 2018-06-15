@@ -1,5 +1,6 @@
 pragma solidity ^0.4.23;
 
+import "./thirdparty/openzeppelin/Ownable.sol";
 import "./storage/EternalStorageUpdater.sol";
 
 /**
