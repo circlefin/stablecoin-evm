@@ -5,10 +5,6 @@ phases:
     commands:
       - npm install -g truffle@^4.1.8
       - npm install
-      - git clone -n https://github.com/OpenZeppelin/zeppelin-solidity.git lib/openzeppelin
-      - cd lib/openzeppelin
-      - git checkout feb665136c0dae9912e08397c1a21c4af3651ef3
-      - cd ../..
   build:
     commands:
       - echo Build started on `date`
