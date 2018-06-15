@@ -166,7 +166,7 @@ async function fail_transferFrom_toZeroAddress(token) {
     {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
     {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(50)}
   ]
-  expectRevert(token.transferFrom(arbitraryAccount, "0x0", 50, {from: upgraderAccount}));
+  await expectRevert(token.transferFrom(arbitraryAccount, "0x0", 50, {from: upgraderAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -187,7 +187,7 @@ async function fail_transferFrom_amountGreaterThanBalance(token) {
     {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
     {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(amount)},
   ]
-  expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, amount, {from: upgraderAccount}));
+  await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, amount, {from: upgraderAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -210,7 +210,7 @@ async function fail_transferFrom_recipientBlacklisted(token) {
     {'variable': 'allowance.upgraderAccount.pauserAccount', 'expectedValue': new BigNumber(50)},
     {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
   ]
-  expectRevert(token.transferFrom(upgraderAccount, arbitraryAccount, 50, {from: pauserAccount}));
+  await expectRevert(token.transferFrom(upgraderAccount, arbitraryAccount, 50, {from: pauserAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -233,7 +233,7 @@ async function fail_transferFrom_messageSenderBlacklisted(token) {
     {'variable': 'allowance.upgraderAccount.arbitraryAccount', 'expectedValue': new BigNumber(50)},
     {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
   ]
-  expectRevert(token.transferFrom(upgraderAccount, pauserAccount, 50, {from: arbitraryAccount}));
+  await expectRevert(token.transferFrom(upgraderAccount, pauserAccount, 50, {from: arbitraryAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -256,7 +256,7 @@ async function fail_transferFrom_fromBlacklisted(token) {
     {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(50)},
     {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
   ]
-  expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 50, {from: upgraderAccount}));
+  await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 50, {from: upgraderAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -277,7 +277,7 @@ async function fail_transferFrom_amountGreaterThanAllowance(token) {
     {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
     {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(50)},
   ]
-  expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 60, {from: upgraderAccount}));
+  await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 60, {from: upgraderAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -348,7 +348,7 @@ async function fail_transfer_toZeroAddress(token) {
     {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
     {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
   ]
-  expectRevert(token.transfer("0x0", 50, {from: arbitraryAccount}));
+  await expectRevert(token.transfer("0x0", 50, {from: arbitraryAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -367,7 +367,7 @@ async function fail_transfer_amountGreaterThanBalance(token) {
     {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
     {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
   ]
-  expectRevert(token.transfer(pauserAccount, amount, {from: arbitraryAccount}));
+  await expectRevert(token.transfer(pauserAccount, amount, {from: arbitraryAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -388,7 +388,7 @@ async function fail_transfer_recipientBlacklisted(token) {
     {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
     {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
   ]
-  expectRevert(token.transfer(arbitraryAccount, 50, {from: upgraderAccount}));
+  await expectRevert(token.transfer(arbitraryAccount, 50, {from: upgraderAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -409,7 +409,7 @@ async function fail_transfer_senderBlacklisted(token) {
     {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
     {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
   ]
-  expectRevert(token.transfer(upgraderAccount, 50, {from: arbitraryAccount}));
+  await expectRevert(token.transfer(upgraderAccount, 50, {from: arbitraryAccount}));
   await checkVariables(token, customVars);
 }
 
@@ -738,7 +738,7 @@ async function fail_disablePriorContract_senderNotPauser(token) {
     blacklisterAccount,
     upgraderAccount,
     roleAddressChangerAccount);
-  await(token.upgrade(newToken.address, {from: upgraderAccount}));
+  await (token.upgrade(newToken.address, {from: upgraderAccount}));
 
   await expectRevert(newToken.disablePriorContract({from: arbitraryAccount}));
   await checkVariables(token, []);
