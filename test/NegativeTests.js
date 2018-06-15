@@ -27,8 +27,6 @@ var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
 contract('FiatToken', function (accounts) {
 
   beforeEach(async function checkBefore() {
-    //var amount = 100;
-
     token = await FiatToken.new(
       "0x0",
       name,
