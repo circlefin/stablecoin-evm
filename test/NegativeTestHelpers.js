@@ -3,12 +3,12 @@ var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
 var BigNumber = require('bignumber.js');
 var tokenUtils = require('./TokenTestUtils');
+
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
 var decimals = tokenUtils.decimals;
 var bigZero = tokenUtils.bigZero;
-
 var checkVariables = tokenUtils.checkVariables;
 var expectRevert = tokenUtils.expectRevert;
 var blacklist = tokenUtils.blacklist;
@@ -25,7 +25,6 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
 
 var amount = 100;
-
 
 //Begin mint test helpers
 

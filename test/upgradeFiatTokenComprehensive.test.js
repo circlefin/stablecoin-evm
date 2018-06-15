@@ -70,9 +70,9 @@ const should = require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-contract('FiatToken', function (accounts) {
+contract('UpgradedFiatToken', function (accounts) {
   beforeEach(async function checkBefore() {
-    token = await FiatToken.new(
+    oldToken = await FiatToken.new(
       "0x0",
       name,
       symbol,
@@ -84,11 +84,23 @@ contract('FiatToken', function (accounts) {
       upgraderAccount,
       roleAddressChangerAccount);
 
-    let dataContractAddress = await token.getDataContractAddress();
+    let dataContractAddress = await oldToken.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
+    assert.equal(await storage.owner.call(), oldToken.address);
 
-    // add in javascript field for storageAddress + owner to token
-
+    token = await UpgradedFiatToken.new(
+      dataContractAddress,
+      oldToken.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      roleAddressChangerAccount);
+    await(oldToken.upgrade(token.address, {from: upgraderAccount}));
     assert.equal(await storage.owner.call(), token.address);
   });
 
