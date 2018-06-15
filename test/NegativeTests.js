@@ -260,7 +260,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transferFrom(arbitraryAccount, "0x0", 50, {from: upgraderAccount}));
+    await expectRevert(token.transferFrom(arbitraryAccount, "0x0", 50, {from: upgraderAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -291,7 +291,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, amount, {from: upgraderAccount}));
+    await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, amount, {from: upgraderAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -333,7 +333,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transferFrom(upgraderAccount, arbitraryAccount, 50, {from: pauserAccount}));
+    await expectRevert(token.transferFrom(upgraderAccount, arbitraryAccount, 50, {from: pauserAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -375,7 +375,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transferFrom(upgraderAccount, pauserAccount, 50, {from: arbitraryAccount}));
+    await expectRevert(token.transferFrom(upgraderAccount, pauserAccount, 50, {from: arbitraryAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -417,7 +417,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 50, {from: upgraderAccount}));
+    await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 50, {from: upgraderAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -448,7 +448,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 60, {from: upgraderAccount}));
+    await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 60, {from: upgraderAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -550,7 +550,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transfer("0x0", 50, {from: arbitraryAccount}));
+    await expectRevert(token.transfer("0x0", 50, {from: arbitraryAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -571,7 +571,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transfer(pauserAccount, amount, {from: arbitraryAccount}));
+    await expectRevert(token.transfer(pauserAccount, amount, {from: arbitraryAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -602,7 +602,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transfer(arbitraryAccount, 50, {from: upgraderAccount}));
+    await expectRevert(token.transfer(arbitraryAccount, 50, {from: upgraderAccount}));
     await checkVariables(token, customVars);
   })
 
@@ -633,7 +633,7 @@ contract('Negative Tests', function (accounts) {
     ]
     await checkVariables(token, customVars);
 
-    expectRevert(token.transfer(upgraderAccount, 50, {from: arbitraryAccount}));
+    await expectRevert(token.transfer(upgraderAccount, 50, {from: arbitraryAccount}));
     await checkVariables(token, customVars);
   })
 

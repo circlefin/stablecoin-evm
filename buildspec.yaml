@@ -13,7 +13,7 @@ phases:
     commands:
       - echo Build started on `date`
       - mkdir -p build/logs
-      - truffle compile
+      - truffle compile --strict
       - npm test
 
 artifacts:
