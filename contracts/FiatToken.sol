@@ -24,7 +24,6 @@ contract FiatToken is Ownable, ERC20, PausableTokenByRole, BlacklistableTokenByR
 
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
-    event RoleAddressChange(string role, address indexed newAddress);
     event MinterConfigured(address minter, uint256 minterAllowedAmount);
     event MinterRemoved(address oldMinter);
     event MasterMinterChanged(address newMasterMinter);
