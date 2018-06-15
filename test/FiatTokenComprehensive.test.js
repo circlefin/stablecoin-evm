@@ -630,7 +630,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup)
   });
 
-  it('updateRoleAddress masterMinter', async function () {
+  it('update masterMinter', async function () {
     // change masterMinter role address
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
@@ -640,7 +640,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('updateRoleAddress blacklister', async function () {
+  it('update blacklister', async function () {
     // change masterMinter role address
     await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
@@ -650,7 +650,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('updateRoleAddress pauser', async function () {
+  it('update pauser', async function () {
 
     // change masterMinter role address
     await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
@@ -661,7 +661,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('updateRoleAddress tokenOwner', async function () {
+  it('update tokenOwner', async function () {
 
     // change masterMinter role address
     await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
@@ -673,7 +673,7 @@ contract('FiatToken', function (accounts) {
   });
 
   // while paused
-  it('updateRoleAddress while paused', async function () {
+  it('update owner while paused', async function () {
     // initial
     await token.pause({ from: pauserAccount });
     var setup = [
@@ -691,7 +691,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('updateRoleAddress old tokenOwner disabled', async function () {
+  it('update owner old tokenOwner disabled', async function () {
     // initial
     await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
@@ -706,7 +706,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
   });
 
-  it('updateRoleAddress new tokenOwner can update', async function () {
+  it('update owner new tokenOwner can update', async function () {
     // switch tokenOwner
     await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
@@ -725,7 +725,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('updateRoleAddress user is 0x00', async function () {
+  it('update master minter and pauser to 0x00', async function () {
     let bigZero = 0x0000000000000000000000000000000000000000; // TODO rename variable
     let smallZero = 0x00;
 
@@ -742,7 +742,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('updateRoleAddress user is tokenOwner', async function () {
+  it('update owner user is tokenOwner', async function () {
     // Set tokenOwner to self
     await token.transferOwnership(tokenOwnerAccount, { from: tokenOwnerAccount });
 
@@ -750,7 +750,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, []);
   });
 
-  it('updateRoleAddress user is blacklisted', async function () {
+  it('update master minter user is blacklisted', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     var setup = [
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
@@ -768,7 +768,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
-  it('updateRoleAddress tokenOwner is blacklisted', async function () {
+  it('update master minter tokenOwner is blacklisted', async function () {
     await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
     var setup = [
       { 'variable': 'isAccountBlacklisted.tokenOwnerAccount', 'expectedValue': true }
@@ -818,7 +818,7 @@ contract('FiatToken', function (accounts) {
     });
 
     // while paused
-  it('updateRoleAddress while paused', async function () {
+  it('update master minter while paused', async function () {
     await token.pause({ from: pauserAccount });
     var setup = [
       { 'variable': 'paused', 'expectedValue': true }
@@ -837,7 +837,7 @@ contract('FiatToken', function (accounts) {
   });
 
   // while upgraded
-  it('updateRoleAddress after upgrade', async function () {
+  it('update master minter after upgrade', async function () {
     // create new token with same DataConract but arbitraryAddress in all the roles
     let dataContractAddress = await token.getDataContractAddress();
     let newToken = await FiatToken.new(dataContractAddress,
