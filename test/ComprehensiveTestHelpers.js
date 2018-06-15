@@ -32,12 +32,6 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 var amount = 100;
 
-//Where should this be??
-const should = require('chai')
-  .use(require('chai-as-promised'))
-  .use(require('chai-bignumber')(BigNumber))
-  .should();
-
 async function check_defaultVariableValues(token) {
   await checkVariables(token, []);
 }
