@@ -137,7 +137,7 @@ contract UpgradedFiatToken is FiatToken, UpgradedContract {
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
     */
-    function doTransferFrom(address _sender, address _from, address _to, uint256 _value) private {
+    function doTransferFrom(address _sender, address _from, address _to, uint256 _value) notBlacklisted(_sender) private {
         uint256 allowed;
         allowed = getAllowed(_from, _sender);
 
