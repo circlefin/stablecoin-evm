@@ -787,7 +787,7 @@ contract('FiatToken', function (accounts) {
   });
 
   // bad sender
-  it('updateRoleAddress msg.sender is not tokenOwner', async function () {
+  it('update master minter msg.sender is not tokenOwner', async function () {
 
     // try to update masterMinter
     await expectRevert(token.updateMasterMinter(arbitraryAccount, { from: arbitraryAccount }));
@@ -796,7 +796,28 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, []);
   });
 
-  // while paused
+    // bad sender
+    it('update pauser msg.sender is not tokenOwner', async function () {
+
+        // try to update masterMinter
+        await expectRevert(token.updatePauser(arbitraryAccount, { from: arbitraryAccount }));
+    });
+
+    // bad sender
+    it('update blacklister msg.sender is not tokenOwner', async function () {
+
+        // try to update masterMinter
+        await expectRevert(token.updateBlacklister(arbitraryAccount, { from: arbitraryAccount }));
+    });
+
+    // bad sender
+    it('update owner msg.sender is not tokenOwner', async function () {
+
+        // try to update masterMinter
+        await expectRevert(token.transferOwnership(arbitraryAccount, { from: arbitraryAccount }));
+    });
+
+    // while paused
   it('updateRoleAddress while paused', async function () {
     await token.pause({ from: pauserAccount });
     var setup = [
