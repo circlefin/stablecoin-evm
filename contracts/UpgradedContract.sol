@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
+import './thirdparty/openzeppelin/ERC20.sol';
 
 /**
  * @title Upgrdaded Contract
