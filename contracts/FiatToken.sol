@@ -2,6 +2,7 @@ pragma solidity ^0.4.23;
 
 import './../lib/openzeppelin/contracts/token/ERC20/ERC20.sol';
 import './../lib/openzeppelin/contracts/math/SafeMath.sol';
+import './thirdparty/openzeppelin/Ownable.sol';
 
 import './PausableTokenByRole.sol';
 import './BlacklistableTokenByRole.sol';
@@ -12,21 +13,20 @@ import './UpgradedContract.sol';
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
+contract FiatToken is Ownable, ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
     using SafeMath for uint256;
 
     string public name;
     string public symbol;
     uint8 public decimals;
     string public currency;
-    address public roleAddressChanger;
     address public masterMinter;
 
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
-    event RoleAddressChange(string role, address indexed newAddress);
     event MinterConfigured(address minter, uint256 minterAllowedAmount);
     event MinterRemoved(address oldMinter);
+    event MasterMinterChanged(address newMasterMinter);
 
     constructor(
         address _contractStorageAddress,
@@ -38,7 +38,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
         address _pauser,
         address _blacklister,
         address _upgrader,
-        address _roleAddressChanger
+        address _owner
     )
         EternalStorageUpdater(_contractStorageAddress)
         PausableTokenByRole(_pauser)
@@ -52,15 +52,7 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
         currency = _currency;
         decimals = _decimals;
         masterMinter = _masterMinter;
-        roleAddressChanger = _roleAddressChanger;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the roleAddressChanger
-    */
-    modifier onlyRoleAddressChanger() {
-        require(msg.sender == roleAddressChanger);
-        _;
+        transferOwnership(_owner);
     }
 
     /**
@@ -270,40 +262,8 @@ contract FiatToken is ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgr
         emit Burn(msg.sender, _amount);
     }
 
-    /**
-     * @dev updates the upgrader address
-     * Validates that caller is the upgrader
-     * @param _newAddress address The new upgrader address
-    */
-    function updateUpgraderAddress(address _newAddress) onlyUpgrader public {
-        upgrader = _newAddress;
-        emit RoleAddressChange('upgrader', _newAddress);
+    function updateMasterMinter(address _newMasterMinter) onlyOwner public {
+        masterMinter = _newMasterMinter;
+        emit MasterMinterChanged(masterMinter);
     }
-
-    /**
-     * @dev updates a role's address with the roleAddressChanger
-     * Validates that caller is the roleAddressChanger
-     * @param _newAddress address The new role address
-     * @param _role string The role to update
-    */
-    function updateRoleAddress(address _newAddress, string _role) onlyRoleAddressChanger public {
-        bytes32 roleHash = keccak256(abi.encodePacked(_role));
-        if (roleHash == keccak256('masterMinter')) {
-            masterMinter = _newAddress;
-            emit RoleAddressChange(_role, _newAddress);
-        }
-        if (roleHash == keccak256('blacklister')) {
-            blacklister = _newAddress;
-            emit RoleAddressChange(_role, _newAddress);
-        }
-        if (roleHash == keccak256('pauser')) {
-            pauser = _newAddress;
-            emit RoleAddressChange(_role, _newAddress);
-        }
-        if (roleHash == keccak256('roleAddressChanger')) {
-            roleAddressChanger = _newAddress;
-            emit RoleAddressChange(_role, _newAddress);
-        }
-    }
-
 }

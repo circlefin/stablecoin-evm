@@ -14,7 +14,7 @@ var blacklist = tokenUtils.blacklist;
 var ownerAccount = tokenUtils.ownerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
-var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
@@ -36,7 +36,7 @@ contract('Negative Tests', function (accounts) {
       pauserAccount,
       blacklisterAccount,
       upgraderAccount,
-      roleAddressChangerAccount);
+      tokenOwnerAccount);
 
     let tokenAddress = token.address;
 

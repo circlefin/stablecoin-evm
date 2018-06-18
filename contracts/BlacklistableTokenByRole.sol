@@ -1,18 +1,19 @@
 pragma solidity ^0.4.23;
 
-import './PausableTokenByRole.sol';
+import "./thirdparty/openzeppelin/Ownable.sol";
 import "./storage/EternalStorageUpdater.sol";
 
 /**
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
-contract BlacklistableTokenByRole is EternalStorageUpdater {
+contract BlacklistableTokenByRole is EternalStorageUpdater, Ownable {
 
     address public blacklister;
 
     event Blacklisted(address _account);
     event UnBlacklisted(address _account);
+    event BlacklisterChanged(address indexed newBlacklister);
 
     constructor(address _blacklister) public {
         blacklister = _blacklister;
@@ -71,4 +72,8 @@ contract BlacklistableTokenByRole is EternalStorageUpdater {
         emit UnBlacklisted(_account);
     }
 
+    function updateBlacklister(address _newBlacklister) public onlyOwner {
+        blacklister = _newBlacklister;
+        emit BlacklisterChanged(blacklister);
+    }
 }
