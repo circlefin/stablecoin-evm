@@ -143,8 +143,8 @@ contract UpgradedFiatToken is FiatToken, UpgradedContract {
 
         require(_value <= allowed);
 
-        doTransfer(_from, _to, _value);
         setAllowed(_from, _sender, allowed.sub(_value));
+        doTransfer(_from, _to, _value);
     }
 
     /**

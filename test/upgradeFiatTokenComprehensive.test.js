@@ -64,12 +64,6 @@ var check_updateRoleAddress_afterUpgrade = helpers.check_updateRoleAddress_after
 var check_noPayableFunction = helpers.check_noPayableFunction;
 var check_updateUpgraderAddress = helpers.check_updateUpgraderAddress;
 
-//Where should this be??
-// const should = require('chai')
-//   .use(require('chai-as-promised'))
-//   .use(require('chai-bignumber')(BigNumber))
-//   .should();
-
 contract('UpgradedFiatToken', function (accounts) {
   beforeEach(async function checkBefore() {
     oldToken = await FiatToken.new(

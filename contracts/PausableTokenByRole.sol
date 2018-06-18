@@ -1,16 +1,19 @@
 pragma solidity ^0.4.23;
 
+import './thirdparty/openzeppelin/Ownable.sol';
 /**
  * @title Pausable fiat token
  * @dev Pausable Token with special "pauser" role
  **/
-contract PausableTokenByRole {
+contract PausableTokenByRole is Ownable {
 
     address public pauser;
     bool public paused = false;
 
     event Pause();
     event Unpause();
+    event PauserChanged(address indexed newAddress);
+
 
     constructor(address _pauser) public {
         pauser = _pauser;
@@ -53,6 +56,11 @@ contract PausableTokenByRole {
     modifier whenPaused() {
         require(paused);
         _;
+    }
+
+    function updatePauser(address _newPauser) onlyOwner public {
+        pauser = _newPauser;
+        emit PauserChanged(pauser);
     }
 }
 

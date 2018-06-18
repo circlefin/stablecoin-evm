@@ -12,16 +12,20 @@ var decimals = tokenUtils.decimals
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
+<<<<<<< HEAD
 var masterMinterRole = tokenUtils.masterMinterRole;
 var blacklisterRole = tokenUtils.blacklisterRole;
 var pauserRole = tokenUtils.pauserRole;
 var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
+=======
+var expectRevert = tokenUtils.expectRevert;
+>>>>>>> 36f10f5e0e9ce674e5abf8ab2a7b0decdbe307b4
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
 var ownerAccount = tokenUtils.ownerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
-var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
@@ -67,6 +71,7 @@ var check_updateUpgraderAddress = helpers.check_updateUpgraderAddress;
 
 contract('FiatToken', function (accounts) {
   beforeEach(async function checkBefore() {
+<<<<<<< HEAD
     token = await FiatToken.new(
       "0x0",
       name,
@@ -78,6 +83,11 @@ contract('FiatToken', function (accounts) {
       blacklisterAccount,
       upgraderAccount,
       roleAddressChangerAccount);
+=======
+    token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
+
+    let tokenAddress = token.address;
+>>>>>>> 36f10f5e0e9ce674e5abf8ab2a7b0decdbe307b4
 
     let dataContractAddress = await token.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
@@ -217,6 +227,7 @@ contract('FiatToken', function (accounts) {
     await check_burn_some(token);
   });
 
+<<<<<<< HEAD
   it('updateRoleAddress masterMinter', async function () {
     await check_updateRoleAddress_masterMinter(token);
   });
@@ -263,6 +274,197 @@ contract('FiatToken', function (accounts) {
 
   //**REPEAT of "updateRoleAddress while paused"**
   it('updateRoleAddress while paused', async function () {
+=======
+  it('update masterMinter', async function () {
+    // change masterMinter role address
+    await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
+    ];
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('update blacklister', async function () {
+    // change masterMinter role address
+    await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
+    ];
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('update pauser', async function () {
+
+    // change masterMinter role address
+    await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
+    ];
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('update tokenOwner', async function () {
+
+    // change masterMinter role address
+    await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
+    ];
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  // while paused
+  it('update owner while paused', async function () {
+    // initial
+    await token.pause({ from: pauserAccount });
+    var setup = [
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+
+    // change masterMinter role address
+    await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('update owner old tokenOwner disabled', async function () {
+    // initial
+    await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
+    var setup = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
+    ];
+    await checkVariables(token, setup);
+
+    // try change tokenOwner role address
+    await expectRevert(token.transferOwnership(masterMinterAccount, { from: tokenOwnerAccount }))
+
+    // verify it no changes
+    await checkVariables(token, setup);
+  });
+
+  it('update owner new tokenOwner can update', async function () {
+    // switch tokenOwner
+    await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
+    var setup = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
+    ];
+
+    await checkVariables(token, setup);
+
+    // arbitraryAccount will try to make himself masterMinter
+    await token.updateMasterMinter(arbitraryAccount, { from: arbitraryAccount });
+    var result = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
+    ];
+    // verify it worked
+    await checkVariables(token, result);
+  });
+
+  it('update master minter and pauser to 0x00', async function () {
+    let bigZero = 0x0000000000000000000000000000000000000000; // TODO rename variable
+    let smallZero = 0x00;
+
+    // Set masterMinter and pauser to zero-addresss
+    await token.updateMasterMinter(bigZero, { from: tokenOwnerAccount });
+    await token.updatePauser(smallZero, { from: tokenOwnerAccount });
+
+    // Note: bigZero and smallZero both resolve to 0x0000000000000000000000000000000000000000
+    var result = [
+      { 'variable': 'masterMinter', 'expectedValue': "0x0000000000000000000000000000000000000000" },
+      { 'variable': 'pauser', 'expectedValue': "0x0000000000000000000000000000000000000000" }
+    ];
+
+    await checkVariables(token, result);
+  });
+
+  it('update owner user is tokenOwner', async function () {
+    // Set tokenOwner to self
+    await token.transferOwnership(tokenOwnerAccount, { from: tokenOwnerAccount });
+
+    // verify no changes
+    await checkVariables(token, []);
+  });
+
+  it('update master minter user is blacklisted', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    var setup = [
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+
+    // updated masterMinter to blacklisted account
+    await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
+
+    // verify
+    var result = [
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
+
+  it('update master minter tokenOwner is blacklisted', async function () {
+    await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
+    var setup = [
+      { 'variable': 'isAccountBlacklisted.tokenOwnerAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+
+    // updated masterMinter to blacklisted account
+    await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
+
+    // verify
+    var result = [
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.tokenOwnerAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
+
+  // bad sender
+  it('update master minter msg.sender is not tokenOwner', async function () {
+
+    // try to update masterMinter
+    await expectRevert(token.updateMasterMinter(arbitraryAccount, { from: arbitraryAccount }));
+
+    // ensure nothing changed
+    await checkVariables(token, []);
+  });
+
+    // bad sender
+    it('update pauser msg.sender is not tokenOwner', async function () {
+
+        // try to update masterMinter
+        await expectRevert(token.updatePauser(arbitraryAccount, { from: arbitraryAccount }));
+    });
+
+    // bad sender
+    it('update blacklister msg.sender is not tokenOwner', async function () {
+
+        // try to update masterMinter
+        await expectRevert(token.updateBlacklister(arbitraryAccount, { from: arbitraryAccount }));
+    });
+
+    // bad sender
+    it('update owner msg.sender is not tokenOwner', async function () {
+
+        // try to update masterMinter
+        await expectRevert(token.transferOwnership(arbitraryAccount, { from: arbitraryAccount }));
+    });
+
+    // while paused
+  it('update master minter while paused', async function () {
+>>>>>>> 36f10f5e0e9ce674e5abf8ab2a7b0decdbe307b4
     await token.pause({ from: pauserAccount });
     var setup = [
       { 'variable': 'paused', 'expectedValue': true }
@@ -270,7 +472,7 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, setup);
 
     // updated masterMinter to blacklisted account
-    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+    await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
 
     // verify
     var result = [
@@ -280,8 +482,43 @@ contract('FiatToken', function (accounts) {
     await checkVariables(token, result);
   });
 
+<<<<<<< HEAD
   it('updateRoleAddress after upgrade', async function () {
     await check_updateRoleAddress_afterUpgrade(token);
+=======
+  // while upgraded
+  it('update master minter after upgrade', async function () {
+    // create new token with same DataConract but arbitraryAddress in all the roles
+    let dataContractAddress = await token.getDataContractAddress();
+    let newToken = await FiatToken.new(dataContractAddress,
+      name, symbol, currency, decimals, arbitraryAccount, arbitraryAccount, arbitraryAccount,
+      arbitraryAccount, arbitraryAccount);
+    var newTokenSetup = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
+      { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
+      { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
+    ]
+    await checkVariables(newToken, newTokenSetup);
+
+    //upgrade the token contract
+    await token.upgrade(newToken.address, { from: upgraderAccount });
+
+    await checkVariables(token, []);
+
+    // updateRoleAddress
+    await token.updateMasterMinter(arbitraryAccount2, { from: tokenOwnerAccount });
+
+    // verify
+    var result = [
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount2 }
+    ];
+
+    // check only old token has changed
+    await checkVariables(token, result);
+    await checkVariables(newToken, newTokenSetup);
+>>>>>>> 36f10f5e0e9ce674e5abf8ab2a7b0decdbe307b4
   });
 
   it('no payable function', async function () {
@@ -289,7 +526,32 @@ contract('FiatToken', function (accounts) {
   });
 
   it('updateUpgraderAddress', async function () {
+<<<<<<< HEAD
     await check_updateUpgraderAddress(token);
+=======
+    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
+    var result = [{ 'variable': 'upgrader', 'expectedValue': arbitraryAccount }];
+    await checkVariables(token, result);
+  });
+
+  it('updateUpgraderAddress should fail with bad sender', async function () {
+    await expectRevert(token.updateUpgraderAddress(arbitraryAccount, { from: tokenOwnerAccount }));
+    await checkVariables(token, []);
+  });
+
+  it('updateUpgraderAddress should fail with bad new Value', async function () {
+    await expectRevert(token.updateUpgraderAddress(0x00, { from: tokenOwnerAccount }));
+    await checkVariables(token, []);
+  });
+
+  it('updateUpgraderAddress should fail with old upgrader', async function () {
+    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
+    await expectRevert(token.updateUpgraderAddress(upgraderAccount, { from: upgraderAccount }));
+    var result = [
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount }
+    ];
+    await checkVariables(token, result);
+>>>>>>> 36f10f5e0e9ce674e5abf8ab2a7b0decdbe307b4
   });
 
 });

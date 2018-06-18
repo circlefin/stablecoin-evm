@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-import './../../lib/openzeppelin/contracts/math/SafeMath.sol';
+import './../thirdparty/openzeppelin/SafeMath.sol';
 
 import './EternalStorage.sol';
 
