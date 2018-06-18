@@ -172,8 +172,8 @@ contract FiatToken is Ownable, ERC20, PausableTokenByRole, BlacklistableTokenByR
 
         require(_value <= allowed);
 
-        doTransfer(_from, _to, _value);
         setAllowed(_from, msg.sender, allowed.sub(_value));
+        doTransfer(_from, _to, _value);
         return true;
     }
 
