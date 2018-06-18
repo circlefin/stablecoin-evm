@@ -18,7 +18,7 @@ var blacklist = tokenUtils.blacklist;
 var ownerAccount = tokenUtils.ownerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
-var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
@@ -90,8 +90,7 @@ contract('UpgradedFiatToken', function (accounts) {
       pauserAccount,
       blacklisterAccount,
       upgraderAccount,
-      roleAddressChangerAccount);
-
+      tokenOwnerAccount);
     let dataContractAddress = await oldToken.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
     assert.equal(await storage.owner.call(), oldToken.address);
@@ -107,15 +106,14 @@ contract('UpgradedFiatToken', function (accounts) {
       pauserAccount,
       blacklisterAccount,
       upgraderAccount,
-      roleAddressChangerAccount);
-    await(oldToken.upgrade(token.address, {from: upgraderAccount}));
+      tokenOwnerAccount);
+    await oldToken.upgrade(token.address, {from: upgraderAccount});
     assert.equal(await storage.owner.call(), token.address);
-
   });
 
   it('should check variable defaults are correct for negative tests', async function () {
     await checkVariables(token, []);
-  })
+  });
 
   //Begin mint tests
   it('should fail to mint when paused', async function () {
@@ -281,13 +279,13 @@ contract('UpgradedFiatToken', function (accounts) {
 
   //Begin updateRoleAddress/updateUpgraderAddress tests
 
-  it('should fail to updateRoleAddress when sender is not roleAddressChanger', async function () {
-    await fail_updateRoleAddress_senderNotRoleAddressChanger(token);
-  });
-
-  it('should fail to updateRoleAddress when sender is old roleAddressChanger', async function () {
-    await fail_updateRoleAddress_senderIsOldRoleAddressChanger(token);
-  });
+  // it('should fail to updateRoleAddress when sender is not roleAddressChanger', async function () {
+  //   await fail_updateRoleAddress_senderNotRoleAddressChanger(token);
+  // });
+  //
+  // it('should fail to updateRoleAddress when sender is old roleAddressChanger', async function () {
+  //   await fail_updateRoleAddress_senderIsOldRoleAddressChanger(token);
+  // });
 
   it('should fail to updateUpgraderAddress when sender is not upgrader', async function () {
     await fail_updateUpgraderAddress_senderNotUpgrader(token);

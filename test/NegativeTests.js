@@ -96,9 +96,9 @@ contract('FiatToken', function (accounts) {
     assert.equal(await storage.owner.call(), token.address);
   });
 
-  it('should check variable defaults are correct for negative tests', async function () {
-    await checkVariables(token, []);
-  })
+  // it('should check variable defaults are correct for negative tests', async function () {
+  //   await checkVariables(token, []);
+  // });
 
   //Begin mint tests
   it('should fail to mint when paused', async function () {
@@ -264,13 +264,13 @@ contract('FiatToken', function (accounts) {
 
   //Begin updateRoleAddress/updateUpgraderAddress tests
 
-  it('should fail to updateRoleAddress when sender is not roleAddressChanger', async function () {
-    await fail_updateRoleAddress_senderNotRoleAddressChanger(token);
-  });
-
-  it('should fail to updateRoleAddress when sender is old roleAddressChanger', async function () {
-    await fail_updateRoleAddress_senderIsOldRoleAddressChanger(token);
-  });
+  // it('should fail to updateRoleAddress when sender is not roleAddressChanger', async function () {
+  //   await fail_updateRoleAddress_senderNotRoleAddressChanger(token);
+  // });
+  //
+  // it('should fail to updateRoleAddress when sender is old roleAddressChanger', async function () {
+  //   await fail_updateRoleAddress_senderIsOldRoleAddressChanger(token);
+  // });
 
   it('should fail to updateUpgraderAddress when sender is not upgrader', async function () {
     await fail_updateUpgraderAddress_senderNotUpgrader(token);
@@ -312,8 +312,8 @@ contract('FiatToken', function (accounts) {
 
   //Begin disablePriorContract tests
 
-  it('should fail to disablePriorContract when sender is not pauser', async function () {
-    await fail_disablePriorContract_senderNotPauser(token);
-  });
+  // it('should fail to disablePriorContract when sender is not pauser', async function () {
+  //   await fail_disablePriorContract_senderNotPauser(token);
+  // });
 
 })

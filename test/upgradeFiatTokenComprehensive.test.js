@@ -21,7 +21,7 @@ var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
 var ownerAccount = tokenUtils.ownerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
-var roleAddressChangerAccount = tokenUtils.roleAddressChangerAccount;
+var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
@@ -76,7 +76,7 @@ contract('UpgradedFiatToken', function (accounts) {
       pauserAccount,
       blacklisterAccount,
       upgraderAccount,
-      roleAddressChangerAccount);
+      tokenOwnerAccount);
 
     let dataContractAddress = await oldToken.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
@@ -93,8 +93,8 @@ contract('UpgradedFiatToken', function (accounts) {
       pauserAccount,
       blacklisterAccount,
       upgraderAccount,
-      roleAddressChangerAccount);
-    await(oldToken.upgrade(token.address, {from: upgraderAccount}));
+      tokenOwnerAccount);
+    await oldToken.upgrade(token.address, {from: upgraderAccount});
     assert.equal(await storage.owner.call(), token.address);
   });
 
@@ -228,72 +228,72 @@ contract('UpgradedFiatToken', function (accounts) {
     await check_burn_some(token);
   });
 
-  it('updateRoleAddress masterMinter', async function () {
-    await check_updateRoleAddress_masterMinter(token);
-  });
-
-  it('updateRoleAddress blacklister', async function () {
-    await check_updateRoleAddress_blacklister(token);
-  });
-
-  it('updateRoleAddress pauser', async function () {
-    await check_updateRoleAddress_pauser(token);
-  });
-
-  it('updateRoleAddress roleAddressChanger', async function () {
-    await check_updateRoleAddress_roleAddressChanger(token);
-  });
-
-  it('updateRoleAddress while paused', async function () {
-    await check_updateRoleAddress_whilePaused(token);
-  });
-
-  it('updateRoleAddress new roleAddressChanger can update', async function () {
-    await check_updateRoleAddress_newRoleAddressChangerCanUpdate(token);
-  });
-
-  it('updateRoleAddress fake role', async function () {
-    await check_updateRoleAddress_fakeRole(token);
-  });
-
-  it('updateRoleAddress user is 0x00', async function () {
-    await check_updateRoleAddress_userIsZeroAccount(token);
-  });
-
-  it('updateRoleAddress user is roleAddressChanger', async function () {
-    await check_updateRoleAddress_userIsRoleAddressChanger(token);
-  });
-
-  it('updateRoleAddress user is blacklisted', async function () {
-    await check_updateRoleAddress_userIsBlacklisted(token);
-  });
-
-  it('updateRoleAddress roleAddressChanger is blacklisted', async function () {
-    await check_updateRoleAddress_roleAddressChangerIsBlacklisted(token);
-  });
+  // it('updateRoleAddress masterMinter', async function () {
+  //   await check_updateRoleAddress_masterMinter(token);
+  // });
+  //
+  // it('updateRoleAddress blacklister', async function () {
+  //   await check_updateRoleAddress_blacklister(token);
+  // });
+  //
+  // it('updateRoleAddress pauser', async function () {
+  //   await check_updateRoleAddress_pauser(token);
+  // });
+  //
+  // it('updateRoleAddress roleAddressChanger', async function () {
+  //   await check_updateRoleAddress_roleAddressChanger(token);
+  // });
+  //
+  // it('updateRoleAddress while paused', async function () {
+  //   await check_updateRoleAddress_whilePaused(token);
+  // });
+  //
+  // it('updateRoleAddress new roleAddressChanger can update', async function () {
+  //   await check_updateRoleAddress_newRoleAddressChangerCanUpdate(token);
+  // });
+  //
+  // it('updateRoleAddress fake role', async function () {
+  //   await check_updateRoleAddress_fakeRole(token);
+  // });
+  //
+  // it('updateRoleAddress user is 0x00', async function () {
+  //   await check_updateRoleAddress_userIsZeroAccount(token);
+  // });
+  //
+  // it('updateRoleAddress user is roleAddressChanger', async function () {
+  //   await check_updateRoleAddress_userIsRoleAddressChanger(token);
+  // });
+  //
+  // it('updateRoleAddress user is blacklisted', async function () {
+  //   await check_updateRoleAddress_userIsBlacklisted(token);
+  // });
+  //
+  // it('updateRoleAddress roleAddressChanger is blacklisted', async function () {
+  //   await check_updateRoleAddress_roleAddressChangerIsBlacklisted(token);
+  // });
 
   //**REPEAT of "updateRoleAddress while paused"**
-  it('updateRoleAddress while paused', async function () {
-    await token.pause({ from: pauserAccount });
-    var setup = [
-      { 'variable': 'paused', 'expectedValue': true }
-    ];
-    await checkVariables(token, setup);
+  // it('updateRoleAddress while paused', async function () {
+  //   await token.pause({ from: pauserAccount });
+  //   var setup = [
+  //     { 'variable': 'paused', 'expectedValue': true }
+  //   ];
+  //   await checkVariables(token, setup);
+  //
+  //   // updated masterMinter to blacklisted account
+  //   await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
+  //
+  //   // verify
+  //   var result = [
+  //     { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+  //     { 'variable': 'paused', 'expectedValue': true }
+  //   ]
+  //   await checkVariables(token, result);
+  // });
 
-    // updated masterMinter to blacklisted account
-    await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
-
-    // verify
-    var result = [
-      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
-      { 'variable': 'paused', 'expectedValue': true }
-    ]
-    await checkVariables(token, result);
-  });
-
-  it('updateRoleAddress after upgrade', async function () {
-    await check_updateRoleAddress_afterUpgrade(token);
-  });
+  // it('updateRoleAddress after upgrade', async function () {
+  //   await check_updateRoleAddress_afterUpgrade(token);
+  // });
 
   it('no payable function', async function () {
     await check_noPayableFunction(token);
