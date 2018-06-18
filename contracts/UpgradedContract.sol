@@ -3,7 +3,7 @@ pragma solidity ^0.4.23;
 import './thirdparty/openzeppelin/ERC20.sol';
 
 /**
- * @title Upgrdaded Contract
+ * @title Upgraded Contract
  * @dev ERC20 interface
 */
 contract UpgradedContract is ERC20 {
