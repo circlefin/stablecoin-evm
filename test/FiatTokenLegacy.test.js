@@ -1440,7 +1440,7 @@ contract('Legacy Tests', function (accounts) {
     await token.upgrade(tokenNew.address, { from: upgraderAccount });
     let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+    await tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
     await tokenNew.mint(accounts[2], 200, { from: minterAccount });
     let balance = await tokenNew.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
