@@ -1,3 +1,6 @@
+/* 
+ *	Copied from openzeppelin v1.10.0 
+*/
 export default async promise => {
   try {
     await promise;
