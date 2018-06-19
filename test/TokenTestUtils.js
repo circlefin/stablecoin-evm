@@ -673,12 +673,6 @@ module.exports = {
   masterMinterRole: masterMinterRole,
   blacklisterRole: blacklisterRole,
   pauserRole: pauserRole,
-
-  //DO WE NEED THIS??
-  //roleAddressChangerRole: roleAddressChangerRole,
-
-
-
   ownerAccount: ownerAccount,
   arbitraryAccount: arbitraryAccount,
   upgraderAccount: upgraderAccount,
