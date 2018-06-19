@@ -12,7 +12,10 @@ var decimals = tokenUtils.decimals
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
-var expectRevert = tokenUtils.expectRevert;
+var masterMinterRole = tokenUtils.masterMinterRole;
+var blacklisterRole = tokenUtils.blacklisterRole;
+var pauserRole = tokenUtils.pauserRole;
+var roleAddressChangerRole = tokenUtils.roleAddressChangerRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
 var ownerAccount = tokenUtils.ownerAccount;
@@ -61,18 +64,37 @@ var check_updateRoleAddress_afterUpgrade = helpers.check_updateRoleAddress_after
 var check_noPayableFunction = helpers.check_noPayableFunction;
 var check_updateUpgraderAddress = helpers.check_updateUpgraderAddress;
 
-
-contract('FiatToken', function (accounts) {
+contract('UpgradedFiatToken', function (accounts) {
   beforeEach(async function checkBefore() {
-    token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
+    oldToken = await FiatToken.new(
+      "0x0",
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount);
 
-    let tokenAddress = token.address;
-
-    let dataContractAddress = await token.getDataContractAddress();
+    let dataContractAddress = await oldToken.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
+    assert.equal(await storage.owner.call(), oldToken.address);
 
-    // add in javascript field for storageAddress + owner to token
-
+    token = await UpgradedFiatToken.new(
+      dataContractAddress,
+      oldToken.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount);
+    await oldToken.upgrade(token.address, {from: upgraderAccount});
     assert.equal(await storage.owner.call(), token.address);
   });
 
@@ -209,27 +231,27 @@ contract('FiatToken', function (accounts) {
   // it('updateRoleAddress masterMinter', async function () {
   //   await check_updateRoleAddress_masterMinter(token);
   // });
-
+  //
   // it('updateRoleAddress blacklister', async function () {
   //   await check_updateRoleAddress_blacklister(token);
   // });
-
+  //
   // it('updateRoleAddress pauser', async function () {
   //   await check_updateRoleAddress_pauser(token);
   // });
-
+  //
   // it('updateRoleAddress roleAddressChanger', async function () {
   //   await check_updateRoleAddress_roleAddressChanger(token);
   // });
-
+  //
   // it('updateRoleAddress while paused', async function () {
   //   await check_updateRoleAddress_whilePaused(token);
   // });
-
+  //
   // it('updateRoleAddress new roleAddressChanger can update', async function () {
   //   await check_updateRoleAddress_newRoleAddressChangerCanUpdate(token);
   // });
-
+  //
   // it('updateRoleAddress fake role', async function () {
   //   await check_updateRoleAddress_fakeRole(token);
   // });
@@ -250,7 +272,7 @@ contract('FiatToken', function (accounts) {
   //   await check_updateRoleAddress_roleAddressChangerIsBlacklisted(token);
   // });
 
-  // //**REPEAT of "updateRoleAddress while paused"**
+  //**REPEAT of "updateRoleAddress while paused"**
   // it('updateRoleAddress while paused', async function () {
   //   await token.pause({ from: pauserAccount });
   //   var setup = [
@@ -259,7 +281,7 @@ contract('FiatToken', function (accounts) {
   //   await checkVariables(token, setup);
   //
   //   // updated masterMinter to blacklisted account
-  //   await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
+  //   await token.updateRoleAddress(arbitraryAccount, masterMinterRole, { from: roleAddressChangerAccount });
   //
   //   // verify
   //   var result = [
@@ -269,6 +291,9 @@ contract('FiatToken', function (accounts) {
   //   await checkVariables(token, result);
   // });
 
+  // it('updateRoleAddress after upgrade', async function () {
+  //   await check_updateRoleAddress_afterUpgrade(token);
+  // });
 
   it('no payable function', async function () {
     await check_noPayableFunction(token);
