@@ -12,12 +12,6 @@ assertDiff.options.strict = true;
 var Q = require('q');
 // TODO: test really big numbers
 
-// string role names to send to updateRoleAddress()
-var masterMinterRole = 'masterMinter';
-var blacklisterRole = 'blacklister';
-var pauserRole = 'pauser';
-var roleAddressChangerRole = 'roleAddressChanger';
-
 var ownerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
@@ -434,19 +428,19 @@ async function getActualState(token) {
             'upgraderAccount': allowanceBtoU
           },
           'tokenOwnerAccount': {
-            'arbitraryAccount': allowanceRACtoA, 
-            'masterMinterAccount': allowanceRACtoMM, 
-            'minterAccount': allowanceRACtoM, 
-            'pauserAccount': allowanceRACtoP, 
-            'blacklisterAccount': allowanceRACtoB, 
+            'arbitraryAccount': allowanceRACtoA,
+            'masterMinterAccount': allowanceRACtoMM,
+            'minterAccount': allowanceRACtoM,
+            'pauserAccount': allowanceRACtoP,
+            'blacklisterAccount': allowanceRACtoB,
             'upgraderAccount': allowanceRACtoU
           },
           'upgraderAccount': {
             'arbitraryAccount': allowanceUtoA,
-            'masterMinterAccount': allowanceUtoMM, 
-            'minterAccount': allowanceUtoM, 
-            'pauserAccount': allowanceUtoP, 
-            'blacklisterAccount': allowanceUtoB, 
+            'masterMinterAccount': allowanceUtoMM,
+            'minterAccount': allowanceUtoM,
+            'pauserAccount': allowanceUtoP,
+            'blacklisterAccount': allowanceUtoB,
             'tokenOwnerAccount': allowanceUtoRAC
           }
         },
@@ -679,7 +673,12 @@ module.exports = {
   masterMinterRole: masterMinterRole,
   blacklisterRole: blacklisterRole,
   pauserRole: pauserRole,
-  roleAddressChangerRole: roleAddressChangerRole,
+
+  //DO WE NEED THIS??
+  //roleAddressChangerRole: roleAddressChangerRole,
+
+
+
   ownerAccount: ownerAccount,
   arbitraryAccount: arbitraryAccount,
   upgraderAccount: upgraderAccount,
