@@ -86,64 +86,6 @@ async function checkVariables(token, customVars) {
             'upgraderAccount': bigZero
         },
         'allowance': {
-<<<<<<< HEAD
-          'arbitraryAccount': {
-            'masterMinterAccount': allowanceAtoMM,
-            'minterAccount': allowanceAtoM,
-            'pauserAccount': allowanceAtoP,
-            'blacklisterAccount': allowanceAtoB,
-            'tokenOwnerAccount': allowanceAtoRAC,
-            'upgraderAccount': allowanceAtoU
-          },
-          'masterMinterAccount': {
-            'arbitraryAccount': allowanceMMtoA,
-            'minterAccount': allowanceMMtoM,
-            'pauserAccount': allowanceMMtoP,
-            'blacklisterAccount': allowanceMMtoB,
-            'tokenOwnerAccount': allowanceMMtoRAC,
-            'upgraderAccount': allowanceMMtoU
-          },
-          'minterAccount': {
-            'arbitraryAccount': allowanceMtoA,
-            'masterMinterAccount': allowanceMtoMM,
-            'pauserAccount': allowanceMtoP,
-            'blacklisterAccount': allowanceMtoB,
-            'tokenOwnerAccount': allowanceMtoRAC,
-            'upgraderAccount': allowanceMtoU
-          },
-          'pauserAccount': {
-            'arbitraryAccount': allowancePtoA,
-            'masterMinterAccount': allowancePtoMM,
-            'minterAccount': allowancePtoM,
-            'blacklisterAccount': allowancePtoB,
-            'tokenOwnerAccount': allowancePtoRAC,
-            'upgraderAccount': allowancePtoU
-          },
-          'blacklisterAccount': {
-            'arbitraryAccount': allowanceBtoA,
-            'masterMinterAccount': allowanceBtoMM,
-            'minterAccount': allowanceBtoM,
-            'pauserAccount': allowanceBtoP,
-            'tokenOwnerAccount': allowanceBtoRAC,
-            'upgraderAccount': allowanceBtoU
-          },
-          'tokenOwnerAccount': {
-            'arbitraryAccount': allowanceRACtoA,
-            'masterMinterAccount': allowanceRACtoMM,
-            'minterAccount': allowanceRACtoM,
-            'pauserAccount': allowanceRACtoP,
-            'blacklisterAccount': allowanceRACtoB,
-            'upgraderAccount': allowanceRACtoU
-          },
-          'upgraderAccount': {
-            'arbitraryAccount': allowanceUtoA,
-            'masterMinterAccount': allowanceUtoMM,
-            'minterAccount': allowanceUtoM,
-            'pauserAccount': allowanceUtoP,
-            'blacklisterAccount': allowanceUtoB,
-            'tokenOwnerAccount': allowanceUtoRAC
-          }
-=======
             'arbitraryAccount': {
                 'masterMinterAccount': bigZero,
                 'minterAccount': bigZero,
@@ -200,7 +142,6 @@ async function checkVariables(token, customVars) {
                 'blacklisterAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
             }
->>>>>>> 20b56beb1d84a0ab0d7e637de3873a4f0dd7ac43
         },
         'totalSupply': bigZero,
         'isAccountBlacklisted': {
@@ -706,47 +647,6 @@ async function expectRevert(contractPromise) {
 }
 
 module.exports = {
-<<<<<<< HEAD
-  name: name,
-  symbol: symbol,
-  currency: currency,
-  decimals: decimals,
-  bigZero: bigZero,
-  bigHundred: bigHundred,
-  debugLogging: debugLogging,
-  calculateFeeAmount: calculateFeeAmount,
-  checkTransferEventsWithFee: checkTransferEventsWithFee,
-  checkTransferEvents: checkTransferEvents,
-  checkVariables: checkVariables,
-  setMinter: setMinter,
-  mint: mint,
-  mintRaw: mintRaw,
-  mintToReserveAccount: mintToReserveAccount,
-  blacklist: blacklist,
-  unBlacklist: unBlacklist,
-  setLongDecimalFeesTransferWithFees: setLongDecimalFeesTransferWithFees,
-  sampleTransfer: sampleTransfer,
-  transferFromWithFees: transferFromWithFees,
-  sampleTransferFrom: sampleTransferFrom,
-  approve: approve,
-  redeem: redeem,
-  expectRevert: expectRevert,
-  masterMinterRole: masterMinterRole,
-  blacklisterRole: blacklisterRole,
-  pauserRole: pauserRole,
-  ownerAccount: ownerAccount,
-  arbitraryAccount: arbitraryAccount,
-  upgraderAccount: upgraderAccount,
-  tokenOwnerAccount: tokenOwnerAccount,
-  blacklisterAccount: blacklisterAccount,
-  arbitraryAccount2: arbitraryAccount2,
-  masterMinterAccount: masterMinterAccount,
-  minterAccount: minterAccount,
-  pauserAccount: pauserAccount,
-  blacklisterAccount: blacklisterAccount,
-
-  arbitraryAccountPrivateKey
-=======
     name: name,
     symbol: symbol,
     currency: currency,
@@ -774,7 +674,6 @@ module.exports = {
     masterMinterRole: masterMinterRole,
     blacklisterRole: blacklisterRole,
     pauserRole: pauserRole,
-    roleAddressChangerRole: roleAddressChangerRole,
     ownerAccount: ownerAccount,
     arbitraryAccount: arbitraryAccount,
     upgraderAccount: upgraderAccount,
@@ -788,5 +687,4 @@ module.exports = {
 
     arbitraryAccountPrivateKey,
     ownerAccountPrivateKey
->>>>>>> 20b56beb1d84a0ab0d7e637de3873a4f0dd7ac43
 };
