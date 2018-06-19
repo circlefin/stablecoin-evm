@@ -1,55 +1,53 @@
-/* 
- * Copied from openzeppelin v1.10.0 
- * Modificiations: deleted mul, div tests as not needed at time of modification
- * Modifcation date: 6/18/18
- *
-*/
-import assertJump from '../helpers/assertJump';
-const BigNumber = web3.BigNumber;
-const SafeMathMock = artifacts.require('SafeMathMock');
+var SafeMath = artifacts.require('SafeMathMock');
+var tokenUtils = require('./../../TokenTestUtils');
+var BigNumber = require('bignumber.js');
+var bigZero = tokenUtils.bigZero;
+var bigHundred = tokenUtils.bigHundred;
+var expectRevert = tokenUtils.expectRevert;
+var expectJump = tokenUtils.expectJump;
+const MAX_UINT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
-require('chai')
+const should = require('chai')
+  .use(require('chai-as-promised'))
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-contract('SafeMath', () => {
-  const MAX_UINT = new BigNumber('115792089237316195423570985008687907853269984665640564039457584007913129639935');
-
-  before(async function () {
-    this.safeMath = await SafeMathMock.new();
+contract('SafeMath', function() {
+  beforeEach(async function checkBefore() {
+    this.safeMath = await SafeMath.new();
   });
 
   describe('add', function () {
     it('adds correctly', async function () {
-      const a = new BigNumber(5678);
-      const b = new BigNumber(1234);
+      const a = 5678;
+      const b = 1234;
 
       const result = await this.safeMath.add(a, b);
-      result.should.be.bignumber.equal(a.plus(b));
+      assert.isTrue(new BigNumber(result).isEqualTo((new BigNumber(a)).plus(new BigNumber(b))));
     });
 
     it('throws an error on addition overflow', async function () {
       const a = MAX_UINT;
-      const b = new BigNumber(1);
+      const b = 1;
 
-      await assertJump(this.safeMath.add(a, b));
+      await expectJump(this.safeMath.add(a, b));
     });
   });
 
   describe('sub', function () {
     it('subtracts correctly', async function () {
-      const a = new BigNumber(5678);
-      const b = new BigNumber(1234);
+      const a = 5678;
+      const b = 1234;
 
       const result = await this.safeMath.sub(a, b);
-      result.should.be.bignumber.equal(a.minus(b));
+      assert.isTrue(new BigNumber(result).isEqualTo((new BigNumber(a)).minus(new BigNumber(b))));
     });
 
     it('throws an error if subtraction result would be negative', async function () {
-      const a = new BigNumber(1234);
-      const b = new BigNumber(5678);
+      const a = 1234;
+      const b = 5678;
 
-      await assertJump(this.safeMath.sub(a, b));
+      await expectJump(this.safeMath.sub(a, b));
     });
   });
 });

@@ -31,12 +31,7 @@
     "lodash": "^4.17.10",
     "npm": "^6.1.0",
     "q": "^1.5.1",
-    "zeppelin-solidity": "1.8.0",
-    "babel-preset-es2015": "^6.18.0",
-    "babel-preset-stage-2": "^6.24.1",
-    "babel-preset-stage-3": "^6.17.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-register": "^6.23.0"
+    "zeppelin-solidity": "1.8.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
