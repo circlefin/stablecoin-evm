@@ -6,3 +6,5 @@ package-lock.json
 .idea/
 #local codebuild results
 artifacts/
+.DS_Store
+contracts/.DS_Store

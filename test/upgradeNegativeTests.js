@@ -76,10 +76,11 @@ var fail_upgrade_upgradedAddressIsNotZeroAddress = helpers.fail_upgrade_upgraded
 var fail_upgrade_newAddressIsZeroAddress = helpers.fail_upgrade_newAddressIsZeroAddress;
 var fail_disablePriorContract_senderNotPauser = helpers.fail_disablePriorContract_senderNotPauser;
 
-contract('FiatToken', function (accounts) {
+contract('UpgradedFiatToken', function (accounts) {
 
   beforeEach(async function checkBefore() {
-    token = await FiatToken.new(
+
+    oldToken = await FiatToken.new(
       "0x0",
       name,
       symbol,
@@ -90,15 +91,29 @@ contract('FiatToken', function (accounts) {
       blacklisterAccount,
       upgraderAccount,
       tokenOwnerAccount);
-
-    let dataContractAddress = await token.getDataContractAddress();
+    let dataContractAddress = await oldToken.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
+    assert.equal(await storage.owner.call(), oldToken.address);
+
+    token = await UpgradedFiatToken.new(
+      dataContractAddress,
+      oldToken.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount);
+    await oldToken.upgrade(token.address, {from: upgraderAccount});
     assert.equal(await storage.owner.call(), token.address);
   });
 
-  // it('should check variable defaults are correct for negative tests', async function () {
-  //   await checkVariables(token, []);
-  // });
+  it('should check variable defaults are correct for negative tests', async function () {
+    await checkVariables(token, []);
+  });
 
   //Begin mint tests
   it('should fail to mint when paused', async function () {
@@ -312,8 +327,8 @@ contract('FiatToken', function (accounts) {
 
   //Begin disablePriorContract tests
 
-  // it('should fail to disablePriorContract when sender is not pauser', async function () {
-  //   await fail_disablePriorContract_senderNotPauser(token);
-  // });
+  it('should fail to disablePriorContract when sender is not pauser', async function () {
+    await fail_disablePriorContract_senderNotPauser(token);
+  });
 
 })

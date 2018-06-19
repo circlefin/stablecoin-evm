@@ -12,7 +12,7 @@ assertDiff.options.strict = true;
 var Q = require('q');
 // TODO: test really big numbers
 
-// string role names to send to updateRoleAddress()  
+// string role names to send to updateRoleAddress()
 var masterMinterRole = 'masterMinter';
 var blacklisterRole = 'blacklister';
 var pauserRole = 'pauser';
@@ -189,7 +189,7 @@ async function checkVariables(token, customVars) {
         _.set(expectedState, customVars[i].variable, customVars[i].expectedValue);
       }
     } else {
-      // TODO: test the error 
+      // TODO: test the error
       throw new Error("variable " + customVars[i].variable + " not found in expectedState");
     }
   }
