@@ -9,9 +9,9 @@ import "./Ownable.sol";
  * @dev Base contract which allows children to implement an emergency stop mechanism.
  * Based on openzeppelin tag v1.10.0 commit: feb665136c0dae9912e08397c1a21c4af3651ef3
  * Modifications:
- * 1) Added pauser role, switched pause/unpause to be onlyPauser
- * 2) Removed whenNotPause/whenPaused from pause/unpause
- * 3) Removed whenPaused
+ * 1) Added pauser role, switched pause/unpause to be onlyPauser (6/14/2018)
+ * 2) Removed whenNotPause/whenPaused from pause/unpause (6/14/2018)
+ * 3) Removed whenPaused (6/14/2018)
  */
 contract Pausable is Ownable {
   event Pause();
