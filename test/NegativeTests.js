@@ -96,9 +96,9 @@ contract('FiatToken', function (accounts) {
     assert.equal(await storage.owner.call(), token.address);
   });
 
-  // it('should check variable defaults are correct for negative tests', async function () {
-  //   await checkVariables(token, []);
-  // });
+  it('should check variable defaults are correct for negative tests', async function () {
+    await checkVariables(token, []);
+  });
 
   //Begin mint tests
   it('should fail to mint when paused', async function () {
@@ -312,8 +312,8 @@ contract('FiatToken', function (accounts) {
 
   //Begin disablePriorContract tests
 
-  // it('should fail to disablePriorContract when sender is not pauser', async function () {
-  //   await fail_disablePriorContract_senderNotPauser(token);
-  // });
+  it('should fail to disablePriorContract when sender is not pauser', async function () {
+    await fail_disablePriorContract_senderNotPauser(token);
+  });
 
 })

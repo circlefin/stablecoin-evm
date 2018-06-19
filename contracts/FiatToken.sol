@@ -3,8 +3,8 @@ pragma solidity ^0.4.23;
 import './thirdparty/openzeppelin/ERC20.sol';
 import './thirdparty/openzeppelin/SafeMath.sol';
 import './thirdparty/openzeppelin/Ownable.sol';
+import './thirdparty/openzeppelin/Pausable.sol';
 
-import './PausableTokenByRole.sol';
 import './BlacklistableTokenByRole.sol';
 import './Upgradable.sol';
 import './UpgradedContract.sol';
@@ -13,7 +13,7 @@ import './UpgradedContract.sol';
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is Ownable, ERC20, PausableTokenByRole, BlacklistableTokenByRole, Upgradable {
+contract FiatToken is Ownable, ERC20, Pausable, BlacklistableTokenByRole, Upgradable {
     using SafeMath for uint256;
 
     string public name;
@@ -41,7 +41,7 @@ contract FiatToken is Ownable, ERC20, PausableTokenByRole, BlacklistableTokenByR
         address _owner
     )
         EternalStorageUpdater(_contractStorageAddress)
-        PausableTokenByRole(_pauser)
+        Pausable(_pauser)
         BlacklistableTokenByRole(_blacklister)
         Upgradable(_upgrader)
         public
