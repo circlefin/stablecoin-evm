@@ -19,6 +19,7 @@ var pauserRole = 'pauser';
 var roleAddressChangerRole = 'roleAddressChanger';
 
 var ownerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
+var ownerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
 var upgraderAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
@@ -202,7 +203,7 @@ async function checkVariables(token, customVars) {
   assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
 }
 
-  // build up actualState object to compare to expectedState object
+// build up actualState object to compare to expectedState object
 
 async function getActualState(token) {
   return Q.all([
@@ -287,201 +288,201 @@ async function getActualState(token) {
     token.minterAllowance(tokenOwnerAccount),
     token.minterAllowance(upgraderAccount),
     token.paused()
-    ]).spread(function (
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinter,
-      pauser,
-      blacklister,
-      upgrader,
-      tokenOwner,
-      balancesA,
-      balancesMM,
-      balancesM,
-      balancesP,
-      balancesB,
-      balancesRAC,
-      balancesU,
-      allowanceAtoMM,
-      allowanceAtoM,
-      allowanceAtoP,
-      allowanceAtoB,
-      allowanceAtoRAC,
-      allowanceAtoU,
-      allowanceMMtoA,
-      allowanceMMtoM,
-      allowanceMMtoP,
-      allowanceMMtoB,
-      allowanceMMtoRAC,
-      allowanceMMtoU,
-      allowanceMtoA,
-      allowanceMtoMM,
-      allowanceMtoP,
-      allowanceMtoB,
-      allowanceMtoRAC,
-      allowanceMtoU,
-      allowancePtoA,
-      allowancePtoMM,
-      allowancePtoM,
-      allowancePtoB,
-      allowancePtoRAC,
-      allowancePtoU,
-      allowanceBtoA,
-      allowanceBtoMM,
-      allowanceBtoM,
-      allowanceBtoP,
-      allowanceBtoRAC,
-      allowanceBtoU,
-      allowanceRACtoA,
-      allowanceRACtoMM,
-      allowanceRACtoM,
-      allowanceRACtoP,
-      allowanceRACtoB,
-      allowanceRACtoU,
-      allowanceUtoA,
-      allowanceUtoMM,
-      allowanceUtoM,
-      allowanceUtoP,
-      allowanceUtoB,
-      allowanceUtoRAC,
-      totalSupply,
-      isAccountBlacklistedA,
-      isAccountBlacklistedMM,
-      isAccountBlacklistedM,
-      isAccountBlacklistedP,
-      isAccountBlacklistedB,
-      isAccountBlacklistedRAC,
-      isAccountBlacklistedU,
-      isAccountMinterA,
-      isAccountMinterMM,
-      isAccountMinterM,
-      isAccountMinterP,
-      isAccountMinterB,
-      isAccountMinterRAC,
-      isAccountMinterU,
-      minterAllowanceA,
-      minterAllowanceMM,
-      minterAllowanceM,
-      minterAllowanceP,
-      minterAllowanceB,
-      minterAllowanceRAC,
-      minterAllowanceU,
-      paused
-      ) {
-      var actualState = {
-        'name': name,
-        'symbol': symbol,
-        'currency': currency,
-        'decimals': decimals,
-        'masterMinter': masterMinter,
-        'pauser': pauser,
-        'blacklister': blacklister,
-        'upgrader': upgrader,
-        'tokenOwner': tokenOwner,
-        // contractStorage is not deterministic for FiatTokenWithStorage
-        //'contractStorage': storageAddress,
-        // 'owner': await token.owner.call(),
-        'balances': {
-          'arbitraryAccount': balancesA,
-          'masterMinterAccount': balancesMM,
-          'minterAccount': balancesM,
-          'pauserAccount': balancesP,
-          'blacklisterAccount': balancesB,
-          'tokenOwnerAccount': balancesRAC,
-          'upgraderAccount': balancesU
+  ]).spread(function (
+    name,
+    symbol,
+    currency,
+    decimals,
+    masterMinter,
+    pauser,
+    blacklister,
+    upgrader,
+    tokenOwner,
+    balancesA,
+    balancesMM,
+    balancesM,
+    balancesP,
+    balancesB,
+    balancesRAC,
+    balancesU,
+    allowanceAtoMM,
+    allowanceAtoM,
+    allowanceAtoP,
+    allowanceAtoB,
+    allowanceAtoRAC,
+    allowanceAtoU,
+    allowanceMMtoA,
+    allowanceMMtoM,
+    allowanceMMtoP,
+    allowanceMMtoB,
+    allowanceMMtoRAC,
+    allowanceMMtoU,
+    allowanceMtoA,
+    allowanceMtoMM,
+    allowanceMtoP,
+    allowanceMtoB,
+    allowanceMtoRAC,
+    allowanceMtoU,
+    allowancePtoA,
+    allowancePtoMM,
+    allowancePtoM,
+    allowancePtoB,
+    allowancePtoRAC,
+    allowancePtoU,
+    allowanceBtoA,
+    allowanceBtoMM,
+    allowanceBtoM,
+    allowanceBtoP,
+    allowanceBtoRAC,
+    allowanceBtoU,
+    allowanceRACtoA,
+    allowanceRACtoMM,
+    allowanceRACtoM,
+    allowanceRACtoP,
+    allowanceRACtoB,
+    allowanceRACtoU,
+    allowanceUtoA,
+    allowanceUtoMM,
+    allowanceUtoM,
+    allowanceUtoP,
+    allowanceUtoB,
+    allowanceUtoRAC,
+    totalSupply,
+    isAccountBlacklistedA,
+    isAccountBlacklistedMM,
+    isAccountBlacklistedM,
+    isAccountBlacklistedP,
+    isAccountBlacklistedB,
+    isAccountBlacklistedRAC,
+    isAccountBlacklistedU,
+    isAccountMinterA,
+    isAccountMinterMM,
+    isAccountMinterM,
+    isAccountMinterP,
+    isAccountMinterB,
+    isAccountMinterRAC,
+    isAccountMinterU,
+    minterAllowanceA,
+    minterAllowanceMM,
+    minterAllowanceM,
+    minterAllowanceP,
+    minterAllowanceB,
+    minterAllowanceRAC,
+    minterAllowanceU,
+    paused
+  ) {
+    var actualState = {
+      'name': name,
+      'symbol': symbol,
+      'currency': currency,
+      'decimals': decimals,
+      'masterMinter': masterMinter,
+      'pauser': pauser,
+      'blacklister': blacklister,
+      'upgrader': upgrader,
+      'tokenOwner': tokenOwner,
+      // contractStorage is not deterministic for FiatTokenWithStorage
+      //'contractStorage': storageAddress,
+      // 'owner': await token.owner.call(),
+      'balances': {
+        'arbitraryAccount': balancesA,
+        'masterMinterAccount': balancesMM,
+        'minterAccount': balancesM,
+        'pauserAccount': balancesP,
+        'blacklisterAccount': balancesB,
+        'tokenOwnerAccount': balancesRAC,
+        'upgraderAccount': balancesU
+      },
+      'allowance': {
+        'arbitraryAccount': {
+          'masterMinterAccount': allowanceAtoMM,
+          'minterAccount': allowanceAtoM,
+          'pauserAccount': allowanceAtoP,
+          'blacklisterAccount': allowanceAtoB,
+          'tokenOwnerAccount': allowanceAtoRAC,
+          'upgraderAccount': allowanceAtoU
         },
-        'allowance': {
-          'arbitraryAccount': {
-            'masterMinterAccount': allowanceAtoMM,
-            'minterAccount': allowanceAtoM,
-            'pauserAccount': allowanceAtoP,
-            'blacklisterAccount': allowanceAtoB,
-            'tokenOwnerAccount': allowanceAtoRAC,
-            'upgraderAccount': allowanceAtoU
-          },
-          'masterMinterAccount': {
-            'arbitraryAccount': allowanceMMtoA,
-            'minterAccount': allowanceMMtoM,
-            'pauserAccount': allowanceMMtoP,
-            'blacklisterAccount': allowanceMMtoB,
-            'tokenOwnerAccount': allowanceMMtoRAC,
-            'upgraderAccount': allowanceMMtoU
-          },
-          'minterAccount': {
-            'arbitraryAccount': allowanceMtoA,
-            'masterMinterAccount': allowanceMtoMM,
-            'pauserAccount': allowanceMtoP,
-            'blacklisterAccount': allowanceMtoB,
-            'tokenOwnerAccount': allowanceMtoRAC,
-            'upgraderAccount': allowanceMtoU
-          },
-          'pauserAccount': {
-            'arbitraryAccount': allowancePtoA,
-            'masterMinterAccount': allowancePtoMM,
-            'minterAccount': allowancePtoM,
-            'blacklisterAccount': allowancePtoB,
-            'tokenOwnerAccount': allowancePtoRAC,
-            'upgraderAccount': allowancePtoU
-          },
-          'blacklisterAccount': {
-            'arbitraryAccount': allowanceBtoA,
-            'masterMinterAccount': allowanceBtoMM,
-            'minterAccount': allowanceBtoM,
-            'pauserAccount': allowanceBtoP,
-            'tokenOwnerAccount': allowanceBtoRAC,
-            'upgraderAccount': allowanceBtoU
-          },
-          'tokenOwnerAccount': {
-            'arbitraryAccount': allowanceRACtoA, 
-            'masterMinterAccount': allowanceRACtoMM, 
-            'minterAccount': allowanceRACtoM, 
-            'pauserAccount': allowanceRACtoP, 
-            'blacklisterAccount': allowanceRACtoB, 
-            'upgraderAccount': allowanceRACtoU
-          },
-          'upgraderAccount': {
-            'arbitraryAccount': allowanceUtoA,
-            'masterMinterAccount': allowanceUtoMM, 
-            'minterAccount': allowanceUtoM, 
-            'pauserAccount': allowanceUtoP, 
-            'blacklisterAccount': allowanceUtoB, 
-            'tokenOwnerAccount': allowanceUtoRAC
-          }
+        'masterMinterAccount': {
+          'arbitraryAccount': allowanceMMtoA,
+          'minterAccount': allowanceMMtoM,
+          'pauserAccount': allowanceMMtoP,
+          'blacklisterAccount': allowanceMMtoB,
+          'tokenOwnerAccount': allowanceMMtoRAC,
+          'upgraderAccount': allowanceMMtoU
         },
-        'totalSupply': totalSupply,
-        'isAccountBlacklisted': {
-          'arbitraryAccount': isAccountBlacklistedA,
-          'masterMinterAccount': isAccountBlacklistedMM,
-          'minterAccount': isAccountBlacklistedM,
-          'pauserAccount': isAccountBlacklistedP,
-          'blacklisterAccount': isAccountBlacklistedB,
-          'tokenOwnerAccount': isAccountBlacklistedRAC,
-          'upgraderAccount': isAccountBlacklistedU
+        'minterAccount': {
+          'arbitraryAccount': allowanceMtoA,
+          'masterMinterAccount': allowanceMtoMM,
+          'pauserAccount': allowanceMtoP,
+          'blacklisterAccount': allowanceMtoB,
+          'tokenOwnerAccount': allowanceMtoRAC,
+          'upgraderAccount': allowanceMtoU
         },
-        'isAccountMinter': {
-          'arbitraryAccount': isAccountMinterA,
-          'masterMinterAccount': isAccountMinterMM,
-          'minterAccount': isAccountMinterM,
-          'pauserAccount': isAccountMinterP,
-          'blacklisterAccount': isAccountMinterB,
-          'tokenOwnerAccount': isAccountMinterRAC,
-          'upgraderAccount': isAccountMinterU
+        'pauserAccount': {
+          'arbitraryAccount': allowancePtoA,
+          'masterMinterAccount': allowancePtoMM,
+          'minterAccount': allowancePtoM,
+          'blacklisterAccount': allowancePtoB,
+          'tokenOwnerAccount': allowancePtoRAC,
+          'upgraderAccount': allowancePtoU
         },
-        'minterAllowance': {
-          'arbitraryAccount': minterAllowanceA,
-          'masterMinterAccount': minterAllowanceMM,
-          'minterAccount': minterAllowanceM,
-          'pauserAccount': minterAllowanceP,
-          'blacklisterAccount': minterAllowanceB,
-          'tokenOwnerAccount': minterAllowanceRAC,
-          'upgraderAccount': minterAllowanceU
+        'blacklisterAccount': {
+          'arbitraryAccount': allowanceBtoA,
+          'masterMinterAccount': allowanceBtoMM,
+          'minterAccount': allowanceBtoM,
+          'pauserAccount': allowanceBtoP,
+          'tokenOwnerAccount': allowanceBtoRAC,
+          'upgraderAccount': allowanceBtoU
         },
-        'paused': paused
-      };
-      return actualState;
-    })
+        'tokenOwnerAccount': {
+          'arbitraryAccount': allowanceRACtoA,
+          'masterMinterAccount': allowanceRACtoMM,
+          'minterAccount': allowanceRACtoM,
+          'pauserAccount': allowanceRACtoP,
+          'blacklisterAccount': allowanceRACtoB,
+          'upgraderAccount': allowanceRACtoU
+        },
+        'upgraderAccount': {
+          'arbitraryAccount': allowanceUtoA,
+          'masterMinterAccount': allowanceUtoMM,
+          'minterAccount': allowanceUtoM,
+          'pauserAccount': allowanceUtoP,
+          'blacklisterAccount': allowanceUtoB,
+          'tokenOwnerAccount': allowanceUtoRAC
+        }
+      },
+      'totalSupply': totalSupply,
+      'isAccountBlacklisted': {
+        'arbitraryAccount': isAccountBlacklistedA,
+        'masterMinterAccount': isAccountBlacklistedMM,
+        'minterAccount': isAccountBlacklistedM,
+        'pauserAccount': isAccountBlacklistedP,
+        'blacklisterAccount': isAccountBlacklistedB,
+        'tokenOwnerAccount': isAccountBlacklistedRAC,
+        'upgraderAccount': isAccountBlacklistedU
+      },
+      'isAccountMinter': {
+        'arbitraryAccount': isAccountMinterA,
+        'masterMinterAccount': isAccountMinterMM,
+        'minterAccount': isAccountMinterM,
+        'pauserAccount': isAccountMinterP,
+        'blacklisterAccount': isAccountMinterB,
+        'tokenOwnerAccount': isAccountMinterRAC,
+        'upgraderAccount': isAccountMinterU
+      },
+      'minterAllowance': {
+        'arbitraryAccount': minterAllowanceA,
+        'masterMinterAccount': minterAllowanceMM,
+        'minterAccount': minterAllowanceM,
+        'pauserAccount': minterAllowanceP,
+        'blacklisterAccount': minterAllowanceB,
+        'tokenOwnerAccount': minterAllowanceRAC,
+        'upgraderAccount': minterAllowanceU
+      },
+      'paused': paused
+    };
+    return actualState;
+  })
 }
 
 async function setMinter(token, minter, amount) {
@@ -508,10 +509,10 @@ async function mintRaw(token, to, amount, minter) {
   assert.equal(minting.logs[0].args.to, to);
   assert.equal(minting.logs[0].args.amount, amount);
   // TODO revisit this
-/*  let totalSupply = await token.totalSupply();
-  totalSupply.should.be.bignumber.equal(initialTotalSupply);
-  let minterAllowance = await token.minterAllowance(minter);
-  assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).isEqualTo(new BigNumber(minterAllowance)));*/
+  /*  let totalSupply = await token.totalSupply();
+    totalSupply.should.be.bignumber.equal(initialTotalSupply);
+    let minterAllowance = await token.minterAllowance(minter);
+    assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).isEqualTo(new BigNumber(minterAllowance)));*/
 }
 
 async function mintToReserveAccount(token, address, amount) {
@@ -691,5 +692,6 @@ module.exports = {
   pauserAccount: pauserAccount,
   blacklisterAccount: blacklisterAccount,
 
-  arbitraryAccountPrivateKey
+  arbitraryAccountPrivateKey,
+  ownerAccountPrivateKey
 };

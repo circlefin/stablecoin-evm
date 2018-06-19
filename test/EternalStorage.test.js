@@ -28,12 +28,13 @@ var pauserAccount = tokenUtils.pauserAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
+var storageOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
 
 function sendRawTransaction(raw) {
     return new Promise(function (resolve, reject) {
         web3.eth.sendRawTransaction(raw, function (err, transactionHash) {
             if (err !== null) return reject(err);
-            resolve(data);
+            resolve(transactionHash);
         });
     });
 }
@@ -42,6 +43,22 @@ const should = require('chai')
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
     .should();
+
+
+function functionSignature(methodName) {
+    return web3.sha3(methodName).substr(0, 2 + 8);
+}
+
+function encodeAddress(address) {
+    address = address.substr(2, address.length - 2);
+    while (address.length < 64) address = "0" + address;
+    return address;
+}
+
+// creates an ABI call for a function methodName(address) and encodes the address.
+function msgData(methodName, addressValue) {
+    return functionSignature(methodName) + encodeAddress(addressValue);
+}
 
 contract('Eternal Storage Tests', function (accounts) {
     beforeEach(async function checkBefore() {
@@ -59,35 +76,6 @@ contract('Eternal Storage Tests', function (accounts) {
         await storage.transferOwnership(arbitraryAccount, { from: storageOwner });
         var actualOwner = await storage.owner.call();
         assert.equal(arbitraryAccount, actualOwner, "expected owner should be token.");
-    });
-
-    it('check Ownable constructor is not inherited as a function', async function () {
-        // lets make sure this is not callable
-        let badData = web3.sha3('Ownable()');
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(arbitraryAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: storage.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(arbitraryAccountPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-
-        // make sure owner did not change
-        var actualOwner = await storage.owner.call();
-        assert.equal(storageOwner, actualOwner, "owner should not change.");
-    });
-
-    it('check transferOwnership cannot be called', async function () {
-        // lets make sure this is not callable
-        await expectRevert(storage.transferOwnership(arbitraryAccount, { from: arbitraryAccount }));
-        var actualOwner = await storage.owner.call();
-        assert.equal(storageOwner, actualOwner, "owner should not change.");
     });
 
     ///// SETTER Positive tests /////
@@ -125,7 +113,6 @@ contract('Eternal Storage Tests', function (accounts) {
         (expectedAmount).should.be.bignumber.equal(actualAmount);
     });
 
-    // (check what happens if I sign a big number instread of true/false - will it overwrite anything else in the mapping)
     it('setBlacklisted', async function () {
         await storage.setBlacklisted(arbitraryAccount, true, { from: storageOwner });
         assert.equal(true, await storage.isBlacklisted(arbitraryAccount));
@@ -156,6 +143,185 @@ contract('Eternal Storage Tests', function (accounts) {
 
     });
 
+    // getter functions (not tested by setter)
+    it('getBalances', async function () {
+        var expectedAmount1 = 867534278;
+        var expectedAmount2 = 342;
+        await storage.setBalances(arbitraryAccount, expectedAmount1, minterAccount, expectedAmount2, { from: storageOwner });
+
+        let amounts = await storage.getBalances(arbitraryAccount, minterAccount);
+        let actualAmount1 = amounts[0];
+        let actualAmount2 = amounts[1];
+
+        (expectedAmount1).should.be.bignumber.equal(actualAmount1);
+        (expectedAmount2).should.be.bignumber.equal(actualAmount2);
+    });
+
+    it('getBalances flip args', async function () {
+        var expectedAmount1 = 867534278;
+        var expectedAmount2 = 342;
+        await storage.setBalances(arbitraryAccount, expectedAmount1, minterAccount, expectedAmount2, { from: storageOwner });
+
+        let amounts = await storage.getBalances(minterAccount, arbitraryAccount);
+        let actualAmount1 = amounts[1];
+        let actualAmount2 = amounts[0];
+
+        (expectedAmount1).should.be.bignumber.equal(actualAmount1);
+        (expectedAmount2).should.be.bignumber.equal(actualAmount2);
+    });
+
+    it('isAnyBlacklisted (true, true)', async function () {
+        await storage.setBlacklisted(arbitraryAccount, true, { from: storageOwner });
+        await storage.setBlacklisted(minterAccount, true, { from: storageOwner });
+
+        let result1 = await storage.isAnyBlacklisted(arbitraryAccount, minterAccount);
+        let result2 = await storage.isAnyBlacklisted(minterAccount, arbitraryAccount);
+
+        assert.equal(true, result1);
+        assert.equal(true, result2);
+    });
+
+    it('isAnyBlacklisted (true, false)', async function () {
+        await storage.setBlacklisted(arbitraryAccount, true, { from: storageOwner });
+        await storage.setBlacklisted(minterAccount, false, { from: storageOwner });
+
+        let result1 = await storage.isAnyBlacklisted(arbitraryAccount, minterAccount);
+        let result2 = await storage.isAnyBlacklisted(minterAccount, arbitraryAccount);
+
+        assert.equal(true, result1);
+        assert.equal(true, result2);
+    });
+
+    it('isAnyBlacklisted (false, true)', async function () {
+        await storage.setBlacklisted(arbitraryAccount, false, { from: storageOwner });
+        await storage.setBlacklisted(minterAccount, true, { from: storageOwner });
+
+        let result1 = await storage.isAnyBlacklisted(arbitraryAccount, minterAccount);
+        let result2 = await storage.isAnyBlacklisted(minterAccount, arbitraryAccount);
+
+        assert.equal(true, result1);
+        assert.equal(true, result2);
+    });
+
+    it('isAnyBlacklisted (false, false)', async function () {
+        await storage.setBlacklisted(arbitraryAccount, false, { from: storageOwner });
+        await storage.setBlacklisted(minterAccount, false, { from: storageOwner });
+
+        let result1 = await storage.isAnyBlacklisted(arbitraryAccount, minterAccount);
+        let result2 = await storage.isAnyBlacklisted(minterAccount, arbitraryAccount);
+
+        assert.equal(false, result1);
+        assert.equal(false, result2);
+    });
+
+    ////// Call functions from non-owner account //////////
+
+    it('transferOwnership called by Mallory', async function () {
+        await expectRevert(storage.transferOwnership(arbitraryAccount, { from: arbitraryAccount }));
+        var actualOwner = await storage.owner.call();
+        assert.equal(storageOwner, actualOwner, "owner should not change.");
+    });
+
+    it('setAllowed called by Mallory', async function () {
+        await expectRevert(storage.setAllowed(arbitraryAccount, minterAccount, 433, { from: arbitraryAccount }));
+    });
+
+    it('setBalance called by Mallory', async function () {
+        await expectRevert(storage.setBalance(arbitraryAccount, 435, { from: arbitraryAccount }));
+    });
+
+    it('setBalances called by Mallory', async function () {
+        await expectRevert(storage.setBalances(arbitraryAccount, 342, minterAccount, 75483, { from: arbitraryAccount }));
+    });
+
+    it('setTotalSupply called by Mallory', async function () {
+        await expectRevert(storage.setTotalSupply(7587684752969, { from: arbitraryAccount }));
+    });
+
+    it('setBlacklisted called by Mallory', async function () {
+        await expectRevert(storage.setBlacklisted(arbitraryAccount, true, { from: arbitraryAccount }));
+        await expectRevert(storage.setBlacklisted(arbitraryAccount, false, { from: arbitraryAccount }));
+    });
+
+    it('setMinterAllowed called by Mallory', async function () {
+        await expectRevert(storage.setMinterAllowed(minterAccount, 6542682969, { from: arbitraryAccount }));
+    });
+
+    it('setMinter called by Mallory', async function () {
+        await expectRevert(storage.setMinter(minterAccount, true, { from: arbitraryAccount }));
+        await expectRevert(storage.setMinter(minterAccount, false, { from: arbitraryAccount }));
+    });
+
+    /////// Call functions that are not exposed ////////
+
+    // this test is a sanity check to make sure tests are using ABI correctly
+    it('Ownable transferOwnership(address) is public', async function () {
+        let badData = msgData('transferOwnership(address)', arbitraryAccount);
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(storageOwner)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: storage.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(storageOwnerPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await sendRawTransaction(raw);
+
+        // make sure owner did not change
+        var actualOwner = await storage.owner.call();
+        assert.equal(arbitraryAccount, actualOwner, "owner should change.");
+    });
+
+    it('Ownable constructor is not inherited as a function', async function () {
+        // lets make sure this is not callable
+        let badData = web3.sha3('Ownable()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(arbitraryAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: storage.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(arbitraryAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+
+        // make sure owner did not change
+        var actualOwner = await storage.owner.call();
+        assert.equal(storageOwner, actualOwner, "owner should not change.");
+    });
+
+    it('Ownable _transferOwnership(address) is not public', async function () {
+        // lets make sure this is not callable
+        let badData = msgData('_transferOwnership(address)', arbitraryAccount);
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(storageOwner)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: storage.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(storageOwnerPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+
+        // make sure owner did not change
+        var actualOwner = await storage.owner.call();
+        assert.equal(storageOwner, actualOwner, "owner should not change.");
+    });
+
+
+    // try to cause collisions
     it('setBlacklisted bigInt', async function () {
         await storage.setBlacklisted(arbitraryAccount, 4, { from: storageOwner });
         assert.equal(true, await storage.isBlacklisted(arbitraryAccount));
@@ -171,71 +337,38 @@ contract('Eternal Storage Tests', function (accounts) {
 
     it('setBlacklisted long address (right) no collision', async function () {
         let shortAddress = 0x1212;
-        let longAdress = 0x121200000000;
-
-        await storage.setBlacklisted(longAdress, true, { from: storageOwner });
-        assert.equal(false, await storage.isBlacklisted(shortAddress));
-    });
-
-    it('setBlacklisted long address (left) collision', async function () {
-        let longAddress = 0x000000000000000afce3ad7c92f4fd7e1b8fad9f;
-        let shortAddress = 0xafce3ad7c92f4fd7e1b8fad9f;
-
-        await storage.setBlacklisted(longAdress, true, { from: storageOwner });
-        assert.equal(false, await storage.isBlacklisted(shortAddress));
-    });
-    /*
-        it('setAllowed long address (left) collision', async function () {
-            //       let address1 = 0x000000000000000afce3ad7c92f4fd7e1b8fad9f;
-            let address1 = 0xbbbbbbbbbbbbbbbbbbbbbbbbb;
-            let address2 = 0xccccccccccccccc;
-            let address1a = 0xbbbbbbbbbbbbbbbbbbbbbbbbb;
-            let address2a = 0xbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccc;
-            let shortAddress = 0xafce3ad7c92f4fd7e1b8fad9f;
-    
-            await storage.setAllowed(address1, address2, 100, { from: storageOwner });
-    
-            let result = await storage.getAllowed(address1a, address2);
-            result.equal.
-            console.log("result: " + result.toString());
-        });
-    
-        it('setAllowed long address (zero) collision', async function () {
-            let address1 = 0xaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbb;
-            let address2 = 0xccccccccccccccc0000000000000000000000000;
-            let address1a = 0x0000000000000000000000000aaaaaaaaaaaaaaa;
-            let address2a = 0xbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccc;
-            let shortAddress = 0xafce3ad7c92f4fd7e1b8fad9f;
-    
-            await storage.setAllowed(address1, address2, 100, { from: storageOwner });
-    
-            let result = await storage.getAllowed(address1a, address2);
-            console.log("result: " + result.toString());
-        });*/
-
-
-    it('balances long address (zero) collision', async function () {
-        let shortAdress1 = 0xbbbbbbbbbbbbbbbbbbbbbbbbb;
-        let address1 = 0x000000000000000bbbbbbbbbbbbbbbbbbbbbbbbb;
-
-        let address2 = 0xccccccccccccccc0000000000000000000000000;
-        let shortAddress2 = 0xccccccccccccccc;
-
-        await storage.setBalance(shortAdress1, 100, { from: storageOwner });
-        await storage.setBalance(shortAddress2, 200, { from: storageOwner });
-
-        let balance1 = await storage.getBalance(address1);
-        let balance2 = await storage.getBalance(address2);
-
-        console.log("balance1: " + balance1.toString());
-        console.log("balance2: " + balance2.toString());
-    });
-
-    it('setBlacklisted test', async function () {
-        let longAddress = 0x000000000000000afce3ad7c92f4fd7e1b8fad9f;
-        let shortAddress = 0xafce3ad7c92f4fd7e1b8fad9f;
+        let longAddress = 0x121200000000;
 
         await storage.setBlacklisted(longAddress, true, { from: storageOwner });
         assert.equal(false, await storage.isBlacklisted(shortAddress));
     });
+
+    it('setBlacklisted long address (left) COLLISION', async function () {
+        let longAddress = 0x000000000000000afce3ad7c92f4fd7e1b8fad9f;
+        let shortAddress = 0xafce3ad7c92f4fd7e1b8fad9f;
+
+        await storage.setBlacklisted(longAddress, true, { from: storageOwner });
+        assert.equal(true, await storage.isBlacklisted(shortAddress));
+    });
+
+    it('balances long address (right) no collision', async function () {
+        let expectedAmount = 100;
+        let shortAddress = 0xbbbbbbbbbbbbbbbbbbbbbbbbb;
+        let address = 0xbbbbbbbbbbbbbbbbbbbbbbbbb000000000000000;
+
+        await storage.setBalance(shortAddress, 100, { from: storageOwner });
+        let actualAmount = await storage.getBalance(address);
+        assert.equal(0, actualAmount.toNumber());
+    });
+
+    it('balances long address (right) COLLISION', async function () {
+        let expectedAmount = 100;
+        let shortAddress = 0xbbbbbbbbbbbbbbbbbbbbbbbbb;
+        let address = 0x000000000000000bbbbbbbbbbbbbbbbbbbbbbbbb;
+
+        await storage.setBalance(shortAddress, 100, { from: storageOwner });
+        let actualAmount = await storage.getBalance(address);
+        assert.equal(expectedAmount, actualAmount.toNumber());
+    });
+
 });
