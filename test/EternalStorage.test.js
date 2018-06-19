@@ -277,7 +277,7 @@ contract('Eternal Storage Tests', function (accounts) {
     });
 
     it('Ownable constructor is not inherited as a function', async function () {
-        let badData = web3.sha3('Ownable()');
+        let badData = functionSignature('Ownable()');
         var tx = new Tx({
             nonce: web3.toHex(web3.eth.getTransactionCount(arbitraryAccount)),
             gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
