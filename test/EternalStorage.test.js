@@ -277,7 +277,6 @@ contract('Eternal Storage Tests', function (accounts) {
     });
 
     it('Ownable constructor is not inherited as a function', async function () {
-        // lets make sure this is not callable
         let badData = web3.sha3('Ownable()');
         var tx = new Tx({
             nonce: web3.toHex(web3.eth.getTransactionCount(arbitraryAccount)),
@@ -299,7 +298,6 @@ contract('Eternal Storage Tests', function (accounts) {
     });
 
     it('Ownable _transferOwnership(address) is not public', async function () {
-        // lets make sure this is not callable
         let badData = msgData('_transferOwnership(address)', arbitraryAccount);
         var tx = new Tx({
             nonce: web3.toHex(web3.eth.getTransactionCount(storageOwner)),
@@ -320,8 +318,8 @@ contract('Eternal Storage Tests', function (accounts) {
         assert.equal(storageOwner, actualOwner, "owner should not change.");
     });
 
-
     // try to cause collisions
+
     it('setBlacklisted bigInt', async function () {
         await storage.setBlacklisted(arbitraryAccount, 4, { from: storageOwner });
         assert.equal(true, await storage.isBlacklisted(arbitraryAccount));
