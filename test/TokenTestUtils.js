@@ -12,8 +12,8 @@ assertDiff.options.strict = true;
 var Q = require('q');
 // TODO: test really big numbers
 
-var ownerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
-var ownerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
+var deployerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
+var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
 var upgraderAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
@@ -75,7 +75,6 @@ async function checkVariables(token, customVars) {
         'tokenOwner': tokenOwnerAccount,
         // contractStorage is not deterministic for FiatTokenWithStorage
         //'contractStorage': storageAddress,
-        // 'owner': ownerAccount,
         'balances': {
             'arbitraryAccount': bigZero,
             'masterMinterAccount': bigZero,
@@ -377,7 +376,6 @@ async function getActualState(token) {
             'tokenOwner': tokenOwner,
             // contractStorage is not deterministic for FiatTokenWithStorage
             //'contractStorage': storageAddress,
-            // 'owner': await token.owner.call(),
             'balances': {
                 'arbitraryAccount': balancesA,
                 'masterMinterAccount': balancesMM,
@@ -682,10 +680,7 @@ module.exports = {
     redeem: redeem,
     expectRevert: expectRevert,
     expectJump: expectJump,
-    masterMinterRole: masterMinterRole,
-    blacklisterRole: blacklisterRole,
-    pauserRole: pauserRole,
-    ownerAccount: ownerAccount,
+    deployerAccount: deployerAccount,
     arbitraryAccount: arbitraryAccount,
     upgraderAccount: upgraderAccount,
     tokenOwnerAccount: tokenOwnerAccount,
@@ -697,5 +692,5 @@ module.exports = {
     blacklisterAccount: blacklisterAccount,
 
     arbitraryAccountPrivateKey,
-    ownerAccountPrivateKey
+    deployerAccountPrivateKey
 };

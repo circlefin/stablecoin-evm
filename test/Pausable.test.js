@@ -4,9 +4,10 @@ var Pausable = artifacts.require('Pausable');
 var tokenUtils = require('./TokenTestUtils');
 var BigNumber = require('bignumber.js');
 var expectRevert = tokenUtils.expectRevert;
-var ownerAccount = tokenUtils.ownerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var pauserAccount = tokenUtils.pauserAccount;
+var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 
 
 const should = require('chai')
@@ -22,7 +23,7 @@ contract('Pausable', function (accounts) {
 
     it('constructor owner', async function () {
         var actualOwner = await pause.owner.call();
-        assert.equal(ownerAccount, actualOwner, "wrong owner");
+        assert.equal(deployerAccount, actualOwner, "wrong owner");
     });
 
     it('constructor pauser', async function () {
@@ -49,7 +50,7 @@ contract('Pausable', function (accounts) {
         await pause.pause({from: pauserAccount});
         await checkPaused("should have paused from original pauser account");
 
-        await pause.updatePauser(arbitraryAccount, {from: ownerAccount});
+        await pause.updatePauser(arbitraryAccount, {from: deployerAccount});
         var newPauser = await pause.pauser.call();
         assert.equal(arbitraryAccount, newPauser);
         // double check we're still paused

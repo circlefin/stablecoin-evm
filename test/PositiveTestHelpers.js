@@ -13,12 +13,9 @@ var decimals = tokenUtils.decimals
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
-var masterMinterRole = tokenUtils.masterMinterRole;
-var blacklisterRole = tokenUtils.blacklisterRole;
-var pauserRole = tokenUtils.pauserRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
-var ownerAccount = tokenUtils.ownerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
@@ -75,7 +72,7 @@ async function check_burn(token) {
   var mintAmount = 11;
   var burnAmount = 10;
   await token.configureMinter(minterAccount, mintAmount, { from: masterMinterAccount });
-  await token.mint(minterAccount, amount, { from: minterAccount });
+  await token.mint(minterAccount, mintAmount, { from: minterAccount });
   var setup = [
     { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
     { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
@@ -85,7 +82,6 @@ async function check_burn(token) {
   await checkVariables(token, setup);
 
   await token.burn(burnAmount, { from: minterAccount });
-
   var afterBurn = [
     { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
     { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
@@ -264,7 +260,7 @@ async function check_removeMinter_masterMinterBlacklisted(token) {
     { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
     { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
   ];
-  await checkVariables(token, setup);
+  await checkVariables(token, customVars);
 
   await token.removeMinter(minterAccount, { from: masterMinterAccount });
   customVars = [
@@ -283,7 +279,7 @@ async function check_removeMinter_minterBlacklisted(token) {
     { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
     { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
   ];
-  await checkVariables(token, setup);
+  await checkVariables(token, customVars);
 
   await token.removeMinter(minterAccount, { from: masterMinterAccount });
   customVars = [
@@ -305,7 +301,7 @@ async function check_updateUpgraderAddress(token) {
 }
 
 async function check_updateMasterMinter(token) {
-  await token.updateMasterMinter(arbitraryAccount, { from: ownerAccount });
+  await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
   ];
@@ -313,7 +309,7 @@ async function check_updateMasterMinter(token) {
 }
 
 async function check_updateBlacklister(token) {
-  await token.updateBlacklister(arbitraryAccount, { from: ownerAccount });
+  await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
   ];
@@ -321,7 +317,7 @@ async function check_updateBlacklister(token) {
 }
 
 async function check_updatePauser(token) {
-  await token.updateRoleAddress(arbitraryAccount, { from: ownerAccount });
+  await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
   ];
@@ -329,9 +325,9 @@ async function check_updatePauser(token) {
 }
 
 async function check_transferOwnership(token) {
-  await token.transferOwnership(arbitraryAccount, { from: ownerAccount });
+  await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
-    { 'variable': 'owner', 'expectedValue': arbitraryAccount }
+    { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
   ];
   await checkVariables(token, result);
 }
@@ -350,7 +346,7 @@ async function check_updateUpgraderAddress_whilePaused(token) {
 
 async function check_updateMasterMinter_whilePaused(token) {
   await token.pause({ from: pauserAccount });
-  await token.updateMasterMinter(arbitraryAccount, { from: ownerAccount });
+  await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
     { 'variable': 'paused', 'expectedValue': true }
@@ -360,7 +356,7 @@ async function check_updateMasterMinter_whilePaused(token) {
 
 async function check_updateBlacklister_whilePaused(token) {
   await token.pause({ from: pauserAccount });
-  await token.updateBlacklister(arbitraryAccount, { from: ownerAccount });
+  await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
     { 'variable': 'paused', 'expectedValue': true }
@@ -370,7 +366,7 @@ async function check_updateBlacklister_whilePaused(token) {
 
 async function check_updatePauser_whilePaused(token) {
   await token.pause({ from: pauserAccount });
-  await token.updateRoleAddress(arbitraryAccount, { from: ownerAccount });
+  await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
     { 'variable': 'paused', 'expectedValue': true }
@@ -380,9 +376,9 @@ async function check_updatePauser_whilePaused(token) {
 
 async function check_transferOwnership_whilePaused(token) {
   await token.pause({ from: pauserAccount });
-  await token.transferOwnership(arbitraryAccount { from: ownerAccount });
+  await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
   var result = [
-    { 'variable': 'owner', 'expectedValue': arbitraryAccount },
+    { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
     { 'variable': 'paused', 'expectedValue': true }
   ];
   await checkVariables(token, result);
@@ -408,12 +404,12 @@ async function check_updateMasterMinter_toZeroAddress(token) {
   let longZero = 0x0000000000000000000000000000000000000000;
   let shortZero = 0x00;
 
-  await token.updateMasterMinter(longZero { from: ownerAccount });
+  await token.updateMasterMinter(longZero, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'masterMinter', 'expectedValue': "0x0000000000000000000000000000000000000000" },
   ];
 
-  await token.updateMasterMinter(shortZero, { from: ownerAccount });
+  await token.updateMasterMinter(shortZero, { from: tokenOwnerAccount });
   await checkVariables(token, result);
 }
 
@@ -421,12 +417,12 @@ async function check_updateBlacklister_toZeroAddress(token) {
   let longZero = 0x0000000000000000000000000000000000000000;
   let shortZero = 0x00;
 
-  await token.updateBlacklister(bigZero { from: ownerAccount });
+  await token.updateBlacklister(longZero, { from: tokenOwnerAccount });
   var result = [
     { 'variable': 'blacklister', 'expectedValue': "0x0000000000000000000000000000000000000000" },
   ];
 
-  await token.updateBlacklister(shortZero, { from: ownerAccount });
+  await token.updateBlacklister(shortZero, { from: tokenOwnerAccount });
   await checkVariables(token, result);
 }
 
@@ -434,12 +430,12 @@ async function check_updatePauser_toZeroAddress(token) {
   let longZero = 0x0000000000000000000000000000000000000000;
   let shortZero = 0x00;
 
-  await token.updatePauser(longZero { from: ownerAccount });
+  await token.updatePauser(longZero, { from: tokenOwnerAccount });
   var result = [
-    { 'variable': 'masterMinter', 'expectedValue': "0x0000000000000000000000000000000000000000" },
+    { 'variable': 'pauser', 'expectedValue': "0x0000000000000000000000000000000000000000" },
   ];
 
-  await token.updatePauser(shortZero, { from: ownerAccount });
+  await token.updatePauser(shortZero, { from: tokenOwnerAccount });
   await checkVariables(token, result);
 }
 
@@ -457,7 +453,7 @@ async function check_updateUpgraderAddress_toBlacklisted(token) {
 
 async function check_updateMasterMinter_toBlacklisted(token) {
   await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-  await token.updateMasterMinter(arbitraryAccount, { from: ownerAccount });
+  await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
   var setup = [
     { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
     { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
@@ -467,7 +463,7 @@ async function check_updateMasterMinter_toBlacklisted(token) {
 
 async function check_updateBlacklister_toBlacklisted(token) {
   await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-  await token.updateBlacklister(arbitraryAccount, { from: ownerAccount });
+  await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
   var setup = [
     { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
     { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
@@ -477,17 +473,7 @@ async function check_updateBlacklister_toBlacklisted(token) {
 
 async function check_updatePauser_toBlacklisted(token) {
   await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-  await token.updatePauser(arbitraryAccount, { from: ownerAccount });
-  var setup = [
-    { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
-    { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
-  ];
-  await checkVariables(token, setup);
-}
-
-async function check_updatePauser_toBlacklisted(token) {
-  await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-  await token.updatePauser(arbitraryAccount, { from: ownerAccount });
+  await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
   var setup = [
     { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
     { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
@@ -497,9 +483,9 @@ async function check_updatePauser_toBlacklisted(token) {
 
 async function check_transferOwnership_toBlacklisted(token) {
   await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-  await token.transferOwnership(arbitraryAccount, { from: ownerAccount });
+  await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
   var setup = [
-    { 'variable': 'owner', 'expectedValue': arbitraryAccount },
+    { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
     { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
   ];
   await checkVariables(token, setup);

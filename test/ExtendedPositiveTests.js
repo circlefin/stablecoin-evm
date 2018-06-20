@@ -1,172 +1,275 @@
-var FiatToken = artifacts.require('FiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
-var tokenUtils = require('./TokenTestUtils');
-var helpers = require('./PositiveTestHelpers');
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
+var tokenUtils = require('./TokenTestUtils');;
 var BigNumber = require('bignumber.js');
+var assertDiff = require('assert-diff');
+assertDiff.options.strict = true;
 
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
-var expectRevert = tokenUtils.expectRevert;
 var checkVariables = tokenUtils.checkVariables;
-var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
-var ownerAccount = tokenUtils.ownerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
+var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var upgraderAccount = tokenUtils.upgraderAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
 
-var check_defaultVariableValues = helpers.check_defaultVariableValues;
-var check_pause = helpers.check_pause;
-var check_unpause = helpers.check_unpause;
-var check_approve = helpers.check_approve;
-var check_blacklist = helpers.check_blacklist;
-var check_unblacklist = helpers.check_unblacklist;
-var check_burn = helpers.check_burn;
-var check_configureMinter = helpers.check_configureMinter;
-var check_mint = helpers.check_mint;
-var check_removeMinter = helpers.check_removeMinter;
-var check_transfer = helpers.check_transfer;
-var check_transferFrom = helpers.check_transferFrom;
-var check_configureMinter = helpers.check_configureMinter;
-var check_configureMinter_masterMinterBlacklisted = helpers.check_configureMinter_masterMinterBlacklisted;
-var check_configureMinter_minterBlacklisted = helpers.check_configureMinter_minterBlacklisted;
-var check_removeMinter_doesNotAffectTotalSupplyOrBalances = helpers.check_removeMinter_doesNotAffectTotalSupplyOrBalances;
-var check_removeMinter_whilePaused = helpers.check_removeMinter_whilePaused;
-var check_removeMinter_masterMinterBlacklisted = helpers.check_removeMinter_masterMinterBlacklisted;
-var check_removeMinter_minterBlacklisted = helpers.check_removeMinter_minterBlacklisted;
-var check_updateUpgraderAddress = helpers.check_updateUpgraderAddress;
-var check_updateMasterMinter = helpers.check_updateMasterMinter;
-var check_updateBlacklister = helpers.check_updateBlacklister;
-var check_updatePauser = helpers.check_updatePauser;
-var check_transferOwnership = helpers.check_transferOwnership;
-var check_updateUpgraderAddress_whilePaused = helpers.check_updateUpgraderAddress_whilePaused;
-var check_updateMasterMinter_whilePaused = helpers.check_updateMasterMinter_whilePaused;
-var check_updateBlacklister_whilePaused = helpers.check_updateBlacklister_whilePaused;
-var check_updatePauser_whilePaused = helpers.check_updatePauser_whilePaused;
-var check_transferOwnership_whilePaused = helpers.check_transferOwnership_whilePaused;
-var check_updateUpgraderAddress_toZeroAddress = helpers.check_updateUpgraderAddress_toZeroAddress;
-var check_updateMasterMinter_toZeroAddress = helpers.check_updateMasterMinter_toZeroAddress;
-var check_updateBlacklister_toZeroAddress = helpers.check_updateBlacklister_toZeroAddress;
-var check_updatePauser_toZeroAddress = helpers.check_updatePauser_toZeroAddress;
-var check_updateUpgraderAddress_toBlacklisted = helpers.check_updateUpgraderAddress_toBlacklisted;
-var check_updateMasterMinter_toBlacklisted = helpers.check_updateMasterMinter_toBlacklisted;
-var check_updateBlacklister_toBlacklisted = helpers.check_updateBlacklister_toBlacklisted;
-var check_updatePauser_toBlacklisted = helpers.check_updatePauser_toBlacklisted;
-var check_updatePauser_toBlacklisted = helpers.check_updatePauser_toBlacklisted;
-var check_transferOwnership_toBlacklisted = helpers.check_transferOwnership_toBlacklisted;
-var check_noPayableFunction = helpers.check_noPayableFunction;
-var check_updateUpgraderAddress = helpers.check_updateUpgraderAddress;
+var amount = 100;
 
+async function run_tests(newToken) {
 
-contract('FiatTokenExtended', function (accounts) {
-  beforeEach(async function checkBefore() {
-    token = await FiatToken.new(
-      "0x0",
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
+  /////////////////////////////////////////////////////////////////////////////
 
-    let dataContractAddress = await token.getDataContractAddress();
-    let storage = EternalStorage.at(dataContractAddress);
-
-    assert.equal(await storage.owner.call(), token.address);
+  beforeEach('Make fresh token contract', async function () {
+    token = await newToken();
   });
 
+  it('should check that default variable values are correct', async function () {
+    await checkVariables(token, []);
+  });
 
-it('should check that default variable values are correct', async function () {
-  await check_defaultVariableValues(token);
-});
+  /////////////////////////////////////////////////////////////////////////////
 
-it('should updateUpgraderAddress while paused', async function () {
-  await check_updateUpgraderAddress_whilePaused(token);
-});
+  // Paused
 
-it('should transferOwnership while paused', async function () {
-  await check_transferOwnership_whilePaused(token);
-});
+  it('should updateUpgraderAddress while paused', async function () {
+    await token.pause({ from: pauserAccount });
+    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
+    var result = [
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
 
-it('should updateMasterMinter while paused', async function () {
-  await check_updateMasterMinter_whilePaused(token);
-});
+  it('should updateMasterMinter while paused', async function () {
+    await token.pause({ from: pauserAccount });
+    await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
 
-it('should updateBlacklister while paused', async function () {
-  await check_updateBlacklister_whilePaused(token);
-});
+  it('should updateBlacklister while paused', async function () {
+    await token.pause({ from: pauserAccount });
+    await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
 
-it('should updatePauser while paused', async function () {
-  await check_updatePauser_whilePaused(token);
-});
+  it('should updatePauser while paused', async function () {
+    await token.pause({ from: pauserAccount });
+    await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
 
-it('should updateUpgraderAddress to zero address', async function () {
-  await check_updateUpgraderAddress_toZeroAddress(token);
-});
+  it('should transferOwnership while paused', async function () {
+    await token.pause({ from: pauserAccount });
+    await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
 
-it('should updateMasterMinter to zero address', async function () {
-  await check_updateMasterMinter_toZeroAddress(token);
-});
+  it('should removeMinter when paused', async function () {
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.pause({ from: pauserAccount });
+    var isAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, isAMinter);
 
-it('should updateBlacklister to zero address', async function () {
-  await check_updateBlacklister_toZeroAddress(token);
-});
+    await token.removeMinter(minterAccount, { from: masterMinterAccount });
+    var notAMinter = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, notAMinter);
+  });
 
-it('should updatePauser to zero address', async function () {
-  await check_updatePauser_toZeroAddress(token);
-});
+  // Zero Address
 
-it('should updateUpgraderAddress to blacklisted address', async function () {
-  await check_updateUpgraderAddress_toBlacklisted(token);
-});
+  it('should updateUpgraderAddress to zero address', async function () {
+    let longZero = 0x0000000000000000000000000000000000000000;
 
-it('should transferOwnership to blacklisted address', async function () {
-  await check_transferOwnership_toBlacklisted(token);
-});
+    await token.updateUpgraderAddress(longZero, { from: upgraderAccount });
+    var result = [
+      { 'variable': 'upgrader', 'expectedValue': "0x0000000000000000000000000000000000000000" },
+    ];
+    await checkVariables(token, result);
+  });
 
-it('should updateMasterMinter to blacklisted address', async function () {
-  await check_updateMasterMinter_toBlacklisted(token);
-});
+  it('should updateMasterMinter to zero address', async function () {
+    let longZero = 0x0000000000000000000000000000000000000000;
+    let shortZero = 0x00;
 
-it('should updateBlacklister to blacklisted address', async function () {
-  await check_updateBlacklister_toBlacklisted(token);
-});
+    await token.updateMasterMinter(longZero, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'masterMinter', 'expectedValue': "0x0000000000000000000000000000000000000000" },
+    ];
 
-it('should updatePauser to blacklisted address', async function () {
-  await check_updatePauser_toBlacklisted(token);
-});
+    // Note: longZero and shortZero both resolve to 0x0000000000000000000000000000000000000000
+    await token.updateMasterMinter(shortZero, { from: tokenOwnerAccount });
+    await checkVariables(token, result);
+  });
 
-it('should configureMinter when masterMinter is blacklisted', async function () {
-  await check_configureMinter_masterMinterBlacklisted(token);
-});
+  it('should updateBlacklister to zero address', async function () {
+    let longZero = 0x0000000000000000000000000000000000000000;
+    let shortZero = 0x00;
 
-it('should configureMinter when minter is blacklisted', async function () {
-  await check_configureMinter_minterBlacklisted(token);
-});
+    await token.updateBlacklister(longZero, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'blacklister', 'expectedValue': "0x0000000000000000000000000000000000000000" },
+    ];
 
-it('should removeMinter when paused', async function () {
-  await check_removeMinter_whilePaused(token);
-});
+    await token.updateBlacklister(shortZero, { from: tokenOwnerAccount });
+    await checkVariables(token, result);
+  });
 
-it('should removeMinter when masterMinter is blacklisted', async function() {
-  await check_removeMinter_masterMinterBlacklisted(token);
-});
+  it('should updatePauser to zero address', async function () {
+    let longZero = 0x0000000000000000000000000000000000000000;
+    let shortZero = 0x00;
 
-it('should removeMinter when minter is blacklisted', async function() {
-  await check_removeMinter_masterMinterBlacklisted(token);
-});
+    await token.updatePauser(longZero, { from: tokenOwnerAccount });
+    var result = [
+      { 'variable': 'pauser', 'expectedValue': "0x0000000000000000000000000000000000000000" },
+    ];
+
+    await token.updatePauser(shortZero, { from: tokenOwnerAccount });
+    await checkVariables(token, result);
+  });
+
+  // Blacklisted
+
+  it('should updateUpgraderAddress to blacklisted address', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
+    var setup = [
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+  });
+
+  it('should updateMasterMinter to blacklisted address', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
+    var setup = [
+      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+  });
+
+  it('should updateBlacklister to blacklisted address', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
+    var setup = [
+      { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+  });
+
+  it('should updatePauser to blacklisted address', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
+    var setup = [
+      { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+  });
+
+  it('should transferOwnership to blacklisted address', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
+    var setup = [
+      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, setup);
+  });
+
+  it('should configureMinter when masterMinter is blacklisted', async function () {
+    await token.blacklist(masterMinterAccount, { from: blacklisterAccount });
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var result = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+  });
+
+  it('should configureMinter when minter is blacklisted', async function () {
+    await token.blacklist(minterAccount, { from: blacklisterAccount });
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var result = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
+    ];
+    await checkVariables(token, result);
+  });
+
+  it('should removeMinter when masterMinter is blacklisted', async function() {
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.blacklist(masterMinterAccount, { from: blacklisterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
+    ];
+    await checkVariables(token, customVars);
+
+    await token.removeMinter(minterAccount, { from: masterMinterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
+      { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
+    ];
+    await checkVariables(token, customVars);
+  });
+
+  it('should removeMinter when minter is blacklisted', async function() {
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.blacklist(minterAccount, { from: blacklisterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
+    ];
+    await checkVariables(token, customVars);
+
+    await token.removeMinter(minterAccount, { from: masterMinterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
+      { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
+    ];
+    await checkVariables(token, customVars);
+  });
+
+}
+
+module.exports = {
+  run_tests: run_tests,
+}
