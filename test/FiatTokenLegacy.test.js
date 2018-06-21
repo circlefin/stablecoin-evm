@@ -18,7 +18,7 @@ var approve = tokenUtils.approve;
 var unBlacklist = tokenUtils.unBlacklist;
 var sampleTransfer = tokenUtils.sampleTransfer;
 var checkTransferEvents = tokenUtils.checkTransferEvents;
-var ownerAccount = tokenUtils.ownerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
@@ -120,7 +120,7 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should complete transferFrom', async function () {
-    await sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount);
+    await sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should approve', async function () {
@@ -130,7 +130,7 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should complete sample transfer', async function () {
-    await sampleTransfer(token, ownerAccount, arbitraryAccount2, minterAccount);
+    await sampleTransfer(token, deployerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should complete transfer from non-owner', async function () {
@@ -248,7 +248,7 @@ contract('Legacy Tests', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount));
+    await expectRevert(sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount));
   });
 
   it('should pause and should not be able to transfer, then unpause and be able to transfer', async function () {
@@ -257,11 +257,11 @@ contract('Legacy Tests', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount));
+    await expectRevert(sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount));
 
     await token.unpause({ from: pauserAccount });
     assert.equal(await token.paused.call(), false);
-    await sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount);
+    await sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should pause and should not be able to transferFrom', async function () {
@@ -270,7 +270,7 @@ contract('Legacy Tests', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransfer(token, ownerAccount, arbitraryAccount2, minterAccount));
+    await expectRevert(sampleTransfer(token, deployerAccount, arbitraryAccount2, minterAccount));
   });
 
   it('should pause and should not be able to approve', async function () {
@@ -942,7 +942,7 @@ contract('Legacy Tests', function (accounts) {
 
 
   /* Comments out increase/decrease approval tests */
-  /* 
+  /*
 
   it('should increase approval', async function() {
     await approve(token, accounts[3], 100, accounts[2]);
@@ -998,39 +998,39 @@ contract('Legacy Tests', function (accounts) {
       let totalAmount = transferAmount + feeAmount;
       await mint(token, accounts[0], totalAmount, minterAccount);
       console.log(totalAmount);
-  
-  
+
+
       await token.approveWithFee(accounts[3], transferAmount);
       allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(totalAmount)));
       transfer = await token.transferFrom(accounts[0], accounts[3], transferAmount, {from: accounts[3]});
-  
+
       checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount, feeAmount);
-  
+
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 0);
       let balance3 = await token.balanceOf(accounts[3]);
       assert.equal(balance3, transferAmount);
       let balanceFeeAccount = await token.balanceOf(feeAccount);
       assert.equal(balanceFeeAccount, feeAmount);
-  
+
       let transferAmountOld = transferAmount;
       let feeAmountOld = feeAmount;
       let totalAmountOld = totalAmount;
-  
+
       transferAmount = 800;
       feeAmount = calculateFeeAmount(transferAmount);
       totalAmount = transferAmount + feeAmount;
       await mint(token, accounts[0], totalAmount, minterAccount);
-  
+
       await token.increaseApprovalWithFee(accounts[3], transferAmount);
       allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(totalAmount)));
-  
+
       transfer = await token.transferFrom(accounts[0], accounts[3], transferAmount, {from: accounts[3]});
-  
+
       checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount, feeAmount);
-  
+
       balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 0);
       balance3 = await token.balanceOf(accounts[3]);
@@ -1038,7 +1038,7 @@ contract('Legacy Tests', function (accounts) {
       balanceFeeAccount = await token.balanceOf(feeAccount);
       assert.equal(balanceFeeAccount, feeAmount + feeAmountOld);
     });
-  
+
     it('should set approve transfer amount with fee, decrease approval amount with fee', async function() {
       fee = 1235;
       feeBase = 10000;
@@ -1046,20 +1046,20 @@ contract('Legacy Tests', function (accounts) {
       let allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
       let transferAmount = 650;
-  
+
       await token.approveWithFee(accounts[3], transferAmount);
       await token.decreaseApprovalWithFee(accounts[3], transferAmount);
       allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
     });
-  
+
     it('should pause and should not be able to increaseApproval', async function () {
       await mint(token, accounts[2], 1900, minterAccount);
       await approve(token, accounts[2], 50, accounts[3]);
       assert.equal(await token.paused.call(), false);
       await token.pause({from: pauserAccount});
       assert.equal(await token.paused.call(), true);
-  
+
       try {
         await increaseApproval(accounts[2], 200, accounts[3]);
         assert.fail();
@@ -1067,14 +1067,14 @@ contract('Legacy Tests', function (accounts) {
         checkFailureIsExpected(e);
       }
     });
-  
+
     it('should pause and should not be able to decreaseApproval', async function () {
       await mint(token, accounts[2], 1900, minterAccount);
       await approve(token, accounts[2], 50, accounts[3]);
       assert.equal(await token.paused.call(), false);
       await token.pause({from: pauserAccount});
       assert.equal(await token.paused.call(), true);
-  
+
       try {
         await decreaseApproval(accounts[2], 20, accounts[3]);
         assert.fail();
@@ -1082,7 +1082,7 @@ contract('Legacy Tests', function (accounts) {
         checkFailureIsExpected(e);
       }
     });
-  
+
     it('should blacklist and make increaseApproval impossible', async function() {
       await mint(token, accounts[1], 1900, minterAccount);
       await token.approve(accounts[2], 600, {from: accounts[1]});
@@ -1097,7 +1097,7 @@ contract('Legacy Tests', function (accounts) {
          assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
       }
     });
-  
+
     it('should make giving increaseApproval to blacklisted account impossible', async function() {
       await mint(token, accounts[2], 1900, minterAccount);
       await token.approve(accounts[1], 600, {from: accounts[2]});
@@ -1112,7 +1112,7 @@ contract('Legacy Tests', function (accounts) {
           assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
       }
     });
-  
+
     it('should blacklist and make decreaseApproval impossible', async function() {
       await mint(token, accounts[1], 1900, minterAccount);
       await token.approve(accounts[2], 600, {from: accounts[1]});
@@ -1127,7 +1127,7 @@ contract('Legacy Tests', function (accounts) {
           assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
       }
     });
-  
+
     it('should make giving decreaseApproval to blacklisted account impossible', async function() {
       await mint(token, accounts[2], 1900, minterAccount);
       await token.approve(accounts[1], 600, {from: accounts[2]});
@@ -1195,10 +1195,10 @@ contract('Legacy Tests', function (accounts) {
         assert.equal(masterMinterAccount, minter);
       }
     });
-  
+
     it('should change the masterMinter with a valid minterCertifier account and fail to finishMinting with old masterMinter', async function() {
       await token.updateMasterMinter(accounts[8], {from: minterCertifier});
-  
+
       try {
         await token.finishMinting({from: masterMinterAccount});
       } catch(e) {
@@ -1555,15 +1555,15 @@ contract('Legacy Tests', function (accounts) {
   /*
     var fee = 25;
     var feeBase = 1000;
-  
+
     it('should set fees and complete transferFrom with fees', async function() {
-      await sampleTransferFrom(token, ownerAccount, feeAccount, minterAccount);
+      await sampleTransferFrom(token, deployerAccount, feeAccount, minterAccount);
     });
-  
+
     it('should set long-decimal fees and complete transferFrom with fees', async function() {
-      await sampleTransferFrom(token, ownerAccount, feeAccount, minterAccount);
+      await sampleTransferFrom(token, deployerAccount, feeAccount, minterAccount);
     });
-  
+
     it('should set fees and and fail to complete transferFrom with insufficient balance to cover fees', async function() {
       fee = 1235;
       feeBase = 10000;
@@ -1589,23 +1589,23 @@ contract('Legacy Tests', function (accounts) {
           assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(0)));
         }
     });
-  
+
     it('should set long-decimal fees and complete transfer with fees', async function() {
-      await sampleTransfer(token, ownerAccount, feeAccount, minterAccount);  
+      await sampleTransfer(token, deployerAccount, feeAccount, minterAccount);
     });
-  
+
     it('should set long-decimal fees and complete transfer with fees from non-owner', async function() {
       fee = 123589;
       feeBase = 1000000;
       await token.updateTransferFee(fee, feeBase);
       await mint(token, accounts[2], 1900, minterAccount);
       let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
-  
+
       let transfer = await token.transfer(accounts[3], 1000, {from: accounts[2]});
-  
+
       let feeAmount = calculateFeeAmount(1000);
       checkTransferEvents(transfer, accounts[2], accounts[3], 1000, feeAmount);
-  
+
       let balance0 = await token.balanceOf(accounts[2]);
       assert.equal(balance0, 1900 - 1000 - feeAmount);
       let balance3 = await token.balanceOf(accounts[3]);
@@ -1613,7 +1613,7 @@ contract('Legacy Tests', function (accounts) {
       let balanceFeeAccount = await token.balanceOf(feeAccount);
       assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(0)));
     });
-  
+
     it('should set allowance and balances before and after approved transfer', async function() {
       let allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
@@ -1622,12 +1622,12 @@ contract('Legacy Tests', function (accounts) {
       allowed = await token.allowance.call(accounts[0], accounts[3]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
       let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
-  
+
       let transfer = await token.transferFrom(accounts[0], accounts[3], 50, {from: accounts[3]});
-  
+
       let feeAmount = calculateFeeAmount(50);
       checkTransferEvents(transfer, accounts[0], accounts[3], 50, feeAmount);
-  
+
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, 450 - feeAmount);
       let balance3 = await token.balanceOf(accounts[3]);
@@ -1635,7 +1635,7 @@ contract('Legacy Tests', function (accounts) {
       let balanceFeeAccount = await token.balanceOf(feeAccount);
       assert.isTrue(new BigNumber(balanceFeeAccount).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(feeAmount)));
     });
-  
+
     it('should test consistency of transfer(x) and approve(x) + transferFrom(x) with fees', async function() {
       fee = 1235;
       feeBase = 10000;
@@ -1647,30 +1647,30 @@ contract('Legacy Tests', function (accounts) {
       let totalAmount = transferAmount + feeAmount;
       await mint(token, accounts[0], totalAmount, minterAccount);
       let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
-  
+
       let transfer = await token.transfer(accounts[3], transferAmount);
       checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount, feeAmount);
-  
+
       let balance0 = await token.balanceOf(accounts[0]);
       assert.equal(balance0, totalAmount - transferAmount - feeAmount);
       let balance3 = await token.balanceOf(accounts[3]);
       assert.equal(balance3, transferAmount);
       let balanceFeeAccount = await token.balanceOf(feeAccount);
       assert.equal(balanceFeeAccount - initialBalanceFeeAccount, feeAmount);
-  
+
       await token.allowance.call(accounts[1], accounts[4]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
       await mint(token, accounts[1], totalAmount, minterAccount);
       initialBalanceFeeAccount = await token.balanceOf(feeAccount);
-  
+
       await token.approve(accounts[4], transferAmount, {from: accounts[1]});
       allowed = await token.allowance.call(accounts[1], accounts[4]);
       assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(transferAmount)));
-  
+
       transfer = await token.transferFrom(accounts[1], accounts[4], transferAmount, {from: accounts[4]});
-  
+
       checkTransferEvents(transfer, accounts[1], accounts[4], transferAmount, feeAmount);
-  
+
       let balance1 = await token.balanceOf(accounts[1]);
       assert.equal(balance0, totalAmount - transferAmount - feeAmount);
       let balance4 = await token.balanceOf(accounts[4]);
@@ -1678,7 +1678,7 @@ contract('Legacy Tests', function (accounts) {
       let balanceFeeAccountNew = await token.balanceOf(feeAccount);
       assert.isTrue(new BigNumber(balanceFeeAccountNew).minus(new BigNumber(initialBalanceFeeAccount)).isEqualTo(new BigNumber(feeAmount)));
     });
-  
+
     it('should blacklist then unblacklist to make a transfer possible', async function() {
       await mint(token, accounts[2], 1900, minterAccount);
       await blacklist(token, accounts[2]);
@@ -1689,7 +1689,7 @@ contract('Legacy Tests', function (accounts) {
       balance = await token.balanceOf(accounts[3]);
       assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
     });
-  
+
     it('should fail to blacklist with non-blacklister account', async function() {
       await mint(token, accounts[2], 1900, minterAccount);
       try {

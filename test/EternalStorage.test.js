@@ -17,7 +17,7 @@ var blacklisterRole = tokenUtils.blacklisterRole;
 var pauserRole = tokenUtils.pauserRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
-var ownerAccount = tokenUtils.ownerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
@@ -28,7 +28,7 @@ var pauserAccount = tokenUtils.pauserAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
-var storageOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
+var storageOwnerPrivateKey = tokenUtils.deployerAccountPrivateKey;
 
 function sendRawTransaction(raw) {
     return new Promise(function (resolve, reject) {
@@ -62,8 +62,8 @@ function msgData(methodName, addressValue) {
 
 contract('Eternal Storage Tests', function (accounts) {
     beforeEach(async function checkBefore() {
-        storage = await EternalStorage.new(ownerAccount);
-        storageOwner = ownerAccount;
+        storage = await EternalStorage.new(deployerAccount);
+        storageOwner = deployerAccount;
         assert.equal(await storage.owner.call(), storageOwner)
     });
 
