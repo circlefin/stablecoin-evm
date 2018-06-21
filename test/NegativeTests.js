@@ -1,6 +1,6 @@
 var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
-var tokenUtils = require('./TokenTestUtils');;
+var tokenUtils = require('./TokenTestUtils');
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
@@ -54,13 +54,13 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should fail to mint when message sender is not a minter', async function () {
+  it('should fail to mint when msg.sender is not a minter', async function () {
     //Note: minterAccount has not yet been configured as a minter
     await expectRevert(token.mint(arbitraryAccount, 50, {from: minterAccount}));
     await checkVariables(token, []);
   });
 
-  it('should fail to mint when message sender is blacklisted', async function () {
+  it('should fail to mint when msg.sender is blacklisted', async function () {
     await token.blacklist(minterAccount, {from: blacklisterAccount});
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [

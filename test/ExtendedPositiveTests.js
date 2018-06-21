@@ -85,7 +85,7 @@ async function run_tests(newToken) {
     await checkVariables(token, result);
   });
 
-  it('should removeMinter when paused', async function () {
+  it('should removeMinter while paused', async function () {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     await token.pause({ from: pauserAccount });
     var isAMinter = [
