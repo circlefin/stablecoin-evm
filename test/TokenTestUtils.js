@@ -661,6 +661,16 @@ async function expectRevert(contractPromise) {
     assert.fail('Expected error of type revert, but no error was received');
 }
 
+async function expectJump(contractPromise) {
+  try {
+    await contractPromise;
+    assert.fail('Expected invalid opcode not received');
+  } catch (error) {
+    const invalidOpcodeReceived = error.message.search('invalid opcode') >= 0;
+    assert(invalidOpcodeReceived, `Expected "invalid opcode", got ${error} instead`);
+  }
+}
+
 module.exports = {
     name: name,
     symbol: symbol,
@@ -686,6 +696,7 @@ module.exports = {
     approve: approve,
     redeem: redeem,
     expectRevert: expectRevert,
+    expectJump: expectJump,
     masterMinterRole: masterMinterRole,
     blacklisterRole: blacklisterRole,
     pauserRole: pauserRole,
