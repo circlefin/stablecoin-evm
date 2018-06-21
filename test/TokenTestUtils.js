@@ -684,7 +684,6 @@ module.exports = {
     arbitraryAccount: arbitraryAccount,
     upgraderAccount: upgraderAccount,
     tokenOwnerAccount: tokenOwnerAccount,
-    blacklisterAccount: blacklisterAccount,
     arbitraryAccount2: arbitraryAccount2,
     masterMinterAccount: masterMinterAccount,
     minterAccount: minterAccount,
