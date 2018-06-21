@@ -76,6 +76,8 @@ async function newUpgradedToken() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Run specific tests combos by commenting/uncommenting the contract blocks below. 
+
 contract('FiatToken_PositiveTests_Original', async function (accounts) {
   await positive_tests.run_tests(newOriginalToken);
 });
