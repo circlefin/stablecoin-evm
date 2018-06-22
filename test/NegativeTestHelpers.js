@@ -672,6 +672,11 @@ async function fail_updateUpgraderAddress_senderNotUpgrader(token) {
   await checkVariables(token, []);
 }
 
+async function fail_updateUpgraderAddress_newAddressIsZeroAddress(token) {
+  await expectRevert(token.updateUpgraderAddress("0x0", {from: upgraderAccount}));
+  await checkVariables(token, []);
+}
+
 //Begin pause/unpause test helpers
 
 async function fail_pause_senderNotPauser(token) {
@@ -784,6 +789,7 @@ module.exports = {
   fail_updateRoleAddress_senderNotRoleAddressChanger: fail_updateRoleAddress_senderNotRoleAddressChanger,
   fail_updateRoleAddress_senderIsOldRoleAddressChanger: fail_updateRoleAddress_senderIsOldRoleAddressChanger,
   fail_updateUpgraderAddress_senderNotUpgrader: fail_updateUpgraderAddress_senderNotUpgrader,
+  fail_updateUpgraderAddress_newAddressIsZeroAddress: fail_updateUpgraderAddress_newAddressIsZeroAddress,
   fail_pause_senderNotPauser: fail_pause_senderNotPauser,
   fail_unpause_senderNotPauser: fail_unpause_senderNotPauser,
   fail_blacklist_senderNotBlacklister: fail_blacklist_senderNotBlacklister,
