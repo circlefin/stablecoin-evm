@@ -48,10 +48,11 @@ contract Upgradable is EternalStorageUpdater {
 
     /**
      * @dev updates the upgrader address
-     * Validates that caller is the upgrader
+     * Validates that caller is the upgrader and that the _newAddress is not null
      * @param _newAddress address The new upgrader address
     */
     function updateUpgraderAddress(address _newAddress) onlyUpgrader public {
+        require(_newAddress != address(0));
         upgrader = _newAddress;
         emit UpgraderChanged(upgrader);
     }
