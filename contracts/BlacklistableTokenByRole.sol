@@ -11,8 +11,8 @@ contract BlacklistableTokenByRole is EternalStorageUpdater, Ownable {
 
     address public blacklister;
 
-    event Blacklisted(address _account);
-    event UnBlacklisted(address _account);
+    event Blacklisted(address indexed _account);
+    event UnBlacklisted(address indexed _account);
     event BlacklisterChanged(address indexed newBlacklister);
 
     constructor(address _blacklister) public {

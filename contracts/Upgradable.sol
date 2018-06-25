@@ -11,7 +11,7 @@ contract Upgradable is EternalStorageUpdater {
     address public upgrader;
     address public upgradedAddress;
 
-    event Upgraded(address newContractAddress);
+    event Upgraded(address indexed newContractAddress);
     event UpgraderChanged(address indexed newUpgrader);
 
     constructor(address _upgrader) public {
