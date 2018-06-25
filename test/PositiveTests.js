@@ -341,7 +341,7 @@ async function run_tests(newToken) {
       upgraderAccount,
       tokenOwnerAccount);
     await token.upgrade(newToken.address, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), newToken.address); // should this be in checkVariables??
+    assert.equal(await storage.owner.call(), newToken.address);
 
     await newToken.disablePriorContract({from: pauserAccount});
     var result = [
