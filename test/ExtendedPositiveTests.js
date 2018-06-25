@@ -138,16 +138,6 @@ async function run_tests(newToken) {
 
   // Zero Address
 
-  it('should updateUpgraderAddress to zero address', async function () {
-    let longZero = 0x0000000000000000000000000000000000000000;
-
-    await token.updateUpgraderAddress(longZero, { from: upgraderAccount });
-    var result = [
-      { 'variable': 'upgrader', 'expectedValue': "0x0000000000000000000000000000000000000000" },
-    ];
-    await checkVariables(token, result);
-  });
-
   it('should updateMasterMinter to zero address', async function () {
     let longZero = 0x0000000000000000000000000000000000000000;
     let shortZero = 0x00;
