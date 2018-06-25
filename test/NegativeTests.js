@@ -672,12 +672,10 @@ async function run_tests(newToken) {
     await checkVariables(token, []);
   });
 
-
-//TODO: Uncomment test below when smart contract merge lands to make it pass.
-  // it('should fail to updateUpgraderAddress when newAddress is 0x0', async function () {
-  //   await expectRevert(token.updateUpgraderAddress("0x0", {from: upgraderAccount}));
-  //   await checkVariables(token, []);
-  // });
+  it('should fail to updateUpgraderAddress when newAddress is 0x0', async function () {
+    await expectRevert(token.updateUpgraderAddress("0x0", {from: upgraderAccount}));
+    await checkVariables(token, []);
+  });
 
   // Pause and Unpause
 
