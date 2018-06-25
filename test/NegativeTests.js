@@ -672,7 +672,12 @@ async function run_tests(newToken) {
     await checkVariables(token, []);
   });
 
-  // Pause and Unpause
+  it('should fail to updateUpgraderAddress when new address is 0x0', async function () {
+    await expectRevert(token.updateUpgraderAddress("0x0", {from: upgraderAccount}));
+    await checkVariables(token, []);
+  });
+
+  //Begin pause/unpause tests
 
   it('should fail to pause when sender is not pauser', async function () {
     await expectRevert(token.pause({from: arbitraryAccount}));
