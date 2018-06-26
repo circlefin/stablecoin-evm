@@ -7,12 +7,12 @@ import "./storage/EternalStorageUpdater.sol";
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
-contract BlacklistableTokenByRole is EternalStorageUpdater, Ownable {
+contract Blacklistable is EternalStorageUpdater, Ownable {
 
     address public blacklister;
 
-    event Blacklisted(address _account);
-    event UnBlacklisted(address _account);
+    event Blacklisted(address indexed _account);
+    event UnBlacklisted(address indexed _account);
     event BlacklisterChanged(address indexed newBlacklister);
 
     constructor(address _blacklister) public {

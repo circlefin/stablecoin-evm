@@ -5,7 +5,7 @@ import './thirdparty/openzeppelin/SafeMath.sol';
 import './thirdparty/openzeppelin/Ownable.sol';
 import './thirdparty/openzeppelin/Pausable.sol';
 
-import './BlacklistableTokenByRole.sol';
+import './Blacklistable.sol';
 import './Upgradable.sol';
 import './UpgradedContract.sol';
 
@@ -13,7 +13,7 @@ import './UpgradedContract.sol';
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is Ownable, ERC20, Pausable, BlacklistableTokenByRole, Upgradable {
+contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
     using SafeMath for uint256;
 
     string public name;
@@ -24,9 +24,9 @@ contract FiatToken is Ownable, ERC20, Pausable, BlacklistableTokenByRole, Upgrad
 
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
-    event MinterConfigured(address minter, uint256 minterAllowedAmount);
-    event MinterRemoved(address oldMinter);
-    event MasterMinterChanged(address newMasterMinter);
+    event MinterConfigured(address indexed minter, uint256 minterAllowedAmount);
+    event MinterRemoved(address indexed oldMinter);
+    event MasterMinterChanged(address indexed newMasterMinter);
 
     constructor(
         address _contractStorageAddress,
@@ -42,7 +42,7 @@ contract FiatToken is Ownable, ERC20, Pausable, BlacklistableTokenByRole, Upgrad
     )
         EternalStorageUpdater(_contractStorageAddress)
         Pausable(_pauser)
-        BlacklistableTokenByRole(_blacklister)
+        Blacklistable(_blacklister)
         Upgradable(_upgrader)
         public
     {

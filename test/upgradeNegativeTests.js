@@ -67,6 +67,7 @@ var fail_burn_contractNotOwner = helpers.fail_burn_contractNotOwner;
 var fail_updateRoleAddress_senderNotRoleAddressChanger = helpers.fail_updateRoleAddress_senderNotRoleAddressChanger;
 var fail_updateRoleAddress_senderIsOldRoleAddressChanger = helpers.fail_updateRoleAddress_senderIsOldRoleAddressChanger;
 var fail_updateUpgraderAddress_senderNotUpgrader = helpers.fail_updateUpgraderAddress_senderNotUpgrader;
+var fail_updateUpgraderAddress_newAddressIsZeroAddress = helpers.fail_updateUpgraderAddress_newAddressIsZeroAddress;
 var fail_pause_senderNotPauser = helpers.fail_pause_senderNotPauser;
 var fail_unpause_senderNotPauser = helpers.fail_unpause_senderNotPauser;
 var fail_blacklist_senderNotBlacklister = helpers.fail_blacklist_senderNotBlacklister;
@@ -289,6 +290,10 @@ contract('UpgradedFiatToken', function (accounts) {
 
   it('should fail to updateUpgraderAddress when sender is not upgrader', async function () {
     await fail_updateUpgraderAddress_senderNotUpgrader(token);
+  });
+
+  it('should fail to updateUpgraderAddress when new address is 0x0', async function () {
+    await fail_updateUpgraderAddress_newAddressIsZeroAddress(token);
   });
 
   //Begin pause/unpause tests
