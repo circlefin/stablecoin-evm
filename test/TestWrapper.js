@@ -15,6 +15,7 @@ var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
+var arbitraryAccount = tokenUtils.arbitraryAccount;
 
 
 // The following helpers make fresh original/upgraded tokens before each test.
@@ -34,6 +35,7 @@ async function newOriginalToken() {
   );
 
   token.default_priorContractAddress = "undefined";
+  token.default_storageOwner = token.address;
 
   return token;
 }
@@ -71,15 +73,70 @@ async function newUpgradedToken() {
   await oldToken.upgrade(token.address, {from: upgraderAccount});
 
   token.default_priorContractAddress = oldToken.address;
+  token.default_storageOwner = token.address;
 
   return token;
 }
 
-// Instantiates a FiatToken and an EternalStorage without making the token contract
+// Instantiate a FiatToken and an EternalStorage without making the token contract
 // owner of the storage contract. This setup is needed for several negative tests.
 
-async function notStorageOwner() {
-  //TODO 
+async function notStorageOwner_Original() {
+  var storage = await EternalStorage.new({from: arbitraryAccount});
+  var token = await FiatToken.new(
+    storage.address,
+    name,
+    symbol,
+    currency,
+    decimals,
+    masterMinterAccount,
+    pauserAccount,
+    blacklisterAccount,
+    upgraderAccount,
+    tokenOwnerAccount
+  );
+
+  token.default_priorContractAddress = "undefined";
+  token.default_storageOwner = await storage.owner.call();
+
+  return [token, storage];
+}
+
+async function notStorageOwner_Upgraded() {
+  var storage = await EternalStorage.new({from: arbitraryAccount});
+  let oldToken = await FiatToken.new(
+    storage.address,
+    name,
+    symbol,
+    currency,
+    decimals,
+    masterMinterAccount,
+    pauserAccount,
+    blacklisterAccount,
+    upgraderAccount,
+    tokenOwnerAccount
+  );
+
+  var token = await UpgradedFiatToken.new(
+    storage.address,
+    oldToken.address,
+    name,
+    symbol,
+    currency,
+    decimals,
+    masterMinterAccount,
+    pauserAccount,
+    blacklisterAccount,
+    upgraderAccount,
+    tokenOwnerAccount
+  );
+
+  await oldToken.upgrade(token.address, {from: upgraderAccount});
+
+  token.default_priorContractAddress = oldToken.address;
+  token.default_storageOwner = await storage.owner.call();
+
+  return [token, storage];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,11 +159,18 @@ async function notStorageOwner() {
 //   await extended_positive_tests.run_tests(newUpgradedToken);
 // });
 //
-contract('FiatToken_NegativeTests_Original', async function () {
-  await negative_tests.run_tests(newOriginalToken);
+// contract('FiatToken_NegativeTests_Original', async function () {
+//   await negative_tests.run_tests(newOriginalToken);
+// });
+
+contract('FiatToken_NegativeTests_Original_contractNotOwner', async function () {
+  await negative_tests.run_tests_contractNotStorageOwner(notStorageOwner_Original);
 });
 
-contract('FiatToken_NegativeTests_Upgraded', async function () {
-  await negative_tests.run_tests(newUpgradedToken);
-  await negative_tests.run_tests_contractNotStorageOwner(notStorageOwner);
+// contract('FiatToken_NegativeTests_Upgraded', async function () {
+//   await negative_tests.run_tests(newUpgradedToken);
+// });
+
+contract('FiatToken_NegativeTests_Upgraded_contractNotOwner', async function () {
+  await negative_tests.run_tests_contractNotStorageOwner(notStorageOwner_Upgraded);
 });

@@ -75,7 +75,7 @@ async function checkVariables(token, customVars) {
         'blacklister': blacklisterAccount,
         'upgrader': upgraderAccount,
         'tokenOwner': tokenOwnerAccount,
-        'storageOwner': token.address,
+        'storageOwner': token.default_storageOwner,
         // contractStorage is not deterministic for FiatTokenWithStorage
         //'contractStorage': ,
         'priorContractAddress': token.default_priorContractAddress,
@@ -220,8 +220,6 @@ async function getActualState(token) {
         await token.upgrader.call(),
         await token.owner.call(),
         await storage.owner.call(),
-        // contractStorage is not deterministic for FiatTokenWithStorage
-        //'contractStorage': ,
         _priorContractAddress,
         await token.upgradedAddress.call(),
         await token.balanceOf(arbitraryAccount),
@@ -393,8 +391,6 @@ async function getActualState(token) {
             'upgrader': upgrader,
             'tokenOwner': tokenOwner,
             'storageOwner': storageOwner,
-            // contractStorage is not deterministic for FiatTokenWithStorage
-            //'contractStorage': storageAddress,
             'priorContractAddress': priorContractAddress,
             'upgradedAddress': upgradedAddress,
             'balances': {
