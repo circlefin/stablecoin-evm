@@ -76,8 +76,6 @@ async function checkVariables(token, customVars) {
         'upgrader': upgraderAccount,
         'tokenOwner': tokenOwnerAccount,
         'storageOwner': token.default_storageOwner,
-        // contractStorage is not deterministic for FiatTokenWithStorage
-        //'contractStorage': ,
         'priorContractAddress': token.default_priorContractAddress,
         'upgradedAddress': "0x0000000000000000000000000000000000000000",
         'balances': {
