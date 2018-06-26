@@ -85,7 +85,7 @@ function encodeUint(value) {
     return value;
 }
 
-// creates an ABI call for a function methodName(address) and encodes the address.
+// Create ABI calls for functions
 function msgData0(methodName, value) {
     return functionSignature(methodName) + encodeUint(value);
 }
