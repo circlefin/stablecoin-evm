@@ -24,9 +24,9 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
 
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
-    event MinterConfigured(address minter, uint256 minterAllowedAmount);
-    event MinterRemoved(address oldMinter);
-    event MasterMinterChanged(address newMasterMinter);
+    event MinterConfigured(address indexed minter, uint256 minterAllowedAmount);
+    event MinterRemoved(address indexed oldMinter);
+    event MasterMinterChanged(address indexed newMasterMinter);
 
     constructor(
         address _contractStorageAddress,

@@ -938,6 +938,7 @@ contract('Legacy Tests', function (accounts) {
     assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(200)));
   });
 
+<<<<<<< HEAD
 
 
 
@@ -1143,6 +1144,8 @@ contract('Legacy Tests', function (accounts) {
       }
     });*/
 
+=======
+>>>>>>> 03e14ce7e5ebbcef8d72b534e82aa269c0b2f9c9
   it('should blacklist then unblacklist to make a transfer possible', async function () {
     await mint(token, accounts[2], 1900, minterAccount);
     await blacklist(token, accounts[2]);
@@ -1183,6 +1186,7 @@ contract('Legacy Tests', function (accounts) {
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
   });
 
+<<<<<<< HEAD
 
   /* TODO: Update with global tokenOwnerAccount
     it('should fail to change the minter with a non-minterCertifier account', async function() {
@@ -1209,6 +1213,8 @@ contract('Legacy Tests', function (accounts) {
       }
     });
   */
+=======
+>>>>>>> 03e14ce7e5ebbcef8d72b534e82aa269c0b2f9c9
   it('should change the minter and mint as well as fail to mint with the old minter', async function () {
     let update = await token.removeMinter(minterAccount, { from: masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterRemoved');
@@ -1551,6 +1557,7 @@ contract('Legacy Tests', function (accounts) {
     await expectRevert(token.updateMasterMinter(address1, { from: nonRoleAddressChanger }));
   });
 
+<<<<<<< HEAD
   /* Comments out tests with fees */
   /*
     var fee = 25;
@@ -1707,4 +1714,6 @@ contract('Legacy Tests', function (accounts) {
     });
   */
 
+=======
+>>>>>>> 03e14ce7e5ebbcef8d72b534e82aa269c0b2f9c9
 });
