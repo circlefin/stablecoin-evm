@@ -59,7 +59,9 @@ async function run_tests(newToken) {
 
   it('should approve a spend and set allowed amount', async function () {
     await token.approve(minterAccount, amount, { from: arbitraryAccount });
-    var customVars = [{ 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': new BigNumber(amount) }];
+    var customVars = [
+      { 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
     await checkVariables(token, customVars);
   });
 
@@ -67,13 +69,17 @@ async function run_tests(newToken) {
 
   it('should blacklist and set blacklisted to true', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    var customVars = [{ 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }];
+    var customVars = [
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
     await checkVariables(token, customVars);
   });
 
   it('should blacklist and set blacklisted to true, then unblacklist and set blacklisted to false', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    var customVars = [{ 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }]
+    var customVars = [
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+    ];
     await checkVariables(token, customVars);
 
     await token.unBlacklist(arbitraryAccount, { from: blacklisterAccount });
@@ -223,7 +229,7 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  // Update methods
+  // // Update methods
 
   it('should updateMasterMinter', async function () {
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
@@ -285,18 +291,16 @@ async function run_tests(newToken) {
       tokenOwnerAccount
     );
 
-    var result = [
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'priorContractAddress', 'expectedValue': token.address }
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address },
+      { 'variable': 'storageOwner', 'expectedValue': token.address}
     ];
-    await checkVariables(newToken, result);
-    assert.equal(await newToken.priorContractAddress.call(), token.address);
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, []);
   });
 
-  it('should upgrade, setting owner and upgradedAddress to address of new contract', async function () {
+  it('should upgrade, setting storage owner and upgradedAddress to address of new contract', async function () {
     let dataContractAddress = await token.getDataContractAddress();
-    let storage = EternalStorage.at(dataContractAddress);
-    assert.equal(await storage.owner.call(), token.address);
 
     var newToken = await UpgradedFiatToken.new(
       dataContractAddress,
@@ -309,25 +313,25 @@ async function run_tests(newToken) {
       pauserAccount,
       blacklisterAccount,
       upgraderAccount,
-      tokenOwnerAccount);
+      tokenOwnerAccount
+    );
     await token.upgrade(newToken.address, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), newToken.address); // should this be in checkVariables??
 
-    var result = [
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
-      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
     ];
-    await checkVariables(token, result);
+    var oldToken_result = [
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
   });
 
   // disablePriorContract
 
   it('should disablePriorContract, setting priorContractAddress to zero address', async function () {
     let dataContractAddress = await token.getDataContractAddress();
-    let storage = EternalStorage.at(dataContractAddress);
-    assert.equal(await storage.owner.call(), token.address);
-
     var newToken = await UpgradedFiatToken.new(
       dataContractAddress,
       token.address,
@@ -339,15 +343,26 @@ async function run_tests(newToken) {
       pauserAccount,
       blacklisterAccount,
       upgraderAccount,
-      tokenOwnerAccount);
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), newToken.address);
+      tokenOwnerAccount
+    );
+    await token.upgrade(newToken.address, { from: upgraderAccount });
 
-    await newToken.disablePriorContract({from: pauserAccount});
-    var result = [
-      //TODO: add priorContractAddress to checkVariables
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
     ];
-    await checkVariables(newToken, result);
+    var oldToken_result = [
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
+
+    await newToken.disablePriorContract({ from: pauserAccount });
+    newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': "0x0000000000000000000000000000000000000000" }
+    ];
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
   });
 
   // No payable function

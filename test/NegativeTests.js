@@ -106,22 +106,6 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should fail to mint when contract is not owner', async function () {
-    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    var customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
-    ]
-    await checkVariables(token, customVars);
-
-    var dataContractAddress = await token.getDataContractAddress();
-    var storage = EternalStorage.at(dataContractAddress);
-    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), arbitraryAccount);
-
-    await expectRevert(token.mint(pauserAccount, 50, {from: minterAccount}));
-  });
-
   // Approve
 
   it('should fail to approve when spender is blacklisted', async function () {
@@ -149,15 +133,6 @@ async function run_tests(newToken) {
     ]
     await expectRevert(token.approve(minterAccount, 100, {from: arbitraryAccount}));
     await checkVariables(token, customVars);
-  });
-
-  it('should fail to approve when contract is not owner', async function () {
-    var dataContractAddress = await token.getDataContractAddress();
-    var storage = EternalStorage.at(dataContractAddress);
-    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), arbitraryAccount);
-
-    await expectRevert(token.approve(pauserAccount, 50, {from: minterAccount}));
   });
 
   // TransferFrom
@@ -317,33 +292,6 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should fail to transferFrom when contract is not owner', async function () {
-    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    var customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
-    ]
-    await checkVariables(token, customVars);
-
-    await token.mint(arbitraryAccount, 50, {from: minterAccount});
-    await token.approve(upgraderAccount, 50, {from: arbitraryAccount});
-    customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(50)},
-    ]
-    await checkVariables(token, customVars);
-
-    var dataContractAddress = await token.getDataContractAddress();
-    var storage = EternalStorage.at(dataContractAddress);
-    await token.upgrade(pauserAccount, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), pauserAccount);
-
-    await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, 50, {from: upgraderAccount}));
-  });
-
   // Transfer
 
   it('should fail to transfer to 0x0 address', async function () {
@@ -447,46 +395,12 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should fail to transfer when contract is not owner', async function () {
-    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    var customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
-    ]
-    await checkVariables(token, customVars);
-
-    await token.mint(arbitraryAccount, 50, {from: minterAccount});
-    customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
-    ]
-    await checkVariables(token, customVars);
-
-    var dataContractAddress = await token.getDataContractAddress();
-    var storage = EternalStorage.at(dataContractAddress);
-    await token.upgrade(pauserAccount, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), pauserAccount);
-
-    await expectRevert(token.transfer(pauserAccount, 50, {from: arbitraryAccount}));
-  });
-
   // ConfigureMinter
 
   it('should fail to configureMinter when sender is not masterMinter', async function () {
     assert.isFalse(arbitraryAccount == masterMinterAccount);
     await expectRevert(token.configureMinter(minterAccount, amount, {from: arbitraryAccount}));
     await checkVariables(token, []);
-  });
-
-  it('should fail to configureMinter when contract is not owner', async function () {
-    var dataContractAddress = await token.getDataContractAddress();
-    var storage = EternalStorage.at(dataContractAddress);
-    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), arbitraryAccount);
-
-    await expectRevert(token.configureMinter(minterAccount, amount, {from: masterMinterAccount}));
   });
 
   it('should fail to configureMinter when paused', async function () {
@@ -510,7 +424,7 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should fail to removeMinter when contract is not owner', async function () {
+  it('should fail to removeMinter when contract is not storage owner', async function () {
     await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
@@ -640,31 +554,6 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should fail to burn when contract is not owner', async function () {
-    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    var customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
-    ]
-    await checkVariables(token, customVars);
-
-    await token.mint(minterAccount, 50, {from: minterAccount});
-    customVars = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
-    ]
-    await checkVariables(token, customVars);
-
-    var dataContractAddress = await token.getDataContractAddress();
-    var storage = EternalStorage.at(dataContractAddress);
-    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
-    assert.equal(await storage.owner.call(), arbitraryAccount);
-
-    await expectRevert(token.burn(50, {from: minterAccount}));
-  });
-
   // Update functions
 
   it('should fail to updateUpgraderAddress when sender is not upgrader', async function () {
@@ -749,6 +638,165 @@ async function run_tests(newToken) {
   });
 }
 
+async function run_tests_contractNotStorageOwner (newToken) {
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  beforeEach('Make fresh token contract', async function () {
+    token = await newToken();
+  });
+
+  it('should check that default variable values are correct', async function () {
+    await checkVariables(token, []);
+  });
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  it('should fail to mint when contract is not owner', async function () {
+    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    var customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+    ]
+    await checkVariables(token, customVars);
+
+    var dataContractAddress = await token.getDataContractAddress();
+    var storage = EternalStorage.at(dataContractAddress);
+    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
+    assert.equal(await storage.owner.call(), arbitraryAccount);
+
+    await expectRevert(token.mint(pauserAccount, 50, {from: minterAccount}));
+  });
+
+  it('should fail to approve when contract is not owner', async function () {
+    var dataContractAddress = await token.getDataContractAddress();
+    var storage = EternalStorage.at(dataContractAddress);
+    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
+    assert.equal(await storage.owner.call(), arbitraryAccount);
+
+    await expectRevert(token.approve(pauserAccount, 50, {from: minterAccount}));
+  });
+
+  it('should fail to transferFrom when contract is not storage owner', async function () {
+    let mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    var setup = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+    ]
+    await checkVariables(token, setup);
+
+    await token.mint(arbitraryAccount, mintAmount, {from: minterAccount});
+    await token.approve(upgraderAccount, mintAmount, {from: arbitraryAccount});
+    setup = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount)},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount)},
+      {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(mintAmount)},
+    ]
+    await checkVariables(token, setup);
+
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    var newToken_result = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount)},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount)},
+      {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(mintAmount)},
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
+    ];
+    var oldToken_result = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount)},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount)},
+      {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(mintAmount)},
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
+
+    await expectRevert(token.transferFrom(arbitraryAccount, pauserAccount, mintAmount, {from: upgraderAccount}));
+  });
+
+  it('should fail to transfer when contract is not owner', async function () {
+    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    var customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+    ]
+    await checkVariables(token, customVars);
+
+    await token.mint(arbitraryAccount, 50, {from: minterAccount});
+    customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+    ]
+    await checkVariables(token, customVars);
+
+    var dataContractAddress = await token.getDataContractAddress();
+    var storage = EternalStorage.at(dataContractAddress);
+    await token.upgrade(pauserAccount, {from: upgraderAccount});
+    assert.equal(await storage.owner.call(), pauserAccount);
+
+    await expectRevert(token.transfer(pauserAccount, 50, {from: arbitraryAccount}));
+  });
+
+  it('should fail to configureMinter when contract is not owner', async function () {
+    var dataContractAddress = await token.getDataContractAddress();
+    var storage = EternalStorage.at(dataContractAddress);
+    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
+    assert.equal(await storage.owner.call(), arbitraryAccount);
+
+    await expectRevert(token.configureMinter(minterAccount, amount, {from: masterMinterAccount}));
+  });
+
+  it('should fail to burn when contract is not owner', async function () {
+    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    var customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+    ]
+    await checkVariables(token, customVars);
+
+    await token.mint(minterAccount, 50, {from: minterAccount});
+    customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
+      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+    ]
+    await checkVariables(token, customVars);
+
+    var dataContractAddress = await token.getDataContractAddress();
+    var storage = EternalStorage.at(dataContractAddress);
+    await token.upgrade(arbitraryAccount, {from: upgraderAccount});
+    assert.equal(await storage.owner.call(), arbitraryAccount);
+
+    await expectRevert(token.burn(50, {from: minterAccount}));
+  });
+}
+
 module.exports = {
   run_tests: run_tests,
+  run_tests_contractNotStorageOwner: run_tests_contractNotStorageOwner,
 }
