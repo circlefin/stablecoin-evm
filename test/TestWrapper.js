@@ -15,6 +15,7 @@ var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
+var arbitraryAccount = tokenUtils.arbitraryAccount;
 
 
 // The following helpers make fresh original/upgraded tokens before each test.
@@ -33,10 +34,9 @@ async function newOriginalToken() {
     tokenOwnerAccount
   );
 
-  let dataContractAddress = await token.getDataContractAddress();
-  let storage = EternalStorage.at(dataContractAddress);
+  token.default_priorContractAddress = "undefined";
+  token.default_storageOwner = token.address;
 
-  assert.equal(await storage.owner.call(), token.address);
   return token;
 }
 
@@ -51,11 +51,10 @@ async function newUpgradedToken() {
     pauserAccount,
     blacklisterAccount,
     upgraderAccount,
-    tokenOwnerAccount);
+    tokenOwnerAccount
+  );
 
   let dataContractAddress = await oldToken.getDataContractAddress();
-  let storage = EternalStorage.at(dataContractAddress);
-  assert.equal(await storage.owner.call(), oldToken.address);
 
   var token = await UpgradedFiatToken.new(
     dataContractAddress,
@@ -68,9 +67,14 @@ async function newUpgradedToken() {
     pauserAccount,
     blacklisterAccount,
     upgraderAccount,
-    tokenOwnerAccount);
+    tokenOwnerAccount
+  );
+
   await oldToken.upgrade(token.address, {from: upgraderAccount});
-  assert.equal(await storage.owner.call(), token.address);
+
+  token.default_priorContractAddress = oldToken.address;
+  token.default_storageOwner = token.address;
+
   return token;
 }
 
