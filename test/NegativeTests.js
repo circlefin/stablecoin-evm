@@ -1,4 +1,3 @@
-var FiatToken = artifacts.require('FiatToken');
 var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');
@@ -29,7 +28,7 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
-  /////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
 
   beforeEach('Make fresh token contract', async function () {
     token = await newToken();

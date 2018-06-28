@@ -229,7 +229,7 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  // // Update methods
+  // Update methods
 
   it('should updateMasterMinter', async function () {
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
