@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var tokenUtils = require('./TokenTestUtils');
-=======
-var tokenUtils = require('./TokenTestUtils');;
->>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
@@ -12,13 +8,10 @@ var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
 var checkVariables = tokenUtils.checkVariables;
-<<<<<<< HEAD
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
 var decimals = tokenUtils.decimals;
-=======
->>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
 var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
@@ -116,7 +109,6 @@ async function run_tests(newToken) {
     await checkVariables(token, notAMinter);
   });
 
-<<<<<<< HEAD
   it('should upgrade while paused', async function() {
     let dataContractAddress = await token.getDataContractAddress();
     var newToken = await UpgradedFiatToken.new(
@@ -144,8 +136,6 @@ async function run_tests(newToken) {
     assert.equal(await token.upgradedAddress.call(), newToken.address);
   });
 
-=======
->>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
   // Zero Address
 
   it('should updateMasterMinter to zero address', async function () {
@@ -190,7 +180,6 @@ async function run_tests(newToken) {
 
   // Blacklisted
 
-<<<<<<< HEAD
   it('should updateUpgraderAddress when msg.sender blacklisted', async function () {
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
     await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
@@ -350,8 +339,6 @@ async function run_tests(newToken) {
     await checkVariables(token, setup);
   });
 
-=======
->>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
   it('should updateUpgraderAddress to blacklisted address', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
