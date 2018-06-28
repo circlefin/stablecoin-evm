@@ -34,7 +34,7 @@ async function run_tests(newToken) {
   });
 
   it('should check that default variable values are correct', async function () {
-    await checkVariables(token, []);
+    await checkVariables([token], [[]]);
   });
 
   /////////////////////////////////////////////////////////////////////////////
@@ -44,15 +44,15 @@ async function run_tests(newToken) {
   it('should pause and set paused to true', async function () {
     await token.pause({ from: pauserAccount });
     var customVars = [{ 'variable': 'paused', 'expectedValue': true }];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   it('should unpause and set paused to false', async function () {
     await token.pause({ from: pauserAccount });
     var customVars = [{ 'variable': 'paused', 'expectedValue': true }];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
     await token.unpause({ from: pauserAccount });
-    await checkVariables(token, []);
+    await checkVariables([token], [[]]);
   });
 
   // Approve
@@ -62,7 +62,7 @@ async function run_tests(newToken) {
     var customVars = [
       { 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   // Blacklist and Unblacklist
@@ -72,7 +72,7 @@ async function run_tests(newToken) {
     var customVars = [
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   it('should blacklist and set blacklisted to true, then unblacklist and set blacklisted to false', async function () {
@@ -80,10 +80,10 @@ async function run_tests(newToken) {
     var customVars = [
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.unBlacklist(arbitraryAccount, { from: blacklisterAccount });
-    await checkVariables(token, []);
+    await checkVariables([token], [[]]);
   });
 
   // Configure minter
@@ -94,7 +94,7 @@ async function run_tests(newToken) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   // Mint and Burn
@@ -107,7 +107,7 @@ async function run_tests(newToken) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     customVars = [
@@ -116,7 +116,7 @@ async function run_tests(newToken) {
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   it('should burn amount of tokens and reduce balance and total supply by amount', async function () {
@@ -131,7 +131,7 @@ async function run_tests(newToken) {
       { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
 
     await token.burn(burnAmount, { from: minterAccount });
     var afterBurn = [
@@ -140,7 +140,7 @@ async function run_tests(newToken) {
       { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(mintAmount - burnAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount - burnAmount) },
     ];
-    await checkVariables(token, afterBurn);
+    await checkVariables([token], [afterBurn]);
   });
 
   // Remove minter
@@ -156,14 +156,14 @@ async function run_tests(newToken) {
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.removeMinter(minterAccount, { from: masterMinterAccount });
     customVars = [
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   // Transfer and transferFrom
@@ -176,7 +176,7 @@ async function run_tests(newToken) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     customVars = [
@@ -185,7 +185,7 @@ async function run_tests(newToken) {
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
     customVars = [
@@ -195,7 +195,7 @@ async function run_tests(newToken) {
       { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   it('should transferFrom, reducing sender balance by amount and increasing recipient balance by amount', async function () {
@@ -206,7 +206,7 @@ async function run_tests(newToken) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     customVars = [
@@ -215,7 +215,7 @@ async function run_tests(newToken) {
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.approve(upgraderAccount, mintAmount, { from: arbitraryAccount });
     await token.transferFrom(arbitraryAccount, pauserAccount, mintAmount, { from: upgraderAccount });
@@ -226,7 +226,7 @@ async function run_tests(newToken) {
       { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
   // Update methods
@@ -236,7 +236,7 @@ async function run_tests(newToken) {
     var result = [
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
   it('should updateBlacklister', async function () {
@@ -244,7 +244,7 @@ async function run_tests(newToken) {
     var result = [
       { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
   it('should updatePauser', async function () {
@@ -252,7 +252,7 @@ async function run_tests(newToken) {
     var result = [
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
   it('should updateUpgraderAddress', async function () {
@@ -260,7 +260,7 @@ async function run_tests(newToken) {
     var result = [
       { 'variable': 'upgrader', 'expectedValue': arbitraryAccount }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
   // Transfer Ownership
@@ -270,7 +270,7 @@ async function run_tests(newToken) {
     var result = [
       { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
   // Upgrade
@@ -295,8 +295,7 @@ async function run_tests(newToken) {
       { 'variable': 'priorContractAddress', 'expectedValue': token.address },
       { 'variable': 'storageOwner', 'expectedValue': token.address}
     ];
-    await checkVariables(newToken, newToken_result);
-    await checkVariables(token, []);
+    await checkVariables([newToken, token], [newToken_result, []]);
   });
 
   it('should upgrade, setting storage owner and upgradedAddress to address of new contract', async function () {
@@ -325,8 +324,7 @@ async function run_tests(newToken) {
       { 'variable': 'storageOwner', 'expectedValue': newToken.address },
       { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
     ];
-    await checkVariables(newToken, newToken_result);
-    await checkVariables(token, oldToken_result);
+    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
   });
 
   // disablePriorContract
@@ -356,15 +354,13 @@ async function run_tests(newToken) {
       { 'variable': 'storageOwner', 'expectedValue': newToken.address },
       { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
     ];
-    await checkVariables(newToken, newToken_result);
-    await checkVariables(token, oldToken_result);
+    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
 
     await newToken.disablePriorContract({ from: pauserAccount });
     newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': "0x0000000000000000000000000000000000000000" }
     ];
-    await checkVariables(newToken, newToken_result);
-    await checkVariables(token, oldToken_result);
+    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
   });
 
   // No payable function

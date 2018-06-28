@@ -978,35 +978,6 @@ contract('Legacy Tests', function (accounts) {
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
   });
 
-<<<<<<< HEAD
-
-  /* TODO: Update with global tokenOwnerAccount
-    it('should fail to change the minter with a non-minterCertifier account', async function() {
-      try {
-        await token.updateMasterMinter(accounts[8]);
-      } catch(e) {
-        checkFailureIsExpected(e);
-      } finally {
-        let minter = await token.masterMinter();
-        assert.equal(masterMinterAccount, minter);
-      }
-    });
-
-    it('should change the masterMinter with a valid minterCertifier account and fail to finishMinting with old masterMinter', async function() {
-      await token.updateMasterMinter(accounts[8], {from: minterCertifier});
-
-      try {
-        await token.finishMinting({from: masterMinterAccount});
-      } catch(e) {
-        checkFailureIsExpected(e);
-      } finally {
-        await token.finishMinting({from: accounts[8]});
-        assert.equal(await token.mintingFinished(), true);
-      }
-    });
-  */
-=======
->>>>>>> 6c8b1fd50d14ecf9da8b1e1996606ff817b6195d
   it('should change the minter and mint as well as fail to mint with the old minter', async function () {
     let update = await token.removeMinter(minterAccount, { from: masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterRemoved');

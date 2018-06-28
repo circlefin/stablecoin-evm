@@ -63,7 +63,15 @@ function checkTransferEvents(transfer, from, to, value) {
 // customVars is an array of objects of the form,
 // {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
 // to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
-async function checkVariables(tokenArray, customVarArray) {
+async function checkVariables(_tokens, _customVars) {
+  // Iterate over array of tokens.
+  var numTokens = _tokens.length;
+  assert.equal(numTokens, _customVars.length);
+  var n;
+  for (n  = 0; n < numTokens; n++) {
+    var token = _tokens[n];
+    var customVars = _customVars[n];
+
     // set each variable's default value
     var expectedState = {
         'name': name,
@@ -197,6 +205,7 @@ async function checkVariables(tokenArray, customVarArray) {
 
     let actualState = await getActualState(token);
     assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
+  }
 }
 
 // build up actualState object to compare to expectedState object
