@@ -86,6 +86,7 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
         setBalance(_to, getBalance(_to).add(_amount));
         setMinterAllowed(msg.sender, mintingAllowedAmount.sub(_amount));
         emit Mint(msg.sender, _to, _amount);
+        emit Transfer(msg.sender, _to, _amount);
         return true;
     }
 

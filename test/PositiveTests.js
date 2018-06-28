@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
+=======
+>>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
 var tokenUtils = require('./TokenTestUtils');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
@@ -9,10 +12,13 @@ var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
 var checkVariables = tokenUtils.checkVariables;
+<<<<<<< HEAD
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
 var decimals = tokenUtils.decimals;
+=======
+>>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
 var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
@@ -59,7 +65,11 @@ async function run_tests(newToken) {
 
   it('should approve a spend and set allowed amount', async function () {
     await token.approve(minterAccount, amount, { from: arbitraryAccount });
+<<<<<<< HEAD
     var customVars = [{ 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': new BigNumber(amount) }];
+=======
+    var customVars = [{ 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': bigHundred }];
+>>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
     await checkVariables(token, customVars);
   });
 
@@ -267,6 +277,7 @@ async function run_tests(newToken) {
     await checkVariables(token, result);
   });
 
+<<<<<<< HEAD
   // Upgrade
 
   it('should instantiate new UpgradedFiatToken, setting priorContractAddress to address of old token', async function() {
@@ -350,6 +361,8 @@ async function run_tests(newToken) {
     await checkVariables(newToken, result);
   });
 
+=======
+>>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
   // No payable function
 
   it('no payable function', async function () {

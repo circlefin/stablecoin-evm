@@ -28,7 +28,11 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
+<<<<<<< HEAD
   /////////////////////////////////////////////////////////////////////////////
+=======
+  //////////////////////////////////////////////////////////////////////////////
+>>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
 
   beforeEach('Make fresh token contract', async function () {
     token = await newToken();
@@ -672,7 +676,11 @@ async function run_tests(newToken) {
     await checkVariables(token, []);
   });
 
+<<<<<<< HEAD
   it('should fail to updateUpgraderAddress when newAddress is 0x0', async function () {
+=======
+  it('should fail to updateUpgraderAddress when new address is 0x0', async function () {
+>>>>>>> 66abec9b1602962ac625392c18d15139037b87b2
     await expectRevert(token.updateUpgraderAddress("0x0", {from: upgraderAccount}));
     await checkVariables(token, []);
   });
