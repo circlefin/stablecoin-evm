@@ -28,7 +28,7 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
-  /////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
 
   beforeEach('Make fresh token contract', async function () {
     token = await newToken();
@@ -378,7 +378,8 @@ async function run_tests(newToken) {
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
       {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
+      {'variable': 'allowance.arbitraryAccount.upgraderAccount', 'expectedValue': new BigNumber(50)}
     ]
     await expectRevert(token.transfer(pauserAccount, amount, {from: arbitraryAccount}));
     await checkVariables(token, customVars);
