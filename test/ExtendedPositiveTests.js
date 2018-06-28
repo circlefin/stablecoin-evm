@@ -126,14 +126,18 @@ async function run_tests(newToken) {
     );
     await token.pause({from: pauserAccount});
     await token.upgrade(newToken.address, {from: upgraderAccount});
-    var result = [
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
-      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address },
+    newToken.default_storageOwner = newToken.address;
+
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
+    ];
+    var oldToken_result = [
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
-    assert.equal(await token.upgradedAddress.call(), newToken.address);
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
   });
 
   // Zero Address
@@ -293,14 +297,19 @@ async function run_tests(newToken) {
     );
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
-    var setup = [
+    newToken.default_storageOwner = newToken.address;
+
+    var newToken_result = [
       { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
-      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address },
     ];
-    await checkVariables(token, setup);
-    assert.equal(await token.upgradedAddress.call(), newToken.address);
+    var oldToken_result = [
+      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
   });
 
   it ('should upgrade to blacklisted address', async function() {
@@ -320,14 +329,19 @@ async function run_tests(newToken) {
     );
     await token.blacklist(newToken.address, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
-    var setup = [
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'isAccountBlacklisted.newToken.address', 'expectedValue': true },
-      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
-      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    newToken.default_storageOwner = newToken.address;
+
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
     ];
-    await checkVariables(token, setup);
-    assert.equal(await token.upgradedAddress.call(), newToken.address);
+    var oldToken_result = [
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    assert(await newToken.isAccountBlacklisted(newToken.address));
+    assert(await token.isAccountBlacklisted(newToken.address));
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
   });
 
   it('should blacklist a blacklisted address', async function () {

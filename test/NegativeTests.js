@@ -1,3 +1,4 @@
+var FiatToken = artifacts.require('FiatToken');
 var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');
@@ -136,12 +137,9 @@ async function run_tests(newToken) {
   });
 
   it('should fail to approve when contract is not storage owner', async function () {
-
-    // Create new upgraded contract
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
+    let storage = await EternalStorage.new({from: arbitraryAccount});
+    let newToken = await FiatToken.new(
+      storage.address,
       name,
       symbol,
       currency,
@@ -152,41 +150,10 @@ async function run_tests(newToken) {
       upgraderAccount,
       tokenOwnerAccount
     );
-    await token.upgrade(newToken.address, { from: upgraderAccount });
-    var newToken_result = [
-      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
-    ];
-    var oldToken_result = [
-      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
-      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
-    ];
-    await checkVariables(newToken, newToken_result);
-    await checkVariables(token, oldToken_result);
+    newToken.default_priorContractAddress = 'undefined';
 
-    // Setup token state for approve.
-    let mintAmount = 50;
-    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    await token.mint(arbitraryAccount, mintAmount, {from: minterAccount});
-    newToken_result = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount)},
-      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
-    ];
-    oldToken_result = [
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount)},
-      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
-      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
-    ];
-    await checkVariables(newToken, newToken_result);
-    await checkVariables(token, oldToken_result);
-
-    // Expect revert on approve
-    await expectRevert(token.approve(pauserAccount, mintAmount, {from: arbitraryAccount}));
+    await expectRevert(newToken.approve(pauserAccount, amount, {from: arbitraryAccount}));
+    await checkVariables(newToken, [{'variable': 'storageOwner', 'expectedValue': arbitraryAccount}]);
   });
 
   // TransferFrom
@@ -467,8 +434,34 @@ async function run_tests(newToken) {
   });
 
   it('should fail to configureMinter when contract is not storage owner', async function () {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    await token.upgrade(newToken.address, { from: upgraderAccount });
+    newToken.default_storageOwner = newToken.address;
+
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
+    ];
+    var oldToken_result = [
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+
     await expectRevert(token.configureMinter(minterAccount, amount, {from: masterMinterAccount}));
-    await checkVariables(token, []);
+    await checkVariables(newToken, newToken_result);
+    await checkVariables(token, oldToken_result);
   });
 
   // RemoveMinter
@@ -675,6 +668,7 @@ async function run_tests(newToken) {
       upgraderAccount,
       tokenOwnerAccount);
     await (token.upgrade(newToken.address, {from: upgraderAccount}));
+    newToken.default_storageOwner = newToken.address;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }

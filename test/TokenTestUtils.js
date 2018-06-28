@@ -63,7 +63,7 @@ function checkTransferEvents(transfer, from, to, value) {
 // customVars is an array of objects of the form,
 // {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
 // to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
-async function checkVariables(token, customVars) {
+async function checkVariables(tokenArray, customVarArray) {
     // set each variable's default value
     var expectedState = {
         'name': name,
