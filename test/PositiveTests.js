@@ -33,7 +33,8 @@ async function run_tests(newToken) {
     token = await newToken();
   });
 
-  it('should check that default variable values are correct', async function () {
+
+  it('pt016 should check that default variable values are correct', async function () {
     await checkVariables(token, []);
   });
 
@@ -41,13 +42,13 @@ async function run_tests(newToken) {
 
   // Pause and Unpause
 
-  it('should pause and set paused to true', async function () {
+  it('pt011 should pause and set paused to true', async function () {
     await token.pause({ from: pauserAccount });
     var customVars = [{ 'variable': 'paused', 'expectedValue': true }];
     await checkVariables(token, customVars);
   });
 
-  it('should unpause and set paused to false', async function () {
+  it('pt006 should unpause and set paused to false', async function () {
     await token.pause({ from: pauserAccount });
     var customVars = [{ 'variable': 'paused', 'expectedValue': true }];
     await checkVariables(token, customVars);
@@ -57,7 +58,7 @@ async function run_tests(newToken) {
 
   // Approve
 
-  it('should approve a spend and set allowed amount', async function () {
+  it('pt020 should approve a spend and set allowed amount', async function () {
     await token.approve(minterAccount, amount, { from: arbitraryAccount });
     var customVars = [{ 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': new BigNumber(amount) }];
     await checkVariables(token, customVars);
@@ -65,13 +66,13 @@ async function run_tests(newToken) {
 
   // Blacklist and Unblacklist
 
-  it('should blacklist and set blacklisted to true', async function () {
+  it('pt019 should blacklist and set blacklisted to true', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     var customVars = [{ 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }];
     await checkVariables(token, customVars);
   });
 
-  it('should blacklist and set blacklisted to true, then unblacklist and set blacklisted to false', async function () {
+  it('pt018 should blacklist and set blacklisted to true, then unblacklist and set blacklisted to false', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     var customVars = [{ 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }]
     await checkVariables(token, customVars);
@@ -82,7 +83,7 @@ async function run_tests(newToken) {
 
   // Configure minter
 
-  it('should configureMinter, setting the minter to true and mintingAllowance to amount', async function () {
+  it('pt015 should configureMinter, setting the minter to true and mintingAllowance to amount', async function () {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
@@ -93,7 +94,7 @@ async function run_tests(newToken) {
 
   // Mint and Burn
 
-  it('should mint the amount, increasing balance of recipient by amount, increasing total supply by amount, and decreasing minterAllowed by amount', async function () {
+  it('pt012 should mint the amount, increasing balance of recipient by amount, increasing total supply by amount, and decreasing minterAllowed by amount', async function () {
     var mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
@@ -113,7 +114,7 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should burn amount of tokens and reduce balance and total supply by amount', async function () {
+  it('pt017 should burn amount of tokens and reduce balance and total supply by amount', async function () {
     var mintAmount = 11;
     var burnAmount = 10;
 
@@ -139,7 +140,7 @@ async function run_tests(newToken) {
 
   // Remove minter
 
-  it('should removeMinter, setting the minter to false and minterAllowed to 0', async function () {
+  it('pt010 should removeMinter, setting the minter to false and minterAllowed to 0', async function () {
     let mintAmount = 11;
 
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
@@ -162,7 +163,7 @@ async function run_tests(newToken) {
 
   // Transfer and transferFrom
 
-  it('should transfer, reducing sender balance by amount and increasing recipient balance by amount', async function () {
+  it('pt008 should transfer, reducing sender balance by amount and increasing recipient balance by amount', async function () {
     let mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
@@ -192,7 +193,7 @@ async function run_tests(newToken) {
     await checkVariables(token, customVars);
   });
 
-  it('should transferFrom, reducing sender balance by amount and increasing recipient balance by amount', async function () {
+  it('pt007 should transferFrom, reducing sender balance by amount and increasing recipient balance by amount', async function () {
     let mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
@@ -225,7 +226,7 @@ async function run_tests(newToken) {
 
   // Update methods
 
-  it('should updateMasterMinter', async function () {
+  it('pt004 should updateMasterMinter', async function () {
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
@@ -233,7 +234,7 @@ async function run_tests(newToken) {
     await checkVariables(token, result);
   });
 
-  it('should updateBlacklister', async function () {
+  it('pt005 should updateBlacklister', async function () {
     await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
@@ -241,7 +242,7 @@ async function run_tests(newToken) {
     await checkVariables(token, result);
   });
 
-  it('should updatePauser', async function () {
+  it('pt003 should updatePauser', async function () {
     await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
@@ -249,7 +250,7 @@ async function run_tests(newToken) {
     await checkVariables(token, result);
   });
 
-  it('should updateUpgraderAddress', async function () {
+  it('pt001 should updateUpgraderAddress', async function () {
     await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
     var result = [
       { 'variable': 'upgrader', 'expectedValue': arbitraryAccount }
@@ -259,7 +260,7 @@ async function run_tests(newToken) {
 
   // Transfer Ownership
 
-  it('should set owner to _newOwner', async function () {
+  it('pt009 should set owner to _newOwner', async function () {
     await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
@@ -269,7 +270,7 @@ async function run_tests(newToken) {
 
   // Upgrade
 
-  it('should instantiate new UpgradedFiatToken, setting priorContractAddress to address of old token', async function() {
+  it('pt013 should instantiate new UpgradedFiatToken, setting priorContractAddress to address of old token', async function() {
     let dataContractAddress = await token.getDataContractAddress();
     var newToken = await UpgradedFiatToken.new(
       dataContractAddress,
@@ -293,7 +294,7 @@ async function run_tests(newToken) {
     assert.equal(await newToken.priorContractAddress.call(), token.address);
   });
 
-  it('should upgrade, setting owner and upgradedAddress to address of new contract', async function () {
+  it('pt002 should upgrade, setting owner and upgradedAddress to address of new contract', async function () {
     let dataContractAddress = await token.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
     assert.equal(await storage.owner.call(), token.address);
@@ -323,7 +324,7 @@ async function run_tests(newToken) {
 
   // disablePriorContract
 
-  it('should disablePriorContract, setting priorContractAddress to zero address', async function () {
+  it('pt014 should disablePriorContract, setting priorContractAddress to zero address', async function () {
     let dataContractAddress = await token.getDataContractAddress();
     let storage = EternalStorage.at(dataContractAddress);
     assert.equal(await storage.owner.call(), token.address);
