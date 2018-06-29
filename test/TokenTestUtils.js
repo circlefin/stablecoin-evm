@@ -692,4 +692,4 @@ module.exports = {
 
     arbitraryAccountPrivateKey,
     deployerAccountPrivateKey
-};
+}
