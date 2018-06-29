@@ -135,7 +135,7 @@ async function run_tests(newToken) {
     await checkVariables(token, result);
     assert.equal(await token.upgradedAddress.call(), newToken.address);
   });
-
+  
   // Zero Address
 
   it('should updateMasterMinter to zero address', async function () {

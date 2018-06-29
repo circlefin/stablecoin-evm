@@ -349,7 +349,7 @@ async function run_tests(newToken) {
     ];
     await checkVariables(newToken, result);
   });
-
+  
   // No payable function
 
   it('no payable function', async function () {
