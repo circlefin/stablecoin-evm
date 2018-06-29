@@ -34,7 +34,7 @@ async function run_tests(newToken) {
   });
 
   it('pt016 should check that default variable values are correct', async function () {
-    await checkVariables([token], [[]];
+    await checkVariables([token], [[]]);
   });
 
   /////////////////////////////////////////////////////////////////////////////
