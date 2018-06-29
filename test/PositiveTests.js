@@ -363,6 +363,89 @@ async function run_tests(newToken) {
     await checkVariables([newToken, token], [newToken_result, oldToken_result]);
   });
 
+  // Upgrade
+
+  it('should instantiate new UpgradedFiatToken, setting priorContractAddress to address of old token', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+
+    var result = [
+      //TODO: Add this to checkVariables.
+      //{ 'variable': 'priorContractAddress', 'expectedValue': token.address }
+    ];
+    await checkVariables(newToken, result);
+    assert.equal(await newToken.priorContractAddress.call(), token.address);
+  });
+
+  it('should upgrade, setting owner and upgradedAddress to address of new contract', async function () {
+    let dataContractAddress = await token.getDataContractAddress();
+    let storage = EternalStorage.at(dataContractAddress);
+    assert.equal(await storage.owner.call(), token.address);
+
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount);
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    assert.equal(await storage.owner.call(), newToken.address); // should this be in checkVariables??
+
+    var result = [
+      //TODO: Add this to checkVariables.
+      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
+      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    await checkVariables(token, result);
+  });
+
+  // disablePriorContract
+
+  it('should disablePriorContract, setting priorContractAddress to zero address', async function () {
+    let dataContractAddress = await token.getDataContractAddress();
+    let storage = EternalStorage.at(dataContractAddress);
+    assert.equal(await storage.owner.call(), token.address);
+
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount);
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    assert.equal(await storage.owner.call(), newToken.address);
+
+    await newToken.disablePriorContract({from: pauserAccount});
+    var result = [
+      //TODO: add priorContractAddress to checkVariables
+    ];
+    await checkVariables(newToken, result);
+  });
+  
   // No payable function
 
   it('no payable function', async function () {

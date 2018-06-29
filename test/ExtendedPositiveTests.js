@@ -139,6 +139,33 @@ async function run_tests(newToken) {
     await checkVariables([newToken, token], [newToken_result, oldToken_result]);
   });
 
+  it('should upgrade while paused', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    await token.pause({from: pauserAccount});
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    var result = [
+      //TODO: Add this to checkVariables.
+      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
+      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address },
+      { 'variable': 'paused', 'expectedValue': true }
+    ];
+    await checkVariables(token, result);
+    assert.equal(await token.upgradedAddress.call(), newToken.address);
+  });
+  
   // Zero Address
 
   it('should updateMasterMinter to zero address', async function () {
@@ -190,6 +217,7 @@ async function run_tests(newToken) {
       { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true }
     ];
+    
     await checkVariables([token], [setup]);
   });
 
@@ -296,6 +324,7 @@ async function run_tests(newToken) {
     );
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
+    
     newToken.default_storageOwner = newToken.address;
 
     var newToken_result = [
@@ -327,6 +356,7 @@ async function run_tests(newToken) {
     );
     await token.blacklist(newToken.address, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
+    
     newToken.default_storageOwner = newToken.address;
 
     var newToken_result = [
