@@ -15,6 +15,7 @@ var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
+var arbitraryAccount = tokenUtils.arbitraryAccount;
 
 
 // The following helpers make fresh original/upgraded tokens before each test.
@@ -33,10 +34,9 @@ async function newOriginalToken() {
     tokenOwnerAccount
   );
 
-  let dataContractAddress = await token.getDataContractAddress();
-  let storage = EternalStorage.at(dataContractAddress);
+  token.default_priorContractAddress = "undefined";
+  token.default_storageOwner = token.address;
 
-  assert.equal(await storage.owner.call(), token.address);
   return token;
 }
 
@@ -51,11 +51,10 @@ async function newUpgradedToken() {
     pauserAccount,
     blacklisterAccount,
     upgraderAccount,
-    tokenOwnerAccount);
+    tokenOwnerAccount
+  );
 
   let dataContractAddress = await oldToken.getDataContractAddress();
-  let storage = EternalStorage.at(dataContractAddress);
-  assert.equal(await storage.owner.call(), oldToken.address);
 
   var token = await UpgradedFiatToken.new(
     dataContractAddress,
@@ -68,9 +67,14 @@ async function newUpgradedToken() {
     pauserAccount,
     blacklisterAccount,
     upgraderAccount,
-    tokenOwnerAccount);
+    tokenOwnerAccount
+  );
+
   await oldToken.upgrade(token.address, {from: upgraderAccount});
-  assert.equal(await storage.owner.call(), token.address);
+
+  token.default_priorContractAddress = oldToken.address;
+  token.default_storageOwner = token.address;
+
   return token;
 }
 
@@ -78,26 +82,26 @@ async function newUpgradedToken() {
 
 // Run specific tests combos by commenting/uncommenting the contract blocks below.
 
-contract('FiatToken_PositiveTests_Original', async function () {
-  await positive_tests.run_tests(newOriginalToken);
-});
-
-contract('FiatToken_PositiveTests_Upgraded', async function () {
-  await positive_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_ExtendedPositiveTests_Original', async function () {
-  await extended_positive_tests.run_tests(newOriginalToken);
-});
-
-contract('FiatToken_ExtendedPositiveTests_Upgraded', async function () {
-  await extended_positive_tests.run_tests(newUpgradedToken);
-});
+// contract('FiatToken_PositiveTests_Original', async function () {
+//   await positive_tests.run_tests(newOriginalToken);
+// });
+//
+// contract('FiatToken_PositiveTests_Upgraded', async function () {
+//   await positive_tests.run_tests(newUpgradedToken);
+// });
+//
+// contract('FiatToken_ExtendedPositiveTests_Original', async function () {
+//   await extended_positive_tests.run_tests(newOriginalToken);
+// });
+//
+// contract('FiatToken_ExtendedPositiveTests_Upgraded', async function () {
+//   await extended_positive_tests.run_tests(newUpgradedToken);
+// });
 
 contract('FiatToken_NegativeTests_Original', async function () {
   await negative_tests.run_tests(newOriginalToken);
 });
 
-contract('FiatToken_NegativeTests_Upgraded', async function () {
-  await negative_tests.run_tests(newUpgradedToken);
-});
+// contract('FiatToken_NegativeTests_Upgraded', async function () {
+//   await negative_tests.run_tests(newUpgradedToken);
+// });
