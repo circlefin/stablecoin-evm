@@ -17,7 +17,7 @@ var blacklisterRole = tokenUtils.blacklisterRole;
 var pauserRole = tokenUtils.pauserRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
-var ownerAccount = tokenUtils.ownerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
@@ -27,7 +27,7 @@ var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 
-var ownerAccountPrivateKey = tokenUtils.ownerAccountPrivateKey;
+var deployerAccountPrivateKey = tokenUtils.deployerAccountPrivateKey;
 var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
 var tokenOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
 var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
@@ -488,8 +488,8 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
 
 contract('EternalStorage ABI Hacking tests', function (accounts) {
     beforeEach(async function checkBefore() {
-        storage = await EternalStorage.new(ownerAccount);
-        storageOwner = ownerAccount;
+        storage = await EternalStorage.new(deployerAccount);
+        storageOwner = deployerAccount;
         assert.equal(await storage.owner.call(), storageOwner)
     });
 
@@ -498,8 +498,8 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
         let goodData = msgData('transferOwnership(address)', arbitraryAccount);
         let raw = makeRawTransaction(
             goodData,
-            ownerAccount,
-            ownerAccountPrivateKey,
+            deployerAccount,
+            deployerAccountPrivateKey,
             storage.address);
         await sendRawTransaction(raw);
 
@@ -512,28 +512,28 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
         let badData = msgData('Ownable(address)', arbitraryAccount);
         let raw = makeRawTransaction(
             badData,
-            ownerAccount,
-            ownerAccountPrivateKey,
+            deployerAccount,
+            deployerAccountPrivateKey,
             storage.address);
         await expectRevert(sendRawTransaction(raw));
 
         // make sure ownership changed
         let actualOwner = await storage.owner.call();
-        assert.equal(ownerAccount, actualOwner, "owner should not change");
+        assert.equal(deployerAccount, actualOwner, "owner should not change");
     });
 
     it('ABI023 EternalStorage Ownable _transferOwnership(address) is not public', async function () {
         let badData = msgData('_transferOwnership(address)', arbitraryAccount);
         let raw = makeRawTransaction(
             badData,
-            ownerAccount,
-            ownerAccountPrivateKey,
+            deployerAccount,
+            deployerAccountPrivateKey,
             storage.address);
         await expectRevert(sendRawTransaction(raw));
 
         // make sure ownership changed
         let actualOwner = await storage.owner.call();
-        assert.equal(ownerAccount, actualOwner, "owner should change");
+        assert.equal(deployerAccount, actualOwner, "owner should change");
     });
 
     // sanity check
@@ -541,8 +541,8 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
         let goodData = msgData1('setMinter(address,bool)', arbitraryAccount, 1); //hack - 1=true
         let raw = makeRawTransaction(
             goodData,
-            ownerAccount,
-            ownerAccountPrivateKey,
+            deployerAccount,
+            deployerAccountPrivateKey,
             storage.address);
         await sendRawTransaction(raw);
 
@@ -555,14 +555,14 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
         let badData = msgData('EternalStorage(address)', arbitraryAccount);
         let raw = makeRawTransaction(
             badData,
-            ownerAccount,
-            ownerAccountPrivateKey,
+            deployerAccount,
+            deployerAccountPrivateKey,
             storage.address);
         await expectRevert(sendRawTransaction(raw));
 
         // make sure ownership changed
         let actualOwner = await storage.owner.call();
-        assert.equal(ownerAccount, actualOwner, "owner should change");
+        assert.equal(deployerAccount, actualOwner, "owner should change");
     });
 
 });
