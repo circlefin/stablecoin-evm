@@ -39,73 +39,26 @@ var minterAccountPrivateKey = tokenUtils.minterAccountPrivateKey;
 var pauserAccountPrivateKey = tokenUtils.pauserAccountPrivateKey;
 var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
 
+var storageUtils = require('./EternalStorageUtils');
+var checkEternalStorageVariables = storageUtils.checkEternalStorageVariables;
 
-function makeRawTransaction(msgData, msgSender, hexPrivateKey, contractAddress) {
-    var tx = new Tx({
-        nonce: web3.toHex(web3.eth.getTransactionCount(msgSender)),
-        gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-        gasLimit: 100000,
-        to: contractAddress,
-        value: 0,
-        data: msgData,
-    });
-    var privateKey = Buffer.from(hexPrivateKey, 'hex');
-    tx.sign(privateKey);
-    var raw = '0x' + tx.serialize().toString('hex');
-    return raw
-}
-
-function sendRawTransaction(raw) {
-    return new Promise(function (resolve, reject) {
-        web3.eth.sendRawTransaction(raw, function (err, transactionHash) {
-            if (err !== null) return reject(err);
-            resolve(transactionHash);
-        });
-    });
-}
+var abiUtils = require('./ABIUtils');
+var makeRawTransaction = abiUtils.makeRawTransaction;
+var sendRawTransaction = abiUtils.sendRawTransaction;
+var functionSignature = abiUtils.functionSignature;
+var encodeAddress = abiUtils.encodeAddress;
+var encodeUint = abiUtils.encodeUint;
+var msgData0 = abiUtils.msgData0;
+var msgData = abiUtils.msgData;
+var msgData1 = abiUtils.msgData1;
+var msgData2 = abiUtils.msgData2;
+var msgData3 = abiUtils.msgData3;
 
 const should = require('chai')
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
     .should();
-
-function functionSignature(methodName) {
-    return web3.sha3(methodName).substr(0, 2 + 8);
-}
-
-function encodeAddress(address) {
-    address = address.substr(2, address.length - 2);
-    while (address.length < 64) address = "0" + address;
-    return address;
-}
-
-function encodeUint(value) {
-    value = value.toString(16);
-    while (value.length < 64) value = "0" + value;
-    return value;
-}
-
-// Create ABI calls for functions
-function msgData0(methodName, value) {
-    return functionSignature(methodName) + encodeUint(value);
-}
-
-function msgData(methodName, addressValue) {
-    return functionSignature(methodName) + encodeAddress(addressValue);
-}
-
-function msgData1(methodName, address, value) {
-    return functionSignature(methodName) + encodeAddress(address) + encodeUint(value);
-}
-
-function msgData2(methodName, address1, address2, value) {
-    return functionSignature(methodName) + encodeAddress(address1) + encodeAddress(address2) + encodeUint(value);
-}
-
-function msgData3(methodName, address1, value1, address2, value2) {
-    return functionSignature(methodName) + encodeAddress(address1) + encodeUint(value1) + encodeAddress(address2) + encodeUint(value2);
-}
-
+/*
 contract('FiatToken ABI Hacking tests', function (accounts) {
     beforeEach(async function checkBefore() {
         token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
@@ -130,9 +83,10 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
 
         await sendRawTransaction(raw);
 
-        // make sure owner did not change
-        var actualOwner = await token.owner.call();
-        assert.equal(arbitraryAccount, actualOwner, "owner should change.");
+        var customVars = [
+            { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
+        ];
+        await checkVariables(token, customVars);
     });
 
     it('ABI002 Ownable constructor is not inherited as a function', async function () {
@@ -150,10 +104,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure owner did not change
-        var actualOwner = await token.owner.call();
-        assert.equal(tokenOwnerAccount, actualOwner, "owner should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI003 Ownable _transferOwnership(address) is not public', async function () {
@@ -171,10 +122,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure owner did not change
-        var actualOwner = await token.owner.call();
-        assert.equal(tokenOwnerAccount, actualOwner, "owner should not change.");
+        await checkVariables(token, []);
     });
 
     // sanity check for pausable
@@ -193,10 +141,10 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await sendRawTransaction(raw);
-
-        // make sure contract paused
-        var isPaused = await token.paused.call();
-        assert.equal(true, isPaused, "contract should be paused.");
+        var customVars = [
+            { 'variable': 'paused', 'expectedValue': true }
+        ];
+        await checkVariables(token, customVars);
     });
 
     it('ABI005 Pausable constructor is not a function', async function () {
@@ -214,10 +162,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure owner did not change
-        var actualPauser = await token.pauser.call();
-        assert.equal(pauserAccount, actualPauser, "pauser should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI006 BlacklistableTokenByRole blacklist is public', async function () {
@@ -235,10 +180,10 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await sendRawTransaction(raw);
-
-        // make arbitrary account is blacklisted
-        var isBlacklisted = await token.isAccountBlacklisted.call(arbitraryAccount);
-        assert.equal(true, isBlacklisted);
+        var customVars = [
+            { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+        ];
+        await checkVariables(token, customVars);
     });
 
     it('ABI007 BlacklistableTokenByRole constructor is not a function', async function () {
@@ -256,10 +201,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure owner did not change
-        var actualBlacklister = await token.blacklister.call();
-        assert.equal(blacklisterAccount, actualBlacklister, "blacklister should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI008 EternalStorageUpdater constructor is not a function', async function () {
@@ -277,10 +219,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure storage did not change
-        var actualStorage = await token.getDataContractAddress.call();
-        assert.equal(dataContractAddress, actualStorage, "storage should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI009 EternalStorageUpdater setAllowed is internal', async function () {
@@ -298,10 +237,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure allowance did not change
-        let actualAllowed = await token.allowance.call(arbitraryAccount, minterAccount);
-        assert.equal(0, actualAllowed.toNumber(), "allowed should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI010 EternalStorageUpdater setBalance is internal', async function () {
@@ -312,10 +248,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure allowance did not change
-        let actualBalance = await token.balanceOf.call(arbitraryAccount);
-        assert.equal(0, actualBalance.toNumber(), "balance should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI011 EternalStorageUpdater setBalances is internal', async function () {
@@ -326,12 +259,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure allowance did not change
-        let actualBalance1 = await token.balanceOf.call(arbitraryAccount);
-        let actualBalance2 = await token.balanceOf.call(minterAccount);
-        assert.equal(0, actualBalance1.toNumber(), "balance1 should not change.");
-        assert.equal(0, actualBalance2.toNumber(), "balance2 should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI012 EternalStorageUpdater setTotalSupply is internal', async function () {
@@ -342,10 +270,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure allowance did not change
-        let totalSupply = await token.totalSupply.call();
-        assert.equal(0, totalSupply.toNumber(), "totalSupply should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI013 EternalStorageUpdater setBlacklisted(true) is internal', async function () {
@@ -356,10 +281,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure allowance did not change
-        let isBlacklisted = await token.isAccountBlacklisted.call(arbitraryAccount);
-        assert.equal(false, isBlacklisted, "isBlacklisted should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI014 EternalStorageUpdater setBlacklisted(false) is internal', async function () {
@@ -373,9 +295,10 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             token.address);
         await expectRevert(sendRawTransaction(raw));
 
-        // make sure blacklisted status did not change
-        let isBlacklisted = await token.isAccountBlacklisted.call(arbitraryAccount);
-        assert.equal(true, isBlacklisted, "isBlacklisted should not change.");
+        var customVars = [
+            { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
+        ];
+        await checkVariables(token, customVars);
     });
 
     it('ABI015 EternalStorageUpdater setMinter is internal', async function () {
@@ -386,10 +309,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             masterMinterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure isAccountMinter did not change
-        var isMinter = await token.isAccountMinter.call(arbitraryAccount);
-        assert.equal(false, isMinter, "isAccountMinter should not change.");
+        await checkVariables(token, []);
     });
 
     it('ABI026 EternalStorageUpdater setMinter(false) is internal', async function () {
@@ -402,10 +322,11 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             masterMinterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure isAccountMinter did not change
-        let isMinter = await token.isAccountMinter.call(arbitraryAccount);
-        assert.equal(true, isMinter, "isAccountMinter should not change.");
+        var customVars = [
+            { 'variable': 'isAccountMinter.arbitraryAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.arbitraryAccount', 'expectedValue': new BigNumber(100) }
+        ];
+        await checkVariables(token, customVars);
     });
 
     it('ABI016 EternalStorageUpdater setMinterAllowed is internal', async function () {
@@ -416,10 +337,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             masterMinterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure allowance did not change
-        let minterAllowed = await token.minterAllowance.call(arbitraryAccount);
-        (0).should.be.bignumber.equal(minterAllowed);
+        await checkVariables(token, []);
     });
 
     // sanity test
@@ -432,9 +350,8 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             token.address);
         await sendRawTransaction(raw);
 
-        // make sure contract changed
-        let upgradedAddress = await token.upgradedAddress.call();
-        assert.equal(arbitraryAccount, upgradedAddress, "upgradedAddress should change");
+        var actualUpgradedAddress = await token.upgradedAddress.call();
+        assert.equal(arbitraryAccount, actualUpgradedAddress, "upgradedAddress should be changed")
     });
 
     it('ABI018 Upgradable constructor is not inherited as a function', async function () {
@@ -445,10 +362,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             upgraderAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure allowance did not change
-        let actualUpgraderAccount = await token.upgrader.call();
-        assert.equal(upgraderAccount, actualUpgraderAccount, "upgrader should not change.");
+        await checkVariables(token, []);
     });
 
 
@@ -460,10 +374,10 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             pauserAccountPrivateKey,
             token.address);
         await sendRawTransaction(raw);
-
-        // make sure allowance did not change
-        let isPaused = await token.paused.call();
-        assert.equal(true, isPaused, "paused should change.");
+        var customVars = [
+            { 'variable': 'paused', 'expectedValue': true }
+        ];
+        await checkVariables(token, customVars);
     });
 
     it('ABI020 FiatToken doTransfer is internal', async function () {
@@ -477,18 +391,19 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure balances did not change
-        let actualArbitraryAccountBalance = await token.balanceOf(arbitraryAccount);
-        let actualBlacklisterBalance = await token.balanceOf(blacklisterAccount);
-        (50).should.be.bignumber.equal(actualArbitraryAccountBalance);
-        (0).should.be.bignumber.equal(actualBlacklisterBalance);
+        var customVars = [
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50) },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(950) },
+            { 'variable': 'totalSupply', 'expectedValue': new BigNumber(50) }
+        ];
+        await checkVariables(token, customVars);
     });
 });
-
+*/
 contract('EternalStorage ABI Hacking tests', function (accounts) {
     beforeEach(async function checkBefore() {
-        storage = await EternalStorage.new(deployerAccount);
+        storage = await EternalStorage.new({ from: deployerAccount });
         storageOwner = deployerAccount;
         assert.equal(await storage.owner.call(), storageOwner)
     });
@@ -502,10 +417,10 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
             deployerAccountPrivateKey,
             storage.address);
         await sendRawTransaction(raw);
-
-        // make sure ownership changed
-        let actualOwner = await storage.owner.call();
-        assert.equal(arbitraryAccount, actualOwner, "owner should change");
+        var customVars = [
+            { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
+        ];
+        await checkEternalStorageVariables(storage, customVars);
     });
 
     it('ABI022 EternalStorage Ownable constructor is not inherited as a function', async function () {
@@ -516,10 +431,7 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
             deployerAccountPrivateKey,
             storage.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure ownership changed
-        let actualOwner = await storage.owner.call();
-        assert.equal(deployerAccount, actualOwner, "owner should not change");
+        await checkEternalStorageVariables(storage, []);
     });
 
     it('ABI023 EternalStorage Ownable _transferOwnership(address) is not public', async function () {
@@ -530,25 +442,22 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
             deployerAccountPrivateKey,
             storage.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure ownership changed
-        let actualOwner = await storage.owner.call();
-        assert.equal(deployerAccount, actualOwner, "owner should change");
+        await checkEternalStorageVariables(storage, []);
     });
 
     // sanity check
     it('ABI024 EternalStorage setMinter is public', async function () {
-        let goodData = msgData1('setMinter(address,bool)', arbitraryAccount, 1); //hack - 1=true
+        let goodData = msgData1('setMinter(address,bool)', minterAccount, 1); //hack - 1=true
         let raw = makeRawTransaction(
             goodData,
             deployerAccount,
             deployerAccountPrivateKey,
             storage.address);
         await sendRawTransaction(raw);
-
-        // make sure ownership changed
-        let isMinter = await storage.isMinter.call(arbitraryAccount);
-        assert.equal(true, isMinter, "arbitrary account should be a minter");
+        var customVars = [
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true }
+        ];
+        await checkEternalStorageVariables(storage, customVars);
     });
 
     it('ABI025 EternalStorage constructor is not inherited as a function', async function () {
@@ -559,10 +468,7 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
             deployerAccountPrivateKey,
             storage.address);
         await expectRevert(sendRawTransaction(raw));
-
-        // make sure ownership changed
-        let actualOwner = await storage.owner.call();
-        assert.equal(deployerAccount, actualOwner, "owner should change");
+        await checkEternalStorageVariables(storage, []);
     });
 
 });
