@@ -298,6 +298,7 @@ async function run_tests(newToken) {
     await checkVariables([newToken, token], [newToken_result, []]);
   });
 
+
   it('pt002 should upgrade, setting owner and upgradedAddress to address of new contract', async function () {
     let dataContractAddress = await token.getDataContractAddress();
 
