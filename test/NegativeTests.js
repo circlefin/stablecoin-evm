@@ -151,6 +151,7 @@ async function run_tests(newToken) {
       tokenOwnerAccount
     );
     newToken.default_priorContractAddress = 'undefined';
+    newToken.default_storageAddress = storage.address;
 
     await expectRevert(newToken.approve(pauserAccount, amount, {from: arbitraryAccount}));
     await checkVariables([newToken], [[{'variable': 'storageOwner', 'expectedValue': arbitraryAccount}]]);
@@ -441,6 +442,7 @@ async function run_tests(newToken) {
     );
     await token.upgrade(newToken.address, { from: upgraderAccount });
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -683,6 +685,7 @@ async function run_tests(newToken) {
       tokenOwnerAccount);
     await (token.upgrade(newToken.address, {from: upgraderAccount}));
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -714,6 +717,7 @@ async function run_tests(newToken) {
     );
     await token.upgrade(newToken.address, {from: upgraderAccount});
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -768,6 +772,7 @@ async function run_tests(newToken) {
     );
     await token.upgrade(newToken.address, {from: upgraderAccount});
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -821,6 +826,7 @@ async function run_tests(newToken) {
     );
     await token.upgrade(newToken.address, {from: upgraderAccount});
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -877,6 +883,7 @@ async function run_tests(newToken) {
     );
     await token.upgrade(newToken.address, {from: upgraderAccount});
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }

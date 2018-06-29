@@ -1,3 +1,4 @@
+var FiatToken = artifacts.require('FiatToken');
 var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
 var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');;
@@ -290,6 +291,7 @@ async function run_tests(newToken) {
       upgraderAccount,
       tokenOwnerAccount
     );
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address },
@@ -316,6 +318,7 @@ async function run_tests(newToken) {
     );
     await token.upgrade(newToken.address, {from: upgraderAccount});
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -346,6 +349,7 @@ async function run_tests(newToken) {
     );
     await token.upgrade(newToken.address, { from: upgraderAccount });
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -361,6 +365,27 @@ async function run_tests(newToken) {
       { 'variable': 'priorContractAddress', 'expectedValue': "0x0000000000000000000000000000000000000000" }
     ];
     await checkVariables([newToken, token], [newToken_result, oldToken_result]);
+  });
+
+  it('pt021 should construct a FiatToken with a preexisting storage contract, setting contractStorage to the storage contract address', async function() {
+    let storage = await EternalStorage.new({from: arbitraryAccount});
+    let newToken = await FiatToken.new(
+      storage.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_priorContractAddress = "undefined";
+    newToken.default_storageOwner = arbitraryAccount;
+    newToken.default_storageAddress = storage.address;
+
+    await checkVariables([newToken], [[]]);
   });
 
   // No payable function

@@ -127,6 +127,7 @@ async function run_tests(newToken) {
     await token.pause({from: pauserAccount});
     await token.upgrade(newToken.address, {from: upgraderAccount});
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
@@ -297,6 +298,7 @@ async function run_tests(newToken) {
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
@@ -328,6 +330,7 @@ async function run_tests(newToken) {
     await token.blacklist(newToken.address, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
     newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
 
     var newToken_result = [
       { 'variable': 'priorContractAddress', 'expectedValue': token.address }
