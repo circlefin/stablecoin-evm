@@ -12,13 +12,7 @@ assertDiff.options.strict = true;
 var Q = require('q');
 // TODO: test really big numbers
 
-// string role names to send to updateRoleAddress()
-var masterMinterRole = 'masterMinter';
-var blacklisterRole = 'blacklister';
-var pauserRole = 'pauser';
-var roleAddressChangerRole = 'roleAddressChanger';
-
-var ownerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
+var deployerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
 var upgraderAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
 var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
@@ -29,7 +23,7 @@ var minterAccount = "0x28a8746e75304c0780e011bed21c72cd78cd535e"; // accounts[7]
 var pauserAccount = "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e"; // accounts[8]
 //var blacklisterAccount = "0x1df62f291b2e969fb0849d99d9ce41e2f137006e"; // accounts[9]
 
-var ownerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
+var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
 var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
 var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
@@ -88,7 +82,6 @@ function buildExpectedState(customVars) {
         'tokenOwner': tokenOwnerAccount,
         // contractStorage is not deterministic for FiatTokenWithStorage
         //'contractStorage': storageAddress,
-        // 'owner': ownerAccount,
         'balances': {
             'arbitraryAccount': bigZero,
             'masterMinterAccount': bigZero,
@@ -398,7 +391,6 @@ async function getActualState(token) {
             'tokenOwner': tokenOwner,
             // contractStorage is not deterministic for FiatTokenWithStorage
             //'contractStorage': storageAddress,
-            // 'owner': await token.owner.call(),
             'balances': {
                 'arbitraryAccount': balancesA,
                 'masterMinterAccount': balancesMM,
@@ -704,22 +696,16 @@ module.exports = {
     redeem: redeem,
     expectRevert: expectRevert,
     expectJump: expectJump,
-    masterMinterRole: masterMinterRole,
-    blacklisterRole: blacklisterRole,
-    pauserRole: pauserRole,
-    roleAddressChangerRole: roleAddressChangerRole,
-    ownerAccount: ownerAccount,
+    deployerAccount: deployerAccount,
     arbitraryAccount: arbitraryAccount,
     upgraderAccount: upgraderAccount,
     tokenOwnerAccount: tokenOwnerAccount,
-    blacklisterAccount: blacklisterAccount,
     arbitraryAccount2: arbitraryAccount2,
     masterMinterAccount: masterMinterAccount,
     minterAccount: minterAccount,
     pauserAccount: pauserAccount,
     blacklisterAccount: blacklisterAccount,
 
-    ownerAccountPrivateKey,
     arbitraryAccountPrivateKey,
     upgraderAccountPrivateKey,
     tokenOwnerPrivateKey,
@@ -727,5 +713,6 @@ module.exports = {
     arbitraryAccount2PrivateKey,
     masterMinterAccountPrivateKey,
     minterAccountPrivateKey,
-    pauserAccountPrivateKey
+    pauserAccountPrivateKey,
+    deployerAccountPrivateKey
 }

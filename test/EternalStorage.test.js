@@ -24,8 +24,7 @@ var pauserRole = tokenUtils.pauserRole;
 var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
 
-var ownerAccount = tokenUtils.ownerAccount;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
@@ -36,7 +35,7 @@ var pauserAccount = tokenUtils.pauserAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 
 var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
-var storageOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
+var storageOwnerPrivateKey = tokenUtils.deployerAccountPrivateKey;
 
 var debugLogging = tokenUtils.debugLogging;
 
@@ -76,7 +75,7 @@ async function checkEternalStorageVariables(storage, customVars) {
 
     // now copy only the subset relevant to EternalStorage
     var expectedStorageState = {
-        'owner': ownerAccount,
+        'owner': deployerAccount,
         'balances': expectedTokenState['balances'],
         'allowance': expectedTokenState['allowance'],
         'totalSupply': expectedTokenState['totalSupply'],
@@ -102,51 +101,51 @@ async function getActualEternalStorageState(storage) {
         storage.getBalance(minterAccount),
         storage.getBalance(pauserAccount),
         storage.getBalance(blacklisterAccount),
-        storage.getBalance(tokenOwnerAccount),
+        storage.getBalance(deployerAccount),
         storage.getBalance(upgraderAccount),
 
         storage.getAllowed(arbitraryAccount, masterMinterAccount),
         storage.getAllowed(arbitraryAccount, minterAccount),
         storage.getAllowed(arbitraryAccount, pauserAccount),
         storage.getAllowed(arbitraryAccount, blacklisterAccount),
-        storage.getAllowed(arbitraryAccount, tokenOwnerAccount),
+        storage.getAllowed(arbitraryAccount, deployerAccount),
         storage.getAllowed(arbitraryAccount, upgraderAccount),
         storage.getAllowed(masterMinterAccount, arbitraryAccount),
         storage.getAllowed(masterMinterAccount, minterAccount),
         storage.getAllowed(masterMinterAccount, pauserAccount),
         storage.getAllowed(masterMinterAccount, blacklisterAccount),
-        storage.getAllowed(masterMinterAccount, tokenOwnerAccount),
+        storage.getAllowed(masterMinterAccount, deployerAccount),
         storage.getAllowed(masterMinterAccount, upgraderAccount),
         storage.getAllowed(minterAccount, arbitraryAccount),
         storage.getAllowed(minterAccount, masterMinterAccount),
         storage.getAllowed(minterAccount, pauserAccount),
         storage.getAllowed(minterAccount, blacklisterAccount),
-        storage.getAllowed(minterAccount, tokenOwnerAccount),
+        storage.getAllowed(minterAccount, deployerAccount),
         storage.getAllowed(minterAccount, upgraderAccount),
         storage.getAllowed(pauserAccount, arbitraryAccount),
         storage.getAllowed(pauserAccount, masterMinterAccount),
         storage.getAllowed(pauserAccount, minterAccount),
         storage.getAllowed(pauserAccount, blacklisterAccount),
-        storage.getAllowed(pauserAccount, tokenOwnerAccount),
+        storage.getAllowed(pauserAccount, deployerAccount),
         storage.getAllowed(pauserAccount, upgraderAccount),
         storage.getAllowed(blacklisterAccount, arbitraryAccount),
         storage.getAllowed(blacklisterAccount, masterMinterAccount),
         storage.getAllowed(blacklisterAccount, minterAccount),
         storage.getAllowed(blacklisterAccount, pauserAccount),
-        storage.getAllowed(blacklisterAccount, tokenOwnerAccount),
+        storage.getAllowed(blacklisterAccount, deployerAccount),
         storage.getAllowed(blacklisterAccount, upgraderAccount),
-        storage.getAllowed(tokenOwnerAccount, arbitraryAccount),
-        storage.getAllowed(tokenOwnerAccount, masterMinterAccount),
-        storage.getAllowed(tokenOwnerAccount, minterAccount),
-        storage.getAllowed(tokenOwnerAccount, pauserAccount),
-        storage.getAllowed(tokenOwnerAccount, blacklisterAccount),
-        storage.getAllowed(tokenOwnerAccount, upgraderAccount),
+        storage.getAllowed(deployerAccount, arbitraryAccount),
+        storage.getAllowed(deployerAccount, masterMinterAccount),
+        storage.getAllowed(deployerAccount, minterAccount),
+        storage.getAllowed(deployerAccount, pauserAccount),
+        storage.getAllowed(deployerAccount, blacklisterAccount),
+        storage.getAllowed(deployerAccount, upgraderAccount),
         storage.getAllowed(upgraderAccount, arbitraryAccount),
         storage.getAllowed(upgraderAccount, masterMinterAccount),
         storage.getAllowed(upgraderAccount, minterAccount),
         storage.getAllowed(upgraderAccount, pauserAccount),
         storage.getAllowed(upgraderAccount, blacklisterAccount),
-        storage.getAllowed(upgraderAccount, tokenOwnerAccount),
+        storage.getAllowed(upgraderAccount, deployerAccount),
 
         storage.getTotalSupply(),
 
@@ -155,7 +154,7 @@ async function getActualEternalStorageState(storage) {
         storage.isBlacklisted(minterAccount),
         storage.isBlacklisted(pauserAccount),
         storage.isBlacklisted(blacklisterAccount),
-        storage.isBlacklisted(tokenOwnerAccount),
+        storage.isBlacklisted(deployerAccount),
         storage.isBlacklisted(upgraderAccount),
 
         storage.isMinter(arbitraryAccount),
@@ -163,7 +162,7 @@ async function getActualEternalStorageState(storage) {
         storage.isMinter(minterAccount),
         storage.isMinter(pauserAccount),
         storage.isMinter(blacklisterAccount),
-        storage.isMinter(tokenOwnerAccount),
+        storage.isMinter(deployerAccount),
         storage.isMinter(upgraderAccount),
 
         storage.getMinterAllowed(arbitraryAccount),
@@ -171,7 +170,7 @@ async function getActualEternalStorageState(storage) {
         storage.getMinterAllowed(minterAccount),
         storage.getMinterAllowed(pauserAccount),
         storage.getMinterAllowed(blacklisterAccount),
-        storage.getMinterAllowed(tokenOwnerAccount),
+        storage.getMinterAllowed(deployerAccount),
         storage.getMinterAllowed(upgraderAccount),
     ]).spread(function (
         storageOwner,
@@ -354,8 +353,8 @@ async function getActualEternalStorageState(storage) {
 
 contract('Eternal Storage Tests', function (accounts) {
     beforeEach(async function checkBefore() {
-        storage = await EternalStorage.new(ownerAccount);
-        storageOwner = ownerAccount;
+        storage = await EternalStorage.new(deployerAccount);
+        storageOwner = deployerAccount;
     });
 
     it('es030 constructor owner', async function () {

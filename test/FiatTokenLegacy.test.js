@@ -18,7 +18,7 @@ var approve = tokenUtils.approve;
 var unBlacklist = tokenUtils.unBlacklist;
 var sampleTransfer = tokenUtils.sampleTransfer;
 var checkTransferEvents = tokenUtils.checkTransferEvents;
-var ownerAccount = tokenUtils.ownerAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var upgraderAccount = tokenUtils.upgraderAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
@@ -120,7 +120,7 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should complete transferFrom', async function () {
-    await sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount);
+    await sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should approve', async function () {
@@ -130,7 +130,7 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should complete sample transfer', async function () {
-    await sampleTransfer(token, ownerAccount, arbitraryAccount2, minterAccount);
+    await sampleTransfer(token, deployerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should complete transfer from non-owner', async function () {
@@ -248,7 +248,7 @@ contract('Legacy Tests', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount));
+    await expectRevert(sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount));
   });
 
   it('should pause and should not be able to transfer, then unpause and be able to transfer', async function () {
@@ -257,11 +257,11 @@ contract('Legacy Tests', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount));
+    await expectRevert(sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount));
 
     await token.unpause({ from: pauserAccount });
     assert.equal(await token.paused.call(), false);
-    await sampleTransferFrom(token, ownerAccount, arbitraryAccount2, minterAccount);
+    await sampleTransferFrom(token, deployerAccount, arbitraryAccount2, minterAccount);
   });
 
   it('should pause and should not be able to transferFrom', async function () {
@@ -270,7 +270,7 @@ contract('Legacy Tests', function (accounts) {
     await token.pause({ from: pauserAccount });
     assert.equal(await token.paused.call(), true);
 
-    await expectRevert(sampleTransfer(token, ownerAccount, arbitraryAccount2, minterAccount));
+    await expectRevert(sampleTransfer(token, deployerAccount, arbitraryAccount2, minterAccount));
   });
 
   it('should pause and should not be able to approve', async function () {
