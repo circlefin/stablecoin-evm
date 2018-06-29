@@ -72,11 +72,9 @@ function checkTransferEvents(transfer, from, to, value) {
     assert.equal(transfer.logs[0].args.value, value);
 }
 
-// For testing variance of specific variables from their default values.
-// customVars is an array of objects of the form,
-// {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
-// to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
-async function checkVariables(token, customVars) {
+// Creates a state object, with default values replaced by
+// customVars where appropriate.
+function buildExpectedState(customVars) {
     // set each variable's default value
     var expectedState = {
         'name': name,
@@ -203,7 +201,15 @@ async function checkVariables(token, customVars) {
             throw new Error("variable " + customVars[i].variable + " not found in expectedState");
         }
     }
+    return expectedState;
+}
 
+// For testing variance of specific variables from their default values.
+// customVars is an array of objects of the form,
+// {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
+// to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
+async function checkVariables(token, customVars) {
+    let expectedState = buildExpectedState(customVars);
     if (debugLogging) {
         console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
     }
@@ -662,13 +668,13 @@ async function expectRevert(contractPromise) {
 }
 
 async function expectJump(contractPromise) {
-  try {
-    await contractPromise;
-    assert.fail('Expected invalid opcode not received');
-  } catch (error) {
-    const invalidOpcodeReceived = error.message.search('invalid opcode') >= 0;
-    assert(invalidOpcodeReceived, `Expected "invalid opcode", got ${error} instead`);
-  }
+    try {
+        await contractPromise;
+        assert.fail('Expected invalid opcode not received');
+    } catch (error) {
+        const invalidOpcodeReceived = error.message.search('invalid opcode') >= 0;
+        assert(invalidOpcodeReceived, `Expected "invalid opcode", got ${error} instead`);
+    }
 }
 
 module.exports = {
@@ -682,6 +688,7 @@ module.exports = {
     calculateFeeAmount: calculateFeeAmount,
     checkTransferEventsWithFee: checkTransferEventsWithFee,
     checkTransferEvents: checkTransferEvents,
+    buildExpectedState,
     checkVariables: checkVariables,
     setMinter: setMinter,
     mint: mint,
