@@ -84,6 +84,7 @@ async function checkVariables(_tokens, _customVars) {
         'upgrader': upgraderAccount,
         'tokenOwner': tokenOwnerAccount,
         'storageOwner': token.default_storageOwner,
+        'storageAddress': token.default_storageAddress,
         'priorContractAddress': token.default_priorContractAddress,
         'upgradedAddress': "0x0000000000000000000000000000000000000000",
         'balances': {
@@ -227,6 +228,7 @@ async function getActualState(token) {
         await token.upgrader.call(),
         await token.owner.call(),
         await storage.owner.call(),
+        await token.getDataContractAddress(),
         _priorContractAddress,
         await token.upgradedAddress.call(),
         await token.balanceOf(arbitraryAccount),
@@ -312,6 +314,7 @@ async function getActualState(token) {
         upgrader,
         tokenOwner,
         storageOwner,
+        storageAddress,
         priorContractAddress,
         upgradedAddress,
         balancesA,
@@ -398,6 +401,7 @@ async function getActualState(token) {
             'upgrader': upgrader,
             'tokenOwner': tokenOwner,
             'storageOwner': storageOwner,
+            'storageAddress': storageAddress,
             'priorContractAddress': priorContractAddress,
             'upgradedAddress': upgradedAddress,
             'balances': {

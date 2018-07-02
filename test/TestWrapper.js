@@ -36,6 +36,7 @@ async function newOriginalToken() {
 
   token.default_priorContractAddress = "undefined";
   token.default_storageOwner = token.address;
+  token.default_storageAddress = await token.getDataContractAddress();
 
   return token;
 }
@@ -74,6 +75,7 @@ async function newUpgradedToken() {
 
   token.default_priorContractAddress = oldToken.address;
   token.default_storageOwner = token.address;
+  token.default_storageAddress = dataContractAddress;
 
   return token;
 }
@@ -82,26 +84,26 @@ async function newUpgradedToken() {
 
 // Run specific tests combos by commenting/uncommenting the contract blocks below.
 
-// contract('FiatToken_PositiveTests_Original', async function () {
-//   await positive_tests.run_tests(newOriginalToken);
-// });
-//
-// contract('FiatToken_PositiveTests_Upgraded', async function () {
-//   await positive_tests.run_tests(newUpgradedToken);
-// });
-//
-// contract('FiatToken_ExtendedPositiveTests_Original', async function () {
-//   await extended_positive_tests.run_tests(newOriginalToken);
-// });
-//
-// contract('FiatToken_ExtendedPositiveTests_Upgraded', async function () {
-//   await extended_positive_tests.run_tests(newUpgradedToken);
-// });
+contract('FiatToken_PositiveTests_Original', async function () {
+  await positive_tests.run_tests(newOriginalToken);
+});
+
+contract('FiatToken_PositiveTests_Upgraded', async function () {
+  await positive_tests.run_tests(newUpgradedToken);
+});
+
+contract('FiatToken_ExtendedPositiveTests_Original', async function () {
+  await extended_positive_tests.run_tests(newOriginalToken);
+});
+
+contract('FiatToken_ExtendedPositiveTests_Upgraded', async function () {
+  await extended_positive_tests.run_tests(newUpgradedToken);
+});
 
 contract('FiatToken_NegativeTests_Original', async function () {
   await negative_tests.run_tests(newOriginalToken);
 });
 
-// contract('FiatToken_NegativeTests_Upgraded', async function () {
-//   await negative_tests.run_tests(newUpgradedToken);
-// });
+contract('FiatToken_NegativeTests_Upgraded', async function () {
+  await negative_tests.run_tests(newUpgradedToken);
+});
