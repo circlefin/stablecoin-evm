@@ -36,6 +36,7 @@ async function newOriginalToken() {
 
   token.default_priorContractAddress = "undefined";
   token.default_storageOwner = token.address;
+  token.default_storageAddress = await token.getDataContractAddress();
 
   return token;
 }
@@ -74,6 +75,7 @@ async function newUpgradedToken() {
 
   token.default_priorContractAddress = oldToken.address;
   token.default_storageOwner = token.address;
+  token.default_storageAddress = dataContractAddress;
 
   return token;
 }
