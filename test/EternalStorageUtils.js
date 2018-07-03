@@ -236,9 +236,6 @@ async function getActualEternalStorageState(storage) {
     ) {
         var actualState = {
             'owner': storageOwner,
-            // contractStorage is not deterministic for FiatTokenWithStorage
-            //'contractStorage': storageAddress,
-            // 'owner': await token.owner.call(),
             'balances': {
                 'arbitraryAccount': balancesA,
                 'masterMinterAccount': balancesMM,

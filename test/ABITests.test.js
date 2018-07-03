@@ -54,11 +54,6 @@ var msgData1 = abiUtils.msgData1;
 var msgData2 = abiUtils.msgData2;
 var msgData3 = abiUtils.msgData3;
 
-const should = require('chai')
-    .use(require('chai-as-promised'))
-    .use(require('chai-bignumber')(BigNumber))
-    .should();
-/*
 contract('FiatToken ABI Hacking tests', function (accounts) {
     beforeEach(async function checkBefore() {
         token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
@@ -400,7 +395,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         await checkVariables(token, customVars);
     });
 });
-*/
+
 contract('EternalStorage ABI Hacking tests', function (accounts) {
     beforeEach(async function checkBefore() {
         storage = await EternalStorage.new({ from: deployerAccount });
