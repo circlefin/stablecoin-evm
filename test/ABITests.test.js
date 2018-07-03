@@ -54,9 +54,37 @@ var msgData1 = abiUtils.msgData1;
 var msgData2 = abiUtils.msgData2;
 var msgData3 = abiUtils.msgData3;
 
+async function newOriginalToken() {
+    var token = await FiatToken.new(
+        "0x0",
+        name,
+        symbol,
+        currency,
+        decimals,
+        masterMinterAccount,
+        pauserAccount,
+        blacklisterAccount,
+        upgraderAccount,
+        tokenOwnerAccount
+    );
+
+    token.default_priorContractAddress = "undefined";
+    token.default_storageOwner = token.address;
+    token.default_storageAddress = await token.getDataContractAddress();
+
+    return token;
+}
+
 contract('FiatToken ABI Hacking tests', function (accounts) {
     beforeEach(async function checkBefore() {
-        token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
+        token = await newOriginalToken();/*
+        token = await FiatToken.new(
+            "0x0",
+            name,
+            symbol,
+            currency,
+            decimals,
+            masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);*/
         let tokenAddress = token.address;
         dataContractAddress = await token.getDataContractAddress();
     });
@@ -81,7 +109,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var customVars = [
             { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
         ];
-        await checkVariables(token, customVars);
+        await checkVariables([token], [customVars]);
     });
 
     it('ABI002 Ownable constructor is not inherited as a function', async function () {
@@ -99,7 +127,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI003 Ownable _transferOwnership(address) is not public', async function () {
@@ -117,7 +145,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     // sanity check for pausable
@@ -139,7 +167,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var customVars = [
             { 'variable': 'paused', 'expectedValue': true }
         ];
-        await checkVariables(token, customVars);
+        await checkVariables([token], [customVars]);
     });
 
     it('ABI005 Pausable constructor is not a function', async function () {
@@ -157,7 +185,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI006 BlacklistableTokenByRole blacklist is public', async function () {
@@ -178,7 +206,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var customVars = [
             { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
         ];
-        await checkVariables(token, customVars);
+        await checkVariables([token], [customVars]);
     });
 
     it('ABI007 BlacklistableTokenByRole constructor is not a function', async function () {
@@ -196,7 +224,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI008 EternalStorageUpdater constructor is not a function', async function () {
@@ -214,7 +242,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI009 EternalStorageUpdater setAllowed is internal', async function () {
@@ -232,7 +260,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var raw = '0x' + tx.serialize().toString('hex');
 
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI010 EternalStorageUpdater setBalance is internal', async function () {
@@ -243,7 +271,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI011 EternalStorageUpdater setBalances is internal', async function () {
@@ -254,7 +282,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI012 EternalStorageUpdater setTotalSupply is internal', async function () {
@@ -265,7 +293,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI013 EternalStorageUpdater setBlacklisted(true) is internal', async function () {
@@ -276,7 +304,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             blacklisterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI014 EternalStorageUpdater setBlacklisted(false) is internal', async function () {
@@ -293,7 +321,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var customVars = [
             { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
         ];
-        await checkVariables(token, customVars);
+        await checkVariables([token], [customVars]);
     });
 
     it('ABI015 EternalStorageUpdater setMinter is internal', async function () {
@@ -304,7 +332,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             masterMinterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     it('ABI026 EternalStorageUpdater setMinter(false) is internal', async function () {
@@ -321,7 +349,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             { 'variable': 'isAccountMinter.arbitraryAccount', 'expectedValue': true },
             { 'variable': 'minterAllowance.arbitraryAccount', 'expectedValue': new BigNumber(100) }
         ];
-        await checkVariables(token, customVars);
+        await checkVariables([token], [customVars]);
     });
 
     it('ABI016 EternalStorageUpdater setMinterAllowed is internal', async function () {
@@ -332,7 +360,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             masterMinterAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
     // sanity test
@@ -357,7 +385,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             upgraderAccountPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        await checkVariables(token, []);
+        await checkVariables([token], [[]]);
     });
 
 
@@ -372,7 +400,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         var customVars = [
             { 'variable': 'paused', 'expectedValue': true }
         ];
-        await checkVariables(token, customVars);
+        await checkVariables([token], [customVars]);
     });
 
     it('ABI020 FiatToken doTransfer is internal', async function () {
@@ -392,7 +420,7 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
             { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(950) },
             { 'variable': 'totalSupply', 'expectedValue': new BigNumber(50) }
         ];
-        await checkVariables(token, customVars);
+        await checkVariables([token], [customVars]);
     });
 });
 
@@ -413,7 +441,7 @@ contract('EternalStorage ABI Hacking tests', function (accounts) {
             storage.address);
         await sendRawTransaction(raw);
         var customVars = [
-            { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
+            { 'variable': 'owner', 'expectedValue': arbitraryAccount }
         ];
         await checkEternalStorageVariables(storage, customVars);
     });

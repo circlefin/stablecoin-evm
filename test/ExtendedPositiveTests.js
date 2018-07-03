@@ -33,64 +33,64 @@ async function run_tests(newToken) {
   });
 
   it('should check that default variable values are correct', async function () {
-    await checkVariables(token, []);
+    await checkVariables([token], [[]]);
   });
 
   /////////////////////////////////////////////////////////////////////////////
 
   // Paused
 
-  it('should updateUpgraderAddress while paused', async function () {
+  it('ept001 should updateUpgraderAddress while paused', async function () {
     await token.pause({ from: pauserAccount });
     await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
     var result = [
       { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should updateMasterMinter while paused', async function () {
+  it('ept002 should updateMasterMinter while paused', async function () {
     await token.pause({ from: pauserAccount });
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should updateBlacklister while paused', async function () {
+  it('ept003 should updateBlacklister while paused', async function () {
     await token.pause({ from: pauserAccount });
     await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should updatePauser while paused', async function () {
+  it('ept004 should updatePauser while paused', async function () {
     await token.pause({ from: pauserAccount });
     await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should transferOwnership while paused', async function () {
+  it('ept005 should transferOwnership while paused', async function () {
     await token.pause({ from: pauserAccount });
     await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
     var result = [
       { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should removeMinter while paused', async function () {
+  it('ept006 should removeMinter while paused', async function () {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     await token.pause({ from: pauserAccount });
     var isAMinter = [
@@ -98,7 +98,7 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, isAMinter);
+    await checkVariables([token], [isAMinter]);
 
     await token.removeMinter(minterAccount, { from: masterMinterAccount });
     var notAMinter = [
@@ -106,10 +106,10 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, notAMinter);
+    await checkVariables([token], [notAMinter]);
   });
 
-  it('should upgrade while paused', async function() {
+  it('ept008 should upgrade while paused', async function() {
     let dataContractAddress = await token.getDataContractAddress();
     var newToken = await UpgradedFiatToken.new(
       dataContractAddress,
@@ -126,19 +126,23 @@ async function run_tests(newToken) {
     );
     await token.pause({from: pauserAccount});
     await token.upgrade(newToken.address, {from: upgraderAccount});
-    var result = [
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
-      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address },
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
+    ];
+    var oldToken_result = [
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address },
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
-    assert.equal(await token.upgradedAddress.call(), newToken.address);
+    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
   });
 
   // Zero Address
 
-  it('should updateMasterMinter to zero address', async function () {
+  it('ept010 should updateMasterMinter to zero address', async function () {
     let longZero = 0x0000000000000000000000000000000000000000;
     let shortZero = 0x00;
 
@@ -149,10 +153,10 @@ async function run_tests(newToken) {
 
     // Note: longZero and shortZero both resolve to 0x0000000000000000000000000000000000000000
     await token.updateMasterMinter(shortZero, { from: tokenOwnerAccount });
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should updateBlacklister to zero address', async function () {
+  it('ept011 should updateBlacklister to zero address', async function () {
     let longZero = 0x0000000000000000000000000000000000000000;
     let shortZero = 0x00;
 
@@ -162,10 +166,10 @@ async function run_tests(newToken) {
     ];
 
     await token.updateBlacklister(shortZero, { from: tokenOwnerAccount });
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should updatePauser to zero address', async function () {
+  it('ept012 should updatePauser to zero address', async function () {
     let longZero = 0x0000000000000000000000000000000000000000;
     let shortZero = 0x00;
 
@@ -175,108 +179,108 @@ async function run_tests(newToken) {
     ];
 
     await token.updatePauser(shortZero, { from: tokenOwnerAccount });
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
   // Blacklisted
 
-  it('should updateUpgraderAddress when msg.sender blacklisted', async function () {
+  it('ept013 should updateUpgraderAddress when msg.sender blacklisted', async function () {
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
     await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
     var setup = [
       { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should updateMasterMinter when msg.sender blacklisted', async function () {
+  it('ept014 should updateMasterMinter when msg.sender blacklisted', async function () {
     await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.tokenOwnerAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should updateBlacklister when msg.sender blacklisted', async function () {
+  it('ept015 should updateBlacklister when msg.sender blacklisted', async function () {
     await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
     await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.tokenOwnerAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should updatePauser when msg.sender blacklisted', async function () {
+  it('ept016 should updatePauser when msg.sender blacklisted', async function () {
     await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
     await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.tokenOwnerAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should transferOwnership when msg.sender blacklisted', async function () {
+  it('ept017 should transferOwnership when msg.sender blacklisted', async function () {
     await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
     await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.tokenOwnerAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it ('should pause when msg.sender blacklisted', async function() {
+  it ('ept018 should pause when msg.sender blacklisted', async function() {
     await token.blacklist(pauserAccount, { from: blacklisterAccount });
     await token.pause({ from: pauserAccount });
     var setup = [
       { 'variable': 'paused', 'expectedValue': true },
       { 'variable': 'isAccountBlacklisted.pauserAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it ('should unpause when msg.sender blacklisted', async function() {
+  it ('ept019 should unpause when msg.sender blacklisted', async function() {
     await token.pause({ from: pauserAccount });
     var setup = [
       { 'variable': 'paused', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
 
     await token.blacklist(pauserAccount, { from: blacklisterAccount });
     await token.unpause({ from: pauserAccount });
     setup = [
       { 'variable': 'isAccountBlacklisted.pauserAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it ('should blacklist when msg.sender blacklisted', async function() {
+  it ('ept020 should blacklist when msg.sender blacklisted', async function() {
     await token.blacklist(blacklisterAccount, { from: blacklisterAccount });
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     var setup = [
       { 'variable': 'isAccountBlacklisted.blacklisterAccount', 'expectedValue': true },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it ('should unBlacklist when msg.sender blacklisted', async function() {
+  it ('ept021 should unBlacklist when msg.sender blacklisted', async function() {
     await token.blacklist(blacklisterAccount, { from: blacklisterAccount });
     var setup = [
       { 'variable': 'isAccountBlacklisted.blacklisterAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
 
     await token.unBlacklist(blacklisterAccount, { from: blacklisterAccount });
-    await checkVariables(token, []);
+    await checkVariables([token], [[]]);
   });
 
-  it ('should upgrade when msg.sender blacklisted', async function() {
+  it ('ept022 should upgrade when msg.sender blacklisted', async function() {
     let dataContractAddress = await token.getDataContractAddress();
     var newToken = await UpgradedFiatToken.new(
       dataContractAddress,
@@ -293,17 +297,22 @@ async function run_tests(newToken) {
     );
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
-    var setup = [
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    var newToken_result = [
       { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
-      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address },
     ];
-    await checkVariables(token, setup);
-    assert.equal(await token.upgradedAddress.call(), newToken.address);
+    var oldToken_result = [
+      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
   });
 
-  it ('should upgrade to blacklisted address', async function() {
+  it ('ept023 should upgrade to blacklisted address', async function() {
     let dataContractAddress = await token.getDataContractAddress();
     var newToken = await UpgradedFiatToken.new(
       dataContractAddress,
@@ -320,76 +329,82 @@ async function run_tests(newToken) {
     );
     await token.blacklist(newToken.address, { from: blacklisterAccount });
     await token.upgrade(newToken.address, { from: upgraderAccount });
-    var setup = [
-      //TODO: Add this to checkVariables.
-      //{ 'variable': 'isAccountBlacklisted.newToken.address', 'expectedValue': true },
-      //{ 'variable': 'tokenOwner', 'expectedValue': newToken.address },
-      //{ 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    var newToken_result = [
+      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
     ];
-    await checkVariables(token, setup);
-    assert.equal(await token.upgradedAddress.call(), newToken.address);
+    var oldToken_result = [
+      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
+      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
+    ];
+    // TODO: Come up with a clean way around these assert statements.
+    assert(await newToken.isAccountBlacklisted(newToken.address));
+    assert(await token.isAccountBlacklisted(newToken.address));
+    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
   });
 
-  it('should blacklist a blacklisted address', async function () {
+  it('ept024 should blacklist a blacklisted address', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     var setup = [
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should updateUpgraderAddress to blacklisted address', async function () {
+  it('ept025 should updateUpgraderAddress to blacklisted address', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
     var setup = [
       { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should updateMasterMinter to blacklisted address', async function () {
+  it('ept026 should updateMasterMinter to blacklisted address', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should updateBlacklister to blacklisted address', async function () {
+  it('ept027 should updateBlacklister to blacklisted address', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'blacklister', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should updatePauser to blacklisted address', async function () {
+  it('ept028 should updatePauser to blacklisted address', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'pauser', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should transferOwnership to blacklisted address', async function () {
+  it('ept029 should transferOwnership to blacklisted address', async function () {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
     var setup = [
       { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount },
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, setup);
+    await checkVariables([token], [setup]);
   });
 
-  it('should configureMinter when masterMinter is blacklisted', async function () {
+  it('ept030 should configureMinter when masterMinter is blacklisted', async function () {
     await token.blacklist(masterMinterAccount, { from: blacklisterAccount });
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var result = [
@@ -397,10 +412,10 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true }
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should configureMinter when minter is blacklisted', async function () {
+  it('ept032 should configureMinter when minter is blacklisted', async function () {
     await token.blacklist(minterAccount, { from: blacklisterAccount });
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var result = [
@@ -408,10 +423,10 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
     ];
-    await checkVariables(token, result);
+    await checkVariables([token], [result]);
   });
 
-  it('should removeMinter when masterMinter is blacklisted', async function() {
+  it('ept033 should removeMinter when masterMinter is blacklisted', async function() {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     await token.blacklist(masterMinterAccount, { from: blacklisterAccount });
     var customVars = [
@@ -419,7 +434,7 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.removeMinter(minterAccount, { from: masterMinterAccount });
     customVars = [
@@ -427,10 +442,10 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
       { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
-  it('should removeMinter when minter is blacklisted', async function() {
+  it('ept034 should removeMinter when minter is blacklisted', async function() {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     await token.blacklist(minterAccount, { from: blacklisterAccount });
     var customVars = [
@@ -438,7 +453,7 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
 
     await token.removeMinter(minterAccount, { from: masterMinterAccount });
     customVars = [
@@ -446,7 +461,7 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
       { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
     ];
-    await checkVariables(token, customVars);
+    await checkVariables([token], [customVars]);
   });
 
 }

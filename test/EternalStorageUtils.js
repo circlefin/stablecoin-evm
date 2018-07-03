@@ -36,41 +36,135 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
 var storageOwnerPrivateKey = tokenUtils.deployerAccountPrivateKey;
 
-var debugLogging = tokenUtils.debugLogging;
+var debugLogging = true; //tokenUtils.debugLogging;
 
 const should = require('chai')
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-async function checkEternalStorageVariables(storage, customVars) {
-    // make sure we use the default EternalStorage deployerAccount
-    // otherwise TokenTestUtils.buildExpectedState will use the
-    // tokenOwnerAccount.
+// Creates a state object, with default values replaced by
+// customVars where appropriate.
+function buildExpectedEternalStorageState(customVars) {
+    // set each variable's default value
+    var expectedState = {
+        'owner': deployerAccount,
+        'balances': {
+            'arbitraryAccount': bigZero,
+            'masterMinterAccount': bigZero,
+            'minterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero
+        },
+        'allowance': {
+            'arbitraryAccount': {
+                'masterMinterAccount': bigZero,
+                'minterAccount': bigZero,
+                'pauserAccount': bigZero,
+                'blacklisterAccount': bigZero,
+                'tokenOwnerAccount': bigZero,
+                'upgraderAccount': bigZero
+            },
+            'masterMinterAccount': {
+                'arbitraryAccount': bigZero,
+                'minterAccount': bigZero,
+                'pauserAccount': bigZero,
+                'blacklisterAccount': bigZero,
+                'tokenOwnerAccount': bigZero,
+                'upgraderAccount': bigZero
+            },
+            'minterAccount': {
+                'arbitraryAccount': bigZero,
+                'masterMinterAccount': bigZero,
+                'pauserAccount': bigZero,
+                'blacklisterAccount': bigZero,
+                'tokenOwnerAccount': bigZero,
+                'upgraderAccount': bigZero
+            },
+            'pauserAccount': {
+                'arbitraryAccount': bigZero,
+                'masterMinterAccount': bigZero,
+                'minterAccount': bigZero,
+                'blacklisterAccount': bigZero,
+                'tokenOwnerAccount': bigZero,
+                'upgraderAccount': bigZero
+            },
+            'blacklisterAccount': {
+                'arbitraryAccount': bigZero,
+                'masterMinterAccount': bigZero,
+                'minterAccount': bigZero,
+                'pauserAccount': bigZero,
+                'tokenOwnerAccount': bigZero,
+                'upgraderAccount': bigZero
+            },
+            'tokenOwnerAccount': {
+                'arbitraryAccount': bigZero,
+                'masterMinterAccount': bigZero,
+                'minterAccount': bigZero,
+                'pauserAccount': bigZero,
+                'blacklisterAccount': bigZero,
+                'upgraderAccount': bigZero
+            },
+            'upgraderAccount': {
+                'arbitraryAccount': bigZero,
+                'masterMinterAccount': bigZero,
+                'minterAccount': bigZero,
+                'pauserAccount': bigZero,
+                'blacklisterAccount': bigZero,
+                'tokenOwnerAccount': bigZero,
+            }
+        },
+        'totalSupply': bigZero,
+        'isAccountBlacklisted': {
+            'arbitraryAccount': false,
+            'masterMinterAccount': false,
+            'minterAccount': false,
+            'pauserAccount': false,
+            'blacklisterAccount': false,
+            'tokenOwnerAccount': false,
+            'upgraderAccount': false
+        },
+        'isAccountMinter': {
+            'arbitraryAccount': false,
+            'masterMinterAccount': false,
+            'minterAccount': false,
+            'pauserAccount': false,
+            'blacklisterAccount': false,
+            'tokenOwnerAccount': false,
+            'upgraderAccount': false
+        },
+        'minterAllowance': {
+            'arbitraryAccount': bigZero,
+            'masterMinterAccount': bigZero,
+            'minterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero
+        }
+    };
+
+    // for each item in customVars, set the item in expectedState
     var i;
-    var foundTokenOwner = false;
     for (i = 0; i < customVars.length; ++i) {
-        if (customVars[i].variable == 'tokenOwner') {
-            foundTokenOwner = true;
+        if (_.has(expectedState, customVars[i].variable)) {
+            if (expectedState[customVars[i].variable] == customVars[i].expectedValue) {
+                throw new Error("variable " + customVars[i].variable + " to test has same default state as expected state");
+            } else {
+                _.set(expectedState, customVars[i].variable, customVars[i].expectedValue);
+            }
+        } else {
+            // TODO: test the error
+            throw new Error("variable " + customVars[i].variable + " not found in expectedState");
         }
     }
-    if (!foundTokenOwner) {
-        customVars.push({ 'variable': 'tokenOwner', 'expectedValue': deployerAccount });
-    }
+    return expectedState;
+}
 
-    // get default token state
-    var expectedTokenState = buildExpectedState(customVars);
-
-    // now copy only the subset relevant to EternalStorage
-    var expectedStorageState = {
-        'owner': expectedTokenState['tokenOwner'],
-        'balances': expectedTokenState['balances'],
-        'allowance': expectedTokenState['allowance'],
-        'totalSupply': expectedTokenState['totalSupply'],
-        'isAccountBlacklisted': expectedTokenState['isAccountBlacklisted'],
-        'isAccountMinter': expectedTokenState['isAccountMinter'],
-        'minterAllowance': expectedTokenState['minterAllowance'],
-    };
+async function checkEternalStorageVariables(storage, customVars) {
+    var expectedStorageState = buildExpectedEternalStorageState(customVars);
 
     if (debugLogging) {
         console.log(util.inspect(expectedStorageState, { showHidden: false, depth: null }))
