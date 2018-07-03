@@ -36,7 +36,7 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
 var storageOwnerPrivateKey = tokenUtils.deployerAccountPrivateKey;
 
-var debugLogging = true; //tokenUtils.debugLogging;
+var debugLogging = tokenUtils.debugLogging;
 
 const should = require('chai')
     .use(require('chai-as-promised'))
