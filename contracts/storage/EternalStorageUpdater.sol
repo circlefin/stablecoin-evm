@@ -29,18 +29,13 @@ contract EternalStorageUpdater {
         return contractStorage.getBalance(_account);
     }
 
-    function getBalances(address _firstAccount, address _secondAccount) internal view returns (uint256, uint256) {
-        return contractStorage.getBalances(_firstAccount, _secondAccount);
-    }
-
     function setBalance(address _account, uint256 _amount) internal {
         contractStorage.setBalance(_account, _amount);
     }
 
-    function setBalances(address _firstAccount, uint256 _firstAmount,
-        address _secondAccount, uint256 _secondAmount) internal {
-        contractStorage.setBalances(_firstAccount, _firstAmount, _secondAccount, _secondAmount);
-    }
+    function moveBalanceAmount(address _originAccount, address _destinationAccount, uint256 _amount) internal {
+        contractStorage.moveBalanceAmount(_originAccount, _destinationAccount, _amount);
+    }   
 
     function getTotalSupply() internal view returns (uint256) {
         return contractStorage.getTotalSupply();

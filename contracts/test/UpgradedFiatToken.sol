@@ -158,14 +158,12 @@ contract UpgradedFiatToken is FiatToken, UpgradedContract {
         require(_to != address(0));
 
         uint256 balance;
-        uint256 toBalance;
-
-        (balance, toBalance) = getBalances(_from, _to);
+        
+        balance = getBalance(_from);
 
         require(_value <= balance);
 
-        // SafeMath.sub will throw if there is not enough balance.
-        setBalances(_from, balance.sub(_value), _to, toBalance.add(_value));
+        moveBalanceAmount(_from, _to, _value);
         emit Transfer(_from, _to, _value);
     }
 
