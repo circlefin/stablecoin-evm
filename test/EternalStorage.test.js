@@ -105,6 +105,30 @@ contract('Eternal Storage Tests', function (accounts) {
         (expectedAmount2).should.be.bignumber.equal(actualAmount2);
     });
 
+    it('moveBalanceAmount', async function () {
+        var expectedAmountDestination = 867534278;
+        var expectedAmountOrigin = 0;
+
+        await storage.setBalance(arbitraryAccount, expectedAmountDestination, { from: storageOwner });
+        await storage.moveBalanceAmount(arbitraryAccount, pauserAccount, expectedAmountDestination, { from: storageOwner });
+
+        var actualAmountOrigin = await storage.getBalance(arbitraryAccount);
+        var actualAmountDestination = await storage.getBalance(pauserAccount);
+        (expectedAmountOrigin).should.be.bignumber.equal(actualAmountOrigin);
+        (expectedAmountDestination).should.be.bignumber.equal(actualAmountDestination);
+    });
+
+
+    it('moveBalanceAmount to self', async function () {
+        var expectedAmount = 867534278;
+        var moveAmount = 1000;
+        await storage.setBalance(arbitraryAccount, expectedAmount, { from: storageOwner });
+        await storage.moveBalanceAmount(arbitraryAccount, arbitraryAccount, moveAmount, { from: storageOwner });
+
+        var actualAmount = await storage.getBalance(arbitraryAccount);
+        (expectedAmount).should.be.bignumber.equal(actualAmount);
+    });
+
     it('setTotalSupply', async function () {
         var expectedAmount = 7587684752969;
         await storage.setTotalSupply(expectedAmount, { from: storageOwner });
@@ -232,6 +256,10 @@ contract('Eternal Storage Tests', function (accounts) {
 
     it('setBalances called by Mallory', async function () {
         await expectRevert(storage.setBalances(arbitraryAccount, 342, minterAccount, 75483, { from: arbitraryAccount }));
+    });
+
+    it('moveBalanceAmount called by Mallory', async function () {
+        await expectRevert(storage.moveBalanceAmount(arbitraryAccount, arbitraryAccount, 75483, { from: arbitraryAccount }));
     });
 
     it('setTotalSupply called by Mallory', async function () {
