@@ -1,9 +1,11 @@
 pragma solidity ^0.4.23;
 
 import './../thirdparty/openzeppelin/Ownable.sol';
+import './../thirdparty/openzeppelin/SafeMath.sol';
 
 contract EternalStorage is Ownable {
-
+    using SafeMath for uint256;
+    
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) private allowed;
     uint256 private totalSupply = 0;
@@ -63,6 +65,11 @@ contract EternalStorage is Ownable {
         address _secondAccount, uint256 _secondAmount) onlyOwner external {
         balances[_firstAccount] = _firstAmount;
         balances[_secondAccount] = _secondAmount;
+    }
+
+    function moveBalanceAmount(address _originAccount, address _destinationAccount, uint256 _amount) onlyOwner external {
+        balances[_originAccount] = balances[_originAccount].sub(_amount);
+        balances[_destinationAccount] = balances[_destinationAccount].add(_amount);
     }
 
     function setTotalSupply(uint256 _totalSupply) onlyOwner external {
