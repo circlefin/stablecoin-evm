@@ -389,9 +389,11 @@ async function run_tests(newToken) {
     await checkVariables([newToken], [[]]);
   });
 
+  //BEGIN MISC. TESTS
+
   // No payable function
 
-  it('no payable function', async function () {
+  it('ms001 no payable function', async function () {
     var success = false;
     try {
       await web3.eth.sendTransaction({ from: arbitraryAccount, to: token.address, value: 1 });
@@ -400,6 +402,51 @@ async function run_tests(newToken) {
     }
     assert.equal(true, success);
   });
+
+  // "Self-tests"
+
+  it('ms005 should mint to self with correct final balance', async function () {
+    var mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.mint(minterAccount, mintAmount, { from: minterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
+      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms006 should approve correct allowance for self', async function () {
+    var mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.approve(arbitraryAccount, amount, { from: arbitraryAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'allowance.arbitraryAccount.arbitraryAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+    await checkVariables([token], [customVars]);
+  });
+
 }
 
 module.exports = {
