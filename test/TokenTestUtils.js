@@ -102,7 +102,8 @@ function buildExpectedState(token, customVars) {
                 'pauserAccount': bigZero,
                 'blacklisterAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
-                'upgraderAccount': bigZero
+                'upgraderAccount': bigZero,
+                'arbitraryAccount': bigZero
             },
             'masterMinterAccount': {
                 'arbitraryAccount': bigZero,
@@ -110,7 +111,8 @@ function buildExpectedState(token, customVars) {
                 'pauserAccount': bigZero,
                 'blacklisterAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
-                'upgraderAccount': bigZero
+                'upgraderAccount': bigZero,
+                'masterMinterAccount': bigZero
             },
             'minterAccount': {
                 'arbitraryAccount': bigZero,
@@ -118,7 +120,8 @@ function buildExpectedState(token, customVars) {
                 'pauserAccount': bigZero,
                 'blacklisterAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
-                'upgraderAccount': bigZero
+                'upgraderAccount': bigZero,
+                'minterAccount': bigZero
             },
             'pauserAccount': {
                 'arbitraryAccount': bigZero,
@@ -126,7 +129,8 @@ function buildExpectedState(token, customVars) {
                 'minterAccount': bigZero,
                 'blacklisterAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
-                'upgraderAccount': bigZero
+                'upgraderAccount': bigZero,
+                'pauserAccount': bigZero
             },
             'blacklisterAccount': {
                 'arbitraryAccount': bigZero,
@@ -134,7 +138,8 @@ function buildExpectedState(token, customVars) {
                 'minterAccount': bigZero,
                 'pauserAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
-                'upgraderAccount': bigZero
+                'upgraderAccount': bigZero,
+                'blacklisterAccount': bigZero
             },
             'tokenOwnerAccount': {
                 'arbitraryAccount': bigZero,
@@ -142,7 +147,8 @@ function buildExpectedState(token, customVars) {
                 'minterAccount': bigZero,
                 'pauserAccount': bigZero,
                 'blacklisterAccount': bigZero,
-                'upgraderAccount': bigZero
+                'upgraderAccount': bigZero,
+                'tokenOwnerAccount': bigZero
             },
             'upgraderAccount': {
                 'arbitraryAccount': bigZero,
@@ -151,6 +157,7 @@ function buildExpectedState(token, customVars) {
                 'pauserAccount': bigZero,
                 'blacklisterAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
+                'upgraderAccount': bigZero
             }
         },
         'totalSupply': bigZero,
@@ -218,9 +225,19 @@ async function checkVariables(_tokens, _customVars) {
             console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
         }
 
-        let actualState = await getActualState(token);
-        assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
+    let actualState = await getActualState(token);
+    assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
+
+    // Check that sum of individual balances equals totalSupply
+    var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+    var balanceSum = bigZero;
+    var x;
+    for (x = 0; x < accounts.length; x++) {
+      balanceSum = balanceSum.plus(new BigNumber(await token.balanceOf(accounts[x])));
     }
+    var totalSupply = new BigNumber(await token.totalSupply())
+    assert(balanceSum.isEqualTo(totalSupply));
+  }
 }
 
 // build up actualState object to compare to expectedState object
@@ -257,42 +274,49 @@ async function getActualState(token) {
         await token.allowance(arbitraryAccount, blacklisterAccount),
         await token.allowance(arbitraryAccount, tokenOwnerAccount),
         await token.allowance(arbitraryAccount, upgraderAccount),
+        await token.allowance(arbitraryAccount, arbitraryAccount),
         await token.allowance(masterMinterAccount, arbitraryAccount),
         await token.allowance(masterMinterAccount, minterAccount),
         await token.allowance(masterMinterAccount, pauserAccount),
         await token.allowance(masterMinterAccount, blacklisterAccount),
         await token.allowance(masterMinterAccount, tokenOwnerAccount),
         await token.allowance(masterMinterAccount, upgraderAccount),
+        await token.allowance(masterMinterAccount, masterMinterAccount),
         await token.allowance(minterAccount, arbitraryAccount),
         await token.allowance(minterAccount, masterMinterAccount),
         await token.allowance(minterAccount, pauserAccount),
         await token.allowance(minterAccount, blacklisterAccount),
         await token.allowance(minterAccount, tokenOwnerAccount),
         await token.allowance(minterAccount, upgraderAccount),
+        await token.allowance(minterAccount, minterAccount),
         await token.allowance(pauserAccount, arbitraryAccount),
         await token.allowance(pauserAccount, masterMinterAccount),
         await token.allowance(pauserAccount, minterAccount),
         await token.allowance(pauserAccount, blacklisterAccount),
         await token.allowance(pauserAccount, tokenOwnerAccount),
         await token.allowance(pauserAccount, upgraderAccount),
+        await token.allowance(pauserAccount, pauserAccount),
         await token.allowance(blacklisterAccount, arbitraryAccount),
         await token.allowance(blacklisterAccount, masterMinterAccount),
         await token.allowance(blacklisterAccount, minterAccount),
         await token.allowance(blacklisterAccount, pauserAccount),
         await token.allowance(blacklisterAccount, tokenOwnerAccount),
         await token.allowance(blacklisterAccount, upgraderAccount),
+        await token.allowance(blacklisterAccount, blacklisterAccount),
         await token.allowance(tokenOwnerAccount, arbitraryAccount),
         await token.allowance(tokenOwnerAccount, masterMinterAccount),
         await token.allowance(tokenOwnerAccount, minterAccount),
         await token.allowance(tokenOwnerAccount, pauserAccount),
         await token.allowance(tokenOwnerAccount, blacklisterAccount),
         await token.allowance(tokenOwnerAccount, upgraderAccount),
+        await token.allowance(tokenOwnerAccount, tokenOwnerAccount),
         await token.allowance(upgraderAccount, arbitraryAccount),
         await token.allowance(upgraderAccount, masterMinterAccount),
         await token.allowance(upgraderAccount, minterAccount),
         await token.allowance(upgraderAccount, pauserAccount),
         await token.allowance(upgraderAccount, blacklisterAccount),
         await token.allowance(upgraderAccount, tokenOwnerAccount),
+        await token.allowance(upgraderAccount, upgraderAccount),
         await token.totalSupply(),
         await token.isAccountBlacklisted(arbitraryAccount),
         await token.isAccountBlacklisted(masterMinterAccount),
@@ -343,42 +367,49 @@ async function getActualState(token) {
         allowanceAtoB,
         allowanceAtoRAC,
         allowanceAtoU,
+        allowanceAtoA,
         allowanceMMtoA,
         allowanceMMtoM,
         allowanceMMtoP,
         allowanceMMtoB,
         allowanceMMtoRAC,
         allowanceMMtoU,
+        allowanceMMtoMM,
         allowanceMtoA,
         allowanceMtoMM,
         allowanceMtoP,
         allowanceMtoB,
         allowanceMtoRAC,
         allowanceMtoU,
+        allowanceMtoM,
         allowancePtoA,
         allowancePtoMM,
         allowancePtoM,
         allowancePtoB,
         allowancePtoRAC,
         allowancePtoU,
+        allowancePtoP,
         allowanceBtoA,
         allowanceBtoMM,
         allowanceBtoM,
         allowanceBtoP,
         allowanceBtoRAC,
         allowanceBtoU,
+        allowanceBtoB,
         allowanceRACtoA,
         allowanceRACtoMM,
         allowanceRACtoM,
         allowanceRACtoP,
         allowanceRACtoB,
         allowanceRACtoU,
+        allowanceRACtoRAC,
         allowanceUtoA,
         allowanceUtoMM,
         allowanceUtoM,
         allowanceUtoP,
         allowanceUtoB,
         allowanceUtoRAC,
+        allowanceUtoU,
         totalSupply,
         isAccountBlacklistedA,
         isAccountBlacklistedMM,
@@ -433,7 +464,8 @@ async function getActualState(token) {
                     'pauserAccount': allowanceAtoP,
                     'blacklisterAccount': allowanceAtoB,
                     'tokenOwnerAccount': allowanceAtoRAC,
-                    'upgraderAccount': allowanceAtoU
+                    'upgraderAccount': allowanceAtoU,
+                    'arbitraryAccount': allowanceAtoA,
                 },
                 'masterMinterAccount': {
                     'arbitraryAccount': allowanceMMtoA,
@@ -441,7 +473,8 @@ async function getActualState(token) {
                     'pauserAccount': allowanceMMtoP,
                     'blacklisterAccount': allowanceMMtoB,
                     'tokenOwnerAccount': allowanceMMtoRAC,
-                    'upgraderAccount': allowanceMMtoU
+                    'upgraderAccount': allowanceMMtoU,
+                    'masterMinterAccount': allowanceMMtoMM,
                 },
                 'minterAccount': {
                     'arbitraryAccount': allowanceMtoA,
@@ -449,7 +482,8 @@ async function getActualState(token) {
                     'pauserAccount': allowanceMtoP,
                     'blacklisterAccount': allowanceMtoB,
                     'tokenOwnerAccount': allowanceMtoRAC,
-                    'upgraderAccount': allowanceMtoU
+                    'upgraderAccount': allowanceMtoU,
+                    'minterAccount': allowanceMtoM,
                 },
                 'pauserAccount': {
                     'arbitraryAccount': allowancePtoA,
@@ -457,7 +491,8 @@ async function getActualState(token) {
                     'minterAccount': allowancePtoM,
                     'blacklisterAccount': allowancePtoB,
                     'tokenOwnerAccount': allowancePtoRAC,
-                    'upgraderAccount': allowancePtoU
+                    'upgraderAccount': allowancePtoU,
+                    'pauserAccount': allowancePtoP,
                 },
                 'blacklisterAccount': {
                     'arbitraryAccount': allowanceBtoA,
@@ -465,7 +500,8 @@ async function getActualState(token) {
                     'minterAccount': allowanceBtoM,
                     'pauserAccount': allowanceBtoP,
                     'tokenOwnerAccount': allowanceBtoRAC,
-                    'upgraderAccount': allowanceBtoU
+                    'upgraderAccount': allowanceBtoU,
+                    'blacklisterAccount': allowanceBtoB,
                 },
                 'tokenOwnerAccount': {
                     'arbitraryAccount': allowanceRACtoA,
@@ -473,7 +509,8 @@ async function getActualState(token) {
                     'minterAccount': allowanceRACtoM,
                     'pauserAccount': allowanceRACtoP,
                     'blacklisterAccount': allowanceRACtoB,
-                    'upgraderAccount': allowanceRACtoU
+                    'upgraderAccount': allowanceRACtoU,
+                    'tokenOwnerAccount': allowanceRACtoRAC,
                 },
                 'upgraderAccount': {
                     'arbitraryAccount': allowanceUtoA,
@@ -481,7 +518,8 @@ async function getActualState(token) {
                     'minterAccount': allowanceUtoM,
                     'pauserAccount': allowanceUtoP,
                     'blacklisterAccount': allowanceUtoB,
-                    'tokenOwnerAccount': allowanceUtoRAC
+                    'tokenOwnerAccount': allowanceUtoRAC,
+                    'upgraderAccount': allowanceUtoU,
                 }
             },
             'totalSupply': totalSupply,

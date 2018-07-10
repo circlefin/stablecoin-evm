@@ -5,6 +5,7 @@ var tokenUtils = require('./TokenTestUtils');
 var positive_tests = require('./PositiveTests');
 var extended_positive_tests = require('./ExtendedPositiveTests');
 var negative_tests = require('./NegativeTests');
+var forwarding_tests = require('./ForwardingTests');
 
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -77,12 +78,41 @@ async function newUpgradedToken() {
   token.default_storageOwner = token.address;
   token.default_storageAddress = dataContractAddress;
 
+  oldToken.default_priorContractAddress = "undefined";
+  oldToken.default_storageOwner = oldToken.address;
+  oldToken.default_storageAddress = dataContractAddress;
+  token.priorToken = oldToken;
+
   return token;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // Run specific tests combos by commenting/uncommenting the contract blocks below.
+
+contract('FiatToken_Forwarding_Original', async function () {
+  await forwarding_tests.run_tests_common(newOriginalToken);
+});
+
+contract('FiatToken_Forwarding_Upgraded', async function () {
+  await forwarding_tests.run_tests_common(newUpgradedToken);
+});
+
+contract('FiatToken_Forwarding_Original_Disabled', async function () {
+  await forwarding_tests.run_tests_common_upgraded_disabled(newOriginalToken);
+});
+
+contract('FiatToken_Forwarding_Upgraded_Disabled', async function () {
+  await forwarding_tests.run_tests_common_upgraded_disabled(newUpgradedToken);
+});
+
+contract('FiatToken_Forwarding_UpgradedOnly', async function () {
+  await forwarding_tests.run_tests_upgraded_only(newUpgradedToken);
+});
+
+contract('FiatToken_Forwarding_UpgradedOnly_Disabled', async function () {
+  await forwarding_tests.run_tests_upgraded_only_upgraded_disabled(newUpgradedToken);
+});
 
 contract('FiatToken_PositiveTests_Original', async function () {
   await positive_tests.run_tests(newOriginalToken);
