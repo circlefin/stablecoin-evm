@@ -28,8 +28,6 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
-  /////////////////////////////////////////////////////////////////////////////
-
   beforeEach('Make fresh token contract', async function () {
     token = await newToken();
   });
@@ -38,7 +36,6 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
-  /////////////////////////////////////////////////////////////////////////////
 
   // Pause and Unpause
 
@@ -388,7 +385,7 @@ async function run_tests(newToken) {
 
     await checkVariables([newToken], [[]]);
   });
-  
+
 }
 
 module.exports = {

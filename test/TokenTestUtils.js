@@ -59,6 +59,407 @@ function checkTransferEvents(transfer, from, to, value) {
     assert.equal(transfer.logs[0].args.value, value);
 }
 
+async function checkVariables_storage(storage, customVars) {
+  var expectedState = {
+    'storageOwner': deployerAccount,
+    'totalSupply': bigZero,
+    'balances': {
+        'arbitraryAccount': bigZero,
+        'masterMinterAccount': bigZero,
+        'minterAccount': bigZero,
+        'pauserAccount': bigZero,
+        'blacklisterAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
+        'upgraderAccount': bigZero
+    },
+    'allowance': {
+        'arbitraryAccount': {
+            'masterMinterAccount': bigZero,
+            'minterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero,
+            'arbitraryAccount': bigZero
+        },
+        'masterMinterAccount': {
+            'arbitraryAccount': bigZero,
+            'minterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero,
+            'masterMinterAccount': bigZero
+        },
+        'minterAccount': {
+            'arbitraryAccount': bigZero,
+            'masterMinterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero,
+            'minterAccount': bigZero
+        },
+        'pauserAccount': {
+            'arbitraryAccount': bigZero,
+            'masterMinterAccount': bigZero,
+            'minterAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero,
+            'pauserAccount': bigZero
+        },
+        'blacklisterAccount': {
+            'arbitraryAccount': bigZero,
+            'masterMinterAccount': bigZero,
+            'minterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero,
+            'blacklisterAccount': bigZero
+        },
+        'tokenOwnerAccount': {
+            'arbitraryAccount': bigZero,
+            'masterMinterAccount': bigZero,
+            'minterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'upgraderAccount': bigZero,
+            'tokenOwnerAccount': bigZero
+        },
+        'upgraderAccount': {
+            'arbitraryAccount': bigZero,
+            'masterMinterAccount': bigZero,
+            'minterAccount': bigZero,
+            'pauserAccount': bigZero,
+            'blacklisterAccount': bigZero,
+            'tokenOwnerAccount': bigZero,
+            'upgraderAccount': bigZero
+        }
+    },
+    'isAccountBlacklisted': {
+        'arbitraryAccount': false,
+        'masterMinterAccount': false,
+        'minterAccount': false,
+        'pauserAccount': false,
+        'blacklisterAccount': false,
+        'tokenOwnerAccount': false,
+        'upgraderAccount': false
+    },
+    'isAccountMinter': {
+        'arbitraryAccount': false,
+        'masterMinterAccount': false,
+        'minterAccount': false,
+        'pauserAccount': false,
+        'blacklisterAccount': false,
+        'tokenOwnerAccount': false,
+        'upgraderAccount': false
+    },
+    'minterAllowance': {
+        'arbitraryAccount': bigZero,
+        'masterMinterAccount': bigZero,
+        'minterAccount': bigZero,
+        'pauserAccount': bigZero,
+        'blacklisterAccount': bigZero,
+        'tokenOwnerAccount': bigZero,
+        'upgraderAccount': bigZero
+    },
+  }
+
+  // for each item in customVars, set the item in expectedState
+  var i;
+  for (i = 0; i < customVars.length; ++i) {
+      if (_.has(expectedState, customVars[i].variable)) {
+          if (expectedState[customVars[i].variable] == customVars[i].expectedValue) {
+              throw new Error("variable " + customVars[i].variable + " to test has same default state as expected state");
+          } else {
+              _.set(expectedState, customVars[i].variable, customVars[i].expectedValue);
+          }
+      } else {
+          throw new Error("variable " + customVars[i].variable + " not found in expectedState");
+      }
+  }
+
+  if (debugLogging) {
+      console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
+  }
+
+  let actualState = await getActualState_storage(storage);
+  assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
+}
+
+
+async function getActualState_storage(_storage) {
+  return Q.all([
+      await storage.owner.call(),
+      await storage.getTotalSupply(),
+      await storage.getBalance(arbitraryAccount),
+      await storage.getBalance(masterMinterAccount),
+      await storage.getBalance(minterAccount),
+      await storage.getBalance(pauserAccount),
+      await storage.getBalance(blacklisterAccount),
+      await storage.getBalance(tokenOwnerAccount),
+      await storage.getBalance(upgraderAccount),
+      await storage.getAllowed(arbitraryAccount, masterMinterAccount),
+      await storage.getAllowed(arbitraryAccount, minterAccount),
+      await storage.getAllowed(arbitraryAccount, pauserAccount),
+      await storage.getAllowed(arbitraryAccount, blacklisterAccount),
+      await storage.getAllowed(arbitraryAccount, tokenOwnerAccount),
+      await storage.getAllowed(arbitraryAccount, upgraderAccount),
+      await storage.getAllowed(arbitraryAccount, arbitraryAccount),
+      await storage.getAllowed(masterMinterAccount, arbitraryAccount),
+      await storage.getAllowed(masterMinterAccount, minterAccount),
+      await storage.getAllowed(masterMinterAccount, pauserAccount),
+      await storage.getAllowed(masterMinterAccount, blacklisterAccount),
+      await storage.getAllowed(masterMinterAccount, tokenOwnerAccount),
+      await storage.getAllowed(masterMinterAccount, upgraderAccount),
+      await storage.getAllowed(masterMinterAccount, masterMinterAccount),
+      await storage.getAllowed(minterAccount, arbitraryAccount),
+      await storage.getAllowed(minterAccount, masterMinterAccount),
+      await storage.getAllowed(minterAccount, pauserAccount),
+      await storage.getAllowed(minterAccount, blacklisterAccount),
+      await storage.getAllowed(minterAccount, tokenOwnerAccount),
+      await storage.getAllowed(minterAccount, upgraderAccount),
+      await storage.getAllowed(minterAccount, minterAccount),
+      await storage.getAllowed(pauserAccount, arbitraryAccount),
+      await storage.getAllowed(pauserAccount, masterMinterAccount),
+      await storage.getAllowed(pauserAccount, minterAccount),
+      await storage.getAllowed(pauserAccount, blacklisterAccount),
+      await storage.getAllowed(pauserAccount, tokenOwnerAccount),
+      await storage.getAllowed(pauserAccount, upgraderAccount),
+      await storage.getAllowed(pauserAccount, pauserAccount),
+      await storage.getAllowed(blacklisterAccount, arbitraryAccount),
+      await storage.getAllowed(blacklisterAccount, masterMinterAccount),
+      await storage.getAllowed(blacklisterAccount, minterAccount),
+      await storage.getAllowed(blacklisterAccount, pauserAccount),
+      await storage.getAllowed(blacklisterAccount, tokenOwnerAccount),
+      await storage.getAllowed(blacklisterAccount, upgraderAccount),
+      await storage.getAllowed(blacklisterAccount, blacklisterAccount),
+      await storage.getAllowed(tokenOwnerAccount, arbitraryAccount),
+      await storage.getAllowed(tokenOwnerAccount, masterMinterAccount),
+      await storage.getAllowed(tokenOwnerAccount, minterAccount),
+      await storage.getAllowed(tokenOwnerAccount, pauserAccount),
+      await storage.getAllowed(tokenOwnerAccount, blacklisterAccount),
+      await storage.getAllowed(tokenOwnerAccount, upgraderAccount),
+      await storage.getAllowed(tokenOwnerAccount, tokenOwnerAccount),
+      await storage.getAllowed(upgraderAccount, arbitraryAccount),
+      await storage.getAllowed(upgraderAccount, masterMinterAccount),
+      await storage.getAllowed(upgraderAccount, minterAccount),
+      await storage.getAllowed(upgraderAccount, pauserAccount),
+      await storage.getAllowed(upgraderAccount, blacklisterAccount),
+      await storage.getAllowed(upgraderAccount, tokenOwnerAccount),
+      await storage.getAllowed(upgraderAccount, upgraderAccount),
+      await storage.isBlacklisted(arbitraryAccount),
+      await storage.isBlacklisted(masterMinterAccount),
+      await storage.isBlacklisted(minterAccount),
+      await storage.isBlacklisted(pauserAccount),
+      await storage.isBlacklisted(blacklisterAccount),
+      await storage.isBlacklisted(tokenOwnerAccount),
+      await storage.isBlacklisted(upgraderAccount),
+      await storage.isMinter(arbitraryAccount),
+      await storage.isMinter(masterMinterAccount),
+      await storage.isMinter(minterAccount),
+      await storage.isMinter(pauserAccount),
+      await storage.isMinter(blacklisterAccount),
+      await storage.isMinter(tokenOwnerAccount),
+      await storage.isMinter(upgraderAccount),
+      await storage.getMinterAllowed(arbitraryAccount),
+      await storage.getMinterAllowed(masterMinterAccount),
+      await storage.getMinterAllowed(minterAccount),
+      await storage.getMinterAllowed(pauserAccount),
+      await storage.getMinterAllowed(blacklisterAccount),
+      await storage.getMinterAllowed(tokenOwnerAccount),
+      await storage.getMinterAllowed(upgraderAccount),
+  ]).spread(function (
+      storageOwner,
+      totalSupply,
+      balancesA,
+      balancesMM,
+      balancesM,
+      balancesP,
+      balancesB,
+      balancesRAC,
+      balancesU,
+      allowanceAtoMM,
+      allowanceAtoM,
+      allowanceAtoP,
+      allowanceAtoB,
+      allowanceAtoRAC,
+      allowanceAtoU,
+      allowanceAtoA,
+      allowanceMMtoA,
+      allowanceMMtoM,
+      allowanceMMtoP,
+      allowanceMMtoB,
+      allowanceMMtoRAC,
+      allowanceMMtoU,
+      allowanceMMtoMM,
+      allowanceMtoA,
+      allowanceMtoMM,
+      allowanceMtoP,
+      allowanceMtoB,
+      allowanceMtoRAC,
+      allowanceMtoU,
+      allowanceMtoM,
+      allowancePtoA,
+      allowancePtoMM,
+      allowancePtoM,
+      allowancePtoB,
+      allowancePtoRAC,
+      allowancePtoU,
+      allowancePtoP,
+      allowanceBtoA,
+      allowanceBtoMM,
+      allowanceBtoM,
+      allowanceBtoP,
+      allowanceBtoRAC,
+      allowanceBtoU,
+      allowanceBtoB,
+      allowanceRACtoA,
+      allowanceRACtoMM,
+      allowanceRACtoM,
+      allowanceRACtoP,
+      allowanceRACtoB,
+      allowanceRACtoU,
+      allowanceRACtoRAC,
+      allowanceUtoA,
+      allowanceUtoMM,
+      allowanceUtoM,
+      allowanceUtoP,
+      allowanceUtoB,
+      allowanceUtoRAC,
+      allowanceUtoU,
+      isAccountBlacklistedA,
+      isAccountBlacklistedMM,
+      isAccountBlacklistedM,
+      isAccountBlacklistedP,
+      isAccountBlacklistedB,
+      isAccountBlacklistedRAC,
+      isAccountBlacklistedU,
+      isAccountMinterA,
+      isAccountMinterMM,
+      isAccountMinterM,
+      isAccountMinterP,
+      isAccountMinterB,
+      isAccountMinterRAC,
+      isAccountMinterU,
+      minterAllowanceA,
+      minterAllowanceMM,
+      minterAllowanceM,
+      minterAllowanceP,
+      minterAllowanceB,
+      minterAllowanceRAC,
+      minterAllowanceU,
+  ) {
+      var actualState = {
+          'storageOwner': storageOwner,
+          'totalSupply': totalSupply,
+          'balances': {
+              'arbitraryAccount': balancesA,
+              'masterMinterAccount': balancesMM,
+              'minterAccount': balancesM,
+              'pauserAccount': balancesP,
+              'blacklisterAccount': balancesB,
+              'tokenOwnerAccount': balancesRAC,
+              'upgraderAccount': balancesU
+          },
+          'allowance': {
+              'arbitraryAccount': {
+                  'masterMinterAccount': allowanceAtoMM,
+                  'minterAccount': allowanceAtoM,
+                  'pauserAccount': allowanceAtoP,
+                  'blacklisterAccount': allowanceAtoB,
+                  'tokenOwnerAccount': allowanceAtoRAC,
+                  'upgraderAccount': allowanceAtoU,
+                  'arbitraryAccount': allowanceAtoA,
+              },
+              'masterMinterAccount': {
+                  'arbitraryAccount': allowanceMMtoA,
+                  'minterAccount': allowanceMMtoM,
+                  'pauserAccount': allowanceMMtoP,
+                  'blacklisterAccount': allowanceMMtoB,
+                  'tokenOwnerAccount': allowanceMMtoRAC,
+                  'upgraderAccount': allowanceMMtoU,
+                  'masterMinterAccount': allowanceMMtoMM,
+              },
+              'minterAccount': {
+                  'arbitraryAccount': allowanceMtoA,
+                  'masterMinterAccount': allowanceMtoMM,
+                  'pauserAccount': allowanceMtoP,
+                  'blacklisterAccount': allowanceMtoB,
+                  'tokenOwnerAccount': allowanceMtoRAC,
+                  'upgraderAccount': allowanceMtoU,
+                  'minterAccount': allowanceMtoM,
+              },
+              'pauserAccount': {
+                  'arbitraryAccount': allowancePtoA,
+                  'masterMinterAccount': allowancePtoMM,
+                  'minterAccount': allowancePtoM,
+                  'blacklisterAccount': allowancePtoB,
+                  'tokenOwnerAccount': allowancePtoRAC,
+                  'upgraderAccount': allowancePtoU,
+                  'pauserAccount': allowancePtoP,
+              },
+              'blacklisterAccount': {
+                  'arbitraryAccount': allowanceBtoA,
+                  'masterMinterAccount': allowanceBtoMM,
+                  'minterAccount': allowanceBtoM,
+                  'pauserAccount': allowanceBtoP,
+                  'tokenOwnerAccount': allowanceBtoRAC,
+                  'upgraderAccount': allowanceBtoU,
+                  'blacklisterAccount': allowanceBtoB,
+              },
+              'tokenOwnerAccount': {
+                  'arbitraryAccount': allowanceRACtoA,
+                  'masterMinterAccount': allowanceRACtoMM,
+                  'minterAccount': allowanceRACtoM,
+                  'pauserAccount': allowanceRACtoP,
+                  'blacklisterAccount': allowanceRACtoB,
+                  'upgraderAccount': allowanceRACtoU,
+                  'tokenOwnerAccount': allowanceRACtoRAC,
+              },
+              'upgraderAccount': {
+                  'arbitraryAccount': allowanceUtoA,
+                  'masterMinterAccount': allowanceUtoMM,
+                  'minterAccount': allowanceUtoM,
+                  'pauserAccount': allowanceUtoP,
+                  'blacklisterAccount': allowanceUtoB,
+                  'tokenOwnerAccount': allowanceUtoRAC,
+                  'upgraderAccount': allowanceUtoU,
+              }
+          },
+          'isAccountBlacklisted': {
+              'arbitraryAccount': isAccountBlacklistedA,
+              'masterMinterAccount': isAccountBlacklistedMM,
+              'minterAccount': isAccountBlacklistedM,
+              'pauserAccount': isAccountBlacklistedP,
+              'blacklisterAccount': isAccountBlacklistedB,
+              'tokenOwnerAccount': isAccountBlacklistedRAC,
+              'upgraderAccount': isAccountBlacklistedU
+          },
+          'isAccountMinter': {
+              'arbitraryAccount': isAccountMinterA,
+              'masterMinterAccount': isAccountMinterMM,
+              'minterAccount': isAccountMinterM,
+              'pauserAccount': isAccountMinterP,
+              'blacklisterAccount': isAccountMinterB,
+              'tokenOwnerAccount': isAccountMinterRAC,
+              'upgraderAccount': isAccountMinterU
+          },
+          'minterAllowance': {
+              'arbitraryAccount': minterAllowanceA,
+              'masterMinterAccount': minterAllowanceMM,
+              'minterAccount': minterAllowanceM,
+              'pauserAccount': minterAllowanceP,
+              'blacklisterAccount': minterAllowanceB,
+              'tokenOwnerAccount': minterAllowanceRAC,
+              'upgraderAccount': minterAllowanceU
+          },
+      };
+      return actualState;
+  })
+}
+
 // For testing variance of specific variables from their default values.
 // customVars is an array of objects of the form,
 // {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
@@ -732,6 +1133,7 @@ module.exports = {
     checkTransferEventsWithFee: checkTransferEventsWithFee,
     checkTransferEvents: checkTransferEvents,
     checkVariables: checkVariables,
+    checkVariables_storage: checkVariables_storage,
     setMinter: setMinter,
     mint: mint,
     mintRaw: mintRaw,

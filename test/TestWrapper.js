@@ -18,6 +18,7 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 
 
 // The following helpers make fresh original/upgraded tokens before each test.
@@ -87,6 +88,14 @@ async function newUpgradedToken() {
   return token;
 }
 
+// The following helper makes a new EternalStorage for testing the storage contract directly.
+
+async function newEternalStorage() {
+  storage = await EternalStorage.new(deployerAccount);
+  storageOwner = deployerAccount;
+  return [storage, storageOwner];
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Run specific tests combos by commenting/uncommenting the contract blocks below.
@@ -145,4 +154,8 @@ contract('FiatToken_MiscTests_Original', async function () {
 
 contract('FiatToken_MiscTests_Upgraded', async function () {
   await misc_tests.run_tests(newUpgradedToken);
+});
+
+contract('EternalStorage_MiscTests', async function () {
+  await misc_tests.run_storage_tests(newEternalStorage);
 });

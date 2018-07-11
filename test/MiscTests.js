@@ -10,6 +10,7 @@ var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
 var checkVariables = tokenUtils.checkVariables;
+var checkVariables_storage = tokenUtils.checkVariables_storage;
 var expectRevert = tokenUtils.expectRevert;
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -29,8 +30,6 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
-  /////////////////////////////////////////////////////////////////////////////
-
   beforeEach('Make fresh token contract', async function () {
     token = await newToken();
   });
@@ -39,7 +38,6 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
-  /////////////////////////////////////////////////////////////////////////////
 
   // No Payable Function
 
@@ -330,9 +328,104 @@ async function run_tests(newToken) {
     await token.burn(burnAmount, { from: minterAccount });
     await checkVariables([token], [customVars]);
   });
+}
+
+async function run_storage_tests(newStorage) {
+
+  beforeEach('Make fresh eternal storage', async function () {
+    params = await newStorage();
+    storage = params[0];
+    storageOwner = params[1];
+  });
+
+  it('should check that storage default variable values are correct', async function() {
+    await checkVariables_storage(storage, []);
+  });
+
+
+  it('ms022 should setAllowed to 0 with unchanged state', async function() {
+    await storage.setAllowed(arbitraryAccount, upgraderAccount, 0, {from: storageOwner});
+    await checkVariables_storage(storage, []);
+  });
+
+  it('ms023 should setAllowed for same address', async function() {
+    await storage.setAllowed(arbitraryAccount, arbitraryAccount, amount, {from: storageOwner});
+    var customVars = [
+      {'variable': 'allowance.arbitraryAccount.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
+    ];
+    await checkVariables_storage(storage, customVars);
+  });
+
+  it('ms024 should setBalance to 0 with unchanged state', async function() {
+    await storage.setBalance(arbitraryAccount, 0, {from: storageOwner});
+    await checkVariables_storage(storage, []);
+  });
+
+  it('ms025 should setBalances for same address', async function() {
+    await storage.setBalances(arbitraryAccount, 30, arbitraryAccount, 40, {from: storageOwner});
+    var customVars = [
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(40)},
+    ];
+    await checkVariables_storage(storage, customVars);
+  });
+
+  it('ms026 should setBalances to 0 firstAmount', async function() {
+    await storage.setBalances(arbitraryAccount, 0, upgraderAccount, 20, {from: storageOwner});
+    var customVars = [
+      {'variable': 'balances.upgraderAccount', 'expectedValue': new BigNumber(20)},
+    ];
+    await checkVariables_storage(storage, customVars);
+  });
+
+  it('ms027 should setBalances to 0 secondAmount', async function() {
+    await storage.setBalances(arbitraryAccount, 20, upgraderAccount, 0, {from: storageOwner});
+    var customVars = [
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(20)},
+    ];
+    await checkVariables_storage(storage, customVars);
+  });
+
+  it('ms028 should setTotalSupply to 0', async function() {
+    await storage.setTotalSupply(0, {from: storageOwner});
+    await checkVariables_storage(storage, []);
+  });
+
+  it('ms029 should setMinterAllowed to 0', async function() {
+    await storage.setMinterAllowed(arbitraryAccount, 0, {from: storageOwner});
+    await checkVariables_storage(storage, []);
+  });
+
+  // it('ms030 should approveViaPriorContract for same address', async function() {
+  //   //TODO
+  // });
+  //
+  // it('ms031 should approveViaPriorContract 0 tokens', async function() {
+  //   //TODO
+  // });
+  //
+  // it('ms032 should transferViaPriorContract for same address', async function() {
+  //   //TODO
+  // });
+  //
+  // it('ms033 should transferViaPriorContract 0 tokens', async function() {
+  //   //TODO
+  // });
+  //
+  // it('ms034 should transferFromViaPriorContract for same address', async function() {
+  //   //TODO
+  // });
+  //
+  // it('ms035 should transferFromViaPriorContract 0 tokens', async function() {
+  //   //TODO
+  // });
+  //
+  // it('ms036 should get allowance for same address', async function() {
+  //   //TODO
+  // });
 
 }
 
 module.exports = {
   run_tests: run_tests,
+  run_storage_tests: run_storage_tests,
 }
