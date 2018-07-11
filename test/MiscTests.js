@@ -41,7 +41,7 @@ async function run_tests(newToken) {
 
   /////////////////////////////////////////////////////////////////////////////
 
-  // No payable function
+  // No Payable Function
 
   it('ms001 no payable function', async function () {
     var success = false;
@@ -53,7 +53,7 @@ async function run_tests(newToken) {
     assert.equal(true, success);
   });
 
-  // "Self-tests"
+  // Same Address
 
   it('ms005 should mint to self with correct final balance', async function () {
     var mintAmount = 50;
@@ -285,6 +285,49 @@ async function run_tests(newToken) {
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount2 - burnAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount1 + mintAmount2 - burnAmount - burnAmount) },
     ];
+    await checkVariables([token], [customVars]);
+  });
+
+  // 0 Input
+
+  it('ms017 should mint 0 tokens with unchanged state', async function () {
+    var mintAmount = 0;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms018 should approve 0 token allowance with unchanged state', async function () {
+    await token.approve(minterAccount, 0, { from: arbitraryAccount });
+    await checkVariables([token], [[]]);
+  });
+
+  it('ms019 should transferFrom 0 tokens with unchanged state', async function () {
+    await token.transferFrom(arbitraryAccount, pauserAccount, 0, { from: upgraderAccount });
+    await checkVariables([token], [[]]);
+  });
+
+  it('ms020 should transfer 0 tokens with unchanged state', async function () {
+    await token.transfer(arbitraryAccount, 0, { from: upgraderAccount });
+    await checkVariables([token], [[]]);
+  });
+
+  it('ms021 should burn 0 tokens with unchanged state', async function () {
+    var burnAmount = 0;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+
+    await token.burn(burnAmount, { from: minterAccount });
     await checkVariables([token], [customVars]);
   });
 
