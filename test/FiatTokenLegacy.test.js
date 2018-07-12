@@ -1,6 +1,4 @@
 var FiatToken = artifacts.require('FiatToken');
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;

@@ -1,8 +1,7 @@
 pragma solidity ^0.4.23;
 
-
-import "./Ownable.sol";
-
+/*TODO: Don't link this to zeppelinOS project - for prototype only*/
+import "./../zeppelinos/ownership/Ownable.sol";
 
 /**
  * @title Pausable
@@ -22,10 +21,11 @@ contract Pausable is Ownable {
   address public pauser;
   bool public paused = false;
 
-
+  /*Todo: //Determine if makes sense to remove
   constructor(address _pauser) public {
     pauser = _pauser;
   }
+  */
 
   /**
    * @dev Modifier to make a function callable only when the contract is not paused.

@@ -2,18 +2,17 @@ pragma solidity ^0.4.23;
 
 import './thirdparty/openzeppelin/ERC20.sol';
 import './thirdparty/openzeppelin/SafeMath.sol';
-import './thirdparty/openzeppelin/Ownable.sol';
 import './thirdparty/openzeppelin/Pausable.sol';
+import './thirdparty/zeppelinos/ownership/Ownable.sol';
+import './thirdparty/zeppelinos/OwnedUpgradeabilityStorage.sol';
 
 import './Blacklistable.sol';
-import './Upgradable.sol';
-import './UpgradedContract.sol';
 
 /**
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
+contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blacklistable {
     using SafeMath for uint256;
 
     string public name;
@@ -28,8 +27,7 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
     event MinterRemoved(address indexed oldMinter);
     event MasterMinterChanged(address indexed newMasterMinter);
 
-    constructor(
-        address _contractStorageAddress,
+    function initialize(
         string _name,
         string _symbol,
         string _currency,
@@ -37,22 +35,16 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
         address _masterMinter,
         address _pauser,
         address _blacklister,
-        address _upgrader,
         address _owner
-    )
-        EternalStorageUpdater(_contractStorageAddress)
-        Pausable(_pauser)
-        Blacklistable(_blacklister)
-        Upgradable(_upgrader)
-        public
-    {
-
+    ) public {
         name = _name;
         symbol = _symbol;
         currency = _currency;
         decimals = _decimals;
         masterMinter = _masterMinter;
-        transferOwnership(_owner);
+        pauser = _pauser;
+        blacklister = _blacklister;
+        setOwner(_owner);
     }
 
     /**
@@ -61,13 +53,6 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
     modifier onlyMinters() {
         require(isMinter(msg.sender) == true);
         _;
-    }
-
-    /**
-     * @dev Function to get address of data contract
-    */
-    function getDataContractAddress() external view returns (address) {
-        return address(contractStorage);
     }
 
     /**
@@ -112,9 +97,6 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
      * @param spender address The account spender
     */
     function allowance(address owner, address spender) public view returns (uint256) {
-        if (isUpgraded()) {
-            return UpgradedContract(upgradedAddress).allowance(owner, spender);
-        }
         return getAllowed(owner, spender);
     }
 
@@ -122,9 +104,6 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
      * @dev Get totalSupply of token
     */
     function totalSupply() public view returns (uint256) {
-        if (isUpgraded()) {
-            return UpgradedContract(upgradedAddress).totalSupply();
-        }
         return getTotalSupply();
     }
 
@@ -133,9 +112,6 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
      * @param account address The account
     */
     function balanceOf(address account) public view returns (uint256) {
-        if (isUpgraded()) {
-            return UpgradedContract(upgradedAddress).balanceOf(account);
-        }
         return getBalance(account);
     }
 
@@ -144,10 +120,6 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
      * @return True if the operation was successful.
     */
     function approve(address _spender, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _spender) public returns (bool) {
-        if (isUpgraded()) {
-            return UpgradedContract(upgradedAddress).approveViaPriorContract(msg.sender, _spender, _value);
-        }
-
         setAllowed(msg.sender, _spender, _value);
         emit Approval(msg.sender, _spender, _value);
         return true;
@@ -162,10 +134,6 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
      * @return bool success
     */
     function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _from) public returns (bool) {
-        if (isUpgraded()) {
-            return UpgradedContract(upgradedAddress).transferFromViaPriorContract(msg.sender, _from, _to, _value);
-        }
-
         require(isBlacklisted(_to) == false);
 
         uint256 allowed;
@@ -185,10 +153,6 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable, Upgradable {
      * @return bool success
     */
     function transfer(address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _to) public returns (bool) {
-        if (isUpgraded()) {
-            return UpgradedContract(upgradedAddress).transferViaPriorContract(msg.sender, _to, _value);
-        }
-
         doTransfer(msg.sender, _to, _value);
         return true;
     }

@@ -1,6 +1,4 @@
 var FiatToken = artifacts.require('FiatToken');
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
