@@ -109,6 +109,12 @@ async function run_tests(newToken) {
     assert.equal(await token.upgradedAddress.call(), token.address);
   });
 
+  it('ms037 should upgrade contract to original address and then fail to upgrade again', async function() {
+    await token.upgrade(token.address, {from: upgraderAccount});
+    await expectRevert(token.upgrade(arbitraryAccount, {from: upgraderAccount}));
+    assert.equal(await token.upgradedAddress.call(), token.address);
+  });
+
   // Multiple Minters
 
   it('ms009 should configure two minters', async function () {
@@ -328,6 +334,260 @@ async function run_tests(newToken) {
     await token.burn(burnAmount, { from: minterAccount });
     await checkVariables([token], [customVars]);
   });
+
+  it('ms036 should get allowance for same address', async function() {
+    await token.approve(arbitraryAccount, amount, {from: arbitraryAccount});
+    var allowance = new BigNumber(await token.allowance(arbitraryAccount, arbitraryAccount));
+    assert(allowance.isEqualTo(new BigNumber(amount)));
+  });
+
+  it('ms030 should approveViaPriorContract for same address', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    await token.approve(minterAccount, amount, {from: minterAccount});
+
+    var tokenOld_result = [
+      {'variable': 'storageOwner', 'expectedValue': newToken.address},
+      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
+      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
+    ]
+    var tokenNew_result = [
+      {'variable': 'priorContractAddress', 'expectedValue': token.address },
+      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
+    ]
+    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
+  });
+
+  it('ms031 should approveViaPriorContract 0 tokens', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    await token.approve(arbitraryAccount, 0, {from: minterAccount});
+
+    var tokenOld_result = [
+      {'variable': 'storageOwner', 'expectedValue': newToken.address},
+      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
+    ]
+    var tokenNew_result = [
+      {'variable': 'priorContractAddress', 'expectedValue': token.address },
+    ]
+    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
+  });
+
+  it('ms032 should transferViaPriorContract for same address', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    await newToken.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    await newToken.mint(arbitraryAccount, amount, {from: minterAccount});
+    await token.transfer(arbitraryAccount, amount, {from: arbitraryAccount});
+
+    var tokenOld_result = [
+      {'variable': 'storageOwner', 'expectedValue': newToken.address},
+      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
+    ]
+    var tokenNew_result = [
+      {'variable': 'priorContractAddress', 'expectedValue': token.address },
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
+    ]
+    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
+  });
+
+  it('ms033 should transferViaPriorContract 0 tokens', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    await token.transfer(upgraderAccount, 0, {from: arbitraryAccount});
+
+    var tokenOld_result = [
+      {'variable': 'storageOwner', 'expectedValue': newToken.address},
+      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
+    ]
+    var tokenNew_result = [
+      {'variable': 'priorContractAddress', 'expectedValue': token.address },
+    ]
+    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
+  });
+
+  it('ms034 should transferFromViaPriorContract for same address', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    await newToken.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    await newToken.mint(arbitraryAccount, amount, {from: minterAccount});
+    await token.approve(minterAccount, amount, {from: arbitraryAccount});
+    await token.transferFrom(arbitraryAccount, arbitraryAccount, amount, {from: minterAccount});
+
+    var tokenOld_result = [
+      {'variable': 'storageOwner', 'expectedValue': newToken.address},
+      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
+    ]
+    var tokenNew_result = [
+      {'variable': 'priorContractAddress', 'expectedValue': token.address },
+      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
+    ]
+    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
+  });
+
+  it('ms035 should transferFromViaPriorContract 0 tokens', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    await token.transferFrom(arbitraryAccount, upgraderAccount, 0, {from: minterAccount});
+
+    var tokenOld_result = [
+      {'variable': 'storageOwner', 'expectedValue': newToken.address},
+      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
+    ]
+    var tokenNew_result = [
+      {'variable': 'priorContractAddress', 'expectedValue': token.address },
+    ]
+    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
+  });
+
+  it('ms038 should transferFromViaPriorContract to self from approved self and have correct final balance', async function() {
+    let dataContractAddress = await token.getDataContractAddress();
+    var newToken = await UpgradedFiatToken.new(
+      dataContractAddress,
+      token.address,
+      name,
+      symbol,
+      currency,
+      decimals,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      upgraderAccount,
+      tokenOwnerAccount
+    );
+    newToken.default_storageOwner = newToken.address;
+    newToken.default_storageAddress = dataContractAddress;
+
+    await token.upgrade(newToken.address, {from: upgraderAccount});
+    await newToken.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    await newToken.mint(arbitraryAccount, amount, {from: minterAccount});
+    await token.approve(arbitraryAccount, amount, {from: arbitraryAccount});
+    await token.transferFrom(arbitraryAccount, arbitraryAccount, amount, {from: arbitraryAccount});
+
+    var tokenOld_result = [
+      {'variable': 'storageOwner', 'expectedValue': newToken.address},
+      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
+    ]
+    var tokenNew_result = [
+      {'variable': 'priorContractAddress', 'expectedValue': token.address },
+      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
+    ]
+    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
+  });
+
 }
 
 async function run_storage_tests(newStorage) {
@@ -394,35 +654,6 @@ async function run_storage_tests(newStorage) {
     await storage.setMinterAllowed(arbitraryAccount, 0, {from: storageOwner});
     await checkVariables_storage(storage, []);
   });
-
-  // it('ms030 should approveViaPriorContract for same address', async function() {
-  //   //TODO
-  // });
-  //
-  // it('ms031 should approveViaPriorContract 0 tokens', async function() {
-  //   //TODO
-  // });
-  //
-  // it('ms032 should transferViaPriorContract for same address', async function() {
-  //   //TODO
-  // });
-  //
-  // it('ms033 should transferViaPriorContract 0 tokens', async function() {
-  //   //TODO
-  // });
-  //
-  // it('ms034 should transferFromViaPriorContract for same address', async function() {
-  //   //TODO
-  // });
-  //
-  // it('ms035 should transferFromViaPriorContract 0 tokens', async function() {
-  //   //TODO
-  // });
-  //
-  // it('ms036 should get allowance for same address', async function() {
-  //   //TODO
-  // });
-
 }
 
 module.exports = {
