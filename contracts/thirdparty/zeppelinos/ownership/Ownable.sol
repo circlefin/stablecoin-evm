@@ -4,7 +4,10 @@ import './OwnableStorage.sol';
 
 /**
  * @title Ownable
- * @dev This contract has the owner address providing basic authorization control
+ * @dev The Ownable contract from https://github.com/zeppelinos/labs/blob/master/upgradeability_ownership/contracts/ownership/Ownable.sol 
+ * branch: master commit: 3887ab77b8adafba4a26ace002f3a684c1a3388b modified to:
+ * 1) Add emit prefix to OwnershipTransferred event (7/13/18)
+ * 2) Replace constructor with constructor syntax (7/13/18)
  */
 contract Ownable is OwnableStorage {
   /**
@@ -17,7 +20,7 @@ contract Ownable is OwnableStorage {
   /**
   * @dev The constructor sets the original owner of the contract to the sender account.
   */
-  function Ownable() public {
+  constructor() public {
     setOwner(msg.sender);
   }
 
@@ -35,7 +38,7 @@ contract Ownable is OwnableStorage {
    */
   function transferOwnership(address newOwner) public onlyOwner {
     require(newOwner != address(0));
-    OwnershipTransferred(owner(), newOwner);
+    emit OwnershipTransferred(owner(), newOwner);
     setOwner(newOwner);
   }
 }
