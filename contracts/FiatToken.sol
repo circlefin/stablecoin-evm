@@ -20,6 +20,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     uint8 public decimals;
     string public currency;
     address public masterMinter;
+    bool internal initialized;
 
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
@@ -37,6 +38,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
         address _blacklister,
         address _owner
     ) public {
+        require(!initialized);
         name = _name;
         symbol = _symbol;
         currency = _currency;
@@ -45,6 +47,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
         pauser = _pauser;
         blacklister = _blacklister;
         setOwner(_owner);
+        initialized = true;
     }
 
     /**
