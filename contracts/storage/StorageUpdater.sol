@@ -17,35 +17,35 @@ contract StorageUpdater is Ownable {
     /**** Get Methods ***********/
 
 
-    function getAllowed(address _from, address _spender)internal view returns (uint256) {
+    function getAllowed(address _from, address _spender) internal view returns (uint256) {
         return allowed[_from][_spender];
     }
 
-    function getBalance(address _account)internal view returns (uint256) {
+    function getBalance(address _account) internal view returns (uint256) {
         return balances[_account];
     }
 
-    function getBalances(address _firstAccount, address _secondAccount)internal view returns (uint256, uint256) {
+    function getBalances(address _firstAccount, address _secondAccount) internal view returns (uint256, uint256) {
         return (balances[_firstAccount], balances[_secondAccount]);
     }
 
-    function getTotalSupply()internal view returns (uint256) {
+    function getTotalSupply() internal view returns (uint256) {
         return totalSupply;
     }
 
-    function isBlacklisted(address _account)internal view returns (bool) {
+    function isBlacklisted(address _account) internal view returns (bool) {
         return blacklisted[_account];
     }
 
-    function isAnyBlacklisted(address _account1, address _account2)internal view returns (bool) {
+    function isAnyBlacklisted(address _account1, address _account2) internal view returns (bool) {
         return blacklisted[_account1] || blacklisted[_account2];
     }
 
-    function getMinterAllowed(address _minter)internal view returns (uint256) {
+    function getMinterAllowed(address _minter) internal view returns (uint256) {
         return minterAllowed[_minter];
     }
 
-    function isMinter(address _account)internal view returns (bool) {
+    function isMinter(address _account) internal view returns (bool) {
         return minters[_account];
     }
 
