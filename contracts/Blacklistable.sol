@@ -14,11 +14,6 @@ contract Blacklistable is StorageUpdater {
     event UnBlacklisted(address indexed _account);
     event BlacklisterChanged(address indexed newBlacklister);
 
-    /* Todo: determine if makes sense to remove
-    constructor(address _blacklister) public {
-        blacklister = _blacklister;
-    }*/
-
     /**
      * @dev Throws if called by any account other than the blacklister
     */
