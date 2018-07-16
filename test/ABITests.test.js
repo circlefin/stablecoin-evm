@@ -77,14 +77,7 @@ async function newOriginalToken() {
 
 contract('FiatToken ABI Hacking tests', function (accounts) {
     beforeEach(async function checkBefore() {
-        token = await newOriginalToken();/*
-        token = await FiatToken.new(
-            "0x0",
-            name,
-            symbol,
-            currency,
-            decimals,
-            masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);*/
+        token = await newOriginalToken();
         let tokenAddress = token.address;
         dataContractAddress = await token.getDataContractAddress();
     });
