@@ -79,7 +79,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
         balances[_to] = balances[_to].add(_amount);
         minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
         emit Mint(msg.sender, _to, _amount);
-        emit Transfer(msg.sender, _to, _amount);
+        emit Transfer(0x0, _to, _amount);
         return true;
     }
 
