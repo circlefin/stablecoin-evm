@@ -1,5 +1,4 @@
 var FiatToken = artifacts.require('FiatToken');
-var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 var tokenUtils = require('./TokenTestUtils');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
@@ -23,7 +22,7 @@ var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
-var encodeCall = tokenUtils.encodeCall;
+var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
 var amount = 100;
 
@@ -33,11 +32,10 @@ async function run_tests(newToken) {
 
   beforeEach('Make fresh token contract', async function () {
     rawToken = await newToken();
-    const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
-    const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
-    await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
-    token = await FiatToken.at(proxy.address);
-    assert.equal(token.address, proxy.address);
+    var tokenConfig = await initializeTokenWithProxy(rawToken);
+    proxy = tokenConfig.proxy;
+    token = tokenConfig.token;
+    assert.equal(proxy.address, token.address);
   });
 
   it('pt016 should check that default variable values are correct', async function () {

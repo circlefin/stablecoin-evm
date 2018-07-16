@@ -11,6 +11,9 @@ var bigHundred = new BigNumber(100);
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 var Q = require('q');
+var FiatToken = artifacts.require('FiatToken');
+var FiatTokenProxy = artifacts.require('FiatTokenProxy');
+
 // TODO: test really big numbers  Does this still have to be done??
 
 var deployerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
@@ -81,6 +84,7 @@ async function checkVariables(_tokens, _customVars) {
         'pauser': pauserAccount,
         'blacklister': blacklisterAccount,
         'tokenOwner': tokenOwnerAccount,
+        'proxiedTokenAddress': token.proxiedTokenAddress,
         'balances': {
             'arbitraryAccount': bigZero,
             'masterMinterAccount': bigZero,
@@ -197,6 +201,7 @@ async function getActualState(token) {
         await token.pauser.call(),
         await token.blacklister.call(),
         await token.owner.call(),
+        await token.implementation.call(),
         await token.balanceOf(arbitraryAccount),
         await token.balanceOf(masterMinterAccount),
         await token.balanceOf(minterAccount),
@@ -262,6 +267,7 @@ async function getActualState(token) {
         pauser,
         blacklister,
         tokenOwner,
+        proxiedTokenAddress,
         balancesA,
         balancesMM,
         balancesM,
@@ -328,6 +334,7 @@ async function getActualState(token) {
             'pauser': pauser,
             'blacklister': blacklister,
             'tokenOwner': tokenOwner,
+            'proxiedTokenAddress': proxiedTokenAddress,
             'balances': {
                 'arbitraryAccount': balancesA,
                 'masterMinterAccount': balancesMM,
@@ -564,6 +571,34 @@ async function redeem(token, account, amount) {
     assert.equal(redeemResult.logs[0].args.amount, amount);
 }
 
+async function initializeTokenWithProxy(rawToken) {
+    const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+    const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+    await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+    proxiedToken = await FiatToken.at(proxy.address);
+    proxiedToken.proxiedTokenAddress = rawToken.address;
+    assert.equal(proxiedToken.address, proxy.address);
+    assert.notEqual(proxiedToken.address, rawToken.address);
+    var tokenConfig = {
+      proxy: proxy,
+      token: proxiedToken
+    };
+    return tokenConfig;
+}
+
+async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
+  if (proxyUpgraderAccount == null) {
+    proxyUpgraderAccount = proxyOwnerAccount;
+  }
+  await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  proxiedToken = await FiatToken.at(proxy.address);
+  assert.equal(proxiedToken.address, proxy.address);
+  return tokenConfig = {
+    proxy: proxy,
+    token: proxiedToken
+  }
+}
+
 async function expectRevert(contractPromise) {
     try {
         await contractPromise;
@@ -618,6 +653,8 @@ module.exports = {
     sampleTransferFrom: sampleTransferFrom,
     approve: approve,
     redeem: redeem,
+    initializeTokenWithProxy: initializeTokenWithProxy,
+    upgradeTo: upgradeTo,
     expectRevert: expectRevert,
     expectJump: expectJump,
     encodeCall: encodeCall,

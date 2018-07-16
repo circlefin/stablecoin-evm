@@ -17,34 +17,25 @@ var arbitraryAccount = tokenUtils.arbitraryAccount;
 
 // The following helpers make fresh original/upgraded tokens before each test.
 
-async function newOriginalToken() {
+async function newToken() {
   var token = await FiatToken.new();
   return token;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // Run specific tests combos by commenting/uncommenting the contract blocks below.
 
 contract('FiatToken_PositiveTests', async function () {
-  await positive_tests.run_tests(newOriginalToken);
+  await positive_tests.run_tests(newToken);
 });
 
-/*
-contract('FiatToken_ExtendedPositiveTests_Original', async function () {
-  await extended_positive_tests.run_tests(newOriginalToken);
+
+contract('FiatToken_ExtendedPositiveTests', async function () {
+  await extended_positive_tests.run_tests(newToken);
 });
 
-contract('FiatToken_ExtendedPositiveTests_Upgraded', async function () {
-  await extended_positive_tests.run_tests(newUpgradedToken);
-});
 
 contract('FiatToken_NegativeTests_Original', async function () {
-  await negative_tests.run_tests(newOriginalToken);
+  await negative_tests.run_tests(newToken);
 });
-
-contract('FiatToken_NegativeTests_Upgraded', async function () {
-  await negative_tests.run_tests(newUpgradedToken);
-});
-*/
