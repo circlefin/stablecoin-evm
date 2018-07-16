@@ -6,6 +6,12 @@ import './OwnedUpgradeabilityStorage.sol';
 /**
  * @title OwnedUpgradeabilityProxy
  * @dev This contract combines an upgradeability proxy with basic authorization control functionalities
+ * Based on https://github.com/zeppelinos/labs/blob/master/upgradeability_ownership/contracts/ownership/Ownable.sol
+ * branch: master commit: 3887ab77b8adafba4a26ace002f3a684c1a3388b
+ * Modifications:
+ * 1) Added emit before ProxyOwnershipTransferred event (7/16/2018)
+ * 2) Replaces this.call.value with address(this).call (7/16/18)
+ * 3) Updates constructor to use "constructor" keyword (7/16/18)
  */
 contract OwnedUpgradeabilityProxy is UpgradeabilityProxy, OwnedUpgradeabilityStorage {
   /**
@@ -18,7 +24,7 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityProxy, OwnedUpgradeabilitySto
   /**
   * @dev the constructor sets the original owner of the contract to the sender account.
   */
-  function OwnedUpgradeabilityProxy() public {
+  constructor() public {
     setUpgradeabilityOwner(msg.sender);
   }
 
@@ -44,7 +50,7 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityProxy, OwnedUpgradeabilitySto
    */
   function transferProxyOwnership(address newOwner) public onlyProxyOwner {
     require(newOwner != address(0));
-    ProxyOwnershipTransferred(proxyOwner(), newOwner);
+    emit ProxyOwnershipTransferred(proxyOwner(), newOwner);
     setUpgradeabilityOwner(newOwner);
   }
 
@@ -67,6 +73,6 @@ contract OwnedUpgradeabilityProxy is UpgradeabilityProxy, OwnedUpgradeabilitySto
    */
   function upgradeToAndCall(string version, address implementation, bytes data) payable public onlyProxyOwner {
     upgradeTo(version, implementation);
-    require(this.call.value(msg.value)(data));
+    require(address(this).call.value(msg.value)(data));
   }
 }

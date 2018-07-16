@@ -6,6 +6,10 @@ import './UpgradeabilityStorage.sol';
 /**
  * @title UpgradeabilityProxy
  * @dev This contract represents a proxy where the implementation address to which it will delegate can be upgraded
+ * Based on https://github.com/zeppelinos/labs/blob/master/upgradeability_ownership/contracts/ownership/Ownable.sol
+ * branch: master commit: 3887ab77b8adafba4a26ace002f3a684c1a3388b
+ * Modifications:
+ * 1) Added emit before Upgraded event (7/16/2018)
  */
 contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
   /**
@@ -24,6 +28,6 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
     require(_implementation != implementation);
     _version = version;
     _implementation = implementation;
-    Upgraded(version, implementation);
+    emit Upgraded(version, implementation);
   }
 }
