@@ -25,10 +25,6 @@ contract StorageUpdater is Ownable {
         return balances[_account];
     }
 
-    function getBalances(address _firstAccount, address _secondAccount) internal view returns (uint256, uint256) {
-        return (balances[_firstAccount], balances[_secondAccount]);
-    }
-
     function getTotalSupply() internal view returns (uint256) {
         return totalSupply;
     }
