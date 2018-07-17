@@ -225,19 +225,19 @@ async function checkVariables(_tokens, _customVars) {
             console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
         }
 
-    let actualState = await getActualState(token);
-    assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
+        let actualState = await getActualState(token);
+        assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
 
-    // Check that sum of individual balances equals totalSupply
-    var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
-    var balanceSum = bigZero;
-    var x;
-    for (x = 0; x < accounts.length; x++) {
-      balanceSum = balanceSum.plus(new BigNumber(await token.balanceOf(accounts[x])));
+        // Check that sum of individual balances equals totalSupply
+        var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+        var balanceSum = bigZero;
+        var x;
+        for (x = 0; x < accounts.length; x++) {
+            balanceSum = balanceSum.plus(new BigNumber(await token.balanceOf(accounts[x])));
+        }
+        var totalSupply = new BigNumber(await token.totalSupply())
+        assert(balanceSum.isEqualTo(totalSupply));
     }
-    var totalSupply = new BigNumber(await token.totalSupply())
-    assert(balanceSum.isEqualTo(totalSupply));
-  }
 }
 
 // build up actualState object to compare to expectedState object
