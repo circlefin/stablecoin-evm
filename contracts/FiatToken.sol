@@ -22,6 +22,12 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     address public masterMinter;
     bool internal initialized;
 
+    mapping(address => uint256) private balances;
+    mapping(address => mapping(address => uint256)) private allowed;
+    uint256 private totalSupply_ = 0;
+    mapping(address => bool) private minters;
+    mapping(address => uint256) private minterAllowed;
+
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
     event MinterConfigured(address indexed minter, uint256 minterAllowedAmount);
@@ -54,7 +60,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @dev Throws if called by any account other than a minter
     */
     modifier onlyMinters() {
-        require(isMinter(msg.sender) == true);
+        require(minters[msg.sender] == true);
         _;
     }
 
@@ -63,16 +69,15 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param _amount The amount of tokens to mint.
      * @return A boolean that indicates if the operation was successful.
     */
-    function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklistedBoth(msg.sender, _to) public returns (bool) {
+    function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) notBlacklisted(_to) public returns (bool) {
         require(_to != address(0));
 
-
-        uint256 mintingAllowedAmount = getMinterAllowed(msg.sender);
+        uint256 mintingAllowedAmount = minterAllowed[msg.sender];
         require(_amount <= mintingAllowedAmount);
 
-        setTotalSupply(getTotalSupply().add(_amount));
-        setBalance(_to, getBalance(_to).add(_amount));
-        setMinterAllowed(msg.sender, mintingAllowedAmount.sub(_amount));
+        totalSupply_ = totalSupply_.add(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(msg.sender, _to, _amount);
         return true;
@@ -91,7 +96,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param minter The address of the minter
     */
     function minterAllowance(address minter) public view returns (uint256) {
-        return getMinterAllowed(minter);
+        return minterAllowed[minter];
     }
 
     /**
@@ -100,14 +105,14 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param spender address The account spender
     */
     function allowance(address owner, address spender) public view returns (uint256) {
-        return getAllowed(owner, spender);
+        return allowed[owner][spender];
     }
 
     /**
      * @dev Get totalSupply of token
     */
     function totalSupply() public view returns (uint256) {
-        return getTotalSupply();
+        return totalSupply_;
     }
 
     /**
@@ -115,15 +120,15 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param account address The account
     */
     function balanceOf(address account) public view returns (uint256) {
-        return getBalance(account);
+        return balances[account];
     }
 
     /**
      * @dev Adds blacklisted check to approve
      * @return True if the operation was successful.
     */
-    function approve(address _spender, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _spender) public returns (bool) {
-        setAllowed(msg.sender, _spender, _value);
+    function approve(address _spender, uint256 _value) whenNotPaused notBlacklisted(msg.sender) notBlacklisted(_spender) public returns (bool) {
+        allowed[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
     }
@@ -136,15 +141,12 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param _value uint256 the amount of tokens to be transferred
      * @return bool success
     */
-    function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _from) public returns (bool) {
-        require(isBlacklisted(_to) == false);
+    function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted(msg.sender) notBlacklisted(_from) public returns (bool) {
+        require(isAccountBlacklisted(_to) == false);
 
-        uint256 allowed;
-        allowed = getAllowed(_from, msg.sender);
+        require(_value <= allowed[_from][msg.sender]);
 
-        require(_value <= allowed);
-
-        setAllowed(_from, msg.sender, allowed.sub(_value));
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
         doTransfer(_from, _to, _value);
         return true;
     }
@@ -155,7 +157,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param _value The amount to be transferred.
      * @return bool success
     */
-    function transfer(address _to, uint256 _value) whenNotPaused notBlacklistedBoth(msg.sender, _to) public returns (bool) {
+    function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted(msg.sender) notBlacklisted(_to) public returns (bool) {
         doTransfer(msg.sender, _to, _value);
         return true;
     }
@@ -172,11 +174,12 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
 
         uint256 balance;
 
-        balance = getBalance(_from);
+        balance = balances[_from];
 
         require(_value <= balance);
 
-        moveBalanceAmount(_from, _to, _value);
+        balances[_from] = balances[_from].sub(_value);
+        balances[_to] = balances[_to].add(_value);
         emit Transfer(_from, _to, _value);
     }
 
@@ -185,7 +188,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param account The address of the account
     */
     function isAccountMinter(address account) public view returns (bool) {
-        return isMinter(account);
+        return minters[account];
     }
 
     /**
@@ -195,8 +198,8 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @return True if the operation was successful.
     */
     function configureMinter(address minter, uint256 minterAllowedAmount) whenNotPaused onlyMasterMinter public returns (bool) {
-        setMinter(minter, true);
-        setMinterAllowed(minter, minterAllowedAmount);
+        minters[minter] = true;
+        minterAllowed[minter] = minterAllowedAmount;
         emit MinterConfigured(minter, minterAllowedAmount);
         return true;
     }
@@ -207,8 +210,8 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @return True if the operation was successful.
     */
     function removeMinter(address minter) onlyMasterMinter public returns (bool) {
-        setMinter(minter, false);
-        setMinterAllowed(minter, 0);
+        minters[minter] = false;
+        minterAllowed[minter] = 0;
         emit MinterRemoved(minter);
         return true;
     }
@@ -220,11 +223,11 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param _amount uint256 the amount of tokens to be burned
     */
     function burn(uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) public {
-        uint256 balance = getBalance(msg.sender);
+        uint256 balance = balances[msg.sender];
         require(balance >= _amount);
 
-        setTotalSupply(getTotalSupply().sub(_amount));
-        setBalance(msg.sender, balance.sub(_amount));
+        totalSupply_ = totalSupply_.sub(_amount);
+        balances[msg.sender] = balance.sub(_amount);
         emit Burn(msg.sender, _amount);
     }
 
