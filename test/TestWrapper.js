@@ -73,7 +73,7 @@ async function newUpgradedToken() {
     tokenOwnerAccount
   );
 
-  await oldToken.upgrade(token.address, {from: upgraderAccount});
+  await oldToken.upgrade(token.address, { from: upgraderAccount });
 
   token.default_priorContractAddress = oldToken.address;
   token.default_storageOwner = token.address;
