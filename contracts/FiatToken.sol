@@ -25,8 +25,8 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) private allowed;
     uint256 private totalSupply_ = 0;
-    mapping(address => bool) private minters;
-    mapping(address => uint256) private minterAllowed;
+    mapping(address => bool) public minters;
+    mapping(address => uint256) public minterAllowed;
 
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
@@ -141,9 +141,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @param _value uint256 the amount of tokens to be transferred
      * @return bool success
     */
-    function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted(msg.sender) notBlacklisted(_from) public returns (bool) {
-        require(isAccountBlacklisted(_to) == false);
-
+    function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted(_to) notBlacklisted(msg.sender) notBlacklisted(_from) public returns (bool) {
         require(_value <= allowed[_from][msg.sender]);
 
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
