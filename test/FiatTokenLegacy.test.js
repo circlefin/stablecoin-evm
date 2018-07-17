@@ -346,7 +346,7 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should blacklist and make transferFrom impossible with the approved transferer', async function () {
-    let isBlacklistedBefore = await token.isAccountBlacklisted(accounts[2])
+    let isBlacklistedBefore = await token.blacklisted(accounts[2])
     assert.equal(isBlacklistedBefore, false);
 
     await mint(token, accounts[2], 1900, minterAccount);
@@ -429,7 +429,7 @@ contract('Legacy Tests', function (accounts) {
   it('should unblacklist when paused', async function () {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.blacklist(accounts[2], { from: blacklisterAccount });
-    let blacklisted = await token.isAccountBlacklisted(accounts[2]);
+    let blacklisted = await token.blacklisted(accounts[2]);
     assert.isTrue(blacklisted);
 
     await token.pause({ from: pauserAccount });
