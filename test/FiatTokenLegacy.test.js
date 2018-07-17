@@ -358,7 +358,7 @@ contract('Legacy Tests', function (accounts) {
     let balance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
 
-    let isBlacklistedAfter = await token.isAccountBlacklisted(accounts[2]);
+    let isBlacklistedAfter = await token.blacklisted(accounts[2]);
     assert.equal(isBlacklistedAfter, true);
   });
 
@@ -436,7 +436,7 @@ contract('Legacy Tests', function (accounts) {
 
     await token.unBlacklist(accounts[2], { from: blacklisterAccount });
 
-    blacklisted = await token.isAccountBlacklisted(accounts[2]);
+    blacklisted = await token.blacklisted(accounts[2]);
     assert.isFalse(blacklisted);
 
     let balance = await token.balanceOf(accounts[2]);
