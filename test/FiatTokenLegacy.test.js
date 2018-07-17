@@ -452,7 +452,7 @@ contract('Legacy Tests', function (accounts) {
 
     await expectRevert(token.mint(accounts[1], 200, { from: minterAccount }));
 
-    let isMinter = await token.isAccountMinter(minterAccount);
+    let isMinter = await token.minters(minterAccount);
     assert.equal(isMinter, false);
     let balance = await token.balanceOf(accounts[1]);
     assert.equal(balance, 100);
@@ -460,11 +460,11 @@ contract('Legacy Tests', function (accounts) {
 
   it('should remove a minter even if the contract is paused', async function () {
     await token.configureMinter(accounts[3], 200, { from: masterMinterAccount });
-    let isAccountMinter = await token.isAccountMinter(accounts[3]);
+    let isAccountMinter = await token.minters(accounts[3]);
     assert.equal(isAccountMinter, true);
     await token.pause({ from: pauserAccount });
     await token.removeMinter(accounts[3], { from: masterMinterAccount });
-    isAccountMinter = await token.isAccountMinter(accounts[3]);
+    isAccountMinter = await token.minters(accounts[3]);
     assert.equal(isAccountMinter, false);
   });
 
