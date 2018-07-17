@@ -182,14 +182,6 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     }
 
     /**
-     * @dev Function to check if an account is a minter
-     * @param account The address of the account
-    */
-    function isAccountMinter(address account) public view returns (bool) {
-        return minters[account];
-    }
-
-    /**
      * @dev Function to add/update a new minter
      * @param minter The address of the minter
      * @param minterAllowedAmount The minting amount allowed for the minter
