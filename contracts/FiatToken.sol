@@ -22,9 +22,9 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     address public masterMinter;
     bool internal initialized;
 
-    mapping(address => uint256) private balances;
-    mapping(address => mapping(address => uint256)) private allowed;
-    uint256 private totalSupply_ = 0;
+    mapping(address => uint256) internal balances;
+    mapping(address => mapping(address => uint256)) internal allowed;
+    uint256 internal totalSupply_ = 0;
     mapping(address => bool) public minters;
     mapping(address => uint256) public minterAllowed;
 
