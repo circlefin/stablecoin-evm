@@ -111,7 +111,8 @@ function buildExpectedState(token, customVars) {
                 'blacklisterAccount': bigZero,
                 'tokenOwnerAccount': bigZero,
                 'upgraderAccount': bigZero,
-                'masterMinterAccount': bigZero            },
+                'masterMinterAccount': bigZero
+            },
             'minterAccount': {
                 'arbitraryAccount': bigZero,
                 'masterMinterAccount': bigZero,
