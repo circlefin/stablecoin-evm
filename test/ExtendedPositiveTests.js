@@ -28,8 +28,6 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
-  /////////////////////////////////////////////////////////////////////////////
-
   beforeEach('Make fresh token contract', async function () {
     rawToken = await newToken();
     var tokenConfig = await initializeTokenWithProxy(rawToken);
@@ -41,8 +39,6 @@ async function run_tests(newToken) {
   it('should check that default variable values are correct', async function () {
     await checkVariables([token], [[]]);
   });
-
-  /////////////////////////////////////////////////////////////////////////////
 
   // Paused
 
