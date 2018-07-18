@@ -1,8 +1,6 @@
 pragma solidity ^0.4.23;
 
-
-import "./Ownable.sol";
-
+import "./../zeppelinos/ownership/Ownable.sol";
 
 /**
  * @title Pausable
@@ -12,6 +10,8 @@ import "./Ownable.sol";
  * 1) Added pauser role, switched pause/unpause to be onlyPauser (6/14/2018)
  * 2) Removed whenNotPause/whenPaused from pause/unpause (6/14/2018)
  * 3) Removed whenPaused (6/14/2018)
+ * 4) Switches ownable library to use zeppelinos (7/12/18)
+ * 5) Remove constructor (7/13/18)
  */
 contract Pausable is Ownable {
   event Pause();
@@ -21,11 +21,6 @@ contract Pausable is Ownable {
 
   address public pauser;
   bool public paused = false;
-
-
-  constructor(address _pauser) public {
-    pauser = _pauser;
-  }
 
   /**
    * @dev Modifier to make a function callable only when the contract is not paused.
