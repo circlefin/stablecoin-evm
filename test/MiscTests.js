@@ -8,6 +8,7 @@ var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
 var checkVariables = tokenUtils.checkVariables;
+var checkVariables_storage = tokenUtils.checkVariables_storage;
 var expectRevert = tokenUtils.expectRevert;
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -27,8 +28,6 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
-  /////////////////////////////////////////////////////////////////////////////
-
   beforeEach('Make fresh token contract', async function () {
     rawToken = await newToken();
     var tokenConfig = await initializeTokenWithProxy(rawToken);
@@ -41,9 +40,8 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
-  /////////////////////////////////////////////////////////////////////////////
 
-  // No payable function
+  // No Payable Function
 
   it('ms001 no payable function', async function () {
     var success = false;
@@ -55,7 +53,7 @@ async function run_tests(newToken) {
     assert.equal(true, success);
   });
 
-  // "Self-tests"
+  // Same Address
 
   it('ms005 should mint to self with correct final balance', async function () {
     var mintAmount = 50;
@@ -285,6 +283,54 @@ async function run_tests(newToken) {
     await checkVariables([token], [customVars]);
   });
 
+  // 0 Input
+
+  it('ms017 should mint 0 tokens with unchanged state', async function () {
+    var mintAmount = 0;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms018 should approve 0 token allowance with unchanged state', async function () {
+    await token.approve(minterAccount, 0, { from: arbitraryAccount });
+    await checkVariables([token], [[]]);
+  });
+
+  it('ms019 should transferFrom 0 tokens with unchanged state', async function () {
+    await token.transferFrom(arbitraryAccount, pauserAccount, 0, { from: arbitraryAccount2 });
+    await checkVariables([token], [[]]);
+  });
+
+  it('ms020 should transfer 0 tokens with unchanged state', async function () {
+    await token.transfer(arbitraryAccount, 0, { from: arbitraryAccount2 });
+    await checkVariables([token], [[]]);
+  });
+
+  it('ms021 should burn 0 tokens with unchanged state', async function () {
+    var burnAmount = 0;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+
+    await token.burn(burnAmount, { from: minterAccount });
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms036 should get allowance for same address', async function() {
+    await token.approve(arbitraryAccount, amount, {from: arbitraryAccount});
+    var allowance = new BigNumber(await token.allowance(arbitraryAccount, arbitraryAccount));
+    assert(allowance.isEqualTo(new BigNumber(amount)));
+  });
 }
 
 module.exports = {

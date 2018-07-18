@@ -30,8 +30,6 @@ var amount = 100;
 
 async function run_tests(newToken) {
 
-  //////////////////////////////////////////////////////////////////////////////
-
   beforeEach('Make fresh token contract', async function () {
     rawToken = await newToken();
     var tokenConfig = await initializeTokenWithProxy(rawToken);
@@ -44,7 +42,6 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
-  /////////////////////////////////////////////////////////////////////////////
 
   // Mint
 
