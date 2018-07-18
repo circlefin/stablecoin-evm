@@ -566,17 +566,6 @@ async function mintRaw(token, to, amount, minter) {
       assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).isEqualTo(new BigNumber(minterAllowance)));*/
 }
 
-async function mintToReserveAccount(token, address, amount) {
-    let minting = await token.mint(amount, { from: minterAccount });
-    checkMintEvents(minting, address, amount, minterAccount);
-
-    let mintTransfer = await token.transfer(address, amount, { from: reserverAccount });
-    assert.equal(mintTransfer.logs[0].event, 'Transfer');
-    assert.equal(mintTransfer.logs[0].args.from, reserverAccount);
-    assert.equal(mintTransfer.logs[0].args.to, address);
-    assert.equal(mintTransfer.logs[0].args.value, amount);
-}
-
 async function blacklist(token, account) {
     let blacklist = await token.blacklist(account, { from: blacklisterAccount });
     assert.equal(blacklist.logs[0].event, 'Blacklisted');
@@ -763,7 +752,6 @@ module.exports = {
     setMinter: setMinter,
     mint: mint,
     mintRaw: mintRaw,
-    mintToReserveAccount: mintToReserveAccount,
     blacklist: blacklist,
     unBlacklist: unBlacklist,
     setLongDecimalFeesTransferWithFees: setLongDecimalFeesTransferWithFees,
