@@ -318,18 +318,6 @@ async function run_tests(newToken) {
     ];
     await checkVariables([token], [customVars]);
   });
-
-  // No payable function
-
-  it('no payable function', async function () {
-    var success = false;
-    try {
-      await web3.eth.sendTransaction({ from: arbitraryAccount, to: token.address, value: 1 });
-    } catch (e) {
-      success = true;
-    }
-    assert.equal(true, success);
-  });
 }
 
 module.exports = {

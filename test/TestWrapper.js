@@ -3,6 +3,7 @@ var tokenUtils = require('./TokenTestUtils');
 var positive_tests = require('./PositiveTests');
 var extended_positive_tests = require('./ExtendedPositiveTests');
 var negative_tests = require('./NegativeTests');
+var misc_tests = require('./MiscTests');
 
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -30,12 +31,15 @@ contract('FiatToken_PositiveTests', async function () {
   await positive_tests.run_tests(newToken);
 });
 
-
 contract('FiatToken_ExtendedPositiveTests', async function () {
   await extended_positive_tests.run_tests(newToken);
 });
 
-
-contract('FiatToken_NegativeTests_Original', async function () {
+contract('FiatToken_NegativeTests', async function () {
   await negative_tests.run_tests(newToken);
 });
+
+contract('FiatToken_MiscTests', async function () {
+  await misc_tests.run_tests(newToken);
+});
+
