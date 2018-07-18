@@ -1,6 +1,4 @@
 var FiatToken = artifacts.require('FiatToken');
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
@@ -18,12 +16,12 @@ var decimals = tokenUtils.decimals;
 var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var upgraderAccount = tokenUtils.upgraderAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
+var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
 var amount = 100;
 
@@ -32,7 +30,11 @@ async function run_tests(newToken) {
   /////////////////////////////////////////////////////////////////////////////
 
   beforeEach('Make fresh token contract', async function () {
-    token = await newToken();
+    rawToken = await newToken();
+    var tokenConfig = await initializeTokenWithProxy(rawToken);
+    proxy = tokenConfig.proxy;
+    token = tokenConfig.token;
+    assert.equal(proxy.address, token.address);
   });
 
   it('pt016 should check that default variable values are correct', async function () {
@@ -104,11 +106,6 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.masterMinterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
-  });
-
-  it('ms008 should upgrade contract to original address', async function () {
-    await token.upgrade(token.address, {from: upgraderAccount});
-    assert.equal(await token.upgradedAddress.call(), token.address);
   });
 
   // Multiple Minters
