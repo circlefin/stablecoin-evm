@@ -14,6 +14,7 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
+var deployerAccount = tokenUtils.deployerAccount;
 
 
 // The following helpers make fresh original/upgraded tokens before each test.
@@ -21,6 +22,14 @@ var arbitraryAccount = tokenUtils.arbitraryAccount;
 async function newToken() {
   var token = await FiatToken.new();
   return token;
+}
+
+// The following helper makes a new EternalStorage for testing the storage contract directly.
+
+async function newEternalStorage() {
+  storage = await EternalStorage.new(deployerAccount);
+  storageOwner = deployerAccount;
+  return [storage, storageOwner];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,4 +51,3 @@ contract('FiatToken_NegativeTests', async function () {
 contract('FiatToken_MiscTests', async function () {
   await misc_tests.run_tests(newToken);
 });
-
