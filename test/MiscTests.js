@@ -304,12 +304,12 @@ async function run_tests(newToken) {
   });
 
   it('ms019 should transferFrom 0 tokens with unchanged state', async function () {
-    await token.transferFrom(arbitraryAccount, pauserAccount, 0, { from: upgraderAccount });
+    await token.transferFrom(arbitraryAccount, pauserAccount, 0, { from: arbitraryAccount2 });
     await checkVariables([token], [[]]);
   });
 
   it('ms020 should transfer 0 tokens with unchanged state', async function () {
-    await token.transfer(arbitraryAccount, 0, { from: upgraderAccount });
+    await token.transfer(arbitraryAccount, 0, { from: arbitraryAccount2 });
     await checkVariables([token], [[]]);
   });
 
