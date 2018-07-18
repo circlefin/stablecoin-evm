@@ -72,6 +72,21 @@ function checkTransferEvents(transfer, from, to, value) {
     assert.equal(transfer.logs[0].args.value, value);
 }
 
+function checkMintEvents(minting, to, amount, minter) {
+    // Mint Event
+    assert.equal(minting.logs[0].event, 'Mint');
+    assert.equal(minting.logs[0].args.minter, minter);
+    assert.equal(minting.logs[0].args.to, to);
+    assert.equal(minting.logs[0].args.amount, amount);
+
+    // Transfer from 0 Event
+    assert.equal(minting.logs[1].event, 'Transfer');
+    assert.equal(minting.logs[1].args.from, 0);
+    assert.equal(minting.logs[1].args.to, to);
+    assert.equal(minting.logs[1].args.value, amount);
+
+}
+
 // Creates a state object, with default values replaced by
 // customVars where appropriate.
 function buildExpectedState(token, customVars) {
@@ -542,10 +557,8 @@ async function mintRaw(token, to, amount, minter) {
     let initialTotalSupply = await token.totalSupply();
     let initialMinterAllowance = await token.minterAllowance(minter);
     let minting = await token.mint(to, amount, { from: minter });
-    assert.equal(minting.logs[0].event, 'Mint');
-    assert.equal(minting.logs[0].args.minter, minter);
-    assert.equal(minting.logs[0].args.to, to);
-    assert.equal(minting.logs[0].args.amount, amount);
+    checkMintEvents(minting, to, amount, minter);
+
     // TODO revisit this
     /*  let totalSupply = await token.totalSupply();
       totalSupply.should.be.bignumber.equal(initialTotalSupply);
@@ -555,8 +568,8 @@ async function mintRaw(token, to, amount, minter) {
 
 async function mintToReserveAccount(token, address, amount) {
     let minting = await token.mint(amount, { from: minterAccount });
-    assert.equal(minting.logs[0].event, 'Mint');
-    assert.equal(minting.logs[0].args.amount, amount);
+    checkMintEvents(minting, address, amount, minterAccount);
+
     let mintTransfer = await token.transfer(address, amount, { from: reserverAccount });
     assert.equal(mintTransfer.logs[0].event, 'Transfer');
     assert.equal(mintTransfer.logs[0].args.from, reserverAccount);
