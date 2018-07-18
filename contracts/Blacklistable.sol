@@ -11,7 +11,7 @@ contract Blacklistable is Ownable {
     using SafeMath for uint256;
 
     address public blacklister;
-    mapping(address => bool) public blacklisted;
+    mapping(address => bool) internal blacklisted;
 
     event Blacklisted(address indexed _account);
     event UnBlacklisted(address indexed _account);
@@ -32,6 +32,14 @@ contract Blacklistable is Ownable {
     modifier notBlacklisted(address _account) {
         require(blacklisted[_account] == false);
         _;
+    }
+
+    /**
+     * @dev Checks if account is blacklisted
+     * @param _account The address to check    
+    */
+    function isBlacklisted(address _account) public view returns (bool) {
+        return blacklisted[_account];
     }
 
     /**

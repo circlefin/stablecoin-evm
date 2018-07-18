@@ -261,7 +261,7 @@ async function run_tests(newToken) {
       {'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address }
     ];
 
-    assert(await newToken.blacklisted(newRawToken.address));
+    assert(await newToken.isBlacklisted(newRawToken.address));
     await checkVariables([newToken], [newToken_result]);
   });
 
