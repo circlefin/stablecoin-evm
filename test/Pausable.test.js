@@ -18,7 +18,8 @@ const should = require('chai')
 contract('Pausable', function (accounts) {
     var pause;
     beforeEach(async function checkBefore() {
-        pause = await Pausable.new(pauserAccount);
+        pause = await Pausable.new();
+        await pause.updatePauser(pauserAccount);
     });
 
     it('constructor owner', async function () {

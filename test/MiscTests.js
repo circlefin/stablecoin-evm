@@ -1,6 +1,4 @@
 var FiatToken = artifacts.require('FiatToken');
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
@@ -19,19 +17,23 @@ var decimals = tokenUtils.decimals;
 var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var upgraderAccount = tokenUtils.upgraderAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
+var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
 var amount = 100;
 
 async function run_tests(newToken) {
 
   beforeEach('Make fresh token contract', async function () {
-    token = await newToken();
+    rawToken = await newToken();
+    var tokenConfig = await initializeTokenWithProxy(rawToken);
+    proxy = tokenConfig.proxy;
+    token = tokenConfig.token;
+    assert.equal(proxy.address, token.address);
   });
 
   it('pt016 should check that default variable values are correct', async function () {
@@ -102,17 +104,6 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.masterMinterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
-  });
-
-  it('ms008 should upgrade contract to original address', async function () {
-    await token.upgrade(token.address, {from: upgraderAccount});
-    assert.equal(await token.upgradedAddress.call(), token.address);
-  });
-
-  it('ms037 should upgrade contract to original address and then fail to upgrade again', async function() {
-    await token.upgrade(token.address, {from: upgraderAccount});
-    await expectRevert(token.upgrade(arbitraryAccount, {from: upgraderAccount}));
-    assert.equal(await token.upgradedAddress.call(), token.address);
   });
 
   // Multiple Minters
@@ -341,322 +332,8 @@ async function run_tests(newToken) {
     assert(allowance.isEqualTo(new BigNumber(amount)));
   });
 
-  it('ms030 should approveViaPriorContract for same address', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    await token.approve(minterAccount, amount, {from: minterAccount});
-
-    var tokenOld_result = [
-      {'variable': 'storageOwner', 'expectedValue': newToken.address},
-      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
-      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
-    ]
-    var tokenNew_result = [
-      {'variable': 'priorContractAddress', 'expectedValue': token.address },
-      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
-    ]
-    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
-  });
-
-  it('ms031 should approveViaPriorContract 0 tokens', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    await token.approve(arbitraryAccount, 0, {from: minterAccount});
-
-    var tokenOld_result = [
-      {'variable': 'storageOwner', 'expectedValue': newToken.address},
-      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
-    ]
-    var tokenNew_result = [
-      {'variable': 'priorContractAddress', 'expectedValue': token.address },
-    ]
-    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
-  });
-
-  it('ms032 should transferViaPriorContract for same address', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    await newToken.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    await newToken.mint(arbitraryAccount, amount, {from: minterAccount});
-    await token.transfer(arbitraryAccount, amount, {from: arbitraryAccount});
-
-    var tokenOld_result = [
-      {'variable': 'storageOwner', 'expectedValue': newToken.address},
-      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
-    ]
-    var tokenNew_result = [
-      {'variable': 'priorContractAddress', 'expectedValue': token.address },
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
-    ]
-    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
-  });
-
-  it('ms033 should transferViaPriorContract 0 tokens', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    await token.transfer(upgraderAccount, 0, {from: arbitraryAccount});
-
-    var tokenOld_result = [
-      {'variable': 'storageOwner', 'expectedValue': newToken.address},
-      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
-    ]
-    var tokenNew_result = [
-      {'variable': 'priorContractAddress', 'expectedValue': token.address },
-    ]
-    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
-  });
-
-  it('ms034 should transferFromViaPriorContract for same address', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    await newToken.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    await newToken.mint(arbitraryAccount, amount, {from: minterAccount});
-    await token.approve(minterAccount, amount, {from: arbitraryAccount});
-    await token.transferFrom(arbitraryAccount, arbitraryAccount, amount, {from: minterAccount});
-
-    var tokenOld_result = [
-      {'variable': 'storageOwner', 'expectedValue': newToken.address},
-      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
-    ]
-    var tokenNew_result = [
-      {'variable': 'priorContractAddress', 'expectedValue': token.address },
-      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
-    ]
-    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
-  });
-
-  it('ms035 should transferFromViaPriorContract 0 tokens', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    await token.transferFrom(arbitraryAccount, upgraderAccount, 0, {from: minterAccount});
-
-    var tokenOld_result = [
-      {'variable': 'storageOwner', 'expectedValue': newToken.address},
-      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
-    ]
-    var tokenNew_result = [
-      {'variable': 'priorContractAddress', 'expectedValue': token.address },
-    ]
-    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
-  });
-
-  it('ms038 should transferFromViaPriorContract to self from approved self and have correct final balance', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    await newToken.configureMinter(minterAccount, amount, {from: masterMinterAccount});
-    await newToken.mint(arbitraryAccount, amount, {from: minterAccount});
-    await token.approve(arbitraryAccount, amount, {from: arbitraryAccount});
-    await token.transferFrom(arbitraryAccount, arbitraryAccount, amount, {from: arbitraryAccount});
-
-    var tokenOld_result = [
-      {'variable': 'storageOwner', 'expectedValue': newToken.address},
-      {'variable': 'upgradedAddress', 'expectedValue': newToken.address},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
-    ]
-    var tokenNew_result = [
-      {'variable': 'priorContractAddress', 'expectedValue': token.address },
-      {'variable': 'allowance.minterAccount.minterAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)},
-    ]
-    await checkVariables([token, newToken], [tokenOld_result, tokenNew_result]);
-  });
-
-}
-
-async function run_storage_tests(newStorage) {
-
-  beforeEach('Make fresh eternal storage', async function () {
-    params = await newStorage();
-    storage = params[0];
-    storageOwner = params[1];
-  });
-
-  it('should check that storage default variable values are correct', async function() {
-    await checkVariables_storage(storage, []);
-  });
-
-
-  it('ms022 should setAllowed to 0 with unchanged state', async function() {
-    await storage.setAllowed(arbitraryAccount, upgraderAccount, 0, {from: storageOwner});
-    await checkVariables_storage(storage, []);
-  });
-
-  it('ms023 should setAllowed for same address', async function() {
-    await storage.setAllowed(arbitraryAccount, arbitraryAccount, amount, {from: storageOwner});
-    var customVars = [
-      {'variable': 'allowance.arbitraryAccount.arbitraryAccount', 'expectedValue': new BigNumber(amount)},
-    ];
-    await checkVariables_storage(storage, customVars);
-  });
-
-  it('ms024 should setBalance to 0 with unchanged state', async function() {
-    await storage.setBalance(arbitraryAccount, 0, {from: storageOwner});
-    await checkVariables_storage(storage, []);
-  });
-
-  it('ms025 should setBalances for same address', async function() {
-    await storage.setBalances(arbitraryAccount, 30, arbitraryAccount, 40, {from: storageOwner});
-    var customVars = [
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(40)},
-    ];
-    await checkVariables_storage(storage, customVars);
-  });
-
-  it('ms026 should setBalances to 0 firstAmount', async function() {
-    await storage.setBalances(arbitraryAccount, 0, upgraderAccount, 20, {from: storageOwner});
-    var customVars = [
-      {'variable': 'balances.upgraderAccount', 'expectedValue': new BigNumber(20)},
-    ];
-    await checkVariables_storage(storage, customVars);
-  });
-
-  it('ms027 should setBalances to 0 secondAmount', async function() {
-    await storage.setBalances(arbitraryAccount, 20, upgraderAccount, 0, {from: storageOwner});
-    var customVars = [
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(20)},
-    ];
-    await checkVariables_storage(storage, customVars);
-  });
-
-  it('ms028 should setTotalSupply to 0', async function() {
-    await storage.setTotalSupply(0, {from: storageOwner});
-    await checkVariables_storage(storage, []);
-  });
-
-  it('ms029 should setMinterAllowed to 0', async function() {
-    await storage.setMinterAllowed(arbitraryAccount, 0, {from: storageOwner});
-    await checkVariables_storage(storage, []);
-  });
 }
 
 module.exports = {
   run_tests: run_tests,
-  run_storage_tests: run_storage_tests,
 }
