@@ -1,4 +1,4 @@
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
+var FiatToken = artifacts.require('FiatToken');
 var tokenUtils = require('./TokenTestUtils');
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
@@ -21,6 +21,8 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
+var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+var upgradeTo = tokenUtils.upgradeTo;
 
 var amount = 100;
 
@@ -29,7 +31,11 @@ async function run_tests(newToken) {
   /////////////////////////////////////////////////////////////////////////////
 
   beforeEach('Make fresh token contract', async function () {
-    token = await newToken();
+    rawToken = await newToken();
+    var tokenConfig = await initializeTokenWithProxy(rawToken);
+    proxy = tokenConfig.proxy;
+    token = tokenConfig.token;
+    assert.equal(proxy.address, token.address);
   });
 
   it('should check that default variable values are correct', async function () {
@@ -39,16 +45,6 @@ async function run_tests(newToken) {
   /////////////////////////////////////////////////////////////////////////////
 
   // Paused
-
-  it('ept001 should updateUpgraderAddress while paused', async function () {
-    await token.pause({ from: pauserAccount });
-    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
-    var result = [
-      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
-      { 'variable': 'paused', 'expectedValue': true }
-    ];
-    await checkVariables([token], [result]);
-  });
 
   it('ept002 should updateMasterMinter while paused', async function () {
     await token.pause({ from: pauserAccount });
@@ -110,34 +106,17 @@ async function run_tests(newToken) {
   });
 
   it('ept008 should upgrade while paused', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
+    var newRawToken = await FiatToken.new();
     await token.pause({from: pauserAccount});
-    await token.upgrade(newToken.address, {from: upgraderAccount});
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
+    var tokenConfig = await upgradeTo(proxy, newRawToken);
+    var newProxiedToken = tokenConfig.token;
+    var newToken = newProxiedToken;
 
     var newToken_result = [
-      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
+      { 'variable': 'paused', 'expectedValue': true },
+      {'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address }
     ];
-    var oldToken_result = [
-      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
-      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address },
-      { 'variable': 'paused', 'expectedValue': true }
-    ];
-    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
+    await checkVariables([newToken], [newToken_result]);
   });
 
   // Zero Address
@@ -183,16 +162,6 @@ async function run_tests(newToken) {
   });
 
   // Blacklisted
-
-  it('ept013 should updateUpgraderAddress when msg.sender blacklisted', async function () {
-    await token.blacklist(upgraderAccount, { from: blacklisterAccount });
-    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
-    var setup = [
-      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
-      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true }
-    ];
-    await checkVariables([token], [setup]);
-  });
 
   it('ept014 should updateMasterMinter when msg.sender blacklisted', async function () {
     await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
@@ -280,69 +249,20 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
-  it ('ept022 should upgrade when msg.sender blacklisted', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    await token.blacklist(upgraderAccount, { from: blacklisterAccount });
-    await token.upgrade(newToken.address, { from: upgraderAccount });
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
-
-    var newToken_result = [
-      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
-      { 'variable': 'priorContractAddress', 'expectedValue': token.address },
-    ];
-    var oldToken_result = [
-      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
-      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
-      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
-    ];
-    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
-  });
-
   it ('ept023 should upgrade to blacklisted address', async function() {
-    let dataContractAddress = await token.getDataContractAddress();
-    var newToken = await UpgradedFiatToken.new(
-      dataContractAddress,
-      token.address,
-      name,
-      symbol,
-      currency,
-      decimals,
-      masterMinterAccount,
-      pauserAccount,
-      blacklisterAccount,
-      upgraderAccount,
-      tokenOwnerAccount
-    );
-    await token.blacklist(newToken.address, { from: blacklisterAccount });
-    await token.upgrade(newToken.address, { from: upgraderAccount });
-    newToken.default_storageOwner = newToken.address;
-    newToken.default_storageAddress = dataContractAddress;
+    var newRawToken = await FiatToken.new();
+
+    await token.blacklist(newRawToken.address, { from: blacklisterAccount });
+    var tokenConfig = await upgradeTo(proxy, newRawToken);
+    var newProxiedToken = tokenConfig.token;
+    var newToken = newProxiedToken;
 
     var newToken_result = [
-      { 'variable': 'priorContractAddress', 'expectedValue': token.address }
+      {'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address }
     ];
-    var oldToken_result = [
-      { 'variable': 'storageOwner', 'expectedValue': newToken.address },
-      { 'variable': 'upgradedAddress', 'expectedValue': newToken.address }
-    ];
-    // TODO: Come up with a clean way around these assert statements.
-    assert(await newToken.isAccountBlacklisted(newToken.address));
-    assert(await token.isAccountBlacklisted(newToken.address));
-    await checkVariables([newToken, token], [newToken_result, oldToken_result]);
+
+    assert(await newToken.blacklisted(newRawToken.address));
+    await checkVariables([newToken], [newToken_result]);
   });
 
   it('ept024 should blacklist a blacklisted address', async function () {
@@ -351,16 +271,6 @@ async function run_tests(newToken) {
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    await checkVariables([token], [setup]);
-  });
-
-  it('ept025 should updateUpgraderAddress to blacklisted address', async function () {
-    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    await token.updateUpgraderAddress(arbitraryAccount, { from: upgraderAccount });
-    var setup = [
-      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
-      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
-    ];
     await checkVariables([token], [setup]);
   });
 

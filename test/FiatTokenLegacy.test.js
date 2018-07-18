@@ -1,6 +1,4 @@
 var FiatToken = artifacts.require('FiatToken');
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
 var tokenUtils = require('./TokenTestUtils');
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -20,7 +18,6 @@ var sampleTransfer = tokenUtils.sampleTransfer;
 var checkTransferEvents = tokenUtils.checkTransferEvents;
 var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
-var upgraderAccount = tokenUtils.upgraderAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
@@ -28,12 +25,18 @@ var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
+var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+var upgradeTo = tokenUtils.upgradeTo;
 
 // these tests are for reference and do not track side effects on all variables
 contract('Legacy Tests', function (accounts) {
   beforeEach(async function () {
-    token = await FiatToken.new("0x0", name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-    let tokenAddress = token.address;
+    rawToken =  await FiatToken.new();
+    var tokenConfig = await initializeTokenWithProxy(rawToken);
+    proxy = tokenConfig.proxy;
+    token = tokenConfig.token;
+    assert.equal(proxy.address, token.address);
   });
 
   it('should start with a totalSupply of 0', async function () {
@@ -343,7 +346,7 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should blacklist and make transferFrom impossible with the approved transferer', async function () {
-    let isBlacklistedBefore = await token.isAccountBlacklisted(accounts[2])
+    let isBlacklistedBefore = await token.blacklisted(accounts[2])
     assert.equal(isBlacklistedBefore, false);
 
     await mint(token, accounts[2], 1900, minterAccount);
@@ -355,7 +358,7 @@ contract('Legacy Tests', function (accounts) {
     let balance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
 
-    let isBlacklistedAfter = await token.isAccountBlacklisted(accounts[2]);
+    let isBlacklistedAfter = await token.blacklisted(accounts[2]);
     assert.equal(isBlacklistedAfter, true);
   });
 
@@ -400,544 +403,6 @@ contract('Legacy Tests', function (accounts) {
     assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
   });
 
-  it('should approve on old contract', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-
-    await token.approve(accounts[1], 600, { from: accounts[2] });
-
-    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(600)));
-  });
-
-  it('should fail to approve on old contract when new contract is paused', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.pause({ from: pauserAccount });
-
-    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
-
-    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to approve on old contract when from account is blacklisted', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.blacklist(accounts[2], { from: blacklisterAccount });
-
-    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
-
-    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to approve on old contract when spender account is blacklisted', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
-
-    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
-
-    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to approve using priorContract method when caller is not prior contract', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-
-    await expectRevert(tokenNew.approveViaPriorContract(accounts[2], accounts[1], 600, { from: accounts[2] }));
-
-    let approval = await tokenNew.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should transfer on old contract', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-
-    await token.transfer(accounts[1], 200, { from: accounts[2] });
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(200)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to transfer on old contract when new contract is paused', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-
-    await tokenNew.pause({ from: pauserAccount });
-
-    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should fail to transfer on old contract when from account is blacklisted', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-
-    await tokenNew.blacklist(accounts[2], { from: blacklisterAccount });
-
-    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should fail to transfer on old contract when to account is blacklisted', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-
-    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
-
-    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should fail to transfer using priorContract method when caller is not prior contract', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-
-    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
-
-    await expectRevert(tokenNew.transferViaPriorContract(accounts[2], accounts[1], 200, { from: accounts[2] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should transferFrom on old contract', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-    await token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(0)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should fail to transferFrom on old contract when new contract is paused', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-    await tokenNew.pause({ from: pauserAccount });
-
-    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to transferFrom on old contract when from account is blacklisted', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-    await tokenNew.blacklist(accounts[2], { from: blacklisterAccount });
-
-    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to transfer on old contract when to account is blacklisted', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-    await tokenNew.blacklist(accounts[3], { from: blacklisterAccount });
-
-    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to transfer on old contract when sender account is blacklisted', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-    await tokenNew.blacklist(accounts[1], { from: blacklisterAccount });
-
-    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to transferFrom using priorContract method when caller is not prior contract', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-
-    await expectRevert(tokenNew.transferFromViaPriorContract(accounts[1], accounts[2], accounts[3], 200, { from: accounts[1] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to approve using priorContract when disablePriorContract has been called', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.disablePriorContract({ from: pauserAccount });
-
-    await expectRevert(token.approve(accounts[1], 200, { from: accounts[2] }));
-
-    let allowance = await tokenNew.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(allowance).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should fail to transfer using priorContract when disablePriorContract has been called', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.disablePriorContract({ from: pauserAccount });
-
-    await expectRevert(token.transfer(accounts[1], 200, { from: accounts[2] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should fail to transferFrom using priorContract when disablePriorContract has been called', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-    await tokenNew.disablePriorContract({ from: pauserAccount });
-
-    await expectRevert(token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] }));
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(200)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(0)));
-  });
-
-
-  it('should approve using priorContract when disablePriorContract is called with non-pauser', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await expectRevert(tokenNew.disablePriorContract({ from: minterAccount }));
-
-    token.approve(accounts[1], 200, { from: accounts[2] });
-
-    let allowance = await tokenNew.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(allowance).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should transfer using priorContract when disablePriorContract is called with non-pauser', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await expectRevert(tokenNew.disablePriorContract({ from: minterAccount }));
-
-    token.transfer(accounts[1], 200, { from: accounts[2] });
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(200)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(0)));
-  });
-
-  it('should transferFrom using priorContract when disablePriorContract has been called with non-pauser account', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.approve(accounts[1], 200, { from: accounts[2] });
-    await expectRevert(tokenNew.disablePriorContract({ from: minterAccount }));
-
-    token.transferFrom(accounts[2], accounts[3], 200, { from: accounts[1] });
-
-    let balanceFirst = await tokenNew.balanceOf(accounts[1]);
-    assert.isTrue(new BigNumber(balanceFirst).isEqualTo(new BigNumber(0)));
-
-    let balanceSecond = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balanceSecond).isEqualTo(new BigNumber(0)));
-
-    let balanceThird = await tokenNew.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balanceThird).isEqualTo(new BigNumber(200)));
-  });
-
   it('should blacklist then unblacklist to make a transfer possible', async function () {
     await mint(token, accounts[2], 1900, minterAccount);
     await blacklist(token, accounts[2]);
@@ -964,14 +429,14 @@ contract('Legacy Tests', function (accounts) {
   it('should unblacklist when paused', async function () {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.blacklist(accounts[2], { from: blacklisterAccount });
-    let blacklisted = await token.isAccountBlacklisted(accounts[2]);
+    let blacklisted = await token.blacklisted(accounts[2]);
     assert.isTrue(blacklisted);
 
     await token.pause({ from: pauserAccount });
 
     await token.unBlacklist(accounts[2], { from: blacklisterAccount });
 
-    blacklisted = await token.isAccountBlacklisted(accounts[2]);
+    blacklisted = await token.blacklisted(accounts[2]);
     assert.isFalse(blacklisted);
 
     let balance = await token.balanceOf(accounts[2]);
@@ -987,7 +452,7 @@ contract('Legacy Tests', function (accounts) {
 
     await expectRevert(token.mint(accounts[1], 200, { from: minterAccount }));
 
-    let isMinter = await token.isAccountMinter(minterAccount);
+    let isMinter = await token.minters(minterAccount);
     assert.equal(isMinter, false);
     let balance = await token.balanceOf(accounts[1]);
     assert.equal(balance, 100);
@@ -995,11 +460,11 @@ contract('Legacy Tests', function (accounts) {
 
   it('should remove a minter even if the contract is paused', async function () {
     await token.configureMinter(accounts[3], 200, { from: masterMinterAccount });
-    let isAccountMinter = await token.isAccountMinter(accounts[3]);
+    let isAccountMinter = await token.minters(accounts[3]);
     assert.equal(isAccountMinter, true);
     await token.pause({ from: pauserAccount });
     await token.removeMinter(accounts[3], { from: masterMinterAccount });
-    isAccountMinter = await token.isAccountMinter(accounts[3]);
+    isAccountMinter = await token.minters(accounts[3]);
     assert.equal(isAccountMinter, false);
   });
 
@@ -1044,33 +509,6 @@ contract('Legacy Tests', function (accounts) {
   it('should have correct currency', async function () {
     let actual = await token.currency.call();
     assert.equal(actual, currency);
-  });
-
-  it('should setBalance and getBalance from storage', async function () {
-    let testStorage = await EternalStorage.new();
-    let setterAddress = accounts[3];
-
-    await testStorage.setBalance(setterAddress, 100);
-    let balance = await testStorage.getBalance(setterAddress);
-    assert.equal(balance, 100);
-  });
-
-  it('should setAllowed and getAllowed from storage', async function () {
-    let testStorage = await EternalStorage.new();
-    let setterAddress = accounts[3];
-    let spenderAddress = accounts[4];
-    await testStorage.setAllowed(setterAddress, spenderAddress, 100);
-    let allowedBalance = await testStorage.getAllowed(setterAddress, spenderAddress);
-    assert.equal(allowedBalance, 100);
-  });
-
-  it('should set totalSupply and getTotalSupply from storage', async function () {
-    let testStorage = await EternalStorage.new();
-    let setterAddress = accounts[3];
-    let spenderAddress = accounts[4];
-    await testStorage.setTotalSupply(100);
-    let totalSupply = await testStorage.getTotalSupply();
-    assert.equal(totalSupply, 100);
   });
 
   it('should mint and burn tokens', async function () {
@@ -1126,97 +564,22 @@ contract('Legacy Tests', function (accounts) {
     await expectRevert(token.burn(amount, { from: burnerAddress }));
   });
 
-  it('should fail to upgrade to 0x0', async function () {
-    let dataContractAddress = await token.getDataContractAddress();
-
-    // make sure token isn't already upgraded
-    assert.isFalse(await token.isUpgraded.call());
-
-    let storage = EternalStorage.at(dataContractAddress);
-
-    let storageOwner = await storage.owner.call();
-    // make sure data contract owned by the token contract
-    assert.equal(storageOwner, token.address);
-
-    await expectRevert(token.upgrade("0x0", { from: upgraderAccount }));
-
-    // make sure the data contracts owner is unchanged
-    assert.equal(await storage.owner.call(), token.address);
-  });
-
   it('should upgrade and preserve data', async function () {
     await mint(token, accounts[2], 200, minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
 
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
+    var newRawToken = await FiatToken.new();
+    var tokenConfig = await upgradeTo(proxy, newRawToken);
+    var newProxiedToken = tokenConfig.token;
+    var newToken = newProxiedToken;
 
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    let upgradedBalance = await newToken.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
-    await tokenNew.mint(accounts[2], 200, { from: minterAccount });
-    let balance = await tokenNew.balanceOf(accounts[2]);
+    await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+    await newToken.mint(accounts[2], 200, { from: minterAccount });
+    let balance = await newToken.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
-  });
-
-  it('should upgrade and fail to update data from old contract', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
-    await tokenNew.mint(accounts[2], 200, { from: minterAccount });
-    let balance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
-
-    await expectRevert(token.mint(accounts[2], 200, { from: minterAccount }));
-
-    let balance1 = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance1)).isEqualTo(new BigNumber(400)));
-    let balance2 = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance2)).isEqualTo(new BigNumber(400)));
-
-    token.transfer(accounts[7], 200, { from: accounts[2] });
-
-    balance1 = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance1)).isEqualTo(new BigNumber(200)));
-    balance2 = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance2)).isEqualTo(new BigNumber(200)));
-  });
-
-  it('should fail to upgrade twice', async function () {
-    await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: upgraderAccount });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
-    await tokenNew.mint(accounts[2], 200, { from: minterAccount });
-    let balance = await tokenNew.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
-
-    let tokenNewSecond = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
-
-    await expectRevert(token.upgrade(tokenNewSecond.address, { from: upgraderAccount }));
   });
 
   it('should updateRoleAddress for masterMinter', async function () {
@@ -1255,50 +618,39 @@ contract('Legacy Tests', function (accounts) {
     assert.equal(pauser2, address2);
   });
 
-  it('should updateRoleAddress for upgrader and fail as upgrader is updated separately', async function () {
-    let address1 = accounts[7];
-    let address2 = accounts[6];
-    expectRevert(token.updateUpgraderAddress(address1, { from: tokenOwnerAccount }));
-    let upgrader = await token.upgrader();
-    assert.notEqual(upgrader, address1);
-  });
-
   it('should updateUpgraderAddress for upgrader', async function () {
-    let upgrader = await token.upgrader();
-    assert.equal(upgraderAccount, upgrader);
+    let upgrader = await proxy.upgradeabilityOwner();
+    assert.equal(proxyOwnerAccount, upgrader);
     let address1 = accounts[7];
-    let updated = await token.updateUpgraderAddress(address1, { from: upgraderAccount });
-    upgrader = await token.upgrader();
+    let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
+    upgrader = await token.upgradeabilityOwner();
     assert.equal(upgrader, address1);
 
     //Test upgrade with new upgrader account
-    await mint(token, accounts[2], 200, minterAccount);
+    await token.configureMinter(minterAccount, 1000, {from: masterMinterAccount});
+    await token.mint(accounts[2], 200, {from: minterAccount});
+
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
-    let dataContractAddress = await token.getDataContractAddress();
-    let tokenNew = await UpgradedFiatToken.new(dataContractAddress, token.address, name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, upgraderAccount, tokenOwnerAccount);
+    
+    var newRawToken = await FiatToken.new();
+    var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+    var newProxiedToken = tokenConfig.token;
+    var newToken = newProxiedToken;
 
-    let upgradedDataContractAddress = await tokenNew.getDataContractAddress();
-    assert.isTrue(upgradedDataContractAddress == dataContractAddress);
-
-    await token.upgrade(tokenNew.address, { from: address1 });
-    let upgradedBalance = await tokenNew.balanceOf(accounts[2]);
+    let upgradedBalance = await newToken.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
-    await tokenNew.configureMinter(minterAccount, 500, { from: masterMinterAccount });
-    await tokenNew.mint(accounts[2], 200, { from: minterAccount });
-    let balance = await tokenNew.balanceOf(accounts[2]);
+    await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+    await newToken.mint(accounts[2], 200, { from: minterAccount });
+    let balance = await newToken.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
   });
 
   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
-    let upgrader = await token.upgrader();
-    assert.equal(upgraderAccount, upgrader);
     let address1 = accounts[7];
-
-    await expectRevert(token.updateUpgraderAddress(address1, { from: pauserAccount }));
-
-    upgrader = await token.upgrader();
-    assert.equal(upgraderAccount, upgrader);
+    await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
+    let upgrader = await proxy.upgradeabilityOwner();
+    assert.notEqual(upgrader, address1);
   });
 
   it('should updateRoleAddress for roleAddressChanger', async function () {
