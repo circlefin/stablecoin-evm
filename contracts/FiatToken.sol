@@ -144,7 +144,6 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
 
     /**
      * @dev Transfer tokens from one address to another.
-     * Validates that the totalAmount <= the allowed amount for the sender on the from account.
      * @param _from address The address which you want to send tokens from
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
@@ -171,7 +170,6 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
 
     /**
      * @dev updates balances for sender, recipient.
-     * Validates that _to address exists, totalAmount <= balance of the from account.
      * @param _from address The address which you want to send tokens from
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
