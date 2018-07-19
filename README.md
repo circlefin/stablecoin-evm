@@ -14,9 +14,6 @@ install ganache-cli:
 install project npm dependencies:
 ```npm install```
 
-install submodules:
-```git submodule update --init```
-
 # Testing
 ganache-cli (Ethereum RPC client) must be running first
 ```ganache-cli --defaultBalanceEther 1000000 --deterministic```
