@@ -29,7 +29,8 @@ tokens. CENTRE will not mint any tokens itself, it will approve members to mint 
 Each `minter` has a `mintingAllowance`, which CENTRE configures. The `mintingAllowance` is how many tokens that minter 
 may issue, and as a `minter` issues tokens, their `mintingAllowance` declines. 
 CENTRE will periodically reset the `mintingAllowance` as long as a `minter` remains in good standing with CENTRE and is 
-maintaining adequate reserves for the tokens they have issued.
+maintaining adequate reserves for the tokens they have issued. The `mintingAllowance` is to limit the damage if any particular
+`minter` is compromised.
 
 ### Adding Minters
 CENTRE adds minters via the `configureMinter` method. When a minter is configured a `mintingAllowance` is specified, 
@@ -89,7 +90,9 @@ CENTRE removes an address from the blacklist via the `unblacklist` method. The s
 
 ## Pausing
 The entire contract can be paused in case a serious bug is found or there is a serious key compromise. 
-All transfers, minting, and burning will be prevented while the contract is paused. 
+All transfers, minting, and burning will be prevented while the contract is paused. Other functionality, such as modifying
+the blacklist, adding/removing minters, changing roles, and upgrading will remain operational as those methods may be
+required to fix or mitigate the issue that caused CENTRE to pause the contract.
 
 ### Pause
 CENTRE will pause the contract via the `pause` method. This method will set the paused flag to true.
