@@ -346,7 +346,7 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should blacklist and make transferFrom impossible with the approved transferer', async function () {
-    let isBlacklistedBefore = await token.blacklisted(accounts[2])
+    let isBlacklistedBefore = await token.isBlacklisted(accounts[2])
     assert.equal(isBlacklistedBefore, false);
 
     await mint(token, accounts[2], 1900, minterAccount);
@@ -358,7 +358,7 @@ contract('Legacy Tests', function (accounts) {
     let balance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
 
-    let isBlacklistedAfter = await token.blacklisted(accounts[2]);
+    let isBlacklistedAfter = await token.isBlacklisted(accounts[2]);
     assert.equal(isBlacklistedAfter, true);
   });
 
@@ -429,14 +429,14 @@ contract('Legacy Tests', function (accounts) {
   it('should unblacklist when paused', async function () {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.blacklist(accounts[2], { from: blacklisterAccount });
-    let blacklisted = await token.blacklisted(accounts[2]);
+    let blacklisted = await token.isBlacklisted(accounts[2]);
     assert.isTrue(blacklisted);
 
     await token.pause({ from: pauserAccount });
 
     await token.unBlacklist(accounts[2], { from: blacklisterAccount });
 
-    blacklisted = await token.blacklisted(accounts[2]);
+    blacklisted = await token.isBlacklisted(accounts[2]);
     assert.isFalse(blacklisted);
 
     let balance = await token.balanceOf(accounts[2]);
@@ -452,7 +452,7 @@ contract('Legacy Tests', function (accounts) {
 
     await expectRevert(token.mint(accounts[1], 200, { from: minterAccount }));
 
-    let isMinter = await token.minters(minterAccount);
+    let isMinter = await token.isMinter(minterAccount);
     assert.equal(isMinter, false);
     let balance = await token.balanceOf(accounts[1]);
     assert.equal(balance, 100);
@@ -460,11 +460,11 @@ contract('Legacy Tests', function (accounts) {
 
   it('should remove a minter even if the contract is paused', async function () {
     await token.configureMinter(accounts[3], 200, { from: masterMinterAccount });
-    let isAccountMinter = await token.minters(accounts[3]);
+    let isAccountMinter = await token.isMinter(accounts[3]);
     assert.equal(isAccountMinter, true);
     await token.pause({ from: pauserAccount });
     await token.removeMinter(accounts[3], { from: masterMinterAccount });
-    isAccountMinter = await token.minters(accounts[3]);
+    isAccountMinter = await token.isMinter(accounts[3]);
     assert.equal(isAccountMinter, false);
   });
 
