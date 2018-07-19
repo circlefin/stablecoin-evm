@@ -1,6 +1,5 @@
 pragma solidity ^0.4.23;
 
-import './thirdparty/openzeppelin/SafeMath.sol';
 import "./thirdparty/zeppelinos/ownership/Ownable.sol";
 
 /**
@@ -8,7 +7,6 @@ import "./thirdparty/zeppelinos/ownership/Ownable.sol";
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
 contract Blacklistable is Ownable {
-    using SafeMath for uint256;
 
     address public blacklister;
     mapping(address => bool) public blacklisted;
