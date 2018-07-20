@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import './thirdparty/openzeppelin/ERC20.sol';
 import './thirdparty/openzeppelin/SafeMath.sol';
@@ -25,8 +25,8 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     mapping(address => uint256) internal balances;
     mapping(address => mapping(address => uint256)) internal allowed;
     uint256 internal totalSupply_ = 0;
-    mapping(address => bool) public minters;
-    mapping(address => uint256) public minterAllowed;
+    mapping(address => bool) internal minters;
+    mapping(address => uint256) internal minterAllowed;
 
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
@@ -79,7 +79,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
         balances[_to] = balances[_to].add(_amount);
         minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
         emit Mint(msg.sender, _to, _amount);
-        emit Transfer(msg.sender, _to, _amount);
+        emit Transfer(0x0, _to, _amount);
         return true;
     }
 
@@ -92,11 +92,19 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     }
 
     /**
-     * @dev Function to get minter allowance
+     * @dev Get minter allowance for an account
      * @param minter The address of the minter
     */
     function minterAllowance(address minter) public view returns (uint256) {
         return minterAllowed[minter];
+    }
+
+    /**
+     * @dev Checks if account is a minter
+     * @param account The address to check    
+    */
+    function isMinter(address account) public view returns (bool) {
+        return minters[account];
     }
 
     /**

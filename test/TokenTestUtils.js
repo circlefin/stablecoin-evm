@@ -72,6 +72,21 @@ function checkTransferEvents(transfer, from, to, value) {
     assert.equal(transfer.logs[0].args.value, value);
 }
 
+function checkMintEvents(minting, to, amount, minter) {
+    // Mint Event
+    assert.equal(minting.logs[0].event, 'Mint');
+    assert.equal(minting.logs[0].args.minter, minter);
+    assert.equal(minting.logs[0].args.to, to);
+    assert.equal(minting.logs[0].args.amount, amount);
+
+    // Transfer from 0 Event
+    assert.equal(minting.logs[1].event, 'Transfer');
+    assert.equal(minting.logs[1].args.from, 0);
+    assert.equal(minting.logs[1].args.to, to);
+    assert.equal(minting.logs[1].args.value, amount);
+
+}
+
 // Creates a state object, with default values replaced by
 // customVars where appropriate.
 function buildExpectedState(token, customVars) {
@@ -304,18 +319,18 @@ async function getActualState(token) {
         await token.allowance(upgraderAccount, tokenOwnerAccount),
         await token.allowance(upgraderAccount, upgraderAccount),
         await token.totalSupply(),
-        await token.blacklisted(arbitraryAccount),
-        await token.blacklisted(masterMinterAccount),
-        await token.blacklisted(minterAccount),
-        await token.blacklisted(pauserAccount),
-        await token.blacklisted(blacklisterAccount),
-        await token.blacklisted(tokenOwnerAccount),
-        await token.minters(arbitraryAccount),
-        await token.minters(masterMinterAccount),
-        await token.minters(minterAccount),
-        await token.minters(pauserAccount),
-        await token.minters(blacklisterAccount),
-        await token.minters(tokenOwnerAccount),
+        await token.isBlacklisted(arbitraryAccount),
+        await token.isBlacklisted(masterMinterAccount),
+        await token.isBlacklisted(minterAccount),
+        await token.isBlacklisted(pauserAccount),
+        await token.isBlacklisted(blacklisterAccount),
+        await token.isBlacklisted(tokenOwnerAccount),
+        await token.isMinter(arbitraryAccount),
+        await token.isMinter(masterMinterAccount),
+        await token.isMinter(minterAccount),
+        await token.isMinter(pauserAccount),
+        await token.isMinter(blacklisterAccount),
+        await token.isMinter(tokenOwnerAccount),
         await token.minterAllowance(arbitraryAccount),
         await token.minterAllowance(masterMinterAccount),
         await token.minterAllowance(minterAccount),
@@ -542,26 +557,13 @@ async function mintRaw(token, to, amount, minter) {
     let initialTotalSupply = await token.totalSupply();
     let initialMinterAllowance = await token.minterAllowance(minter);
     let minting = await token.mint(to, amount, { from: minter });
-    assert.equal(minting.logs[0].event, 'Mint');
-    assert.equal(minting.logs[0].args.minter, minter);
-    assert.equal(minting.logs[0].args.to, to);
-    assert.equal(minting.logs[0].args.amount, amount);
+    checkMintEvents(minting, to, amount, minter);
+
     // TODO revisit this
     /*  let totalSupply = await token.totalSupply();
       totalSupply.should.be.bignumber.equal(initialTotalSupply);
       let minterAllowance = await token.minterAllowance(minter);
       assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).isEqualTo(new BigNumber(minterAllowance)));*/
-}
-
-async function mintToReserveAccount(token, address, amount) {
-    let minting = await token.mint(amount, { from: minterAccount });
-    assert.equal(minting.logs[0].event, 'Mint');
-    assert.equal(minting.logs[0].args.amount, amount);
-    let mintTransfer = await token.transfer(address, amount, { from: reserverAccount });
-    assert.equal(mintTransfer.logs[0].event, 'Transfer');
-    assert.equal(mintTransfer.logs[0].args.from, reserverAccount);
-    assert.equal(mintTransfer.logs[0].args.to, address);
-    assert.equal(mintTransfer.logs[0].args.value, amount);
 }
 
 async function blacklist(token, account) {
@@ -750,7 +752,6 @@ module.exports = {
     setMinter: setMinter,
     mint: mint,
     mintRaw: mintRaw,
-    mintToReserveAccount: mintToReserveAccount,
     blacklist: blacklist,
     unBlacklist: unBlacklist,
     setLongDecimalFeesTransferWithFees: setLongDecimalFeesTransferWithFees,
