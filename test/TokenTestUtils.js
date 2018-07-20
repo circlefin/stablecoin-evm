@@ -1,6 +1,5 @@
-var UpgradedFiatToken = artifacts.require('UpgradedFiatToken');
-var EternalStorage = artifacts.require('EternalStorage');
 const util = require('util');
+const abi = require('ethereumjs-abi')
 var _ = require('lodash');
 var name = 'Sample Fiat Token';
 var symbol = 'C-USD';
@@ -12,11 +11,16 @@ var bigHundred = new BigNumber(100);
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 var Q = require('q');
+var FiatToken = artifacts.require('FiatToken');
+var FiatTokenProxy = artifacts.require('FiatTokenProxy');
+
 // TODO: test really big numbers  Does this still have to be done??
 
 var deployerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
-var upgraderAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+var proxyOwnerAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+var upgraderAccount = proxyOwnerAccount; // accounts[2]
 var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
 var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
 var arbitraryAccount2 = "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc"; // accounts[5]
@@ -68,6 +72,21 @@ function checkTransferEvents(transfer, from, to, value) {
     assert.equal(transfer.logs[0].args.value, value);
 }
 
+function checkMintEvents(minting, to, amount, minter) {
+    // Mint Event
+    assert.equal(minting.logs[0].event, 'Mint');
+    assert.equal(minting.logs[0].args.minter, minter);
+    assert.equal(minting.logs[0].args.to, to);
+    assert.equal(minting.logs[0].args.amount, amount);
+
+    // Transfer from 0 Event
+    assert.equal(minting.logs[1].event, 'Transfer');
+    assert.equal(minting.logs[1].args.from, 0);
+    assert.equal(minting.logs[1].args.to, to);
+    assert.equal(minting.logs[1].args.value, amount);
+
+}
+
 // Creates a state object, with default values replaced by
 // customVars where appropriate.
 function buildExpectedState(token, customVars) {
@@ -80,20 +99,15 @@ function buildExpectedState(token, customVars) {
         'masterMinter': masterMinterAccount,
         'pauser': pauserAccount,
         'blacklister': blacklisterAccount,
-        'upgrader': upgraderAccount,
         'tokenOwner': tokenOwnerAccount,
-        'storageOwner': token.default_storageOwner,
-        'storageAddress': token.default_storageAddress,
-        'priorContractAddress': token.default_priorContractAddress,
-        'upgradedAddress': "0x0000000000000000000000000000000000000000",
+        'proxiedTokenAddress': token.proxiedTokenAddress,
         'balances': {
             'arbitraryAccount': bigZero,
             'masterMinterAccount': bigZero,
             'minterAccount': bigZero,
             'pauserAccount': bigZero,
             'blacklisterAccount': bigZero,
-            'tokenOwnerAccount': bigZero,
-            'upgraderAccount': bigZero
+            'tokenOwnerAccount': bigZero
         },
         'allowance': {
             'arbitraryAccount': {
@@ -168,7 +182,6 @@ function buildExpectedState(token, customVars) {
             'pauserAccount': false,
             'blacklisterAccount': false,
             'tokenOwnerAccount': false,
-            'upgraderAccount': false
         },
         'isAccountMinter': {
             'arbitraryAccount': false,
@@ -177,7 +190,6 @@ function buildExpectedState(token, customVars) {
             'pauserAccount': false,
             'blacklisterAccount': false,
             'tokenOwnerAccount': false,
-            'upgraderAccount': false
         },
         'minterAllowance': {
             'arbitraryAccount': bigZero,
@@ -185,8 +197,7 @@ function buildExpectedState(token, customVars) {
             'minterAccount': bigZero,
             'pauserAccount': bigZero,
             'blacklisterAccount': bigZero,
-            'tokenOwnerAccount': bigZero,
-            'upgraderAccount': bigZero
+            'tokenOwnerAccount': bigZero
         },
         'paused': false
     };
@@ -242,11 +253,6 @@ async function checkVariables(_tokens, _customVars) {
 
 // build up actualState object to compare to expectedState object
 async function getActualState(token) {
-    let storage = EternalStorage.at(await token.getDataContractAddress());
-    let _priorContractAddress = "undefined";
-    if (_.has(token, 'priorContractAddress')) {
-        _priorContractAddress = await token.priorContractAddress.call();
-    }
     return Q.all([
         await token.name.call(),
         await token.symbol.call(),
@@ -255,19 +261,14 @@ async function getActualState(token) {
         await token.masterMinter.call(),
         await token.pauser.call(),
         await token.blacklister.call(),
-        await token.upgrader.call(),
         await token.owner.call(),
-        await storage.owner.call(),
-        await token.getDataContractAddress(),
-        _priorContractAddress,
-        await token.upgradedAddress.call(),
+        await token.implementation.call(),
         await token.balanceOf(arbitraryAccount),
         await token.balanceOf(masterMinterAccount),
         await token.balanceOf(minterAccount),
         await token.balanceOf(pauserAccount),
         await token.balanceOf(blacklisterAccount),
         await token.balanceOf(tokenOwnerAccount),
-        await token.balanceOf(upgraderAccount),
         await token.allowance(arbitraryAccount, masterMinterAccount),
         await token.allowance(arbitraryAccount, minterAccount),
         await token.allowance(arbitraryAccount, pauserAccount),
@@ -318,27 +319,24 @@ async function getActualState(token) {
         await token.allowance(upgraderAccount, tokenOwnerAccount),
         await token.allowance(upgraderAccount, upgraderAccount),
         await token.totalSupply(),
-        await token.isAccountBlacklisted(arbitraryAccount),
-        await token.isAccountBlacklisted(masterMinterAccount),
-        await token.isAccountBlacklisted(minterAccount),
-        await token.isAccountBlacklisted(pauserAccount),
-        await token.isAccountBlacklisted(blacklisterAccount),
-        await token.isAccountBlacklisted(tokenOwnerAccount),
-        await token.isAccountBlacklisted(upgraderAccount),
-        await token.isAccountMinter(arbitraryAccount),
-        await token.isAccountMinter(masterMinterAccount),
-        await token.isAccountMinter(minterAccount),
-        await token.isAccountMinter(pauserAccount),
-        await token.isAccountMinter(blacklisterAccount),
-        await token.isAccountMinter(tokenOwnerAccount),
-        await token.isAccountMinter(upgraderAccount),
+        await token.isBlacklisted(arbitraryAccount),
+        await token.isBlacklisted(masterMinterAccount),
+        await token.isBlacklisted(minterAccount),
+        await token.isBlacklisted(pauserAccount),
+        await token.isBlacklisted(blacklisterAccount),
+        await token.isBlacklisted(tokenOwnerAccount),
+        await token.isMinter(arbitraryAccount),
+        await token.isMinter(masterMinterAccount),
+        await token.isMinter(minterAccount),
+        await token.isMinter(pauserAccount),
+        await token.isMinter(blacklisterAccount),
+        await token.isMinter(tokenOwnerAccount),
         await token.minterAllowance(arbitraryAccount),
         await token.minterAllowance(masterMinterAccount),
         await token.minterAllowance(minterAccount),
         await token.minterAllowance(pauserAccount),
         await token.minterAllowance(blacklisterAccount),
         await token.minterAllowance(tokenOwnerAccount),
-        await token.minterAllowance(upgraderAccount),
         await token.paused()
     ]).spread(function (
         name,
@@ -348,19 +346,14 @@ async function getActualState(token) {
         masterMinter,
         pauser,
         blacklister,
-        upgrader,
         tokenOwner,
-        storageOwner,
-        storageAddress,
-        priorContractAddress,
-        upgradedAddress,
+        proxiedTokenAddress,
         balancesA,
         balancesMM,
         balancesM,
         balancesP,
         balancesB,
         balancesRAC,
-        balancesU,
         allowanceAtoMM,
         allowanceAtoM,
         allowanceAtoP,
@@ -417,21 +410,18 @@ async function getActualState(token) {
         isAccountBlacklistedP,
         isAccountBlacklistedB,
         isAccountBlacklistedRAC,
-        isAccountBlacklistedU,
         isAccountMinterA,
         isAccountMinterMM,
         isAccountMinterM,
         isAccountMinterP,
         isAccountMinterB,
         isAccountMinterRAC,
-        isAccountMinterU,
         minterAllowanceA,
         minterAllowanceMM,
         minterAllowanceM,
         minterAllowanceP,
         minterAllowanceB,
         minterAllowanceRAC,
-        minterAllowanceU,
         paused
     ) {
         var actualState = {
@@ -442,20 +432,15 @@ async function getActualState(token) {
             'masterMinter': masterMinter,
             'pauser': pauser,
             'blacklister': blacklister,
-            'upgrader': upgrader,
             'tokenOwner': tokenOwner,
-            'storageOwner': storageOwner,
-            'storageAddress': storageAddress,
-            'priorContractAddress': priorContractAddress,
-            'upgradedAddress': upgradedAddress,
+            'proxiedTokenAddress': proxiedTokenAddress,
             'balances': {
                 'arbitraryAccount': balancesA,
                 'masterMinterAccount': balancesMM,
                 'minterAccount': balancesM,
                 'pauserAccount': balancesP,
                 'blacklisterAccount': balancesB,
-                'tokenOwnerAccount': balancesRAC,
-                'upgraderAccount': balancesU
+                'tokenOwnerAccount': balancesRAC
             },
             'allowance': {
                 'arbitraryAccount': {
@@ -529,8 +514,7 @@ async function getActualState(token) {
                 'minterAccount': isAccountBlacklistedM,
                 'pauserAccount': isAccountBlacklistedP,
                 'blacklisterAccount': isAccountBlacklistedB,
-                'tokenOwnerAccount': isAccountBlacklistedRAC,
-                'upgraderAccount': isAccountBlacklistedU
+                'tokenOwnerAccount': isAccountBlacklistedRAC
             },
             'isAccountMinter': {
                 'arbitraryAccount': isAccountMinterA,
@@ -538,8 +522,7 @@ async function getActualState(token) {
                 'minterAccount': isAccountMinterM,
                 'pauserAccount': isAccountMinterP,
                 'blacklisterAccount': isAccountMinterB,
-                'tokenOwnerAccount': isAccountMinterRAC,
-                'upgraderAccount': isAccountMinterU
+                'tokenOwnerAccount': isAccountMinterRAC
             },
             'minterAllowance': {
                 'arbitraryAccount': minterAllowanceA,
@@ -547,8 +530,7 @@ async function getActualState(token) {
                 'minterAccount': minterAllowanceM,
                 'pauserAccount': minterAllowanceP,
                 'blacklisterAccount': minterAllowanceB,
-                'tokenOwnerAccount': minterAllowanceRAC,
-                'upgraderAccount': minterAllowanceU
+                'tokenOwnerAccount': minterAllowanceRAC
             },
             'paused': paused
         };
@@ -575,26 +557,13 @@ async function mintRaw(token, to, amount, minter) {
     let initialTotalSupply = await token.totalSupply();
     let initialMinterAllowance = await token.minterAllowance(minter);
     let minting = await token.mint(to, amount, { from: minter });
-    assert.equal(minting.logs[0].event, 'Mint');
-    assert.equal(minting.logs[0].args.minter, minter);
-    assert.equal(minting.logs[0].args.to, to);
-    assert.equal(minting.logs[0].args.amount, amount);
+    checkMintEvents(minting, to, amount, minter);
+
     // TODO revisit this
     /*  let totalSupply = await token.totalSupply();
       totalSupply.should.be.bignumber.equal(initialTotalSupply);
       let minterAllowance = await token.minterAllowance(minter);
       assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).isEqualTo(new BigNumber(minterAllowance)));*/
-}
-
-async function mintToReserveAccount(token, address, amount) {
-    let minting = await token.mint(amount, { from: minterAccount });
-    assert.equal(minting.logs[0].event, 'Mint');
-    assert.equal(minting.logs[0].args.amount, amount);
-    let mintTransfer = await token.transfer(address, amount, { from: reserverAccount });
-    assert.equal(mintTransfer.logs[0].event, 'Transfer');
-    assert.equal(mintTransfer.logs[0].args.from, reserverAccount);
-    assert.equal(mintTransfer.logs[0].args.to, address);
-    assert.equal(mintTransfer.logs[0].args.value, amount);
 }
 
 async function blacklist(token, account) {
@@ -709,6 +678,34 @@ async function redeem(token, account, amount) {
     assert.equal(redeemResult.logs[0].args.amount, amount);
 }
 
+async function initializeTokenWithProxy(rawToken) {
+    const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+    const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+    await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+    proxiedToken = await FiatToken.at(proxy.address);
+    proxiedToken.proxiedTokenAddress = rawToken.address;
+    assert.equal(proxiedToken.address, proxy.address);
+    assert.notEqual(proxiedToken.address, rawToken.address);
+    var tokenConfig = {
+        proxy: proxy,
+        token: proxiedToken
+    };
+    return tokenConfig;
+}
+
+async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
+    if (proxyUpgraderAccount == null) {
+        proxyUpgraderAccount = proxyOwnerAccount;
+    }
+    await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+    proxiedToken = await FiatToken.at(proxy.address);
+    assert.equal(proxiedToken.address, proxy.address);
+    return tokenConfig = {
+        proxy: proxy,
+        token: proxiedToken
+    }
+}
+
 async function expectRevert(contractPromise) {
     try {
         await contractPromise;
@@ -733,6 +730,12 @@ async function expectJump(contractPromise) {
     }
 }
 
+function encodeCall(name, arguments, values) {
+    const methodId = abi.methodID(name, arguments).toString('hex');
+    const params = abi.rawEncode(arguments, values).toString('hex');
+    return '0x' + methodId + params;
+}
+
 module.exports = {
     name: name,
     symbol: symbol,
@@ -749,7 +752,6 @@ module.exports = {
     setMinter: setMinter,
     mint: mint,
     mintRaw: mintRaw,
-    mintToReserveAccount: mintToReserveAccount,
     blacklist: blacklist,
     unBlacklist: unBlacklist,
     setLongDecimalFeesTransferWithFees: setLongDecimalFeesTransferWithFees,
@@ -758,18 +760,20 @@ module.exports = {
     sampleTransferFrom: sampleTransferFrom,
     approve: approve,
     redeem: redeem,
+    initializeTokenWithProxy: initializeTokenWithProxy,
+    upgradeTo: upgradeTo,
     expectRevert: expectRevert,
     expectJump: expectJump,
+    encodeCall: encodeCall,
     deployerAccount: deployerAccount,
     arbitraryAccount: arbitraryAccount,
-    upgraderAccount: upgraderAccount,
     tokenOwnerAccount: tokenOwnerAccount,
     arbitraryAccount2: arbitraryAccount2,
     masterMinterAccount: masterMinterAccount,
     minterAccount: minterAccount,
     pauserAccount: pauserAccount,
     blacklisterAccount: blacklisterAccount,
-
+    proxyOwnerAccount: proxyOwnerAccount,
     arbitraryAccountPrivateKey,
     upgraderAccountPrivateKey,
     tokenOwnerPrivateKey,

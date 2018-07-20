@@ -1,23 +1,19 @@
 pragma solidity ^0.4.23;
 
-import "./thirdparty/openzeppelin/Ownable.sol";
-import "./storage/EternalStorageUpdater.sol";
+import "./thirdparty/zeppelinos/ownership/Ownable.sol";
 
 /**
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
 */
-contract Blacklistable is EternalStorageUpdater, Ownable {
+contract Blacklistable is Ownable {
 
     address public blacklister;
+    mapping(address => bool) internal blacklisted;
 
     event Blacklisted(address indexed _account);
     event UnBlacklisted(address indexed _account);
     event BlacklisterChanged(address indexed newBlacklister);
-
-    constructor(address _blacklister) public {
-        blacklister = _blacklister;
-    }
 
     /**
      * @dev Throws if called by any account other than the blacklister
@@ -28,30 +24,20 @@ contract Blacklistable is EternalStorageUpdater, Ownable {
     }
 
     /**
-     * @dev Throws if either argument account is blacklisted
-     * @param _secondAccount An account to check
-     * @param _secondAccount An additional account to check
-    */
-    modifier notBlacklistedBoth(address _firstAccount, address _secondAccount) {
-        require(isAnyBlacklisted(_firstAccount, _secondAccount) == false);
-        _;
-    }
-
-    /**
      * @dev Throws if argument account is blacklisted
      * @param _account An additional account to check
     */
     modifier notBlacklisted(address _account) {
-        require(isBlacklisted(_account) == false);
+        require(blacklisted[_account] == false);
         _;
     }
 
     /**
      * @dev Checks if account is blacklisted
-     * @param _account The address to check
+     * @param _account The address to check    
     */
-    function isAccountBlacklisted(address _account) public constant returns (bool) {
-        return isBlacklisted(_account);
+    function isBlacklisted(address _account) public view returns (bool) {
+        return blacklisted[_account];
     }
 
     /**
@@ -59,7 +45,7 @@ contract Blacklistable is EternalStorageUpdater, Ownable {
      * @param _account The address to blacklist
     */
     function blacklist(address _account) public onlyBlacklister {
-        setBlacklisted(_account, true);
+        blacklisted[_account] = true;
         emit Blacklisted(_account);
     }
 
@@ -68,7 +54,7 @@ contract Blacklistable is EternalStorageUpdater, Ownable {
      * @param _account The address to remove from the blacklist
     */
     function unBlacklist(address _account) public onlyBlacklister {
-        setBlacklisted(_account, false);
+        blacklisted[_account] = false;
         emit UnBlacklisted(_account);
     }
 
