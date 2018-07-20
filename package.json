@@ -32,7 +32,8 @@
     "lodash": "^4.17.10",
     "npm": "^6.1.0",
     "q": "^1.5.1",
-    "zeppelin-solidity": "1.8.0"
+    "zeppelin-solidity": "1.8.0",
+    "zos-lib": "^1.3.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

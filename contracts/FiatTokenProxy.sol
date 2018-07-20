@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
-import './thirdparty/zeppelinos/OwnedUpgradeabilityProxy.sol';
+import 'zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol';
 
 /**
  * @title FiatTokenProxy
  * @dev This contract proxies FiatToken calls and enables FiatToken upgrades
 */ 
-contract FiatTokenProxy is OwnedUpgradeabilityProxy {
+contract FiatTokenProxy is AdminUpgradeabilityProxy {
 
 }
