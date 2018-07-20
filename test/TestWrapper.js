@@ -23,7 +23,6 @@ async function newToken() {
   return token;
 }
 
-///////////////////////////////////////////////////////////////////////////////
 
 // Run specific tests combos by commenting/uncommenting the contract blocks below.
 
@@ -42,4 +41,3 @@ contract('FiatToken_NegativeTests', async function () {
 contract('FiatToken_MiscTests', async function () {
   await misc_tests.run_tests(newToken);
 });
-
