@@ -63,7 +63,7 @@ async function run_tests(newToken) {
   // Approve
 
   it('pt020 should approve a spend and set allowed amount', async function () {
-    assert(await token.approve(minterAccount, amount, { from: arbitraryAccount }));
+    await token.approve(minterAccount, amount, { from: arbitraryAccount });
     var customVars = [
       { 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
@@ -94,7 +94,7 @@ async function run_tests(newToken) {
   // Configure minter
 
   it('pt015 should configureMinter, setting the minter to true and mintingAllowance to amount', async function () {
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
@@ -107,14 +107,14 @@ async function run_tests(newToken) {
   it('pt012 should mint the amount, increasing balance of recipient by amount, increasing total supply by amount, and decreasing minterAllowed by amount', async function () {
     var mintAmount = 50;
 
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
 
-    assert(await token.mint(arbitraryAccount, mintAmount, { from: minterAccount }));
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -128,8 +128,8 @@ async function run_tests(newToken) {
     var mintAmount = 11;
     var burnAmount = 10;
 
-    assert(await token.configureMinter(minterAccount, mintAmount, { from: masterMinterAccount }));
-    assert(await token.mint(minterAccount, mintAmount, { from: minterAccount }));
+    await token.configureMinter(minterAccount, mintAmount, { from: masterMinterAccount });
+    await token.mint(minterAccount, mintAmount, { from: minterAccount });
     var setup = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
@@ -153,8 +153,8 @@ async function run_tests(newToken) {
   it('pt010 should removeMinter, setting the minter to false and minterAllowed to 0', async function () {
     let mintAmount = 11;
 
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
-    assert(await token.mint(arbitraryAccount, mintAmount, { from: minterAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount })
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -163,7 +163,7 @@ async function run_tests(newToken) {
     ];
     await checkVariables([token], [customVars]);
 
-    assert(await token.removeMinter(minterAccount, { from: masterMinterAccount }));
+    await token.removeMinter(minterAccount, { from: masterMinterAccount });
     customVars = [
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
@@ -176,14 +176,14 @@ async function run_tests(newToken) {
   it('pt008 should transfer, reducing sender balance by amount and increasing recipient balance by amount', async function () {
     let mintAmount = 50;
 
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
 
-    assert(await token.mint(arbitraryAccount, mintAmount, { from: minterAccount }));
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -192,7 +192,7 @@ async function run_tests(newToken) {
     ];
     await checkVariables([token], [customVars]);
 
-    assert(await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount }));
+    await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
     customVars = [
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
@@ -206,14 +206,14 @@ async function run_tests(newToken) {
   it('pt007 should transferFrom, reducing sender balance by amount and increasing recipient balance by amount', async function () {
     let mintAmount = 50;
 
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
 
-    assert(await token.mint(arbitraryAccount, mintAmount, { from: minterAccount }));
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -222,8 +222,8 @@ async function run_tests(newToken) {
     ];
     await checkVariables([token], [customVars]);
 
-    assert(await token.approve(masterMinterAccount, mintAmount, { from: arbitraryAccount }));
-    assert(await token.transferFrom(arbitraryAccount, pauserAccount, mintAmount, { from: masterMinterAccount }));
+    await token.approve(masterMinterAccount, mintAmount, { from: arbitraryAccount });
+    await token.transferFrom(arbitraryAccount, pauserAccount, mintAmount, { from: masterMinterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -272,9 +272,9 @@ async function run_tests(newToken) {
 
   it('ms002 should transfer to self has correct final balance', async function() {
     let mintAmount = 50;
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
-    assert(await token.mint(arbitraryAccount, mintAmount, { from: minterAccount }));
-    assert(await token.transfer(arbitraryAccount, mintAmount, { from: arbitraryAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.transfer(arbitraryAccount, mintAmount, { from: arbitraryAccount });
 
     var customVars = [
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -288,11 +288,11 @@ async function run_tests(newToken) {
   it('ms003 should transferFrom to self from approved account and have correct final balance', async function() {
     let mintAmount = 50;
 
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
-    assert(await token.mint(arbitraryAccount, mintAmount, { from: minterAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
 
-    assert(await token.approve(pauserAccount, mintAmount, { from: arbitraryAccount }));
-    assert(await token.transferFrom(arbitraryAccount, arbitraryAccount, mintAmount, { from: pauserAccount }));
+    await token.approve(pauserAccount, mintAmount, { from: arbitraryAccount });
+    await token.transferFrom(arbitraryAccount, arbitraryAccount, mintAmount, { from: pauserAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -305,11 +305,11 @@ async function run_tests(newToken) {
   it('ms004 should transferFrom to self from approved self and have correct final balance', async function() {
     let mintAmount = 50;
 
-    assert(await token.configureMinter(minterAccount, amount, { from: masterMinterAccount }));
-    assert(await token.mint(arbitraryAccount, mintAmount, { from: minterAccount }));
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
 
-    assert(await token.approve(arbitraryAccount, mintAmount, { from: arbitraryAccount }));
-    assert(await token.transferFrom(arbitraryAccount, arbitraryAccount, mintAmount, { from: arbitraryAccount }));
+    await token.approve(arbitraryAccount, mintAmount, { from: arbitraryAccount });
+    await token.transferFrom(arbitraryAccount, arbitraryAccount, mintAmount, { from: arbitraryAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
