@@ -71,6 +71,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     */
     function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) notBlacklisted(_to) public returns (bool) {
         require(_to != address(0));
+        require(_amount > 0);
 
         uint256 mintingAllowedAmount = minterAllowed[msg.sender];
         require(_amount <= mintingAllowedAmount);
@@ -222,6 +223,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
     */
     function burn(uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) public {
         uint256 balance = balances[msg.sender];
+        require(_amount > 0);
         require(balance >= _amount);
 
         totalSupply_ = totalSupply_.sub(_amount);
