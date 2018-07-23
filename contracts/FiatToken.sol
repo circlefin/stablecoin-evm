@@ -151,10 +151,14 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @return bool success
     */
     function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted(_to) notBlacklisted(msg.sender) notBlacklisted(_from) public returns (bool) {
+        require(_to != address(0));
+        require(_value <= balances[_from]);
         require(_value <= allowed[_from][msg.sender]);
 
+        balances[_from] = balances[_from].sub(_value);
+        balances[_to] = balances[_to].add(_value);
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-        doTransfer(_from, _to, _value);
+        emit Transfer(_from, _to, _value);
         return true;
     }
 
@@ -165,29 +169,13 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
      * @return bool success
     */
     function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted(msg.sender) notBlacklisted(_to) public returns (bool) {
-        doTransfer(msg.sender, _to, _value);
-        return true;
-    }
-
-    /**
-     * @dev updates balances for sender, recipient.
-     * Validates that _to address exists, totalAmount <= balance of the from account.
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-    */
-    function doTransfer(address _from, address _to, uint256 _value) private {
         require(_to != address(0));
+        require(_value <= balances[msg.sender]);
 
-        uint256 balance;
-
-        balance = balances[_from];
-
-        require(_value <= balance);
-
-        balances[_from] = balances[_from].sub(_value);
+        balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);
-        emit Transfer(_from, _to, _value);
+        emit Transfer(msg.sender, _to, _value);
+        return true;
     }
 
     /**
