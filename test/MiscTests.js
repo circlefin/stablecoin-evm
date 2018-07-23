@@ -341,12 +341,12 @@ async function run_tests(newToken) {
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
-    console.log(await token.mint.call(arbitraryAccount, mintAmount, { from: minterAccount }));
+    assert(await token.mint.call(arbitraryAccount, mintAmount, { from: minterAccount }));
     await checkVariables([token], [customVars]);
   });
 
   it('ms040 should return true on approve', async function() {
-    console.log(await token.approve.call(minterAccount, amount, { from: arbitraryAccount }));
+    assert(await token.approve.call(minterAccount, amount, { from: arbitraryAccount }));
   });
 
   it('ms041 should return true on transferFrom', async function() {
@@ -368,7 +368,7 @@ async function run_tests(newToken) {
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'allowance.arbitraryAccount.masterMinterAccount', 'expectedValue': new BigNumber(mintAmount)},
     ];
-    console.log(await token.transferFrom.call(arbitraryAccount, pauserAccount, mintAmount, { from: masterMinterAccount }));
+    assert(await token.transferFrom.call(arbitraryAccount, pauserAccount, mintAmount, { from: masterMinterAccount }));
     await checkVariables([token], [customVars]);
   });
 
@@ -389,16 +389,16 @@ async function run_tests(newToken) {
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
-    console.log(await token.transfer.call(pauserAccount, mintAmount, { from: arbitraryAccount }));
+    assert(await token.transfer.call(pauserAccount, mintAmount, { from: arbitraryAccount }));
     await checkVariables([token], [customVars]);
   });
 
   it('ms043 should return true on configureMinter', async function() {
-    console.log(await token.configureMinter.call(minterAccount, amount, { from: masterMinterAccount }));
+    assert(await token.configureMinter.call(minterAccount, amount, { from: masterMinterAccount }));
   });
 
   it('ms044 should return true on removeMinter', async function() {
-    console.log(await token.removeMinter.call(minterAccount, { from: masterMinterAccount }));
+    assert(await token.removeMinter.call(minterAccount, { from: masterMinterAccount }));
   });
 
 }
