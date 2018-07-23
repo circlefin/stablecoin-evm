@@ -27,9 +27,9 @@ These entities will have to be members of CENTRE, and will be vetted by CENTRE b
 tokens. CENTRE will not mint any tokens itself, it will approve members to mint and burn tokens.
 
 Each `minter` has a `mintingAllowance`, which CENTRE configures. The `mintingAllowance` is how many tokens that minter 
-may issue, and as a `minter` issues tokens, their `mintingAllowance` declines. 
-CENTRE will periodically reset the `mintingAllowance` as long as a `minter` remains in good standing with CENTRE and is 
-maintaining adequate reserves for the tokens they have issued. The `mintingAllowance` is to limit the damage if any particular
+may issue, and as a `minter` issues tokens, its `mintingAllowance` declines. 
+CENTRE will periodically reset the `mintingAllowance` as long as a `minter` remains in good standing with CENTRE and maintains 
+adequate reserves for the tokens it has issued. The `mintingAllowance` is to limit the damage if any particular
 `minter` is compromised.
 
 ### Adding Minters
@@ -37,10 +37,11 @@ CENTRE adds minters via the `configureMinter` method. When a minter is configure
 which is the number of tokens that address is allowed to mint. As a `minter` mints tokens, the `mintingAllowance` will decline.
 
 - Only the `masterMinter` role may call configureMinter.
+- 
 
 ### Resetting Minting Allowance
-As the `mintingAllowance` declines, `minters` will need their allowance reset periodically if they wish to continue 
-minting. When a `minters` allowance is low CENTRE can make another call to `configureMinter` to reset the 
+The `minters` will need their allowance reset periodically to allow them to continue 
+minting. When a `minter`'s allowance is low, CENTRE can make another call to `configureMinter` to reset the 
 `mintingAllowance` to a higher value.
 
 ### Removing Minters
@@ -59,7 +60,7 @@ will each increase by `amount`.
 
 - Minting fails when the contract is `paused`.
 - Minting fails when the `minter` or `_to` address is blacklisted.
- 
+- Minting emits a `Mint(minter, _to, amount)` event and a `Transfer(0x00, _to, amount)` event. 
 ### Burning
 A `minter` burns tokens via the `burn` method. The `minter` specifies the `amount` of tokens to burn, and the `minter` 
 must have a `balance` greater than or equal to the `amount`. Burning tokens is restricted to `minter` addresses to 
@@ -74,6 +75,7 @@ Burning tokens will not increase the mintingAllowance of the address doing the b
 - Burning fails when the contract is paused.
 - Burning fails when the minter is blacklisted. 
 
+- Burning emits a `Burn(minter, amount)` event, and a `Transfer(minter, 0x00, amount)` event.
 
 ## Blacklisting
 Addresses can be blacklisted. A blacklisted address will be unable to transfer tokens, approve, mint, or burn tokens. 
@@ -81,17 +83,18 @@ Addresses can be blacklisted. A blacklisted address will be unable to transfer t
 CENTRE blacklists an address via the `blacklist` method. The specified `account` will be added to the blacklist.
 
 - Only the `blacklister` role may call `blacklist`.
+- Blacklisting emits a `Blacklist(account)` event
 
 ### Removing a blacklisted address
 CENTRE removes an address from the blacklist via the `unblacklist` method. The specified `account` will be removed from the blacklist.
 
 - Only the `blacklister` role may call `unblacklist`.
-
+- Unblacklisting emits an `UnBlacklist(account)` event.
 
 ## Pausing
 The entire contract can be paused in case a serious bug is found or there is a serious key compromise. 
-All transfers, minting, and burning will be prevented while the contract is paused. Other functionality, such as modifying
-the blacklist, adding/removing minters, changing roles, and upgrading will remain operational as those methods may be
+All transfers, minting, burning, and adding minters will be prevented while the contract is paused. Other functionality, such as modifying
+the blacklist, removing minters, changing roles, and upgrading will remain operational as those methods may be
 required to fix or mitigate the issue that caused CENTRE to pause the contract.
 
 ### Pause
