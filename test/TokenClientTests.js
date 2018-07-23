@@ -4,6 +4,7 @@ var makeRawTransaction = abiUtils.makeRawTransaction;
 var sendRawTransaction = abiUtils.sendRawTransaction;
 var tokenUtils = require('./TokenTestUtils');
 var FiatToken = artifacts.require('FiatToken');
+var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 var BigNumber = require('bignumber.js');
 var configureMinterJson = require('./assets/ConfigureMinter');
 var pauseJson = require('./assets/Pause');
@@ -45,36 +46,36 @@ var masterMinterAccountPrivateKey = tokenUtils.masterMinterAccountPrivateKey;
 var minterAccountPrivateKey = tokenUtils.minterAccountPrivateKey;
 var pauserAccountPrivateKey = tokenUtils.pauserAccountPrivateKey;
 var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
+var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+
+var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+var proxyOwnerAccountPrivateKey = tokenUtils.proxyOwnerAccountPrivateKey;
 
 /* Note: we are not actually using all the fields present in the unsigned JSON transaction (like nonce).
 These tests check correctness of the data field by sending a raw transaction using data from the tokenclient. */
-async function newOriginalToken() {
-    var token = await FiatToken.new(
-        "0x0",
-        name,
-        symbol,
-        currency,
-        decimals,
-        masterMinterAccount,
-        pauserAccount,
-        blacklisterAccount,
-        upgraderAccount,
-        tokenOwnerAccount
-    );
-
-    token.default_priorContractAddress = "undefined";
-    token.default_storageOwner = token.address;
-    token.default_storageAddress = await token.getDataContractAddress();
-
-    return token;
-}
-
-contract('Token Client tests', function (accounts) {
+contract('Token Client Test', function (accounts) {
     beforeEach(async function checkBefore() {
-        token = await newOriginalToken();
-        let tokenAddress = token.address;
-        dataContractAddress = await token.getDataContractAddress();
+        token = await FiatToken.new({from: tokenOwnerAccount});
+    	var tokenConfig = await initializeTokenWithProxy(token);
+    	proxy = tokenConfig.proxy;
+    	token = tokenConfig.token;
+    	assert.equal(proxy.address, token.address);
     });
+
+	/* Note: rerun ganache on each run of this test file, or else TC000 will fail */
+    it('TCU000 upgrades', async function () {
+    	token = await FiatToken.new({from: arbitraryAccount});
+    	console.log('FiatToken address');
+		console.log(token.address);
+		const proxy = await FiatTokenProxy.new({ from: arbitraryAccount2 })
+		console.log('proxy address');
+		console.log(proxy.address);
+		var upgradeRawTx = makeRawTransaction(upgradeJson.data, arbitraryAccount2, arbitraryAccount2PrivateKey, proxy.address);
+		await sendRawTransaction(upgradeRawTx);
+		proxiedToken = await FiatToken.at(proxy.address);
+    	assert.equal(proxiedToken.address, proxy.address);
+    	assert.notEqual(proxiedToken.address, token.address);
+	})
 
 	/*Command: UpdateMasterMinter
 	Example Input:
@@ -82,8 +83,6 @@ contract('Token Client tests', function (accounts) {
 	Expected Output:
 	*/
 	it('TC001 updates the master minter address', async function () {
-
-//		var updateMasterMinter = {"toAddress": "5e7b85e7b7257684566532992d0c7d8a179bf56e", "fromAddress": "5e7b85e7b7257684566532992d0c7d8a179bf56e", "nonce": 0, "gasLimit": 0, "gasPrice": 0, "value": 0, "data": "0xaa20e1e40000000000000000000000005e7b85e7b7257684566532992d0c7d8a179bf56e"}
 
 		var updateMasterMinterRawTx = makeRawTransaction(updateMasterMinterJson.data, tokenOwnerAccount, tokenOwnerPrivateKey, token.address)
 
@@ -154,14 +153,12 @@ contract('Token Client tests', function (accounts) {
 	*/
 	it('TC005 updates the upgrader', async function () {
 
-		var updateUpgraderAddressRawTx = makeRawTransaction(updateUpgraderAddressJson.data, upgraderAccount, upgraderAccountPrivateKey, token.address)
+		var updateUpgraderAddressRawTx = makeRawTransaction(updateUpgraderAddressJson.data, proxyOwnerAccount, proxyOwnerAccountPrivateKey, token.address)
 
 		await sendRawTransaction(updateUpgraderAddressRawTx);
 
-		var customVars = [
-	            { 'variable': 'upgrader', 'expectedValue': "0x5e7b85e7b7257684566532992d0c7d8a179bf56e"}
-	        ];
-	    await checkVariables([token], [customVars]);
+	    await checkVariables([token], [[]]);
+	    assert.equal(await proxy.proxyOwner(), "0x5e7b85e7b7257684566532992d0c7d8a179bf56e")
 	})
 
 	/*Command: Upgrade
@@ -170,7 +167,7 @@ contract('Token Client tests', function (accounts) {
 	Expected Output:
 	*/
 
-	it('TC006 upgrades', async function () {
+	/*it('TC006 upgrades', async function () {
 
 		var upgradeRawTx = makeRawTransaction(upgradeJson.data, upgraderAccount, upgraderAccountPrivateKey, token.address)
 
@@ -179,12 +176,12 @@ contract('Token Client tests', function (accounts) {
 		assert.equal(await token.upgradedAddress.call(), "0x5e7b85e7b7257684566532992d0c7d8a179bf56e");
 
 		// TODO: why does this checkVariables cause a revert?:
-		/*		var customVars = [
+				var customVars = [
 			            { 'variable': 'upgradedAddress', 'expectedValue': "0x5e7b85e7b7257684566532992d0c7d8a179bf56e"}
 			        ];
 			    await checkVariables([token], [customVars]);
-		*/
-	})
+		
+	})*/
 
 	/*Command: ConfigureMinter
 	java -jar tokenclient-1.0-SNAPSHOT.jar ConfigureMinter ../../integrationtests/config/token-client.yml --tokenAddress 5e7b85e7b7257684566532992d0c7d8a179bf56e --minterAddress ffcf8fdee72ac11b5c542428b35eef5769c409f0 --amount 1 --nonce 0 --gasLimit 0 --gasPrice 0 --value 0 --fromAddress 5e7b85e7b7257684566532992d0c7d8a179bf56e

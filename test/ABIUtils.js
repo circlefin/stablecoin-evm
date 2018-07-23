@@ -5,7 +5,7 @@ function makeRawTransaction(msgData, msgSender, hexPrivateKey, contractAddress) 
     var tx = new Tx({
         nonce: web3.toHex(web3.eth.getTransactionCount(msgSender)),
         gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-        gasLimit: 100000,
+        gasLimit: 1000000,
         to: contractAddress,
         value: 0,
         data: msgData,
