@@ -22,6 +22,7 @@ var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 var upgradeTo = tokenUtils.upgradeTo;
 
 var amount = 100;
@@ -102,7 +103,7 @@ async function run_tests(newToken) {
   });
 
   it('ept008 should upgrade while paused', async function() {
-    var newRawToken = await FiatToken.new();
+    var newRawToken = await UpgradedFiatToken.new();
     await token.pause({from: pauserAccount});
     var tokenConfig = await upgradeTo(proxy, newRawToken);
     var newProxiedToken = tokenConfig.token;
@@ -246,7 +247,7 @@ async function run_tests(newToken) {
   });
 
   it ('ept023 should upgrade to blacklisted address', async function() {
-    var newRawToken = await FiatToken.new();
+    var newRawToken = await UpgradedFiatToken.new();
 
     await token.blacklist(newRawToken.address, { from: blacklisterAccount });
     var tokenConfig = await upgradeTo(proxy, newRawToken);

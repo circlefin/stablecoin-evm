@@ -12,6 +12,7 @@ var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 var Q = require('q');
 var FiatToken = artifacts.require('FiatToken');
+var UpgradedFiatToken = artifacts.require('FiatTokenV2');
 var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 
 // TODO: test really big numbers  Does this still have to be done??
@@ -698,7 +699,7 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
     proxyUpgraderAccount = proxyOwnerAccount;
   }
   await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
-  proxiedToken = await FiatToken.at(proxy.address);
+  proxiedToken = await UpgradedFiatToken.at(proxy.address);
   assert.equal(proxiedToken.address, proxy.address);
   return tokenConfig = {
     proxy: proxy,
@@ -737,6 +738,7 @@ function encodeCall(name, arguments, values) {
 }
 
 module.exports = {
+    UpgradedFiatToken: UpgradedFiatToken,
     name: name,
     symbol: symbol,
     currency: currency,

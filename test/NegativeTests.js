@@ -25,6 +25,7 @@ var pauserAccount = tokenUtils.pauserAccount;
 var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var upgradeTo = tokenUtils.upgradeTo;
+var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 
 var amount = 100;
 
@@ -593,14 +594,14 @@ async function run_tests(newToken) {
   // Upgrade
 
   it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
-    var newRawToken = await FiatToken.new();
+    var newRawToken = await UpgradedFiatToken.new();
     await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
     await checkVariables([token], [[]]);
   });
 
   it('nt054 should fail to transferOwnership when sender is not owner', async function() {
     // Create upgraded token
-    var newRawToken = await FiatToken.new();
+    var newRawToken = await UpgradedFiatToken.new();
     var tokenConfig = await upgradeTo(proxy, newRawToken);
     var newProxiedToken = tokenConfig.token;
     var newToken = newProxiedToken;

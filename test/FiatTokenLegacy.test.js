@@ -28,9 +28,11 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var upgradeTo = tokenUtils.upgradeTo;
+var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 
 // these tests are for reference and do not track side effects on all variables
-contract('Legacy Tests', function (accounts) {
+async function run_tests(newToken, accounts) {
+
   beforeEach(async function () {
     rawToken =  await FiatToken.new();
     var tokenConfig = await initializeTokenWithProxy(rawToken);
@@ -569,7 +571,7 @@ contract('Legacy Tests', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
 
-    var newRawToken = await FiatToken.new();
+    var newRawToken = await UpgradedFiatToken.new();
     var tokenConfig = await upgradeTo(proxy, newRawToken);
     var newProxiedToken = tokenConfig.token;
     var newToken = newProxiedToken;
@@ -633,7 +635,7 @@ contract('Legacy Tests', function (accounts) {
     let initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
     
-    var newRawToken = await FiatToken.new();
+    var newRawToken = await UpgradedFiatToken.new();
     var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
     var newProxiedToken = tokenConfig.token;
     var newToken = newProxiedToken;
@@ -671,5 +673,8 @@ contract('Legacy Tests', function (accounts) {
 
     await expectRevert(token.updateMasterMinter(address1, { from: nonRoleAddressChanger }));
   });
+}
 
-});
+module.exports = {
+  run_tests: run_tests,
+}
