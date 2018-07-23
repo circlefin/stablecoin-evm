@@ -28,6 +28,7 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var upgradeTo = tokenUtils.upgradeTo;
+var getAdmin = tokenUtils.getAdmin;
 
 // these tests are for reference and do not track side effects on all variables
 contract('Legacy Tests', function (accounts) {
@@ -619,11 +620,11 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should updateUpgraderAddress for upgrader', async function () {
-    let upgrader = await proxy.upgradeabilityOwner();
+    let upgrader = getAdmin(proxy);
     assert.equal(proxyOwnerAccount, upgrader);
-    let address1 = accounts[7];
-    let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
-    upgrader = await token.upgradeabilityOwner();
+    let address1 = accounts[10];
+    let updated = await proxy.changeAdmin(address1, { from: proxyOwnerAccount });
+    upgrader = getAdmin(proxy);
     assert.equal(upgrader, address1);
 
     //Test upgrade with new upgrader account
@@ -648,8 +649,8 @@ contract('Legacy Tests', function (accounts) {
 
   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
     let address1 = accounts[7];
-    await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
-    let upgrader = await proxy.upgradeabilityOwner();
+    await expectRevert(proxy.changeAdmin(address1, { from: tokenOwnerAccount }));
+    let upgrader = getAdmin(proxy);
     assert.notEqual(upgrader, address1);
   });
 
