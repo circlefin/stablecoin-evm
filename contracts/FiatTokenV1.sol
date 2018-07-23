@@ -12,7 +12,7 @@ import './Blacklistable.sol';
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blacklistable {
+contract FiatTokenV1 is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blacklistable {
     using SafeMath for uint256;
 
     string public name;

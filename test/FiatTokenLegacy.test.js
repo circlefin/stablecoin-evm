@@ -1,4 +1,3 @@
-var FiatToken = artifacts.require('FiatToken');
 var tokenUtils = require('./TokenTestUtils');
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -29,6 +28,8 @@ var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var upgradeTo = tokenUtils.upgradeTo;
 var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
+var FiatToken = tokenUtils.FiatToken;
+
 
 // these tests are for reference and do not track side effects on all variables
 async function run_tests(newToken, accounts) {

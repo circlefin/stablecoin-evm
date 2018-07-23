@@ -1,4 +1,3 @@
-var FiatToken = artifacts.require('FiatToken');
 var tokenUtils = require('./TokenTestUtils');
 var positive_tests = require('./PositiveTests');
 var extended_positive_tests = require('./ExtendedPositiveTests');
@@ -17,6 +16,8 @@ var masterMinterAccount = tokenUtils.masterMinterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
+var FiatToken = tokenUtils.FiatToken;
+
 
 // The following helpers make fresh original/upgraded tokens before each test.
 
