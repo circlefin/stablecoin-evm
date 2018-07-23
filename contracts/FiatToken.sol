@@ -4,7 +4,6 @@ import './thirdparty/openzeppelin/ERC20.sol';
 import './thirdparty/openzeppelin/SafeMath.sol';
 import './thirdparty/openzeppelin/Pausable.sol';
 import './thirdparty/zeppelinos/ownership/Ownable.sol';
-import './thirdparty/zeppelinos/OwnedUpgradeabilityStorage.sol';
 
 import './Blacklistable.sol';
 
