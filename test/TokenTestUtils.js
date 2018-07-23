@@ -87,6 +87,20 @@ function checkMintEvents(minting, to, amount, minter) {
 
 }
 
+function checkBurnEvents(burning, amount, burner) {
+    // Burn Event
+    assert.equal(burning.logs[0].event, 'Burn');
+    assert.equal(burning.logs[0].args.burner, burner);
+    assert.equal(burning.logs[0].args.amount, amount);
+
+    // Transfer to 0 Event
+    assert.equal(burning.logs[1].event, 'Transfer');
+    assert.equal(burning.logs[1].args.from, burner);
+    assert.equal(burning.logs[1].args.to, 0);
+    assert.equal(burning.logs[1].args.value, amount);
+
+}
+
 // Creates a state object, with default values replaced by
 // customVars where appropriate.
 function buildExpectedState(token, customVars) {
@@ -548,6 +562,11 @@ async function setMinter(token, minter, amount) {
     assert.equal(minterAllowance, amount);
 }
 
+async function burn(token, amount, burner) {
+    let burning = await token.burn(amount, { from: burner });
+    checkBurnEvents(burning, amount, burner);
+}
+
 async function mint(token, to, amount, minter) {
     await setMinter(token, minter, amount);
     await mintRaw(token, to, amount, minter);
@@ -751,6 +770,7 @@ module.exports = {
     checkVariables: checkVariables,
     setMinter: setMinter,
     mint: mint,
+    burn: burn,
     mintRaw: mintRaw,
     blacklist: blacklist,
     unBlacklist: unBlacklist,
