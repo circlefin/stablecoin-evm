@@ -615,6 +615,29 @@ async function run_tests(newToken) {
     await checkVariables([newToken], [newToken_result]);
   });
 
+  it('nt055 should fail to mint when amount = 0', async function() {
+    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    await expectRevert(token.mint(pauserAccount, 0, {from: minterAccount}));
+
+    var customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+    ]
+    await checkVariables([token], [customVars]);
+  });
+
+  it('nt056 should fail to burn when amount = 0', async function() {
+    await token.configureMinter(minterAccount, amount, {from: masterMinterAccount});
+    await token.mint(minterAccount, amount, {from: minterAccount});
+    await expectRevert(token.burn(0, {from: minterAccount}));
+    var customVars = [
+      {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
+      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)}
+    ]
+    await checkVariables([token], [customVars]);
+  });
+
 }
 
 module.exports = {
