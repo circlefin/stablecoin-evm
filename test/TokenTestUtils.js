@@ -32,7 +32,8 @@ var upgraderAccount = proxyOwnerAccount; // accounts[14]
 
 var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+var proxyOwnerAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+var upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
 var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
 var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
 var arbitraryAccount2PrivateKey = "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd"; // accounts[5]
@@ -809,6 +810,7 @@ module.exports = {
     getAdmin: getAdmin,
     arbitraryAccountPrivateKey,
     upgraderAccountPrivateKey,
+    proxyOwnerAccountPrivateKey,
     tokenOwnerPrivateKey,
     blacklisterAccountPrivateKey,
     arbitraryAccount2PrivateKey,
