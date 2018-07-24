@@ -216,6 +216,7 @@ contract FiatToken is Ownable, ERC20, Pausable, Blacklistable {
         totalSupply_ = totalSupply_.sub(_amount);
         balances[msg.sender] = balance.sub(_amount);
         emit Burn(msg.sender, _amount);
+        emit Transfer(msg.sender, address(0), _amount);
     }
 
     function updateMasterMinter(address _newMasterMinter) onlyOwner public {

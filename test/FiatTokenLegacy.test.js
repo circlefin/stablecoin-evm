@@ -8,6 +8,7 @@ var BigNumber = require('bignumber.js');
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
+var burn = tokenUtils.burn;
 var setMinter = tokenUtils.setMinter;
 var expectRevert = tokenUtils.expectRevert;
 var blacklist = tokenUtils.blacklist;
@@ -529,7 +530,7 @@ contract('Legacy Tests', function (accounts) {
     assert.isTrue(new BigNumber(minterBalance1).isEqualTo(new BigNumber(minterBalance).plus(new BigNumber(amount))));
 
     // burn tokens
-    await token.burn(amount, { from: burnerAddress });
+    await burn(token, amount, burnerAddress);
     let totalSupply2 = await token.totalSupply();
     assert.isTrue(new BigNumber(totalSupply2).isEqualTo(new BigNumber(totalSupply1).minus(new BigNumber(amount))));
 
