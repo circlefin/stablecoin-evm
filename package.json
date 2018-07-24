@@ -31,8 +31,8 @@
     "ganache-cli": "^6.1.0",
     "lodash": "^4.17.10",
     "npm": "^6.2.0",
+    "openzeppelin-solidity": "1.11.0",
     "q": "^1.5.1",
-    "zeppelin-solidity": "1.8.0",
     "zos-lib": "1.3.0"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import './thirdparty/openzeppelin/ERC20.sol';
-import './thirdparty/openzeppelin/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 import './thirdparty/openzeppelin/Pausable.sol';
 import './thirdparty/zeppelinos/ownership/Ownable.sol';
 
