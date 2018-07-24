@@ -39,6 +39,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
+
   // No Payable Function
 
   it('ms001 no payable function', async function () {
@@ -303,6 +304,92 @@ async function run_tests(newToken) {
     var allowance = new BigNumber(await token.allowance(arbitraryAccount, arbitraryAccount));
     assert(allowance.isEqualTo(new BigNumber(amount)));
   });
+
+  // Return value
+
+  /*
+  * Calls (i.e token.mint.call(...) , token.approve.call(...) etc.) expose the
+  * return value of functions while transactions (token.mint(...) ,
+  * token.approve(...) etc.) return transaction receipts and do not read
+  * function return values. Calls, unlike transactions, do not permanently
+  * modify data. However, both calls and transactions execute code on the
+  * network. That is, token.mint.call(...) will revert if and only if
+  * token.mint(...) reverts.
+  *
+  * "Choosing between a transaction and a call is as simple as deciding
+  *  whether you want to read data, or write it."
+  *  - truffle docs
+  *    (https://truffleframework.com/docs/getting_started/contracts)
+  */
+
+  it('ms039 should return true on mint', async function() {
+    var mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+    assert(await token.mint.call(arbitraryAccount, mintAmount, { from: minterAccount }));
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms040 should return true on approve', async function() {
+    assert(await token.approve.call(minterAccount, amount, { from: arbitraryAccount }));
+  });
+
+  it('ms041 should return true on transferFrom', async function() {
+    let mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.approve(masterMinterAccount, mintAmount, { from: arbitraryAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'allowance.arbitraryAccount.masterMinterAccount', 'expectedValue': new BigNumber(mintAmount)},
+    ];
+    assert(await token.transferFrom.call(arbitraryAccount, pauserAccount, mintAmount, { from: masterMinterAccount }));
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms042 should return true on transfer', async function() {
+    let mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
+    ];
+    assert(await token.transfer.call(pauserAccount, mintAmount, { from: arbitraryAccount }));
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms043 should return true on configureMinter', async function() {
+    assert(await token.configureMinter.call(minterAccount, amount, { from: masterMinterAccount }));
+  });
+
+  it('ms044 should return true on removeMinter', async function() {
+    assert(await token.removeMinter.call(minterAccount, { from: masterMinterAccount }));
+  });
+
 }
 
 module.exports = {
