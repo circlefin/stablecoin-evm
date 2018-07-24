@@ -51,7 +51,14 @@ var msgData1 = abiUtils.msgData1;
 var msgData2 = abiUtils.msgData2;
 var msgData3 = abiUtils.msgData3;
 
+// Encodes methodName, 32 byte string of 0, and address.
+function mockStringAddressEncode(methodName, address) {
+    var version = encodeUint(32) + encodeUint(0); // encode 32 byte string of 0's 
+    return functionSignature(methodName) + version + encodeAddress(address);
+}
+
 async function run_tests(newToken) {
+
     beforeEach(async function checkBefore() {
         rawToken = await newToken();
         var tokenConfig = await initializeTokenWithProxy(rawToken);
@@ -60,67 +67,8 @@ async function run_tests(newToken) {
         assert.equal(proxy.address, token.address);
     });
 
-    // this test is a sanity check to make sure tests are using ABI correctly
-    it('ABI001 Ownable transferOwnership(address) is public', async function () {
-        let badData = msgData('transferOwnership(address)', arbitraryAccount);
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(tokenOwnerPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await sendRawTransaction(raw);
-
-        var customVars = [
-            { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
-        ];
-        await checkVariables([token], [customVars]);
-    });
-
-    it('ABI002 Ownable constructor is not inherited as a function', async function () {
-        let badData = functionSignature('Ownable()');
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(arbitraryAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(arbitraryAccountPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-        await checkVariables([token], [[]]);
-    });
-
-    it('ABI003 Ownable _transferOwnership(address) is not public', async function () {
-        let badData = msgData('_transferOwnership(address)', arbitraryAccount);
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(tokenOwnerPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-        await checkVariables([token], [[]]);
-    });
-
     // sanity check for pausable
-    it('ABI004 Pausable pause() is public', async function () {
+    it('abi004 FiatToken pause() is public', async function () {
         let badData = functionSignature('pause()');
         var tx = new Tx({
             nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
@@ -141,42 +89,229 @@ async function run_tests(newToken) {
         await checkVariables([token], [customVars]);
     });
 
-    it('ABI006 BlacklistableTokenByRole blacklist is public', async function () {
-        let badData = msgData('blacklist(address)', arbitraryAccount);
+    it('abi040 Blacklistable constructor is not a function', async function () {
+        let badData = functionSignature('Blacklistable()');
         var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(blacklisterAccount)),
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
             gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
             gasLimit: 100000,
             to: token.address,
             value: 0,
             data: badData,
         });
-        var privateKey = Buffer.from(blacklisterAccountPrivateKey, 'hex');
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
         tx.sign(privateKey);
         var raw = '0x' + tx.serialize().toString('hex');
 
-        await sendRawTransaction(raw);
-        var customVars = [
-            { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
-        ];
-        await checkVariables([token], [customVars]);
+        await expectRevert(sendRawTransaction(raw));
     });
 
-    it('ABI019 FiatToken pause is public', async function () {
-        let goodData = functionSignature('pause()');
-        let raw = makeRawTransaction(
-            goodData,
-            pauserAccount,
-            pauserAccountPrivateKey,
-            token.address);
-        await sendRawTransaction(raw);
-        var customVars = [
-            { 'variable': 'paused', 'expectedValue': true }
-        ];
-        await checkVariables([token], [customVars]);
+    it('abi042 Ownable constructor is not a function', async function () {
+        let badData = functionSignature('Ownable()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
     });
 
-    it('ABI020 FiatToken doTransfer is internal', async function () {
+    it('abi024 OwnableStorage constructor', async function () {
+        let badData = functionSignature('OwnableStorage()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi031 OwnedUpgradeabilityProxy constructor', async function () {
+        let badData = functionSignature('OwnedUpgradeabilityProxy()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi023 OwnedUpgradeabilityStorage constructor', async function () {
+        let badData = functionSignature('OwnedUpgradeabilityStorage()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi005 Pausable constructor is not a function', async function () {
+        let badData = functionSignature('Pausable()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi043 Proxy constructor is not a function', async function () {
+        let badData = functionSignature('Proxy()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi027 UpgradeabilityProxy constructor', async function () {
+        let badData = functionSignature('UpgradeabilityProxy()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi034 UpgradeabilityStorage constructor is not a function', async function () {
+        let badData = functionSignature('UpgradeabilityStorage()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi041 FiatToken constructor is not a function', async function () {
+        let badData = functionSignature('FiatToken()');
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi025 setOwner is internal', async function () {
+        let badData = msgData('setOwner(address)', pauserAccount);
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(tokenOwnerPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi033 OwnedUpgradeabilityStorage.setUpgradeabilityOwner is internal', async function () {
+        let badData = msgData('setUpgradeabilityOwner(address)', pauserAccount);
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(tokenOwnerPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi028 UpgradeabilityProxy._upgradeTo is internal', async function () {
+        let badData = mockStringAddressEncode('_upgradeTo(string,address)', pauserAccount);
+        var tx = new Tx({
+            nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
+            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+            gasLimit: 100000,
+            to: token.address,
+            value: 0,
+            data: badData,
+        });
+        var privateKey = Buffer.from(tokenOwnerPrivateKey, 'hex');
+        tx.sign(privateKey);
+        var raw = '0x' + tx.serialize().toString('hex');
+
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+
+    it('abi020 FiatToken doTransfer is internal', async function () {
         await token.configureMinter(minterAccount, 1000, { from: masterMinterAccount });
         await token.mint(arbitraryAccount, 50, { from: minterAccount });
 

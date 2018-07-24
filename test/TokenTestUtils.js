@@ -709,23 +709,23 @@ async function initializeTokenWithProxy(rawToken) {
     assert.equal(proxiedToken.address, proxy.address);
     assert.notEqual(proxiedToken.address, rawToken.address);
     var tokenConfig = {
-      proxy: proxy,
-      token: proxiedToken
+        proxy: proxy,
+        token: proxiedToken
     };
     return tokenConfig;
 }
 
 async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
-  if (proxyUpgraderAccount == null) {
-    proxyUpgraderAccount = proxyOwnerAccount;
-  }
-  await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
-  proxiedToken = await FiatToken.at(proxy.address);
-  assert.equal(proxiedToken.address, proxy.address);
-  return tokenConfig = {
-    proxy: proxy,
-    token: proxiedToken
-  }
+    if (proxyUpgraderAccount == null) {
+        proxyUpgraderAccount = proxyOwnerAccount;
+    }
+    await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
+    proxiedToken = await FiatToken.at(proxy.address);
+    assert.equal(proxiedToken.address, proxy.address);
+    return tokenConfig = {
+        proxy: proxy,
+        token: proxiedToken
+    }
 }
 
 async function expectRevert(contractPromise) {
@@ -753,9 +753,9 @@ async function expectJump(contractPromise) {
 }
 
 function encodeCall(name, arguments, values) {
-  const methodId = abi.methodID(name, arguments).toString('hex');
-  const params = abi.rawEncode(arguments, values).toString('hex');
-  return '0x' + methodId + params;
+    const methodId = abi.methodID(name, arguments).toString('hex');
+    const params = abi.rawEncode(arguments, values).toString('hex');
+    return '0x' + methodId + params;
 }
 
 function getAdmin(proxy) {
