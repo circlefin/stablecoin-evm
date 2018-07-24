@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "./thirdparty/zeppelinos/ownership/Ownable.sol";
+import "./Ownable.sol";
 
 /**
  * @title Blacklistable Token

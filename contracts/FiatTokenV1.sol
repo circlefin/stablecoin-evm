@@ -2,10 +2,10 @@ pragma solidity ^0.4.24;
 
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import './thirdparty/openzeppelin/Pausable.sol';
-import './thirdparty/zeppelinos/ownership/Ownable.sol';
 
+import './Ownable.sol';
 import './Blacklistable.sol';
+import "./Pausable.sol";
 
 /**
  * @title FiatToken

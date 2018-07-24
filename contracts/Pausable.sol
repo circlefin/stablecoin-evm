@@ -1,6 +1,6 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
-import "./../zeppelinos/ownership/Ownable.sol";
+import "./Ownable.sol";
 
 /**
  * @title Pausable
