@@ -4,7 +4,6 @@ import './thirdparty/openzeppelin/ERC20.sol';
 import './thirdparty/openzeppelin/SafeMath.sol';
 import './thirdparty/openzeppelin/Pausable.sol';
 import './thirdparty/zeppelinos/ownership/Ownable.sol';
-import './thirdparty/zeppelinos/OwnedUpgradeabilityStorage.sol';
 
 import './Blacklistable.sol';
 
@@ -12,7 +11,7 @@ import './Blacklistable.sol';
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blacklistable {
+contract FiatToken is Ownable, ERC20, Pausable, Blacklistable {
     using SafeMath for uint256;
 
     string public name;
