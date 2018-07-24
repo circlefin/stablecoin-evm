@@ -5,12 +5,12 @@ and a way to upgrade the contract so that bugs can be fixed or features added.
 
 ## Roles
 The `FiatToken` has a numer of roles (addresses) which control different functionality:
-- `masterMinter` - adds and removes minters
+- `masterMinter` - adds and removes minters and increases their minting allowance
 - `minters` - create and destroy tokens
 - `pauser` - pause the contract, which prevents all transfers, minting, and burning
-- `blacklister` - prevent all transfers to or from a particular address
-- `owner` - re-assign any of the roles except for proxyOwner
-- `proxyOwner` - upgrade the contract, and re-assign itself
+- `blacklister` - prevent all transfers to or from a particular address, and prevents that address from minting or burning
+- `owner` - re-assign any of the roles except for `admin`
+- `admin` - upgrade the contract, and re-assign itself
 
 CENTRE will control the address of all roles except for minters, which will be controlled by the entities that 
 CENTRE elects to make minters
@@ -48,7 +48,7 @@ minting. When a `minter`'s allowance is low, CENTRE can make another call to `co
 CENTRE removes minters via the `removeMinter` method. This will remove the `minter` from the list of `minters` and set 
 its `mintingAllowance` to 0. Once a `minter` is removed it will no longer be able to mint or burn tokens.
 
- - Only the masterMinter role may call removeMinter. 
+ - Only the `masterMinter` role may call `removeMinter`. 
 
 ### Minting
 A `minter` mints tokens via the `mint` method. The `minter` specifies the `amount` of tokens to create, and a `_to` 
@@ -109,21 +109,20 @@ All functionality will be restored when the contract is unpaused.
 - Only the `pauser` role may call unpause.
 
 ## Upgrading
-The Fiat Token uses the [Upgraadeability using Inherited Storage](https://github.com/zeppelinos/labs/tree/master/upgradeability_using_inherited_storage)
- pattern from zepplinos. [FiatToken.sol](../contracts/FiatToken.sol) is the implementation, the actual token will be a 
+The Fiat Token uses the zeppelinos Unstructured-Storage Proxy pattern [https://docs.zeppelinos.org/docs/upgradeability_AdminUpgradeabilityProxy.html]. [FiatToken.sol](../contracts/FiatToken.sol) is the implementation, the actual token will be a 
  Proxy contract ([FiatTokenProxy.sol](../contracts/FiatTokenProxy.sol)) which will forward all calls to `FiatToken` via 
  delegatecall. This pattern allows CENTRE to upgrade the logic of any deployed tokens seamlessly.
 
 - CENTRE will upgrade the token via a call to `upgradeTo` or `upgradeToAndCall` if initialization is required for the new version.
-- Only the `proxyOwner` role may call `upgradeTo` or `upgradeToAndCall`. 
+- Only the `admin` role may call `upgradeTo` or `upgradeToAndCall`. 
 
 ## Reassigning Roles
 The roles outlined above may be reassigned. 
-The `owner` role has the ability to reassign all roles (including itself) except for the `proxyOwner` role.
+The `owner` role has the ability to reassign all roles (including itself) except for the `admin` role.
 
-### Proxy Owner
-- `transferProxyOwnership` updates the `proxyOwner` role to a new address.
-- `transferProxyOwnership` may only be called by the `proxyOwner` role.
+### Admin
+- `changeAdmin` updates the `admin` role to a new address.
+- `changeAdmin` may only be called by the `admin` role.
 ### Master Minter
 - `updateMasterMinter` updates the `masterMinter` role to a new address.
 - `updateMasterMinter` may only be called by the `owner` role.
