@@ -333,6 +333,21 @@ async function run_tests(newToken) {
 
   // Return value
 
+  /*
+  * Calls (i.e token.mint.call(...) , token.approve.call(...) etc.) expose the
+  * return value of functions while transactions (token.mint(...) ,
+  * token.approve(...) etc.) return transaction receipts and do not read
+  * function return values. Calls, unlike transactions, do not permanently
+  * modify data. However, both calls and transactions execute code on the
+  * network. That is, token.mint.call(...) will revert if and only if
+  * token.mint(...) reverts.
+  *
+  * "Choosing between a transaction and a call is as simple as deciding
+  *  whether you want to read data, or write it."
+  *  - truffle docs
+  *    (https://truffleframework.com/docs/getting_started/contracts)
+  */
+
   it('ms039 should return true on mint', async function() {
     var mintAmount = 50;
 
