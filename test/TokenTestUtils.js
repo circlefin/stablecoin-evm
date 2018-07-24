@@ -20,8 +20,6 @@ var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 var deployerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
 var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-var proxyOwnerAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
-var upgraderAccount = proxyOwnerAccount; // accounts[2]
 var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
 var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
 var arbitraryAccount2 = "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc"; // accounts[5]
@@ -29,6 +27,9 @@ var masterMinterAccount = "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9"; // accou
 var minterAccount = "0x28a8746e75304c0780e011bed21c72cd78cd535e"; // accounts[7]
 var pauserAccount = "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e"; // accounts[8]
 //var blacklisterAccount = "0x1df62f291b2e969fb0849d99d9ce41e2f137006e"; // accounts[9]
+
+var proxyOwnerAccount = "0x2f560290fef1b3ada194b6aa9c40aa71f8e95598"; // accounts[14]
+var upgraderAccount = proxyOwnerAccount; // accounts[14]
 
 var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
@@ -41,6 +42,8 @@ var minterAccountPrivateKey = "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19
 var pauserAccountPrivateKey = "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9];
 //var blacklisterAccountPrivateKey = "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
 
+var adminSlot = "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
+var implSlot = "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3";
 const should = require('chai')
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
@@ -85,6 +88,20 @@ function checkMintEvents(minting, to, amount, minter) {
     assert.equal(minting.logs[1].args.from, 0);
     assert.equal(minting.logs[1].args.to, to);
     assert.equal(minting.logs[1].args.value, amount);
+
+}
+
+function checkBurnEvents(burning, amount, burner) {
+    // Burn Event
+    assert.equal(burning.logs[0].event, 'Burn');
+    assert.equal(burning.logs[0].args.burner, burner);
+    assert.equal(burning.logs[0].args.amount, amount);
+
+    // Transfer to 0 Event
+    assert.equal(burning.logs[1].event, 'Transfer');
+    assert.equal(burning.logs[1].args.from, burner);
+    assert.equal(burning.logs[1].args.to, 0);
+    assert.equal(burning.logs[1].args.value, amount);
 
 }
 
@@ -263,7 +280,7 @@ async function getActualState(token) {
         await token.pauser.call(),
         await token.blacklister.call(),
         await token.owner.call(),
-        await token.implementation.call(),
+        await getImplementation(token),
         await token.balanceOf(arbitraryAccount),
         await token.balanceOf(masterMinterAccount),
         await token.balanceOf(minterAccount),
@@ -549,6 +566,11 @@ async function setMinter(token, minter, amount) {
     assert.equal(minterAllowance, amount);
 }
 
+async function burn(token, amount, burner) {
+    let burning = await token.burn(amount, { from: burner });
+    checkBurnEvents(burning, amount, burner);
+}
+
 async function mint(token, to, amount, minter) {
     await setMinter(token, minter, amount);
     await mintRaw(token, to, amount, minter);
@@ -680,10 +702,9 @@ async function redeem(token, account, amount) {
 }
 
 async function initializeTokenWithProxy(rawToken) {
-    const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
-    const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
-    await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+    const proxy = await FiatTokenProxy.new(rawToken.address, { from: proxyOwnerAccount })
     proxiedToken = await FiatToken.at(proxy.address);
+    await proxiedToken.initialize(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount);
     proxiedToken.proxiedTokenAddress = rawToken.address;
     assert.equal(proxiedToken.address, proxy.address);
     assert.notEqual(proxiedToken.address, rawToken.address);
@@ -698,8 +719,8 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
   if (proxyUpgraderAccount == null) {
     proxyUpgraderAccount = proxyOwnerAccount;
   }
-  await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
-  proxiedToken = await UpgradedFiatToken.at(proxy.address);
+  await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
+  proxiedToken = await FiatToken.at(proxy.address);
   assert.equal(proxiedToken.address, proxy.address);
   return tokenConfig = {
     proxy: proxy,
@@ -737,6 +758,16 @@ function encodeCall(name, arguments, values) {
   return '0x' + methodId + params;
 }
 
+function getAdmin(proxy) {
+    let adm = web3.eth.getStorageAt(proxy.address, adminSlot);
+    return adm;
+}
+
+function getImplementation(proxy) {
+    let impl = web3.eth.getStorageAt(proxy.address, implSlot);
+    return impl;
+}
+
 module.exports = {
     FiatToken: FiatToken,
     UpgradedFiatToken: UpgradedFiatToken,
@@ -754,6 +785,7 @@ module.exports = {
     checkVariables: checkVariables,
     setMinter: setMinter,
     mint: mint,
+    burn: burn,
     mintRaw: mintRaw,
     blacklist: blacklist,
     unBlacklist: unBlacklist,
@@ -777,6 +809,7 @@ module.exports = {
     pauserAccount: pauserAccount,
     blacklisterAccount: blacklisterAccount,
     proxyOwnerAccount: proxyOwnerAccount,
+    getAdmin: getAdmin,
     arbitraryAccountPrivateKey,
     upgraderAccountPrivateKey,
     tokenOwnerPrivateKey,

@@ -1,0 +1,2519 @@
+Searching 16 files for "pure"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/test/mocks/SafeMathMock.sol:
+    7  contract SafeMathMock {
+    8  
+    9:   function sub(uint256 a, uint256 b) public pure returns (uint256) {
+   10      return SafeMath.sub(a, b);
+   11    }
+   12  
+   13:   function add(uint256 a, uint256 b) public pure returns (uint256) {
+   14      return SafeMath.add(a, b);
+   15    }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/openzeppelin/SafeMath.sol:
+   16    * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
+   17    */
+   18:   function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+   19      assert(b <= a);
+   20      return a - b;
+   ..
+   24    * @dev Adds two numbers, throws on overflow.
+   25    */
+   26:   function add(uint256 a, uint256 b) internal pure returns (uint256 c) {
+   27      c = a + b;
+   28      assert(c >= a);
+
+4 matches across 2 files
+
+
+Searching 16 files for "view"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/FiatToken.sol:
+   96       * @param minter The address of the minter
+   97      */
+   98:     function minterAllowance(address minter) public view returns (uint256) {
+   99          return minterAllowed[minter];
+  100      }
+  ...
+  105       * @param spender address The account spender
+  106      */
+  107:     function allowance(address owner, address spender) public view returns (uint256) {
+  108          return allowed[owner][spender];
+  109      }
+  ...
+  112       * @dev Get totalSupply of token
+  113      */
+  114:     function totalSupply() public view returns (uint256) {
+  115          return totalSupply_;
+  116      }
+  ...
+  120       * @param account address The account
+  121      */
+  122:     function balanceOf(address account) public view returns (uint256) {
+  123          return balances[account];
+  124      }
+  125  
+  126:     function minters(address account) public view returns (bool) {
+  127          return true;
+  128      }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/openzeppelin/ERC20.sol:
+   11  contract ERC20 is ERC20Basic {
+   12    function allowance(address owner, address spender)
+   13:     public view returns (uint256);
+   14  
+   15    function transferFrom(address from, address to, uint256 value)
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/openzeppelin/ERC20Basic.sol:
+    9   */
+   10  contract ERC20Basic {
+   11:   function totalSupply() public view returns (uint256);
+   12:   function balanceOf(address who) public view returns (uint256);
+   13    function transfer(address to, uint256 value) public returns (bool);
+   14    event Transfer(address indexed from, address indexed to, uint256 value);
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/zeppelinos/OwnedUpgradeabilityProxy.sol:
+   41     * @return the address of the proxy owner
+   42     */
+   43:   function proxyOwner() public view returns (address) {
+   44      return upgradeabilityOwner();
+   45    }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/zeppelinos/OwnedUpgradeabilityStorage.sol:
+   15     * @return the address of the owner
+   16     */
+   17:   function upgradeabilityOwner() public view returns (address) {
+   18      return _upgradeabilityOwner;
+   19    }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/zeppelinos/ownership/OwnableStorage.sol:
+   13     * @return the address of the owner
+   14     */
+   15:   function owner() public view returns (address) {
+   16      return _owner;
+   17    }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/zeppelinos/Proxy.sol:
+   11    * @return address of the implementation to which it will be delegated
+   12    */
+   13:   function implementation() public view returns (address);
+   14  
+   15    /**
+
+/Users/ohudson/Raiden/centre-tokens-backup2/contracts/thirdparty/zeppelinos/UpgradeabilityStorage.sol:
+   16    * @return string representing the name of the current version
+   17    */
+   18:   function version() public view returns (string) {
+   19      return _version;
+   20    }
+   ..
+   24    * @return address of the current implementation
+   25    */
+   26:   function implementation() public view returns (address) {
+   27      return _implementation;
+   28    }
+
+14 matches across 8 files
+
+
+Searching 11 files for "blacklisted("
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+  262      ];
+  263  
+  264:     assert(await newToken.blacklisted(newRawToken.address));
+  265      await checkVariables([newToken], [newToken_result]);
+  266    });
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+  347  
+  348    it('should blacklist and make transferFrom impossible with the approved transferer', async function () {
+  349:     let isBlacklistedBefore = await token.blacklisted(accounts[2])
+  350      assert.equal(isBlacklistedBefore, false);
+  351  
+  ...
+  359      assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+  360  
+  361:     let isBlacklistedAfter = await token.blacklisted(accounts[2]);
+  362      assert.equal(isBlacklistedAfter, true);
+  363    });
+  ...
+  430      await mint(token, accounts[2], 1900, minterAccount);
+  431      await token.blacklist(accounts[2], { from: blacklisterAccount });
+  432:     let blacklisted = await token.blacklisted(accounts[2]);
+  433      assert.isTrue(blacklisted);
+  434  
+  ...
+  437      await token.unBlacklist(accounts[2], { from: blacklisterAccount });
+  438  
+  439:     blacklisted = await token.blacklisted(accounts[2]);
+  440      assert.isFalse(blacklisted);
+  441  
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+  305          await token.allowance(upgraderAccount, upgraderAccount),
+  306          await token.totalSupply(),
+  307:         await token.isBlacklisted(arbitraryAccount),
+  308:         await token.isBlacklisted(masterMinterAccount),
+  309:         await token.isBlacklisted(minterAccount),
+  310:         await token.isBlacklisted(pauserAccount),
+  311:         await token.isBlacklisted(blacklisterAccount),
+  312:         await token.isBlacklisted(tokenOwnerAccount),
+  313          await token.minters(arbitraryAccount),
+  314          await token.minters(masterMinterAccount),
+
+11 matches across 3 files
+
+
+Searching 11 files for "minters("
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+  453      await expectRevert(token.mint(accounts[1], 200, { from: minterAccount }));
+  454  
+  455:     let isMinter = await token.minters(minterAccount);
+  456      assert.equal(isMinter, false);
+  457      let balance = await token.balanceOf(accounts[1]);
+  ...
+  461    it('should remove a minter even if the contract is paused', async function () {
+  462      await token.configureMinter(accounts[3], 200, { from: masterMinterAccount });
+  463:     let isAccountMinter = await token.minters(accounts[3]);
+  464      assert.equal(isAccountMinter, true);
+  465      await token.pause({ from: pauserAccount });
+  466      await token.removeMinter(accounts[3], { from: masterMinterAccount });
+  467:     isAccountMinter = await token.minters(accounts[3]);
+  468      assert.equal(isAccountMinter, false);
+  469    });
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+  311          await token.isBlacklisted(blacklisterAccount),
+  312          await token.isBlacklisted(tokenOwnerAccount),
+  313:         await token.minters(arbitraryAccount),
+  314:         await token.minters(masterMinterAccount),
+  315:         await token.minters(minterAccount),
+  316:         await token.minters(pauserAccount),
+  317:         await token.minters(blacklisterAccount),
+  318:         await token.minters(tokenOwnerAccount),
+  319          await token.minterAllowance(arbitraryAccount),
+  320          await token.minterAllowance(masterMinterAccount),
+
+9 matches across 2 files
+
+
+Searching 11 files for "nt040: ' should fail to pause when sender is not pauser"
+
+0 matches
+
+Searching 11 files for "should fail to pause when sender is not pauser"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+  565    // Pause and Unpause
+  566  
+  567:   it('nt040 should fail to pause when sender is not pauser', async function () {
+  568      await expectRevert(token.pause({from: arbitraryAccount}));
+  569      await checkVariables([token], [[]]);
+
+1 match in 1 file
+
+
+Searching 11 files for "makeRawTransaction"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   41  
+   42  var abiUtils = require('./ABIUtils');
+   43: var makeRawTransaction = abiUtils.makeRawTransaction;
+   44  var sendRawTransaction = abiUtils.sendRawTransaction;
+   45  var functionSignature = abiUtils.functionSignature;
+   ..
+  170      it('ABI019 FiatToken pause is public', async function () {
+  171          let goodData = functionSignature('pause()');
+  172:         let raw = makeRawTransaction(
+  173              goodData,
+  174              pauserAccount,
+  ...
+  187  
+  188          let badData = msgData1('doTransfer(address,address,uint256)', arbitraryAccount, blacklisterAccount, 40);
+  189:         let raw = makeRawTransaction(
+  190              badData,
+  191              blacklisterAccount,
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABIUtils.js:
+    2  var Tx = require('ethereumjs-tx');
+    3  
+    4: function makeRawTransaction(msgData, msgSender, hexPrivateKey, contractAddress) {
+    5      var tx = new Tx({
+    6          nonce: web3.toHex(web3.eth.getTransactionCount(msgSender)),
+    .
+   64  
+   65  module.exports = {
+   66:     makeRawTransaction: makeRawTransaction,
+   67      sendRawTransaction: sendRawTransaction,
+   68      functionSignature: functionSignature,
+
+7 matches across 2 files
+
+
+Searching 11 files for "should mint 0"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/MiscTests.js:
+  284    // 0 Input
+  285  
+  286:   it('ms017 should mint 0 tokens with unchanged state', async function () {
+  287      var mintAmount = 0;
+  288  
+
+1 match in 1 file
+
+
+Searching 11 files for "upgrad"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   20  var deployerAccount = tokenUtils.deployerAccount;
+   21  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   22: var upgraderAccount = tokenUtils.upgraderAccount;
+   23  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   24  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   ..
+   31  var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
+   32  var tokenOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
+   33: var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
+   34  var tokenOwnerPrivateKey = tokenUtils.tokenOwnerPrivateKey;
+   35  var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   ..
+   23  var pauserAccount = tokenUtils.pauserAccount;
+   24  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   25: var upgradeTo = tokenUtils.upgradeTo;
+   26  
+   27  var amount = 100;
+   ..
+  102    });
+  103  
+  104:   it('ept008 should upgrade while paused', async function() {
+  105      var newRawToken = await FiatToken.new();
+  106      await token.pause({from: pauserAccount});
+  107:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  108      var newProxiedToken = tokenConfig.token;
+  109      var newToken = newProxiedToken;
+  ...
+  246    });
+  247  
+  248:   it ('ept023 should upgrade to blacklisted address', async function() {
+  249      var newRawToken = await FiatToken.new();
+  250  
+  251      await token.blacklist(newRawToken.address, { from: blacklisterAccount });
+  252:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  253      var newProxiedToken = tokenConfig.token;
+  254      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   28  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   29  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   30: var upgradeTo = tokenUtils.upgradeTo;
+   31  
+   32  // these tests are for reference and do not track side effects on all variables
+   ..
+  565    });
+  566  
+  567:   it('should upgrade and preserve data', async function () {
+  568      await mint(token, accounts[2], 200, minterAccount);
+  569      let initialBalance = await token.balanceOf(accounts[2]);
+  ...
+  571  
+  572      var newRawToken = await FiatToken.new();
+  573:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  574      var newProxiedToken = tokenConfig.token;
+  575      var newToken = newProxiedToken;
+  576  
+  577:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  578:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  579      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  580      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  619    });
+  620  
+  621:   it('should updateUpgraderAddress for upgrader', async function () {
+  622:     let upgrader = await proxy.upgradeabilityOwner();
+  623:     assert.equal(proxyOwnerAccount, upgrader);
+  624      let address1 = accounts[7];
+  625      let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
+  626:     upgrader = await token.upgradeabilityOwner();
+  627:     assert.equal(upgrader, address1);
+  628  
+  629:     //Test upgrade with new upgrader account
+  630      await token.configureMinter(minterAccount, 1000, {from: masterMinterAccount});
+  631      await token.mint(accounts[2], 200, {from: minterAccount});
+  ...
+  635      
+  636      var newRawToken = await FiatToken.new();
+  637:     var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+  638      var newProxiedToken = tokenConfig.token;
+  639      var newToken = newProxiedToken;
+  640  
+  641:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  642:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  643      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  644      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  647    });
+  648  
+  649:   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
+  650      let address1 = accounts[7];
+  651      await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
+  652:     let upgrader = await proxy.upgradeabilityOwner();
+  653:     assert.notEqual(upgrader, address1);
+  654    });
+  655  
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+   25  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   26  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   27: var upgradeTo = tokenUtils.upgradeTo;
+   28  
+   29  var amount = 100;
+   ..
+  591    });
+  592  
+  593:   // Upgrade
+  594  
+  595:   it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596      var newRawToken = await FiatToken.new();
+  597:     await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  599    });
+  600  
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602:     // Create upgraded token
+  603      var newRawToken = await FiatToken.new();
+  604:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+  606      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+    1  var FiatToken = artifacts.require('FiatToken');
+    2: var UpgradedFiatToken = artifacts.require('FiatTokenV2');
+    3  var tokenUtils = require('./TokenTestUtils');
+    4  var positive_tests = require('./PositiveTests');
+    .
+   18  
+   19  
+   20: // The following helpers make fresh original/upgraded tokens before each test.
+   21  
+   22  async function newToken() {
+   ..
+   25  }
+   26  
+   27: async function newUpgradedToken() {
+   28: 	var token = await UpgradedFiatToken.new();
+   29  	return token;
+   30  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+   21  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   22  var proxyOwnerAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+   23: var upgraderAccount = proxyOwnerAccount; // accounts[2]
+   24  var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
+   25  var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
+   ..
+   32  var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
+   33  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   34: var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+   35  var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
+   36  var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
+   ..
+  117                  'blacklisterAccount': bigZero,
+  118                  'tokenOwnerAccount': bigZero,
+  119:                 'upgraderAccount': bigZero,
+  120                  'arbitraryAccount': bigZero
+  121              },
+  ...
+  126                  'blacklisterAccount': bigZero,
+  127                  'tokenOwnerAccount': bigZero,
+  128:                 'upgraderAccount': bigZero,
+  129                  'masterMinterAccount': bigZero
+  130              },
+  ...
+  135                  'blacklisterAccount': bigZero,
+  136                  'tokenOwnerAccount': bigZero,
+  137:                 'upgraderAccount': bigZero,
+  138                  'minterAccount': bigZero
+  139              },
+  ...
+  144                  'blacklisterAccount': bigZero,
+  145                  'tokenOwnerAccount': bigZero,
+  146:                 'upgraderAccount': bigZero,
+  147                  'pauserAccount': bigZero
+  148              },
+  ...
+  153                  'pauserAccount': bigZero,
+  154                  'tokenOwnerAccount': bigZero,
+  155:                 'upgraderAccount': bigZero,
+  156                  'blacklisterAccount': bigZero
+  157              },
+  ...
+  162                  'pauserAccount': bigZero,
+  163                  'blacklisterAccount': bigZero,
+  164:                 'upgraderAccount': bigZero,
+  165                  'tokenOwnerAccount': bigZero
+  166              },
+  167:             'upgraderAccount': {
+  168                  'arbitraryAccount': bigZero,
+  169                  'masterMinterAccount': bigZero,
+  ...
+  172                  'blacklisterAccount': bigZero,
+  173                  'tokenOwnerAccount': bigZero,
+  174:                 'upgraderAccount': bigZero
+  175              }
+  176          },
+  ...
+  241  
+  242          // Check that sum of individual balances equals totalSupply
+  243:         var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+  244          var balanceSum = bigZero;
+  245          var x;
+  ...
+  275          await token.allowance(arbitraryAccount, blacklisterAccount),
+  276          await token.allowance(arbitraryAccount, tokenOwnerAccount),
+  277:         await token.allowance(arbitraryAccount, upgraderAccount),
+  278          await token.allowance(arbitraryAccount, arbitraryAccount),
+  279          await token.allowance(masterMinterAccount, arbitraryAccount),
+  ...
+  282          await token.allowance(masterMinterAccount, blacklisterAccount),
+  283          await token.allowance(masterMinterAccount, tokenOwnerAccount),
+  284:         await token.allowance(masterMinterAccount, upgraderAccount),
+  285          await token.allowance(masterMinterAccount, masterMinterAccount),
+  286          await token.allowance(minterAccount, arbitraryAccount),
+  ...
+  289          await token.allowance(minterAccount, blacklisterAccount),
+  290          await token.allowance(minterAccount, tokenOwnerAccount),
+  291:         await token.allowance(minterAccount, upgraderAccount),
+  292          await token.allowance(minterAccount, minterAccount),
+  293          await token.allowance(pauserAccount, arbitraryAccount),
+  ...
+  296          await token.allowance(pauserAccount, blacklisterAccount),
+  297          await token.allowance(pauserAccount, tokenOwnerAccount),
+  298:         await token.allowance(pauserAccount, upgraderAccount),
+  299          await token.allowance(pauserAccount, pauserAccount),
+  300          await token.allowance(blacklisterAccount, arbitraryAccount),
+  ...
+  303          await token.allowance(blacklisterAccount, pauserAccount),
+  304          await token.allowance(blacklisterAccount, tokenOwnerAccount),
+  305:         await token.allowance(blacklisterAccount, upgraderAccount),
+  306          await token.allowance(blacklisterAccount, blacklisterAccount),
+  307          await token.allowance(tokenOwnerAccount, arbitraryAccount),
+  ...
+  310          await token.allowance(tokenOwnerAccount, pauserAccount),
+  311          await token.allowance(tokenOwnerAccount, blacklisterAccount),
+  312:         await token.allowance(tokenOwnerAccount, upgraderAccount),
+  313          await token.allowance(tokenOwnerAccount, tokenOwnerAccount),
+  314:         await token.allowance(upgraderAccount, arbitraryAccount),
+  315:         await token.allowance(upgraderAccount, masterMinterAccount),
+  316:         await token.allowance(upgraderAccount, minterAccount),
+  317:         await token.allowance(upgraderAccount, pauserAccount),
+  318:         await token.allowance(upgraderAccount, blacklisterAccount),
+  319:         await token.allowance(upgraderAccount, tokenOwnerAccount),
+  320:         await token.allowance(upgraderAccount, upgraderAccount),
+  321          await token.totalSupply(),
+  322          await token.isBlacklisted(arbitraryAccount),
+  ...
+  450                      'blacklisterAccount': allowanceAtoB,
+  451                      'tokenOwnerAccount': allowanceAtoRAC,
+  452:                     'upgraderAccount': allowanceAtoU,
+  453                      'arbitraryAccount': allowanceAtoA,
+  454                  },
+  ...
+  459                      'blacklisterAccount': allowanceMMtoB,
+  460                      'tokenOwnerAccount': allowanceMMtoRAC,
+  461:                     'upgraderAccount': allowanceMMtoU,
+  462                      'masterMinterAccount': allowanceMMtoMM,
+  463                  },
+  ...
+  468                      'blacklisterAccount': allowanceMtoB,
+  469                      'tokenOwnerAccount': allowanceMtoRAC,
+  470:                     'upgraderAccount': allowanceMtoU,
+  471                      'minterAccount': allowanceMtoM,
+  472                  },
+  ...
+  477                      'blacklisterAccount': allowancePtoB,
+  478                      'tokenOwnerAccount': allowancePtoRAC,
+  479:                     'upgraderAccount': allowancePtoU,
+  480                      'pauserAccount': allowancePtoP,
+  481                  },
+  ...
+  486                      'pauserAccount': allowanceBtoP,
+  487                      'tokenOwnerAccount': allowanceBtoRAC,
+  488:                     'upgraderAccount': allowanceBtoU,
+  489                      'blacklisterAccount': allowanceBtoB,
+  490                  },
+  ...
+  495                      'pauserAccount': allowanceRACtoP,
+  496                      'blacklisterAccount': allowanceRACtoB,
+  497:                     'upgraderAccount': allowanceRACtoU,
+  498                      'tokenOwnerAccount': allowanceRACtoRAC,
+  499                  },
+  500:                 'upgraderAccount': {
+  501                      'arbitraryAccount': allowanceUtoA,
+  502                      'masterMinterAccount': allowanceUtoMM,
+  ...
+  505                      'blacklisterAccount': allowanceUtoB,
+  506                      'tokenOwnerAccount': allowanceUtoRAC,
+  507:                     'upgraderAccount': allowanceUtoU,
+  508                  }
+  509              },
+  ...
+  682      const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684:     await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685      proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  ...
+  694  }
+  695  
+  696: async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
+  697:   if (proxyUpgraderAccount == null) {
+  698:     proxyUpgraderAccount = proxyOwnerAccount;
+  699    }
+  700:   await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701    proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  ...
+  762      redeem: redeem,
+  763      initializeTokenWithProxy: initializeTokenWithProxy,
+  764:     upgradeTo: upgradeTo,
+  765      expectRevert: expectRevert,
+  766      expectJump: expectJump,
+  ...
+  776      proxyOwnerAccount: proxyOwnerAccount,
+  777      arbitraryAccountPrivateKey,
+  778:     upgraderAccountPrivateKey,
+  779      tokenOwnerPrivateKey,
+  780      blacklisterAccountPrivateKey,
+
+95 matches across 7 files
+
+
+Searching 11 files for "upgrad"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   20  var deployerAccount = tokenUtils.deployerAccount;
+   21  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   22: var upgraderAccount = tokenUtils.upgraderAccount;
+   23  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   24  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   ..
+   31  var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
+   32  var tokenOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
+   33: var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
+   34  var tokenOwnerPrivateKey = tokenUtils.tokenOwnerPrivateKey;
+   35  var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   ..
+   23  var pauserAccount = tokenUtils.pauserAccount;
+   24  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   25: var upgradeTo = tokenUtils.upgradeTo;
+   26  
+   27  var amount = 100;
+   ..
+  102    });
+  103  
+  104:   it('ept008 should upgrade while paused', async function() {
+  105      var newRawToken = await FiatToken.new();
+  106      await token.pause({from: pauserAccount});
+  107:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  108      var newProxiedToken = tokenConfig.token;
+  109      var newToken = newProxiedToken;
+  ...
+  246    });
+  247  
+  248:   it ('ept023 should upgrade to blacklisted address', async function() {
+  249      var newRawToken = await FiatToken.new();
+  250  
+  251      await token.blacklist(newRawToken.address, { from: blacklisterAccount });
+  252:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  253      var newProxiedToken = tokenConfig.token;
+  254      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   28  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   29  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   30: var upgradeTo = tokenUtils.upgradeTo;
+   31  
+   32  // these tests are for reference and do not track side effects on all variables
+   ..
+  565    });
+  566  
+  567:   it('should upgrade and preserve data', async function () {
+  568      await mint(token, accounts[2], 200, minterAccount);
+  569      let initialBalance = await token.balanceOf(accounts[2]);
+  ...
+  571  
+  572      var newRawToken = await FiatToken.new();
+  573:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  574      var newProxiedToken = tokenConfig.token;
+  575      var newToken = newProxiedToken;
+  576  
+  577:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  578:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  579      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  580      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  619    });
+  620  
+  621:   it('should updateUpgraderAddress for upgrader', async function () {
+  622:     let upgrader = await proxy.upgradeabilityOwner();
+  623:     assert.equal(proxyOwnerAccount, upgrader);
+  624      let address1 = accounts[7];
+  625      let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
+  626:     upgrader = await token.upgradeabilityOwner();
+  627:     assert.equal(upgrader, address1);
+  628  
+  629:     //Test upgrade with new upgrader account
+  630      await token.configureMinter(minterAccount, 1000, {from: masterMinterAccount});
+  631      await token.mint(accounts[2], 200, {from: minterAccount});
+  ...
+  635      
+  636      var newRawToken = await FiatToken.new();
+  637:     var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+  638      var newProxiedToken = tokenConfig.token;
+  639      var newToken = newProxiedToken;
+  640  
+  641:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  642:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  643      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  644      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  647    });
+  648  
+  649:   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
+  650      let address1 = accounts[7];
+  651      await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
+  652:     let upgrader = await proxy.upgradeabilityOwner();
+  653:     assert.notEqual(upgrader, address1);
+  654    });
+  655  
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+   25  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   26  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   27: var upgradeTo = tokenUtils.upgradeTo;
+   28  
+   29  var amount = 100;
+   ..
+  591    });
+  592  
+  593:   // Upgrade
+  594  
+  595:   it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596      var newRawToken = await FiatToken.new();
+  597:     await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  599    });
+  600  
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602:     // Create upgraded token
+  603      var newRawToken = await FiatToken.new();
+  604:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+  606      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+    1  var FiatToken = artifacts.require('FiatToken');
+    2: var UpgradedFiatToken = artifacts.require('FiatTokenV2');
+    3  var tokenUtils = require('./TokenTestUtils');
+    4  var positive_tests = require('./PositiveTests');
+    .
+   18  
+   19  
+   20: // The following helpers make fresh original/upgraded tokens before each test.
+   21  
+   22  async function newToken() {
+   ..
+   25  }
+   26  
+   27: async function newUpgradedToken() {
+   28: 	var token = await UpgradedFiatToken.new();
+   29  	return token;
+   30  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+   21  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   22  var proxyOwnerAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+   23: var upgraderAccount = proxyOwnerAccount; // accounts[2]
+   24  var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
+   25  var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
+   ..
+   32  var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
+   33  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   34: var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+   35  var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
+   36  var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
+   ..
+  117                  'blacklisterAccount': bigZero,
+  118                  'tokenOwnerAccount': bigZero,
+  119:                 'upgraderAccount': bigZero,
+  120                  'arbitraryAccount': bigZero
+  121              },
+  ...
+  126                  'blacklisterAccount': bigZero,
+  127                  'tokenOwnerAccount': bigZero,
+  128:                 'upgraderAccount': bigZero,
+  129                  'masterMinterAccount': bigZero
+  130              },
+  ...
+  135                  'blacklisterAccount': bigZero,
+  136                  'tokenOwnerAccount': bigZero,
+  137:                 'upgraderAccount': bigZero,
+  138                  'minterAccount': bigZero
+  139              },
+  ...
+  144                  'blacklisterAccount': bigZero,
+  145                  'tokenOwnerAccount': bigZero,
+  146:                 'upgraderAccount': bigZero,
+  147                  'pauserAccount': bigZero
+  148              },
+  ...
+  153                  'pauserAccount': bigZero,
+  154                  'tokenOwnerAccount': bigZero,
+  155:                 'upgraderAccount': bigZero,
+  156                  'blacklisterAccount': bigZero
+  157              },
+  ...
+  162                  'pauserAccount': bigZero,
+  163                  'blacklisterAccount': bigZero,
+  164:                 'upgraderAccount': bigZero,
+  165                  'tokenOwnerAccount': bigZero
+  166              },
+  167:             'upgraderAccount': {
+  168                  'arbitraryAccount': bigZero,
+  169                  'masterMinterAccount': bigZero,
+  ...
+  172                  'blacklisterAccount': bigZero,
+  173                  'tokenOwnerAccount': bigZero,
+  174:                 'upgraderAccount': bigZero
+  175              }
+  176          },
+  ...
+  241  
+  242          // Check that sum of individual balances equals totalSupply
+  243:         var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+  244          var balanceSum = bigZero;
+  245          var x;
+  ...
+  275          await token.allowance(arbitraryAccount, blacklisterAccount),
+  276          await token.allowance(arbitraryAccount, tokenOwnerAccount),
+  277:         await token.allowance(arbitraryAccount, upgraderAccount),
+  278          await token.allowance(arbitraryAccount, arbitraryAccount),
+  279          await token.allowance(masterMinterAccount, arbitraryAccount),
+  ...
+  282          await token.allowance(masterMinterAccount, blacklisterAccount),
+  283          await token.allowance(masterMinterAccount, tokenOwnerAccount),
+  284:         await token.allowance(masterMinterAccount, upgraderAccount),
+  285          await token.allowance(masterMinterAccount, masterMinterAccount),
+  286          await token.allowance(minterAccount, arbitraryAccount),
+  ...
+  289          await token.allowance(minterAccount, blacklisterAccount),
+  290          await token.allowance(minterAccount, tokenOwnerAccount),
+  291:         await token.allowance(minterAccount, upgraderAccount),
+  292          await token.allowance(minterAccount, minterAccount),
+  293          await token.allowance(pauserAccount, arbitraryAccount),
+  ...
+  296          await token.allowance(pauserAccount, blacklisterAccount),
+  297          await token.allowance(pauserAccount, tokenOwnerAccount),
+  298:         await token.allowance(pauserAccount, upgraderAccount),
+  299          await token.allowance(pauserAccount, pauserAccount),
+  300          await token.allowance(blacklisterAccount, arbitraryAccount),
+  ...
+  303          await token.allowance(blacklisterAccount, pauserAccount),
+  304          await token.allowance(blacklisterAccount, tokenOwnerAccount),
+  305:         await token.allowance(blacklisterAccount, upgraderAccount),
+  306          await token.allowance(blacklisterAccount, blacklisterAccount),
+  307          await token.allowance(tokenOwnerAccount, arbitraryAccount),
+  ...
+  310          await token.allowance(tokenOwnerAccount, pauserAccount),
+  311          await token.allowance(tokenOwnerAccount, blacklisterAccount),
+  312:         await token.allowance(tokenOwnerAccount, upgraderAccount),
+  313          await token.allowance(tokenOwnerAccount, tokenOwnerAccount),
+  314:         await token.allowance(upgraderAccount, arbitraryAccount),
+  315:         await token.allowance(upgraderAccount, masterMinterAccount),
+  316:         await token.allowance(upgraderAccount, minterAccount),
+  317:         await token.allowance(upgraderAccount, pauserAccount),
+  318:         await token.allowance(upgraderAccount, blacklisterAccount),
+  319:         await token.allowance(upgraderAccount, tokenOwnerAccount),
+  320:         await token.allowance(upgraderAccount, upgraderAccount),
+  321          await token.totalSupply(),
+  322          await token.isBlacklisted(arbitraryAccount),
+  ...
+  450                      'blacklisterAccount': allowanceAtoB,
+  451                      'tokenOwnerAccount': allowanceAtoRAC,
+  452:                     'upgraderAccount': allowanceAtoU,
+  453                      'arbitraryAccount': allowanceAtoA,
+  454                  },
+  ...
+  459                      'blacklisterAccount': allowanceMMtoB,
+  460                      'tokenOwnerAccount': allowanceMMtoRAC,
+  461:                     'upgraderAccount': allowanceMMtoU,
+  462                      'masterMinterAccount': allowanceMMtoMM,
+  463                  },
+  ...
+  468                      'blacklisterAccount': allowanceMtoB,
+  469                      'tokenOwnerAccount': allowanceMtoRAC,
+  470:                     'upgraderAccount': allowanceMtoU,
+  471                      'minterAccount': allowanceMtoM,
+  472                  },
+  ...
+  477                      'blacklisterAccount': allowancePtoB,
+  478                      'tokenOwnerAccount': allowancePtoRAC,
+  479:                     'upgraderAccount': allowancePtoU,
+  480                      'pauserAccount': allowancePtoP,
+  481                  },
+  ...
+  486                      'pauserAccount': allowanceBtoP,
+  487                      'tokenOwnerAccount': allowanceBtoRAC,
+  488:                     'upgraderAccount': allowanceBtoU,
+  489                      'blacklisterAccount': allowanceBtoB,
+  490                  },
+  ...
+  495                      'pauserAccount': allowanceRACtoP,
+  496                      'blacklisterAccount': allowanceRACtoB,
+  497:                     'upgraderAccount': allowanceRACtoU,
+  498                      'tokenOwnerAccount': allowanceRACtoRAC,
+  499                  },
+  500:                 'upgraderAccount': {
+  501                      'arbitraryAccount': allowanceUtoA,
+  502                      'masterMinterAccount': allowanceUtoMM,
+  ...
+  505                      'blacklisterAccount': allowanceUtoB,
+  506                      'tokenOwnerAccount': allowanceUtoRAC,
+  507:                     'upgraderAccount': allowanceUtoU,
+  508                  }
+  509              },
+  ...
+  682      const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684:     await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685      proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  ...
+  694  }
+  695  
+  696: async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
+  697:   if (proxyUpgraderAccount == null) {
+  698:     proxyUpgraderAccount = proxyOwnerAccount;
+  699    }
+  700:   await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701    proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  ...
+  762      redeem: redeem,
+  763      initializeTokenWithProxy: initializeTokenWithProxy,
+  764:     upgradeTo: upgradeTo,
+  765      expectRevert: expectRevert,
+  766      expectJump: expectJump,
+  ...
+  776      proxyOwnerAccount: proxyOwnerAccount,
+  777      arbitraryAccountPrivateKey,
+  778:     upgraderAccountPrivateKey,
+  779      tokenOwnerPrivateKey,
+  780      blacklisterAccountPrivateKey,
+
+95 matches across 7 files
+
+
+Searching 11 files for "upgrad"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   20  var deployerAccount = tokenUtils.deployerAccount;
+   21  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   22: var upgraderAccount = tokenUtils.upgraderAccount;
+   23  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   24  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   ..
+   31  var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
+   32  var tokenOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
+   33: var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
+   34  var tokenOwnerPrivateKey = tokenUtils.tokenOwnerPrivateKey;
+   35  var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   ..
+   23  var pauserAccount = tokenUtils.pauserAccount;
+   24  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   25: var UpgradedFiatToken = tokenUtils.upgradedFiatToken;
+   26: var upgradeTo = tokenUtils.upgradeTo;
+   27  
+   28  var amount = 100;
+   ..
+  103    });
+  104  
+  105:   it('ept008 should upgrade while paused', async function() {
+  106:     var newRawToken = await UpgradedFiatToken.new();
+  107      await token.pause({from: pauserAccount});
+  108:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  109      var newProxiedToken = tokenConfig.token;
+  110      var newToken = newProxiedToken;
+  ...
+  247    });
+  248  
+  249:   it ('ept023 should upgrade to blacklisted address', async function() {
+  250      var newRawToken = await FiatToken.new();
+  251  
+  252      await token.blacklist(newRawToken.address, { from: blacklisterAccount });
+  253:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  254      var newProxiedToken = tokenConfig.token;
+  255      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   28  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   29  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   30: var upgradeTo = tokenUtils.upgradeTo;
+   31  
+   32  // these tests are for reference and do not track side effects on all variables
+   ..
+  565    });
+  566  
+  567:   it('should upgrade and preserve data', async function () {
+  568      await mint(token, accounts[2], 200, minterAccount);
+  569      let initialBalance = await token.balanceOf(accounts[2]);
+  ...
+  571  
+  572      var newRawToken = await FiatToken.new();
+  573:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  574      var newProxiedToken = tokenConfig.token;
+  575      var newToken = newProxiedToken;
+  576  
+  577:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  578:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  579      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  580      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  619    });
+  620  
+  621:   it('should updateUpgraderAddress for upgrader', async function () {
+  622:     let upgrader = await proxy.upgradeabilityOwner();
+  623:     assert.equal(proxyOwnerAccount, upgrader);
+  624      let address1 = accounts[7];
+  625      let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
+  626:     upgrader = await token.upgradeabilityOwner();
+  627:     assert.equal(upgrader, address1);
+  628  
+  629:     //Test upgrade with new upgrader account
+  630      await token.configureMinter(minterAccount, 1000, {from: masterMinterAccount});
+  631      await token.mint(accounts[2], 200, {from: minterAccount});
+  ...
+  635      
+  636      var newRawToken = await FiatToken.new();
+  637:     var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+  638      var newProxiedToken = tokenConfig.token;
+  639      var newToken = newProxiedToken;
+  640  
+  641:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  642:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  643      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  644      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  647    });
+  648  
+  649:   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
+  650      let address1 = accounts[7];
+  651      await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
+  652:     let upgrader = await proxy.upgradeabilityOwner();
+  653:     assert.notEqual(upgrader, address1);
+  654    });
+  655  
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+   25  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   26  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   27: var upgradeTo = tokenUtils.upgradeTo;
+   28  
+   29  var amount = 100;
+   ..
+  591    });
+  592  
+  593:   // Upgrade
+  594  
+  595:   it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596      var newRawToken = await FiatToken.new();
+  597:     await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  599    });
+  600  
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602:     // Create upgraded token
+  603      var newRawToken = await FiatToken.new();
+  604:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+  606      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   15  var pauserAccount = tokenUtils.pauserAccount;
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17: var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
+   18  
+   19: // The following helpers make fresh original/upgraded tokens before each test.
+   20  
+   21  async function newToken() {
+   ..
+   24  }
+   25  
+   26: async function newUpgradedToken() {
+   27: 	var token = await UpgradedFiatToken.new();
+   28  	return token;
+   29  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+   21  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   22  var proxyOwnerAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+   23: var upgraderAccount = proxyOwnerAccount; // accounts[2]
+   24  var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
+   25  var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
+   ..
+   32  var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
+   33  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   34: var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+   35  var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
+   36  var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
+   ..
+  117                  'blacklisterAccount': bigZero,
+  118                  'tokenOwnerAccount': bigZero,
+  119:                 'upgraderAccount': bigZero,
+  120                  'arbitraryAccount': bigZero
+  121              },
+  ...
+  126                  'blacklisterAccount': bigZero,
+  127                  'tokenOwnerAccount': bigZero,
+  128:                 'upgraderAccount': bigZero,
+  129                  'masterMinterAccount': bigZero
+  130              },
+  ...
+  135                  'blacklisterAccount': bigZero,
+  136                  'tokenOwnerAccount': bigZero,
+  137:                 'upgraderAccount': bigZero,
+  138                  'minterAccount': bigZero
+  139              },
+  ...
+  144                  'blacklisterAccount': bigZero,
+  145                  'tokenOwnerAccount': bigZero,
+  146:                 'upgraderAccount': bigZero,
+  147                  'pauserAccount': bigZero
+  148              },
+  ...
+  153                  'pauserAccount': bigZero,
+  154                  'tokenOwnerAccount': bigZero,
+  155:                 'upgraderAccount': bigZero,
+  156                  'blacklisterAccount': bigZero
+  157              },
+  ...
+  162                  'pauserAccount': bigZero,
+  163                  'blacklisterAccount': bigZero,
+  164:                 'upgraderAccount': bigZero,
+  165                  'tokenOwnerAccount': bigZero
+  166              },
+  167:             'upgraderAccount': {
+  168                  'arbitraryAccount': bigZero,
+  169                  'masterMinterAccount': bigZero,
+  ...
+  172                  'blacklisterAccount': bigZero,
+  173                  'tokenOwnerAccount': bigZero,
+  174:                 'upgraderAccount': bigZero
+  175              }
+  176          },
+  ...
+  241  
+  242          // Check that sum of individual balances equals totalSupply
+  243:         var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+  244          var balanceSum = bigZero;
+  245          var x;
+  ...
+  275          await token.allowance(arbitraryAccount, blacklisterAccount),
+  276          await token.allowance(arbitraryAccount, tokenOwnerAccount),
+  277:         await token.allowance(arbitraryAccount, upgraderAccount),
+  278          await token.allowance(arbitraryAccount, arbitraryAccount),
+  279          await token.allowance(masterMinterAccount, arbitraryAccount),
+  ...
+  282          await token.allowance(masterMinterAccount, blacklisterAccount),
+  283          await token.allowance(masterMinterAccount, tokenOwnerAccount),
+  284:         await token.allowance(masterMinterAccount, upgraderAccount),
+  285          await token.allowance(masterMinterAccount, masterMinterAccount),
+  286          await token.allowance(minterAccount, arbitraryAccount),
+  ...
+  289          await token.allowance(minterAccount, blacklisterAccount),
+  290          await token.allowance(minterAccount, tokenOwnerAccount),
+  291:         await token.allowance(minterAccount, upgraderAccount),
+  292          await token.allowance(minterAccount, minterAccount),
+  293          await token.allowance(pauserAccount, arbitraryAccount),
+  ...
+  296          await token.allowance(pauserAccount, blacklisterAccount),
+  297          await token.allowance(pauserAccount, tokenOwnerAccount),
+  298:         await token.allowance(pauserAccount, upgraderAccount),
+  299          await token.allowance(pauserAccount, pauserAccount),
+  300          await token.allowance(blacklisterAccount, arbitraryAccount),
+  ...
+  303          await token.allowance(blacklisterAccount, pauserAccount),
+  304          await token.allowance(blacklisterAccount, tokenOwnerAccount),
+  305:         await token.allowance(blacklisterAccount, upgraderAccount),
+  306          await token.allowance(blacklisterAccount, blacklisterAccount),
+  307          await token.allowance(tokenOwnerAccount, arbitraryAccount),
+  ...
+  310          await token.allowance(tokenOwnerAccount, pauserAccount),
+  311          await token.allowance(tokenOwnerAccount, blacklisterAccount),
+  312:         await token.allowance(tokenOwnerAccount, upgraderAccount),
+  313          await token.allowance(tokenOwnerAccount, tokenOwnerAccount),
+  314:         await token.allowance(upgraderAccount, arbitraryAccount),
+  315:         await token.allowance(upgraderAccount, masterMinterAccount),
+  316:         await token.allowance(upgraderAccount, minterAccount),
+  317:         await token.allowance(upgraderAccount, pauserAccount),
+  318:         await token.allowance(upgraderAccount, blacklisterAccount),
+  319:         await token.allowance(upgraderAccount, tokenOwnerAccount),
+  320:         await token.allowance(upgraderAccount, upgraderAccount),
+  321          await token.totalSupply(),
+  322          await token.isBlacklisted(arbitraryAccount),
+  ...
+  450                      'blacklisterAccount': allowanceAtoB,
+  451                      'tokenOwnerAccount': allowanceAtoRAC,
+  452:                     'upgraderAccount': allowanceAtoU,
+  453                      'arbitraryAccount': allowanceAtoA,
+  454                  },
+  ...
+  459                      'blacklisterAccount': allowanceMMtoB,
+  460                      'tokenOwnerAccount': allowanceMMtoRAC,
+  461:                     'upgraderAccount': allowanceMMtoU,
+  462                      'masterMinterAccount': allowanceMMtoMM,
+  463                  },
+  ...
+  468                      'blacklisterAccount': allowanceMtoB,
+  469                      'tokenOwnerAccount': allowanceMtoRAC,
+  470:                     'upgraderAccount': allowanceMtoU,
+  471                      'minterAccount': allowanceMtoM,
+  472                  },
+  ...
+  477                      'blacklisterAccount': allowancePtoB,
+  478                      'tokenOwnerAccount': allowancePtoRAC,
+  479:                     'upgraderAccount': allowancePtoU,
+  480                      'pauserAccount': allowancePtoP,
+  481                  },
+  ...
+  486                      'pauserAccount': allowanceBtoP,
+  487                      'tokenOwnerAccount': allowanceBtoRAC,
+  488:                     'upgraderAccount': allowanceBtoU,
+  489                      'blacklisterAccount': allowanceBtoB,
+  490                  },
+  ...
+  495                      'pauserAccount': allowanceRACtoP,
+  496                      'blacklisterAccount': allowanceRACtoB,
+  497:                     'upgraderAccount': allowanceRACtoU,
+  498                      'tokenOwnerAccount': allowanceRACtoRAC,
+  499                  },
+  500:                 'upgraderAccount': {
+  501                      'arbitraryAccount': allowanceUtoA,
+  502                      'masterMinterAccount': allowanceUtoMM,
+  ...
+  505                      'blacklisterAccount': allowanceUtoB,
+  506                      'tokenOwnerAccount': allowanceUtoRAC,
+  507:                     'upgraderAccount': allowanceUtoU,
+  508                  }
+  509              },
+  ...
+  682      const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684:     await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685      proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  ...
+  694  }
+  695  
+  696: async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
+  697:   if (proxyUpgraderAccount == null) {
+  698:     proxyUpgraderAccount = proxyOwnerAccount;
+  699    }
+  700:   await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701    proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  ...
+  738  
+  739  module.exports = {
+  740:     upgradedFiatToken: artifacts.require('FiatTokenV2');
+  741      name: name,
+  742      symbol: symbol,
+  ...
+  763      redeem: redeem,
+  764      initializeTokenWithProxy: initializeTokenWithProxy,
+  765:     upgradeTo: upgradeTo,
+  766      expectRevert: expectRevert,
+  767      expectJump: expectJump,
+  ...
+  777      proxyOwnerAccount: proxyOwnerAccount,
+  778      arbitraryAccountPrivateKey,
+  779:     upgraderAccountPrivateKey,
+  780      tokenOwnerPrivateKey,
+  781      blacklisterAccountPrivateKey,
+
+100 matches across 7 files
+
+
+Searching 11 files for "upgrad"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   20  var deployerAccount = tokenUtils.deployerAccount;
+   21  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   22: var upgraderAccount = tokenUtils.upgraderAccount;
+   23  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   24  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   ..
+   31  var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
+   32  var tokenOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
+   33: var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
+   34  var tokenOwnerPrivateKey = tokenUtils.tokenOwnerPrivateKey;
+   35  var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   ..
+   23  var pauserAccount = tokenUtils.pauserAccount;
+   24  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   25: var UpgradedFiatToken = tokenUtils.upgradedFiatToken;
+   26: var upgradeTo = tokenUtils.upgradeTo;
+   27  
+   28  var amount = 100;
+   ..
+  103    });
+  104  
+  105:   it('ept008 should upgrade while paused', async function() {
+  106:     var newRawToken = await UpgradedFiatToken.new();
+  107      await token.pause({from: pauserAccount});
+  108:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  109      var newProxiedToken = tokenConfig.token;
+  110      var newToken = newProxiedToken;
+  ...
+  247    });
+  248  
+  249:   it ('ept023 should upgrade to blacklisted address', async function() {
+  250:     var newRawToken = await UpgradedFiatToken.new();
+  251  
+  252      await token.blacklist(newRawToken.address, { from: blacklisterAccount });
+  253:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  254      var newProxiedToken = tokenConfig.token;
+  255      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   28  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   29  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   30: var upgradeTo = tokenUtils.upgradeTo;
+   31  
+   32  // these tests are for reference and do not track side effects on all variables
+   ..
+  565    });
+  566  
+  567:   it('should upgrade and preserve data', async function () {
+  568      await mint(token, accounts[2], 200, minterAccount);
+  569      let initialBalance = await token.balanceOf(accounts[2]);
+  ...
+  571  
+  572      var newRawToken = await FiatToken.new();
+  573:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  574      var newProxiedToken = tokenConfig.token;
+  575      var newToken = newProxiedToken;
+  576  
+  577:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  578:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  579      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  580      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  619    });
+  620  
+  621:   it('should updateUpgraderAddress for upgrader', async function () {
+  622:     let upgrader = await proxy.upgradeabilityOwner();
+  623:     assert.equal(proxyOwnerAccount, upgrader);
+  624      let address1 = accounts[7];
+  625      let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
+  626:     upgrader = await token.upgradeabilityOwner();
+  627:     assert.equal(upgrader, address1);
+  628  
+  629:     //Test upgrade with new upgrader account
+  630      await token.configureMinter(minterAccount, 1000, {from: masterMinterAccount});
+  631      await token.mint(accounts[2], 200, {from: minterAccount});
+  ...
+  635      
+  636      var newRawToken = await FiatToken.new();
+  637:     var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+  638      var newProxiedToken = tokenConfig.token;
+  639      var newToken = newProxiedToken;
+  640  
+  641:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  642:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  643      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  644      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  647    });
+  648  
+  649:   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
+  650      let address1 = accounts[7];
+  651      await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
+  652:     let upgrader = await proxy.upgradeabilityOwner();
+  653:     assert.notEqual(upgrader, address1);
+  654    });
+  655  
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+   25  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   26  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   27: var upgradeTo = tokenUtils.upgradeTo;
+   28  
+   29  var amount = 100;
+   ..
+  591    });
+  592  
+  593:   // Upgrade
+  594  
+  595:   it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596      var newRawToken = await FiatToken.new();
+  597:     await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  599    });
+  600  
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602:     // Create upgraded token
+  603      var newRawToken = await FiatToken.new();
+  604:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+  606      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   15  var pauserAccount = tokenUtils.pauserAccount;
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17: var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
+   18  
+   19: // The following helpers make fresh original/upgraded tokens before each test.
+   20  
+   21  async function newToken() {
+   ..
+   24  }
+   25  
+   26: async function newUpgradedToken() {
+   27: 	var token = await UpgradedFiatToken.new();
+   28  	return token;
+   29  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+   21  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   22  var proxyOwnerAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+   23: var upgraderAccount = proxyOwnerAccount; // accounts[2]
+   24  var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
+   25  var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
+   ..
+   32  var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
+   33  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   34: var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+   35  var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
+   36  var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
+   ..
+  117                  'blacklisterAccount': bigZero,
+  118                  'tokenOwnerAccount': bigZero,
+  119:                 'upgraderAccount': bigZero,
+  120                  'arbitraryAccount': bigZero
+  121              },
+  ...
+  126                  'blacklisterAccount': bigZero,
+  127                  'tokenOwnerAccount': bigZero,
+  128:                 'upgraderAccount': bigZero,
+  129                  'masterMinterAccount': bigZero
+  130              },
+  ...
+  135                  'blacklisterAccount': bigZero,
+  136                  'tokenOwnerAccount': bigZero,
+  137:                 'upgraderAccount': bigZero,
+  138                  'minterAccount': bigZero
+  139              },
+  ...
+  144                  'blacklisterAccount': bigZero,
+  145                  'tokenOwnerAccount': bigZero,
+  146:                 'upgraderAccount': bigZero,
+  147                  'pauserAccount': bigZero
+  148              },
+  ...
+  153                  'pauserAccount': bigZero,
+  154                  'tokenOwnerAccount': bigZero,
+  155:                 'upgraderAccount': bigZero,
+  156                  'blacklisterAccount': bigZero
+  157              },
+  ...
+  162                  'pauserAccount': bigZero,
+  163                  'blacklisterAccount': bigZero,
+  164:                 'upgraderAccount': bigZero,
+  165                  'tokenOwnerAccount': bigZero
+  166              },
+  167:             'upgraderAccount': {
+  168                  'arbitraryAccount': bigZero,
+  169                  'masterMinterAccount': bigZero,
+  ...
+  172                  'blacklisterAccount': bigZero,
+  173                  'tokenOwnerAccount': bigZero,
+  174:                 'upgraderAccount': bigZero
+  175              }
+  176          },
+  ...
+  241  
+  242          // Check that sum of individual balances equals totalSupply
+  243:         var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+  244          var balanceSum = bigZero;
+  245          var x;
+  ...
+  275          await token.allowance(arbitraryAccount, blacklisterAccount),
+  276          await token.allowance(arbitraryAccount, tokenOwnerAccount),
+  277:         await token.allowance(arbitraryAccount, upgraderAccount),
+  278          await token.allowance(arbitraryAccount, arbitraryAccount),
+  279          await token.allowance(masterMinterAccount, arbitraryAccount),
+  ...
+  282          await token.allowance(masterMinterAccount, blacklisterAccount),
+  283          await token.allowance(masterMinterAccount, tokenOwnerAccount),
+  284:         await token.allowance(masterMinterAccount, upgraderAccount),
+  285          await token.allowance(masterMinterAccount, masterMinterAccount),
+  286          await token.allowance(minterAccount, arbitraryAccount),
+  ...
+  289          await token.allowance(minterAccount, blacklisterAccount),
+  290          await token.allowance(minterAccount, tokenOwnerAccount),
+  291:         await token.allowance(minterAccount, upgraderAccount),
+  292          await token.allowance(minterAccount, minterAccount),
+  293          await token.allowance(pauserAccount, arbitraryAccount),
+  ...
+  296          await token.allowance(pauserAccount, blacklisterAccount),
+  297          await token.allowance(pauserAccount, tokenOwnerAccount),
+  298:         await token.allowance(pauserAccount, upgraderAccount),
+  299          await token.allowance(pauserAccount, pauserAccount),
+  300          await token.allowance(blacklisterAccount, arbitraryAccount),
+  ...
+  303          await token.allowance(blacklisterAccount, pauserAccount),
+  304          await token.allowance(blacklisterAccount, tokenOwnerAccount),
+  305:         await token.allowance(blacklisterAccount, upgraderAccount),
+  306          await token.allowance(blacklisterAccount, blacklisterAccount),
+  307          await token.allowance(tokenOwnerAccount, arbitraryAccount),
+  ...
+  310          await token.allowance(tokenOwnerAccount, pauserAccount),
+  311          await token.allowance(tokenOwnerAccount, blacklisterAccount),
+  312:         await token.allowance(tokenOwnerAccount, upgraderAccount),
+  313          await token.allowance(tokenOwnerAccount, tokenOwnerAccount),
+  314:         await token.allowance(upgraderAccount, arbitraryAccount),
+  315:         await token.allowance(upgraderAccount, masterMinterAccount),
+  316:         await token.allowance(upgraderAccount, minterAccount),
+  317:         await token.allowance(upgraderAccount, pauserAccount),
+  318:         await token.allowance(upgraderAccount, blacklisterAccount),
+  319:         await token.allowance(upgraderAccount, tokenOwnerAccount),
+  320:         await token.allowance(upgraderAccount, upgraderAccount),
+  321          await token.totalSupply(),
+  322          await token.isBlacklisted(arbitraryAccount),
+  ...
+  450                      'blacklisterAccount': allowanceAtoB,
+  451                      'tokenOwnerAccount': allowanceAtoRAC,
+  452:                     'upgraderAccount': allowanceAtoU,
+  453                      'arbitraryAccount': allowanceAtoA,
+  454                  },
+  ...
+  459                      'blacklisterAccount': allowanceMMtoB,
+  460                      'tokenOwnerAccount': allowanceMMtoRAC,
+  461:                     'upgraderAccount': allowanceMMtoU,
+  462                      'masterMinterAccount': allowanceMMtoMM,
+  463                  },
+  ...
+  468                      'blacklisterAccount': allowanceMtoB,
+  469                      'tokenOwnerAccount': allowanceMtoRAC,
+  470:                     'upgraderAccount': allowanceMtoU,
+  471                      'minterAccount': allowanceMtoM,
+  472                  },
+  ...
+  477                      'blacklisterAccount': allowancePtoB,
+  478                      'tokenOwnerAccount': allowancePtoRAC,
+  479:                     'upgraderAccount': allowancePtoU,
+  480                      'pauserAccount': allowancePtoP,
+  481                  },
+  ...
+  486                      'pauserAccount': allowanceBtoP,
+  487                      'tokenOwnerAccount': allowanceBtoRAC,
+  488:                     'upgraderAccount': allowanceBtoU,
+  489                      'blacklisterAccount': allowanceBtoB,
+  490                  },
+  ...
+  495                      'pauserAccount': allowanceRACtoP,
+  496                      'blacklisterAccount': allowanceRACtoB,
+  497:                     'upgraderAccount': allowanceRACtoU,
+  498                      'tokenOwnerAccount': allowanceRACtoRAC,
+  499                  },
+  500:                 'upgraderAccount': {
+  501                      'arbitraryAccount': allowanceUtoA,
+  502                      'masterMinterAccount': allowanceUtoMM,
+  ...
+  505                      'blacklisterAccount': allowanceUtoB,
+  506                      'tokenOwnerAccount': allowanceUtoRAC,
+  507:                     'upgraderAccount': allowanceUtoU,
+  508                  }
+  509              },
+  ...
+  682      const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684:     await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685      proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  ...
+  694  }
+  695  
+  696: async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
+  697:   if (proxyUpgraderAccount == null) {
+  698:     proxyUpgraderAccount = proxyOwnerAccount;
+  699    }
+  700:   await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701    proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  ...
+  738  
+  739  module.exports = {
+  740:     upgradedFiatToken: artifacts.require('FiatTokenV2');
+  741      name: name,
+  742      symbol: symbol,
+  ...
+  763      redeem: redeem,
+  764      initializeTokenWithProxy: initializeTokenWithProxy,
+  765:     upgradeTo: upgradeTo,
+  766      expectRevert: expectRevert,
+  767      expectJump: expectJump,
+  ...
+  777      proxyOwnerAccount: proxyOwnerAccount,
+  778      arbitraryAccountPrivateKey,
+  779:     upgraderAccountPrivateKey,
+  780      tokenOwnerPrivateKey,
+  781      blacklisterAccountPrivateKey,
+
+101 matches across 7 files
+
+
+Searching 11 files for "upgrad"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   20  var deployerAccount = tokenUtils.deployerAccount;
+   21  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   22: var upgraderAccount = tokenUtils.upgraderAccount;
+   23  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   24  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   ..
+   31  var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
+   32  var tokenOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
+   33: var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
+   34  var tokenOwnerPrivateKey = tokenUtils.tokenOwnerPrivateKey;
+   35  var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+   ..
+   23  var pauserAccount = tokenUtils.pauserAccount;
+   24  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   25: var UpgradedFiatToken = tokenUtils.upgradedFiatToken;
+   26: var upgradeTo = tokenUtils.upgradeTo;
+   27  
+   28  var amount = 100;
+   ..
+  103    });
+  104  
+  105:   it('ept008 should upgrade while paused', async function() {
+  106:     var newRawToken = await UpgradedFiatToken.new();
+  107      await token.pause({from: pauserAccount});
+  108:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  109      var newProxiedToken = tokenConfig.token;
+  110      var newToken = newProxiedToken;
+  ...
+  247    });
+  248  
+  249:   it ('ept023 should upgrade to blacklisted address', async function() {
+  250:     var newRawToken = await UpgradedFiatToken.new();
+  251  
+  252      await token.blacklist(newRawToken.address, { from: blacklisterAccount });
+  253:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  254      var newProxiedToken = tokenConfig.token;
+  255      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   28  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   29  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   30: var upgradeTo = tokenUtils.upgradeTo;
+   31  
+   32  // these tests are for reference and do not track side effects on all variables
+   ..
+  565    });
+  566  
+  567:   it('should upgrade and preserve data', async function () {
+  568      await mint(token, accounts[2], 200, minterAccount);
+  569      let initialBalance = await token.balanceOf(accounts[2]);
+  570      assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+  571  
+  572:     var newRawToken = await UpgradedFiatToken.new();
+  573:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  574      var newProxiedToken = tokenConfig.token;
+  575      var newToken = newProxiedToken;
+  576  
+  577:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  578:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  579      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  580      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  619    });
+  620  
+  621:   it('should updateUpgraderAddress for upgrader', async function () {
+  622:     let upgrader = await proxy.upgradeabilityOwner();
+  623:     assert.equal(proxyOwnerAccount, upgrader);
+  624      let address1 = accounts[7];
+  625      let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
+  626:     upgrader = await token.upgradeabilityOwner();
+  627:     assert.equal(upgrader, address1);
+  628  
+  629:     //Test upgrade with new upgrader account
+  630      await token.configureMinter(minterAccount, 1000, {from: masterMinterAccount});
+  631      await token.mint(accounts[2], 200, {from: minterAccount});
+  ...
+  635      
+  636      var newRawToken = await FiatToken.new();
+  637:     var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+  638      var newProxiedToken = tokenConfig.token;
+  639      var newToken = newProxiedToken;
+  640  
+  641:     let upgradedBalance = await newToken.balanceOf(accounts[2]);
+  642:     assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+  643      await newToken.configureMinter(minterAccount, 500, { from: masterMinterAccount });
+  644      await newToken.mint(accounts[2], 200, { from: minterAccount });
+  ...
+  647    });
+  648  
+  649:   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
+  650      let address1 = accounts[7];
+  651      await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
+  652:     let upgrader = await proxy.upgradeabilityOwner();
+  653:     assert.notEqual(upgrader, address1);
+  654    });
+  655  
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+   25  var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+   26  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   27: var upgradeTo = tokenUtils.upgradeTo;
+   28  
+   29  var amount = 100;
+   ..
+  591    });
+  592  
+  593:   // Upgrade
+  594  
+  595:   it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596      var newRawToken = await FiatToken.new();
+  597:     await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  599    });
+  600  
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602:     // Create upgraded token
+  603      var newRawToken = await FiatToken.new();
+  604:     var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+  606      var newToken = newProxiedToken;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17  var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
+   18: var upgraderAccount = tokenUtils.upgraderAccount;
+   19  var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+   20  var blacklisterAccount = tokenUtils.blacklisterAccount;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   15  var pauserAccount = tokenUtils.pauserAccount;
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17: var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
+   18  
+   19: // The following helpers make fresh original/upgraded tokens before each test.
+   20  
+   21  async function newToken() {
+   ..
+   24  }
+   25  
+   26: async function newUpgradedToken() {
+   27: 	var token = await UpgradedFiatToken.new();
+   28  	return token;
+   29  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+   21  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   22  var proxyOwnerAccount = "0x22d491bde2303f2f43325b2108d26f1eaba1e32b"; // accounts[2]
+   23: var upgraderAccount = proxyOwnerAccount; // accounts[2]
+   24  var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
+   25  var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
+   ..
+   32  var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
+   33  var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
+   34: var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+   35  var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
+   36  var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
+   ..
+  117                  'blacklisterAccount': bigZero,
+  118                  'tokenOwnerAccount': bigZero,
+  119:                 'upgraderAccount': bigZero,
+  120                  'arbitraryAccount': bigZero
+  121              },
+  ...
+  126                  'blacklisterAccount': bigZero,
+  127                  'tokenOwnerAccount': bigZero,
+  128:                 'upgraderAccount': bigZero,
+  129                  'masterMinterAccount': bigZero
+  130              },
+  ...
+  135                  'blacklisterAccount': bigZero,
+  136                  'tokenOwnerAccount': bigZero,
+  137:                 'upgraderAccount': bigZero,
+  138                  'minterAccount': bigZero
+  139              },
+  ...
+  144                  'blacklisterAccount': bigZero,
+  145                  'tokenOwnerAccount': bigZero,
+  146:                 'upgraderAccount': bigZero,
+  147                  'pauserAccount': bigZero
+  148              },
+  ...
+  153                  'pauserAccount': bigZero,
+  154                  'tokenOwnerAccount': bigZero,
+  155:                 'upgraderAccount': bigZero,
+  156                  'blacklisterAccount': bigZero
+  157              },
+  ...
+  162                  'pauserAccount': bigZero,
+  163                  'blacklisterAccount': bigZero,
+  164:                 'upgraderAccount': bigZero,
+  165                  'tokenOwnerAccount': bigZero
+  166              },
+  167:             'upgraderAccount': {
+  168                  'arbitraryAccount': bigZero,
+  169                  'masterMinterAccount': bigZero,
+  ...
+  172                  'blacklisterAccount': bigZero,
+  173                  'tokenOwnerAccount': bigZero,
+  174:                 'upgraderAccount': bigZero
+  175              }
+  176          },
+  ...
+  241  
+  242          // Check that sum of individual balances equals totalSupply
+  243:         var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+  244          var balanceSum = bigZero;
+  245          var x;
+  ...
+  275          await token.allowance(arbitraryAccount, blacklisterAccount),
+  276          await token.allowance(arbitraryAccount, tokenOwnerAccount),
+  277:         await token.allowance(arbitraryAccount, upgraderAccount),
+  278          await token.allowance(arbitraryAccount, arbitraryAccount),
+  279          await token.allowance(masterMinterAccount, arbitraryAccount),
+  ...
+  282          await token.allowance(masterMinterAccount, blacklisterAccount),
+  283          await token.allowance(masterMinterAccount, tokenOwnerAccount),
+  284:         await token.allowance(masterMinterAccount, upgraderAccount),
+  285          await token.allowance(masterMinterAccount, masterMinterAccount),
+  286          await token.allowance(minterAccount, arbitraryAccount),
+  ...
+  289          await token.allowance(minterAccount, blacklisterAccount),
+  290          await token.allowance(minterAccount, tokenOwnerAccount),
+  291:         await token.allowance(minterAccount, upgraderAccount),
+  292          await token.allowance(minterAccount, minterAccount),
+  293          await token.allowance(pauserAccount, arbitraryAccount),
+  ...
+  296          await token.allowance(pauserAccount, blacklisterAccount),
+  297          await token.allowance(pauserAccount, tokenOwnerAccount),
+  298:         await token.allowance(pauserAccount, upgraderAccount),
+  299          await token.allowance(pauserAccount, pauserAccount),
+  300          await token.allowance(blacklisterAccount, arbitraryAccount),
+  ...
+  303          await token.allowance(blacklisterAccount, pauserAccount),
+  304          await token.allowance(blacklisterAccount, tokenOwnerAccount),
+  305:         await token.allowance(blacklisterAccount, upgraderAccount),
+  306          await token.allowance(blacklisterAccount, blacklisterAccount),
+  307          await token.allowance(tokenOwnerAccount, arbitraryAccount),
+  ...
+  310          await token.allowance(tokenOwnerAccount, pauserAccount),
+  311          await token.allowance(tokenOwnerAccount, blacklisterAccount),
+  312:         await token.allowance(tokenOwnerAccount, upgraderAccount),
+  313          await token.allowance(tokenOwnerAccount, tokenOwnerAccount),
+  314:         await token.allowance(upgraderAccount, arbitraryAccount),
+  315:         await token.allowance(upgraderAccount, masterMinterAccount),
+  316:         await token.allowance(upgraderAccount, minterAccount),
+  317:         await token.allowance(upgraderAccount, pauserAccount),
+  318:         await token.allowance(upgraderAccount, blacklisterAccount),
+  319:         await token.allowance(upgraderAccount, tokenOwnerAccount),
+  320:         await token.allowance(upgraderAccount, upgraderAccount),
+  321          await token.totalSupply(),
+  322          await token.isBlacklisted(arbitraryAccount),
+  ...
+  450                      'blacklisterAccount': allowanceAtoB,
+  451                      'tokenOwnerAccount': allowanceAtoRAC,
+  452:                     'upgraderAccount': allowanceAtoU,
+  453                      'arbitraryAccount': allowanceAtoA,
+  454                  },
+  ...
+  459                      'blacklisterAccount': allowanceMMtoB,
+  460                      'tokenOwnerAccount': allowanceMMtoRAC,
+  461:                     'upgraderAccount': allowanceMMtoU,
+  462                      'masterMinterAccount': allowanceMMtoMM,
+  463                  },
+  ...
+  468                      'blacklisterAccount': allowanceMtoB,
+  469                      'tokenOwnerAccount': allowanceMtoRAC,
+  470:                     'upgraderAccount': allowanceMtoU,
+  471                      'minterAccount': allowanceMtoM,
+  472                  },
+  ...
+  477                      'blacklisterAccount': allowancePtoB,
+  478                      'tokenOwnerAccount': allowancePtoRAC,
+  479:                     'upgraderAccount': allowancePtoU,
+  480                      'pauserAccount': allowancePtoP,
+  481                  },
+  ...
+  486                      'pauserAccount': allowanceBtoP,
+  487                      'tokenOwnerAccount': allowanceBtoRAC,
+  488:                     'upgraderAccount': allowanceBtoU,
+  489                      'blacklisterAccount': allowanceBtoB,
+  490                  },
+  ...
+  495                      'pauserAccount': allowanceRACtoP,
+  496                      'blacklisterAccount': allowanceRACtoB,
+  497:                     'upgraderAccount': allowanceRACtoU,
+  498                      'tokenOwnerAccount': allowanceRACtoRAC,
+  499                  },
+  500:                 'upgraderAccount': {
+  501                      'arbitraryAccount': allowanceUtoA,
+  502                      'masterMinterAccount': allowanceUtoMM,
+  ...
+  505                      'blacklisterAccount': allowanceUtoB,
+  506                      'tokenOwnerAccount': allowanceUtoRAC,
+  507:                     'upgraderAccount': allowanceUtoU,
+  508                  }
+  509              },
+  ...
+  682      const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684:     await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685      proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  ...
+  694  }
+  695  
+  696: async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
+  697:   if (proxyUpgraderAccount == null) {
+  698:     proxyUpgraderAccount = proxyOwnerAccount;
+  699    }
+  700:   await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701    proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  ...
+  738  
+  739  module.exports = {
+  740:     upgradedFiatToken: artifacts.require('FiatTokenV2');
+  741      name: name,
+  742      symbol: symbol,
+  ...
+  763      redeem: redeem,
+  764      initializeTokenWithProxy: initializeTokenWithProxy,
+  765:     upgradeTo: upgradeTo,
+  766      expectRevert: expectRevert,
+  767      expectJump: expectJump,
+  ...
+  777      proxyOwnerAccount: proxyOwnerAccount,
+  778      arbitraryAccountPrivateKey,
+  779:     upgraderAccountPrivateKey,
+  780      tokenOwnerPrivateKey,
+  781      blacklisterAccountPrivateKey,
+
+102 matches across 7 files
+
+
+Searching 11 files for "FiatToken"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+    1  var Tx = require('ethereumjs-tx');
+    2  
+    3: var FiatToken = artifacts.require('FiatToken');
+    4  var tokenUtils = require('./TokenTestUtils');
+    5  var name = tokenUtils.name;
+    .
+   53  
+   54  async function newOriginalToken() {
+   55:     var rawToken = await FiatToken.new();
+   56      return rawToken;
+   57  }
+   58  
+   59: contract('FiatToken ABI Hacking tests', function (accounts) {
+   60      beforeEach(async function checkBefore() {
+   61          rawToken = await newOriginalToken();
+   ..
+  168      });
+  169  
+  170:     it('ABI019 FiatToken pause is public', async function () {
+  171          let goodData = functionSignature('pause()');
+  172          let raw = makeRawTransaction(
+  ...
+  182      });
+  183  
+  184:     it('ABI020 FiatToken doTransfer is internal', async function () {
+  185          await token.configureMinter(minterAccount, 1000, { from: masterMinterAccount });
+  186          await token.mint(arbitraryAccount, 50, { from: minterAccount });
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+    .
+   23  var pauserAccount = tokenUtils.pauserAccount;
+   24  var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+   25: var UpgradedFiatToken = tokenUtils.upgradedFiatToken;
+   26  var upgradeTo = tokenUtils.upgradeTo;
+   27  
+   ..
+  104  
+  105    it('ept008 should upgrade while paused', async function() {
+  106:     var newRawToken = await UpgradedFiatToken.new();
+  107      await token.pause({from: pauserAccount});
+  108      var tokenConfig = await upgradeTo(proxy, newRawToken);
+  ...
+  248  
+  249    it ('ept023 should upgrade to blacklisted address', async function() {
+  250:     var newRawToken = await UpgradedFiatToken.new();
+  251  
+  252      await token.blacklist(newRawToken.address, { from: blacklisterAccount });
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var name = tokenUtils.name;
+    .
+   33  contract('Legacy Tests', function (accounts) {
+   34    beforeEach(async function () {
+   35:     rawToken =  await FiatToken.new();
+   36      var tokenConfig = await initializeTokenWithProxy(rawToken);
+   37      proxy = tokenConfig.proxy;
+   ..
+  570      assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+  571  
+  572:     var newRawToken = await UpgradedFiatToken.new();
+  573      var tokenConfig = await upgradeTo(proxy, newRawToken);
+  574      var newProxiedToken = tokenConfig.token;
+  ...
+  634      assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+  635      
+  636:     var newRawToken = await FiatToken.new();
+  637      var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+  638      var newProxiedToken = tokenConfig.token;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/MiscTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+    .
+  594  
+  595    it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596:     var newRawToken = await FiatToken.new();
+  597      await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  ...
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602      // Create upgraded token
+  603:     var newRawToken = await FiatToken.new();
+  604      var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var positive_tests = require('./PositiveTests');
+    .
+   15  var pauserAccount = tokenUtils.pauserAccount;
+   16  var arbitraryAccount = tokenUtils.arbitraryAccount;
+   17: var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
+   18  
+   19  // The following helpers make fresh original/upgraded tokens before each test.
+   20  
+   21  async function newToken() {
+   22:   var token = await FiatToken.new();
+   23    return token;
+   24  }
+   25  
+   26  async function newUpgradedToken() {
+   27: 	var token = await UpgradedFiatToken.new();
+   28  	return token;
+   29  }
+   ..
+   33  // Run specific tests combos by commenting/uncommenting the contract blocks below.
+   34  
+   35: contract('FiatToken_PositiveTests', async function () {
+   36    await positive_tests.run_tests(newToken);
+   37  });
+   38  
+   39: contract('FiatToken_ExtendedPositiveTests', async function () {
+   40    await extended_positive_tests.run_tests(newToken);
+   41  });
+   42  
+   43: contract('FiatToken_NegativeTests', async function () {
+   44    await negative_tests.run_tests(newToken);
+   45  });
+   46  
+   47: contract('FiatToken_MiscTests', async function () {
+   48    await misc_tests.run_tests(newToken);
+   49  });
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+   12  assertDiff.options.strict = true;
+   13  var Q = require('q');
+   14: var FiatToken = artifacts.require('FiatToken');
+   15: var FiatTokenProxy = artifacts.require('FiatTokenProxy');
+   16  
+   17  // TODO: test really big numbers  Does this still have to be done??
+   ..
+  680  
+  681  async function initializeTokenWithProxy(rawToken) {
+  682:     const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684      await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685:     proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  687      assert.equal(proxiedToken.address, proxy.address);
+  ...
+  699    }
+  700    await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701:   proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  703    return tokenConfig = {
+  ...
+  738  
+  739  module.exports = {
+  740:     upgradedFiatToken: artifacts.require('FiatTokenV2');
+  741      name: name,
+  742      symbol: symbol,
+
+44 matches across 8 files
+
+
+Searching 11 files for "await FiatToken"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   53  
+   54  async function newOriginalToken() {
+   55:     var rawToken = await FiatToken.new();
+   56      return rawToken;
+   57  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   33  contract('Legacy Tests', function (accounts) {
+   34    beforeEach(async function () {
+   35:     rawToken =  await FiatToken.new();
+   36      var tokenConfig = await initializeTokenWithProxy(rawToken);
+   37      proxy = tokenConfig.proxy;
+   ..
+  634      assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+  635      
+  636:     var newRawToken = await FiatToken.new();
+  637      var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+  638      var newProxiedToken = tokenConfig.token;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+  594  
+  595    it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596:     var newRawToken = await FiatToken.new();
+  597      await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  ...
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602      // Create upgraded token
+  603:     var newRawToken = await FiatToken.new();
+  604      var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   20  
+   21  async function newToken() {
+   22:   var token = await FiatToken.new();
+   23    return token;
+   24  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+  680  
+  681  async function initializeTokenWithProxy(rawToken) {
+  682:     const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684      await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685:     proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  687      assert.equal(proxiedToken.address, proxy.address);
+  ...
+  699    }
+  700    await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701:   proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  703    return tokenConfig = {
+
+9 matches across 5 files
+
+
+Searching 11 files for "await FiatToken"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   53  
+   54  async function newOriginalToken() {
+   55:     var rawToken = await FiatToken.new();
+   56      return rawToken;
+   57  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   34  contract('Legacy Tests', function (accounts) {
+   35    beforeEach(async function () {
+   36:     rawToken =  await FiatToken.new();
+   37      var tokenConfig = await initializeTokenWithProxy(rawToken);
+   38      proxy = tokenConfig.proxy;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+  594  
+  595    it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
+  596:     var newRawToken = await FiatToken.new();
+  597      await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+  598      await checkVariables([token], [[]]);
+  ...
+  601    it('nt054 should fail to transferOwnership when sender is not owner', async function() {
+  602      // Create upgraded token
+  603:     var newRawToken = await FiatToken.new();
+  604      var tokenConfig = await upgradeTo(proxy, newRawToken);
+  605      var newProxiedToken = tokenConfig.token;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   20  
+   21  async function newToken() {
+   22:   var token = await FiatToken.new();
+   23    return token;
+   24  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+  680  
+  681  async function initializeTokenWithProxy(rawToken) {
+  682:     const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684      await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685:     proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  687      assert.equal(proxiedToken.address, proxy.address);
+  ...
+  699    }
+  700    await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701:   proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  703    return tokenConfig = {
+
+8 matches across 5 files
+
+
+Searching 11 files for "await FiatToken"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   53  
+   54  async function newOriginalToken() {
+   55:     var rawToken = await FiatToken.new();
+   56      return rawToken;
+   57  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   34  contract('Legacy Tests', function (accounts) {
+   35    beforeEach(async function () {
+   36:     rawToken =  await FiatToken.new();
+   37      var tokenConfig = await initializeTokenWithProxy(rawToken);
+   38      proxy = tokenConfig.proxy;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   20  
+   21  async function newToken() {
+   22:   var token = await FiatToken.new();
+   23    return token;
+   24  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+  680  
+  681  async function initializeTokenWithProxy(rawToken) {
+  682:     const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684      await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685:     proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  687      assert.equal(proxiedToken.address, proxy.address);
+  ...
+  699    }
+  700    await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701:   proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  703    return tokenConfig = {
+
+6 matches across 4 files
+
+
+Searching 11 files for "await FiatToken"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   53  
+   54  async function newOriginalToken() {
+   55:     var rawToken = await FiatToken.new();
+   56      return rawToken;
+   57  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   34  contract('Legacy Tests', function (accounts) {
+   35    beforeEach(async function () {
+   36:     rawToken =  await FiatToken.new();
+   37      var tokenConfig = await initializeTokenWithProxy(rawToken);
+   38      proxy = tokenConfig.proxy;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   20  
+   21  async function newToken() {
+   22:   var token = await FiatToken.new();
+   23    return token;
+   24  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+  680  
+  681  async function initializeTokenWithProxy(rawToken) {
+  682:     const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  683      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  684      await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  685:     proxiedToken = await FiatToken.at(proxy.address);
+  686      proxiedToken.proxiedTokenAddress = rawToken.address;
+  687      assert.equal(proxiedToken.address, proxy.address);
+  ...
+  699    }
+  700    await proxy.upgradeTo('1', upgradedToken.address, { from: proxyUpgraderAccount });
+  701:   proxiedToken = await FiatToken.at(proxy.address);
+  702    assert.equal(proxiedToken.address, proxy.address);
+  703    return tokenConfig = {
+
+6 matches across 4 files
+
+
+Searching 11 files for "await FiatToken"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+   53  
+   54  async function newOriginalToken() {
+   55:     var rawToken = await FiatToken.new();
+   56      return rawToken;
+   57  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+   34  contract('Legacy Tests', function (accounts) {
+   35    beforeEach(async function () {
+   36:     rawToken =  await FiatToken.new();
+   37      var tokenConfig = await initializeTokenWithProxy(rawToken);
+   38      proxy = tokenConfig.proxy;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+   20  
+   21  async function newToken() {
+   22:   var token = await FiatToken.new();
+   23    return token;
+   24  }
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+  681  
+  682  async function initializeTokenWithProxy(rawToken) {
+  683:     const proxy = await FiatTokenProxy.new({ from: proxyOwnerAccount })
+  684      const initializeData = encodeCall('initialize', ['string', 'string', 'string', 'uint8', 'address', 'address', 'address', 'address'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount]);
+  685      await proxy.upgradeToAndCall('0', rawToken.address, initializeData, { from: proxyOwnerAccount })
+  686:     proxiedToken = await FiatToken.at(proxy.address);
+  687      proxiedToken.proxiedTokenAddress = rawToken.address;
+  688      assert.equal(proxiedToken.address, proxy.address);
+
+5 matches across 4 files
+
+
+Searching 11 files for "('FiatToken'"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+    1  var Tx = require('ethereumjs-tx');
+    2  
+    3: var FiatToken = artifacts.require('FiatToken');
+    4  var tokenUtils = require('./TokenTestUtils');
+    5  var name = tokenUtils.name;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var name = tokenUtils.name;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/MiscTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var positive_tests = require('./PositiveTests');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TokenTestUtils.js:
+   12  assertDiff.options.strict = true;
+   13  var Q = require('q');
+   14: var FiatToken = artifacts.require('FiatToken');
+   15  var UpgradedFiatToken = artifacts.require('FiatTokenV2');
+   16  var FiatTokenProxy = artifacts.require('FiatTokenProxy');
+
+8 matches across 8 files
+
+
+Searching 11 files for "('FiatToken'"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ABITests.test.js:
+    1  var Tx = require('ethereumjs-tx');
+    2  
+    3: var FiatToken = artifacts.require('FiatToken');
+    4  var tokenUtils = require('./TokenTestUtils');
+    5  var name = tokenUtils.name;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var name = tokenUtils.name;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/MiscTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var positive_tests = require('./PositiveTests');
+
+7 matches across 7 files
+
+
+Searching 11 files for "('FiatToken'"
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/ExtendedPositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/FiatTokenLegacy.test.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var name = tokenUtils.name;
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/MiscTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/NegativeTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/PositiveTests.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');;
+    3  var BigNumber = require('bignumber.js');
+
+/Users/ohudson/Raiden/centre-tokens-backup2/test/TestWrapper.js:
+    1: var FiatToken = artifacts.require('FiatToken');
+    2  var tokenUtils = require('./TokenTestUtils');
+    3  var positive_tests = require('./PositiveTests');
+
+6 matches across 6 files
+
+
+Searching 11 files for "('FiatToken'"
+
+0 matches

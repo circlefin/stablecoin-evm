@@ -594,8 +594,8 @@ async function run_tests(newToken) {
   // Upgrade
 
   it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
-    var newRawToken = await UpgradedFiatToken.new();
-    await expectRevert(proxy.upgradeTo('1', newRawToken.address, { from: minterAccount }));
+    var newRawToken = await FiatToken.new();
+    await expectRevert(proxy.upgradeTo(newRawToken.address, { from: minterAccount }));
     await checkVariables([token], [[]]);
   });
 

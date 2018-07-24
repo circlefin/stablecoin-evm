@@ -9,7 +9,7 @@ phases:
     commands:
       - echo Build started on `date`
       - mkdir -p build/logs
-      - truffle compile --strict
+      - truffle compile
       - npm test
 
 artifacts:

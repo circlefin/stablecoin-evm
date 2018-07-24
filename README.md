@@ -14,9 +14,6 @@ install ganache-cli:
 install project npm dependencies:
 ```npm install```
 
-install submodules:
-```git submodule update --init```
-
 # Testing
 ganache-cli (Ethereum RPC client) must be running first
 ```ganache-cli --defaultBalanceEther 1000000 --deterministic```
@@ -32,11 +29,12 @@ to generate test coverage run:
 
 
 # Contracts
-The implementation of the FiatToken is broken up into 2 separate contracts - a logic contract (`FiatToken.sol`)and a data storage contract (`EternalStorage.sol`).
-A separate data contract is used so that the logic contract can be upgraded.
-
+The implementation uses 2 separate contracts - a proxy contract (`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`).
+This allows upgrading the contract, as a new implentation contact can be deployed and the Proxy updated to point to it.
 ## FiatToken
-The FiatToken offers a number of capabilities
+The FiatToken offers a number of capabilities, which briefly are described below. There are more 
+[detailed design docs](./doc/tokendesign.md) in the `doc` folder.
+
 ### ERC20 compatible
 The FiatToken implements the ERC20 interface.
 
@@ -45,8 +43,8 @@ The entire contract can be frozen, in case a serious bug is found or there is a 
 Access to the pause functionality is controlled by the `pauser` address.
 
 ### Upgradable
-The logic contract can be upgraded to a new contract, and the old contract will forward calls to the new contract making migration less disruptive.
-Access to the upgrade functionality is guarded by an `upgrader` address. Only the `upgrader` address can change the `upgrader` address.
+A new implementation contract can be deployed, and the proxy contract will forward calls to the new contract.
+Access to the upgrade functionality is guarded by a `proxyOwner` address. Only the `proxyOwner` address can change the `proxyOwner` address.
 
 ### Blacklist
 The contract can blacklist certain addresses which will prevent those addresses from transferring or receiving tokens.
@@ -60,19 +58,7 @@ need the allowance increased again by the `masterMinter`.
 
 ### Ownable
 The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`, or `masterMinter` addresses. The `owner` can not change
-the `upgrader` address.
-
-## EternalStorage
-This is the data storage for the logic contract. All balances, allowances, blacklists, etc are stored here so that the logic contract can be upgraded.
-
-### getters/setters
-The storage contract provides getters/setters for all the data we want to persist through an upgrade. In some cases, we have
-written getters/setters which operate on multiple values to decrease gas costs.
-
-### Ownable
-The storage contract is Ownable, and its owner will be the FiatToken contract. In the event of an upgrade the FiatToken
-will call the `transferOwnership` method to switch ownership to the new, upgraded contract.
-
+the `proxyOwner` address.
 
 # OpenZeppelin
 Contracts from OpenZeppelin version 1.10 are used where possible, with some modifications. These contracts are located
