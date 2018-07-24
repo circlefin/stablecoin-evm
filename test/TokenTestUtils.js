@@ -11,7 +11,8 @@ var bigHundred = new BigNumber(100);
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 var Q = require('q');
-var FiatToken = artifacts.require('FiatToken');
+var FiatToken = artifacts.require('FiatTokenV1');
+var UpgradedFiatToken = artifacts.require('FiatTokenV2');
 var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 
 // TODO: test really big numbers  Does this still have to be done??
@@ -768,6 +769,8 @@ function getImplementation(proxy) {
 }
 
 module.exports = {
+    FiatToken: FiatToken,
+    UpgradedFiatToken: UpgradedFiatToken,
     name: name,
     symbol: symbol,
     currency: currency,
