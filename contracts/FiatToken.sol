@@ -4,7 +4,6 @@ import './thirdparty/openzeppelin/ERC20.sol';
 import './thirdparty/openzeppelin/SafeMath.sol';
 import './thirdparty/openzeppelin/Pausable.sol';
 import './thirdparty/zeppelinos/ownership/Ownable.sol';
-import './thirdparty/zeppelinos/OwnedUpgradeabilityStorage.sol';
 
 import './Blacklistable.sol';
 
@@ -12,7 +11,7 @@ import './Blacklistable.sol';
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blacklistable {
+contract FiatToken is Ownable, ERC20, Pausable, Blacklistable {
     using SafeMath for uint256;
 
     string public name;
@@ -66,7 +65,8 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
 
     /**
      * @dev Function to mint tokens
-     * @param _amount The amount of tokens to mint.
+     * @param _to The address that will receive the minted tokens.
+     * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
      * @return A boolean that indicates if the operation was successful.
     */
     function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) notBlacklisted(_to) public returns (bool) {
@@ -144,7 +144,6 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
 
     /**
      * @dev Transfer tokens from one address to another.
-     * Validates that the totalAmount <= the allowed amount for the sender on the from account.
      * @param _from address The address which you want to send tokens from
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
@@ -217,6 +216,7 @@ contract FiatToken is OwnedUpgradeabilityStorage, Ownable, ERC20, Pausable, Blac
         totalSupply_ = totalSupply_.sub(_amount);
         balances[msg.sender] = balance.sub(_amount);
         emit Burn(msg.sender, _amount);
+        emit Transfer(msg.sender, address(0), _amount);
     }
 
     function updateMasterMinter(address _newMasterMinter) onlyOwner public {

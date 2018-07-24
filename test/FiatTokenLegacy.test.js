@@ -8,6 +8,7 @@ var BigNumber = require('bignumber.js');
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
+var burn = tokenUtils.burn;
 var setMinter = tokenUtils.setMinter;
 var expectRevert = tokenUtils.expectRevert;
 var blacklist = tokenUtils.blacklist;
@@ -28,6 +29,7 @@ var blacklisterAccount = tokenUtils.blacklisterAccount;
 var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var upgradeTo = tokenUtils.upgradeTo;
+var getAdmin = tokenUtils.getAdmin;
 
 // these tests are for reference and do not track side effects on all variables
 contract('Legacy Tests', function (accounts) {
@@ -528,7 +530,7 @@ contract('Legacy Tests', function (accounts) {
     assert.isTrue(new BigNumber(minterBalance1).isEqualTo(new BigNumber(minterBalance).plus(new BigNumber(amount))));
 
     // burn tokens
-    await token.burn(amount, { from: burnerAddress });
+    await burn(token, amount, burnerAddress);
     let totalSupply2 = await token.totalSupply();
     assert.isTrue(new BigNumber(totalSupply2).isEqualTo(new BigNumber(totalSupply1).minus(new BigNumber(amount))));
 
@@ -619,11 +621,11 @@ contract('Legacy Tests', function (accounts) {
   });
 
   it('should updateUpgraderAddress for upgrader', async function () {
-    let upgrader = await proxy.upgradeabilityOwner();
+    let upgrader = getAdmin(proxy);
     assert.equal(proxyOwnerAccount, upgrader);
-    let address1 = accounts[7];
-    let updated = await proxy.transferProxyOwnership(address1, { from: proxyOwnerAccount });
-    upgrader = await token.upgradeabilityOwner();
+    let address1 = accounts[10];
+    let updated = await proxy.changeAdmin(address1, { from: proxyOwnerAccount });
+    upgrader = getAdmin(proxy);
     assert.equal(upgrader, address1);
 
     //Test upgrade with new upgrader account
@@ -648,8 +650,8 @@ contract('Legacy Tests', function (accounts) {
 
   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
     let address1 = accounts[7];
-    await expectRevert(proxy.transferProxyOwnership(address1, { from: tokenOwnerAccount }));
-    let upgrader = await proxy.upgradeabilityOwner();
+    await expectRevert(proxy.changeAdmin(address1, { from: tokenOwnerAccount }));
+    let upgrader = getAdmin(proxy);
     assert.notEqual(upgrader, address1);
   });
 
