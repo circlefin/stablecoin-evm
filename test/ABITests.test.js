@@ -1,7 +1,7 @@
 var Tx = require('ethereumjs-tx');
 
-var FiatToken = artifacts.require('FiatToken');
 var tokenUtils = require('./TokenTestUtils');
+var FiatToken = tokenUtils.FiatToken;
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
@@ -51,20 +51,16 @@ var msgData1 = abiUtils.msgData1;
 var msgData2 = abiUtils.msgData2;
 var msgData3 = abiUtils.msgData3;
 
-async function newOriginalToken() {
-    var rawToken = await FiatToken.new();
-    return rawToken;
-}
-
 // Encodes methodName, 32 byte string of 0, and address.
 function mockStringAddressEncode(methodName, address) {
     var version = encodeUint(32) + encodeUint(0); // encode 32 byte string of 0's 
     return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-contract('FiatToken ABI Hacking tests', function (accounts) {
+async function run_tests(newToken) {
+
     beforeEach(async function checkBefore() {
-        rawToken = await newOriginalToken();
+        rawToken = await newToken();
         var tokenConfig = await initializeTokenWithProxy(rawToken);
         proxy = tokenConfig.proxy;
         token = tokenConfig.token;
@@ -334,4 +330,9 @@ contract('FiatToken ABI Hacking tests', function (accounts) {
         ];
         await checkVariables([token], [customVars]);
     });
-});
+}
+
+module.exports = {
+    run_tests: run_tests,
+}
+
