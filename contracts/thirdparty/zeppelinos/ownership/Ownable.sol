@@ -1,15 +1,18 @@
 pragma solidity ^0.4.18;
 
-import './OwnableStorage.sol';
-
 /**
  * @title Ownable
  * @dev The Ownable contract from https://github.com/zeppelinos/labs/blob/master/upgradeability_ownership/contracts/ownership/Ownable.sol 
  * branch: master commit: 3887ab77b8adafba4a26ace002f3a684c1a3388b modified to:
  * 1) Add emit prefix to OwnershipTransferred event (7/13/18)
  * 2) Replace constructor with constructor syntax (7/13/18)
+ * 3) consolidate OwnableStorage into this contract
  */
-contract Ownable is OwnableStorage {
+contract Ownable {
+
+  // Owner of the contract
+  address private _owner;
+
   /**
   * @dev Event to show ownership has been transferred
   * @param previousOwner representing the address of the previous owner
@@ -22,6 +25,21 @@ contract Ownable is OwnableStorage {
   */
   constructor() public {
     setOwner(msg.sender);
+  }
+
+  /**
+ * @dev Tells the address of the owner
+ * @return the address of the owner
+ */
+  function owner() public view returns (address) {
+    return _owner;
+  }
+
+  /**
+   * @dev Sets a new owner address
+   */
+  function setOwner(address newOwner) internal {
+    _owner = newOwner;
   }
 
   /**
