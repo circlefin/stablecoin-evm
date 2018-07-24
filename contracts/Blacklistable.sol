@@ -25,7 +25,7 @@ contract Blacklistable is Ownable {
 
     /**
      * @dev Throws if argument account is blacklisted
-     * @param _account An additional account to check
+     * @param _account The address to check
     */
     modifier notBlacklisted(address _account) {
         require(blacklisted[_account] == false);
