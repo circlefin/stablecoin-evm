@@ -715,6 +715,21 @@ async function initializeTokenWithProxy(rawToken) {
     return tokenConfig;
 }
 
+async function customInitializeTokenWithProxy(rawToken, _masterMinter, _pauser, _blacklister, _owner) {
+    const proxy = await FiatTokenProxy.new(rawToken.address, { from: proxyOwnerAccount })
+    proxiedToken = await FiatToken.at(proxy.address);
+    await proxiedToken.initialize(name, symbol, currency, decimals, _masterMinter, _pauser, _blacklister, _owner);
+    proxiedToken.proxiedTokenAddress = rawToken.address;
+    assert.equal(proxiedToken.address, proxy.address);
+    assert.notEqual(proxiedToken.address, rawToken.address);
+    var tokenConfig = {
+        proxy: proxy,
+        token: proxiedToken
+    };
+    return tokenConfig;
+}
+
+
 async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
     if (proxyUpgraderAccount == null) {
         proxyUpgraderAccount = proxyOwnerAccount;
@@ -796,6 +811,7 @@ module.exports = {
     approve: approve,
     redeem: redeem,
     initializeTokenWithProxy: initializeTokenWithProxy,
+    customInitializeTokenWithProxy: customInitializeTokenWithProxy,
     upgradeTo: upgradeTo,
     expectRevert: expectRevert,
     expectJump: expectJump,
