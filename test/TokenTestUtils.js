@@ -702,17 +702,7 @@ async function redeem(token, account, amount) {
 }
 
 async function initializeTokenWithProxy(rawToken) {
-    const proxy = await FiatTokenProxy.new(rawToken.address, { from: proxyOwnerAccount })
-    proxiedToken = await FiatToken.at(proxy.address);
-    await proxiedToken.initialize(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount);
-    proxiedToken.proxiedTokenAddress = rawToken.address;
-    assert.equal(proxiedToken.address, proxy.address);
-    assert.notEqual(proxiedToken.address, rawToken.address);
-    var tokenConfig = {
-        proxy: proxy,
-        token: proxiedToken
-    };
-    return tokenConfig;
+    return customInitializeTokenWithProxy(rawToken, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount);
 }
 
 async function customInitializeTokenWithProxy(rawToken, _masterMinter, _pauser, _blacklister, _owner) {

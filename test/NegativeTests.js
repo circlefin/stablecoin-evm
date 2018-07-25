@@ -641,6 +641,11 @@ async function run_tests(newToken) {
     await checkVariables([token], [customVars]);
   });
 
+  it('nt064 transferOwnership should fail on 0x0', async function () {
+    await expectRevert(token.transferOwnership(longZero, { from: tokenOwnerAccount }));
+    await expectRevert(token.transferOwnership(shortZero, { from: tokenOwnerAccount }));
+  });
+
   it('nt057 updateMasterMinter should fail on 0x0', async function () {
     await expectRevert(token.updateMasterMinter(longZero, { from: tokenOwnerAccount }));
     await expectRevert(token.updateMasterMinter(shortZero, { from: tokenOwnerAccount }));
