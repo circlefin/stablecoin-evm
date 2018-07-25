@@ -65,6 +65,11 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
         address _owner
     ) public {
         require(!initialized);
+        require(_masterMinter != address(0));
+        require(_pauser != address(0));
+        require(_blacklister != address(0));
+        require(_owner != address(0));
+
         name = _name;
         symbol = _symbol;
         currency = _currency;
@@ -241,6 +246,7 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
     }
 
     function updateMasterMinter(address _newMasterMinter) onlyOwner public {
+        require(_newMasterMinter != address(0));
         masterMinter = _newMasterMinter;
         emit MasterMinterChanged(masterMinter);
     }

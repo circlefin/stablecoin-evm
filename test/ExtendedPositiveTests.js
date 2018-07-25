@@ -116,48 +116,6 @@ async function run_tests(newToken) {
     await checkVariables([newToken], [newToken_result]);
   });
 
-  // Zero Address
-
-  it('ept010 should updateMasterMinter to zero address', async function () {
-    let longZero = 0x0000000000000000000000000000000000000000;
-    let shortZero = 0x00;
-
-    await token.updateMasterMinter(longZero, { from: tokenOwnerAccount });
-    var result = [
-      { 'variable': 'masterMinter', 'expectedValue': "0x0000000000000000000000000000000000000000" },
-    ];
-
-    // Note: longZero and shortZero both resolve to 0x0000000000000000000000000000000000000000
-    await token.updateMasterMinter(shortZero, { from: tokenOwnerAccount });
-    await checkVariables([token], [result]);
-  });
-
-  it('ept011 should updateBlacklister to zero address', async function () {
-    let longZero = 0x0000000000000000000000000000000000000000;
-    let shortZero = 0x00;
-
-    await token.updateBlacklister(longZero, { from: tokenOwnerAccount });
-    var result = [
-      { 'variable': 'blacklister', 'expectedValue': "0x0000000000000000000000000000000000000000" },
-    ];
-
-    await token.updateBlacklister(shortZero, { from: tokenOwnerAccount });
-    await checkVariables([token], [result]);
-  });
-
-  it('ept012 should updatePauser to zero address', async function () {
-    let longZero = 0x0000000000000000000000000000000000000000;
-    let shortZero = 0x00;
-
-    await token.updatePauser(longZero, { from: tokenOwnerAccount });
-    var result = [
-      { 'variable': 'pauser', 'expectedValue': "0x0000000000000000000000000000000000000000" },
-    ];
-
-    await token.updatePauser(shortZero, { from: tokenOwnerAccount });
-    await checkVariables([token], [result]);
-  });
-
   // Blacklisted
 
   it('ept014 should updateMasterMinter when msg.sender blacklisted', async function () {

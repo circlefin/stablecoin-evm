@@ -79,6 +79,7 @@ contract Pausable is Ownable {
    * @dev update the pauser role
    */
   function updatePauser(address _newPauser) onlyOwner public {
+    require(_newPauser != address(0));
     pauser = _newPauser;
     emit PauserChanged(pauser);
   }
