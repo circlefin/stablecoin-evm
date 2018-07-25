@@ -27,8 +27,8 @@ async function newToken() {
 }
 
 async function newUpgradedToken() {
-  var token = await UpgradedFiatToken.new();
-  return token;
+	var token = await UpgradedFiatToken.new();
+	return token;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
