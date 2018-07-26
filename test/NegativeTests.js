@@ -41,10 +41,7 @@ async function run_tests(newToken) {
     token = tokenConfig.token;
     assert.equal(proxy.address, token.address);
   });
-
-  it('should check that default variable values are correct', async function () {
-    await checkVariables([token], [[]]);
-  });
+  
 
   // Mint
 

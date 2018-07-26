@@ -8,3 +8,5 @@ package-lock.json
 artifacts/
 .DS_Store
 contracts/.DS_Store
+token.json
+credentials.json

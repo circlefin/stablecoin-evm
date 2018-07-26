@@ -15,7 +15,7 @@ const should = require('chai')
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-contract('Pausable', function (accounts) {
+contract('PausableTests', function (accounts) {
     var pause;
     beforeEach(async function checkBefore() {
         pause = await Pausable.new();

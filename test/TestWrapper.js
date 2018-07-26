@@ -82,4 +82,3 @@ contract('FiatToken_LegacyTests', async function (accounts) {
 contract('FiatToken_LegacyTests_Upgraded', async function (accounts) {
   await legacy_tests.run_tests(newUpgradedToken, accounts);
 });
-
