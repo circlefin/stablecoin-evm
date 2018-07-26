@@ -41,8 +41,10 @@ the address needed are:
 2. Deploy [FiatTokenProxy](../contracts/FiatTokenProxy.sol), passing the address of the deployed implementation contract
 to the constructor, which will initialize the `_implementation` field.
 
-3. The `admin` of the proxy contract defaults to msg.sender. If that is not the desired value for admin, it should be changed now.
-It can be changed by calling `changeAdmin`. Note that change admin must be called by the current admin.
+3. The `admin` of the proxy contract defaults to msg.sender. You must either change the `admin` now, or send the remaining
+transactions from a different address. The `amdin` can only see methods in the Proxy, any method calls from `admin` will not
+be forwarded to the implementation contract. 
+The `admin` address can be changed by calling `changeAdmin`. Note that change admin must be called by the current admin.
    ```
    changeAdmin(adminAddress)
 
