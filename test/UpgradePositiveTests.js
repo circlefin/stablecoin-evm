@@ -159,6 +159,27 @@ async function run_tests(newToken) {
     ];
     await checkVariables([newToken], [customVars]);
   });
+
+  it('upt006 should upgrade while paused and upgraded contract should be paused as a result; then unpause should unpause contract', async function () {
+    await token.pause({from: pauserAccount});
+    var upgradedToken = await UpgradedFiatToken.new();
+    var tokenConfig = await upgradeTo(proxy, upgradedToken, proxyOwnerAccount);
+    var newToken = tokenConfig.token;
+
+    customVars = [
+      { 'variable': 'paused', 'expectedValue': true, },
+      { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
+    ];
+    await checkVariables([newToken], [customVars]);
+
+    await newToken.unpause({from:pauserAccount});
+
+    customVars2 = [
+      { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
+    ];
+    await checkVariables([newToken], [customVars2]);
+  });
+
 }
 
 module.exports = {
