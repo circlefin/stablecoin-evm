@@ -13,6 +13,8 @@ assertDiff.options.strict = true;
 var Q = require('q');
 var FiatToken = artifacts.require('FiatTokenV1');
 var UpgradedFiatToken = artifacts.require('FiatTokenV2');
+var UpgradedFiatTokenNewFields = artifacts.require('FiatTokenV2NewFieldsTest');
+var UpgradedFiatTokenNewFieldsNewLogic = artifacts.require('FiatTokenV2NewFieldsNewLogicTest');
 var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 
 // TODO: test really big numbers  Does this still have to be done??
@@ -701,6 +703,14 @@ async function redeem(token, account, amount) {
     assert.equal(redeemResult.logs[0].args.amount, amount);
 }
 
+function validateTransferEvent(transferEvent, from, to, value) {
+    let eventResult = transferEvent.logs[0];
+    assert.equal(eventResult.event, 'Transfer');
+    assert.equal(eventResult.args.from, from);
+    assert.equal(eventResult.args.to, to);
+    assert.equal(eventResult.args.value, value);
+}
+
 async function initializeTokenWithProxy(rawToken) {
     return customInitializeTokenWithProxy(rawToken, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount);
 }
@@ -776,6 +786,8 @@ function getImplementation(proxy) {
 module.exports = {
     FiatToken: FiatToken,
     UpgradedFiatToken: UpgradedFiatToken,
+    UpgradedFiatTokenNewFields: UpgradedFiatTokenNewFields,
+    UpgradedFiatTokenNewFieldsNewLogic: UpgradedFiatTokenNewFieldsNewLogic,
     name: name,
     symbol: symbol,
     currency: currency,
@@ -800,6 +812,7 @@ module.exports = {
     sampleTransferFrom: sampleTransferFrom,
     approve: approve,
     redeem: redeem,
+    validateTransferEvent: validateTransferEvent,
     initializeTokenWithProxy: initializeTokenWithProxy,
     customInitializeTokenWithProxy: customInitializeTokenWithProxy,
     upgradeTo: upgradeTo,
