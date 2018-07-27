@@ -36,7 +36,7 @@ async function run_tests(newToken) {
     assert.equal(proxy.address, token.address);
   });
 
-  it('pt016 should check that default variable values are correct', async function () {
+  it('pt000 should check that default variable values are correct', async function () {
     await checkVariables([token], [[]]);
   });
 

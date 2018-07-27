@@ -1,5 +1,5 @@
 # centre-tokens
-Fiat tokens on the CENTRE network. 
+Fiat tokens on the CENTRE network.
 
 # Setup
 Tests need node v8.0.0 or higher, as they depend on async/await functionality. Interacting with eth is very async-y so await makes it much easier to write tests.
@@ -16,7 +16,7 @@ install project npm dependencies:
 
 # Testing
 ganache-cli (Ethereum RPC client) must be running first
-```ganache-cli --defaultBalanceEther 1000000 --deterministic```
+```ganache-cli --defaultBalanceEther 1000000 --deterministic --a 15```
 
 then run the tests via truffle:
 ```truffle test```
@@ -32,7 +32,7 @@ to generate test coverage run:
 The implementation uses 2 separate contracts - a proxy contract (`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`).
 This allows upgrading the contract, as a new implentation contact can be deployed and the Proxy updated to point to it.
 ## FiatToken
-The FiatToken offers a number of capabilities, which briefly are described below. There are more 
+The FiatToken offers a number of capabilities, which briefly are described below. There are more
 [detailed design docs](./doc/tokendesign.md) in the `doc` folder.
 
 ### ERC20 compatible
@@ -51,8 +51,8 @@ The contract can blacklist certain addresses which will prevent those addresses 
 Access to the blacklist functionality is controlled by the `blacklister` address.
 
 ### Minting/Burning
-Tokens can be minted or burned on demand. The contract supports having multiple minters simultaneously. There is a 
-`masterMinter` address which controls the list of minters and how much each is allowed to mint. The mint allowance is 
+Tokens can be minted or burned on demand. The contract supports having multiple minters simultaneously. There is a
+`masterMinter` address which controls the list of minters and how much each is allowed to mint. The mint allowance is
 similar to the ERC20 allowance - as each minter mints new tokens their allowance decreases. When it gets too low they will
 need the allowance increased again by the `masterMinter`.
 
@@ -70,4 +70,3 @@ in `contracts/thirdparty/openzepplin`. `Ownable` and `Pausable` have been modifi
 1. Add the pauser role, which controlls `pause`/`unpause`
 2. Remove `whenPaused`/`whenNotPaused` modifiers on `unpause`/`pause` methods
 3. Remove `whenPaused` as is is no longer used
-
