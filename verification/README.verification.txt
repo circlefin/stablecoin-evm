@@ -46,6 +46,9 @@ Contract Block Titles:
   The assumption is that any test that is run on an upgraded version of the
   token is also run on a non-upgraded version of the token.)
 
+- Should include the word 'Legacy' if they run tests that do not need to be
+  recorded in the spreadsheet and can be ignored by the verification tool. 
+
 Pending Tests:
 
 - Should be flagged with ' -p' immediately after the test code in the
@@ -76,7 +79,7 @@ Pending Tests:
   1) Ensure your browser is signed in to your Circle Google account and visit
   https://developers.google.com/sheets/api/quickstart/nodejs .
 
-  2) Press the blue 'ENABLE THE GOOGLE SHEETS API BUTTON'.
+  2) Press the blue 'ENABLE THE GOOGLE SHEETS API' button.
 
   3) Enter a project name (i.e. 'spreadsheet-verification') and product name
   (i.e 'centre-tokens') and download the credentials.json file.
