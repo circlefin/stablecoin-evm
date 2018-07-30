@@ -42,9 +42,6 @@ async function run_tests(newToken) {
     assert.equal(proxy.address, token.address);
   });
 
-  it('should check that default variable values are correct', async function () {
-    await checkVariables([token], [[]]);
-  });
 
   it('upt001 should upgradeTo new contract and preserve data field values', async function () {
   	let mintAmount = 50;
@@ -95,7 +92,7 @@ async function run_tests(newToken) {
       { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
     ];
     await checkVariables([newProxiedToken], [customVars]);
-  });  
+  });
 
   it('upt003 should upgradeToAndCall to contract with new data fields set on initialize and new logic and ensure old data preserved,new logic works, and new fields correct', async function () {
     let mintAmount = 50;
@@ -127,13 +124,13 @@ async function run_tests(newToken) {
       { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
     ];
     await checkVariables([newProxiedToken], [customVars]);
-  });  
+  });
 
   it('upt004 should update proxy adminAccount with previous adminAccount', async function () {
     await proxy.changeAdmin(masterMinterAccount, {from: proxyOwnerAccount});
     assert.equal(await proxy.admin({from: masterMinterAccount}), masterMinterAccount);
     await checkVariables([token], [[]]);
-  }); 
+  });
 
   it('upt005 should receive Transfer event on transfer when proxied after upgrade', async function () {
     let mintAmount = 50;

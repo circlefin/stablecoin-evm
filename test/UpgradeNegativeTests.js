@@ -41,10 +41,7 @@ async function run_tests(newToken) {
     token = tokenConfig.token;
     assert.equal(proxy.address, token.address);
   });
-
-  it('should check that default variable values are correct', async function () {
-    await checkVariables([token], [[]]);
-  });
+  
 
   it('nut002 should fail to switch adminAccount with non-adminAccount as caller', async function () {
     await expectRevert(proxy.changeAdmin(masterMinterAccount, {from: masterMinterAccount}));
@@ -74,21 +71,21 @@ async function run_tests(newToken) {
     await expectRevert(token.initialize(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount));
     customVars = [];
     await checkVariables([token], [customVars]);
-  });  
+  });
 
   it('nut006 should fail to call contract function with adminAccount', async function () {
     await expectRevert(token.allowance(minterAccount, arbitraryAccount, { from: proxyOwnerAccount }));
 
     customVars = [];
     await checkVariables([token], [customVars]);
-  });  
+  });
 
   it('nut007 should fail to call proxy function with non-adminAccount', async function () {
     await expectRevert(proxy.admin({ from: masterMinterAccount }));
 
     customVars = [];
     await checkVariables([token], [customVars]);
-  });  
+  });
 
   it('nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken', async function () {
     await rawToken.initialize(name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount);
@@ -98,7 +95,7 @@ async function run_tests(newToken) {
 
     customVars = [];
     await checkVariables([token], [customVars]);
-  });  
+  });
 
   it('nut009 should fail to call upgradeTo with non-adminAccount', async function () {
     var upgradedToken = await UpgradedFiatToken.new();
@@ -121,7 +118,7 @@ async function run_tests(newToken) {
 
     customVars = [];
     await checkVariables([finalToken], [customVars]);
-  }); 
+  });
 
 }
 
