@@ -41,7 +41,7 @@ async function run_tests(newToken) {
     token = tokenConfig.token;
     assert.equal(proxy.address, token.address);
   });
-  
+
 
   // Mint
 
@@ -592,12 +592,6 @@ async function run_tests(newToken) {
   });
 
   // Upgrade
-
-  it('nt044 should fail to upgrade when sender is not proxy owner', async function () {
-    var newRawToken = await FiatToken.new();
-    await expectRevert(proxy.upgradeTo(newRawToken.address, { from: minterAccount }));
-    await checkVariables([token], [[]]);
-  });
 
   it('nt054 should fail to transferOwnership when sender is not owner', async function() {
     // Create upgraded token
