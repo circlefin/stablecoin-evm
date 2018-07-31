@@ -6,7 +6,7 @@ var throwawayAddress = "0x64e078a8aa15a41b85890265648e965de686bae6";
 
 module.exports = function(deployer, network, accounts) {
 
-    if( network == "development") {
+    if( network == "development" || network == "coverage") {
         // Change these to the cold storage addresses provided by ops
         // these are the deterministic addresses from ganache, so the private keys are well known
         // and match the values we use in the tests
