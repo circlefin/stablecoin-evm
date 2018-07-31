@@ -121,6 +121,7 @@ function buildExpectedState(token, customVars) {
         'blacklister': blacklisterAccount,
         'tokenOwner': tokenOwnerAccount,
         'proxiedTokenAddress': token.proxiedTokenAddress,
+        'admin': proxyOwnerAccount,
         'balances': {
             'arbitraryAccount': bigZero,
             'masterMinterAccount': bigZero,
@@ -283,6 +284,7 @@ async function getActualState(token) {
         await token.blacklister.call(),
         await token.owner.call(),
         await getImplementation(token),
+        await getAdmin(token),
         await token.balanceOf(arbitraryAccount),
         await token.balanceOf(masterMinterAccount),
         await token.balanceOf(minterAccount),
@@ -368,6 +370,7 @@ async function getActualState(token) {
         blacklister,
         tokenOwner,
         proxiedTokenAddress,
+        admin,
         balancesA,
         balancesMM,
         balancesM,
@@ -454,6 +457,7 @@ async function getActualState(token) {
             'blacklister': blacklister,
             'tokenOwner': tokenOwner,
             'proxiedTokenAddress': proxiedTokenAddress,
+            'admin': admin,
             'balances': {
                 'arbitraryAccount': balancesA,
                 'masterMinterAccount': balancesMM,
