@@ -123,57 +123,6 @@ async function run_tests(newToken) {
         await expectRevert(sendRawTransaction(raw));
     });
 
-    it('abi024 OwnableStorage constructor', async function () {
-        let badData = functionSignature('OwnableStorage()');
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-    });
-
-    it('abi031 OwnedUpgradeabilityProxy constructor', async function () {
-        let badData = functionSignature('OwnedUpgradeabilityProxy()');
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-    });
-
-    it('abi023 OwnedUpgradeabilityStorage constructor', async function () {
-        let badData = functionSignature('OwnedUpgradeabilityStorage()');
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-    });
-
     it('abi005 Pausable constructor is not a function', async function () {
         let badData = functionSignature('Pausable()');
         var tx = new Tx({
@@ -191,8 +140,8 @@ async function run_tests(newToken) {
         await expectRevert(sendRawTransaction(raw));
     });
 
-    it('abi043 Proxy constructor is not a function', async function () {
-        let badData = functionSignature('Proxy()');
+    it('abi043 FiatTokenProxy constructor is not a function', async function () {
+        let badData = functionSignature('FiatTokenProxy()');
         var tx = new Tx({
             nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
             gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
@@ -209,36 +158,82 @@ async function run_tests(newToken) {
     });
 
     it('abi027 UpgradeabilityProxy constructor', async function () {
-        let badData = functionSignature('UpgradeabilityProxy()');
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
+        let badData = msgData('UpgradeabilityProxy(address)', arbitraryAccount);
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
         await expectRevert(sendRawTransaction(raw));
     });
 
-    it('abi034 UpgradeabilityStorage constructor is not a function', async function () {
-        let badData = functionSignature('UpgradeabilityStorage()');
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(pauserAccountPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
+    it('abi055 Proxy constructor is not a function', async function () {
+        let badData = functionSignature('Proxy()');
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
+        await expectRevert(sendRawTransaction(raw));
+    });
 
+    it('abi056 Proxy _delegate is internal', async function () {
+        let badData = msgData('_delegate(address)', arbitraryAccount);
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi057 Proxy _willFallback is internal', async function () {
+        let badData = functionSignature('_willFallback()');
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi058 Proxy _fallback is internal', async function () {
+        let badData = functionSignature('_fallback()');
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi050 Upgradeability implementation is internal', async function () {
+        let badData = msgData('UpgradeabilityProxy(address)', arbitraryAccount);
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi051 AdminUpgradeabillityProxy constructor is not a function', async function () {
+        let badData = msgData('AdminUpgradeabillityProxy(address)', arbitraryAccount);
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
+        await expectRevert(sendRawTransaction(raw));
+    });
+
+    it('abi053 AdminUpgradeabillityProxy _setAdmin is internal', async function () {
+        let badData = msgData('AdminUpgradeabillityProxy(address)', arbitraryAccount);
+        let raw = makeRawTransaction(
+            badData,
+            arbitraryAccount,
+            arbitraryAccountPrivateKey,
+            token.address);
         await expectRevert(sendRawTransaction(raw));
     });
 
@@ -276,59 +271,14 @@ async function run_tests(newToken) {
         await expectRevert(sendRawTransaction(raw));
     });
 
-    it('abi033 OwnedUpgradeabilityStorage.setUpgradeabilityOwner is internal', async function () {
-        let badData = msgData('setUpgradeabilityOwner(address)', pauserAccount);
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(tokenOwnerPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-    });
-
     it('abi028 UpgradeabilityProxy._upgradeTo is internal', async function () {
         let badData = mockStringAddressEncode('_upgradeTo(string,address)', pauserAccount);
-        var tx = new Tx({
-            nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
-            gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
-            gasLimit: 100000,
-            to: token.address,
-            value: 0,
-            data: badData,
-        });
-        var privateKey = Buffer.from(tokenOwnerPrivateKey, 'hex');
-        tx.sign(privateKey);
-        var raw = '0x' + tx.serialize().toString('hex');
-
-        await expectRevert(sendRawTransaction(raw));
-    });
-
-
-    it('abi020 FiatToken doTransfer is internal', async function () {
-        await token.configureMinter(minterAccount, 1000, { from: masterMinterAccount });
-        await token.mint(arbitraryAccount, 50, { from: minterAccount });
-
-        let badData = msgData1('doTransfer(address,address,uint256)', arbitraryAccount, blacklisterAccount, 40);
         let raw = makeRawTransaction(
             badData,
-            blacklisterAccount,
-            blacklisterAccountPrivateKey,
+            tokenOwnerAccount,
+            tokenOwnerPrivateKey,
             token.address);
         await expectRevert(sendRawTransaction(raw));
-        var customVars = [
-            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50) },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(950) },
-            { 'variable': 'totalSupply', 'expectedValue': new BigNumber(50) }
-        ];
-        await checkVariables([token], [customVars]);
     });
 }
 
