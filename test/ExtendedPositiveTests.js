@@ -99,16 +99,16 @@ async function run_tests(newToken) {
     await checkVariables([token], [notAMinter]);
   });
 
-  it('ept008 should upgrade while paused', async function () {
+  it('ept008 should upgrade while paused', async function() {
     var newRawToken = await UpgradedFiatToken.new();
-    await token.pause({ from: pauserAccount });
+    await token.pause({from: pauserAccount});
     var tokenConfig = await upgradeTo(proxy, newRawToken);
     var newProxiedToken = tokenConfig.token;
     var newToken = newProxiedToken;
 
     var newToken_result = [
       { 'variable': 'paused', 'expectedValue': true },
-      { 'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address }
+      {'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address }
     ];
     await checkVariables([newToken], [newToken_result]);
   });
@@ -155,7 +155,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [setup]);
   });
 
-  it('ept018 should pause when msg.sender blacklisted', async function () {
+  it ('ept018 should pause when msg.sender blacklisted', async function() {
     await token.blacklist(pauserAccount, { from: blacklisterAccount });
     await token.pause({ from: pauserAccount });
     var setup = [
@@ -165,7 +165,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [setup]);
   });
 
-  it('ept019 should unpause when msg.sender blacklisted', async function () {
+  it ('ept019 should unpause when msg.sender blacklisted', async function() {
     await token.pause({ from: pauserAccount });
     var setup = [
       { 'variable': 'paused', 'expectedValue': true }
@@ -180,7 +180,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [setup]);
   });
 
-  it('ept020 should blacklist when msg.sender blacklisted', async function () {
+  it ('ept020 should blacklist when msg.sender blacklisted', async function() {
     await token.blacklist(blacklisterAccount, { from: blacklisterAccount });
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     var setup = [
@@ -190,7 +190,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [setup]);
   });
 
-  it('ept021 should unBlacklist when msg.sender blacklisted', async function () {
+  it ('ept021 should unBlacklist when msg.sender blacklisted', async function() {
     await token.blacklist(blacklisterAccount, { from: blacklisterAccount });
     var setup = [
       { 'variable': 'isAccountBlacklisted.blacklisterAccount', 'expectedValue': true }
@@ -201,7 +201,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
-  it('ept023 should upgrade to blacklisted address', async function () {
+  it ('ept023 should upgrade to blacklisted address', async function() {
     var newRawToken = await UpgradedFiatToken.new();
 
     await token.blacklist(newRawToken.address, { from: blacklisterAccount });
@@ -210,7 +210,7 @@ async function run_tests(newToken) {
     var newToken = newProxiedToken;
 
     var newToken_result = [
-      { 'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address }
+      {'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address }
     ];
 
     assert(await newToken.isBlacklisted(newRawToken.address));
@@ -288,7 +288,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [result]);
   });
 
-  it('ept033 should removeMinter when masterMinter is blacklisted', async function () {
+  it('ept033 should removeMinter when masterMinter is blacklisted', async function() {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     await token.blacklist(masterMinterAccount, { from: blacklisterAccount });
     var customVars = [
@@ -307,7 +307,7 @@ async function run_tests(newToken) {
     await checkVariables([token], [customVars]);
   });
 
-  it('ept034 should removeMinter when minter is blacklisted', async function () {
+  it('ept034 should removeMinter when minter is blacklisted', async function() {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     await token.blacklist(minterAccount, { from: blacklisterAccount });
     var customVars = [
