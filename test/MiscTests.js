@@ -18,12 +18,10 @@ var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
 var blacklisterAccount = tokenUtils.blacklisterAccount;
 var masterMinterAccount = tokenUtils.masterMinterAccount;
-var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var FiatToken = tokenUtils.FiatToken;
-var upgradeTo = tokenUtils.upgradeTo;
 
 var amount = 100;
 
@@ -150,27 +148,6 @@ async function run_tests(newToken) {
       { 'variable': 'minterAllowance.masterMinterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
-  });
-
-  it('ms008 should upgrade to original token', async function () {
-    let mintAmount = 50;
-
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
-    await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
-
-    var tokenConfig = await upgradeTo(proxy, rawToken, proxyOwnerAccount);
-    var sameToken = tokenConfig.token;
-
-    customVars = [
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
-      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'balances.arbitraryAccount', 'expectedValue': bigZero },
-      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
-      { 'variable': 'proxiedTokenAddress', 'expectedValue': rawToken.address }
-    ];
-    await checkVariables([sameToken], [customVars]);
   });
 
   // Multiple Minters
