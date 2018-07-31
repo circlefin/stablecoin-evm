@@ -42,7 +42,6 @@ async function run_tests(newToken) {
     assert.equal(proxy.address, token.address);
   });
 
-
   it('upt001 should upgradeTo new contract and preserve data field values', async function () {
   	let mintAmount = 50;
 

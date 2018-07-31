@@ -36,12 +36,29 @@ function verification_reporter (runner) {
     });
   });
 
+  // Runs at the beginning of each contract block execution.
+  runner.on('suite', function(suite) {
+    // If contract block title is marked 'Upgraded' or 'Legacy',
+    // we skip verification. (See README.verification)
+    var upgraded = suite.title.match(/Upgraded/gi);
+    var legacy = suite.title.match(/Legacy/gi);
+    if (upgraded) {
+      console.log(indent +
+        'This test file is marked "Upgraded". Skipping verification.');
+    }
+    if (legacy) {
+      console.log(indent +
+        'This test file is marked "Legacy". Skipping verification.');
+    }
+  });
+
   // Runs at the end of every test.
   runner.on('test end', function (test) {
-    // If contract block title is marked 'Upgraded', we skip verification.
-    // (See README.verification)
+    // If contract block title is marked 'Upgraded' or 'Legacy',
+    // we skip verification. (See README.verification)
     var upgraded = test.parent.title.match(/Upgraded/gi);
-    if (upgraded) {
+    var legacy = test.parent.title.match(/Legacy/gi);
+    if (upgraded || legacy) {
       return;
     }
 
@@ -113,8 +130,8 @@ function verification_reporter (runner) {
           + color('fail', ' test file ' + file
           + ' does not match a spreadsheet tab'));
         errs.push(red_x
-          + color('fail', ' Test file missing from spreadsheet tab ' + file
-          + '. Possible solutions:\n'
+          + color('fail', ' Test file ' + file
+          + ' missing from spreadsheet. Possible solutions:\n'
           + '1. Ensure test is listed in correct spreadsheet tab.\n'
           + '2. Ensure the tab name is included in the contract block title.\n'
           + '(See README.verification)'));
@@ -147,12 +164,13 @@ function verification_reporter (runner) {
     } else {
       // If not all tests are 'crossed-off', print the tests remaining.
       console.log(color('bright fail',
-      '\nTests missing from test suite:\n'));
+      '\nTests missing from test suite (but included in spreadsheet):\n'));
       console.log(spreadsheet);
     }
     // Print all errors where executed tests did not match spreadsheet.
     if (errs.length) {
-      console.log(color('bright fail', '\nTests missing from spreadsheet: '));
+      console.log(color('bright fail',
+      '\nTests missing from spreadsheet (but included in test suite): '));
       errs.map((err) => {
         console.log('\n' + err);
       });

@@ -41,7 +41,6 @@ async function run_tests(newToken) {
     token = tokenConfig.token;
     assert.equal(proxy.address, token.address);
   });
-  
 
   it('nut002 should fail to switch adminAccount with non-adminAccount as caller', async function () {
     await expectRevert(proxy.changeAdmin(masterMinterAccount, {from: masterMinterAccount}));
