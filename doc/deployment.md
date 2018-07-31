@@ -42,7 +42,7 @@ the address needed are:
 to the constructor, which will initialize the `_implementation` field.
 
 3. The `admin` of the proxy contract defaults to msg.sender. You must either change the `admin` now, or send the remaining
-transactions from a different address. The `amdin` can only see methods in the Proxy, any method calls from `admin` will not
+transactions from a different address. The `admin` can only see methods in the Proxy, any method calls from `admin` will not
 be forwarded to the implementation contract. 
 The `admin` address can be changed by calling `changeAdmin`. Note that change admin must be called by the current admin.
    ```
