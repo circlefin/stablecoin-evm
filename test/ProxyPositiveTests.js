@@ -205,7 +205,7 @@ async function run_tests(newToken) {
     assert.equal(await getAdmin(token), upgraderAccount);
   });
 
-  it('upt010 should upgradeToAndCall while paused and upgraded contract should be paused as a result', async function () {
+  it('upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result', async function () {
     await token.pause({from: pauserAccount});
 
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
@@ -222,7 +222,7 @@ async function run_tests(newToken) {
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it('upt011 should upgradeToAndCall while upgrader is blacklisted', async function () {
+  it('upt012 should upgradeToAndCall while upgrader is blacklisted', async function () {
     await token.blacklist(proxyOwnerAccount, {from: blacklisterAccount});
 
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
@@ -237,7 +237,7 @@ async function run_tests(newToken) {
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it('upt012 should upgradeToAndCall while new logic is blacklisted', async function () {
+  it('upt013 should upgradeToAndCall while new logic is blacklisted', async function () {
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
     await token.blacklist(upgradedToken.address, {from: blacklisterAccount});
 
@@ -251,7 +251,7 @@ async function run_tests(newToken) {
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it('upt013 should upgradeTo while new logic is blacklisted', async function () {
+  it('upt014 should upgradeTo while new logic is blacklisted', async function () {
     var upgradedToken = await UpgradedFiatToken.new();
     await token.blacklist(upgradedToken.address, {from: blacklisterAccount});
 
