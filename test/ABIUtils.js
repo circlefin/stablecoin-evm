@@ -72,5 +72,5 @@ module.exports = {
     msgData: msgData,
     msgData1: msgData1,
     msgData2: msgData2,
-    msgData3: msgData3,
+    msgData3: msgData3
 };
