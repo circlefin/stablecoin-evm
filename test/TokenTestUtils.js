@@ -35,13 +35,16 @@ var upgraderAccount = proxyOwnerAccount; // accounts[14]
 
 var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
 var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+
+//var proxyOwnerAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
+var upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
 var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
 var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
 var arbitraryAccount2PrivateKey = "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd"; // accounts[5]
 var masterMinterAccountPrivateKey = "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"; // accounts[6]
 var minterAccountPrivateKey = "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"; // accounts[7]
 var pauserAccountPrivateKey = "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9];
+var proxyOwnerAccountPrivateKey = "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46";
 //var blacklisterAccountPrivateKey = "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
 
 var adminSlot = "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
@@ -60,25 +63,104 @@ function calculateFeeAmount(amount) {
     return Math.floor((fee / feeBase) * amount);
 }
 
-function checkTransferEventsWithFee(transfer, from, to, value, feeAmount) {
-    assert.equal(transfer.logs[0].event, 'Fee');
-    assert.equal(transfer.logs[0].args.from, from);
-    assert.equal(transfer.logs[0].args.feeAccount, feeAccount);
-    assert.equal(transfer.logs[0].args.feeAmount, feeAmount);
-    assert.equal(transfer.logs[1].event, 'Transfer');
-    assert.equal(transfer.logs[1].args.from, from);
-    assert.equal(transfer.logs[1].args.to, to);
-    assert.equal(transfer.logs[1].args.value, value);
+function checkMinterConfiguredEvent(configureMinterEvent, minter, minterAllowedAmount) {
+    assert.equal(configureMinterEvent.logs[0].event, 'MinterConfigured')
+    assert.equal(configureMinterEvent.logs[0].args.minter, minter)
+    assert.equal(configureMinterEvent.logs[0].args.minterAllowedAmount, minterAllowedAmount)
 }
 
-function checkTransferEvents(transfer, from, to, value) {
-    assert.equal(transfer.logs[0].event, 'Transfer');
-    assert.equal(transfer.logs[0].args.from, from);
-    assert.equal(transfer.logs[0].args.to, to);
-    assert.equal(transfer.logs[0].args.value, value);
+function checkMinterRemovedEvent(minterRemovedEvent, minter) {
+    assert.equal(minterRemovedEvent.logs[0].event, 'MinterRemoved')
+    assert.equal(minterRemovedEvent.logs[0].args.oldMinter, minter);
 }
 
-function checkMintEvents(minting, to, amount, minter) {
+
+
+function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
+    assert.equal(transferEvent.logs[0].event, 'Fee');
+    assert.equal(transferEvent.logs[0].args.from, from);
+    assert.equal(transferEvent.logs[0].args.feeAccount, feeAccount);
+    assert.equal(transferEvent.logs[0].args.feeAmount, feeAmount);
+    assert.equal(transferEvent.logs[1].event, 'Transfer');
+    assert.equal(transferEvent.logs[1].args.from, from);
+    assert.equal(transferEvent.logs[1].args.to, to);
+    assert.equal(transferEvent.logs[1].args.value, value);
+}
+
+function checkTransferEvents(transferEvent, from, to, value) {
+    assert.equal(transferEvent.logs[0].event, 'Transfer');
+    assert.equal(transferEvent.logs[0].args.from, from);
+    assert.equal(transferEvent.logs[0].args.to, to);
+    assert.equal(transferEvent.logs[0].args.value, value);
+}
+
+function checkApprovalEvent(approvalEvent, approver, spender, value) {
+    assert.equal(approvalEvent.logs[0].event, 'Approval');
+    assert.equal(approvalEvent.logs[0].args.owner, approver);
+    assert.equal(approvalEvent.logs[0].args.spender, spender);
+    assert.equal(approvalEvent.logs[0].args.value, value);
+}
+
+function checkBurnEvent(burnEvent, burner, amount) {
+    assert.equal(burnEvent.logs[0].event, 'Burn');
+    assert.equal(burnEvent.logs[0].args.burner, burner);
+    assert.equal(burnEvent.logs[0].args.amount, amount);
+}
+
+function checkBlacklistEvent(blacklistEvent, account) {
+    assert.equal(blacklistEvent.logs[0].event, 'Blacklisted');
+    assert.equal(blacklistEvent.logs[0].args._account, account);
+}
+
+function checkUnblacklistEvent(unblacklistEvent, account) {
+    assert.equal(unblacklistEvent.logs[0].event, 'UnBlacklisted');
+    assert.equal(unblacklistEvent.logs[0].args._account, account);
+}
+
+
+function checkBlacklisterChangedEvent(blacklisterChangedEvent, blacklister) {
+    assert.equal(blacklisterChangedEvent.logs[0].event, 'BlacklisterChanged');
+    assert.equal(blacklisterChangedEvent.logs[0].args.newBlacklister, blacklister);
+}
+
+function checkPauserChangedEvent(pauserChangedEvent, pauser) {
+    assert.equal(pauserChangedEvent.logs[0].event, 'PauserChanged');
+    assert.equal(pauserChangedEvent.logs[0].args.newAddress, pauser);
+}
+
+function checkTransferOwnershipEvent(transferOwnershipEvent, previousOwner, newOwner) {
+    assert.equal(transferOwnershipEvent.logs[0].event, 'OwnershipTransferred');
+    assert.equal(transferOwnershipEvent.logs[0].args.previousOwner, previousOwner)
+    assert.equal(transferOwnershipEvent.logs[0].args.newOwner, newOwner);
+}
+
+function checkUpdateMasterMinterEvent(checkUpdateMasterMinterEvent, newMasterMinter) {
+    assert.equal(checkUpdateMasterMinterEvent.logs[0].event, 'MasterMinterChanged');
+    assert.equal(checkUpdateMasterMinterEvent.logs[0].args.newMasterMinter, newMasterMinter);
+}
+
+function checkAdminChangedEvent(adminChangedEvent, previousAdmin, newAdmin) {
+    assert.equal(adminChangedEvent.logs[0].event, 'AdminChanged')
+    assert.equal(adminChangedEvent.logs[0].args.previousAdmin, previousAdmin);
+    assert.equal(adminChangedEvent.logs[0].args.newAdmin, newAdmin);
+}
+
+function checkUpgradeEvent(upgradeEvent, implementation) {
+    assert.equal(upgradeEvent.logs[0].event, 'Upgraded');
+    assert.equal(upgradeEvent.logs[0].args.implementation, implementation);
+}
+
+function checkTransferProxyOwnershipEvent(transferProxyOwnershipEvent, previousOwner, newOwner) {
+    assert.equal(transferProxyOwnershipEvent.logs[0].event, 'ProxyOwnershipTransferred');
+    assert.equal(transferProxyOwnershipEvent.logs[0].args.previousOwner, previousOwner);
+    assert.equal(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner);
+}
+
+function checkUnpauseEvent(unpause) {
+    assert.equal(unpause.logs[0].event, 'Unpause');
+}
+
+function checkMintEvent(minting, to, amount, minter) {
     // Mint Event
     assert.equal(minting.logs[0].event, 'Mint');
     assert.equal(minting.logs[0].args.minter, minter);
@@ -602,7 +684,7 @@ async function mintRaw(token, to, amount, minter) {
     let initialTotalSupply = await token.totalSupply();
     let initialMinterAllowance = await token.minterAllowance(minter);
     let minting = await token.mint(to, amount, { from: minter });
-    checkMintEvents(minting, to, amount, minter);
+    checkMintEvent(minting, to, amount, minter);
 
     // TODO revisit this
     /*  let totalSupply = await token.totalSupply();
@@ -613,14 +695,12 @@ async function mintRaw(token, to, amount, minter) {
 
 async function blacklist(token, account) {
     let blacklist = await token.blacklist(account, { from: blacklisterAccount });
-    assert.equal(blacklist.logs[0].event, 'Blacklisted');
-    assert.equal(blacklist.logs[0].args._account, account);
+    checkBlacklistEvent(blacklist, account);
 }
 
 async function unBlacklist(token, account) {
     let unblacklist = await token.unBlacklist(account, { from: blacklisterAccount });
-    assert.equal(unblacklist.logs[0].event, 'UnBlacklisted');
-    assert.equal(unblacklist.logs[0].args._account, account);
+    checkUnblacklistEvent(unblacklist, account);
 }
 
 async function setLongDecimalFeesTransferWithFees(token, ownerAccount, arbitraryAccount) {
@@ -818,6 +898,20 @@ module.exports = {
     calculateFeeAmount: calculateFeeAmount,
     checkTransferEventsWithFee: checkTransferEventsWithFee,
     checkTransferEvents: checkTransferEvents,
+    checkMinterConfiguredEvent: checkMinterConfiguredEvent,
+    checkMintEvent: checkMintEvent,
+    checkApprovalEvent: checkApprovalEvent,
+    checkBurnEvent: checkBurnEvent,
+    checkMinterRemovedEvent: checkMinterRemovedEvent,
+    checkBlacklistEvent: checkBlacklistEvent,
+    checkUnblacklistEvent: checkUnblacklistEvent,
+    checkUnpauseEvent: checkUnpauseEvent,
+    checkPauserChangedEvent: checkPauserChangedEvent,
+    checkTransferOwnershipEvent: checkTransferOwnershipEvent,
+    checkUpdateMasterMinterEvent: checkUpdateMasterMinterEvent,
+    checkBlacklisterChangedEvent: checkBlacklisterChangedEvent,
+    checkUpgradeEvent: checkUpgradeEvent,
+    checkAdminChangedEvent: checkAdminChangedEvent,
     buildExpectedState,
     checkVariables: checkVariables,
     setMinter: setMinter,
@@ -848,6 +942,7 @@ module.exports = {
     pauserAccount: pauserAccount,
     blacklisterAccount: blacklisterAccount,
     proxyOwnerAccount: proxyOwnerAccount,
+    proxyOwnerAccountPrivateKey: proxyOwnerAccountPrivateKey,
     upgraderAccount: upgraderAccount,
     getAdmin: getAdmin,
     arbitraryAccountPrivateKey,
