@@ -36,7 +36,7 @@ async function run_tests(newToken) {
     token = tokenConfig.token;
     assert.equal(proxy.address, token.address);
   });
-/*
+
 
   // Paused
 
@@ -325,7 +325,7 @@ async function run_tests(newToken) {
     ];
     await checkVariables([token], [customVars]);
   });
-*/
+
   it('ept035 should unBlacklist while contract is paused', async function() {
     await token.pause({from: pauserAccount});
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
@@ -370,7 +370,7 @@ async function run_tests(newToken) {
     ];
     await checkVariables([token], [customVars]);
   });
-  
+
  }
 
 module.exports = {
