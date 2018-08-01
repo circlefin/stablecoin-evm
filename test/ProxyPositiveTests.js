@@ -29,6 +29,8 @@ var FiatToken = tokenUtils.FiatToken;
 var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
 var UpgradedFiatTokenNewFieldsNewLogic = tokenUtils.UpgradedFiatTokenNewFieldsNewLogic;
+var getAdmin = tokenUtils.getAdmin;
+
 var amount = 100;
 
 
@@ -127,8 +129,10 @@ async function run_tests(newToken) {
 
   it('upt004 should update proxy adminAccount with previous adminAccount', async function () {
     await proxy.changeAdmin(masterMinterAccount, {from: proxyOwnerAccount});
-    assert.equal(await proxy.admin({from: masterMinterAccount}), masterMinterAccount);
-    await checkVariables([token], [[]]);
+    customVars = [
+      { 'variable': 'upgrader', 'expectedValue': masterMinterAccount},
+    ]
+    await checkVariables([token], [customVars]);
   });
 
   it('upt005 should receive Transfer event on transfer when proxied after upgrade', async function () {
@@ -174,6 +178,31 @@ async function run_tests(newToken) {
       { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
     ];
     await checkVariables([newToken], [customVars2]);
+  });
+
+  it('upt007 should upgrade contract to original address', async function () {
+    let mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
+
+    var tokenConfig = await upgradeTo(proxy, rawToken, proxyOwnerAccount);
+    var sameToken = tokenConfig.token;
+    sameToken.proxiedTokenAddress = rawToken.address;
+
+    customVars = [
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': bigZero },
+      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
+    ];
+    await checkVariables([sameToken], [customVars]);
+  });
+    
+  it('upt009 should check that admin is set correctly by proxy constructor', async function() {
+    assert.equal(await getAdmin(token), upgraderAccount);
   });
 
 }

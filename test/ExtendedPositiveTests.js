@@ -40,6 +40,16 @@ async function run_tests(newToken) {
 
   // Paused
 
+  it('ept001 should changeAdmin while paused', async function () {
+    await token.pause({ from: pauserAccount });
+    await proxy.changeAdmin(arbitraryAccount, { from: upgraderAccount });
+    var result = [
+      { 'variable': 'paused', 'expectedValue': true },
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount},
+    ];
+    await checkVariables([token], [result]);
+  });
+
   it('ept002 should updateMasterMinter while paused', async function () {
     await token.pause({ from: pauserAccount });
     await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
@@ -114,6 +124,16 @@ async function run_tests(newToken) {
   });
 
   // Blacklisted
+
+  it('ept013 should changeAdmin when msg.sender blacklisted', async function () {
+    await token.blacklist(upgraderAccount, { from: blacklisterAccount });
+    await proxy.changeAdmin(arbitraryAccount, { from: upgraderAccount });
+    var result = [
+      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
+    ];
+    await checkVariables([token], [result]);
+  });
 
   it('ept014 should updateMasterMinter when msg.sender blacklisted', async function () {
     await token.blacklist(tokenOwnerAccount, { from: blacklisterAccount });
@@ -201,6 +221,19 @@ async function run_tests(newToken) {
     await checkVariables([token], [[]]);
   });
 
+  it('ept022 should upgrade when msg.sender blacklisted', async function () {
+    await token.blacklist(upgraderAccount, { from: blacklisterAccount });
+    var newRawToken = await UpgradedFiatToken.new();
+    var tokenConfig = await upgradeTo(proxy, newRawToken);
+    var newToken = tokenConfig.token;
+
+    var newToken_result = [
+      { 'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address },
+      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
+    ];
+    await checkVariables([newToken], [newToken_result]);
+  });
+
   it ('ept023 should upgrade to blacklisted address', async function() {
     var newRawToken = await UpgradedFiatToken.new();
 
@@ -224,6 +257,16 @@ async function run_tests(newToken) {
     ];
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await checkVariables([token], [setup]);
+  });
+
+  it('ept025 should changeAdmin to blacklisted address', async function () {
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await proxy.changeAdmin(arbitraryAccount, { from: upgraderAccount });
+    var result = [
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true },
+      { 'variable': 'upgrader', 'expectedValue': arbitraryAccount },
+    ];
+    await checkVariables([token], [result]);
   });
 
   it('ept026 should updateMasterMinter to blacklisted address', async function () {
