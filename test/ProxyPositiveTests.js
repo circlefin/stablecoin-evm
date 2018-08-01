@@ -127,8 +127,10 @@ async function run_tests(newToken) {
 
   it('upt004 should update proxy adminAccount with previous adminAccount', async function () {
     await proxy.changeAdmin(masterMinterAccount, {from: proxyOwnerAccount});
-    assert.equal(await proxy.admin({from: masterMinterAccount}), masterMinterAccount);
-    await checkVariables([token], [[]]);
+    customVars = [
+      { 'variable': 'upgrader', 'expectedValue': masterMinterAccount},
+    ]
+    await checkVariables([token], [customVars]);
   });
 
   it('upt005 should receive Transfer event on transfer when proxied after upgrade', async function () {
