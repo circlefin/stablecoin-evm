@@ -85,6 +85,13 @@ function verification_reporter (runner) {
     }
     var test_ran = test.title.replace(id, '');
 
+    // Check if test is in UnitTestCompleteness tab and "cross-off" if it is.
+    if (!_.isEmpty(spreadsheet.completeness)) {
+      if (spreadsheet.completeness[id]) {
+        delete spreadsheet.completeness[id];
+      }
+    }
+
     // If test is marked pending in spreadsheet, record for later output.
     if (spreadsheet.pending && (spreadsheet.pending[id] == test_ran)) {
       console.log(indent + green_x + color('bright pass', ' pending'));
@@ -151,6 +158,17 @@ function verification_reporter (runner) {
     }
     // Do not report tests that are missing from test suite but marked pending.
     delete spreadsheet.pending;
+    // Print out any tests that are included in UnitTestCompleteness tab but
+    // missing from the test suite.
+    if (!_.isEmpty(spreadsheet.completeness)) {
+      console.log('\n' + red_x + color('bright fail',
+      ' UnitTestCompleteness tab includes tests that are not present in test suite:')
+      + '\n' + Object.keys(spreadsheet.completeness).toString());
+    } else {
+      console.log(green_ok + color('bright pass',
+      ' Test suite suite contains all tests in UnitTestCompleteness tab.'));
+    }
+    delete spreadsheet.completeness;
     // If all the tests in a tab are present, 'cross-off' tab by deleting.
     for(var file in spreadsheet) {
       if (_.isEmpty(spreadsheet[file])) {
