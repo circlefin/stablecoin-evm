@@ -29,6 +29,8 @@ var FiatToken = tokenUtils.FiatToken;
 var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
 var UpgradedFiatTokenNewFieldsNewLogic = tokenUtils.UpgradedFiatTokenNewFieldsNewLogic;
+var getAdmin = tokenUtils.getAdmin;
+
 var amount = 100;
 
 
@@ -127,8 +129,10 @@ async function run_tests(newToken) {
 
   it('upt004 should update proxy adminAccount with previous adminAccount', async function () {
     await proxy.changeAdmin(masterMinterAccount, {from: proxyOwnerAccount});
-    assert.equal(await proxy.admin({from: masterMinterAccount}), masterMinterAccount);
-    await checkVariables([token], [[]]);
+    customVars = [
+      { 'variable': 'upgrader', 'expectedValue': masterMinterAccount},
+    ]
+    await checkVariables([token], [customVars]);
   });
 
   it('upt005 should receive Transfer event on transfer when proxied after upgrade', async function () {
@@ -195,6 +199,10 @@ async function run_tests(newToken) {
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
     ];
     await checkVariables([sameToken], [customVars]);
+  });
+    
+  it('upt009 should check that admin is set correctly by proxy constructor', async function() {
+    assert.equal(await getAdmin(token), upgraderAccount);
   });
 
 }
