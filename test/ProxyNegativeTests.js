@@ -119,6 +119,27 @@ async function run_tests(newToken) {
     await checkVariables([finalToken], [customVars]);
   });
 
+   it('nut011 should fail to upgradeToAndCall with initialize (already set variables)', async function () {
+    let mintAmount = 50;
+
+    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
+
+    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+    var data = encodeCall('initialize', ['string','string','string','uint8','address','address','address','address','bool','address','uint256'], [name, symbol, currency, decimals, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, true, pauserAccount, 12]);
+    await expectRevert(proxy.upgradeToAndCall(upgradedToken.address, data, { from: proxyOwnerAccount }));
+
+    customVars = [
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': bigZero },
+      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
+    ];
+    await checkVariables([token], [customVars]);
+  });  
+
 }
 
 module.exports = {
