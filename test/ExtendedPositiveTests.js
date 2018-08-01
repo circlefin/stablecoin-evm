@@ -369,7 +369,52 @@ async function run_tests(newToken) {
     await checkVariables([token], [customVars]);
   });
 
-}
+  it('ept035 should unBlacklist while contract is paused', async function() {
+    await token.pause({from: pauserAccount});
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    var customVars = [
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true },
+      { 'variable': 'paused', 'expectedValue': true},
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.unBlacklist(arbitraryAccount, { from: blacklisterAccount });
+    customVars = [
+      { 'variable': 'paused', 'expectedValue': true},
+    ];
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ept036 should blacklist while contract is paused', async function() {
+    await token.pause({from: pauserAccount});
+    var customVars = [
+      { 'variable': 'paused', 'expectedValue': true},
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    customVars = [
+      { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true },
+      { 'variable': 'paused', 'expectedValue': true},
+    ];
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ept037 should pause while contract is paused', async function() {
+    await token.pause({from: pauserAccount});
+    var customVars = [
+      { 'variable': 'paused', 'expectedValue': true},
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.pause({from: pauserAccount});
+    customVars = [
+      { 'variable': 'paused', 'expectedValue': true},
+    ];
+    await checkVariables([token], [customVars]);
+  });
+
+ }
 
 module.exports = {
   run_tests: run_tests,
