@@ -90,7 +90,7 @@ async function run_tests(newToken) {
 
   it('should check Upgraded event', async function () {
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
-    const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
+    const initializeData = encodeCall('initV2', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
     let upgrade = await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: proxyOwnerAccount })
     checkUpgradeEvent(upgrade, upgradedToken.address)
   })

@@ -42,8 +42,9 @@ var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc93
 var arbitraryAccount2PrivateKey = "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd"; // accounts[5]
 var masterMinterAccountPrivateKey = "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"; // accounts[6]
 var minterAccountPrivateKey = "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"; // accounts[7]
-var pauserAccountPrivateKey = "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9];
-var proxyOwnerAccountPrivateKey = "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46";
+var pauserAccountPrivateKey = "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9]
+var proxyOwnerAccountPrivateKey = "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46"; // accounts[14]
+var upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
 //var blacklisterAccountPrivateKey = "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
 
 var adminSlot = "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";

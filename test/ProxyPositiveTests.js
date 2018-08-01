@@ -257,7 +257,7 @@ async function run_tests(newToken) {
     await token.pause({from: pauserAccount});
 
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
-    const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
+    const initializeData = encodeCall('initV2', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
     assert.equal(newProxiedToken.address, proxy.address);
@@ -274,7 +274,7 @@ async function run_tests(newToken) {
     await token.blacklist(proxyOwnerAccount, {from: blacklisterAccount});
 
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
-    const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
+    const initializeData = encodeCall('initV2', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
 
@@ -289,7 +289,7 @@ async function run_tests(newToken) {
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
     await token.blacklist(upgradedToken.address, {from: blacklisterAccount});
 
-    const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
+    const initializeData = encodeCall('initV2', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
 
