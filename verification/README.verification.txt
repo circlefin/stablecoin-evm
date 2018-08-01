@@ -33,6 +33,15 @@ Spreadsheet Tabs:
 
 - Should keep the column headers in the top row.
 
+UnitTestCompleteness tab:
+
+- The verification tool will print out any test codes that are featured in
+  the UnitTestCompleteness tab but missing from the test suite.
+- It does not matter where these codes are located in the tab so long as they
+  adhere to the same code format used throughout the test suite.
+  (i.e. xyz123, where xyz is a sequence of 2+ lowercase letters and 123 is any
+  sequence of numbers)
+
 Contract Block Titles:
 
 - Should include the name of the test file they run, and this name should not
@@ -47,7 +56,7 @@ Contract Block Titles:
   token is also run on a non-upgraded version of the token.)
 
 - Should include the word 'Legacy' if they run tests that do not need to be
-  recorded in the spreadsheet and can be ignored by the verification tool. 
+  recorded in the spreadsheet and can be ignored by the verification tool.
 
 Pending Tests:
 

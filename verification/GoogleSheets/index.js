@@ -125,6 +125,10 @@ function getTests(auth) {
       if (tabs.length) {
         tabs.map((tab) => {
           let tab_name = tab.properties.title;
+          if (tab_name == 'UnitTestCompleteness') {
+            load_UnitTestCompleteness(tests, tab);
+            return;
+          }
           let rows = tab.data[0].rowData;
           let top_row = rows.shift().values;
           let col = getCol(top_row);
@@ -177,6 +181,33 @@ function processRow(row, tab_name, tests, col) {
           );
     }
   }
+}
+
+
+/**
+* Helper function that gets all test codes included in tab UnitTestCompleteness.
+* @param {Object} tab The UnitTestCompleteness tab object.
+* @param {Object} tests Contains all the spreadsheet test data to verify.
+*/
+function load_UnitTestCompleteness(tests, tab) {
+  tests.completeness = {};
+  let rows = tab.data[0].rowData;
+  rows.map((row) => {
+    row = row.values;
+    row.map((cell) => {
+      cell = cell.formattedValue;
+      if (cell) {
+        let codes = cell.match(/([a-z]{2,})([0-9]+)/g);
+        if (codes != null) {
+          codes.map((code) => {
+            if (!tests.completeness[code]) {
+              tests.completeness[code] = true;
+            }
+          });
+        }
+      }
+    });
+  });
 }
 
 
