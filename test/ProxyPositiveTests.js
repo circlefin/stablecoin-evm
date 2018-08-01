@@ -205,6 +205,65 @@ async function run_tests(newToken) {
     assert.equal(await getAdmin(token), upgraderAccount);
   });
 
+  it('upt010 should upgradeToAndCall while paused and upgraded contract should be paused as a result', async function () {
+    await token.pause({from: pauserAccount});
+
+    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
+    await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: proxyOwnerAccount })
+    newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
+    assert.equal(newProxiedToken.address, proxy.address);
+    assert.notEqual(newProxiedToken.address, upgradedToken.address);
+
+    customVars = [
+      { 'variable': 'paused', 'expectedValue': true, },
+      { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
+    ];
+    await checkVariables([newProxiedToken], [customVars]);
+  });
+
+  it('upt011 should upgradeToAndCall while upgrader is blacklisted', async function () {
+    await token.blacklist(proxyOwnerAccount, {from: blacklisterAccount});
+
+    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
+    await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: proxyOwnerAccount })
+    newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
+
+    customVars = [
+      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true, },
+      { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
+    ];
+    await checkVariables([newProxiedToken], [customVars]);
+  });
+
+  it('upt012 should upgradeToAndCall while new logic is blacklisted', async function () {
+    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+    await token.blacklist(upgradedToken.address, {from: blacklisterAccount});
+
+    const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, pauserAccount, 12]);
+    await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: proxyOwnerAccount })
+    newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
+
+    customVars = [
+      { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
+    ];
+    await checkVariables([newProxiedToken], [customVars]);
+  });
+
+  it('upt013 should upgradeTo while new logic is blacklisted', async function () {
+    var upgradedToken = await UpgradedFiatToken.new();
+    await token.blacklist(upgradedToken.address, {from: blacklisterAccount});
+
+    var tokenConfig = await upgradeTo(proxy, upgradedToken, proxyOwnerAccount);
+    var newToken = tokenConfig.token;
+
+    customVars = [
+      { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
+    ];
+    await checkVariables([newToken], [customVars]);
+  });
+
 }
 
 module.exports = {
