@@ -3,11 +3,14 @@ version: 0.2
 phases:
   install:
     commands:
+      - npm install -g yarn@^1.9.2
       - npm install -g truffle@^4.1.8
-      - npm install
+      - yarn install --frozen-lockfile
+      #- npm install
   build:
     commands:
       - echo Build started on `date`
+      - yarn check --integrity
       - mkdir -p build/logs
       - truffle compile
       - npm test
