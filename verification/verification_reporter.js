@@ -42,14 +42,28 @@ function verification_reporter (runner) {
     // we skip verification. (See README.verification)
     var upgraded = suite.title.match(/Upgraded/gi);
     var legacy = suite.title.match(/Legacy/gi);
-    if (upgraded) {
+    if (upgraded && legacy) {
       console.log(indent +
-        'This test file is marked "Upgraded". Skipping verification.');
+        'This test file is marked "Upgraded" and "Legacy". Skipping verification.');
+    } else {
+      if (upgraded) {
+        console.log(indent +
+          'This test file is marked "Upgraded". Skipping verification.');
+      }
+      if (legacy) {
+        console.log(indent +
+          'This test file is marked "Legacy". Skipping verification.');
+      }
     }
-    if (legacy) {
+
+    // We also skip verification on the 'PausableTests' file.
+    // Remove this block and the one indicated below to re-enable.
+    var pausable_tests = suite.title.match(/PausableTests/gi);
+    if (pausable_tests) {
       console.log(indent +
-        'This test file is marked "Legacy". Skipping verification.');
+        'Verification tool configured to skip PausableTests file.');
     }
+
   });
 
   // Runs at the end of every test.
@@ -59,6 +73,13 @@ function verification_reporter (runner) {
     var upgraded = test.parent.title.match(/Upgraded/gi);
     var legacy = test.parent.title.match(/Legacy/gi);
     if (upgraded || legacy) {
+      return;
+    }
+
+    // We also skip verification on the 'PausableTests' file.
+    // Remove this block and the one indicated above to re-enable.
+    var pausable_tests = test.parent.title.match(/PausableTests/gi);
+    if (pausable_tests) {
       return;
     }
 
