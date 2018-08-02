@@ -7,6 +7,7 @@ var abi_tests = require('./ABITests.test');
 var legacy_tests = require('./FiatTokenLegacy.test');
 var proxy_positive_tests = require('./ProxyPositiveTests');
 var proxy_negative_tests = require('./ProxyNegativeTests');
+var events_tests = require('./EventsTests');
 
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -100,3 +101,11 @@ contract('FiatToken_LegacyTests', async function (accounts) {
 contract('FiatToken_LegacyTests_Upgraded', async function (accounts) {
   await legacy_tests.run_tests(newUpgradedToken, accounts);
 });
+
+contract('Events_Tests', async function () {
+  await events_tests.run_tests(newToken);
+});
+
+contract('Events_Tests', async function () {
+  await events_tests.run_tests(newUpgradedToken);
+})
