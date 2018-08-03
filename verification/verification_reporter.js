@@ -24,6 +24,7 @@ function verification_reporter (runner) {
   spec_reporter.call(this, runner);
 
   var spreadsheet;
+  var spreadsheet_clone;
   var errs = [];
   var pending = {};
 
@@ -34,26 +35,17 @@ function verification_reporter (runner) {
     spreadsheet = await sheets.load().catch((err) => {
       console.log(err);
     });
+    spreadsheet_clone = JSON.parse(JSON.stringify(spreadsheet));
   });
 
   // Runs at the beginning of each contract block execution.
   runner.on('suite', function(suite) {
-    // If contract block title is marked 'Upgraded' or 'Legacy',
+    // If contract block title is marked 'Legacy',
     // we skip verification. (See README.verification)
-    var upgraded = suite.title.match(/Upgraded/gi);
     var legacy = suite.title.match(/Legacy/gi);
-    if (upgraded && legacy) {
+    if (legacy) {
       console.log(indent +
-        'This test file is marked "Upgraded" and "Legacy". Skipping verification.');
-    } else {
-      if (upgraded) {
-        console.log(indent +
-          'This test file is marked "Upgraded". Skipping verification.');
-      }
-      if (legacy) {
-        console.log(indent +
-          'This test file is marked "Legacy". Skipping verification.');
-      }
+        'This test file is marked "Legacy". Skipping verification.');
     }
 
     // We also skip verification on the 'PausableTests' file.
@@ -68,11 +60,10 @@ function verification_reporter (runner) {
 
   // Runs at the end of every test.
   runner.on('test end', function (test) {
-    // If contract block title is marked 'Upgraded' or 'Legacy',
+    // If contract block title is marked 'Legacy',
     // we skip verification. (See README.verification)
-    var upgraded = test.parent.title.match(/Upgraded/gi);
     var legacy = test.parent.title.match(/Legacy/gi);
-    if (upgraded || legacy) {
+    if (legacy) {
       return;
     }
 
@@ -120,7 +111,7 @@ function verification_reporter (runner) {
     } else {
       // Verify test is in spreadsheet.
       if (spreadsheet[file]) {
-        let spreadsheet_test = spreadsheet[file][id];
+        let spreadsheet_test = spreadsheet[file][id] || spreadsheet_clone[file][id];
         if (spreadsheet_test) {
           // Verify test descriptions match.
           if (spreadsheet_test == test_ran) {
@@ -142,7 +133,9 @@ function verification_reporter (runner) {
               + '\n' + indent + 'Diff:           ' + diff);
           }
           // If test is included in spreadsheet, 'cross-off' by deleting.
-          delete spreadsheet[file][id];
+          if (spreadsheet[file][id]) {
+            delete spreadsheet[file][id];
+          }
         } else {
           // If test is not in spreadsheet.
           console.log(indent + red_x

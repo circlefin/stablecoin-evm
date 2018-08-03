@@ -50,11 +50,6 @@ Contract Block Titles:
   'FiatToken_PositiveTests', 'PositiveTestsupgraded', 'PositiveTests' etc.,
   but not 'upgradedPositiveTests'.)
 
-- Should include the word 'Upgraded' if they test an upgraded version of the
-  FiatToken. (Note: This will skip verification on tests in the contract block.
-  The assumption is that any test that is run on an upgraded version of the
-  token is also run on a non-upgraded version of the token.)
-
 - Should include the word 'Legacy' if they run tests that do not need to be
   recorded in the spreadsheet and can be ignored by the verification tool.
 
