@@ -1,3 +1,5 @@
+var FiatTokenProxy = artifacts.require('FiatTokenProxy');
+
 var tokenUtils = require('./TokenTestUtils');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
@@ -433,6 +435,21 @@ async function run_tests(newToken) {
 
   it('ms044 should return true on removeMinter', async function() {
     assert(await token.removeMinter.call(minterAccount, { from: masterMinterAccount }));
+  });
+
+  it('ms045 initialized should be in slot 8, byte 21', async function() {
+    var slot8Data = await web3.eth.getStorageAt(proxy.address, 8);
+    var initialized = "0x" + slot8Data.substring(2,4); // first 2 hex-chars after 0x
+    var masterMinterAddress = "0x" + slot8Data.substring(4,44); // first 42 hex chars after 0xii
+
+    assert.equal(masterMinterAccount, masterMinterAddress);
+    assert.equal("0x01", initialized);
+  });
+
+  it('ms046 initialized should be 0 before initialization', async function() {
+    var newProxy = await FiatTokenProxy.new(token.address, { from: arbitraryAccount });
+    var slot8Data = await web3.eth.getStorageAt(newProxy.address, 8);
+    assert.equal("0x00", slot8Data);
   });
 
 }
