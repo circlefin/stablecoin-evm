@@ -4,7 +4,7 @@ phases:
   install:
     commands:
       - npm install -g yarn@^1.9.2
-      - npm install -g truffle@^4.1.8
+      - npm install -g truffle@4.1.13
       - yarn install --frozen-lockfile
       #- npm install
   build:
