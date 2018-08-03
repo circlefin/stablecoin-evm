@@ -40,7 +40,7 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
     uint8 public decimals;
     string public currency;
     address public masterMinter;
-    bool internal initialized;
+    bool public initialized;
 
     mapping(address => uint256) internal balances;
     mapping(address => mapping(address => uint256)) internal allowed;
