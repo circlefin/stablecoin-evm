@@ -161,7 +161,7 @@ function checkUnpauseEvent(unpause) {
     assert.equal(unpause.logs[0].event, 'Unpause');
 }
 
-function checkMintEvents(minting, to, amount, minter) {
+function checkMintEvent(minting, to, amount, minter) {
     // Mint Event
     assert.equal(minting.logs[0].event, 'Mint');
     assert.equal(minting.logs[0].args.minter, minter);
@@ -901,9 +901,10 @@ module.exports = {
     checkTransferEventsWithFee: checkTransferEventsWithFee,
     checkTransferEvents: checkTransferEvents,
     checkMinterConfiguredEvent: checkMinterConfiguredEvent,
-    checkMintEvents: checkMintEvents,
+    checkMintEvent: checkMintEvent,
     checkApprovalEvent: checkApprovalEvent,
     checkBurnEvents: checkBurnEvents,
+    checkBurnEvent: checkBurnEvent,
     checkMinterRemovedEvent: checkMinterRemovedEvent,
     checkBlacklistEvent: checkBlacklistEvent,
     checkUnblacklistEvent: checkUnblacklistEvent,

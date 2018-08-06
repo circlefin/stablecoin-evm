@@ -19,7 +19,7 @@ var decimals = tokenUtils.decimals;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var encodeCall = tokenUtils.encodeCall;
 
-var checkMintEvents = tokenUtils.checkMintEvents;
+var checkMintEvent = tokenUtils.checkMintEvent;
 var checkMinterConfiguredEvent = tokenUtils.checkMinterConfiguredEvent;
 var checkApprovalEvent = tokenUtils.checkApprovalEvent;
 var checkBurnEvents = tokenUtils.checkBurnEvents;
@@ -57,7 +57,7 @@ async function run_tests(newToken) {
   it('et001 should check Mint/Transfer events', async function () {
     await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
     let mint = await token.mint(arbitraryAccount, amount, {from: minterAccount});
-    checkMintEvents(mint, arbitraryAccount, amount, minterAccount);
+    checkMintEvent(mint, arbitraryAccount, amount, minterAccount);
   });
 
   it('et002 should check Burn/Transfer events', async function () {
