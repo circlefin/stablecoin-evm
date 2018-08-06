@@ -74,8 +74,6 @@ function checkMinterRemovedEvent(minterRemovedEvent, minter) {
     assert.equal(minterRemovedEvent.logs[0].args.oldMinter, minter);
 }
 
-
-
 function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
     assert.equal(transferEvent.logs[0].event, 'Fee');
     assert.equal(transferEvent.logs[0].args.from, from);
@@ -117,7 +115,6 @@ function checkUnblacklistEvent(unblacklistEvent, account) {
     assert.equal(unblacklistEvent.logs[0].args._account, account);
 }
 
-
 function checkBlacklisterChangedEvent(blacklisterChangedEvent, blacklister) {
     assert.equal(blacklisterChangedEvent.logs[0].event, 'BlacklisterChanged');
     assert.equal(blacklisterChangedEvent.logs[0].args.newBlacklister, blacklister);
@@ -156,11 +153,15 @@ function checkTransferProxyOwnershipEvent(transferProxyOwnershipEvent, previousO
     assert.equal(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner);
 }
 
+function checkPauseEvent(pause) {
+  assert.equal(pause.logs[0].event, 'Pause');
+}
+
 function checkUnpauseEvent(unpause) {
     assert.equal(unpause.logs[0].event, 'Unpause');
 }
 
-function checkMintEvent(minting, to, amount, minter) {
+function checkMintEvents(minting, to, amount, minter) {
     // Mint Event
     assert.equal(minting.logs[0].event, 'Mint');
     assert.equal(minting.logs[0].args.minter, minter);
@@ -900,12 +901,13 @@ module.exports = {
     checkTransferEventsWithFee: checkTransferEventsWithFee,
     checkTransferEvents: checkTransferEvents,
     checkMinterConfiguredEvent: checkMinterConfiguredEvent,
-    checkMintEvent: checkMintEvent,
+    checkMintEvents: checkMintEvents,
     checkApprovalEvent: checkApprovalEvent,
-    checkBurnEvent: checkBurnEvent,
+    checkBurnEvents: checkBurnEvents,
     checkMinterRemovedEvent: checkMinterRemovedEvent,
     checkBlacklistEvent: checkBlacklistEvent,
     checkUnblacklistEvent: checkUnblacklistEvent,
+    checkPauseEvent: checkPauseEvent,
     checkUnpauseEvent: checkUnpauseEvent,
     checkPauserChangedEvent: checkPauserChangedEvent,
     checkTransferOwnershipEvent: checkTransferOwnershipEvent,
