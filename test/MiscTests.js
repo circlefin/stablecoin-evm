@@ -447,7 +447,8 @@ async function run_tests(newToken) {
   });
 
   it('ms046 initialized should be 0 before initialization', async function() {
-    var newProxy = await FiatTokenProxy.new(token.address, { from: arbitraryAccount });
+    var rawToken = await newToken();
+    var newProxy = await FiatTokenProxy.new(rawToken.address, { from: arbitraryAccount });
     var slot8Data = await web3.eth.getStorageAt(newProxy.address, 8);
     assert.equal("0x00", slot8Data);
   });
