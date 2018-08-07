@@ -30,7 +30,7 @@ All that remains is to add the new logic (functions) as part of the body (denote
 Note that `private` *functions* will not be inherited in subsequent contract versions and should be added with care. 
 
 ### New Fields Only
-Adding new fields requires inheriting from the prior version of the contract as done in [New Logic](#new-logic-only). In addition, the new contract requires declaring new data fields and initialization logic for the new fields. The new token must add an *initialize* function and a *initV[X]* function, where X is the version of the contract. The initialization function allows the contract to be deployed from scratch and initialize all variables declared in the new contract and in prior contracts. The initV[X] function allows the contract to initialize only the new variables added in the new contract. New variables added *must* be declared as type `internal` or `public`, `private` can never be used. Note that `private` *functions* will also not be inherited in subsequent contract versions and should be added with care. A template is below shown for upgrading from version 1 to version 2. In the example, we add variables newBool, newAddress, and newUint, which would be replaced with the real variables added. 
+Adding new fields requires inheriting from the prior version of the contract as done in [New Logic](#new-logic-only). In addition, the new contract requires declaring new data fields and, if the data fields must be initialized to non-default values, adding initialization logic for the new fields. New variables added *must* be declared as type `internal` or `public`, `private` can never be used. Note that `private` *functions* will also not be inherited in subsequent contract versions and should be added with care. Also note that inline initialization of variables as part of declaration has no effect as the proxy never executes this code (for example, bool public newBool = true is not in fact initialized to true). If possible, new fields should be added that can start with default solidity values and do not need initialization. However, if any new fields require initialization to non-default values, the new token must add an *initialize* function and a *initV[X]* function, where X is the version of the contract. The initialization function allows the contract to be deployed from scratch and initialize all variables declared in the new contract and in prior contracts. The initV[X] function allows the contract to initialize only the new variables added in the new contract.  A template is shown below for upgrading from version 1 to version 2. In the example, we add variables newBool, newAddress, and newUint, which would be replaced with the real variables added. 
 
   ```
   import './FiatTokenV1.sol';
@@ -87,7 +87,7 @@ Deployment can be done in the following steps:
   3) Ensure the test suite has run on the final version of the new contract with added tests and that the test suite passes with 100% code coverage
   4) Complete any external audits as deemed necessary 
   5) Go back to step 1 if any prior step is not completed successfully
-  6) Deploy the contract by following *Deployment Instructions* in *only* section *Deploying the implementation contract* [instructions](deployment.md#Deploying-the-implementation-contract). If new fields are added, substitute initV[X] for initialize in the instructions. If only new logic is added, no initialization is required. 
+  6) Deploy the contract by following *Deployment Instructions* in *only* section *Deploying the implementation contract* [instructions](deployment.md#Deploying-the-implementation-contract). When invoking `initialize` in following deployment instructions, the latest version of `initialize` should be called.
 
 ## Upgrading the Proxy to point to the UpgradedToken
 The proxy must be pointed to the new upgraded token. This is accomplished two ways depending on whether only new logic was added or if new fields (and possibly new logic) were added. 
@@ -95,13 +95,13 @@ The proxy must be pointed to the new upgraded token. This is accomplished two wa
 ### Upgrading if *ONLY* New Logic Added
 1) Use the centre-token-client to prepare an upgradeTo transaction from the adminAccount parameterized with the address of the new upgraded token (see token-client instructions).
 2) Broadcast the transaction
-3) Call getImplementation on the proxy (a read call, no signed tx required) and ensure it matches the address of the upgraded token. 
+3) Check that the implementation field of the proxy matches the address of the upgraded token by calling web3.eth.getStorageAt(proxy.address, implSlot), where implSlot is defined in the contract as a hardcoded field. As of CENTRE Fiat Token v1.0.0 that slot is 0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b. Alternatively, getImplementation may be called on the proxy with the adminAccount.
 4) If the address in 3) does not match, it is likely a wrong address was used. Repeat the process from step 1).
 
 ### Upgrading if New Fields (and possibly new Logic) Added
 1) Use the centre-token-client to prepare an upgradeToAndCall transaction from the adminAccount parameterized with the address of the new upgraded token and an internal call to invoke initV[X] with the new data fields. (see token-client instructions).
 2) Broadcast the transaction
-3) Call getImplementation on the proxy (a read call, no signed tx required) and ensure it matches the address of the upgraded token. 
+3) Check that the implementation field of the proxy matches the address of the upgraded token by calling web3.eth.getStorageAt(proxy.address, implSlot), where implSlot is defined in the contract as a hardcoded field. As of CENTRE Fiat Token v1.0.0 that slot is 0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b. Alternatively, getImplementation may be called on the proxy with the admin account.
 4) If the address in 3) does not match, it is likely a wrong address was used. Repeat the process from step 1).
 5) Verify that the new fields were set correctly as done in *Deployment Instructions* [verification](deployment.md) 
 6) If verification fails, restart the process from step 1)
