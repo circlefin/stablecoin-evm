@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "lite-server",
-    "test": "./node_modules/.bin/solidity-coverage"
+    "test": "truffle test ./scripts/buildTransactionDataTest.js && ./node_modules/.bin/solidity-coverage"
   },
   "repository": {
     "type": "git",
