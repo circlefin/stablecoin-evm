@@ -93,13 +93,13 @@ Deployment can be done in the following steps:
 The proxy must be pointed to the new upgraded token. This is accomplished two ways depending on whether only new logic was added or if new fields (and possibly new logic) were added. 
 
 ### Upgrading if *ONLY* New Logic Added
-1) Use the centre-token-client to prepare an upgradeTo transaction from the adminAccount parameterized with the address of the new upgraded token (see token-client instructions).
+1) Prepare an upgradeTo transaction from the adminAccount parameterized with the address of the new upgraded token.
 2) Broadcast the transaction
 3) Check that the implementation field of the proxy matches the address of the upgraded token by calling web3.eth.getStorageAt(proxy.address, implSlot), where implSlot is defined in the contract as a hardcoded field. As of CENTRE Fiat Token v1.0.0 that slot is 0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b. Alternatively, getImplementation may be called on the proxy with the adminAccount.
 4) If the address in 3) does not match, it is likely a wrong address was used. Repeat the process from step 1).
 
 ### Upgrading if New Fields (and possibly new Logic) Added
-1) Use the centre-token-client to prepare an upgradeToAndCall transaction from the adminAccount parameterized with the address of the new upgraded token and an internal call to invoke initV[X] with the new data fields. (see token-client instructions).
+1) Prepare an upgradeToAndCall transaction from the adminAccount parameterized with the address of the new upgraded token and an internal call to invoke initV[X] with the new data fields.
 2) Broadcast the transaction
 3) Check that the implementation field of the proxy matches the address of the upgraded token by calling web3.eth.getStorageAt(proxy.address, implSlot), where implSlot is defined in the contract as a hardcoded field. As of CENTRE Fiat Token v1.0.0 that slot is 0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b. Alternatively, getImplementation may be called on the proxy with the admin account.
 4) If the address in 3) does not match, it is likely a wrong address was used. Repeat the process from step 1).
