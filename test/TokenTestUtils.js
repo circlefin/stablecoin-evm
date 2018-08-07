@@ -74,8 +74,6 @@ function checkMinterRemovedEvent(minterRemovedEvent, minter) {
     assert.equal(minterRemovedEvent.logs[0].args.oldMinter, minter);
 }
 
-
-
 function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
     assert.equal(transferEvent.logs[0].event, 'Fee');
     assert.equal(transferEvent.logs[0].args.from, from);
@@ -117,7 +115,6 @@ function checkUnblacklistEvent(unblacklistEvent, account) {
     assert.equal(unblacklistEvent.logs[0].args._account, account);
 }
 
-
 function checkBlacklisterChangedEvent(blacklisterChangedEvent, blacklister) {
     assert.equal(blacklisterChangedEvent.logs[0].event, 'BlacklisterChanged');
     assert.equal(blacklisterChangedEvent.logs[0].args.newBlacklister, blacklister);
@@ -154,6 +151,10 @@ function checkTransferProxyOwnershipEvent(transferProxyOwnershipEvent, previousO
     assert.equal(transferProxyOwnershipEvent.logs[0].event, 'ProxyOwnershipTransferred');
     assert.equal(transferProxyOwnershipEvent.logs[0].args.previousOwner, previousOwner);
     assert.equal(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner);
+}
+
+function checkPauseEvent(pause) {
+  assert.equal(pause.logs[0].event, 'Pause');
 }
 
 function checkUnpauseEvent(unpause) {
@@ -902,10 +903,12 @@ module.exports = {
     checkMinterConfiguredEvent: checkMinterConfiguredEvent,
     checkMintEvent: checkMintEvent,
     checkApprovalEvent: checkApprovalEvent,
+    checkBurnEvents: checkBurnEvents,
     checkBurnEvent: checkBurnEvent,
     checkMinterRemovedEvent: checkMinterRemovedEvent,
     checkBlacklistEvent: checkBlacklistEvent,
     checkUnblacklistEvent: checkUnblacklistEvent,
+    checkPauseEvent: checkPauseEvent,
     checkUnpauseEvent: checkUnpauseEvent,
     checkPauserChangedEvent: checkPauserChangedEvent,
     checkTransferOwnershipEvent: checkTransferOwnershipEvent,
