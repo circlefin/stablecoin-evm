@@ -45,4 +45,5 @@ async function run() {
 
 module.exports = async function(callback) {
   await run();
+  callback();
 }
