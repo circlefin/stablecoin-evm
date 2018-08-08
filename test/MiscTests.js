@@ -23,6 +23,7 @@ var masterMinterAccount = tokenUtils.masterMinterAccount;
 var minterAccount = tokenUtils.minterAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+var getInitializedV1 = tokenUtils.getInitializedV1;
 var FiatToken = tokenUtils.FiatToken;
 
 var amount = 100;
@@ -438,19 +439,16 @@ async function run_tests(newToken) {
   });
 
   it('ms045 initialized should be in slot 8, byte 21', async function() {
-    var slot8Data = await web3.eth.getStorageAt(proxy.address, 8);
-    var initialized = "0x" + slot8Data.substring(2,4); // first 2 hex-chars after 0x
-    var masterMinterAddress = "0x" + slot8Data.substring(4,44); // first 42 hex chars after 0xii
-
-    assert.equal(masterMinterAccount, masterMinterAddress);
+    var initialized = await getInitializedV1(token);
     assert.equal("0x01", initialized);
   });
 
   it('ms046 initialized should be 0 before initialization', async function() {
     var rawToken = await newToken();
     var newProxy = await FiatTokenProxy.new(rawToken.address, { from: arbitraryAccount });
-    var slot8Data = await web3.eth.getStorageAt(newProxy.address, 8);
-    assert.equal("0x00", slot8Data);
+    var token = FiatToken.at(newProxy.address);
+    var initialized = await getInitializedV1(token);
+    assert.equal("0x00", initialized);
   });
 
 }
