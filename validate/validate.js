@@ -94,10 +94,6 @@ async function Validate() {
     var initialized = slot8Data.substring(24,26);
     print("initialized", initialized, "01");
 
-    // implementation
-    var implementation = await asyncGetStorageAt(proxiedToken.address, implSlot);
-    print("implement", getAddressFromSlotData(implementation), fiatTokenAddress);
-
     var name = await proxiedToken.name.call();
     print("name", name, NAME);
 
@@ -116,8 +112,12 @@ async function Validate() {
     var paused = await proxiedToken.paused.call();
     print("paused", paused, PAUSED);
 
+    // implementation
+    var implementation = await asyncGetStorageAt(proxiedToken.address, implSlot);
+    print("implement", getAddressFromSlotData(implementation), fiatTokenAddress);
+
     var admin = await asyncGetStorageAt(proxiedToken.address, adminSlot);
-    print("upgrader", admin, UPGRADER);
+    print("upgrader", getAddressFromSlotData(admin), UPGRADER);
 
     var owner = await proxiedToken.owner.call();
     print("owner", owner, OWNER);

@@ -1,8 +1,9 @@
-// Used to validate with Infura
-var HDWalletProvider = require("truffle-hdwallet-provider");
-// These keys will be used only for CALL
+// INFURA Setup
+// Uncomment this code to enable validate/validate.js script
+// See validate/README.validate.md for more info
+/*
+var HDWalletProvider = require("truffle-hdwallet-provider"); // These keys will be used only for CALL
 var mnemonic = "talisman";
-// read Infura access token
 var fs = require('fs');
 var access_token = "none";
 try {
@@ -10,6 +11,7 @@ try {
 } catch (err) {
     console.log("No Infura access token detected. Unit tests will still work.  See ./validate/README.validate.md for more details.")
 }
+*/
 
 module.exports = {
   networks: {
@@ -36,7 +38,7 @@ module.exports = {
       network_id: "*" // Match any network id
     },
     // used to validate contract with Infura
-    mainnet: {
+    infura_mainnet: {
       provider: function() {
          return new HDWalletProvider(mnemonic, "https://mainnet.infura.io/" + access_token)
       },
