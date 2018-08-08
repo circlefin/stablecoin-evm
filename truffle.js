@@ -36,14 +36,18 @@ module.exports = {
       host: "ganache",
       port: 8545,
       network_id: "*" // Match any network id
-    },
-    // used to validate contract with Infura
+    }
+// INFURA Setup
+// Uncomment this code to enable validate/validate.js script
+// See validate/README.validate.md for more info
+/*    ,
     infura_mainnet: {
       provider: function() {
          return new HDWalletProvider(mnemonic, "https://mainnet.infura.io/" + access_token)
       },
       network_id: 1
     }
+*/
   },
   mocha: {
     /*
