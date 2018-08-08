@@ -23,7 +23,7 @@ var TOTALSUPPLY =  0;
 var PAUSED = false
 
 // Name of current implementation artifact as stored in ./build/contracts/*.json
-var FiatToken = artifacts.require("FiatToken");
+var FiatToken = artifacts.require("FiatTokenV1");
 
 // Name of current proxy artifact as stored in ./build/contracts/*.json
 var FiatTokenProxy = artifacts.require("FiatTokenProxy");
