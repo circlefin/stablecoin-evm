@@ -17,12 +17,10 @@ current Token Implementation addresses.
 4. Create a file `./validate/apikey.infura`.  Copy the API Key from your project dashboard into 
 the file and save.
 
-5. Open the file `package.json` and in `dependencies` uncomment the line `"truffle-hdwallet-provider": "0.0.6"`.
-
-6. Open the file `truffle.js` and uncomment the lines at the top of the file marked `INFURA Setup` as well
+5. Open the file `truffle.js` and uncomment the lines at the top of the file marked `INFURA Setup` as well
 as the section defining `infura_mainnet` (also marked `INFURA Setup`).
 
-7. Run `npm install` to install the required dependencies.
+6. Run `npm install truffle-hdwallet-provider` to install the required dependencies.
 
 # Validation
 
