@@ -27,11 +27,11 @@ if (args[1] == "--compile" || args[1] == "-c") {
 	args = args.slice(2)
 }
 
-var fiatTokenFileName = args[0]
+var fiatTokenContractName = args[0]
 // slice off name of contract
 args = args.slice(1);
 
-var FiatTokenVX = artifacts.require(fiatTokenFileName)
+var FiatTokenVX = artifacts.require(fiatTokenContractName)
 
 async function run() {
 	var tokenVX = await FiatTokenVX.new();
