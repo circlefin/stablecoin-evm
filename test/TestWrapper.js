@@ -102,10 +102,10 @@ contract('FiatToken_LegacyTests_Upgraded', async function (accounts) {
   await legacy_tests.run_tests(newUpgradedToken, accounts);
 });
 
-contract('Events_Tests', async function () {
+contract('FiatToken_EventTests', async function () {
   await events_tests.run_tests(newToken);
 });
 
-contract('Events_Tests', async function () {
+contract('FiatToken_EventTests_Upgraded', async function () {
   await events_tests.run_tests(newUpgradedToken);
-})
+});

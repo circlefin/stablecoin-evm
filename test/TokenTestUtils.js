@@ -6,6 +6,7 @@ var symbol = 'C-USD';
 var currency = 'USD';
 var decimals = 2;
 var BigNumber = require('bignumber.js');
+var trueInStorageFormat = "0x01";
 var bigZero = new BigNumber(0);
 var bigHundred = new BigNumber(100);
 var assertDiff = require('assert-diff');
@@ -74,8 +75,6 @@ function checkMinterRemovedEvent(minterRemovedEvent, minter) {
     assert.equal(minterRemovedEvent.logs[0].args.oldMinter, minter);
 }
 
-
-
 function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
     assert.equal(transferEvent.logs[0].event, 'Fee');
     assert.equal(transferEvent.logs[0].args.from, from);
@@ -117,7 +116,6 @@ function checkUnblacklistEvent(unblacklistEvent, account) {
     assert.equal(unblacklistEvent.logs[0].args._account, account);
 }
 
-
 function checkBlacklisterChangedEvent(blacklisterChangedEvent, blacklister) {
     assert.equal(blacklisterChangedEvent.logs[0].event, 'BlacklisterChanged');
     assert.equal(blacklisterChangedEvent.logs[0].args.newBlacklister, blacklister);
@@ -154,6 +152,10 @@ function checkTransferProxyOwnershipEvent(transferProxyOwnershipEvent, previousO
     assert.equal(transferProxyOwnershipEvent.logs[0].event, 'ProxyOwnershipTransferred');
     assert.equal(transferProxyOwnershipEvent.logs[0].args.previousOwner, previousOwner);
     assert.equal(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner);
+}
+
+function checkPauseEvent(pause) {
+  assert.equal(pause.logs[0].event, 'Pause');
 }
 
 function checkUnpauseEvent(unpause) {
@@ -203,6 +205,7 @@ function buildExpectedState(token, customVars) {
         'blacklister': blacklisterAccount,
         'tokenOwner': tokenOwnerAccount,
         'proxiedTokenAddress': token.proxiedTokenAddress,
+        'initializedV1': trueInStorageFormat,
         'upgrader': proxyOwnerAccount,
         'balances': {
             'arbitraryAccount': bigZero,
@@ -371,6 +374,7 @@ async function getActualState(token) {
         await token.owner.call(),
         await getImplementation(token),
         await getAdmin(token),
+        await getInitializedV1(token),
         await token.balanceOf(arbitraryAccount),
         await token.balanceOf(masterMinterAccount),
         await token.balanceOf(minterAccount),
@@ -461,6 +465,7 @@ async function getActualState(token) {
         tokenOwner,
         proxiedTokenAddress,
         upgrader,
+        initializedV1,
         balancesA,
         balancesMM,
         balancesM,
@@ -552,6 +557,7 @@ async function getActualState(token) {
             'tokenOwner': tokenOwner,
             'proxiedTokenAddress': proxiedTokenAddress,
             'upgrader': upgrader,
+            'initializedV1': initializedV1,
             'balances': {
                 'arbitraryAccount': balancesA,
                 'masterMinterAccount': balancesMM,
@@ -883,6 +889,34 @@ function getImplementation(proxy) {
     return impl;
 }
 
+async function getInitializedV1(token) {
+    var slot8Data = await web3.eth.getStorageAt(token.address, 8);
+    var slot8DataLength = slot8Data.length;
+    var initialized;
+    var masterMinterStart;
+    var masterMinterAddress;
+    if (slot8DataLength == 4) {
+        //Validate proxy not yet initialized
+        for (var i = 0; i <= 20; i++) {
+            assert.equal("0x00", await web3.eth.getStorageAt(token.address, i));
+        }
+        initialized = slot8Data;
+    } else {
+        if (slot8DataLength == 44) {
+            initialized = "0x" + slot8Data.substring(2,4); // first 2 hex-chars after 0x
+            masterMinterStart = 4;
+        } else if (slot8DataLength == 40) {
+            initialized = "0x00";
+            masterMinterStart = 2;
+        } else {
+            assert.fail("slot8Data incorrect size");
+        }
+        masterMinterAddress = "0x" + slot8Data.substring(masterMinterStart, masterMinterStart + 40);
+        assert.equal(await token.masterMinter.call(), masterMinterAddress);
+    }
+    return initialized;
+}
+
 module.exports = {
     FiatToken: FiatToken,
     FiatTokenProxy: FiatTokenProxy,
@@ -902,10 +936,12 @@ module.exports = {
     checkMinterConfiguredEvent: checkMinterConfiguredEvent,
     checkMintEvent: checkMintEvent,
     checkApprovalEvent: checkApprovalEvent,
+    checkBurnEvents: checkBurnEvents,
     checkBurnEvent: checkBurnEvent,
     checkMinterRemovedEvent: checkMinterRemovedEvent,
     checkBlacklistEvent: checkBlacklistEvent,
     checkUnblacklistEvent: checkUnblacklistEvent,
+    checkPauseEvent: checkPauseEvent,
     checkUnpauseEvent: checkUnpauseEvent,
     checkPauserChangedEvent: checkPauserChangedEvent,
     checkTransferOwnershipEvent: checkTransferOwnershipEvent,
@@ -934,6 +970,7 @@ module.exports = {
     expectRevert: expectRevert,
     expectJump: expectJump,
     encodeCall: encodeCall,
+    getInitializedV1: getInitializedV1,
     deployerAccount: deployerAccount,
     arbitraryAccount: arbitraryAccount,
     tokenOwnerAccount: tokenOwnerAccount,

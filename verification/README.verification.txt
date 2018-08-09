@@ -90,7 +90,7 @@ Pending Tests:
 
   4) Move your credentials.json file into the verification/GoogleSheets folder.
 
-  5) Run 'truffle test'. You should be prompted to visit a URL and enter a code
+  5) Run 'npm run truffle-test'. You should be prompted to visit a URL and enter a code
   that you find there into your terminal. This will create a token.json file
   inside the GoogleSheets folder. Note, if a token.json file already exists in
   this folder, you will encounter an error.
