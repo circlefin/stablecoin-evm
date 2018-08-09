@@ -10,3 +10,4 @@ artifacts/
 contracts/.DS_Store
 token.json
 credentials.json
+echidna/
