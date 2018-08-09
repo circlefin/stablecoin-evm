@@ -11,3 +11,4 @@ contracts/.DS_Store
 token.json
 credentials.json
 echidna/
+validate/apikey.infura

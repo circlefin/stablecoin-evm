@@ -15,16 +15,13 @@ install project npm dependencies:
 ```npm install```
 
 # Testing
-ganache-cli (Ethereum RPC client) must be running first
-```ganache-cli --defaultBalanceEther 1000000 --deterministic --a 15```
-
-then run the tests via truffle:
-```truffle test```
+All tests are run with:
+```npm run truffle-test```
 
 or run a specific file of tests with:
-```truffle test [file]```
+```npm run truffle-test -- [file]```
 
-to generate test coverage run:
+to generate test coverage on all tests run:
 ```npm test```
 
 
