@@ -268,6 +268,10 @@ async function run_tests(newToken) {
 
 }
 
+contract('FiatToken_PositiveTests', async function () {
+  await run_tests(tokenUtils.newToken);
+});
+
 module.exports = {
   run_tests: run_tests,
 }

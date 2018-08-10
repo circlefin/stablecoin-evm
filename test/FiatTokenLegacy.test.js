@@ -677,6 +677,10 @@ async function run_tests(newToken, accounts) {
   });
 }
 
+contract('FiatToken_LegacyTests', async function (accounts) {
+  await run_tests(tokenUtils.newToken, accounts);
+});
+
 module.exports = {
   run_tests: run_tests,
 }

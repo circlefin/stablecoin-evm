@@ -314,6 +314,10 @@ async function run_tests(newToken) {
 
 }
 
+contract('FiatToken_ProxyPositiveTests', async function (accounts) {
+  await run_tests(tokenUtils.newToken, accounts);
+});
+
 module.exports = {
   run_tests: run_tests,
 }
