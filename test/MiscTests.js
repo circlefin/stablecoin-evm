@@ -26,6 +26,7 @@ var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var getInitializedV1 = tokenUtils.getInitializedV1;
 var FiatToken = tokenUtils.FiatToken;
 
+var maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 var amount = 100;
 
 async function run_tests(newToken) {
@@ -451,6 +452,109 @@ async function run_tests(newToken) {
     assert.equal("0x00", initialized);
   });
 
+  it('ms047 configureMinter works on amount=2^256-1', async function() {
+    await token.configureMinter(minterAccount, maxAmount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+  });
+
+  it('ms048 mint works on amount=2^256-1', async function() {
+    await token.configureMinter(minterAccount, maxAmount, { from: masterMinterAccount });
+    var customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+   });
+
+  it('ms049 burn on works on amount=2^256-1', async function() {
+    await token.configureMinter(minterAccount, maxAmount, { from: masterMinterAccount });
+    await token.mint(minterAccount, maxAmount, { from: minterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.burn(maxAmount, { from: minterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+    ];
+    await checkVariables([token], [customVars]);
+   });
+
+  it('ms050 approve works on amount=2^256-1', async function() {
+    await token.configureMinter(minterAccount, maxAmount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.approve(pauserAccount, maxAmount, {from: arbitraryAccount});
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'allowance.arbitraryAccount.pauserAccount', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+   });
+
+  it('ms051 transfer works on amount=2^256-1', async function() {
+    await token.configureMinter(minterAccount, maxAmount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.transfer(pauserAccount, maxAmount, {from: arbitraryAccount});
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) },
+    ];
+    await checkVariables([token], [customVars]);
+   });
+
+  it('ms052 transferFrom works on amount=2^256-1', async function() {
+    await token.configureMinter(minterAccount, maxAmount, { from: masterMinterAccount });
+    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
+    await token.approve(pauserAccount, maxAmount, {from: arbitraryAccount});
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'allowance.arbitraryAccount.pauserAccount', 'expectedValue': new BigNumber(maxAmount) }
+    ];
+    await checkVariables([token], [customVars]);
+
+    await token.transferFrom(arbitraryAccount, pauserAccount, maxAmount, {from: pauserAccount});
+    customVars = [
+      { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(maxAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(maxAmount) },
+    ];
+    await checkVariables([token], [customVars]);
+   });
 }
 
 module.exports = {
