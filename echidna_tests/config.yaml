@@ -1,0 +1,33 @@
+#Arguments to solc
+# PLEASE CHANGE THE LINE BELOW to include the absolute path of your working directory.
+solcArgs: openzeppelin-solidity=REPLACE_WITH_PWD/node_modules/openzeppelin-solidity zos-lib=REPLACE_WITH_PWD/node_modules/zos-lib contracts=REPLACE_WITH_PWD/contracts
+#Choose the number of epochs to use in coverage-guided testing
+#epochs: 2
+#Set the gas limit for each test
+#gasLimit: 0xfffff
+#Number of tests that will run for each property
+testLimit: 10000
+#Max call sequence length
+range: 10
+#Contract's address in the EVM
+contractAddr: 0x00a329c0648769a73afac7f9381e08fb43dbea72
+#Sender's address in the EVM
+sender: 0x00a329c0648769a73afac7f9381e08fb43dbea70
+#List of addresses that will be used in all tests
+addrList:
+  - 0x00a329c0648769a73afac7f9381e08fb43dbea70
+  - 0x00a329c0648769a73afac7f9381e08fb43dbea72
+  - 0x67518339e369ab3d591d3569ab0a0d83b2ff5198
+  - 0x0
+#Shrink Limit
+shrinkLimit: 1000
+#Test Prefix
+prefix: echidna_
+#Print full coverage
+printCoverage: false
+#Return Type
+#  - Success: all tests should return true
+#  - Fail: all tests should return false
+#  - Throw: all tests should revert
+#  - Fail or Throw: all tests should either return false or revert
+returnType: Fail or Throw
