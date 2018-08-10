@@ -105,13 +105,15 @@ function main() {
         }
     }
 
-    console.log();
-    console.log()
- 	process.stdout.write(chalk.green("Successfully processed " + (total-fail) + " files.\n"));
-  	process.stdout.write(chalk.green(goodFiles));
-    process.stdout.write(chalk.red("\n\nFailed to process " + fail + " files.\n"));
-    process.stdout.write(chalk.red(badFiles));
-    console.log();
+    if(total - fail > 0) {
+ 	    process.stdout.write(chalk.green("\n\nSuccessfully processed " + (total-fail) + " files.\n"));
+  	    process.stdout.write(chalk.green(goodFiles));
+    }
+
+    if(fail > 0) {
+        process.stdout.write(chalk.red("\n\nFailed to process " + fail + " files.\n"));
+        process.stdout.write(chalk.red(badFiles + "\n"));
+    }
 }
 
 main();

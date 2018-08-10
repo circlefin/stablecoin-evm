@@ -2,7 +2,7 @@
 The `checkDiff` script compares source code uploaded to Etherscan to source
 code on the local machine.
 
-The souce code in Etherscan is a concatenation of several files.  The script reads
+The source code in Etherscan is a concatenation of several files.  The script reads
 comments inside the files to determine which local files were used, then it reads the
 file and reconstructs the expected source code.
 
@@ -11,7 +11,7 @@ should fall in the following categories:
 
 1. Comments / whitespace
 2. The local code has `import` statements not included in Etherscan because the files were 
-explictly concatenated into a master file.
+explicitly concatenated into a master file.
 3. The local code has extra `pragma solidity ^0.4.24` statements at the head of each file,
 while Etherscan should have just one at the top.
 
