@@ -70,7 +70,7 @@ function getAddressFromSlotData(slotData) {
 }
 
 function compare(actual, expected) {
-    if(expected == actual)
+    if(actual == expected)
     {
         return "(ok)";
     } else {
@@ -79,7 +79,7 @@ function compare(actual, expected) {
 }
 
 function print(name, actual, expected) {
-    console.log(name + ": \t" + actual + "\t" + compare(expected, actual));
+    console.log(name + "\t" + actual + "\t" + compare(actual, expected));
 }
 
 async function Validate() {
@@ -92,13 +92,17 @@ async function Validate() {
     // initialized needs to retrieved manually
     var slot8Data = await asyncGetStorageAt(proxiedToken.address, 8);
     var initialized = slot8Data.substring(24,26);
-    print("initialized", initialized, "01");
+    print("init proxy", initialized, "01");
+
+    var slot8Data = await asyncGetStorageAt(fiatTokenAddress, 8);
+    var initialized = slot8Data.substring(24,26);
+    print("init logic", initialized, "01");
 
     var name = await proxiedToken.name.call();
-    print("name", name, NAME);
+    print("name     ", name, NAME);
 
     var symbol = await proxiedToken.symbol.call();
-    print("symbol", symbol, SYMBOL);
+    print("symbol   ", symbol, SYMBOL);
 
     var decimals = await proxiedToken.decimals.call();
     print("decimals", decimals, DECIMALS);
@@ -110,7 +114,7 @@ async function Validate() {
     print("totalSupply", totalSupply, TOTALSUPPLY);
 
     var paused = await proxiedToken.paused.call();
-    print("paused", paused, PAUSED);
+    print("paused  ", paused, PAUSED);
 
     // implementation
     var implementation = await asyncGetStorageAt(proxiedToken.address, implSlot);
@@ -120,13 +124,13 @@ async function Validate() {
     print("upgrader", getAddressFromSlotData(admin), UPGRADER);
 
     var owner = await proxiedToken.owner.call();
-    print("owner", owner, OWNER);
+    print("owner   ", owner, OWNER);
 
     var masterMinter = await proxiedToken.masterMinter.call();
     print("masterMinter", masterMinter, MASTER_MINTER);
 
     var pauser = await proxiedToken.pauser.call();
-    print("pauser", pauser, PAUSER);
+    print("pauser  ", pauser, PAUSER);
 
     var blacklister = await proxiedToken.blacklister.call();
     print("blacklister", blacklister, BLACKLISTER);
