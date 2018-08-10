@@ -1,6 +1,6 @@
 #Arguments to solc
 # PLEASE CHANGE THE LINE BELOW to include the absolute path of your working directory.
-solcArgs: openzeppelin-solidity=REPLACE_WITH_PWD/node_modules/openzeppelin-solidity zos-lib=/Users/alecschaefer/Documents/GitHub/centre-tokens/node_modules/zos-lib contracts=REPLACE_WITH_PWD/contracts
+solcArgs: openzeppelin-solidity=REPLACE_WITH_PWD/node_modules/openzeppelin-solidity zos-lib=REPLACE_WITH_PWD/node_modules/zos-lib contracts=REPLACE_WITH_PWD/contracts
 #Choose the number of epochs to use in coverage-guided testing
 #epochs: 2
 #Set the gas limit for each test
