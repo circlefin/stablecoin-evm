@@ -38,72 +38,36 @@ async function newUpgradedToken() {
 
 // Run specific tests combos by commenting/uncommenting the contract blocks below.
 
-contract('FiatToken_ABIHackingTests', async function () {
-  await abi_tests.run_tests(newToken);
-});
-
 contract('FiatToken_ABIHackingTests_Upgraded', async function () {
   await abi_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_PositiveTests', async function () {
-  await positive_tests.run_tests(newToken);
 });
 
 contract('FiatToken_PositiveTests_Upgraded', async function () {
   await positive_tests.run_tests(newUpgradedToken);
 });
 
-contract('FiatToken_ExtendedPositiveTests', async function () {
-  await extended_positive_tests.run_tests(newToken);
-});
-
 contract('FiatToken_ExtendedPositiveTests_Upgraded', async function () {
   await extended_positive_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_NegativeTests', async function () {
-  await negative_tests.run_tests(newToken);
 });
 
 contract('FiatToken_NegativeTests_Upgraded', async function () {
   await negative_tests.run_tests(newUpgradedToken);
 });
 
-contract('FiatToken_MiscTests', async function () {
-  await misc_tests.run_tests(newToken);
-});
-
 contract('FiatToken_MiscTests_Upgraded', async function () {
   await misc_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_ProxyPositiveTests', async function (accounts) {
-  await proxy_positive_tests.run_tests(newToken);
 });
 
 contract('FiatToken_ProxyPositiveTests_Upgraded', async function (accounts) {
   await proxy_positive_tests.run_tests(newUpgradedToken);
 });
 
-contract('FiatToken_ProxyNegativeTests', async function (accounts) {
-  await proxy_negative_tests.run_tests(newToken);
-});
-
 contract('FiatToken_ProxyNegativeTests_Upgraded', async function (accounts) {
   await proxy_negative_tests.run_tests(newUpgradedToken);
 });
 
-contract('FiatToken_LegacyTests', async function (accounts) {
-  await legacy_tests.run_tests(newToken, accounts);
-});
-
 contract('FiatToken_LegacyTests_Upgraded', async function (accounts) {
   await legacy_tests.run_tests(newUpgradedToken, accounts);
-});
-
-contract('FiatToken_EventTests', async function () {
-  await events_tests.run_tests(newToken);
 });
 
 contract('FiatToken_EventTests_Upgraded', async function () {
