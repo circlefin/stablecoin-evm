@@ -24,6 +24,7 @@ else initializing the roles and trying to use it as a token or pass it off as a 
           )
    ```
 3. Verify that all fields in the FiatToken have been initialized correctly and have the expected values.
+See [README.validate.md](../validate/validate.js).
 
 ## Deploying a Proxy:
 
