@@ -25,7 +25,7 @@ var FiatTokenVX = artifacts.require(contractName)
 var abi = FiatTokenVX.abi
 var decoder = new InputDataDecoder(abi)
 
-async function decode() {
+function decode() {
   result = decoder.decodeData(data)
     for (i = 0; i < result.inputs.length; i++) {
       // if the the type is object and corresponding type in type array is uint, try to parse it
