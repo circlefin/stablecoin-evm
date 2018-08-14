@@ -33,10 +33,12 @@ function decode() {
         result.inputs[i] = result.inputs[i].toString()
       }
     }
-  console.log(JSON.stringify(result))
+
+  var decodedDataJson = JSON.stringify(result)
+  console.log(decodedDataJson)
 
   mkdirp.sync('decoded_data')
-  fs.writeFileSync('decoded_data/' + data + '.json', JSON.stringify(result), 'utf8');
+  fs.writeFileSync('decoded_data/' + data + '.json', decodedDataJson, 'utf8');
 }
 
 module.exports = async function(callback) {
