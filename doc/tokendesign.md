@@ -37,7 +37,6 @@ CENTRE adds minters via the `configureMinter` method. When a minter is configure
 which is the number of tokens that address is allowed to mint. As a `minter` mints tokens, the `mintingAllowance` will decline.
 
 - Only the `masterMinter` role may call configureMinter.
-- 
 
 ### Resetting Minting Allowance
 The `minters` will need their allowance reset periodically to allow them to continue 
@@ -102,11 +101,15 @@ CENTRE will pause the contract via the `pause` method. This method will set the 
 
 - Only the `pauser` role may call pause.
 
+- Pausing emits a `Pause()` event
+
 ### Unpause
 CENTRE will unpause the contract via the `unpause` method. This method will set the `paused` flag to false. 
 All functionality will be restored when the contract is unpaused.
 
 - Only the `pauser` role may call unpause.
+
+- Unpausing emits an `Unpause()` event
 
 ## Upgrading
 The Fiat Token uses the zeppelinos Unstructured-Storage Proxy pattern [https://docs.zeppelinos.org/docs/upgradeability_AdminUpgradeabilityProxy.html]. [FiatToken.sol](../contracts/FiatToken.sol) is the implementation, the actual token will be a 
