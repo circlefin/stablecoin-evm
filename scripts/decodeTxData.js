@@ -10,6 +10,10 @@
 //  types: [ 'address', 'uint256' ],
 //  inputs: [ '9c08210cc65b5c9f1961cdbd9ea9bf017522464d', 1000000000 ] }
 const InputDataDecoder = require('ethereum-input-data-decoder')
+var fs = require('fs')
+var path = require('path')
+var mkdirp = require('mkdirp')
+
 var args = process.argv;
 
 var dataFlagIndex = args.indexOf("--data");
@@ -21,7 +25,7 @@ var FiatTokenVX = artifacts.require(contractName)
 var abi = FiatTokenVX.abi
 var decoder = new InputDataDecoder(abi)
 
-function decode() {
+async function decode() {
   result = decoder.decodeData(data)
     for (i = 0; i < result.inputs.length; i++) {
       // if the the type is object and corresponding type in type array is uint, try to parse it
@@ -30,6 +34,9 @@ function decode() {
       }
     }
   console.log(JSON.stringify(result))
+
+  mkdirp.sync('decoded_data')
+  fs.writeFileSync('decoded_data/' + data + '.json', JSON.stringify(result), 'utf8');
 }
 
 module.exports = async function(callback) {

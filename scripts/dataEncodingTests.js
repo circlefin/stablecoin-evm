@@ -1,6 +1,7 @@
 const assert = require('assert');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+var fs = require('fs')
 
 describe('transaction data encoding and decoding tests', function() {
   // disable timeouts
@@ -26,9 +27,10 @@ describe('transaction data encoding and decoding tests', function() {
       assert(stdout.includes("0x4e44d9560000000000000000000000009c08210cc65b5c9f1961cdbd9ea9bf017522464d000000000000000000000000000000000000000000000000000000003b9aca00"))
   })
 
-  it("td005 should decode a data string with the correct inputs for FiatTokenV1", async function () {
+  it("td005 should decode a data string and output decoded result to stdout stream", async function () {
     const { stdout, stderr } = await exec("truffle exec ./scripts/decodeTxData.js --contract FiatTokenV1 --data 0x4e44d9560000000000000000000000009c08210cc65b5c9f1961cdbd9ea9bf017522464d000000000000000000000000000000000000000000000000000000003b9aca00");
 
+    // trim extra output from truffle
     var bracketIndex = stdout.indexOf("{")
     var stdoutJson = stdout.substring(bracketIndex)
     var decodedData = JSON.parse(stdoutJson);
@@ -39,4 +41,14 @@ describe('transaction data encoding and decoding tests', function() {
     assert.equal(decodedData.inputs[1], "1000000000")
   })
 
+  it('td006 should decode a data string and output decoded result to a file', async function () {
+    await exec("truffle exec ./scripts/decodeTxData.js --contract FiatTokenV1 --data 0x4e44d9560000000000000000000000009c08210cc65b5c9f1961cdbd9ea9bf017522464d000000000000000000000000000000000000000000000000000000003b9aca00");
+    var decodedDataJson = fs.readFileSync('decoded_data/0x4e44d9560000000000000000000000009c08210cc65b5c9f1961cdbd9ea9bf017522464d000000000000000000000000000000000000000000000000000000003b9aca00.json');
+    var decodedData = JSON.parse(decodedDataJson);
+    assert.equal(decodedData.name, "configureMinter")
+    assert.equal(decodedData.types[0], "address")
+    assert.equal(decodedData.types[1], "uint256")
+    assert.equal(decodedData.inputs[0], "9c08210cc65b5c9f1961cdbd9ea9bf017522464d")
+    assert.equal(decodedData.inputs[1], "1000000000")
+  })
 })

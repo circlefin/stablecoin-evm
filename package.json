@@ -32,8 +32,10 @@
     "g": "^2.0.1",
     "ganache-cli": "6.1.0",
     "lodash": "^4.17.10",
+    "mkdirp": "^0.5.1",
     "npm": "^6.2.0",
     "openzeppelin-solidity": "1.11.0",
+    "path": "^0.12.7",
     "q": "^1.5.1",
     "zos-lib": "1.3.0"
   },
