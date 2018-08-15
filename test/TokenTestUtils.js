@@ -917,11 +917,6 @@ async function getInitializedV1(token) {
     return initialized;
 }
 
-async function newToken() {
-  var token = await FiatToken.new();
-  return token;
-}
-
 module.exports = {
     FiatToken: FiatToken,
     FiatTokenProxy: FiatTokenProxy,
@@ -997,6 +992,5 @@ module.exports = {
     masterMinterAccountPrivateKey,
     minterAccountPrivateKey,
     pauserAccountPrivateKey,
-    deployerAccountPrivateKey,
-    newToken
+    deployerAccountPrivateKey
 };

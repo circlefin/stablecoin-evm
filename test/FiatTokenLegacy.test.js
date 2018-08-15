@@ -677,9 +677,8 @@ async function run_tests(newToken, accounts) {
   });
 }
 
-contract('FiatToken_LegacyTests', async function (accounts) {
-  await run_tests(tokenUtils.newToken, accounts);
-});
+var testWrapper = require('./TestWrapper');
+testWrapper.execute('FiatToken_LegacyTests', run_tests);
 
 module.exports = {
   run_tests: run_tests,

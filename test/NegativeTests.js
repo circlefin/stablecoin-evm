@@ -32,7 +32,7 @@ var amount = 100;
 let longZero = 0x0000000000000000000000000000000000000000;
 let shortZero = 0x00;
 
-async function run_tests(newToken) {
+async function run_tests(newToken, accounts) {
 
   beforeEach('Make fresh token contract', async function () {
     rawToken = await newToken();
@@ -677,9 +677,8 @@ async function run_tests(newToken) {
   });
 }
 
-contract('FiatToken_NegativeTests', async function () {
-  await run_tests(tokenUtils.newToken);
-});
+var testWrapper = require('./TestWrapper');
+testWrapper.execute('FiatToken_NegativeTests', run_tests);
 
 module.exports = {
   run_tests: run_tests,
