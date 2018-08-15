@@ -1,23 +1,4 @@
 var tokenUtils = require('./TokenTestUtils');
-var positive_tests = require('./PositiveTests');
-var extended_positive_tests = require('./ExtendedPositiveTests');
-var negative_tests = require('./NegativeTests');
-var misc_tests = require('./MiscTests');
-var abi_tests = require('./ABITests.test');
-var legacy_tests = require('./FiatTokenLegacy.test');
-var proxy_positive_tests = require('./ProxyPositiveTests');
-var proxy_negative_tests = require('./ProxyNegativeTests');
-var events_tests = require('./EventsTests');
-
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
 var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 var FiatToken = tokenUtils.FiatToken;
 
@@ -34,78 +15,20 @@ async function newUpgradedToken() {
 	return token;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// Executes the run_tests_function using an original and
+// an upgraded token.  The test_suite_name is printed standard output.
+function execute(test_suite_name, run_tests_function) {
+    contract(test_suite_name, async function (accounts) {
+        await run_tests_function(newToken, accounts);
+    });
 
-// Run specific tests combos by commenting/uncommenting the contract blocks below.
+    contract(test_suite_name + " Upgraded", async function (accounts) {
+        await run_tests_function(newUpgradedToken, accounts);
+    });
 
-contract('FiatToken_ABIHackingTests', async function () {
-  await abi_tests.run_tests(newToken);
-});
+    return;
+}
 
-contract('FiatToken_ABIHackingTests_Upgraded', async function () {
-  await abi_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_PositiveTests', async function () {
-  await positive_tests.run_tests(newToken);
-});
-
-contract('FiatToken_PositiveTests_Upgraded', async function () {
-  await positive_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_ExtendedPositiveTests', async function () {
-  await extended_positive_tests.run_tests(newToken);
-});
-
-contract('FiatToken_ExtendedPositiveTests_Upgraded', async function () {
-  await extended_positive_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_NegativeTests', async function () {
-  await negative_tests.run_tests(newToken);
-});
-
-contract('FiatToken_NegativeTests_Upgraded', async function () {
-  await negative_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_MiscTests', async function () {
-  await misc_tests.run_tests(newToken);
-});
-
-contract('FiatToken_MiscTests_Upgraded', async function () {
-  await misc_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_ProxyPositiveTests', async function (accounts) {
-  await proxy_positive_tests.run_tests(newToken);
-});
-
-contract('FiatToken_ProxyPositiveTests_Upgraded', async function (accounts) {
-  await proxy_positive_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_ProxyNegativeTests', async function (accounts) {
-  await proxy_negative_tests.run_tests(newToken);
-});
-
-contract('FiatToken_ProxyNegativeTests_Upgraded', async function (accounts) {
-  await proxy_negative_tests.run_tests(newUpgradedToken);
-});
-
-contract('FiatToken_LegacyTests', async function (accounts) {
-  await legacy_tests.run_tests(newToken, accounts);
-});
-
-contract('FiatToken_LegacyTests_Upgraded', async function (accounts) {
-  await legacy_tests.run_tests(newUpgradedToken, accounts);
-});
-
-contract('FiatToken_EventTests', async function () {
-  await events_tests.run_tests(newToken);
-});
-
-contract('FiatToken_EventTests_Upgraded', async function () {
-  await events_tests.run_tests(newUpgradedToken);
-});
+module.exports = {
+    execute: execute
+}

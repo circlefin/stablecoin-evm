@@ -39,7 +39,7 @@ var checkTransferEvents = tokenUtils.checkTransferEvents;
 
 var amount = 100;
 
-async function run_tests(newToken) {
+async function run_tests(newToken, accounts) {
 
   beforeEach('Make fresh token contract', async function () {
       rawToken = await FiatToken.new();
@@ -145,6 +145,9 @@ async function run_tests(newToken) {
     checkTransferEvents(transferFrom, arbitraryAccount, blacklisterAccount, amount);
   });
 }
+
+var testWrapper = require('./TestWrapper');
+testWrapper.execute('FiatToken_EventTests', run_tests);
 
 module.exports = {
   run_tests: run_tests,

@@ -1,5 +1,4 @@
 var Tx = require('ethereumjs-tx');
-
 var tokenUtils = require('./TokenTestUtils');
 var FiatToken = tokenUtils.FiatToken;
 var name = tokenUtils.name;
@@ -57,7 +56,7 @@ function mockStringAddressEncode(methodName, address) {
     return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-async function run_tests(newToken) {
+async function run_tests(newToken, accounts) {
 
     beforeEach(async function checkBefore() {
         rawToken = await newToken();
@@ -282,8 +281,9 @@ async function run_tests(newToken) {
     });
 }
 
+var testWrapper = require('./TestWrapper');
+testWrapper.execute('FiatToken_ABIHackingTests', run_tests);
+
 module.exports = {
     run_tests: run_tests,
 }
-
-
