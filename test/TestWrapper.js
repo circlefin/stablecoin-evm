@@ -19,7 +19,7 @@ async function newUpgradedToken() {
 // an upgraded token.  The test_suite_name is printed standard output.
 function execute(test_suite_name, run_tests_function) {
     contract(test_suite_name, async function (accounts) {
-        await run_tests_function(newUpgradedToken, accounts);
+        await run_tests_function(newToken, accounts);
     });
 
     contract(test_suite_name + " Upgraded", async function (accounts) {
