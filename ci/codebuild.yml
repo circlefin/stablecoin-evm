@@ -45,6 +45,9 @@ Resources:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
         Image: !Ref ECRBuildImage
+        EnvironmentVariables:
+          - Name: FailedBuildTopic
+            Value: !Ref FailedBuildTopic
       ServiceRole: !Ref CodeBuildServiceRole
       Source:
         Type: GITHUB
@@ -93,3 +96,10 @@ Resources:
                 Action:
                   - "s3:PutObject*"
                 Resource: !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-${AWS::Region}*"
+
+  FailedBuildTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - { "Endpoint": "o6j1v0d5h5d8h5h7@circlefin.slack.com", "Protocol": "email" } # Slack notification
+      - { "Endpoint": "ohudson@circle.com", "Protocol": "email" } # Oliver's email
