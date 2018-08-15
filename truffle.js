@@ -1,7 +1,4 @@
-// INFURA Setup
-// Uncomment this code to enable validate/validate.js script
-// See validate/README.validate.md for more info
-/*
+// INFURA Setup - see validate/README.validate.md for more info
 var HDWalletProvider = require("truffle-hdwallet-provider"); // These keys will be used only for CALL
 var mnemonic = "talisman";
 var fs = require('fs');
@@ -11,7 +8,6 @@ try {
 } catch (err) {
     console.log("No Infura access token detected. Unit tests will still work.  See ./validate/README.validate.md for more details.")
 }
-*/
 
 module.exports = {
   networks: {
@@ -36,18 +32,14 @@ module.exports = {
       host: "ganache",
       port: 8545,
       network_id: "*" // Match any network id
-    }
-// INFURA Setup
-// Uncomment this code to enable validate/validate.js script
-// See validate/README.validate.md for more info
-/*    ,
+    },
+    // INFURA Setup
     infura_mainnet: {
       provider: function() {
          return new HDWalletProvider(mnemonic, "https://mainnet.infura.io/" + access_token)
       },
       network_id: 1
     }
-*/
   },
   mocha: {
     /*
