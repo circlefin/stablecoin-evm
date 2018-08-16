@@ -45,8 +45,8 @@ describe('transaction data encoding and decoding tests', function() {
   })
 
   it('td006 should decode a data string and output decoded result to a file', async function () {
-    await exec("truffle exec ./scripts/decodeTxData.js --contract FiatTokenV1 --data " + configureMinterData);
-    var decodedDataJson = fs.readFileSync('decoded_data/' + configureMinterData + '.json');
+    await exec("truffle exec ./scripts/decodeTxData.js --contract FiatTokenV1 --data " + configureMinterData + " --filename configureMinterTest");
+    var decodedDataJson = fs.readFileSync('decoded_data/configureMinterTest.json');
     var decodedData = JSON.parse(decodedDataJson);
     assert.equal(decodedData.name, "configureMinter")
     assert.equal(decodedData.types[0], "address")
