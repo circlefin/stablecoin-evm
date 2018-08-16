@@ -42,12 +42,13 @@ function decode() {
     }
 
   var decodedDataJson = JSON.stringify(result)
-  console.log(decodedDataJson)
 
   if (fileNameFlagIndex != -1) {
     fileName = args[fileNameFlagIndex + 1]
     mkdirp.sync('decoded_data')
     fs.writeFileSync('decoded_data/' + fileName + '.json', decodedDataJson, 'utf8');
+  } else {
+    console.log(decodedDataJson)
   }
 }
 
