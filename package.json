@@ -38,7 +38,6 @@
     "path": "^0.12.7",
     "q": "^1.5.1",
     "truffle-hdwallet-provider": "^0.0.6",
-    "web3": "^0.20.6",
     "zos-lib": "1.3.0"
   },
   "devDependencies": {
