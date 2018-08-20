@@ -14,8 +14,6 @@ const InputDataDecoder = require('ethereum-input-data-decoder')
 var fs = require('fs')
 var path = require('path')
 var mkdirp = require('mkdirp')
-var web3 = require('web3')
-
 var args = process.argv;
 
 var dataFlagIndex = args.indexOf("--data");
@@ -24,9 +22,15 @@ var contractNameFlagIndex = args.indexOf("--contract")
 var contractName = args[contractNameFlagIndex + 1]
 var fileNameFlagIndex = args.indexOf("--filename")
 
-var FiatTokenVX = artifacts.require(contractName)
-var abi = FiatTokenVX.abi
+var contract = artifacts.require(contractName)
+var abi = contract.abi
 var decoder = new InputDataDecoder(abi)
+
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('')
+}
 
 function decode() {
   result = decoder.decodeData(data)
@@ -36,11 +40,9 @@ function decode() {
         result.inputs[i] = result.inputs[i].toString()
       }
       if (result.types[i] == "bytes") {
-        result.inputs[i] = web3.utils.bytesToHex(result.inputs[i])
+        result.inputs[i] = toHexString(result.inputs[i])
       }
-
     }
-
   var decodedDataJson = JSON.stringify(result)
 
   if (fileNameFlagIndex != -1) {
