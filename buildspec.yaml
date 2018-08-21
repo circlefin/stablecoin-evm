@@ -16,12 +16,13 @@ phases:
       - npm test
   post_build:    
     commands:
-      - isPR=$(echo $CODEBUILD_SOURCE_VERSION | grep -c 'pr/')
-      - suceeded=$CODEBUILD_BUILD_SUCCEEDING
-      - if [ $isPR -ne 1 ] && [ $suceeded -ne 1 ]; then echo "Build failed in main repo -- sending notification"; aws sns publish --topic-arn ${FailedBuildTopic} --message "Build Notification - centre-tokens build failed!"; else echo "Build succeeded and/or PR build -- not sending notification"; fi
+      - isPR=$(echo $CODEBUILD_SOURCE_VERSION | grep -c 'pr/') || true
+      - succeeded=$CODEBUILD_BUILD_SUCCEEDING
+      - echo "isPR status:${isPR}"
+      - echo "succeeded status:${succeeded}"
+      - if [ $isPR -ne 1 ] && [ $succeeded -ne 1 ]; then echo "Build failed in main repo -- sending notification"; aws sns publish --topic-arn ${FailedBuildTopic} --message "Build Notification - centre-tokens build failed!"; else echo "Build succeeded and/or PR build -- not sending notification"; fi
 
 artifacts:
   files:
     - build/contracts/*
     - coverage/**/*
-    
