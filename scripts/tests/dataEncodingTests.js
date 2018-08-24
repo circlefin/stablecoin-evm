@@ -32,7 +32,7 @@ describe('transaction data encoding and decoding tests', function() {
   })
 
   it("td005 should decode a data string and output decoded result to stdout stream", async function () {
-    const { stdout, stderr } = await exec("truffle exec ./scripts/decodeTxData.js --contract FiatTokenV1 --data " + configureMinterData);
+    const { stdout, stderr } = await exec("truffle exec ./scripts/decodeTxData.js --truffle-artifact FiatTokenV1 --data " + configureMinterData);
 
     // trim extra output from truffle
     var bracketIndex = stdout.indexOf("{")
@@ -46,8 +46,8 @@ describe('transaction data encoding and decoding tests', function() {
   })
 
   it('td006 should decode a data string and output decoded result to a file', async function () {
-    await exec("truffle exec ./scripts/decodeTxData.js --contract FiatTokenV1 --data " + configureMinterData + " --filename configureMinterTest");
-    var decodedDataJson = fs.readFileSync('decoded_data/configureMinterTest.json');
+    await exec("truffle exec ./scripts/decodeTxData.js --truffle-artifact FiatTokenV1 --data " + configureMinterData + " --filename configureMinterTest");
+    var decodedDataJson = fs.readFileSync('./scripts/decoded_data/configureMinterTest.json');
     var decodedData = JSON.parse(decodedDataJson);
     assert.equal(decodedData.name, "configureMinter")
     assert.equal(decodedData.types[0], "address")
@@ -57,8 +57,23 @@ describe('transaction data encoding and decoding tests', function() {
   })
 
   it('td007 should decode a data string for FiatTokenProxy and its byte array input to a hex string', async function () {
-    await exec ("truffle exec scripts/decodeTxData.js --contract FiatTokenProxy --data " + upgradeToAndCallData + " --filename initV2Test")
-    var decodedDataJson = fs.readFileSync('decoded_data/initV2Test.json');
+    await exec ("truffle exec scripts/decodeTxData.js --truffle-artifact FiatTokenProxy --data " + upgradeToAndCallData + " --filename upgradeToAndCallTruffleTest")
+    var decodedDataJson = fs.readFileSync('./scripts/decoded_data/upgradeToAndCallTruffleTest.json');
+    var decodedData = JSON.parse(decodedDataJson);
+    assert.equal(decodedData.name, "upgradeToAndCall")
+    assert.equal(decodedData.types[0], "address")
+    assert.equal(decodedData.types[1], "bytes")
+    assert.equal(decodedData.inputs[0], "023fe1585d8361f0584aaa78c152f94cdcff7b30")
+    assert.equal(decodedData.inputs[1], initV2Data)
+  })
+
+  it('td008 should decode a data string using --abi-path', async function () {
+    fiatTokenProxyCompiled = fs.readFileSync("./build/contracts/FiatTokenProxy.json", "utf8");
+    fiatTokenProxyJson = JSON.parse(fiatTokenProxyCompiled)
+    fs.writeFileSync("./scripts/tests/FiatTokenProxy_abi.json", JSON.stringify(fiatTokenProxyJson.abi), 'utf8')
+
+    await exec ("cd scripts && node ./decodeTxData.js --abi-path ./tests/FiatTokenProxy_abi.json --data " + upgradeToAndCallData + " --filename upgradeToAndCallNodeTest")
+    var decodedDataJson = fs.readFileSync('./scripts/decoded_data/upgradeToAndCallNodeTest.json');
     var decodedData = JSON.parse(decodedDataJson);
     assert.equal(decodedData.name, "upgradeToAndCall")
     assert.equal(decodedData.types[0], "address")
