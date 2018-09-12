@@ -8,21 +8,21 @@ var debugLogging = false;
 var tokenUtils = require('./../TokenTestUtils');
 
 var Controller = artifacts.require('./../minting/Controller');
-var AccountUtils = require('./AccountUtils');
-var mcAccounts = AccountUtils.mcAccounts;
+var AccountUtils = require('./../AccountUtils');
+var Accounts = AccountUtils.Accounts;
 var setAccountDefault = AccountUtils.setAccountDefault;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
 
 // Default state of Controller when it is deployed
 var controllerEmptyState = {
-    'owner': mcAccounts.mintOwnerAccount,
-    'controllers': setAccountDefault(mcAccounts, "0x0000000000000000000000000000000000000000")
+    'owner': Accounts.mintOwnerAccount,
+    'controllers': setAccountDefault(Accounts, "0x0000000000000000000000000000000000000000")
 };
 
 // Checks the state of an array of controller contracts
 async function checkControllerState(controllers, customVars, ignoreExtraStateVariables) {
-    await checkState(controllers, customVars, controllerEmptyState, getActualControllerState, mcAccounts, ignoreExtraStateVariables);
+    await checkState(controllers, customVars, controllerEmptyState, getActualControllerState, Accounts, ignoreExtraStateVariables);
 }
 
 // Gets the actual state of the controller contract.
