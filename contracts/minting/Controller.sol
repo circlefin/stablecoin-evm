@@ -25,18 +25,18 @@ import './../Ownable.sol';
 
 /**
  * @title Controller
- * @dev Generic implementation of the owner-controller-minter model.
+ * @dev Generic implementation of the owner-controller-worker model.
  *
  */
 contract Controller is Ownable {
-    // controllers[controller]=minter
-    // The controller manages a single minter address.
+    // controllers[controller] = worker
+    // The controller manages a single worker address.
     mapping(address => address) public controllers;
 
-    event ControllerConfigured(address indexed _controller, address indexed _minter);
+    event ControllerConfigured(address indexed _controller, address indexed _worker);
 
     /**
-     * @dev ensure that the caller is the controller of a non-zero minter address
+     * @dev ensure that the caller is the controller of a non-zero worker address
      */
     modifier onlyController() {
         require(controllers[msg.sender] != address(0));
@@ -49,12 +49,14 @@ contract Controller is Ownable {
     // onlyOwner functions
 
     /**
-     * @dev set the controller of a particular _minter
+     * @dev set the controller of a particular _worker
      * To disable the controller, call configureController(_controller, address(0))
+     * Since a controller manages a single worker, assigning it address(0) is equivalent to
+     * removing _controller from the list of active controllers.
      */
-    function configureController(address _controller, address _minter) onlyOwner public returns (bool) {
-        controllers[_controller] = _minter;
-        emit ControllerConfigured(_controller, _minter);
+    function configureController(address _controller, address _worker) onlyOwner public returns (bool) {
+        controllers[_controller] = _worker;
+        emit ControllerConfigured(_controller, _worker);
         return true;
     }
 }

@@ -24,8 +24,8 @@ pragma solidity ^0.4.24;
 import './Controller.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-// make an interface instead of including FiatTokenV1 since
-// FiatTokenV1 will include a different impl of Ownable
+// Using an interface for managing minters so that MintController
+// can be used for managing minters with different contracts.
 interface MintableTokenInterface {
     function isMinter(address account) external view returns (bool);
     function minterAllowance(address minter) external view returns (uint256);
@@ -44,7 +44,9 @@ contract MintController is Controller {
     MintableTokenInterface public token;
 
     event TokenSet(address indexed oldToken, address indexed newToken);
-    event MinterModified(address indexed msgSender, address indexed minter);
+    event MinterConfigured(address indexed msgSender, address indexed minter, uint256 allowance);
+    event MinterRemoved(address indexed msgSender, address indexed minter);
+    event MinterAllowanceIncrement(address indexed msgSender, address indexed minter, uint256 increment, uint256 newAllowance);
 
     constructor(address _token) public {
         token =  MintableTokenInterface(_token);
@@ -68,7 +70,7 @@ contract MintController is Controller {
      */
     function removeMinter() onlyController public returns (bool) {
         address minter = controllers[msg.sender];
-        emit MinterModified(msg.sender, minter);
+        emit MinterRemoved(msg.sender, minter);
         return token.removeMinter(minter);
     }
 
@@ -77,22 +79,33 @@ contract MintController is Controller {
      */
     function configureMinter(uint256 newAllowance) onlyController public returns (bool) {
         address minter = controllers[msg.sender];
+        emit MinterConfigured(msg.sender, minter, newAllowance);
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
-    function incrementMinterAllowance(uint256 allowanceIncrement) onlyController public returns (bool) {
+     /**
+     * @dev Increases the minter allowance if and only if the minter is
+     * currently active. The controller can safely send a signed incrementMinterAllowance()
+     * transaction to a minter and not worry about it being used to undo a removeMinter()
+     * transaction.
+     */
+     function incrementMinterAllowance(uint256 allowanceIncrement) onlyController public returns (bool) {
         address minter = controllers[msg.sender];
         require(token.isMinter(minter));
 
         uint256 currentAllowance = token.minterAllowance(minter);
         uint256 newAllowance = currentAllowance.add(allowanceIncrement);
 
+        emit MinterAllowanceIncrement(msg.sender, minter, allowanceIncrement, newAllowance);
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
    // Internal functions
+
+    /**
+     * @dev Uses the MintableTokenInterface to enable the minter and set its allowance.
+     */
    function internal_setMinterAllowance(address minter, uint256 newAllowance) internal returns (bool) {
-        emit MinterModified(msg.sender, minter);
         return token.configureMinter(minter, newAllowance);
     }
 }
