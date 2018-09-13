@@ -7,7 +7,6 @@ var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var MintController = artifacts.require('./../minting/MintController');
 var AccountUtils = require('./../AccountUtils');
 var Accounts = AccountUtils.Accounts;
-var setAccountDefault = AccountUtils.setAccountDefault;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
 
@@ -20,7 +19,7 @@ var checkControllerState = ControllerUtils.checkControllerState;
 async function initializeTokenWithProxyAndMintController(rawToken) {
    var tokenConfig = await initializeTokenWithProxy(rawToken);
    var mintController = await MintController.new(tokenConfig.token.address, {from:Accounts.mintOwnerAccount});
-   await tokenConfig.token.updateMasterMinter(mintController.address, {from:tokenUtils.tokenOwnerAccount});
+   await tokenConfig.token.updateMasterMinter(mintController.address, {from:Accounts.tokenOwnerAccount});
     var tokenConfigWithMinter = {
         proxy: tokenConfig.proxy,
         token: tokenConfig.token,
