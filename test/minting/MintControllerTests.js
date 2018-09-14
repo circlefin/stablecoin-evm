@@ -5,8 +5,8 @@ var tokenUtils = require('./../TokenTestUtils');
 var checkVariables = tokenUtils.checkVariables;
 
 var mintUtils = require('./MintControllerUtils.js');
-var AccountUtils = require('./AccountUtils.js');
-var A = AccountUtils.mcAccounts;
+var AccountUtils = require('./../AccountUtils.js');
+var A = AccountUtils.Accounts;
 var initializeTokenWithProxyAndMintController = mintUtils.initializeTokenWithProxyAndMintController;
 var checkMintControllerState = mintUtils.checkMintControllerState;
 

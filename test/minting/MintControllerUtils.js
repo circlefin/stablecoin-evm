@@ -5,9 +5,8 @@ var tokenUtils = require('./../TokenTestUtils');
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
 var MintController = artifacts.require('./../minting/MintController');
-var AccountUtils = require('./AccountUtils');
-var mcAccounts = AccountUtils.mcAccounts;
-var setAccountDefault = AccountUtils.setAccountDefault;
+var AccountUtils = require('./../AccountUtils');
+var Accounts = AccountUtils.Accounts;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
 
@@ -19,8 +18,8 @@ var checkControllerState = ControllerUtils.checkControllerState;
 // Uses the same workflow we would do in production - first deploy FiatToken then set the masterMinter.
 async function initializeTokenWithProxyAndMintController(rawToken) {
    var tokenConfig = await initializeTokenWithProxy(rawToken);
-   var mintController = await MintController.new(tokenConfig.token.address, {from:mcAccounts.mintOwnerAccount});
-   await tokenConfig.token.updateMasterMinter(mintController.address, {from:tokenUtils.tokenOwnerAccount});
+   var mintController = await MintController.new(tokenConfig.token.address, {from:Accounts.mintOwnerAccount});
+   await tokenConfig.token.updateMasterMinter(mintController.address, {from:Accounts.tokenOwnerAccount});
     var tokenConfigWithMinter = {
         proxy: tokenConfig.proxy,
         token: tokenConfig.token,
@@ -37,7 +36,7 @@ var mintControllerEmptyState = {
 // Checks the state of the mintController contract
 async function checkMintControllerState(mintControllers, customVars) {
     await checkControllerState(mintControllers, customVars, true);
-    await checkState(mintControllers, customVars, mintControllerEmptyState, getActualMintControllerState, mcAccounts, true);
+    await checkState(mintControllers, customVars, mintControllerEmptyState, getActualMintControllerState, Accounts, true);
 }
 
 

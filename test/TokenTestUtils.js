@@ -18,35 +18,9 @@ var UpgradedFiatTokenNewFields = artifacts.require('FiatTokenV2NewFieldsTest');
 var UpgradedFiatTokenNewFieldsNewLogic = artifacts.require('FiatTokenV2NewFieldsNewLogicTest');
 var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 
+var AccountUtils = require('./AccountUtils');
+var Accounts = AccountUtils.Accounts;
 // TODO: test really big numbers  Does this still have to be done??
-
-var deployerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
-var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
-var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
-var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
-var arbitraryAccount2 = "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc"; // accounts[5]
-var masterMinterAccount = "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9"; // accounts[6]
-var minterAccount = "0x28a8746e75304c0780e011bed21c72cd78cd535e"; // accounts[7]
-var pauserAccount = "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e"; // accounts[8]
-//var blacklisterAccount = "0x1df62f291b2e969fb0849d99d9ce41e2f137006e"; // accounts[9]
-
-var proxyOwnerAccount = "0x2f560290fef1b3ada194b6aa9c40aa71f8e95598"; // accounts[14]
-var upgraderAccount = proxyOwnerAccount; // accounts[14]
-
-var deployerAccountPrivateKey = "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
-var arbitraryAccountPrivateKey = "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-var upgraderAccountPrivateKey = "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c"; // accounts[2]
-var proxyOwnerAccountPrivateKey = "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46;" //accounts[14]
-var tokenOwnerPrivateKey = "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
-var blacklisterAccountPrivateKey = "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
-var arbitraryAccount2PrivateKey = "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd"; // accounts[5]
-var masterMinterAccountPrivateKey = "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"; // accounts[6]
-var minterAccountPrivateKey = "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"; // accounts[7]
-var pauserAccountPrivateKey = "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9]
-var proxyOwnerAccountPrivateKey = "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46"; // accounts[14]
-var upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
-//var blacklisterAccountPrivateKey = "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
 
 var adminSlot = "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
 var implSlot = "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3";
@@ -200,13 +174,13 @@ function buildExpectedState(token, customVars) {
         'symbol': symbol,
         'currency': currency,
         'decimals': new BigNumber(decimals),
-        'masterMinter': masterMinterAccount,
-        'pauser': pauserAccount,
-        'blacklister': blacklisterAccount,
-        'tokenOwner': tokenOwnerAccount,
+        'masterMinter': Accounts.masterMinterAccount,
+        'pauser': Accounts.pauserAccount,
+        'blacklister': Accounts.blacklisterAccount,
+        'tokenOwner': Accounts.tokenOwnerAccount,
         'proxiedTokenAddress': token.proxiedTokenAddress,
         'initializedV1': trueInStorageFormat,
-        'upgrader': proxyOwnerAccount,
+        'upgrader': Accounts.proxyOwnerAccount,
         'balances': {
             'arbitraryAccount': bigZero,
             'masterMinterAccount': bigZero,
@@ -350,7 +324,7 @@ async function checkVariables(_tokens, _customVars) {
         assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
 
         // Check that sum of individual balances equals totalSupply
-        var accounts = [arbitraryAccount, masterMinterAccount, minterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount, upgraderAccount];
+        var accounts = [Accounts.arbitraryAccount, Accounts.masterMinterAccount, Accounts.minterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, Accounts.upgraderAccount];
         var balanceSum = bigZero;
         var x;
         for (x = 0; x < accounts.length; x++) {
@@ -375,84 +349,84 @@ async function getActualState(token) {
         await getImplementation(token),
         await getAdmin(token),
         await getInitializedV1(token),
-        await token.balanceOf(arbitraryAccount),
-        await token.balanceOf(masterMinterAccount),
-        await token.balanceOf(minterAccount),
-        await token.balanceOf(pauserAccount),
-        await token.balanceOf(blacklisterAccount),
-        await token.balanceOf(tokenOwnerAccount),
-        await token.balanceOf(upgraderAccount),
-        await token.allowance(arbitraryAccount, masterMinterAccount),
-        await token.allowance(arbitraryAccount, minterAccount),
-        await token.allowance(arbitraryAccount, pauserAccount),
-        await token.allowance(arbitraryAccount, blacklisterAccount),
-        await token.allowance(arbitraryAccount, tokenOwnerAccount),
-        await token.allowance(arbitraryAccount, arbitraryAccount),
-        await token.allowance(arbitraryAccount, upgraderAccount),
-        await token.allowance(masterMinterAccount, arbitraryAccount),
-        await token.allowance(masterMinterAccount, minterAccount),
-        await token.allowance(masterMinterAccount, pauserAccount),
-        await token.allowance(masterMinterAccount, blacklisterAccount),
-        await token.allowance(masterMinterAccount, tokenOwnerAccount),
-        await token.allowance(masterMinterAccount, masterMinterAccount),
-        await token.allowance(masterMinterAccount, upgraderAccount),
-        await token.allowance(minterAccount, arbitraryAccount),
-        await token.allowance(minterAccount, masterMinterAccount),
-        await token.allowance(minterAccount, pauserAccount),
-        await token.allowance(minterAccount, blacklisterAccount),
-        await token.allowance(minterAccount, tokenOwnerAccount),
-        await token.allowance(minterAccount, minterAccount),
-        await token.allowance(minterAccount, upgraderAccount),
-        await token.allowance(pauserAccount, arbitraryAccount),
-        await token.allowance(pauserAccount, masterMinterAccount),
-        await token.allowance(pauserAccount, minterAccount),
-        await token.allowance(pauserAccount, blacklisterAccount),
-        await token.allowance(pauserAccount, tokenOwnerAccount),
-        await token.allowance(pauserAccount, pauserAccount),
-        await token.allowance(pauserAccount, upgraderAccount),
-        await token.allowance(blacklisterAccount, arbitraryAccount),
-        await token.allowance(blacklisterAccount, masterMinterAccount),
-        await token.allowance(blacklisterAccount, minterAccount),
-        await token.allowance(blacklisterAccount, pauserAccount),
-        await token.allowance(blacklisterAccount, tokenOwnerAccount),
-        await token.allowance(blacklisterAccount, blacklisterAccount),
-        await token.allowance(blacklisterAccount, upgraderAccount),
-        await token.allowance(tokenOwnerAccount, arbitraryAccount),
-        await token.allowance(tokenOwnerAccount, masterMinterAccount),
-        await token.allowance(tokenOwnerAccount, minterAccount),
-        await token.allowance(tokenOwnerAccount, pauserAccount),
-        await token.allowance(tokenOwnerAccount, blacklisterAccount),
-        await token.allowance(tokenOwnerAccount, tokenOwnerAccount),
-        await token.allowance(tokenOwnerAccount, upgraderAccount),
-        await token.allowance(upgraderAccount, arbitraryAccount),
-        await token.allowance(upgraderAccount, masterMinterAccount),
-        await token.allowance(upgraderAccount, minterAccount),
-        await token.allowance(upgraderAccount, pauserAccount),
-        await token.allowance(upgraderAccount, blacklisterAccount),
-        await token.allowance(upgraderAccount, tokenOwnerAccount),
-        await token.allowance(upgraderAccount, upgraderAccount),
+        await token.balanceOf(Accounts.arbitraryAccount),
+        await token.balanceOf(Accounts.masterMinterAccount),
+        await token.balanceOf(Accounts.minterAccount),
+        await token.balanceOf(Accounts.pauserAccount),
+        await token.balanceOf(Accounts.blacklisterAccount),
+        await token.balanceOf(Accounts.tokenOwnerAccount),
+        await token.balanceOf(Accounts.upgraderAccount),
+        await token.allowance(Accounts.arbitraryAccount, Accounts.masterMinterAccount),
+        await token.allowance(Accounts.arbitraryAccount, Accounts.minterAccount),
+        await token.allowance(Accounts.arbitraryAccount, Accounts.pauserAccount),
+        await token.allowance(Accounts.arbitraryAccount, Accounts.blacklisterAccount),
+        await token.allowance(Accounts.arbitraryAccount, Accounts.tokenOwnerAccount),
+        await token.allowance(Accounts.arbitraryAccount, Accounts.arbitraryAccount),
+        await token.allowance(Accounts.arbitraryAccount, Accounts.upgraderAccount),
+        await token.allowance(Accounts.masterMinterAccount, Accounts.arbitraryAccount),
+        await token.allowance(Accounts.masterMinterAccount, Accounts.minterAccount),
+        await token.allowance(Accounts.masterMinterAccount, Accounts.pauserAccount),
+        await token.allowance(Accounts.masterMinterAccount, Accounts.blacklisterAccount),
+        await token.allowance(Accounts.masterMinterAccount, Accounts.tokenOwnerAccount),
+        await token.allowance(Accounts.masterMinterAccount, Accounts.masterMinterAccount),
+        await token.allowance(Accounts.masterMinterAccount, Accounts.upgraderAccount),
+        await token.allowance(Accounts.minterAccount, Accounts.arbitraryAccount),
+        await token.allowance(Accounts.minterAccount, Accounts.masterMinterAccount),
+        await token.allowance(Accounts.minterAccount, Accounts.pauserAccount),
+        await token.allowance(Accounts.minterAccount, Accounts.blacklisterAccount),
+        await token.allowance(Accounts.minterAccount, Accounts.tokenOwnerAccount),
+        await token.allowance(Accounts.minterAccount, Accounts.minterAccount),
+        await token.allowance(Accounts.minterAccount, Accounts.upgraderAccount),
+        await token.allowance(Accounts.pauserAccount, Accounts.arbitraryAccount),
+        await token.allowance(Accounts.pauserAccount, Accounts.masterMinterAccount),
+        await token.allowance(Accounts.pauserAccount, Accounts.minterAccount),
+        await token.allowance(Accounts.pauserAccount, Accounts.blacklisterAccount),
+        await token.allowance(Accounts.pauserAccount, Accounts.tokenOwnerAccount),
+        await token.allowance(Accounts.pauserAccount, Accounts.pauserAccount),
+        await token.allowance(Accounts.pauserAccount, Accounts.upgraderAccount),
+        await token.allowance(Accounts.blacklisterAccount, Accounts.arbitraryAccount),
+        await token.allowance(Accounts.blacklisterAccount, Accounts.masterMinterAccount),
+        await token.allowance(Accounts.blacklisterAccount, Accounts.minterAccount),
+        await token.allowance(Accounts.blacklisterAccount, Accounts.pauserAccount),
+        await token.allowance(Accounts.blacklisterAccount, Accounts.tokenOwnerAccount),
+        await token.allowance(Accounts.blacklisterAccount, Accounts.blacklisterAccount),
+        await token.allowance(Accounts.blacklisterAccount, Accounts.upgraderAccount),
+        await token.allowance(Accounts.tokenOwnerAccount, Accounts.arbitraryAccount),
+        await token.allowance(Accounts.tokenOwnerAccount, Accounts.masterMinterAccount),
+        await token.allowance(Accounts.tokenOwnerAccount, Accounts.minterAccount),
+        await token.allowance(Accounts.tokenOwnerAccount, Accounts.pauserAccount),
+        await token.allowance(Accounts.tokenOwnerAccount, Accounts.blacklisterAccount),
+        await token.allowance(Accounts.tokenOwnerAccount, Accounts.tokenOwnerAccount),
+        await token.allowance(Accounts.tokenOwnerAccount, Accounts.upgraderAccount),
+        await token.allowance(Accounts.upgraderAccount, Accounts.arbitraryAccount),
+        await token.allowance(Accounts.upgraderAccount, Accounts.masterMinterAccount),
+        await token.allowance(Accounts.upgraderAccount, Accounts.minterAccount),
+        await token.allowance(Accounts.upgraderAccount, Accounts.pauserAccount),
+        await token.allowance(Accounts.upgraderAccount, Accounts.blacklisterAccount),
+        await token.allowance(Accounts.upgraderAccount, Accounts.tokenOwnerAccount),
+        await token.allowance(Accounts.upgraderAccount, Accounts.upgraderAccount),
         await token.totalSupply(),
-        await token.isBlacklisted(arbitraryAccount),
-        await token.isBlacklisted(masterMinterAccount),
-        await token.isBlacklisted(minterAccount),
-        await token.isBlacklisted(pauserAccount),
-        await token.isBlacklisted(blacklisterAccount),
-        await token.isBlacklisted(tokenOwnerAccount),
-        await token.isBlacklisted(upgraderAccount),
-        await token.isMinter(arbitraryAccount),
-        await token.isMinter(masterMinterAccount),
-        await token.isMinter(minterAccount),
-        await token.isMinter(pauserAccount),
-        await token.isMinter(blacklisterAccount),
-        await token.isMinter(tokenOwnerAccount),
-        await token.isMinter(upgraderAccount),
-        await token.minterAllowance(arbitraryAccount),
-        await token.minterAllowance(masterMinterAccount),
-        await token.minterAllowance(minterAccount),
-        await token.minterAllowance(pauserAccount),
-        await token.minterAllowance(blacklisterAccount),
-        await token.minterAllowance(tokenOwnerAccount),
-        await token.minterAllowance(upgraderAccount),
+        await token.isBlacklisted(Accounts.arbitraryAccount),
+        await token.isBlacklisted(Accounts.masterMinterAccount),
+        await token.isBlacklisted(Accounts.minterAccount),
+        await token.isBlacklisted(Accounts.pauserAccount),
+        await token.isBlacklisted(Accounts.blacklisterAccount),
+        await token.isBlacklisted(Accounts.tokenOwnerAccount),
+        await token.isBlacklisted(Accounts.upgraderAccount),
+        await token.isMinter(Accounts.arbitraryAccount),
+        await token.isMinter(Accounts.masterMinterAccount),
+        await token.isMinter(Accounts.minterAccount),
+        await token.isMinter(Accounts.pauserAccount),
+        await token.isMinter(Accounts.blacklisterAccount),
+        await token.isMinter(Accounts.tokenOwnerAccount),
+        await token.isMinter(Accounts.upgraderAccount),
+        await token.minterAllowance(Accounts.arbitraryAccount),
+        await token.minterAllowance(Accounts.masterMinterAccount),
+        await token.minterAllowance(Accounts.minterAccount),
+        await token.minterAllowance(Accounts.pauserAccount),
+        await token.minterAllowance(Accounts.blacklisterAccount),
+        await token.minterAllowance(Accounts.tokenOwnerAccount),
+        await token.minterAllowance(Accounts.upgraderAccount),
         await token.paused()
     ]).spread(function (
         name,
@@ -667,7 +641,7 @@ async function getActualState(token) {
 }
 
 async function setMinter(token, minter, amount) {
-    let update = await token.configureMinter(minter, amount, { from: masterMinterAccount });
+    let update = await token.configureMinter(minter, amount, { from: Accounts.masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterConfigured');
     assert.equal(update.logs[0].args.minter, minter);
     assert.equal(update.logs[0].args.minterAllowedAmount, amount);
@@ -700,12 +674,12 @@ async function mintRaw(token, to, amount, minter) {
 }
 
 async function blacklist(token, account) {
-    let blacklist = await token.blacklist(account, { from: blacklisterAccount });
+    let blacklist = await token.blacklist(account, { from: Accounts.blacklisterAccount });
     checkBlacklistEvent(blacklist, account);
 }
 
 async function unBlacklist(token, account) {
-    let unblacklist = await token.unBlacklist(account, { from: blacklisterAccount });
+    let unblacklist = await token.unBlacklist(account, { from: Accounts.blacklisterAccount });
     checkUnblacklistEvent(unblacklist, account);
 }
 
@@ -818,11 +792,11 @@ function validateTransferEvent(transferEvent, from, to, value) {
 }
 
 async function initializeTokenWithProxy(rawToken) {
-    return customInitializeTokenWithProxy(rawToken, masterMinterAccount, pauserAccount, blacklisterAccount, tokenOwnerAccount);
+    return customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount);
 }
 
 async function customInitializeTokenWithProxy(rawToken, _masterMinter, _pauser, _blacklister, _owner) {
-    const proxy = await FiatTokenProxy.new(rawToken.address, { from: proxyOwnerAccount })
+    const proxy = await FiatTokenProxy.new(rawToken.address, { from: Accounts.proxyOwnerAccount })
     proxiedToken = await FiatToken.at(proxy.address);
     await proxiedToken.initialize(name, symbol, currency, decimals, _masterMinter, _pauser, _blacklister, _owner);
     proxiedToken.proxiedTokenAddress = rawToken.address;
@@ -838,7 +812,7 @@ async function customInitializeTokenWithProxy(rawToken, _masterMinter, _pauser, 
 
 async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
     if (proxyUpgraderAccount == null) {
-        proxyUpgraderAccount = proxyOwnerAccount;
+        proxyUpgraderAccount = Accounts.proxyOwnerAccount;
     }
     await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
     proxiedToken = await FiatToken.at(proxy.address);
@@ -971,26 +945,5 @@ module.exports = {
     expectJump: expectJump,
     encodeCall: encodeCall,
     getInitializedV1: getInitializedV1,
-    deployerAccount: deployerAccount,
-    arbitraryAccount: arbitraryAccount,
-    tokenOwnerAccount: tokenOwnerAccount,
-    arbitraryAccount2: arbitraryAccount2,
-    masterMinterAccount: masterMinterAccount,
-    minterAccount: minterAccount,
-    pauserAccount: pauserAccount,
-    blacklisterAccount: blacklisterAccount,
-    proxyOwnerAccount: proxyOwnerAccount,
-    proxyOwnerAccountPrivateKey: proxyOwnerAccountPrivateKey,
-    upgraderAccount: upgraderAccount,
     getAdmin: getAdmin,
-    arbitraryAccountPrivateKey,
-    upgraderAccountPrivateKey,
-    proxyOwnerAccountPrivateKey,
-    tokenOwnerPrivateKey,
-    blacklisterAccountPrivateKey,
-    arbitraryAccount2PrivateKey,
-    masterMinterAccountPrivateKey,
-    minterAccountPrivateKey,
-    pauserAccountPrivateKey,
-    deployerAccountPrivateKey
 };
