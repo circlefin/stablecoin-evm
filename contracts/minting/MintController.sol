@@ -26,7 +26,7 @@ import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 // Using an interface for managing minters so that MintController
 // can be used for managing minters with different contracts.
-interface MintableTokenInterface {
+interface MinterManagementInterface {
     function isMinter(address account) external view returns (bool);
     function minterAllowance(address minter) external view returns (uint256);
     function configureMinter(address minter, uint256 minterAllowedAmount) external returns (bool);
@@ -41,25 +41,25 @@ interface MintableTokenInterface {
 contract MintController is Controller {
     using SafeMath for uint256;
 
-    MintableTokenInterface public token;
+    MinterManagementInterface public minterManager;
 
-    event TokenSet(address indexed oldToken, address indexed newToken);
+    event MinterManagerSet(address indexed oldMinterManager, address indexed newMinterManager);
     event MinterConfigured(address indexed msgSender, address indexed minter, uint256 allowance);
     event MinterRemoved(address indexed msgSender, address indexed minter);
     event MinterAllowanceIncrement(address indexed msgSender, address indexed minter, uint256 increment, uint256 newAllowance);
 
-    constructor(address _token) public {
-        token =  MintableTokenInterface(_token);
+    constructor(address _minterManager) public {
+        minterManager =  MinterManagementInterface(_minterManager);
     }
 
     // onlyOwner functions
 
     /**
-     * @dev sets the token
+     * @dev sets the minterManager
      */
-    function setToken(address _newToken) onlyOwner public returns (bool) {
-        emit TokenSet(token, _newToken);
-        token = MintableTokenInterface(_newToken);
+    function setMinterManager(address _newMinterManager) onlyOwner public returns (bool) {
+        emit MinterManagerSet(minterManager, _newMinterManager);
+        minterManager = MinterManagementInterface(_newMinterManager);
         return true;
     }
 
@@ -71,7 +71,7 @@ contract MintController is Controller {
     function removeMinter() onlyController public returns (bool) {
         address minter = controllers[msg.sender];
         emit MinterRemoved(msg.sender, minter);
-        return token.removeMinter(minter);
+        return minterManager.removeMinter(minter);
     }
 
     /**
@@ -91,9 +91,9 @@ contract MintController is Controller {
      */
      function incrementMinterAllowance(uint256 allowanceIncrement) onlyController public returns (bool) {
         address minter = controllers[msg.sender];
-        require(token.isMinter(minter));
+        require(minterManager.isMinter(minter));
 
-        uint256 currentAllowance = token.minterAllowance(minter);
+        uint256 currentAllowance = minterManager.minterAllowance(minter);
         uint256 newAllowance = currentAllowance.add(allowanceIncrement);
 
         emit MinterAllowanceIncrement(msg.sender, minter, allowanceIncrement, newAllowance);
@@ -103,9 +103,9 @@ contract MintController is Controller {
    // Internal functions
 
     /**
-     * @dev Uses the MintableTokenInterface to enable the minter and set its allowance.
+     * @dev Uses the MinterManagementInterface to enable the minter and set its allowance.
      */
    function internal_setMinterAllowance(address minter, uint256 newAllowance) internal returns (bool) {
-        return token.configureMinter(minter, newAllowance);
+        return minterManager.configureMinter(minter, newAllowance);
     }
 }

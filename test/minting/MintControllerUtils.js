@@ -30,7 +30,7 @@ async function initializeTokenWithProxyAndMintController(rawToken) {
 
 // Default state of MintController when it is deployed
 var mintControllerEmptyState = {
-    'token' : bigZero,
+    'minterManager' : bigZero,
 };
 
 // Checks the state of the mintController contract
@@ -44,7 +44,7 @@ async function checkMintControllerState(mintControllers, customVars) {
 // Evaluates all mappings on the provided accounts.
 async function getActualMintControllerState(mintController, accounts) {
     return {
-        'token': await mintController.token.call()
+        'minterManager': await mintController.minterManager.call()
     };
 }
 
