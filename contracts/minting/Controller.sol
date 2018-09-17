@@ -34,6 +34,7 @@ contract Controller is Ownable {
     mapping(address => address) public controllers;
 
     event ControllerConfigured(address indexed _controller, address indexed _worker);
+    event ControllerRemoved(address indexed _controller);
 
     /**
      * @dev ensure that the caller is the controller of a non-zero worker address
@@ -57,6 +58,15 @@ contract Controller is Ownable {
     function configureController(address _controller, address _worker) onlyOwner public returns (bool) {
         controllers[_controller] = _worker;
         emit ControllerConfigured(_controller, _worker);
+        return true;
+    }
+
+    /**
+     * @dev disables a controller by setting its worker to address(0);
+     */
+    function removeController(address _controller) onlyOwner public returns (bool) {
+        controllers[_controller] = address(0);
+        emit ControllerRemoved(_controller);
         return true;
     }
 }

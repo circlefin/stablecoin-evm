@@ -52,6 +52,26 @@ async function run_tests(newToken, accounts) {
         await expectRevert(mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.minterAccount}));
    });
 
+    it('remove controller', async function () {
+        var amount = 5000;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        customState = {
+            'token': token.address,
+            'controllers': {'controller1Account': Accounts.minterAccount }
+        }
+        await checkMintControllerState([mintController], [customState]);
+
+        await mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount});
+        customState = {
+             'token': token.address
+        };
+        await checkMintControllerState([mintController], [customState]);
+    });
+
+    it('only owner can remove controller', async function () {
+         await expectRevert(mintController.removeController(Accounts.controller1Account, {from: Accounts.minterAccount}));
+    });
+
    it('sets token', async function () {
         await mintController.setMinterManager(mintController.address, {from: Accounts.mintOwnerAccount});
    });
