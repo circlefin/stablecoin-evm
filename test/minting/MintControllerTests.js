@@ -56,14 +56,14 @@ async function run_tests(newToken, accounts) {
         var amount = 5000;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         customState = {
-            'token': token.address,
+            'minterManager': token.address,
             'controllers': {'controller1Account': Accounts.minterAccount }
         }
         await checkMintControllerState([mintController], [customState]);
 
         await mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount});
         customState = {
-             'token': token.address
+             'minterManager': token.address
         };
         await checkMintControllerState([mintController], [customState]);
     });
