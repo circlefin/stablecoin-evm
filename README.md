@@ -27,7 +27,7 @@ to generate test coverage on all tests run:
 
 # Contracts
 The implementation uses 2 separate contracts - a proxy contract (`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`).
-This allows upgrading the contract, as a new implentation contact can be deployed and the Proxy updated to point to it.
+This allows upgrading the contract, as a new implementation contact can be deployed and the Proxy updated to point to it.
 ## FiatToken
 The FiatToken offers a number of capabilities, which briefly are described below. There are more
 [detailed design docs](./doc/tokendesign.md) in the `doc` folder.
