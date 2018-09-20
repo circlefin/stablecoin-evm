@@ -18,6 +18,8 @@ function ControllerState(owner, controllers) {
     this.owner = owner;
     this.controllers = controllers;
     this.checkState = checkControllerState;
+    this.checkState = async function(controllerContract) {await checkControllerState(controllerContract, this)};
+    this.clone = function(){return new ControllerState(this.owner, AccountUtils.cloneState(this.controllers))};
 }
 
 // Default state of Controller when it is deployed

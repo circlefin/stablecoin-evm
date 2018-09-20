@@ -34,9 +34,8 @@ async function checkMintControllerState(mintController, customState) {
 // Gets the actual state of the mintController contract.
 // Evaluates all mappings on the provided accounts.
 async function getActualMintControllerState(mintController, accounts) {
-    return {
-        'minterManager': await mintController.minterManager.call()
-    };
+    var minterManager = await mintController.minterManager.call();
+    return new MintControllerState(null, {}, minterManager);
 }
 
 // Deploys a FiatTokenV1 with a MintController contract as the masterMinter.
