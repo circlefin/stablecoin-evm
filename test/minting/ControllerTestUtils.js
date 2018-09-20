@@ -14,11 +14,16 @@ var setAccountDefault = AccountUtils.setAccountDefault;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
 
+var ControllerState(owner, controllers) {
+    this.owner = owner;
+    this.controllers = controllers;
+    this.checkState = checkControllerState;
+}
+
 // Default state of Controller when it is deployed
-var controllerEmptyState = {
-    'owner': Accounts.mintOwnerAccount,
-    'controllers': setAccountDefault(Accounts, "0x0000000000000000000000000000000000000000")
-};
+var controllerEmptyState = ControllerState(
+    Accounts.mintOwnerAccount,
+    setAccountDefault(Accounts, "0x0000000000000000000000000000000000000000"));
 
 // Checks the state of an array of controller contracts
 async function checkControllerState(controllers, customVars, ignoreExtraStateVariables) {
