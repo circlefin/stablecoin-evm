@@ -60,7 +60,7 @@ function cloneState(state) {
     var clone = {};
     for (var attr in state) {
         var attrValue = state[attr];
-        if(isLiteral(attrValue)) {
+        if(typeof(attrValue) != 'object') {
             clone[attr] = state[attr];
         } else {
             clone[attr] = cloneState(attrValue);
@@ -143,15 +143,30 @@ function isLiteral(object) {
 
 // Turns a simple literal object into a printable string
 function logObject(object) {
-    var output = '';
+    internal_logObject(object, 0);
+}
+
+function internal_logObject(object, stackHeight){
+    if(stackHeight > 2) return;
+
     for (var property in object) {
-        if(isLiteral(object[property])) {
-            output += property + ':\n' + logObject(object[property]);
+        var value = object[property];
+        if(typeof(value) == 'function') {
+          console.log("function " + property + "\n");
+        } else if(Array.isArray(value)) {
+          console.log("array " + property);
+          logObject(value);
+        } else if(typeof(value) == 'object') {
+            if(value == null) console.log("object: " + null);
+            else if(value._isBigNumber) console.log("BigNum: " + value );
+            else {
+              console.log("object " + property + ':\n');
+              logObject(value);
+            }
         } else {
-            output += property + ': ' + object[property]+';\n ';
+            console.log("value " + property + ': ' + value+';\n ');
         }
     }
-    return output;
 }
 
 module.exports = {
