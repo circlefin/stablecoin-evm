@@ -315,23 +315,28 @@ async function checkVariables(_tokens, _customVars) {
     for (n = 0; n < numTokens; n++) {
         var token = _tokens[n];
         var customVars = _customVars[n];
-        let expectedState = buildExpectedState(token, customVars);
-        if (debugLogging) {
-            console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
-        }
 
-        let actualState = await getActualState(token);
-        assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
+        if(! Array.isArray(customVars)) {
+            await customVars.checkState(token);
+        } else {
+            let expectedState = buildExpectedState(token, customVars);
+            if (debugLogging) {
+                console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
+            }
 
-        // Check that sum of individual balances equals totalSupply
-        var accounts = [Accounts.arbitraryAccount, Accounts.masterMinterAccount, Accounts.minterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, Accounts.upgraderAccount];
-        var balanceSum = bigZero;
-        var x;
-        for (x = 0; x < accounts.length; x++) {
-            balanceSum = balanceSum.plus(new BigNumber(await token.balanceOf(accounts[x])));
+            let actualState = await getActualState(token);
+            assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
+
+            // Check that sum of individual balances equals totalSupply
+            var accounts = [Accounts.arbitraryAccount, Accounts.masterMinterAccount, Accounts.minterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, Accounts.upgraderAccount];
+            var balanceSum = bigZero;
+            var x;
+            for (x = 0; x < accounts.length; x++) {
+                balanceSum = balanceSum.plus(new BigNumber(await token.balanceOf(accounts[x])));
+            }
+            var totalSupply = new BigNumber(await token.totalSupply())
+            assert(balanceSum.isEqualTo(totalSupply));
         }
-        var totalSupply = new BigNumber(await token.totalSupply())
-        assert(balanceSum.isEqualTo(totalSupply));
     }
 }
 
