@@ -11,18 +11,12 @@ var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
 var decimals = tokenUtils.decimals;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var upgraderAccount = tokenUtils.upgraderAccount;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var minterAccount = tokenUtils.minterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
+
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var FiatToken = tokenUtils.FiatToken;
+
+var AccountUtils = require('./AccountUtils');
+var Accounts = AccountUtils.Accounts;
 
 var amount = 100;
 
@@ -43,23 +37,23 @@ async function run_tests(newToken, accounts) {
   // Pause and Unpause
 
   it('pt011 should pause and set paused to true', async function () {
-    await token.pause({ from: pauserAccount });
+    await token.pause({ from: Accounts.pauserAccount });
     var customVars = [{ 'variable': 'paused', 'expectedValue': true }];
     await checkVariables([token], [customVars]);
   });
 
   it('pt006 should unpause and set paused to false', async function () {
-    await token.pause({ from: pauserAccount });
+    await token.pause({ from: Accounts.pauserAccount });
     var customVars = [{ 'variable': 'paused', 'expectedValue': true }];
     await checkVariables([token], [customVars]);
-    await token.unpause({ from: pauserAccount });
+    await token.unpause({ from: Accounts.pauserAccount });
     await checkVariables([token], [[]]);
   });
 
   // Approve
 
   it('pt020 should approve a spend and set allowed amount', async function () {
-    await token.approve(minterAccount, amount, { from: arbitraryAccount });
+    await token.approve(Accounts.minterAccount, amount, { from: Accounts.arbitraryAccount });
     var customVars = [
       { 'variable': 'allowance.arbitraryAccount.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
@@ -69,7 +63,7 @@ async function run_tests(newToken, accounts) {
   // Blacklist and Unblacklist
 
   it('pt019 should blacklist and set blacklisted to true', async function () {
-    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.blacklist(Accounts.arbitraryAccount, { from: Accounts.blacklisterAccount });
     var customVars = [
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
@@ -77,20 +71,20 @@ async function run_tests(newToken, accounts) {
   });
 
   it('pt018 should blacklist and set blacklisted to true, then unblacklist and set blacklisted to false', async function () {
-    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.blacklist(Accounts.arbitraryAccount, { from: Accounts.blacklisterAccount });
     var customVars = [
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true }
     ];
     await checkVariables([token], [customVars]);
 
-    await token.unBlacklist(arbitraryAccount, { from: blacklisterAccount });
+    await token.unBlacklist(Accounts.arbitraryAccount, { from: Accounts.blacklisterAccount });
     await checkVariables([token], [[]]);
   });
 
   // Configure minter
 
   it('pt015 should configureMinter, setting the minter to true and mintingAllowance to amount', async function () {
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
@@ -103,14 +97,14 @@ async function run_tests(newToken, accounts) {
   it('pt012 should mint the amount, increasing balance of recipient by amount, increasing total supply by amount, and decreasing minterAllowed by amount', async function () {
     var mintAmount = 50;
 
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
 
-    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.mint(Accounts.arbitraryAccount, mintAmount, { from: Accounts.minterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -124,8 +118,8 @@ async function run_tests(newToken, accounts) {
     var mintAmount = 11;
     var burnAmount = 10;
 
-    await token.configureMinter(minterAccount, mintAmount, { from: masterMinterAccount });
-    await token.mint(minterAccount, mintAmount, { from: minterAccount });
+    await token.configureMinter(Accounts.minterAccount, mintAmount, { from: Accounts.masterMinterAccount });
+    await token.mint(Accounts.minterAccount, mintAmount, { from: Accounts.minterAccount });
     var setup = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
@@ -134,7 +128,7 @@ async function run_tests(newToken, accounts) {
     ];
     await checkVariables([token], [setup]);
 
-    await token.burn(burnAmount, { from: minterAccount });
+    await token.burn(burnAmount, { from: Accounts.minterAccount });
     var afterBurn = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
@@ -149,8 +143,8 @@ async function run_tests(newToken, accounts) {
   it('pt010 should removeMinter, setting the minter to false and minterAllowed to 0', async function () {
     let mintAmount = 11;
 
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
-    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount })
+    await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
+    await token.mint(Accounts.arbitraryAccount, mintAmount, { from: Accounts.minterAccount })
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -159,7 +153,7 @@ async function run_tests(newToken, accounts) {
     ];
     await checkVariables([token], [customVars]);
 
-    await token.removeMinter(minterAccount, { from: masterMinterAccount });
+    await token.removeMinter(Accounts.minterAccount, { from: Accounts.masterMinterAccount });
     customVars = [
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
@@ -172,14 +166,14 @@ async function run_tests(newToken, accounts) {
   it('pt008 should transfer, reducing sender balance by amount and increasing recipient balance by amount', async function () {
     let mintAmount = 50;
 
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
 
-    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.mint(Accounts.arbitraryAccount, mintAmount, { from: Accounts.minterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -188,7 +182,7 @@ async function run_tests(newToken, accounts) {
     ];
     await checkVariables([token], [customVars]);
 
-    await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
+    await token.transfer(Accounts.pauserAccount, mintAmount, { from: Accounts.arbitraryAccount });
     customVars = [
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
@@ -202,14 +196,14 @@ async function run_tests(newToken, accounts) {
   it('pt007 should transferFrom, reducing sender balance by amount and increasing recipient balance by amount', async function () {
     let mintAmount = 50;
 
-    await token.configureMinter(minterAccount, amount, { from: masterMinterAccount });
+    await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
     ];
     await checkVariables([token], [customVars]);
 
-    await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
+    await token.mint(Accounts.arbitraryAccount, mintAmount, { from: Accounts.minterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -218,8 +212,8 @@ async function run_tests(newToken, accounts) {
     ];
     await checkVariables([token], [customVars]);
 
-    await token.approve(masterMinterAccount, mintAmount, { from: arbitraryAccount });
-    await token.transferFrom(arbitraryAccount, pauserAccount, mintAmount, { from: masterMinterAccount });
+    await token.approve(Accounts.masterMinterAccount, mintAmount, { from: Accounts.arbitraryAccount });
+    await token.transferFrom(Accounts.arbitraryAccount, Accounts.pauserAccount, mintAmount, { from: Accounts.masterMinterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
@@ -233,25 +227,25 @@ async function run_tests(newToken, accounts) {
   // Update methods
 
   it('pt004 should updateMasterMinter', async function () {
-    await token.updateMasterMinter(arbitraryAccount, { from: tokenOwnerAccount });
+    await token.updateMasterMinter(Accounts.arbitraryAccount, { from: Accounts.tokenOwnerAccount });
     var result = [
-      { 'variable': 'masterMinter', 'expectedValue': arbitraryAccount }
+      { 'variable': 'masterMinter', 'expectedValue': Accounts.arbitraryAccount }
     ];
     await checkVariables([token], [result]);
   });
 
   it('pt005 should updateBlacklister', async function () {
-    await token.updateBlacklister(arbitraryAccount, { from: tokenOwnerAccount });
+    await token.updateBlacklister(Accounts.arbitraryAccount, { from: Accounts.tokenOwnerAccount });
     var result = [
-      { 'variable': 'blacklister', 'expectedValue': arbitraryAccount }
+      { 'variable': 'blacklister', 'expectedValue': Accounts.arbitraryAccount }
     ];
     await checkVariables([token], [result]);
   });
 
   it('pt003 should updatePauser', async function () {
-    await token.updatePauser(arbitraryAccount, { from: tokenOwnerAccount });
+    await token.updatePauser(Accounts.arbitraryAccount, { from: Accounts.tokenOwnerAccount });
     var result = [
-      { 'variable': 'pauser', 'expectedValue': arbitraryAccount }
+      { 'variable': 'pauser', 'expectedValue': Accounts.arbitraryAccount }
     ];
     await checkVariables([token], [result]);
   });
@@ -259,9 +253,9 @@ async function run_tests(newToken, accounts) {
   // Transfer Ownership
 
   it('pt009 should set owner to _newOwner', async function () {
-    await token.transferOwnership(arbitraryAccount, { from: tokenOwnerAccount });
+    await token.transferOwnership(Accounts.arbitraryAccount, { from: Accounts.tokenOwnerAccount });
     var result = [
-      { 'variable': 'tokenOwner', 'expectedValue': arbitraryAccount }
+      { 'variable': 'tokenOwner', 'expectedValue': Accounts.arbitraryAccount }
     ];
     await checkVariables([token], [result]);
   });
