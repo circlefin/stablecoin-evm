@@ -57,13 +57,3 @@ need the allowance increased again by the `masterMinter`.
 The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`, or `masterMinter` addresses. The `owner` can not change
 the `proxyOwner` address.
 
-# OpenZeppelin
-Contracts from OpenZeppelin version 1.10 are used where possible, with some modifications. These contracts are located
-in `contracts/thirdparty/openzepplin`. `Ownable` and `Pausable` have been modified. The other contacts are unmodified.
-
-## `Ownable` has been modified to:
-1. Remove the renounceOwnership function and OwnershipdRenounced event.
-## `Pausable` has been modified to:
-1. Add the pauser role, which controlls `pause`/`unpause`
-2. Remove `whenPaused`/`whenNotPaused` modifiers on `unpause`/`pause` methods
-3. Remove `whenPaused` as is is no longer used
