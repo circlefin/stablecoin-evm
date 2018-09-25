@@ -80,7 +80,7 @@ Pending Tests:
 
 - To ENABLE the spreadsheet verification tool FOR THE FIRST TIME.
 
-  1) Ensure your browser is signed in to your Circle Google account and visit
+  1) Ensure your browser is signed in to your Google account and visit
   https://developers.google.com/sheets/api/quickstart/nodejs .
 
   2) Press the blue 'ENABLE THE GOOGLE SHEETS API' button.
