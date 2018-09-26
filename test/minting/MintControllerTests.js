@@ -2,8 +2,11 @@ var MintController = artifacts.require('minting/MintController');
 
 var BigNumber = require('bignumber.js');
 var tokenUtils = require('./../TokenTestUtils');
-var checkVariables = tokenUtils.checkVariables;
+var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
+var bigZero = tokenUtils.bigZero;
+
+var clone = require('clone');
 
 var mintUtils = require('./MintControllerUtils.js');
 var AccountUtils = require('./../AccountUtils.js');
@@ -19,27 +22,27 @@ async function run_tests(newToken, accounts) {
         tokenConfig = await initializeTokenWithProxyAndMintController(rawToken);
         token = tokenConfig.token;
         mintController = tokenConfig.mintController;
-        customState = tokenConfig.customState.clone();
+        expectedMintControllerState = clone(tokenConfig.customState);
+        expectedTokenState = [{ 'variable': 'masterMinter', 'expectedValue': mintController.address }];
     });
 
     it('should mint through mint controller', async function () {
         var amount = 5000;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
-        customState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
 
         await token.mint(Accounts.arbitraryAccount, amount, {from: Accounts.minterAccount});
-        customVars = [
-             { 'variable': 'masterMinter', 'expectedValue': mintController.address },
+        expectedTokenState.push(
              { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
              { 'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(amount) },
              { 'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)}
-        ];
-        await checkVariables([token, mintController], [customVars, customState]);
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
    it('initial state', async function () {
-        await checkVariables([mintController], [customState]);
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
    it('only owner configures controller', async function () {
@@ -49,11 +52,12 @@ async function run_tests(newToken, accounts) {
     it('remove controller', async function () {
         var amount = 5000;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        customState.controllers['controller1Account'] = Accounts.minterAccount;
-        await checkVariables([mintController], [customState]);
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         await mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount});
-        await checkVariables([mintController], [tokenConfig.customState.clone()]);
+        expectedMintControllerState.controllers['controller1Account'] = bigZero;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
     it('only owner can remove controller', async function () {
@@ -62,8 +66,8 @@ async function run_tests(newToken, accounts) {
 
    it('sets token', async function () {
         await mintController.setMinterManager(mintController.address, {from: Accounts.mintOwnerAccount});
-        customState.minterManager = mintController.address;
-        checkVariables([mintController], [customState]);
+        expectedMintControllerState.minterManager = mintController.address;
+        checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
    });
 
    it('only owner sets token', async function () {
@@ -75,20 +79,19 @@ async function run_tests(newToken, accounts) {
         var amount = 500;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
-        customState.controllers['controller1Account'] = Accounts.minterAccount;
-        customVars = [
-             { 'variable': 'masterMinter', 'expectedValue': mintController.address },
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
              { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
              { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
-        ];
-        await checkVariables([token, mintController], [customVars, customState]);
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         // remove minter
         await mintController.removeMinter({from: Accounts.controller1Account});
-        customVars = [
+        expectedTokenState = [
              { 'variable': 'masterMinter', 'expectedValue': mintController.address },
         ];
-        await checkVariables([token, mintController], [customVars, customState]);
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
    });
 
    it('only controller removes a minter', async function () {
@@ -104,22 +107,21 @@ async function run_tests(newToken, accounts) {
         var amount = 500;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
-        customState.controllers['controller1Account'] = Accounts.minterAccount;
-        customVars = [
-             { 'variable': 'masterMinter', 'expectedValue': mintController.address },
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
              { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
              { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
-        ];
-        await checkVariables([token, mintController], [customVars, customState]);
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         // increment minter allowance
         await mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account});
-        customVars = [
+        expectedTokenState = [
              { 'variable': 'masterMinter', 'expectedValue': mintController.address },
              { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
              { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount*2) },
         ];
-        await checkVariables([token, mintController], [customVars, customState]);
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
    });
 
    it('only controller increments allowance', async function () {
@@ -130,17 +132,12 @@ async function run_tests(newToken, accounts) {
        // configure controller but not minter
         var amount = 500;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        customState.controllers['controller1Account']= Accounts.minterAccount;
-        customVars = [
-             { 'variable': 'masterMinter', 'expectedValue': mintController.address },
-        ];
-        await checkVariables([token, mintController], [customVars, customState]);
+        expectedMintControllerState.controllers['controller1Account']= Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         // increment minter allowance
         await expectRevert(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}));
    });
-
-
 }
 
 var testWrapper = require('./../TestWrapper');

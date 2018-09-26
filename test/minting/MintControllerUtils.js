@@ -1,5 +1,6 @@
 var BigNumber = require('bignumber.js');
 var bigZero = new BigNumber(0);
+var clone = require('clone');
 
 var tokenUtils = require('./../TokenTestUtils');
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
@@ -18,7 +19,8 @@ function MintControllerState(owner, controllers, minterManager) {
     this.controllers = controllers;
     this.minterManager = minterManager;
     this.checkState = async function(mintController) {await checkMintControllerState(mintController, this)};
-    this.clone = function(){return new MintControllerState(this.owner, AccountUtils.cloneState(this.controllers), this.minterManager)};
+//    this.clone = function(){return clone(this);};
+//    this.clone = function(){return new MintControllerState(this.owner, clone(this.controllers), this.minterManager)};
 }
 
 // Default state of MintController when it is deployed
