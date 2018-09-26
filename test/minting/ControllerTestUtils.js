@@ -14,15 +14,23 @@ var setAccountDefault = AccountUtils.setAccountDefault;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
 
+function ControllerState(owner, controllers) {
+    this.owner = owner;
+    this.controllers = controllers;
+    this.checkState = checkControllerState;
+    this.checkState = async function(controllerContract) {await checkControllerState(controllerContract, this)};
+    this.clone = function(){return new ControllerState(this.owner, AccountUtils.cloneState(this.controllers))};
+}
+
 // Default state of Controller when it is deployed
-var controllerEmptyState = {
-    'owner': Accounts.mintOwnerAccount,
-    'controllers': setAccountDefault(Accounts, "0x0000000000000000000000000000000000000000")
-};
+var controllerEmptyState = new ControllerState(
+    Accounts.mintOwnerAccount,
+    setAccountDefault(Accounts, "0x0000000000000000000000000000000000000000")
+);
 
 // Checks the state of an array of controller contracts
-async function checkControllerState(controllers, customVars, ignoreExtraStateVariables) {
-    await checkState(controllers, customVars, controllerEmptyState, getActualControllerState, Accounts, ignoreExtraStateVariables);
+async function checkControllerState(controller, customState) {
+    await checkState(controller, customState, controllerEmptyState, getActualControllerState, Accounts, true);
 }
 
 // Gets the actual state of the controller contract.
@@ -40,12 +48,8 @@ async function getActualControllerState(controllerContract, accounts) {
         owner,
         controllerState,
     ) {
-        var actualState = {
-            'owner': owner,
-            'controllers': controllerState,
-       };
-       return actualState;
-    })
+       return new ControllerState(owner, controllerState);
+    });
 }
 
 module.exports = {

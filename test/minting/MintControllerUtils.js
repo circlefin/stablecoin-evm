@@ -13,6 +13,30 @@ var getAccountState = AccountUtils.getAccountState;
 var ControllerUtils = require('./ControllerTestUtils');
 var checkControllerState = ControllerUtils.checkControllerState;
 
+function MintControllerState(owner, controllers, minterManager) {
+    this.owner = owner;
+    this.controllers = controllers;
+    this.minterManager = minterManager;
+    this.checkState = async function(mintController) {await checkMintControllerState(mintController, this)};
+    this.clone = function(){return new MintControllerState(this.owner, AccountUtils.cloneState(this.controllers), this.minterManager)};
+}
+
+// Default state of MintController when it is deployed
+var mintControllerEmptyState = new MintControllerState(null, {}, bigZero);
+
+// Checks the state of the mintController contract
+async function checkMintControllerState(mintController, customState) {
+    await checkControllerState(mintController, customState);
+    await checkState(mintController, customState, mintControllerEmptyState, getActualMintControllerState, Accounts, true);
+}
+
+
+// Gets the actual state of the mintController contract.
+// Evaluates all mappings on the provided accounts.
+async function getActualMintControllerState(mintController, accounts) {
+    var minterManager = await mintController.minterManager.call();
+    return new MintControllerState(null, {}, minterManager);
+}
 
 // Deploys a FiatTokenV1 with a MintController contract as the masterMinter.
 // Uses the same workflow we would do in production - first deploy FiatToken then set the masterMinter.
@@ -23,32 +47,14 @@ async function initializeTokenWithProxyAndMintController(rawToken) {
     var tokenConfigWithMinter = {
         proxy: tokenConfig.proxy,
         token: tokenConfig.token,
-        mintController: mintController
+        mintController: mintController,
+        customState: new MintControllerState(null, {}, tokenConfig.token.address)
     };
     return tokenConfigWithMinter;
 }
 
-// Default state of MintController when it is deployed
-var mintControllerEmptyState = {
-    'minterManager' : bigZero,
-};
-
-// Checks the state of the mintController contract
-async function checkMintControllerState(mintControllers, customVars) {
-    await checkControllerState(mintControllers, customVars, true);
-    await checkState(mintControllers, customVars, mintControllerEmptyState, getActualMintControllerState, Accounts, true);
-}
-
-
-// Gets the actual state of the mintController contract.
-// Evaluates all mappings on the provided accounts.
-async function getActualMintControllerState(mintController, accounts) {
-    return {
-        'minterManager': await mintController.minterManager.call()
-    };
-}
-
 module.exports = {
     initializeTokenWithProxyAndMintController: initializeTokenWithProxyAndMintController,
-    checkMintControllerState: checkMintControllerState
+    checkMintControllerState: checkMintControllerState,
+    MintControllerState: MintControllerState
 }
