@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CI for Centre Tokens
+Parameters:
+
+  StackName:
+    Default: ci-centre-tokens
+    Type: String
+    Description: Cloudformation stack name
+
+  GithubRepoOwner:
+    Default: centrehq
+    Type: String
+    Description: Github Owner
+
+  GithubRepo:
+    Default: centre-tokens
+    Type: String
+    Description: Github repository name
+
+  GithubBranch:
+    Default: master
+    Type: String
+    Description: Github branch
+
+  ECRBuildImage:
+    Default: "aws/codebuild/nodejs:8.11.0"
+    Type: String
+    Description: The ECR image to use in the Codebuild project
+
+Resources:
+
+  # Note: Webhooks can not be enabled via Cloudformation and must be done manually
+  CodeBuildProject:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: "centre-tokens"
+      Description: !Sub "Codebuild project from stack ${AWS::StackName}"
+      Artifacts:
+        Type: S3
+        Location: !Ref CodeBuildBucket
+        Name: artifacts
+        NamespaceType: BUILD_ID
+      BadgeEnabled: true
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref ECRBuildImage
+        EnvironmentVariables:
+          - Name: FailedBuildTopic
+            Value: !Ref FailedBuildTopic
+      ServiceRole: !Ref CodeBuildServiceRole
+      Source:
+        Type: GITHUB
+        BuildSpec: "buildspec.yaml"
+        Location: !Sub "https://github.com/${GithubRepoOwner}/${GithubRepo}.git"
+        Auth:
+          Type: OAUTH
+        GitCloneDepth: 1
+      TimeoutInMinutes: 60
+
+  CodeBuildBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: "Private"
+      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration:
+        Status: Enabled
+
+  CodeBuildServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "CodeBuildAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: "AllowToCreateLogs"
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/centre-tokens:log-stream:*"
+              - Sid: "AllowPutToBucket"
+                Effect: "Allow"
+                Action:
+                  - "s3:PutObject*"
+                Resource: !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-${AWS::Region}*"
+              - Sid: "AllowPublishToSNS"
+                Effect: "Allow"
+                Action:
+                  - "SNS:Publish"
+                Resource: !Ref FailedBuildTopic
+
+  FailedBuildTopic:
+    Type: AWS::SNS::Topic
