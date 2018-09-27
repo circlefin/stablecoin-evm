@@ -79,7 +79,7 @@ Resources:
             Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-        - PolicyName: !Ref AWS::StackName
+        - PolicyName: "CodeBuildAccess"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -98,7 +98,8 @@ Resources:
                 Resource: !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-${AWS::Region}*"
               - Sid: "AllowPublishToSNS"
                 Effect: "Allow"
-                Action: "SNS:Publish"
+                Action:
+                  - "SNS:Publish"
                 Resource: !Ref FailedBuildTopic
 
   FailedBuildTopic:
