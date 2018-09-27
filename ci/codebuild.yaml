@@ -40,14 +40,14 @@ Resources:
         Location: !Ref CodeBuildBucket
         Name: artifacts
         NamespaceType: BUILD_ID
-      BadgeEnabled: True
+      BadgeEnabled: true
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
         Image: !Ref ECRBuildImage
         EnvironmentVariables:
-        - Name: FailedBuildTopic
-          Value: !Ref FailedBuildTopic
+          - Name: FailedBuildTopic
+            Value: !Ref FailedBuildTopic
       ServiceRole: !Ref CodeBuildServiceRole
       Source:
         Type: GITHUB
@@ -72,34 +72,34 @@ Resources:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-        - Effect: "Allow"
-          Principal:
-            Service:
-            - "codebuild.amazonaws.com"
-          Action: "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action: "sts:AssumeRole"
       Path: "/"
       Policies:
-      - PolicyName: !Ref AWS::StackName
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Sid: "AllowToCreateLogs"
-            Effect: "Allow"
-            Action:
-            - "logs:CreateLogGroup"
-            - "logs:CreateLogStream"
-            - "logs:PutLogEvents"
-            Resource:
-            - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/centre-tokens:log-stream:*"
-          - Sid: "AllowPutToBucket"
-            Effect: "Allow"
-            Action:
-            - "s3:PutObject*"
-            Resource: !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-${AWS::Region}*"
-          - Sid: "AllowPublishToSNS"
-            Effect: "Allow"
-            Action:  "SNS:Publish"
-            Resource: !Ref FailedBuildTopic
+        - PolicyName: !Ref AWS::StackName
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: "AllowToCreateLogs"
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/centre-tokens:log-stream:*"
+              - Sid: "AllowPutToBucket"
+                Effect: "Allow"
+                Action:
+                  - "s3:PutObject*"
+                Resource: !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-${AWS::Region}*"
+              - Sid: "AllowPublishToSNS"
+                Effect: "Allow"
+                Action: "SNS:Publish"
+                Resource: !Ref FailedBuildTopic
 
   FailedBuildTopic:
     Type: AWS::SNS::Topic
