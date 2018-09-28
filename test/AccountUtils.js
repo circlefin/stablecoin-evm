@@ -3,6 +3,7 @@ var debugLogging = false;
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 
+var clone = require('clone');
 
 // named list of all accounts
 var Accounts = {
@@ -54,26 +55,10 @@ function setAccountDefault(accounts, defaultValue) {
     return result;
 }
 
-// Clones a state object
-function cloneState(state) {
-    // for each item in customVars, set the item in expectedState
-    var clone = {};
-    for (var attr in state) {
-        var attrValue = state[attr];
-        if(isLiteral(attrValue)) {
-            clone[attr] = state[attr];
-        } else {
-            clone[attr] = cloneState(attrValue);
-        }
-    }
-    return clone;
-}
-
 // return an expectedState that combines customState with the emptyState
-// todo: after merge, integrate this with TokenTestUtils.js
 function buildExpectedPartialState(emptyState, customState, ignoreExtraCustomVars) {
     // for each item in customVars, set the item in expectedState
-    var expectedState = cloneState(emptyState);
+    var expectedState = clone(emptyState);
 
     for( var variableName in customState) {
         // do I ignore extra values
@@ -102,7 +87,6 @@ function buildExpectedPartialState(emptyState, customState, ignoreExtraCustomVar
 // getActualState: async function(token, accounts) => state
 // accounts: list of accounts on which to evaluate mappings
 // ignoreExtraCustomVars: ignore _customVars names that are not in the emptyState
-// todo: after merge, integrate this with TokenTestUtils.js
 async function checkState(_tokens, _customVars, emptyState, getActualState, accounts, ignoreExtraCustomVars) {
     // Iterate over array of tokens.
     var numTokens = _tokens.length;
@@ -141,26 +125,11 @@ function isLiteral(object) {
     return true;
 }
 
-// Turns a simple literal object into a printable string
-function logObject(object) {
-    var output = '';
-    for (var property in object) {
-        if(isLiteral(object[property])) {
-            output += property + ':\n' + logObject(object[property]);
-        } else {
-            output += property + ': ' + object[property]+';\n ';
-        }
-    }
-    return output;
-}
-
 module.exports = {
     Accounts: Accounts,
     AccountPrivateKeys: AccountPrivateKeys,
     setAccountDefault: setAccountDefault,
-    cloneState: cloneState,
     buildExpectedPartialState: buildExpectedPartialState,
     checkState: checkState,
-    logObject: logObject,
     getAccountState: getAccountState,
 }

@@ -315,9 +315,10 @@ async function checkVariables(_tokens, _customVars) {
     for (n = 0; n < numTokens; n++) {
         var token = _tokens[n];
         var customVars = _customVars[n];
+
         let expectedState = buildExpectedState(token, customVars);
         if (debugLogging) {
-            console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
+           console.log(util.inspect(expectedState, { showHidden: false, depth: null }))
         }
 
         let actualState = await getActualState(token);
@@ -333,6 +334,21 @@ async function checkVariables(_tokens, _customVars) {
         var totalSupply = new BigNumber(await token.totalSupply())
         assert(balanceSum.isEqualTo(totalSupply));
     }
+}
+
+// All MINT p0 tests will call this function.
+// _contracts is an array of exactly two values: a FiatTokenV1 and a MintController
+// _customVars is an array of exactly two values: the expected state of the FiatTokenV1
+// and the expected state of the MintController
+async function checkMINTp0(_contracts, _customVars) {
+    assert.equal(_contracts.length, 2);
+    assert.equal(_customVars.length, 2);
+
+    // the first is a FiatTokenV1
+    await checkVariables([_contracts[0]], [_customVars[0]]);
+
+    // the second is a MintController
+    await _customVars[1].checkState(_contracts[1]);
 }
 
 // build up actualState object to compare to expectedState object
@@ -925,6 +941,7 @@ module.exports = {
     checkAdminChangedEvent: checkAdminChangedEvent,
     buildExpectedState,
     checkVariables: checkVariables,
+    checkMINTp0: checkMINTp0,
     setMinter: setMinter,
     mint: mint,
     burn: burn,
