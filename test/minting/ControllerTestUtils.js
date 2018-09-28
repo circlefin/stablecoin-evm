@@ -1,6 +1,5 @@
 var BigNumber = require('bignumber.js');
 var Q = require('q');
-var clone = require('clone');
 
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
@@ -20,8 +19,6 @@ function ControllerState(owner, controllers) {
     this.controllers = controllers;
     this.checkState = checkControllerState;
     this.checkState = async function(controllerContract) {await checkControllerState(controllerContract, this)};
-//    this.clone = function(){return clone(this);};
-    //this.clone = function(){return new ControllerState(this.owner, clone(this.controllers))};
 }
 
 // Default state of Controller when it is deployed
