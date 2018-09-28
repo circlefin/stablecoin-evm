@@ -1,0 +1,20 @@
+File,Function 1,Function 2,Function 3,Code,Description
+Ownable.sol,transferOwnership,configureController,,ete000,ete000 New owner can configure controllers
+Ownable.sol,transferOwnership,removeController,,ete001,ete001 New owner can remove controllers
+Controller.sol,configureController,configureMinter,,ete002,ete002 New controller can configure minter
+Controller.sol,configureController,incrementMinterAllowance,,ete011,ete011 New controller can increment minter allowance
+Controller.sol,configureController,removeMinter,,ete012,ete012 New controller can remove minter
+Controller.sol,configureController,configureController,configureMinter,ete003,ete003 Configure two controllers for the same minter and make sure they can both configureMinter
+Controller.sol,configureController,configureMinter,removeMinter,ete004,"ete004 Configure two controllers for the same minter, one adds a minter and the other removes it"
+Controller.sol,configureController,configureMinter,removeMinter,ete005,ete005 Configure two controllers for different minters and make sure 2nd cant remove
+Controller.sol,configureController,configureMinter,configureMinter,ete006,ete006 Configure two controllers for different minters and make sure 2nd cant configure
+Controller.sol,removeController,configureMinter,,ete007,ete007 Remove a controller and make sure it can't modify minter
+MintController.sol,setMinterManager,configureMinter,,ete008,ete008 Change minter manager and make sure existing controllers still can configure their minters
+MintController.sol,setMinterManager,removeMinter,,ete009,ete009 Change minter manager and make sure existing controllers still can remove their minters
+MintController.sol,setMinterManager,incrementMinterAllowance,,ete010,ete010 Change minter manager and make sure existing controllers can increment allowances
+MintController.sol,setMinterManager,configureMinter,setMinterManager,ete013,"ete013 Change minter manager, configure a minter, then change back and make sure changes DID NOT propogate"
+MintController.sol,removeMinter,incrementMinterAllowance,,ete014,ete014 Remove a minter and then try to increment its allowance reverts
+MintController.sol,configureMinter,mint,,ete015,ete015 Configure a minter and make sure it can mint
+MintController.sol,configureMinter,burn,,ete017,ete017 Configure a minter and make sure it can burn
+MintController.sol,removeMinter,mint,,ete016,ete016 Remove a minter and make sure it cannot mint
+MintController.sol,removeMinter,burn,,ete018,ete018 Remove a minter and make sure it cannot burn

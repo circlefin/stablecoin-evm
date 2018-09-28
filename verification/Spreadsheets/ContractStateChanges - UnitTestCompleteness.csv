@@ -1,0 +1,36 @@
+File,Function,Modifier,Simple Test,ABI Test,Pausable,Code: paused=true,Blacklistable,blacklisted[msg.sender]=true,blacklisted[address]=true,Only 1 User,Wrong msg.sender
+AdminUpgradeabilityProxy.sol,_setAdmin,internal,,abi053,,,,,,,
+AdminUpgradeabilityProxy.sol,_willFallback,internal,,abi057,,,,,,,
+Blacklistable.sol,blacklist,public,pt019,,no,ept036,no,ept020,ept024,blacklister,nt042
+Blacklistable.sol,unBlacklist,public,pt018,,no,ept035,no,ept021,,blacklister,nt043
+Blacklistable.sol,updateBlacklister,public,pt005,,no,ept003,no,ept015,ept027,owner,nt048
+Blacklistable.sol,isBlacklisted,view,,,,,,,,,
+FiatTokenProxy.sol,changeAdmin,public,upt004,,no,ept001,no,ept013,ept025,upgrader,nut002
+FiatTokenProxy.sol,upgradeTo,public,upt001,,no,ept008,no,ept022,upt013,upgrader,nut009
+FiatTokenProxy.sol,upgradeToAndCall,public ,upt002,,no,upt010,no,upt011,upt012,upgrader,nut010
+FiatTokenV1.sol,initialize,public,upt002,,no,,no,,,,
+FiatTokenV1.sol,removeMinter,public,pt010,,no,ept006,no,ept033,ept034,masterMinter,nt029
+FiatTokenV1.sol,updateMasterMinter,public,pt004,,no,ept002,no,ept014,ept026,masterMinter,nt049
+FiatTokenV1.sol,approve,public,pt020,,yes,nt010,yes,nt009,nt008,user,
+FiatTokenV1.sol,burn,public,pt017,,yes,nt034,yes,nt033,,minter,"nt035, nt031"
+FiatTokenV1.sol,configureMinter,public,pt015,,yes,nt028,no,ept030,ept032,masterMinter,nt026
+FiatTokenV1.sol,mint,public,pt012,,yes,nt001,yes,nt003,nt004,minter,"nt002, nt005"
+FiatTokenV1.sol,transfer,public,pt008,,yes,nt024,yes,nt023,nt022,user,nt021
+FiatTokenV1.sol,transferFrom,public,pt007,,yes,nt018,yes,nt015,"nt014, nt016",user,nt017
+FiatTokenV1.sol,allowance,view,,,,,,,,,
+FiatTokenV1.sol,blanceOf,view,,,,,,,,,
+FiatTokenV1.sol,isMinter,view,,,,,,,,,
+FiatTokenV1.sol,minterAllowance,view,,,,,,,,,
+FiatTokenV1.sol,totalSupply,view,,,,,,,,,
+Ownable.sol,transferOwnership,public,pt009,,no,ept005,no,ept017,ept029,owner,nt054
+Ownable.sol,owner,view,,,,,,,,,
+Ownable.sol,setOwner,internal,,abi025,,,,,,,
+Pausable.sol,pause,public,pt011,,no,ept037,no,ept018,,pauser,nt040
+Pausable.sol,unpause,public,pt006,,no,pt006,no,ept019,,pauser,nt041
+Pausable.sol,updatePauser,public,pt003,,no,ept004,no,ept016,ept028,owner,nt050
+Proxy.sol,_delegate,internal,,abi056,,,,,,,
+Proxy.sol,_fallback,internal,,abi058,,,,,,,
+Proxy.sol,_willFallback,internal,,abi057,,,,,,,
+Proxy.sol,implementation,view,,,,,,,,,
+UpgradeabilityProxy.sol,_setImplementation,internal,,abi050,,,,,,,
+UpgradeabilityProxy.sol,_upgradeTo,internal,,abi028,,,,,,,
