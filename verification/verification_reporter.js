@@ -92,14 +92,18 @@ function verification_reporter (runner) {
     }
     var test_ran = test.title.trim();
 
-    // Check if test is in UnitTestCompleteness tab and "cross-off" if it is.
-    /* TODO: implement UnitTestCompleteness spreadsheet processing
-    if (!_.isEmpty(spreadsheet.completeness)) {
-      if (spreadsheet.completeness[id]) {
-        delete spreadsheet.completeness[id];
-      }
+    // check if test is in a "completeness" unit test sheet
+    // if it is, cross it off as found by deleting it
+    for(var completeness_suite in missingUnitTests) {
+        if(completeness_suite.match(/Completeness/)){
+            if(missingUnitTests[completeness_suite][id]) {
+                console.log("complete: " + id);
+                delete missingUnitTests[completeness_suite][id];
+            }
+        }
     }
-*/
+
+
       // Verify test is in spreadsheet.
       if (spreadsheet[suite]) {
         let spreadsheet_test = spreadsheet[suite][id];
@@ -201,7 +205,7 @@ function verification_reporter (runner) {
 
     // Do not report missing unit tests for files that did not run
     for(var testSuite in missingUnitTests){
-        if(! _.has(executedTestSuites, testSuite)) {
+        if(! _.has(executedTestSuites, testSuite) && ! testSuite.match(/Completeness/)) {
             console.log(color('fail', 'Did not run: ' + testSuite));
             delete missingUnitTests[testSuite];
         }
@@ -210,11 +214,11 @@ function verification_reporter (runner) {
     // If all tests are 'crossed-off', print success.
     if (_.isEmpty(missingUnitTests)) {
       console.log('\n' + green_ok + color('bright pass',
-      ' Test suite contains all tests in spreadsheet.'));
+      ' Test run contains all tests in spreadsheet.'));
     } else {
       // If not all tests are 'crossed-off', print the tests remaining.
       console.log(color('bright fail',
-      '\nTests missing from test suite (but included in spreadsheet):\n'));
+      '\nThe following tests were not executed (but are included in a spreadsheet):\n'));
       console.log(util.inspect(missingUnitTests, { showHidden: false, depth: null }));
     }
   });

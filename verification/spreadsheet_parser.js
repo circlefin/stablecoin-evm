@@ -23,7 +23,7 @@ function UnitTest(code, description, pending){
 /**
 * Reads all files in Spreadsheets directory and returns an oject with their contents
 * Returns a UnitTestDirectory object
-* TODO: handle errors, null objects, UnitTestCompleteness
+* TODO: handle errors, null objects
 */
 function load() {
     var unitTestDirectory = {};
@@ -44,8 +44,13 @@ function load() {
             var unitTestSet = {};
             var spreadsheet = parse(csvFileContents, {columns: true});
             spreadsheet.forEach(row => {
-                var unitTest = parseRow(row);
-                unitTestSet[unitTest.code] = unitTest;
+                if(file.match("Completeness")){
+                    var unitTestArray = parseCompletenessRow(row);
+                    unitTestArray.forEach(unitTest => {unitTestSet[unitTest.code] = unitTest});
+                } else {
+                    var unitTest = parseRow(row);
+                    unitTestSet[unitTest.code] = unitTest;
+                }
             });
             var unittestfilename = getTestSuiteTitle(file);
             unitTestDirectory[unittestfilename] = unitTestSet;
@@ -64,6 +69,24 @@ function isPending(spreadsheet, filename, code) {
         return spreadsheet[filename][code].pending;
     }
     return false;
+}
+
+// Reads a row and tries to find one or more test codes inside the row
+// Returns an array of UnitTest objects
+function parseCompletenessRow(row){
+    var unitTests = [];
+    var index =0;
+    for(var columnName in row) {
+        var rowValues = row[columnName].split(",");
+        for(var potentialCodeIndex in rowValues) {
+            var codes = rowValues[potentialCodeIndex].match(/([a-z]{2,4})([0-9]+)/g);
+            for(var codeIndex in codes) {
+                unitTests[index] = new UnitTest(codes[codeIndex], "", false);
+                ++index;
+            }
+        }
+    }
+    return unitTests;
 }
 
 // Transforms a row in spreadsheet into a UnitTest object
