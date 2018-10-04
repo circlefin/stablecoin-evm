@@ -3,7 +3,7 @@ const spec_reporter = mocha.reporters.Spec;
 const base_reporter = mocha.reporters.Base;
 const color = base_reporter.color;
 const inherits = mocha.utils.inherits;
-const sheets = require('./GoogleSheets/index');
+const sheets = require('./spreadsheet_parser');
 const _ = require('lodash');
 const jsdiff = require('diff');
 const colors = require('colors');
@@ -24,7 +24,6 @@ function verification_reporter (runner) {
   spec_reporter.call(this, runner);
 
   var spreadsheet;
-  var spreadsheet_clone;
   var errs = [];
   var pending = {};
 
@@ -32,10 +31,7 @@ function verification_reporter (runner) {
   before('load_spreadsheet_tests', async function() {
     this.timeout(200000);
     console.log('Loading spreadsheet...\n');
-    spreadsheet = await sheets.load().catch((err) => {
-      console.log(err);
-    });
-    spreadsheet_clone = JSON.parse(JSON.stringify(spreadsheet));
+    spreadsheet = sheets.load();
   });
 
   // Runs at the beginning of each contract block execution.
@@ -59,6 +55,7 @@ function verification_reporter (runner) {
   });
 
   // Runs at the end of every test.
+  // TODO: upgraded tests "missing" because deleted from spreadsheet after first run
   runner.on('test end', function (test) {
     // If contract block title is marked 'Legacy',
     // we skip verification. (See README.verification)
@@ -95,40 +92,46 @@ function verification_reporter (runner) {
       + indent + '(See README.verification)'));
       return;
     }
-    var test_ran = test.title.replace(id, '');
+    var test_ran = test.title;
+//    var test_ran = test.title.replace(id, '');
 
     // Check if test is in UnitTestCompleteness tab and "cross-off" if it is.
+    /* TODO: implement UnitTestCompleteness spreadsheet processing
     if (!_.isEmpty(spreadsheet.completeness)) {
       if (spreadsheet.completeness[id]) {
         delete spreadsheet.completeness[id];
       }
     }
-
-    // If test is marked pending in spreadsheet, record for later output.
-    if (spreadsheet.pending && (spreadsheet.pending[id] == test_ran)) {
-      console.log(indent + green_x + color('bright pass', ' pending'));
-      pending[id] = test_ran;
-    } else {
+*/
       // Verify test is in spreadsheet.
       if (spreadsheet[file]) {
-        let spreadsheet_test = spreadsheet[file][id] || spreadsheet_clone[file][id];
+        let spreadsheet_test = spreadsheet[file][id];
         if (spreadsheet_test) {
-          // Verify test descriptions match.
-          if (spreadsheet_test == test_ran) {
+
+          // If test is marked pending in spreadsheet, record for later output.
+          if(spreadsheet_test.pending) {
+              console.log(indent + green_x + color('bright pass', ' pending'));
+              pending[id] = test_ran;
+
+          // If test descriptions match, mark green.
+          } else if (spreadsheet_test.description == test_ran) {
             console.log(indent + green_x);
+
+          // If test is in spreadsheet, but descriptions don't match.
           } else {
-            // If test is in spreadsheet, but descriptions don't match.
             console.log(indent + red_x
               + color('fail',
               ' test description inconsistent with spreadsheet for '
               + id + ', ' + file));
+            console.log("s: " + spreadsheet_test.description);
+            console.log("t: " + test_ran);
             // Print test description string diff.
-            let diff = getStringDiff(test_ran, spreadsheet_test);
+            let diff = getStringDiff(test_ran, spreadsheet_test.description);
             console.log(indent + diff);
             errs.push(red_x + color('fail',
               ' Test descriptions do not match for '
               + id  + ', ' + file)
-              + '\n' + indent + 'In spreadsheet: ' + spreadsheet_test
+              + '\n' + indent + 'In spreadsheet: ' + spreadsheet_test.description
               + '\n' + indent + 'In test file:   ' + test_ran
               + '\n' + indent + 'Diff:           ' + diff);
           }
@@ -140,24 +143,23 @@ function verification_reporter (runner) {
           // If test is not in spreadsheet.
           console.log(indent + red_x
             + color('fail', ' '
-            + id + ' missing from spreadsheet tab ' + file));
+            + id + ' missing from spreadsheet file ' + file));
           errs.push(red_x
             + color('fail', ' Test ' + id + ' missing from '
-            + file + ' spreadsheet tab.'));
+            + file + ' spreadsheet file.'));
         }
       } else {
-        // If test file not found in spreadsheet tabs.
+        // If test file not found in directory.
         console.log(indent + red_x
           + color('fail', ' test file ' + file
-          + ' does not match a spreadsheet tab'));
+          + ' does not match a spreadsheet in the Spreadsheets directory'));
         errs.push(red_x
           + color('fail', ' Test file ' + file
-          + ' missing from spreadsheet. Possible solutions:\n'
-          + '1. Ensure test is listed in correct spreadsheet tab.\n'
-          + '2. Ensure the tab name is included in the contract block title.\n'
+          + ' missing from Spreadsheets directory. Possible solutions:\n'
+          + '1. Ensure test is listed in correct *.csv file.\n'
+          + '2. Ensure the *.csv file name is included in the contract block title.\n'
           + '(See README.verification)'));
       }
-    }
   });
 
   // Runs at the end of test suite execution. Prints verification summary.
@@ -170,11 +172,13 @@ function verification_reporter (runner) {
       + 'marked pending in the spreadsheet (delete -p flag once merged): ');
       console.log(pending);
     }
+    // TODO: fix pending
     // Do not report tests that are missing from test suite but marked pending.
-    delete spreadsheet.pending;
+ //   delete spreadsheet.pending;
     // Print out any tests that are included in UnitTestCompleteness tab but
     // missing from the test suite.
-    if (!_.isEmpty(spreadsheet.completeness)) {
+    // TODO: fix completeness spreadshet
+ /*   if (!_.isEmpty(spreadsheet.completeness)) {
       console.log('\n' + red_x + color('bright fail',
       ' UnitTestCompleteness tab includes tests that are not present in test suite:')
       + '\n' + Object.keys(spreadsheet.completeness).toString());
@@ -182,7 +186,7 @@ function verification_reporter (runner) {
       console.log(green_ok + color('bright pass',
       ' Test suite suite contains all tests in UnitTestCompleteness tab.'));
     }
-    delete spreadsheet.completeness;
+    delete spreadsheet.completeness;*/
     // If all the tests in a tab are present, 'cross-off' tab by deleting.
     for(var file in spreadsheet) {
       if (_.isEmpty(spreadsheet[file])) {
@@ -197,7 +201,7 @@ function verification_reporter (runner) {
       // If not all tests are 'crossed-off', print the tests remaining.
       console.log(color('bright fail',
       '\nTests missing from test suite (but included in spreadsheet):\n'));
-      console.log(spreadsheet);
+      console.log(spreadsheet); // TODO: test this line works
     }
     // Print all errors where executed tests did not match spreadsheet.
     if (errs.length) {

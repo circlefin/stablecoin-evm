@@ -46,7 +46,7 @@ module.exports = {
     * To disable the spreadsheet verification tool ensure that
     * the reporter is set to 'Spec' by commenting/uncommenting the lines below.
     */
-    reporter: 'Spec',
-    //reporter: './verification/verification_reporter.js',
+    // reporter: 'Spec',
+    reporter: "/Users/mirabelenkiy/Documents/Dev/centre-tokens/verification/verification_reporter.js",
   },
 };
