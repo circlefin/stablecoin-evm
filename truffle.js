@@ -47,6 +47,6 @@ module.exports = {
     * the reporter is set to 'Spec' by commenting/uncommenting the lines below.
     */
     // reporter: 'Spec',
-    reporter: "/Users/mirabelenkiy/Documents/Dev/centre-tokens/verification/verification_reporter.js",
+    reporter: "verification/verification_reporter.js",
   },
 };

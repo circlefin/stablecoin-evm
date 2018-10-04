@@ -1,6 +1,7 @@
 var fs = require('fs');
 var parse = require('csv-parse/lib/sync');
-var SPREADSHEETS_DIR = '/Users/mirabelenkiy/Documents/Dev/centre-tokens/verification/Spreadsheets'
+// NOTE: SPREADSHEETS_DIR must be relative to truffle.js
+var SPREADSHEETS_DIR = './verification/Spreadsheets'
 
 function UnitTest(code, description, pending){
     this.code = code;
@@ -10,7 +11,7 @@ function UnitTest(code, description, pending){
 
 /*
  UnitTestDirectory is a literal object.
-    Keys - names of unit test files
+    Keys - names of unit test suites
     Values - a UnitTestSet
 
  UnitTestSet is a literal object
@@ -38,7 +39,6 @@ function load() {
     // process each file into a unitTestSet, then add the
     // unitTestSet to unitTestDirectory
     files.forEach(file => {
-        console.log('reading ' + file);
         var csvFileContents = fs.readFileSync(SPREADSHEETS_DIR + "/" + file, "utf8");
         if(csvFileContents != null) {
             var unitTestSet = {};
@@ -47,7 +47,7 @@ function load() {
                 var unitTest = parseRow(row);
                 unitTestSet[unitTest.code] = unitTest;
             });
-            var unittestfilename = getUnitTestFileName(file);
+            var unittestfilename = getTestSuiteTitle(file);
             unitTestDirectory[unittestfilename] = unitTestSet;
         }
     });
@@ -75,9 +75,9 @@ function parseRow(row) {
     var pending = false;
     var description = "";
     for(var columnName in row) {
-        if(columnName == 'code' || columnName == 'Code') {
-            test_code = row[columnName];
-            testCodeKey = columnName;
+        if(columnName.trim() == 'code' || columnName.trim() == 'Code') {
+            test_code = row[columnName].trim();
+            testCodeKey = columnName.trim();
             pending = test_code.match(/ -p/);
             if (pending) {
                 test_code = test_code.replace(pending[0], '');
@@ -88,7 +88,7 @@ function parseRow(row) {
         }
     }
     var descriptionKey = getDescriptionKey(row, testCodeKey);
-    description = row[descriptionKey];
+    description = row[descriptionKey].trim();
     if(test_code == '' || description == '') return null;
     return new UnitTest(test_code, description, pending);
 }
@@ -105,17 +105,11 @@ function getDescriptionKey(row, testCodeKey) {
     return Object.keys(row)[i];;
 }
 
-// Returns the raw name of the unit test file associated with this csv file
+// Returns the raw name of the unit test suite associated with this csv file
 // csvFileName: filename in the format `/path/to/file/spreadsheetname - unittestfilename.csv`
-// returns unittestfilename
-function getUnitTestFileName(csvFileName) {
-    var filenames = csvFileName.split(/ - /);
-    if(filenames.length != 2) {
-        console.log("failed to split " + csvFileName)
-        return '';
-    }
-    var unitTestFileName = filenames[filenames.length - 1].replace(/\.csv/, "" );
-    return unitTestFileName;
+// returns 'spreadsheetname - unittestfilename'
+function getTestSuiteTitle(csvFileName) {
+    return csvFileName.replace(/\.csv/, "" );
 }
 
 
