@@ -1,0 +1,34 @@
+Code,Test,Test Type
+ms001,ms001 no payable function,No Payable Function
+ms002,ms002 should transfer to self has correct final balance,Same Address
+ms003,ms003 should transferFrom to self from approved account and have correct final balance,Same Address
+ms004,ms004 should transferFrom to self from approved self and have correct final balance,Same Address
+ms005,ms005 should mint to self with correct final balance,Same Address
+ms006,ms006 should approve correct allowance for self,Same Address
+ms007,ms007 should configureMinter for masterMinter,Same Address
+ms009,ms009 should configure two minters,Multiple Minters
+ms010,ms010 should configure two minters and each mint distinct amounts,Multiple Minters
+ms011,"ms011 should configure two minters, each minting distinct amounts and then remove one minter",Multiple Minters
+ms012,ms012 should configure two minters and adjust both allowances,Multiple Minters
+ms013,"ms013 should configure two minters, one with zero allowance fails to mint",Multiple Minters
+ms014,ms014 should configure two minters and fail to mint when paused,Multiple Minters
+ms015,"ms015 should configure two minters, blacklist one and ensure it cannot mint, then unblacklist and ensure it can mint",Multiple Minters
+ms016,"ms016 should configure two minters, each mints to themselves and then burns certain amount",Multiple Minters
+ms018,ms018 should approve 0 token allowance with unchanged state,0 Input
+ms019,ms019 should transferFrom 0 tokens with unchanged state ,0 Input
+ms020,ms020 should transfer 0 tokens with unchanged state,0 Input
+ms036,ms036 should get allowance for same address,Same Address
+ms039 ,ms039 should return true on mint,Return Value
+ms040 ,ms040 should return true on approve,Return Value
+ms041 ,ms041 should return true on transferFrom,Return Value
+ms042 ,ms042 should return true on transfer,Return Value
+ms043 ,ms043 should return true on configureMinter,Return Value
+ms044 ,ms044 should return true on removeMinter,Return Value
+ms045,"ms045 initialized should be in slot 8, byte 21",Slot Storage
+ms046,ms046 initialized should be 0 before initialization,Slot Storage
+ms047 -p,ms047 configureMinter works on amount=2^256-1,2^256-1 Input
+ms048 -p,ms048 mint works on amount=2^256-1,2^256-1 Input
+ms049 -p,ms049 burn on works on amount=2^256-1,2^256-1 Input
+ms050 -p,ms050 approve works on amount=2^256-1,2^256-1 Input
+ms051 -p,ms051 transfer works on amount=2^256-1,2^256-1 Input
+ms052 -p,ms052 transferFrom works on amount=2^256-1,2^256-1 Input

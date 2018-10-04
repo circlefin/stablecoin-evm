@@ -1,0 +1,11 @@
+Function,Restriction,Code,Test
+changeAdmin,msg.sender == admin,nut002,nut002 should fail to switch adminAccount with non-adminAccount as caller
+upgradeTo,newImplementation is realContract,nut003,nut003 should fail to upgradeTo to null contract address
+upgradeToAndCall,newImplementation is realContract,nut004,nut004 should fail to upgradeToAndCall to null contract address
+initialize,initialized == false,nut005,nut005 should fail to initialize contract twice
+allowance,msg.sender != admin,nut006,nut006 should fail to call contract function with adminAccount 
+admin,msg.sender == admin,nut007,nut007 should fail to call proxy function with non-adminAccount
+transfer,N/A,nut008,nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken
+upgradeTo,msg.sender == admin,nut009,nut009 should fail to call upgradeTo with non-adminAccount
+upgradeToAndCall,msg.sender == admin,nut010,nut010 should fail to call updateToAndCall with non-adminAccount
+upgradeToAndCall,initialized == false,nut011,nut011 should fail to upgradeToAndCall with initialize (already set variables)

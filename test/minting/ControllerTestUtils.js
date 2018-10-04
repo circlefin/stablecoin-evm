@@ -1,5 +1,6 @@
 var BigNumber = require('bignumber.js');
 var Q = require('q');
+var clone = require('clone');
 
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
