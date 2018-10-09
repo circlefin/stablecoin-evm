@@ -5,7 +5,9 @@ var BigNumber = require('bignumber.js');
 var tokenUtils = require('./../TokenTestUtils');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
+var expectJump = tokenUtils.expectJump;
 var bigZero = tokenUtils.bigZero;
+var maxAmount = tokenUtils.maxAmount;
 
 var clone = require('clone');
 
@@ -30,6 +32,22 @@ async function run_tests(newToken, accounts) {
         expectedTokenState = [{ 'variable': 'masterMinter', 'expectedValue': mintController.address }];
     });
 
+    it('bt001 Constructor - owner is msg.sender', async function () {
+        var newMintController = await MintController.new(token.address, {from: Accounts.arbitraryAccount});
+        var owner = await newMintController.owner();
+        assert.equal(owner, Accounts.arbitraryAccount);
+    });
+
+    it('bt002 transferOwnership works when owner is msg.sender', async function () {
+        await mintController.transferOwnership(Accounts.arbitraryAccount, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.owner = Accounts.arbitraryAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt003 transferOwnership reverts when owner is not msg.sender', async function () {
+        await expectRevert(mintController.transferOwnership(Accounts.arbitraryAccount, {from: Accounts.arbitraryAccount}));
+    });
+
     it('bt004 configureController works when owner is msg.sender', async function () {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
@@ -38,6 +56,17 @@ async function run_tests(newToken, accounts) {
 
     it('bt005 configureController reverts when owner is not msg.sender', async function () {
         await expectRevert(mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.arbitraryAccount}));
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt006 setMinterManager works when owner is msg.sender', async function () {
+        await mintController.setMinterManager(Accounts.arbitraryAccount, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.minterManager = Accounts.arbitraryAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt007 setMinterManager reverts when owner is not msg.sender', async function () {
+        await expectRevert(mintController.setMinterManager(Accounts.arbitraryAccount, {from: Accounts.arbitraryAccount}));
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
@@ -63,6 +92,69 @@ async function run_tests(newToken, accounts) {
         await expectRevert(mintController.removeController(Accounts.controller1Account, {from: Accounts.arbitraryAccount}));
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
+
+    it('bt010 removeMinter reverts when msg.sender is not a controller', async function () {
+        await expectRevert(mintController.removeMinter({from: Accounts.controller1Account}));
+    });
+
+    it('bt011 removeMinter sets minters[M] to 0', async function () {
+        // add a minter
+        var amount = 789;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        // remove minter
+        await mintController.removeMinter({from: Accounts.controller1Account});
+        expectedTokenState.pop();
+        expectedTokenState.pop();
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt012 configureMinter reverts when msg.sender is not a controller', async function () {
+        await expectRevert(mintController.configureMinter(50, {from: Accounts.controller1Account}));
+    });
+
+    it('bt013 configureMinter works when controllers[msg.sender]=M', async function () {
+        // add a controller
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+
+        // now configure minter
+        var amount = 6789;
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt014 incrementMinterAllowance reverts if msg.sender is not a controller', async function () {
+        await expectRevert(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account}));
+    });
+
+    it('bt015 incrementMinterAllowance works when controllers[msg.sender]=M', async function () {
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        // now configure minter
+        var amount = 6789;
+        await mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
 
     it('bt016 Constructor sets all controllers to 0', async function () {
          await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
@@ -128,6 +220,241 @@ async function run_tests(newToken, accounts) {
          await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
+    it('bt024 Constructor sets minterManager', async function () {
+        var minterManagerAddress = await mintController.minterManager();
+        assert.equal(token.address, minterManagerAddress);
+    });
+
+    it('bt025 setMinterManager(x) works when existing minterManager = 0', async function () {
+        await mintController.setMinterManager(zeroAddress, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.minterManager = zeroAddress;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        await mintController.setMinterManager(Accounts.arbitraryAccount, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.minterManager = Accounts.arbitraryAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt026 setMinterManager(x) works when existing minterManager != 0', async function () {
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        await mintController.setMinterManager(Accounts.arbitraryAccount, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.minterManager = Accounts.arbitraryAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt027 setMinterManager(x) works when x = msg.sender', async function () {
+        await mintController.setMinterManager(Accounts.mintOwnerAccount, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.minterManager = Accounts.mintOwnerAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt028 setMinterManager(x) works when x = minterManager', async function () {
+        var minterManagerAddress = await mintController.minterManager();
+        await mintController.setMinterManager(minterManagerAddress, {from: Accounts.mintOwnerAccount});
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt030 removeMinter reverts when minterManager is 0', async function () {
+         // set minterManager to 0
+         await mintController.setMinterManager(zeroAddress, {from:Accounts.mintOwnerAccount});
+         expectedMintControllerState.minterManager = zeroAddress;
+         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+         // configure minter will fail with any args
+         await(expectRevert(mintController.removeMinter({from: Accounts.controller1Account})));
+    });
+
+    it('bt031 removeMinter reverts when minterManager is a user account', async function () {
+         // set minterManager to user account
+         await mintController.setMinterManager(Accounts.arbitraryAccount, {from:Accounts.mintOwnerAccount});
+         expectedMintControllerState.minterManager = Accounts.arbitraryAccount;
+         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+         // configure minter will fail with any args
+         await(expectRevert(mintController.removeMinter({from: Accounts.controller1Account})));
+    });
+
+    it('bt032 removeMinter works when minterManager is ok', async function () {
+        // add a minter
+        var amount = 3;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        // remove minter
+        await mintController.removeMinter({from: Accounts.controller1Account});
+        expectedTokenState.pop();
+        expectedTokenState.pop();
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt033 configureMinter reverts when minterManager is 0', async function () {
+         // set minterManager to 0
+         await mintController.setMinterManager(zeroAddress, {from:Accounts.mintOwnerAccount});
+         expectedMintControllerState.minterManager = zeroAddress;
+         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+         // configure minter will fail with any args
+         await(expectRevert(mintController.configureMinter(50, {from: Accounts.controller1Account})));
+    });
+
+    it('bt034 configureMinter reverts when minterManager is a user account', async function () {
+         // set minterManager to user account
+         await mintController.setMinterManager(Accounts.arbitraryAccount, {from:Accounts.mintOwnerAccount});
+         expectedMintControllerState.minterManager = Accounts.arbitraryAccount;
+         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+         // configure minter will fail with any args
+         await(expectRevert(mintController.configureMinter(50, {from: Accounts.controller1Account})));
+    });
+
+    it('bt035 configureMinter works when minterManager is ok', async function () {
+        var amount = 456;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt036 incrementMinterAllowance reverts when minterManager is 0', async function () {
+         // set minterManager to zero
+         await mintController.setMinterManager(zeroAddress, {from:Accounts.mintOwnerAccount});
+         expectedMintControllerState.minterManager = zeroAddress;
+         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+         // incrementMinterAllowance will fail with any args
+         await(expectRevert(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account})));
+    });
+
+    it('bt037 incrementMinterAllowance reverts when minterManager is a user account', async function () {
+         // set minterManager to user account
+         await mintController.setMinterManager(Accounts.arbitraryAccount, {from:Accounts.mintOwnerAccount});
+         expectedMintControllerState.minterManager = Accounts.arbitraryAccount;
+         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+         // incrementMinterAllowance will fail with any args
+         await(expectRevert(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account})));
+    });
+
+    it('bt038 incrementMinterAllowance works when minterManager is ok', async function () {
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        // now incrementMinterAllowance
+        var amount = 45;
+        await mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt039 configureMinter(M, amt) works when minterManager.isMinter(M)=false', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var isMinter = await minterManager.isMinter(Accounts.minterAccount);
+        assert.isFalse(isMinter);
+
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt040 configureMinter(M, amt) works when minterManager.isMinter(M)=true', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var isMinter = await minterManager.isMinter(Accounts.minterAccount);
+        assert.isTrue(isMinter);
+
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt041 removeMinter(M) works when minterManager.isMinter(M)=false', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var isMinter = await minterManager.isMinter(Accounts.minterAccount);
+        assert.isFalse(isMinter);
+
+        await mintController.removeMinter({from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt042 removeMinter(M) works when minterManager.isMinter(M)=true', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var isMinter = await minterManager.isMinter(Accounts.minterAccount);
+        assert.isTrue(isMinter);
+
+        await mintController.removeMinter({from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt043 incrementMinterAllowance(M, amt) reverts when minterManager.isMinter(M)=false', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var isMinter = await minterManager.isMinter(Accounts.minterAccount);
+        assert.isFalse(isMinter);
+
+        await expectRevert(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}));
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt044 incrementMinterAllowance(M, amt) works when minterManager.isMinter(M)=true', async function () {
+        var amount = 65424;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var isMinter = await minterManager.isMinter(Accounts.minterAccount);
+        assert.isTrue(isMinter);
+
+        await mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
     it('bt045 constructor - minterManager.isMinter[ALL] is false', async function () {
         var minterManager = FiatToken.at(await mintController.minterManager());
 
@@ -154,6 +481,148 @@ async function run_tests(newToken, accounts) {
         }
     });
 
+    it('bt047 incrementMinterAllowance(M,amt) works when minterAllowance is 0', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
+        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(0)));
+
+        await mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt048 incrementMinterAllowance(M, amt) works when minterAllowance > 0', async function () {
+        var initialAmount = 987341;
+        var incrementAmount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(initialAmount, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
+        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(initialAmount)));
+
+        await mintController.incrementMinterAllowance(incrementAmount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(initialAmount + incrementAmount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+   it('bt049 incrementMinterAllowance(M,amt) reverts when minterAllowance[M] + amt > 2^256', async function () {
+        var initialAmount = "0x" + ((new BigNumber(maxAmount)).minus(new BigNumber(45))).toString(16);
+        var incrementAmount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(initialAmount, {from: Accounts.controller1Account});
+
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(initialAmount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        await expectJump(mintController.incrementMinterAllowance(incrementAmount, {from: Accounts.controller1Account}));
+
+    });
+
+   it('bt050 configureMinter(M,amt) works when minterAllowance=0', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
+        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(0)));
+
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt051 configureMinter(M,amt) works when minterAllowance>0', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
+        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(amount)));
+
+        await mintController.configureMinter(2* amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(2*amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt052 configureMinter(M,amt) works when amt+minterAllowance > 2^256', async function () {
+        var amount = 64;
+        var minterAllowance = maxAmount;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(maxAmount, {from: Accounts.controller1Account});
+
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt053 removeMinter works when the minterAllowance is 0', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(0, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
+        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(0)));
+
+        await mintController.removeMinter({from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt054 removeMinter works when the minterAllowance is not zero', async function () {
+        var amount = 64;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+
+        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
+        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(amount)));
+
+        await mintController.removeMinter({from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('bt055 removeMinter works when the minterAllowance is big', async function () {
+        var amount = maxAmount;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(maxAmount, {from: Accounts.controller1Account});
+
+        await mintController.removeMinter({from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
 }
 
 var testWrapper = require('./../TestWrapper');
