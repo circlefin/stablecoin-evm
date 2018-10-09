@@ -215,7 +215,7 @@ async function run_tests(newToken, accounts) {
          expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
          await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
-         // now set controllers[controller1Account]=arbitraryAccount
+         // now set controllers[controller1Account]=minterAccount
          await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
          await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });

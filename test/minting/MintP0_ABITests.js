@@ -25,14 +25,8 @@ var zeroAddress = "0x0000000000000000000000000000000000000000";
 var abiUtils = require('./../ABIUtils');
 var makeRawTransaction = abiUtils.makeRawTransaction;
 var sendRawTransaction = abiUtils.sendRawTransaction;
-var functionSignature = abiUtils.functionSignature;
-var encodeAddress = abiUtils.encodeAddress;
-var encodeUint = abiUtils.encodeUint;
-var msgData0 = abiUtils.msgData0;
 var msgData = abiUtils.msgData;
 var msgData1 = abiUtils.msgData1;
-var msgData2 = abiUtils.msgData2;
-var msgData3 = abiUtils.msgData3;
 
 async function run_tests(newToken, accounts) {
 
