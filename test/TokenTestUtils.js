@@ -9,6 +9,7 @@ var BigNumber = require('bignumber.js');
 var trueInStorageFormat = "0x01";
 var bigZero = new BigNumber(0);
 var bigHundred = new BigNumber(100);
+var maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 var Q = require('q');
@@ -963,4 +964,5 @@ module.exports = {
     encodeCall: encodeCall,
     getInitializedV1: getInitializedV1,
     getAdmin: getAdmin,
+    maxAmount: maxAmount,
 };

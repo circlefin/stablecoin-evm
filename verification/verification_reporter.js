@@ -184,18 +184,6 @@ function verification_reporter (runner) {
         }
     }
 
-    // Print out any tests that are included in UnitTestCompleteness tab but
-    // missing from the test suite.
-    // TODO: fix completeness spreadshet
- /*   if (!_.isEmpty(spreadsheet.completeness)) {
-      console.log('\n' + red_x + color('bright fail',
-      ' UnitTestCompleteness tab includes tests that are not present in test suite:')
-      + '\n' + Object.keys(spreadsheet.completeness).toString());
-    } else {
-      console.log(green_ok + color('bright pass',
-      ' Test suite suite contains all tests in UnitTestCompleteness tab.'));
-    }
-    delete spreadsheet.completeness;*/
     // If all the tests in a tab are present, 'cross-off' tab by deleting.
     for(var testSuite in missingUnitTests) {
       if (_.isEmpty(missingUnitTests[testSuite])) {
@@ -205,7 +193,7 @@ function verification_reporter (runner) {
 
     // Do not report missing unit tests for files that did not run
     for(var testSuite in missingUnitTests){
-        if(! _.has(executedTestSuites, testSuite) && ! testSuite.match(/Completeness/)) {
+        if(! _.has(executedTestSuites, testSuite) /* && ! testSuite.match(/Completeness/)*/) {
             console.log(color('fail', 'Did not run: ' + testSuite));
             delete missingUnitTests[testSuite];
         }
