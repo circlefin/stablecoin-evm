@@ -51,11 +51,10 @@ contract Controller is Ownable {
 
     /**
      * @dev set the controller of a particular _worker
-     * To disable the controller, call configureController(_controller, address(0))
-     * Since a controller manages a single worker, assigning it address(0) is equivalent to
-     * removing _controller from the list of active controllers.
+     * Argument _worker must not be 0x00, call removeController(_controller) instead.
      */
     function configureController(address _controller, address _worker) onlyOwner public returns (bool) {
+        require(_worker != address(0));
         controllers[_controller] = _worker;
         emit ControllerConfigured(_controller, _worker);
         return true;
