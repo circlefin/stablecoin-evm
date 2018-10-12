@@ -25,4 +25,7 @@ import './MintController.sol';
 
 contract MasterMinter is MintController {
 
+    constructor(address _minterManager) MintController(_minterManager) public {
+
+    }
 }

@@ -19,7 +19,7 @@ async function run_tests(newToken, accounts) {
 
     beforeEach('Make fresh token contract', async function () {
         rawToken = await newToken();
-        tokenConfig = await initializeTokenWithProxyAndMintController(rawToken);
+        tokenConfig = await initializeTokenWithProxyAndMintController(rawToken, MintController);
         token = tokenConfig.token;
         mintController = tokenConfig.mintController;
         expectedMintControllerState = clone(tokenConfig.customState);

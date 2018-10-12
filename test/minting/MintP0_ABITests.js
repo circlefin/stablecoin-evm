@@ -1,4 +1,5 @@
 var MintController = artifacts.require('minting/MintController');
+var MasterMinter = artifacts.require('minting/MasterMinter');
 var FiatToken = artifacts.require('FiatTokenV1');
 
 var BigNumber = require('bignumber.js');
@@ -28,11 +29,19 @@ var sendRawTransaction = abiUtils.sendRawTransaction;
 var msgData = abiUtils.msgData;
 var msgData1 = abiUtils.msgData1;
 
-async function run_tests(newToken, accounts) {
+async function run_tests_MintController(newToken, accounts) {
+    run_MINT_tests(newToken, MintController, accounts);
+}
+
+async function run_tests_MasterMinter(newToken, accounts) {
+    run_MINT_tests(newToken, MasterMinter, accounts);
+}
+
+async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
     beforeEach('Make fresh token contract', async function () {
         rawToken = await newToken();
-        tokenConfig = await initializeTokenWithProxyAndMintController(rawToken);
+        tokenConfig = await initializeTokenWithProxyAndMintController(rawToken, MintControllerArtifact);
         token = tokenConfig.token;
         mintController = tokenConfig.mintController;
         expectedMintControllerState = clone(tokenConfig.customState);
@@ -63,8 +72,6 @@ async function run_tests(newToken, accounts) {
 }
 
 var testWrapper = require('./../TestWrapper');
-testWrapper.execute('MINTp0_ABITests', run_tests);
+testWrapper.execute('MINTp0_ABITests MintController', run_tests_MintController);
+testWrapper.execute('MINTp0_ABITests MasterMinter', run_tests_MasterMinter);
 
-module.exports = {
-  run_tests: run_tests,
-}

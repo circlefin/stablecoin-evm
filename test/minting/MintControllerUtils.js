@@ -19,8 +19,6 @@ function MintControllerState(owner, controllers, minterManager) {
     this.controllers = controllers;
     this.minterManager = minterManager;
     this.checkState = async function(mintController) {await checkMintControllerState(mintController, this)};
-//    this.clone = function(){return clone(this);};
-//    this.clone = function(){return new MintControllerState(this.owner, clone(this.controllers), this.minterManager)};
 }
 
 // Default state of MintController when it is deployed
@@ -42,9 +40,9 @@ async function getActualMintControllerState(mintController, accounts) {
 
 // Deploys a FiatTokenV1 with a MintController contract as the masterMinter.
 // Uses the same workflow we would do in production - first deploy FiatToken then set the masterMinter.
-async function initializeTokenWithProxyAndMintController(rawToken) {
+async function initializeTokenWithProxyAndMintController(rawToken, MintControllerArtifact) {
    var tokenConfig = await initializeTokenWithProxy(rawToken);
-   var mintController = await MintController.new(tokenConfig.token.address, {from:Accounts.mintOwnerAccount});
+   var mintController = await MintControllerArtifact.new(tokenConfig.token.address, {from:Accounts.mintOwnerAccount});
    await tokenConfig.token.updateMasterMinter(mintController.address, {from:Accounts.tokenOwnerAccount});
     var tokenConfigWithMinter = {
         proxy: tokenConfig.proxy,
