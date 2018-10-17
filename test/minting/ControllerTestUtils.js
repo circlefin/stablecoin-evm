@@ -1,6 +1,5 @@
 var BigNumber = require('bignumber.js');
 var Q = require('q');
-var clone = require('clone');
 
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
@@ -18,7 +17,6 @@ var getAccountState = AccountUtils.getAccountState;
 function ControllerState(owner, controllers) {
     this.owner = owner;
     this.controllers = controllers;
-    this.checkState = checkControllerState;
     this.checkState = async function(controllerContract) {await checkControllerState(controllerContract, this)};
 }
 
