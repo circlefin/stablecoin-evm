@@ -221,28 +221,6 @@ function recursiveSetAccountDefault(accounts, value) {
 // Creates a state object, with default values replaced by
 // customVars where appropriate.
 function buildExpectedState(token, customVars) {
-/*    // set each variable's default value
-    var expectedState = {
-        'name': name,
-        'symbol': symbol,
-        'currency': currency,
-        'decimals': new BigNumber(decimals),
-        'masterMinter': Accounts.masterMinterAccount,
-        'pauser': Accounts.pauserAccount,
-        'blacklister': Accounts.blacklisterAccount,
-        'tokenOwner': Accounts.tokenOwnerAccount,
-        'proxiedTokenAddress': token.proxiedTokenAddress,
-        'initializedV1': trueInStorageFormat,
-        'upgrader': Accounts.proxyOwnerAccount,
-        'balances': setAccountDefault(Accounts, bigZero),
-        'allowance': recursiveSetAccountDefault(Accounts, bigZero),
-        'totalSupply': bigZero,
-        'isAccountBlacklisted': setAccountDefault(Accounts, false),
-        'isAccountMinter': setAccountDefault(Accounts, false),
-        'minterAllowance': setAccountDefault(Accounts, bigZero),
-        'paused': false
-    };*/
-
     // for each item in customVars, set the item in expectedState
     var expectedState = clone(fiatTokenEmptyState);
     expectedState.proxiedTokenAddress = token.proxiedTokenAddress;
@@ -704,4 +682,5 @@ module.exports = {
     getInitializedV1: getInitializedV1,
     getAdmin: getAdmin,
     maxAmount: maxAmount,
+    fiatTokenEmptyState,
 };
