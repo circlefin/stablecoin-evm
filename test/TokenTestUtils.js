@@ -172,7 +172,7 @@ function checkBurnEvents(burning, amount, burner) {
 }
 
 function TokenState(name, symbol, currency, decimals,
-    masterMinter, pauser, blacklister, tokenOwner, upgrader,
+    masterMinter, pauser, blacklister, tokenOwner, proxyOwner,
     initializedV1,
     balances, allowance, totalSupply, isAccountBlacklisted, isAccountMinter, minterAllowance, paused) {
     this.name = name;
@@ -185,7 +185,7 @@ function TokenState(name, symbol, currency, decimals,
     this.tokenOwner = tokenOwner;
     this.proxiedTokenAddress = bigZero;
     this.initializedV1 = initializedV1;
-    this.upgrader = upgrader;
+    this.proxyOwner = proxyOwner;
     this.balances = balances;
     this.allowance = allowance;
     this.totalSupply = totalSupply;
@@ -198,7 +198,7 @@ function TokenState(name, symbol, currency, decimals,
 var fiatTokenEmptyState = new TokenState(
     name, symbol, currency, new BigNumber(decimals),
     Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount,
-    Accounts.proxyOwnerAccount, // upgrader
+    Accounts.proxyOwnerAccount, // proxyOwnerAccount
     trueInStorageFormat, // initializedV1
     setAccountDefault(Accounts, bigZero), // balances
     recursiveSetAccountDefault(Accounts, bigZero), // allowances
@@ -263,7 +263,7 @@ async function checkVariables(_tokens, _customVars) {
         assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
 
         // Check that sum of individual balances equals totalSupply
-        var accounts = [Accounts.arbitraryAccount, Accounts.masterMinterAccount, Accounts.minterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, Accounts.upgraderAccount];
+        var accounts = [Accounts.arbitraryAccount, Accounts.masterMinterAccount, Accounts.minterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, Accounts.proxyOwnerAccount];
         var balanceSum = bigZero;
         var x;
         for (x = 0; x < accounts.length; x++) {
@@ -340,7 +340,7 @@ async function getActualState(token) {
         blacklister,
         tokenOwner,
         proxiedTokenAddress,
-        upgrader,
+        proxyOwner,
         initializedV1,
         balances,
         allowances,
@@ -360,7 +360,7 @@ async function getActualState(token) {
             'blacklister': blacklister,
             'tokenOwner': tokenOwner,
             'proxiedTokenAddress': proxiedTokenAddress,
-            'upgrader': upgrader,
+            'proxyOwner': proxyOwner,
             'initializedV1': initializedV1,
             'balances': balances,
             'allowance': allowances,

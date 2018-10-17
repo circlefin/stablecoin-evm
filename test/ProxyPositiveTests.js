@@ -170,7 +170,7 @@ async function run_tests(newToken, accounts) {
   it('upt004 should update proxy adminAccount with previous adminAccount', async function () {
     await proxy.changeAdmin(Accounts.masterMinterAccount, {from: Accounts.proxyOwnerAccount});
     customVars = [
-      { 'variable': 'upgrader', 'expectedValue': Accounts.masterMinterAccount},
+      { 'variable': 'proxyOwner', 'expectedValue': Accounts.masterMinterAccount},
     ]
     await checkVariables([token], [customVars]);
   });
@@ -242,7 +242,7 @@ async function run_tests(newToken, accounts) {
   });
     
   it('upt009 should check that admin is set correctly by proxy constructor', async function() {
-    assert.equal(await getAdmin(token), Accounts.upgraderAccount);
+    assert.equal(await getAdmin(token), Accounts.proxyOwnerAccount);
   });
 
   it('upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result', async function () {
@@ -262,7 +262,7 @@ async function run_tests(newToken, accounts) {
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it('upt012 should upgradeToAndCall while upgrader is blacklisted', async function () {
+  it('upt012 should upgradeToAndCall while proxyOwner is blacklisted', async function () {
     await token.blacklist(Accounts.proxyOwnerAccount, {from: Accounts.blacklisterAccount});
 
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
@@ -271,7 +271,7 @@ async function run_tests(newToken, accounts) {
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
 
     customVars = [
-      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true, },
+      { 'variable': 'isAccountBlacklisted.proxyOwnerAccount', 'expectedValue': true, },
       { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
     ];
     await checkVariables([newProxiedToken], [customVars]);
