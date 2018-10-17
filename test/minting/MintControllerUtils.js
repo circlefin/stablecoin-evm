@@ -1,6 +1,5 @@
 var BigNumber = require('bignumber.js');
 var bigZero = new BigNumber(0);
-var clone = require('clone');
 
 var tokenUtils = require('./../TokenTestUtils');
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
