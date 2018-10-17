@@ -22,7 +22,6 @@ var Accounts = {
     controller2Account: "0xfa2435eacf10ca62ae6787ba2fb044f8733ee843", // accounts[12]
     issuerOwnerAccount: "0x64e078a8aa15a41b85890265648e965de686bae6", // accounts[13]
     proxyOwnerAccount: "0x2f560290fef1b3ada194b6aa9c40aa71f8e95598", // accounts[14]
-    upgraderAccount: "0x2f560290fef1b3ada194b6aa9c40aa71f8e95598" // accounts[14] upgraderAccount is alias for proxyOwnerAccount
 };
 
 // named list of known private keys
@@ -42,7 +41,6 @@ var AccountPrivateKeys = {
     controller2PrivateKey: "9b9c613a36396172eab2d34d72331c8ca83a358781883a535d2941f66db07b24", // accounts[12]
     issuerOwnerPrivateKey: "0874049f95d55fb76916262dc70571701b5c4cc5900c0691af75f1a8a52c8268", // accounts[13]
     proxyOwnerAccount: "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46", // accounts[14]
-    upgraderAccount: "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46" // accounts[14]
 };
 
 // Returns an object with all named account values set to the default value
