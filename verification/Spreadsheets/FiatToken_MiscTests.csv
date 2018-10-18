@@ -26,9 +26,9 @@ ms043 ,ms043 should return true on configureMinter,Return Value
 ms044 ,ms044 should return true on removeMinter,Return Value
 ms045,"ms045 initialized should be in slot 8, byte 21",Slot Storage
 ms046,ms046 initialized should be 0 before initialization,Slot Storage
-ms047 -p,ms047 configureMinter works on amount=2^256-1,2^256-1 Input
-ms048 -p,ms048 mint works on amount=2^256-1,2^256-1 Input
-ms049 -p,ms049 burn on works on amount=2^256-1,2^256-1 Input
-ms050 -p,ms050 approve works on amount=2^256-1,2^256-1 Input
-ms051 -p,ms051 transfer works on amount=2^256-1,2^256-1 Input
-ms052 -p,ms052 transferFrom works on amount=2^256-1,2^256-1 Input
+ms047,ms047 configureMinter works on amount=2^256-1,2^256-1 Input
+ms048,ms048 mint works on amount=2^256-1,2^256-1 Input
+ms049,ms049 burn on works on amount=2^256-1,2^256-1 Input
+ms050,ms050 approve works on amount=2^256-1,2^256-1 Input
+ms051,ms051 transfer works on amount=2^256-1,2^256-1 Input
+ms052,ms052 transferFrom works on amount=2^256-1,2^256-1 Input

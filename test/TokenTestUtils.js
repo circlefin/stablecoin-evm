@@ -171,6 +171,15 @@ function checkBurnEvents(burning, amount, burner) {
 
 }
 
+// Evaluate the allowance mapping on subset of accounts for efficiency
+var allowanceMappingAccounts = {
+     arbitraryAccount: Accounts.arbitraryAccount,
+     blacklisterAccount: Accounts.blacklisterAccount,
+     arbitraryAccount2: Accounts.arbitraryAccount2,
+     masterMinterAccount: Accounts.masterMinterAccount,
+     minterAccount: Accounts.minterAccount,
+};
+
 function TokenState(name, symbol, currency, decimals,
     masterMinter, pauser, blacklister, tokenOwner, proxyOwner,
     initializedV1,
@@ -201,7 +210,7 @@ var fiatTokenEmptyState = new TokenState(
     Accounts.proxyOwnerAccount, // proxyOwnerAccount
     trueInStorageFormat, // initializedV1
     setAccountDefault(Accounts, bigZero), // balances
-    recursiveSetAccountDefault(Accounts, bigZero), // allowances
+    recursiveSetAccountDefault(allowanceMappingAccounts, bigZero), // allowances
     bigZero, // totalSupply
     setAccountDefault(Accounts, false), // isAccountBlacklisted
     setAccountDefault(Accounts, false), // isAccountMinter
@@ -213,7 +222,7 @@ var fiatTokenEmptyState = new TokenState(
 function recursiveSetAccountDefault(accounts, value) {
     var result = {};
     for(var account in accounts) {
-        result[account] = setAccountDefault(Accounts, value);
+        result[account] = setAccountDefault(accounts, value);
     }
     return result;
 }
@@ -263,14 +272,14 @@ async function checkVariables(_tokens, _customVars) {
         assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
 
         // Check that sum of individual balances equals totalSupply
-        var accounts = [Accounts.arbitraryAccount, Accounts.masterMinterAccount, Accounts.minterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, Accounts.proxyOwnerAccount];
+        var accounts = Object.keys(allowanceMappingAccounts).map(accountName => allowanceMappingAccounts[accountName]);
         var balanceSum = bigZero;
         var x;
         for (x = 0; x < accounts.length; x++) {
             balanceSum = balanceSum.plus(new BigNumber(await token.balanceOf(accounts[x])));
         }
         var totalSupply = new BigNumber(await token.totalSupply())
-        assert(balanceSum.isEqualTo(totalSupply));
+        assert(balanceSum.isEqualTo(totalSupply), "sum of balances is not equal to totalSupply");
     }
 }
 
@@ -291,45 +300,33 @@ async function checkMINTp0(_contracts, _customVars) {
 
 // build up actualState object to compare to expectedState object
 async function getActualState(token) {
-    // lambda expressions to get mappings in token contract
-    var balancesMappingEval = async function(accountAddress) {
-        return await token.balanceOf(accountAddress);
-    };
+    // lambda expressions to get allowance mappings in token contract
     var allowanceMappingEval = async function(account1) {
         var myAllowances = async function(account2) {
-            return await token.allowance(account1, account2);
+            return token.allowance(account1, account2);
         }
-        return await getAccountState(myAllowances, Accounts);
-    };
-    var isAccountBlacklistedMappingEval = async function(accountAddress) {
-        return await token.isBlacklisted(accountAddress);
-    };
-    var isAccountMinterMappingEval = async function(accountAddress) {
-        return await token.isMinter(accountAddress);
-    };
-    var minterAllowanceMappingEval = async function(accountAddress) {
-        return token.minterAllowance(accountAddress);
+        return getAccountState(myAllowances, allowanceMappingAccounts);
     };
 
     return Q.all([
-        await token.name.call(),
-        await token.symbol.call(),
-        await token.currency.call(),
-        await token.decimals.call(),
-        await token.masterMinter.call(),
-        await token.pauser.call(),
-        await token.blacklister.call(),
-        await token.owner.call(),
-        await getImplementation(token),
-        await getAdmin(token),
-        await getInitializedV1(token),
-        await getAccountState(balancesMappingEval, Accounts),
-        await getAccountState(allowanceMappingEval, Accounts),
-        await token.totalSupply(),
-        await getAccountState(isAccountBlacklistedMappingEval, Accounts),
-        await getAccountState(isAccountMinterMappingEval, Accounts),
-        await getAccountState(minterAllowanceMappingEval, Accounts),
-        await token.paused()
+        token.name.call(),
+         token.symbol.call(),
+         token.currency.call(),
+         token.decimals.call(),
+         token.masterMinter.call(),
+         token.pauser.call(),
+         token.blacklister.call(),
+         token.owner.call(),
+         getImplementation(token),
+         getAdmin(token),
+         getInitializedV1(token),
+         getAccountState(token.balanceOf, Accounts),
+         getAccountState(allowanceMappingEval, allowanceMappingAccounts),
+         token.totalSupply(),
+         getAccountState(token.isBlacklisted, Accounts),
+         getAccountState(token.isMinter, Accounts),
+         getAccountState(token.minterAllowance, Accounts),
+         token.paused()
     ]).spread(function (
         name,
         symbol,

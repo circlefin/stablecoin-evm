@@ -83,7 +83,9 @@ function verification_reporter (runner) {
     var id = test.title.match(/([a-z]{2,})([0-9]+)/g);
     if (id) {
       id = id[0];
-    } else {
+    } else if(spreadsheet[suite]) {
+        // only print if the testsuite is in a spreadsheet
+        // otherwise, will print a different error later
       console.log(indent + color('pass',
       'Error parsing test title.\n'
       + indent + 'Confirm id is formatted correctly and included in test title.\n'
@@ -97,7 +99,6 @@ function verification_reporter (runner) {
     for(var completeness_suite in missingUnitTests) {
         if(completeness_suite.match(/Completeness/)){
             if(missingUnitTests[completeness_suite][id]) {
-                console.log("complete: " + id);
                 delete missingUnitTests[completeness_suite][id];
             }
         }
