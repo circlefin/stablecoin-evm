@@ -337,16 +337,16 @@ async function run_tests(newToken, accounts) {
     ]
     await checkVariables([token], [customVars]);
 
-    await token.mint(Accounts.tokenOwnerAccount, 50, {from: Accounts.minterAccount});
+    await token.mint(Accounts.arbitraryAccount2, 50, {from: Accounts.minterAccount});
     await token.blacklist(Accounts.arbitraryAccount, {from: Accounts.blacklisterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.tokenOwnerAccount', 'expectedValue': new BigNumber(50)},
+      {'variable': 'balances.arbitraryAccount2', 'expectedValue': new BigNumber(50)},
       {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
       {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
     ]
-    await expectRevert(token.transfer(Accounts.arbitraryAccount, 50, {from: Accounts.tokenOwnerAccount}));
+    await expectRevert(token.transfer(Accounts.arbitraryAccount, 50, {from: Accounts.arbitraryAccount2}));
     await checkVariables([token], [customVars]);
   });
 
