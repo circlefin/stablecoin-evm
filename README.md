@@ -1,5 +1,5 @@
 # centre-tokens
-Fiat tokens on the CENTRE network.
+Fiat tokens on the [CENTRE](https://centre.io) network.
 
 # Setup
 Tests need node v8.0.0 or higher, as they depend on async/await functionality. Interacting with eth is very async-y so await makes it much easier to write tests.
@@ -27,7 +27,7 @@ to generate test coverage on all tests run:
 
 # Contracts
 The implementation uses 2 separate contracts - a proxy contract (`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`).
-This allows upgrading the contract, as a new implentation contact can be deployed and the Proxy updated to point to it.
+This allows upgrading the contract, as a new implementation contact can be deployed and the Proxy updated to point to it.
 ## FiatToken
 The FiatToken offers a number of capabilities, which briefly are described below. There are more
 [detailed design docs](./doc/tokendesign.md) in the `doc` folder.
@@ -57,13 +57,3 @@ need the allowance increased again by the `masterMinter`.
 The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`, or `masterMinter` addresses. The `owner` can not change
 the `proxyOwner` address.
 
-# OpenZeppelin
-Contracts from OpenZeppelin version 1.10 are used where possible, with some modifications. These contracts are located
-in `contracts/thirdparty/openzepplin`. `Ownable` and `Pausable` have been modified. The other contacts are unmodified.
-
-## `Ownable` has been modified to:
-1. Remove the renounceOwnership function and OwnershipdRenounced event.
-## `Pausable` has been modified to:
-1. Add the pauser role, which controlls `pause`/`unpause`
-2. Remove `whenPaused`/`whenNotPaused` modifiers on `unpause`/`pause` methods
-3. Remove `whenPaused` as is is no longer used
