@@ -10,9 +10,8 @@ const jsdiff = require('diff');
 const colors = require('colors');
 
 // Global variables for text output.
-const green_x = color('bright pass', base_reporter.symbols.err);
 const red_x = color('bright fail', base_reporter.symbols.err);
-const green_ok = color('bright pass', base_reporter.symbols.ok);
+const green_ok = color('green', base_reporter.symbols.ok);
 const red_ok = color('bright fail', base_reporter.symbols.ok);
 const indent = '    ';
 
@@ -112,7 +111,7 @@ function verification_reporter (runner) {
 
           // If test is marked pending in spreadsheet, record for later output.
           if(spreadsheet_test.pending) {
-              console.log(indent + green_x + color('bright pass', ' pending'));
+              console.log(indent + green_ok + color('green', ' pending'));
               if(! pending[suite]) {
                 pending[suite] = {};
               }
@@ -120,7 +119,7 @@ function verification_reporter (runner) {
 
           // If test descriptions match, mark green.
           } else if (spreadsheet_test.description == test_ran) {
-            console.log(indent + green_x);
+            console.log(indent + green_ok);
 
           // If test is in spreadsheet, but descriptions don't match.
           } else {
@@ -173,7 +172,7 @@ function verification_reporter (runner) {
     console.log('\n\nSpreadsheet Verification Summary:\n');
     // If there are pending tests included in the test suite...
     if (!_.isEmpty(pending)) {
-      console.log(color('bright pass', 'Pending Tests:'));
+      console.log(color('green', 'Pending Tests:'));
       console.log('The following tests are included in the test suite, but\n'
       + 'marked pending in the spreadsheet (delete -p flag once merged): ');
       console.log(util.inspect(pending, { showHidden: false, depth: null }));
@@ -192,17 +191,29 @@ function verification_reporter (runner) {
       }
     }
 
-    // Do not report missing unit tests for files that did not run
+    // Report missing unit tests for files that were executed
     for(var testSuite in missingUnitTests){
-        if(! _.has(executedTestSuites, testSuite) /* && ! testSuite.match(/Completeness/)*/) {
+        if(! _.has(executedTestSuites, testSuite)) {
             console.log(color('fail', 'Did not run: ' + testSuite));
             delete missingUnitTests[testSuite];
         }
     }
 
+    // report missing Completeness unit tests ONLY if every test file ran
+    var onlyCompletenessTestsAreMissing = true;
+    for(var testSuite in missingUnitTests){
+        if(! testSuite.match(/Completeness/))
+            onlyCompletenessTestsAreMissing = false;
+    }
+    if(onlyCompletenessTestsAreMissing){
+        for(var testSuite in missingUnitTests){
+           console.log(color('fail', 'Did not run: ' + testSuite));
+        }
+    }
+
     // If all tests are 'crossed-off', print success.
     if (_.isEmpty(missingUnitTests)) {
-      console.log('\n' + green_ok + color('bright pass',
+      console.log('\n' + green_ok + color('green',
       ' Test run contains all tests in spreadsheet.'));
     } else {
       // If not all tests are 'crossed-off', print the tests remaining.

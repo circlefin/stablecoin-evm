@@ -1,6 +1,6 @@
 File,Function,Arguments,Code,Description
 Ownable.sol,transferOwnership,newOwner == msg.sender,arg000,arg000 transferOwnership(msg.sender) works
-Ownable.sol,transferOwnership,newOwner == 0,arg001,arg001 transferOwnership(0) reverts
+Ownable.sol,transferOwnership,newOwner == 0,arg001,arg001 transferOwnership(0) works
 Ownable.sol,transferOwnership,newOwner == owner,arg002,arg002 transferOwnership(owner) works
 Controller.sol,configureController,newController == 0,arg003,"arg003 configureController(0, M) works"
 Controller.sol,configureController,newController == msg.sender,arg004,"arg004 configureController(msg.sender, M) works"
