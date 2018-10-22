@@ -1,6 +1,6 @@
 # MasterMinter contract
 The MasterMinter is a governance contract.  It delegates the functionality
-of the `masterMinter` role in the Centre USDC contract to multiple addresses.
+of the `masterMinter` role in the CENTRE USDC contract to multiple addresses.
 (The `masterMinter` role can add and remove minters from a FiatToken and set their 
 allowances.)  The MasterMinter contract delegates the minter management capability to
 `controllers`. Each `controller` manages exactly one `minter`, and a single `minter`
@@ -32,7 +32,7 @@ to the address of the `MasterMinter` contract.  This enables the `MasterMinter`
 contract to call minter management functions on the FiatToken contract:
 
 - `configureMinter(minter, allowance)` - Enables the `minter` and sets its minting allowance.
-- `removeMinter(minter)` - Disables the `minter` and sets its mintingallowance to 0.
+- `removeMinter(minter)` - Disables the `minter` and sets its minting allowance to 0.
 - `isMinter(minter)` - Returns `true` if the `minter` is enabled, and `false` otherwise.
 - `minterAllowance(minter)` - Returns the  minting allowance of the `minter`.
 
@@ -90,7 +90,7 @@ We recommend assigning at least <b>two</b> `controllers` to each `minter`.
 The private keys to the `AllowanceController` and `SecurityController` should stay in cold storage.
 This configuration lets the Controller keep multiple warm `incrementMinterAllowance` transactions on hand,
 as well as the `removeMinter` transaction in case of a problem.  Broadcasting the `removeMinter` transaction
-will cause all future `incrementMinterAllowance` transactions to `throw`.  Since there two types
+will cause all future `incrementMinterAllowance` transactions to `throw`.  Since the two types
 of transactions are managed by different addresses, there is no need to worry about nonce management.
 
 
