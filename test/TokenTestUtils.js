@@ -171,52 +171,26 @@ function checkBurnEvents(burning, amount, burner) {
 
 }
 
-// Evaluate the allowance mapping on subset of accounts for efficiency
-var allowanceMappingAccounts = {
-     arbitraryAccount: Accounts.arbitraryAccount,
-     blacklisterAccount: Accounts.blacklisterAccount,
-     arbitraryAccount2: Accounts.arbitraryAccount2,
-     masterMinterAccount: Accounts.masterMinterAccount,
-     minterAccount: Accounts.minterAccount,
+var fiatTokenEmptyState = {
+    "name": name,
+    "symbol": symbol,
+    "currency": currency,
+    "decimals": new BigNumber(decimals),
+    "masterMinter": Accounts.masterMinterAccount,
+    "pauser": Accounts.pauserAccount,
+    "blacklister" : Accounts.blacklisterAccount,
+    "tokenOwner": Accounts.tokenOwnerAccount,
+    "proxiedTokenAddress": bigZero,
+    "initializedV1": trueInStorageFormat,
+    "proxyOwner": Accounts.proxyOwnerAccount,
+    "balances": setAccountDefault(Accounts, bigZero),
+    "allowance": recursiveSetAccountDefault(Accounts, bigZero),
+    "totalSupply": bigZero,
+    "isAccountBlacklisted": setAccountDefault(Accounts, false),
+    "isAccountMinter": setAccountDefault(Accounts, false),
+    "minterAllowance": setAccountDefault(Accounts, bigZero),
+    "paused": false,
 };
-
-function TokenState(name, symbol, currency, decimals,
-    masterMinter, pauser, blacklister, tokenOwner, proxyOwner,
-    initializedV1,
-    balances, allowance, totalSupply, isAccountBlacklisted, isAccountMinter, minterAllowance, paused) {
-    this.name = name;
-    this.symbol = symbol;
-    this.currency = currency;
-    this.decimals = decimals;
-    this.masterMinter = masterMinter;
-    this.pauser = pauser;
-    this.blacklister = blacklister;
-    this.tokenOwner = tokenOwner;
-    this.proxiedTokenAddress = bigZero;
-    this.initializedV1 = initializedV1;
-    this.proxyOwner = proxyOwner;
-    this.balances = balances;
-    this.allowance = allowance;
-    this.totalSupply = totalSupply;
-    this.isAccountBlacklisted = isAccountBlacklisted;
-    this.isAccountMinter = isAccountMinter;
-    this.minterAllowance = minterAllowance;
-    this.paused = paused;
-}
-
-var fiatTokenEmptyState = new TokenState(
-    name, symbol, currency, new BigNumber(decimals),
-    Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount,
-    Accounts.proxyOwnerAccount, // proxyOwnerAccount
-    trueInStorageFormat, // initializedV1
-    setAccountDefault(Accounts, bigZero), // balances
-    recursiveSetAccountDefault(allowanceMappingAccounts, bigZero), // allowances
-    bigZero, // totalSupply
-    setAccountDefault(Accounts, false), // isAccountBlacklisted
-    setAccountDefault(Accounts, false), // isAccountMinter
-    setAccountDefault(Accounts, bigZero), // minterAllowance
-    false // paused
-);
 
 
 function recursiveSetAccountDefault(accounts, value) {
@@ -272,7 +246,7 @@ async function checkVariables(_tokens, _customVars) {
         assertDiff.deepEqual(actualState, expectedState, "difference between expected and actual state");
 
         // Check that sum of individual balances equals totalSupply
-        var accounts = Object.keys(allowanceMappingAccounts).map(accountName => allowanceMappingAccounts[accountName]);
+        var accounts = Object.keys(Accounts).map(accountName => Accounts[accountName]);
         var balanceSum = bigZero;
         var x;
         for (x = 0; x < accounts.length; x++) {
@@ -305,7 +279,7 @@ async function getActualState(token) {
         var myAllowances = async function(account2) {
             return token.allowance(account1, account2);
         }
-        return getAccountState(myAllowances, allowanceMappingAccounts);
+        return getAccountState(myAllowances, Accounts);
     };
 
     return Q.all([
@@ -321,7 +295,7 @@ async function getActualState(token) {
          getAdmin(token),
          getInitializedV1(token),
          getAccountState(token.balanceOf, Accounts),
-         getAccountState(allowanceMappingEval, allowanceMappingAccounts),
+         getAccountState(allowanceMappingEval, Accounts),
          token.totalSupply(),
          getAccountState(token.isBlacklisted, Accounts),
          getAccountState(token.isMinter, Accounts),
