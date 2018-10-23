@@ -54,6 +54,17 @@ function setAccountDefault(accounts, defaultValue) {
     return result;
 }
 
+// Returns an object with all named account values set to
+// an object containing all named account values set to default
+// e.g. sets {owner: setAccountDefault(accounts, 0), minter: setAccountDefault(accounts, 0),...}
+function recursiveSetAccountDefault(accounts, value) {
+    var result = {};
+    for(var account in accounts) {
+        result[account] = setAccountDefault(accounts, value);
+    }
+    return result;
+}
+
 // return an expectedState that combines customState with the emptyState
 function buildExpectedPartialState(emptyState, customState, ignoreExtraCustomVars) {
     // for each item in customVars, set the item in expectedState
@@ -108,7 +119,7 @@ async function checkState(_tokens, _customVars, emptyState, getActualState, acco
 // accountQuery: an async function that takes as input an address and
 //       queries the blockchain for a result
 // accounts: an object containing account addresses.  Eg: {owner: 0xffad9033, minter: 0x45289432}
-// returns an object containing the results of calling mappingQuery on each account
+// returns an object containing the results of calling accountQuery on each account
 //        E.g. {owner: value1, minter: value2}
 async function getAccountState(accountQuery, accounts) {
     // create an array of promises
@@ -137,6 +148,7 @@ module.exports = {
     Accounts: Accounts,
     AccountPrivateKeys: AccountPrivateKeys,
     setAccountDefault: setAccountDefault,
+    recursiveSetAccountDefault: recursiveSetAccountDefault,
     buildExpectedPartialState: buildExpectedPartialState,
     checkState: checkState,
     getAccountState: getAccountState,

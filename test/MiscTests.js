@@ -239,7 +239,6 @@ async function run_tests(newToken, accounts) {
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
     ];
     await expectRevert(token.mint(Accounts.arbitraryAccount2, mintAmount, { from: Accounts.arbitraryAccount }));
-    //await expectRevert(token.mint(Accounts.arbitraryAccount2, 0, { from: Accounts.arbitraryAccount }));
     await checkVariables([token], [customVars]);
   });
 

@@ -23,6 +23,7 @@ var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 var AccountUtils = require('./AccountUtils');
 var Accounts = AccountUtils.Accounts;
 var setAccountDefault = AccountUtils.setAccountDefault;
+var recursiveSetAccountDefault = AccountUtils.recursiveSetAccountDefault;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
 
@@ -191,15 +192,6 @@ var fiatTokenEmptyState = {
     "minterAllowance": setAccountDefault(Accounts, bigZero),
     "paused": false,
 };
-
-
-function recursiveSetAccountDefault(accounts, value) {
-    var result = {};
-    for(var account in accounts) {
-        result[account] = setAccountDefault(accounts, value);
-    }
-    return result;
-}
 
 // Creates a state object, with default values replaced by
 // customVars where appropriate.
