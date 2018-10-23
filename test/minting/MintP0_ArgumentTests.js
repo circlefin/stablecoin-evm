@@ -80,7 +80,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg006 configureController(C, 0) throws', async function () {
-        expectRevert(mintController.configureController(Accounts.controller1Account, bigZero, {from: Accounts.mintOwnerAccount}));
+        await expectRevert(mintController.configureController(Accounts.controller1Account, zeroAddress, {from: Accounts.mintOwnerAccount}));
     });
 
     it('arg007 removeController(0) works', async function () {
@@ -108,6 +108,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
     it('arg009 setMinterManager(oldMinterManager) works', async function () {
         await mintController.setMinterManager(token.address, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.minterManager = token.address;
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
