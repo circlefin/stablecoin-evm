@@ -37,10 +37,10 @@ async function run_tests(newToken, accounts) {
 
   it('ept001 should changeAdmin while paused', async function () {
     await token.pause({ from: Accounts.pauserAccount });
-    await proxy.changeAdmin(Accounts.arbitraryAccount, { from: Accounts.proxyOwnerAccount });
+    await proxy.changeAdmin(Accounts.arbitraryAccount, { from: Accounts.upgraderAccount });
     var result = [
       { 'variable': 'paused', 'expectedValue': true },
-      { 'variable': 'proxyOwner', 'expectedValue': Accounts.arbitraryAccount},
+      { 'variable': 'upgrader', 'expectedValue': Accounts.arbitraryAccount},
     ];
     await checkVariables([token], [result]);
   });
@@ -121,11 +121,11 @@ async function run_tests(newToken, accounts) {
   // Blacklisted
 
   it('ept013 should changeAdmin when msg.sender blacklisted', async function () {
-    await token.blacklist(Accounts.proxyOwnerAccount, { from: Accounts.blacklisterAccount });
-    await proxy.changeAdmin(Accounts.arbitraryAccount, { from: Accounts.proxyOwnerAccount });
+    await token.blacklist(Accounts.upgraderAccount, { from: Accounts.blacklisterAccount });
+    await proxy.changeAdmin(Accounts.arbitraryAccount, { from: Accounts.upgraderAccount });
     var result = [
-      { 'variable': 'isAccountBlacklisted.proxyOwnerAccount', 'expectedValue': true },
-      { 'variable': 'proxyOwner', 'expectedValue': Accounts.arbitraryAccount },
+      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
+      { 'variable': 'upgrader', 'expectedValue': Accounts.arbitraryAccount },
     ];
     await checkVariables([token], [result]);
   });
@@ -217,14 +217,14 @@ async function run_tests(newToken, accounts) {
   });
 
   it('ept022 should upgrade when msg.sender blacklisted', async function () {
-    await token.blacklist(Accounts.proxyOwnerAccount, { from: Accounts.blacklisterAccount });
+    await token.blacklist(Accounts.upgraderAccount, { from: Accounts.blacklisterAccount });
     var newRawToken = await UpgradedFiatToken.new();
     var tokenConfig = await upgradeTo(proxy, newRawToken);
     var newToken = tokenConfig.token;
 
     var newToken_result = [
       { 'variable': 'proxiedTokenAddress', 'expectedValue': newRawToken.address },
-      { 'variable': 'isAccountBlacklisted.proxyOwnerAccount', 'expectedValue': true },
+      { 'variable': 'isAccountBlacklisted.upgraderAccount', 'expectedValue': true },
     ];
     await checkVariables([newToken], [newToken_result]);
   });
@@ -256,10 +256,10 @@ async function run_tests(newToken, accounts) {
 
   it('ept025 should changeAdmin to blacklisted address', async function () {
     await token.blacklist(Accounts.arbitraryAccount, { from: Accounts.blacklisterAccount });
-    await proxy.changeAdmin(Accounts.arbitraryAccount, { from: Accounts.proxyOwnerAccount });
+    await proxy.changeAdmin(Accounts.arbitraryAccount, { from: Accounts.upgraderAccount });
     var result = [
       { 'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true },
-      { 'variable': 'proxyOwner', 'expectedValue': Accounts.arbitraryAccount },
+      { 'variable': 'upgrader', 'expectedValue': Accounts.arbitraryAccount },
     ];
     await checkVariables([token], [result]);
   });
