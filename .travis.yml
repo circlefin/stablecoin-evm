@@ -18,6 +18,6 @@ env:
   - TEST_SUITE=test/proxy/*
 
 script:
-  - yarn check --integrity && truffle compile && npm run truffle-test TEST_SUITE
+  - "yarn check --integrity && truffle compile && npm run truffle-test $TEST_SUITE"
 
 
