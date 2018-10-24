@@ -1,4 +1,4 @@
-var tokenUtils = require('./TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils');
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
@@ -17,7 +17,7 @@ var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 var FiatToken = tokenUtils.FiatToken;
 var upgradeTo = tokenUtils.upgradeTo;
 
-var AccountUtils = require('./AccountUtils');
+var AccountUtils = require('./../AccountUtils');
 var Accounts = AccountUtils.Accounts;
 
 var amount = 100;
@@ -411,7 +411,7 @@ async function run_tests(newToken, accounts) {
 
  }
 
-var testWrapper = require('./TestWrapper');
+var testWrapper = require('./../TestWrapper');
 testWrapper.execute('FiatToken_ExtendedPositiveTests', run_tests);
 
 module.exports = {

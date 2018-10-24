@@ -1,4 +1,4 @@
-var tokenUtils = require('./TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils');
 var FiatToken = tokenUtils.FiatToken;
 var FiatTokenProxy = tokenUtils.FiatTokenProxy;
 
@@ -28,7 +28,7 @@ var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
 var checkPauseEvent = tokenUtils.checkPauseEvent;
 var checkTransferEvents = tokenUtils.checkTransferEvents;
 
-var AccountUtils = require('./AccountUtils');
+var AccountUtils = require('./../AccountUtils');
 var Accounts = AccountUtils.Accounts;
 
 var amount = 100;
@@ -140,7 +140,7 @@ async function run_tests(newToken, accounts) {
   });
 }
 
-var testWrapper = require('./TestWrapper');
+var testWrapper = require('./../TestWrapper');
 testWrapper.execute('FiatToken_EventTests', run_tests);
 
 module.exports = {
