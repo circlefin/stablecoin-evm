@@ -97,7 +97,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount});
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
         actualMinter = await mintController.controllers(zeroAddress);
-        assert.equal(zeroAddress, zeroAddress);
+        assert.equal(actualMinter, zeroAddress);
     });
 
     it('arg008 setMinterManager(0) works', async function () {

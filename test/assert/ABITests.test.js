@@ -1,5 +1,5 @@
 var Tx = require('ethereumjs-tx');
-var tokenUtils = require('./TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils');
 var FiatToken = tokenUtils.FiatToken;
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
