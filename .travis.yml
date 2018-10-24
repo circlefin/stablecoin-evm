@@ -11,6 +11,13 @@ install:
   - npm install -g truffle@4.1.13
   - yarn install --frozen-lockfile
 
+env:
+  - TEST_SUITE=test/assert/*
+  - TEST_SUITE=test/basic/*
+  - TEST_SUITE=test/minting/*
+  - TEST_SUITE=test/proxy/*
+
 script:
-  - yarn check --integrity && truffle compile && npm test
+  - yarn check --integrity && truffle compile && npm run truffle-test TEST_SUITE
+
 
