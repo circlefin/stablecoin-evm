@@ -117,17 +117,17 @@ async function run_tests(newToken, accounts) {
 
     await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
     await token.mint(Accounts.arbitraryAccount, mintAmount, { from: Accounts.minterAccount });
-    await token.transfer(Accounts.pauserAccount, mintAmount, { from: Accounts.arbitraryAccount });
+    await token.transfer(Accounts.arbitraryAccount2, mintAmount, { from: Accounts.arbitraryAccount });
 
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
-    var data = encodeCall('initialize', ['string','string','string','uint8','address','address','address','address','bool','address','uint256'], [name, symbol, currency, decimals, Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, true, Accounts.pauserAccount, 12]);
+    var data = encodeCall('initialize', ['string','string','string','uint8','address','address','address','address','bool','address','uint256'], [name, symbol, currency, decimals, Accounts.masterMinterAccount, Accounts.arbitraryAccount2, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount, true, Accounts.arbitraryAccount2, 12]);
     await expectRevert(proxy.upgradeToAndCall(upgradedToken.address, data, { from: Accounts.proxyOwnerAccount }));
 
     customVars = [
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': bigZero },
-      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'balances.arbitraryAccount2', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
     ];
     await checkVariables([token], [customVars]);

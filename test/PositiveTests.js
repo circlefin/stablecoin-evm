@@ -182,12 +182,12 @@ async function run_tests(newToken, accounts) {
     ];
     await checkVariables([token], [customVars]);
 
-    await token.transfer(Accounts.pauserAccount, mintAmount, { from: Accounts.arbitraryAccount });
+    await token.transfer(Accounts.arbitraryAccount2, mintAmount, { from: Accounts.arbitraryAccount });
     customVars = [
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': bigZero },
-      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'balances.arbitraryAccount2', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
     await checkVariables([token], [customVars]);
@@ -213,12 +213,12 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
 
     await token.approve(Accounts.masterMinterAccount, mintAmount, { from: Accounts.arbitraryAccount });
-    await token.transferFrom(Accounts.arbitraryAccount, Accounts.pauserAccount, mintAmount, { from: Accounts.masterMinterAccount });
+    await token.transferFrom(Accounts.arbitraryAccount, Accounts.arbitraryAccount2, mintAmount, { from: Accounts.masterMinterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': bigZero },
-      { 'variable': 'balances.pauserAccount', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'balances.arbitraryAccount2', 'expectedValue': new BigNumber(mintAmount) },
       { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) }
     ];
     await checkVariables([token], [customVars]);

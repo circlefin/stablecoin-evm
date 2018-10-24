@@ -1,6 +1,5 @@
 var BigNumber = require('bignumber.js');
 var Q = require('q');
-var clone = require('clone');
 
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
@@ -18,7 +17,6 @@ var getAccountState = AccountUtils.getAccountState;
 function ControllerState(owner, controllers) {
     this.owner = owner;
     this.controllers = controllers;
-    this.checkState = checkControllerState;
     this.checkState = async function(controllerContract) {await checkControllerState(controllerContract, this)};
 }
 
@@ -36,14 +34,9 @@ async function checkControllerState(controller, customState) {
 // Gets the actual state of the controller contract.
 // Evaluates all mappings on the provided accounts.
 async function getActualControllerState(controllerContract, accounts) {
-    // Lambda expressions for retrieving values from mappings
-    var controllerMappingEval = async function(accountAddress) {
-        return await controllerContract.controllers(accountAddress);
-    };
-
     return Q.all([
-        await controllerContract.owner.call(),
-        await getAccountState(controllerMappingEval, accounts),
+        controllerContract.owner.call(),
+        getAccountState(controllerContract.controllers, accounts),
     ]).spread(function (
         owner,
         controllerState,

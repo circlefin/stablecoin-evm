@@ -10,6 +10,6 @@ should not change state,upt007,upt007 should upgrade contract to original addres
 _admin,upt009,upt009 should check that admin is set correctly by proxy constructor
 "initialization fields, _implementation",upt010,"upt010 should deploy upgraded version of contract with new data fields and logic without previous deployment and ensure new logic works, and new fields correct"
 "_implementation, [new fields]",upt011,upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result
-"_implementation, [new fields]",upt012,upt012 should upgradeToAndCall while upgrader is blacklisted
+"_implementation, [new fields]",upt012,upt012 should upgradeToAndCall while proxyOwner is blacklisted
 "_implementation, [new fields]",upt013,upt013 should upgradeToAndCall while new logic is blacklisted
 _implementation,upt014,upt014 should upgradeTo while new logic is blacklisted
