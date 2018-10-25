@@ -5,10 +5,10 @@ var Q = require('q');
 var debugLogging = false;
 
 
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./TokenTestUtils.js');
 
 var Controller = artifacts.require('./../minting/Controller');
-var AccountUtils = require('./../AccountUtils');
+var AccountUtils = require('./AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var setAccountDefault = AccountUtils.setAccountDefault;
 var checkState = AccountUtils.checkState;
