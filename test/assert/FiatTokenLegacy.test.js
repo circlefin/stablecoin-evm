@@ -1,4 +1,4 @@
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
@@ -22,7 +22,7 @@ var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 var FiatToken = tokenUtils.FiatToken;
 var getAdmin = tokenUtils.getAdmin;
 
-var AccountUtils = require('./../AccountUtils');
+var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 
 // these tests are for reference and do not track side effects on all variables

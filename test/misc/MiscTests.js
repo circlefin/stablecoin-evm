@@ -1,6 +1,6 @@
 var FiatTokenProxy = artifacts.require('FiatTokenProxy');
 
-var tokenUtils = require('./../TokenTestUtils');;
+var tokenUtils = require('./../TokenTestUtils.js');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
@@ -19,7 +19,7 @@ var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var getInitializedV1 = tokenUtils.getInitializedV1;
 var FiatToken = tokenUtils.FiatToken;
 
-var AccountUtils = require('./../AccountUtils');
+var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 
 var maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";

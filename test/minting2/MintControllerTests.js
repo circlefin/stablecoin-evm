@@ -1,7 +1,7 @@
 var MintController = artifacts.require('minting/MintController');
 
 var BigNumber = require('bignumber.js');
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
 var bigZero = tokenUtils.bigZero;

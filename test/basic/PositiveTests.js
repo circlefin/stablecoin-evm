@@ -1,4 +1,4 @@
-var tokenUtils = require('./../TokenTestUtils');;
+var tokenUtils = require('./../TokenTestUtils.js');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
@@ -15,7 +15,7 @@ var decimals = tokenUtils.decimals;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 var FiatToken = tokenUtils.FiatToken;
 
-var AccountUtils = require('./../AccountUtils');
+var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 
 var amount = 100;

@@ -1,11 +1,11 @@
 var Tx = require('ethereumjs-tx');
 
 var Pausable = artifacts.require('Pausable');
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var BigNumber = require('bignumber.js');
 var expectRevert = tokenUtils.expectRevert;
 
-var AccountUtils = require('./../AccountUtils');
+var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 
 const should = require('chai')

@@ -1,4 +1,4 @@
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var FiatToken = tokenUtils.FiatToken;
 var FiatTokenProxy = tokenUtils.FiatTokenProxy;
 
@@ -28,7 +28,7 @@ var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
 var checkPauseEvent = tokenUtils.checkPauseEvent;
 var checkTransferEvents = tokenUtils.checkTransferEvents;
 
-var AccountUtils = require('./../AccountUtils');
+var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 
 var amount = 100;
