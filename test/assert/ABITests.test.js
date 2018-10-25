@@ -1,5 +1,5 @@
 var Tx = require('ethereumjs-tx');
-var tokenUtils = require('./TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var FiatToken = tokenUtils.FiatToken;
 var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
@@ -17,11 +17,11 @@ var checkVariables = tokenUtils.checkVariables;
 var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
-var AccountUtils = require('./AccountUtils');
+var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var AccountPrivateKeys = AccountUtils.AccountPrivateKeys;
 
-var abiUtils = require('./ABIUtils');
+var abiUtils = require('./../ABIUtils.js');
 var makeRawTransaction = abiUtils.makeRawTransaction;
 var sendRawTransaction = abiUtils.sendRawTransaction;
 var functionSignature = abiUtils.functionSignature;
@@ -264,7 +264,7 @@ async function run_tests(newToken, accounts) {
     });
 }
 
-var testWrapper = require('./TestWrapper');
+var testWrapper = require('./../TestWrapper');
 testWrapper.execute('FiatToken_ABIHackingTests', run_tests);
 
 module.exports = {

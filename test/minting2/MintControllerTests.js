@@ -1,14 +1,14 @@
 var MintController = artifacts.require('minting/MintController');
 
 var BigNumber = require('bignumber.js');
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
 var bigZero = tokenUtils.bigZero;
 
 var clone = require('clone');
 
-var mintUtils = require('./MintControllerUtils.js');
+var mintUtils = require('./../MintControllerUtils.js');
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var MintControllerState = AccountUtils.MintControllerState;

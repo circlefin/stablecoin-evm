@@ -5,7 +5,7 @@ var MasterMinter = artifacts.require('minting/MasterMinter');
 var FiatToken = artifacts.require('FiatTokenV1');
 
 var BigNumber = require('bignumber.js');
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
 var expectJump = tokenUtils.expectJump;
@@ -14,7 +14,7 @@ var maxAmount = tokenUtils.maxAmount;
 
 var clone = require('clone');
 
-var mintUtils = require('./MintControllerUtils.js');
+var mintUtils = require('./../MintControllerUtils.js');
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var getAccountState = AccountUtils.getAccountState;
@@ -97,7 +97,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount});
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
         actualMinter = await mintController.controllers(zeroAddress);
-        assert.equal(zeroAddress, zeroAddress);
+        assert.equal(actualMinter, zeroAddress);
     });
 
     it('arg008 setMinterManager(0) works', async function () {

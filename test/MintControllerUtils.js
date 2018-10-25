@@ -1,16 +1,16 @@
 var BigNumber = require('bignumber.js');
 var bigZero = new BigNumber(0);
 
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./TokenTestUtils.js');
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
-var MintController = artifacts.require('./../minting/MintController');
-var AccountUtils = require('./../AccountUtils');
+var MintController = artifacts.require('./minting/MintController');
+var AccountUtils = require('./AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
 
-var ControllerUtils = require('./ControllerTestUtils');
+var ControllerUtils = require('./ControllerTestUtils.js');
 var checkControllerState = ControllerUtils.checkControllerState;
 
 function MintControllerState(owner, controllers, minterManager) {

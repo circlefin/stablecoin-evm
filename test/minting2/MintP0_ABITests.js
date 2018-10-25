@@ -3,7 +3,7 @@ var MasterMinter = artifacts.require('minting/MasterMinter');
 var FiatToken = artifacts.require('FiatTokenV1');
 
 var BigNumber = require('bignumber.js');
-var tokenUtils = require('./../TokenTestUtils');
+var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
 var expectJump = tokenUtils.expectJump;
@@ -12,7 +12,7 @@ var maxAmount = tokenUtils.maxAmount;
 
 var clone = require('clone');
 
-var mintUtils = require('./MintControllerUtils.js');
+var mintUtils = require('./../MintControllerUtils.js');
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var AccountPrivateKeys = AccountUtils.AccountPrivateKeys;
@@ -23,7 +23,7 @@ var checkMintControllerState = mintUtils.checkMintControllerState;
 
 var zeroAddress = "0x0000000000000000000000000000000000000000";
 
-var abiUtils = require('./../ABIUtils');
+var abiUtils = require('./../ABIUtils.js');
 var makeRawTransaction = abiUtils.makeRawTransaction;
 var sendRawTransaction = abiUtils.sendRawTransaction;
 var msgData = abiUtils.msgData;

@@ -1,4 +1,4 @@
-var tokenUtils = require('./TokenTestUtils');;
+var tokenUtils = require('./../TokenTestUtils');;
 var BigNumber = require('bignumber.js');
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
@@ -23,11 +23,11 @@ var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
 var UpgradedFiatTokenNewFieldsNewLogic = tokenUtils.UpgradedFiatTokenNewFieldsNewLogic;
 var getAdmin = tokenUtils.getAdmin;
 
-var abiUtils = require('./ABIUtils');
+var abiUtils = require('./../ABIUtils');
 var makeRawTransaction = abiUtils.makeRawTransaction;
 var sendRawTransaction = abiUtils.sendRawTransaction;
 
-var AccountUtils = require('./AccountUtils');
+var AccountUtils = require('./../AccountUtils');
 var Accounts = AccountUtils.Accounts;
 var AccountPrivateKeys = AccountUtils.AccountPrivateKeys;
 
@@ -306,7 +306,7 @@ async function run_tests(newToken, accounts) {
 
 }
 
-var testWrapper = require('./TestWrapper');
+var testWrapper = require('./../TestWrapper');
 testWrapper.execute('FiatToken_ProxyPositiveTests', run_tests);
 
 module.exports = {
