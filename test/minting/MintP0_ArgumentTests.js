@@ -14,7 +14,7 @@ var maxAmount = tokenUtils.maxAmount;
 
 var clone = require('clone');
 
-var mintUtils = require('./MintControllerUtils.js');
+var mintUtils = require('./../MintControllerUtils.js');
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var getAccountState = AccountUtils.getAccountState;
