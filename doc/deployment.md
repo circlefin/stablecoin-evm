@@ -3,7 +3,7 @@
 This is the process for deploying a new proxy and implementation (as opposed to upgrading an existing proxy).
 
 Since the proxy uses `delegatecall` to forward calls to the implementation initialization of the contracts becomes a little
-tricky because we can not initialize fields in the implementation contrat via the constructor. Instead there is an initialize
+tricky because we can not initialize fields in the implementation contract via the constructor. Instead there is an initialize
 method in the implementation contract, which is publicly available, but can only be called once per proxy.
 
 
@@ -29,7 +29,7 @@ See [README.validate.md](../validate/validate.js).
 ## Deploying a Proxy:
 
 1. Obtain addresses for the various contract roles from CENTRE ops. The keys for these addresses will be stored offline.
-the address needed are:
+The address needed are:
    ```
    admin
    masterMinter
