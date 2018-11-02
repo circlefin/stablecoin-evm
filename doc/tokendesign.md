@@ -4,7 +4,7 @@ It allows minting/burning of tokens by multiple entities, pausing all activity, 
 and a way to upgrade the contract so that bugs can be fixed or features added.
 
 ## Roles
-The `FiatToken` has a numer of roles (addresses) which control different functionality:
+The `FiatToken` has a number of roles (addresses) which control different functionality:
 - `masterMinter` - adds and removes minters and increases their minting allowance
 - `minters` - create and destroy tokens
 - `pauser` - pause the contract, which prevents all transfers, minting, and burning
