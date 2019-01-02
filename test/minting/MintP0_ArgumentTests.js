@@ -9,6 +9,7 @@ var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
 var expectJump = tokenUtils.expectJump;
+var expectError = tokenUtils.expectError;
 var bigZero = tokenUtils.bigZero;
 var maxAmount = tokenUtils.maxAmount;
 
@@ -80,7 +81,8 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg006 configureController(C, 0) throws', async function () {
-        await expectRevert(mintController.configureController(Accounts.controller1Account, zeroAddress, {from: Accounts.mintOwnerAccount}));
+        await expectError(mintController.configureController(Accounts.controller1Account, zeroAddress, {from: Accounts
+        .mintOwnerAccount}), "Worker must be a non-zero address");
     });
 
     it('arg007 removeController(0) works', async function () {

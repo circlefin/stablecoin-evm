@@ -103,7 +103,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt010 removeMinter reverts when msg.sender is not a controller', async function () {
-        await expectRevert(mintController.removeMinter({from: Accounts.controller1Account}));
+        await expectError(mintController.removeMinter({from: Accounts.controller1Account}), "Sender must be a controller");
     });
 
     it('bt011 removeMinter sets minters[M] to 0', async function () {
@@ -127,7 +127,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt012 configureMinter reverts when msg.sender is not a controller', async function () {
-        await expectRevert(mintController.configureMinter(50, {from: Accounts.controller1Account}));
+        await expectError(mintController.configureMinter(50, {from: Accounts.controller1Account}), "Sender must be a controller");
     });
 
     it('bt013 configureMinter works when controllers[msg.sender]=M', async function () {
@@ -146,7 +146,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt014 incrementMinterAllowance reverts if msg.sender is not a controller', async function () {
-        await expectRevert(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account}));
+        await expectError(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account}), "Sender must be a controller");
     });
 
     it('bt015 incrementMinterAllowance works when controllers[msg.sender]=M', async function () {
@@ -441,7 +441,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         var isMinter = await minterManager.isMinter(Accounts.minterAccount);
         assert.isFalse(isMinter);
 
-        await expectRevert(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}));
+        await expectError(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only increment allowance for enabled minter");
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });

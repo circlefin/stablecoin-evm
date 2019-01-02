@@ -521,7 +521,8 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
 }
 
 async function expectRevert(contractPromise) {
-    try {
+    await expectError(contractPromise, 'revert');
+/*    try {
         await contractPromise;
     } catch (error) {
         const revert = error.message.search('revert') >= 0;
@@ -531,16 +532,27 @@ async function expectRevert(contractPromise) {
         );
         return;
     }
-    assert.fail('Expected error of type revert, but no error was received');
+    assert.fail('Expected error of type revert, but no error was received');*/
 }
 
 async function expectJump(contractPromise) {
-    try {
+    await expectError(contractPromise, 'invalid opcode');
+/*    try {
         await contractPromise;
         assert.fail('Expected invalid opcode not received');
     } catch (error) {
         const invalidOpcodeReceived = error.message.search('invalid opcode') >= 0;
         assert(invalidOpcodeReceived, `Expected "invalid opcode", got ${error} instead`);
+    }*/
+}
+
+async function expectError(contractPromise, errorMsg) {
+    try {
+        await contractPromise;
+        assert.fail('Expected error ${errorMsg}, but no error received');
+    } catch (error) {
+        const correctErrorMsgReceived = error.message.includes(errorMsg) >= 0;
+        assert(correctErrorMsgReceived, `Expected ${errorMsg}, got ${error} instead`);
     }
 }
 
@@ -641,6 +653,7 @@ module.exports = {
     upgradeTo: upgradeTo,
     expectRevert: expectRevert,
     expectJump: expectJump,
+    expectError: expectError,
     encodeCall: encodeCall,
     getInitializedV1: getInitializedV1,
     getAdmin: getAdmin,
