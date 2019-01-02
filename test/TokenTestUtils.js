@@ -522,28 +522,10 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
 
 async function expectRevert(contractPromise) {
     await expectError(contractPromise, 'revert');
-/*    try {
-        await contractPromise;
-    } catch (error) {
-        const revert = error.message.search('revert') >= 0;
-        assert(
-            revert,
-            'Expected error of type revert, got \'' + error + '\' instead',
-        );
-        return;
-    }
-    assert.fail('Expected error of type revert, but no error was received');*/
 }
 
 async function expectJump(contractPromise) {
     await expectError(contractPromise, 'invalid opcode');
-/*    try {
-        await contractPromise;
-        assert.fail('Expected invalid opcode not received');
-    } catch (error) {
-        const invalidOpcodeReceived = error.message.search('invalid opcode') >= 0;
-        assert(invalidOpcodeReceived, `Expected "invalid opcode", got ${error} instead`);
-    }*/
 }
 
 async function expectError(contractPromise, errorMsg) {
