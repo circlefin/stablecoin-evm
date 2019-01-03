@@ -7,6 +7,7 @@ var expectRevert = tokenUtils.expectRevert;
 
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
+var upperCaseAddress = AccountUtils.upperCaseAddress;
 
 const should = require('chai')
     .use(require('chai-as-promised'))
@@ -22,12 +23,12 @@ contract('PausableTests', function (accounts) {
 
     it('constructor owner', async function () {
         var actualOwner = await pause.owner.call();
-        assert.equal(Accounts.deployerAccount, actualOwner, "wrong owner");
+        assert.equal(upperCaseAddress(Accounts.deployerAccount), upperCaseAddress(actualOwner, "wrong owner"));
     });
 
     it('constructor pauser', async function () {
         var actualOwner = await pause.pauser.call();
-        assert.equal(Accounts.pauserAccount, actualOwner, "wrong pauser");
+        assert.equal(upperCaseAddress(Accounts.pauserAccount), upperCaseAddress( actualOwner, "wrong pauser"));
     });
 
     it('paused after pausing', async function () {
@@ -51,7 +52,7 @@ contract('PausableTests', function (accounts) {
 
         await pause.updatePauser(Accounts.arbitraryAccount, {from: Accounts.deployerAccount});
         var newPauser = await pause.pauser.call();
-        assert.equal(Accounts.arbitraryAccount, newPauser);
+        assert.equal(upperCaseAddress(Accounts.arbitraryAccount), upperCaseAddress( newPauser));
         // double check we're still paused
         await checkPaused("should still be paused after changing pauser");
 

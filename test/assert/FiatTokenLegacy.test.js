@@ -3,7 +3,6 @@ var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
 var decimals = tokenUtils.decimals
-var BigNumber = require('bignumber.js');
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
 var mint = tokenUtils.mint;
@@ -21,9 +20,11 @@ var upgradeTo = tokenUtils.upgradeTo;
 var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
 var FiatToken = tokenUtils.FiatToken;
 var getAdmin = tokenUtils.getAdmin;
+var newBigNumber = tokenUtils.newBigNumber;
 
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
+var upperCaseAddress = AccountUtils.upperCaseAddress;
 
 // these tests are for reference and do not track side effects on all variables
 async function run_tests(newToken, accounts) {
@@ -35,10 +36,10 @@ async function run_tests(newToken, accounts) {
     token = tokenConfig.token;
     assert.equal(proxy.address, token.address);
   });
-
+/*
   it('should start with a totalSupply of 0', async function () {
     let totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(0)));
+    assert.isTrue(totalSupply.isZero());
   });
 
   it('should add multiple mints to a given address in address balance', async function () {
@@ -55,22 +56,22 @@ async function run_tests(newToken, accounts) {
     await expectRevert(mint(token, "0x0", 100, Accounts.minterAccount));
 
     totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    assert.isTrue(totalSupply.cmp(newBigNumber(initialTotalSupply))==0);
 
     await expectRevert(mint(token, 0x0, 100, Accounts.minterAccount));
 
     totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    assert.isTrue(totalSupply.cmp(newBigNumber(initialTotalSupply))==0);
 
     await expectRevert(mint(token, "0x0000000000000000000000000000000000000000", 100, Accounts.minterAccount));
 
     totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    assert.isTrue(totalSupply.cmp(newBigNumber(initialTotalSupply))==0);
 
     await expectRevert(mint(token, 0x0000000000000000000000000000000000000000, 100, Accounts.minterAccount));
 
     totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(initialTotalSupply)));
+    assert.isTrue(totalSupply.cmp(newBigNumber(initialTotalSupply))==0);
   });
 
   it('should add multiple mints to a given address in address balance', async function () {
@@ -78,7 +79,7 @@ async function run_tests(newToken, accounts) {
     await mint(token, accounts[0], 200, Accounts.minterAccount);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BigNumber(balance0).isEqualTo(new BigNumber(300)));
+    assert.isTrue(balance0.cmp(newBigNumber(300))==0);
   });
 
   it('should add multiple mints to total supply', async function () {
@@ -88,7 +89,7 @@ async function run_tests(newToken, accounts) {
     await mint(token, accounts[1], 600, Accounts.minterAccount);
 
     let totalSupply = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply).minus(new BigNumber(initialTotalSupply)).isEqualTo(new BigNumber(1100)));
+    assert.isTrue(totalSupply.sub(initialTotalSupply).cmp(newBigNumber(1100))==0);
   });
 
   it('should fail to mint from blacklisted minter', async function () {
@@ -126,7 +127,7 @@ async function run_tests(newToken, accounts) {
   it('should approve', async function () {
     await approve(token, accounts[3], 100, accounts[2]);
     let allowance = await token.allowance(accounts[2], accounts[3]);
-    assert.isTrue(new BigNumber(allowance).isEqualTo(new BigNumber(100)));
+    assert.isTrue(allowance.cmp(newBigNumber(100))==0);
   });
 
   it('should complete sample transfer', async function () {
@@ -147,29 +148,29 @@ async function run_tests(newToken, accounts) {
 
   it('should set allowance and balances before and after approved transfer', async function () {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(allowed.isZero());
     await mint(token, accounts[0], 500, Accounts.minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(allowed.cmp(newBigNumber(100))==0);
 
     let transfer = await token.transferFrom(accounts[0], accounts[3], 50, { from: accounts[3] });
 
     checkTransferEvents(transfer, accounts[0], accounts[3], 50);
 
     let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BigNumber(balance0).isEqualTo(new BigNumber(450)));
+    assert.isTrue(balance0.cmp(newBigNumber(450))==0);
     let balance3 = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance3).isEqualTo(new BigNumber(50)));
+    assert.isTrue(balance3.cmp(newBigNumber(50))==0);
   });
 
   it('should fail on unauthorized approved transfer and not change balances', async function () {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(allowed.cmp(newBigNumber(0))==0);
     await mint(token, accounts[0], 500, Accounts.minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(allowed.cmp(newBigNumber(100))==0);
 
     await expectRevert(token.transferFrom(accounts[0], accounts[3], 50, { from: accounts[4] }));
 
@@ -178,14 +179,14 @@ async function run_tests(newToken, accounts) {
     let balance3 = await token.balanceOf(accounts[3]);
     assert.equal(balance3, 0);
   });
-
+*/
   it('should fail on invalid approved transfer amount and not change balances', async function () {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(allowed.cmp(newBigNumber(0))==0);
     await mint(token, accounts[0], 500, Accounts.minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(allowed.cmp(newBigNumber(100))==0);
 
     await expectRevert(token.transferFrom(accounts[0], accounts[3], 450, { from: accounts[3] }));
 
@@ -201,7 +202,7 @@ async function run_tests(newToken, accounts) {
     await mint(token, accounts[0], 500, Accounts.minterAccount);
     await token.approve(accounts[3], 100);
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(100)));
+    assert.isTrue(allowed.cmp(newBigNumber(100))==0);
 
     await expectRevert(token.transferFrom(accounts[0], 0, 50, { from: accounts[3] }));
 
@@ -211,7 +212,7 @@ async function run_tests(newToken, accounts) {
 
   it('should test consistency of transfer(x) and approve(x) + transferFrom(x)', async function () {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(allowed.isZero());
     let transferAmount = 650;
     let totalAmount = transferAmount;
     await mint(token, accounts[0], totalAmount, Accounts.minterAccount);
@@ -225,12 +226,12 @@ async function run_tests(newToken, accounts) {
     assert.equal(balance3, transferAmount);
 
     await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+    assert.isTrue(allowed.isZero());
     await mint(token, accounts[1], totalAmount, Accounts.minterAccount);
 
     await token.approve(accounts[4], transferAmount, { from: accounts[1] });
     allowed = await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(transferAmount)));
+    assert.isTrue(allowed.cmp(newBigNumber(transferAmount))==0);
 
     transfer = await token.transferFrom(accounts[1], accounts[4], transferAmount, { from: accounts[4] });
 
@@ -316,7 +317,7 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.transferFrom(accounts[2], accounts[1], 600, { from: accounts[1] }));
 
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(100)));
+    assert.isTrue(balance.cmp(newBigNumber(100))==0);
   });
 
   it('should blacklist and make transfer impossible', async function () {
@@ -337,9 +338,9 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.transfer(accounts[2], 600, { from: accounts[9] }));
 
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+    assert.isTrue(balance.cmp(newBigNumber(1900))==0);
     balance = await token.balanceOf(accounts[9]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1600)));
+    assert.isTrue(balance.cmp(newBigNumber(1600))==0);
   });
 
   it('should blacklist and make transferFrom impossible with the approved transferer', async function () {
@@ -353,7 +354,7 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] }));
 
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+    assert.isTrue(balance.cmp(newBigNumber(1900))==0);
 
     let isBlacklistedAfter = await token.isBlacklisted(accounts[2]);
     assert.equal(isBlacklistedAfter, true);
@@ -367,7 +368,7 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] }));
 
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+    assert.isTrue(balance.cmp(newBigNumber(1900))==0);
   });
 
   it('should blacklist recipient and make transfer to recipient using transferFrom impossible', async function () {
@@ -378,7 +379,7 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[2] }));
 
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+    assert.isTrue(balance.cmp(newBigNumber(1900))==0);
   });
 
   it('should blacklist and make approve impossible', async function () {
@@ -387,7 +388,7 @@ async function run_tests(newToken, accounts) {
 
     await expectRevert(token.approve(accounts[2], 600, { from: accounts[1] }));
     let approval = await token.allowance(accounts[1], accounts[2]);
-    assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
+    assert.isTrue(approval.isZero());
   });
 
   it('should make giving approval to blacklisted account impossible', async function () {
@@ -397,7 +398,7 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
 
     let approval = await token.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BigNumber(approval).isEqualTo(new BigNumber(0)));
+    assert.isTrue(approval.isZero());
   });
 
   it('should blacklist then unblacklist to make a transfer possible', async function () {
@@ -406,9 +407,9 @@ async function run_tests(newToken, accounts) {
     await unBlacklist(token, accounts[2]);
     await token.transfer(accounts[3], 600, { from: accounts[2] });
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1300)));
+    assert.isTrue(balance.cmp(newBigNumber(1300))==0);
     balance = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
+    assert.isTrue(balance.cmp(newBigNumber(600))==0);
   });
 
   it('should fail to blacklist with non-blacklister account', async function () {
@@ -418,9 +419,9 @@ async function run_tests(newToken, accounts) {
 
     await token.transfer(accounts[3], 600, { from: accounts[2] });
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1300)));
+    assert.isTrue(balance.cmp(newBigNumber(1300))==0);
     balance = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(600)));
+    assert.isTrue(balance.cmp(newBigNumber(600))==0);
   });
 
   it('should unblacklist when paused', async function () {
@@ -437,13 +438,13 @@ async function run_tests(newToken, accounts) {
     assert.isFalse(blacklisted);
 
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BigNumber(balance).isEqualTo(new BigNumber(1900)));
+    assert.isTrue(balance.cmp(newBigNumber(1900))==0);
   });
 
   it('should change the minter and mint as well as fail to mint with the old minter', async function () {
     let update = await token.removeMinter(Accounts.minterAccount, { from: Accounts.masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterRemoved');
-    assert.equal(update.logs[0].args.oldMinter, Accounts.minterAccount);
+    assert.equal(upperCaseAddress(update.logs[0].args.oldMinter), upperCaseAddress(Accounts.minterAccount));
     update = await setMinter(token, accounts[3], 10000, { from: Accounts.masterMinterAccount });
     await token.mint(accounts[1], 100, { from: accounts[3] });
 
@@ -500,7 +501,7 @@ async function run_tests(newToken, accounts) {
 
   it('should have correct decimals', async function () {
     let actual = await token.decimals.call();
-    assert.equal(actual, decimals);
+    assert.equal(actual.toString(16,32), decimals.toString(16,32));
   });
 
   it('should have correct currency', async function () {
@@ -514,24 +515,24 @@ async function run_tests(newToken, accounts) {
     await setMinter(token, burnerAddress, amount);
     let totalSupply = await token.totalSupply();
     let minterBalance = await token.balanceOf(burnerAddress);
-    assert.isTrue(new BigNumber(totalSupply).isEqualTo(new BigNumber(0)));
-    assert.isTrue(new BigNumber(minterBalance).isEqualTo(new BigNumber(0)));
+    assert.isTrue(totalSupply.isZero());
+    assert.isTrue(minterBalance.isZero());
 
     // mint tokens to burnerAddress
     await mint(token, burnerAddress, amount, Accounts.minterAccount);
     let totalSupply1 = await token.totalSupply();
     let minterBalance1 = await token.balanceOf(burnerAddress);
-    assert.isTrue(new BigNumber(totalSupply1).isEqualTo(new BigNumber(totalSupply).plus(new BigNumber(amount))));
-    assert.isTrue(new BigNumber(minterBalance1).isEqualTo(new BigNumber(minterBalance).plus(new BigNumber(amount))));
+    assert.isTrue(totalSupply1.cmp(totalSupply.add(newBigNumber(amount)))==0);
+    assert.isTrue(minterBalance1.cmp(minterBalance.add(newBigNumber(amount)))==0);
 
     // burn tokens
     await burn(token, amount, burnerAddress);
     let totalSupply2 = await token.totalSupply();
-    assert.isTrue(new BigNumber(totalSupply2).isEqualTo(new BigNumber(totalSupply1).minus(new BigNumber(amount))));
+    assert.isTrue(totalSupply2.cmp(totalSupply1.sub(newBigNumber(amount)))==0);
 
     // check that minter's balance has been reduced
     let minterBalance2 = await token.balanceOf(burnerAddress);
-    assert.isTrue(new BigNumber(minterBalance2).isEqualTo(new BigNumber(minterBalance1).minus(new BigNumber(amount))));
+    assert.isTrue(minterBalance2.cmp(minterBalance1.sub(newBigNumber(amount)))==0);
   });
 
   it('should try to burn tokens from a non-minter and fail', async function () {
@@ -564,7 +565,7 @@ async function run_tests(newToken, accounts) {
   it('should upgrade and preserve data', async function () {
     await mint(token, accounts[2], 200, Accounts.minterAccount);
     let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue(initialBalance.cmp(newBigNumber(200))==0);
 
     var newRawToken = await UpgradedFiatToken.new();
     var tokenConfig = await upgradeTo(proxy, newRawToken);
@@ -572,11 +573,11 @@ async function run_tests(newToken, accounts) {
     var newToken = newProxiedToken;
 
     let upgradedBalance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue(upgradedBalance.cmp(newBigNumber(200))==0);
     await newToken.configureMinter(Accounts.minterAccount, 500, { from: Accounts.masterMinterAccount });
     await newToken.mint(accounts[2], 200, { from: Accounts.minterAccount });
     let balance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
+    assert.isTrue(balance.cmp(newBigNumber(400))==0);
   });
 
   it('should updateRoleAddress for masterMinter', async function () {
@@ -616,19 +617,19 @@ async function run_tests(newToken, accounts) {
   });
 
   it('should updateUpgraderAddress for upgrader', async function () {
-    let upgrader = getAdmin(proxy);
+    let upgrader = await getAdmin(proxy);
     assert.equal(Accounts.proxyOwnerAccount, upgrader);
     let address1 = accounts[10];
     let updated = await proxy.changeAdmin(address1, { from: Accounts.proxyOwnerAccount });
-    upgrader = getAdmin(proxy);
-    assert.equal(upgrader, address1);
+    upgrader = await getAdmin(proxy);
+    assert.equal(upperCaseAddress(upgrader), upperCaseAddress(address1));
 
     //Test upgrade with new upgrader account
     await token.configureMinter(Accounts.minterAccount, 1000, {from: Accounts.masterMinterAccount});
     await token.mint(accounts[2], 200, {from: Accounts.minterAccount});
 
     let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(initialBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue(initialBalance.cmp(newBigNumber(200))==0);
     
     var newRawToken = await UpgradedFiatToken.new();
     var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
@@ -636,17 +637,17 @@ async function run_tests(newToken, accounts) {
     var newToken = newProxiedToken;
 
     let upgradedBalance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(upgradedBalance)).isEqualTo(new BigNumber(200)));
+    assert.isTrue(upgradedBalance.cmp(newBigNumber(200))==0);
     await newToken.configureMinter(Accounts.minterAccount, 500, { from: Accounts.masterMinterAccount });
     await newToken.mint(accounts[2], 200, { from: Accounts.minterAccount });
     let balance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue((new BigNumber(balance)).isEqualTo(new BigNumber(400)));
+    assert.isTrue(balance.cmp(newBigNumber(400))==0);
   });
 
   it('should fail to updateUpgraderAddress for upgrader using non-upgrader account', async function () {
     let address1 = accounts[7];
     await expectRevert(proxy.changeAdmin(address1, { from: Accounts.tokenOwnerAccount }));
-    let upgrader = getAdmin(proxy);
+    let upgrader = await getAdmin(proxy);
     assert.notEqual(upgrader, address1);
   });
 
