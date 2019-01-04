@@ -1105,6 +1105,11 @@ bluebird@^3.5.0, bluebird@^3.5.1, bluebird@~3.5.1:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
 
+bn-chai@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/bn-chai/-/bn-chai-1.0.1.tgz#5d6e9654162602a527b08a1546e60cfb44213725"
+  integrity sha512-7rJXt21DwYiLLpvzLaACixBBoUGkRV1iuFD3wElEhw8Ji9IiY/QsJRtvW+c7ChRgEOyLQkGaSGFUUqBKm21SNA==
+
 bn.js@4.11.6:
   version "4.11.6"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.6.tgz#53344adb14617a13f6e8dd2ce28905d1c0ba3215"
