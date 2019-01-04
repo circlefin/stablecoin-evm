@@ -508,8 +508,8 @@ async function redeem(token, account, amount) {
 function validateTransferEvent(transferEvent, from, to, value) {
     let eventResult = transferEvent.logs[0];
     assert.equal(eventResult.event, 'Transfer');
-    assert.equal(eventResult.args.from, from);
-    assert.equal(eventResult.args.to, to);
+    assert.equal(upperCaseAddress(eventResult.args.from), upperCaseAddress(from));
+    assert.equal(upperCaseAddress(eventResult.args.to), upperCaseAddress(to));
     assert.equal(eventResult.args.value, value);
 }
 

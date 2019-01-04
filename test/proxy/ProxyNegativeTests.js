@@ -1,5 +1,5 @@
 var tokenUtils = require('./../TokenTestUtils');;
-var BigNumber = require('bignumber.js');
+var newBigNumber = tokenUtils.newBigNumber;
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 
@@ -22,6 +22,7 @@ var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
 
 var AccountUtils = require('./../AccountUtils');
 var Accounts = AccountUtils.Accounts;
+var upperCaseAddress = AccountUtils.upperCaseAddress;
 
 var amount = 100;
 
@@ -32,12 +33,13 @@ async function run_tests(newToken, accounts) {
     var tokenConfig = await initializeTokenWithProxy(rawToken);
     proxy = tokenConfig.proxy;
     token = tokenConfig.token;
-    assert.equal(proxy.address, token.address);
+    assert.equal(upperCaseAddress(proxy.address), upperCaseAddress(token.address));
   });
 
   it('nut002 should fail to switch adminAccount with non-adminAccount as caller', async function () {
     await expectRevert(proxy.changeAdmin(Accounts.masterMinterAccount, {from: Accounts.masterMinterAccount}));
-    assert.equal(await proxy.admin({from: Accounts.proxyOwnerAccount}), Accounts.proxyOwnerAccount);
+    assert.equal(upperCaseAddress(await proxy.admin({from: Accounts.proxyOwnerAccount})), upperCaseAddress(Accounts
+    .proxyOwnerAccount));
     customVars = [];
     await checkVariables([token], [customVars]);
   });
@@ -81,9 +83,9 @@ async function run_tests(newToken, accounts) {
 
   it('nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken', async function () {
     await rawToken.initialize(name, symbol, currency, decimals, Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount);
-    assert.equal(await rawToken.pauser(), Accounts.pauserAccount);
+    assert.equal(upperCaseAddress(await rawToken.pauser()), upperCaseAddress(Accounts.pauserAccount));
     await rawToken.updatePauser(Accounts.masterMinterAccount, {from: Accounts.tokenOwnerAccount});
-    assert.equal(await rawToken.pauser(), Accounts.masterMinterAccount);
+    assert.equal(upperCaseAddress(await rawToken.pauser()), upperCaseAddress(Accounts.masterMinterAccount));
 
     customVars = [];
     await checkVariables([token], [customVars]);
@@ -92,7 +94,7 @@ async function run_tests(newToken, accounts) {
   it('nut009 should fail to call upgradeTo with non-adminAccount', async function () {
     var upgradedToken = await UpgradedFiatToken.new();
     await expectRevert(proxy.upgradeTo(upgradedToken.address, {from:Accounts.masterMinterAccount}));
-    var finalToken = FiatToken.at(proxy.address);
+    var finalToken = await FiatToken.at(proxy.address);
     var implementation = await proxy.implementation({from: Accounts.proxyOwnerAccount});
     finalToken.proxiedTokenAddress = implementation;
 
@@ -104,7 +106,7 @@ async function run_tests(newToken, accounts) {
     var upgradedToken = await UpgradedFiatTokenNewFields.new();
     const initializeData = encodeCall('initialize', ['bool', 'address', 'uint256'], [true, Accounts.pauserAccount, 12]);
     await expectRevert(proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: Accounts.masterMinterAccount }));
-    var finalToken = FiatToken.at(proxy.address);
+    var finalToken = await FiatToken.at(proxy.address);
     var implementation = await proxy.implementation({from: Accounts.proxyOwnerAccount});
     finalToken.proxiedTokenAddress = implementation;
 
@@ -124,11 +126,11 @@ async function run_tests(newToken, accounts) {
     await expectRevert(proxy.upgradeToAndCall(upgradedToken.address, data, { from: Accounts.proxyOwnerAccount }));
 
     customVars = [
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - mintAmount) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - mintAmount) },
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
       { 'variable': 'balances.arbitraryAccount', 'expectedValue': bigZero },
-      { 'variable': 'balances.arbitraryAccount2', 'expectedValue': new BigNumber(mintAmount) },
-      { 'variable': 'totalSupply', 'expectedValue': new BigNumber(mintAmount) },
+      { 'variable': 'balances.arbitraryAccount2', 'expectedValue': newBigNumber(mintAmount) },
+      { 'variable': 'totalSupply', 'expectedValue': newBigNumber(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
   });  
