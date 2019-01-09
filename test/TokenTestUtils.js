@@ -51,7 +51,7 @@ function calculateFeeAmount(amount) {
 
 function checkMinterConfiguredEvent(configureMinterEvent, minter, minterAllowedAmount) {
     assert.equal(configureMinterEvent.logs[0].event, 'MinterConfigured')
-    assert.true(addressEquals(configureMinterEvent.logs[0].args.minter, minter);
+    assert.true(addressEquals(configureMinterEvent.logs[0].args.minter, minter));
     assert.equal(configureMinterEvent.logs[0].args.minterAllowedAmount, minterAllowedAmount)
 }
 
@@ -135,7 +135,7 @@ function checkUpgradeEvent(upgradeEvent, implementation) {
 
 function checkTransferProxyOwnershipEvent(transferProxyOwnershipEvent, previousOwner, newOwner) {
     assert.equal(transferProxyOwnershipEvent.logs[0].event, 'ProxyOwnershipTransferred');
-    assert.true(addressEquals(transferProxyOwnershipEvent.logs[0].args.previousOwner), previousOwner));
+    assert.true(addressEquals(transferProxyOwnershipEvent.logs[0].args.previousOwner, previousOwner));
     assert.true(addressEquals(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner));
 }
 
