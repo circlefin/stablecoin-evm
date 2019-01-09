@@ -51,13 +51,13 @@ function calculateFeeAmount(amount) {
 
 function checkMinterConfiguredEvent(configureMinterEvent, minter, minterAllowedAmount) {
     assert.equal(configureMinterEvent.logs[0].event, 'MinterConfigured')
-    assert.true(addressEquals(configureMinterEvent.logs[0].args.minter, minter));
+    assert.isTrue(addressEquals(configureMinterEvent.logs[0].args.minter, minter));
     assert.equal(configureMinterEvent.logs[0].args.minterAllowedAmount, minterAllowedAmount)
 }
 
 function checkMinterRemovedEvent(minterRemovedEvent, minter) {
     assert.equal(minterRemovedEvent.logs[0].event, 'MinterRemoved')
-    assert.true(addressEquals(minterRemovedEvent.logs[0].args.oldMinter, minter));
+    assert.isTrue(addressEquals(minterRemovedEvent.logs[0].args.oldMinter, minter));
 }
 
 function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
@@ -66,77 +66,77 @@ function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
     assert.equal(transferEvent.logs[0].args.feeAccount, feeAccount);
     assert.equal(transferEvent.logs[0].args.feeAmount, feeAmount);
     assert.equal(transferEvent.logs[1].event, 'Transfer');
-    assert.true(addressEquals(transferEvent.logs[1].args.from, from));
-    assert.true(addressEquals(transferEvent.logs[1].args.to, to));
+    assert.isTrue(addressEquals(transferEvent.logs[1].args.from, from));
+    assert.isTrue(addressEquals(transferEvent.logs[1].args.to, to));
     assert.equal(transferEvent.logs[1].args.value, value);
 }
 
 function checkTransferEvents(transferEvent, from, to, value) {
     assert.equal(transferEvent.logs[0].event, 'Transfer');
-    assert.true(addressEquals(transferEvent.logs[0].args.from, from));
-    assert.true(addressEquals(transferEvent.logs[0].args.to, to));
+    assert.isTrue(addressEquals(transferEvent.logs[0].args.from, from));
+    assert.isTrue(addressEquals(transferEvent.logs[0].args.to, to));
     assert.equal(transferEvent.logs[0].args.value, value);
 }
 
 function checkApprovalEvent(approvalEvent, approver, spender, value) {
     assert.equal(approvalEvent.logs[0].event, 'Approval');
-    assert.true(addressEquals(approvalEvent.logs[0].args.owner, approver));
-    assert.true(addressEquals(approvalEvent.logs[0].args.spender, spender));
+    assert.isTrue(addressEquals(approvalEvent.logs[0].args.owner, approver));
+    assert.isTrue(addressEquals(approvalEvent.logs[0].args.spender, spender));
     assert.equal(approvalEvent.logs[0].args.value, value);
 }
 
 function checkBurnEvent(burnEvent, burner, amount) {
     assert.equal(burnEvent.logs[0].event, 'Burn');
-    assert.true(addressEquals(burnEvent.logs[0].args.burner, burner));
-    assert.true(addressEquals(burnEvent.logs[0].args.amount, amount));
+    assert.isTrue(addressEquals(burnEvent.logs[0].args.burner, burner));
+    assert.isTrue(addressEquals(burnEvent.logs[0].args.amount, amount));
 }
 
 function checkBlacklistEvent(blacklistEvent, account) {
     assert.equal(blacklistEvent.logs[0].event, 'Blacklisted');
-    assert.true(addressEquals(blacklistEvent.logs[0].args._account, account));
+    assert.isTrue(addressEquals(blacklistEvent.logs[0].args._account, account));
 }
 
 function checkUnblacklistEvent(unblacklistEvent, account) {
     assert.equal(unblacklistEvent.logs[0].event, 'UnBlacklisted');
-    assert.true(addressEquals(unblacklistEvent.logs[0].args._account, account));
+    assert.isTrue(addressEquals(unblacklistEvent.logs[0].args._account, account));
 }
 
 function checkBlacklisterChangedEvent(blacklisterChangedEvent, blacklister) {
     assert.equal(blacklisterChangedEvent.logs[0].event, 'BlacklisterChanged');
-    assert.true(addressEquals(blacklisterChangedEvent.logs[0].args.newBlacklister, blacklister));
+    assert.isTrue(addressEquals(blacklisterChangedEvent.logs[0].args.newBlacklister, blacklister));
 }
 
 function checkPauserChangedEvent(pauserChangedEvent, pauser) {
     assert.equal(pauserChangedEvent.logs[0].event, 'PauserChanged');
-    assert.true(addressEquals(pauserChangedEvent.logs[0].args.newAddress, pauser));
+    assert.isTrue(addressEquals(pauserChangedEvent.logs[0].args.newAddress, pauser));
 }
 
 function checkTransferOwnershipEvent(transferOwnershipEvent, previousOwner, newOwner) {
     assert.equal(transferOwnershipEvent.logs[0].event, 'OwnershipTransferred');
-    assert.true(addressEquals(transferOwnershipEvent.logs[0].args.previousOwner, previousOwner))
-    assert.true(addressEquals(transferOwnershipEvent.logs[0].args.newOwner, newOwner));
+    assert.isTrue(addressEquals(transferOwnershipEvent.logs[0].args.previousOwner, previousOwner))
+    assert.isTrue(addressEquals(transferOwnershipEvent.logs[0].args.newOwner, newOwner));
 }
 
 function checkUpdateMasterMinterEvent(checkUpdateMasterMinterEvent, newMasterMinter) {
     assert.equal(checkUpdateMasterMinterEvent.logs[0].event, 'MasterMinterChanged');
-    assert.true(addressEquals(checkUpdateMasterMinterEvent.logs[0].args.newMasterMinter, newMasterMinter));
+    assert.isTrue(addressEquals(checkUpdateMasterMinterEvent.logs[0].args.newMasterMinter, newMasterMinter));
 }
 
 function checkAdminChangedEvent(adminChangedEvent, previousAdmin, newAdmin) {
     assert.equal(adminChangedEvent.logs[0].event, 'AdminChanged')
-    assert.true(addressEquals(adminChangedEvent.logs[0].args.previousAdmin, previousAdmin));
-    assert.true(addressEquals(adminChangedEvent.logs[0].args.newAdmin, newAdmin));
+    assert.isTrue(addressEquals(adminChangedEvent.logs[0].args.previousAdmin, previousAdmin));
+    assert.isTrue(addressEquals(adminChangedEvent.logs[0].args.newAdmin, newAdmin));
 }
 
 function checkUpgradeEvent(upgradeEvent, implementation) {
     assert.equal(upgradeEvent.logs[0].event, 'Upgraded');
-    assert.true(addressEquals(upgradeEvent.logs[0].args.implementation, implementation));
+    assert.isTrue(addressEquals(upgradeEvent.logs[0].args.implementation, implementation));
 }
 
 function checkTransferProxyOwnershipEvent(transferProxyOwnershipEvent, previousOwner, newOwner) {
     assert.equal(transferProxyOwnershipEvent.logs[0].event, 'ProxyOwnershipTransferred');
-    assert.true(addressEquals(transferProxyOwnershipEvent.logs[0].args.previousOwner, previousOwner));
-    assert.true(addressEquals(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner));
+    assert.isTrue(addressEquals(transferProxyOwnershipEvent.logs[0].args.previousOwner, previousOwner));
+    assert.isTrue(addressEquals(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner));
 }
 
 function checkPauseEvent(pause) {
@@ -150,14 +150,14 @@ function checkUnpauseEvent(unpause) {
 function checkMintEvent(minting, to, amount, minter) {
     // Mint Event
     assert.equal(minting.logs[0].event, 'Mint');
-    assert.true(addressEquals(minting.logs[0].args.minter, minter));
-    assert.true(addressEquals(minting.logs[0].args.to, to));
+    assert.isTrue(addressEquals(minting.logs[0].args.minter, minter));
+    assert.isTrue(addressEquals(minting.logs[0].args.to, to));
     assert.equal(minting.logs[0].args.amount, amount);
 
     // Transfer from 0 Event
     assert.equal(minting.logs[1].event, 'Transfer');
-    assert.true(addressEquals(minting.logs[1].args.from, zeroAddress));
-    assert.true(addressEquals(minting.logs[1].args.to, to));
+    assert.isTrue(addressEquals(minting.logs[1].args.from, zeroAddress));
+    assert.isTrue(addressEquals(minting.logs[1].args.to, to));
     assert.equal(minting.logs[1].args.value, amount);
 
 }
@@ -165,13 +165,13 @@ function checkMintEvent(minting, to, amount, minter) {
 function checkBurnEvents(burning, amount, burner) {
     // Burn Event
     assert.equal(burning.logs[0].event, 'Burn');
-    assert.true(addressEquals(burning.logs[0].args.burner, burner));
+    assert.isTrue(addressEquals(burning.logs[0].args.burner, burner));
     assert.equal(burning.logs[0].args.amount, amount);
 
     // Transfer to 0 Event
     assert.equal(burning.logs[1].event, 'Transfer');
-    assert.true(addressEquals(burning.logs[1].args.from, burner));
-    assert.true(addressEquals(burning.logs[1].args.to, zeroAddress));
+    assert.isTrue(addressEquals(burning.logs[1].args.from, burner));
+    assert.isTrue(addressEquals(burning.logs[1].args.to, zeroAddress));
     assert.equal(burning.logs[1].args.value, amount);
 
 }
@@ -362,7 +362,7 @@ async function getActualState(token) {
 async function setMinter(token, minter, amount) {
     let update = await token.configureMinter(minter, amount, { from: Accounts.masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterConfigured');
-    assert.true(addressEquals(update.logs[0].args.minter, minter));
+    assert.isTrue(addressEquals(update.logs[0].args.minter, minter));
     assert.equal(update.logs[0].args.minterAllowedAmount, amount);
     let minterAllowance = await token.minterAllowance(minter);
 
@@ -506,8 +506,8 @@ async function redeem(token, account, amount) {
 function validateTransferEvent(transferEvent, from, to, value) {
     let eventResult = transferEvent.logs[0];
     assert.equal(eventResult.event, 'Transfer');
-    assert.true(addressEquals(eventResult.args.from, from));
-    assert.true(addressEquals(eventResult.args.to, to));
+    assert.isTrue(addressEquals(eventResult.args.from, from));
+    assert.isTrue(addressEquals(eventResult.args.to, to));
     assert.equal(eventResult.args.value, value);
 }
 
@@ -601,7 +601,7 @@ async function getInitializedV1(token) {
         }
         masterMinterAddress = "0x" + slot8Data.substring(masterMinterStart, masterMinterStart + 40).toUpperCase();
         var tokenMMA = await token.masterMinter.call();
-        assert.true(addressEquals(tokenMMA, masterMinterAddress));
+        assert.isTrue(addressEquals(tokenMMA, masterMinterAddress));
     }
     return initialized;
 }

@@ -444,7 +444,7 @@ async function run_tests(newToken, accounts) {
   it('should change the minter and mint as well as fail to mint with the old minter', async function () {
     let update = await token.removeMinter(Accounts.minterAccount, { from: Accounts.masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterRemoved');
-    assert.true(addressEquals(update.logs[0].args.oldMinter, Accounts.minterAccount));
+    assert.isTrue(addressEquals(update.logs[0].args.oldMinter, Accounts.minterAccount));
     update = await setMinter(token, accounts[3], 10000, { from: Accounts.masterMinterAccount });
     await token.mint(accounts[1], 100, { from: accounts[3] });
 
@@ -618,11 +618,11 @@ async function run_tests(newToken, accounts) {
 
   it('should updateUpgraderAddress for upgrader', async function () {
     let upgrader = await getAdmin(proxy);
-    assert.equal(Accounts.proxyOwnerAccount, upgrader);
+    assert.isTrue(addressEquals(Accounts.proxyOwnerAccount, upgrader));
     let address1 = accounts[10];
     let updated = await proxy.changeAdmin(address1, { from: Accounts.proxyOwnerAccount });
     upgrader = await getAdmin(proxy);
-    assert.true(addressEquals(upgrader, address1));
+    assert.isTrue(addressEquals(upgrader, address1));
 
     //Test upgrade with new upgrader account
     await token.configureMinter(Accounts.minterAccount, 1000, {from: Accounts.masterMinterAccount});

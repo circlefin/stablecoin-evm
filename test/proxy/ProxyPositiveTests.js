@@ -41,7 +41,7 @@ async function run_tests(newToken, accounts) {
     var tokenConfig = await initializeTokenWithProxy(rawToken);
     proxy = tokenConfig.proxy;
     token = tokenConfig.token;
-    assert.true(addressEquals(proxy.address, token.address));
+    assert.isTrue(addressEquals(proxy.address, token.address));
   });
 
   it('upt001 should upgradeTo new contract and preserve data field values', async function () {
@@ -77,11 +77,11 @@ async function run_tests(newToken, accounts) {
     const initializeData = encodeCall('initV2', ['bool', 'address', 'uint256'], [true, Accounts.pauserAccount, 12]);
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: Accounts.proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
-    assert.true(addressEquals(newProxiedToken.address, proxy.address));
+    assert.isTrue(addressEquals(newProxiedToken.address, proxy.address));
     assert.notEqual(upperCaseAddress(newProxiedToken.address, upgradedToken.address));
 
     assert.equal(await newProxiedToken.newBool(), true);
-    assert.true(addressEquals(await newProxiedToken.newAddress(), Accounts.pauserAccount));
+    assert.isTrue(addressEquals(await newProxiedToken.newAddress(), Accounts.pauserAccount));
     assert.equal(newBigNumber(12).cmp(await newProxiedToken.newUint()), 0);
 
     customVars = [
@@ -106,15 +106,15 @@ async function run_tests(newToken, accounts) {
     const initializeData = encodeCall('initV2', ['bool', 'address', 'uint256'], [true, Accounts.pauserAccount, 12]);
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: Accounts.proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFieldsNewLogic.at(proxy.address);
-    assert.true(addressEquals(newProxiedToken.address, proxy.address));
+    assert.isTrue(addressEquals(newProxiedToken.address, proxy.address));
     assert.notEqual(upperCaseAddress(newProxiedToken.address, upgradedToken.address));
 
     assert.equal(await newProxiedToken.newBool(), true);
-    assert.true(addressEquals(await newProxiedToken.newAddress(), Accounts.pauserAccount));
+    assert.isTrue(addressEquals(await newProxiedToken.newAddress(), Accounts.pauserAccount));
     assert.equal(newBigNumber(12).cmp(await newProxiedToken.newUint()), 0);
 
     await newProxiedToken.setNewAddress(Accounts.masterMinterAccount);
-    assert.true(addressEquals(await newProxiedToken.newAddress(), Accounts.masterMinterAccount));
+    assert.isTrue(addressEquals(await newProxiedToken.newAddress(), Accounts.masterMinterAccount));
 
     customVars = [
       { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - mintAmount) },
@@ -138,7 +138,7 @@ async function run_tests(newToken, accounts) {
 
     assert.equal(await proxiedToken.newUint(), 12);
     assert.equal(await proxiedToken.newBool(), true);
-    assert.true(addressEquals(await proxiedToken.newAddress(), Accounts.pauserAccount));
+    assert.isTrue(addressEquals(await proxiedToken.newAddress(), Accounts.pauserAccount));
 
     customVars = [
       { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
@@ -157,10 +157,10 @@ async function run_tests(newToken, accounts) {
 
     assert.equal(await proxiedToken.newUint(), 12);
     assert.equal(await proxiedToken.newBool(), true);
-    assert.true(addressEquals(await proxiedToken.newAddress(), Accounts.pauserAccount));
+    assert.isTrue(addressEquals(await proxiedToken.newAddress(), Accounts.pauserAccount));
 
     await newProxiedToken.setNewAddress(Accounts.masterMinterAccount);
-    assert.true(addressEquals(await newProxiedToken.newAddress(), Accounts.masterMinterAccount));
+    assert.isTrue(addressEquals(await newProxiedToken.newAddress(), Accounts.masterMinterAccount));
 
     customVars = [
       { 'variable': 'proxiedTokenAddress', 'expectedValue': upgradedToken.address }
@@ -243,7 +243,7 @@ async function run_tests(newToken, accounts) {
   });
     
   it('upt009 should check that admin is set correctly by proxy constructor', async function() {
-    assert.true(addressEquals(await getAdmin(token), Accounts.proxyOwnerAccount));
+    assert.isTrue(addressEquals(await getAdmin(token), Accounts.proxyOwnerAccount));
   });
 
   it('upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result', async function () {
@@ -253,7 +253,7 @@ async function run_tests(newToken, accounts) {
     const initializeData = encodeCall('initV2', ['bool', 'address', 'uint256'], [true, Accounts.pauserAccount, 12]);
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: Accounts.proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
-    assert.true(addressEquals(newProxiedToken.address, proxy.address));
+    assert.isTrue(addressEquals(newProxiedToken.address, proxy.address));
     assert.notEqual(upperCaseAddress(newProxiedToken.address, upgradedToken.address));
 
     customVars = [
