@@ -52,11 +52,11 @@ contract FiatTokenV2NewFieldsTest is FiatTokenV1 {
     }
 
     function initV2(bool _newBool, address _newAddress, uint256 _newUint) public {
-            require(!initializedV2);
-            newBool = _newBool;
-            newAddress = _newAddress;
-            newUint = _newUint;
-            initializedV2 = true;
+              require(!initializedV2);
+              newBool = _newBool;
+              newAddress = _newAddress;
+              newUint = _newUint;
+              initializedV2 = true;
     }
 
 
