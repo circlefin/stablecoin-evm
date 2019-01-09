@@ -7,7 +7,7 @@ var expectRevert = tokenUtils.expectRevert;
 
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
-var upperCaseAddress = AccountUtils.upperCaseAddress;
+var addressEquals = AccountUtils.addressEquals;
 
 const should = require('chai')
     .use(require('chai-as-promised'))
