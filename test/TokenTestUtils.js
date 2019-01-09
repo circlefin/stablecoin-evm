@@ -10,7 +10,7 @@ var BigNumber = require('bignumber.js');
 var trueInStorageFormat = "0x01";
 var decimals = newBigNumber(10);
 var bigZero = newBigNumber(0);
-var zeroAddress = '0x' + bigZero.toString(16, 40);
+var zeroAddress = web3.utils.toHex(bigZero);
 var bigHundred = newBigNumber(100);
 var maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 var assertDiff = require('assert-diff');
@@ -28,7 +28,7 @@ var setAccountDefault = AccountUtils.setAccountDefault;
 var recursiveSetAccountDefault = AccountUtils.recursiveSetAccountDefault;
 var checkState = AccountUtils.checkState;
 var getAccountState = AccountUtils.getAccountState;
-var upperCaseAddress = AccountUtils.upperCaseAddress;
+var addressEquals = AccountUtils.addressEquals;
 
 // TODO: test really big numbers  Does this still have to be done??
 
@@ -51,13 +51,13 @@ function calculateFeeAmount(amount) {
 
 function checkMinterConfiguredEvent(configureMinterEvent, minter, minterAllowedAmount) {
     assert.equal(configureMinterEvent.logs[0].event, 'MinterConfigured')
-    assert.equal(upperCaseAddress(configureMinterEvent.logs[0].args.minter), upperCaseAddress(minter));
+    assert.true(addressEquals(configureMinterEvent.logs[0].args.minter, minter);
     assert.equal(configureMinterEvent.logs[0].args.minterAllowedAmount, minterAllowedAmount)
 }
 
 function checkMinterRemovedEvent(minterRemovedEvent, minter) {
     assert.equal(minterRemovedEvent.logs[0].event, 'MinterRemoved')
-    assert.equal(upperCaseAddress(minterRemovedEvent.logs[0].args.oldMinter), upperCaseAddress(minter));
+    assert.true(addressEquals(minterRemovedEvent.logs[0].args.oldMinter, minter));
 }
 
 function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
@@ -66,79 +66,77 @@ function checkTransferEventsWithFee(transferEvent, from, to, value, feeAmount) {
     assert.equal(transferEvent.logs[0].args.feeAccount, feeAccount);
     assert.equal(transferEvent.logs[0].args.feeAmount, feeAmount);
     assert.equal(transferEvent.logs[1].event, 'Transfer');
-    assert.equal(upperCaseAddress(transferEvent.logs[1].args.from), upperCaseAddress(from));
-    assert.equal(upperCaseAddress(transferEvent.logs[1].args.to), upperCaseAddress(to));
+    assert.true(addressEquals(transferEvent.logs[1].args.from, from));
+    assert.true(addressEquals(transferEvent.logs[1].args.to, to));
     assert.equal(transferEvent.logs[1].args.value, value);
 }
 
 function checkTransferEvents(transferEvent, from, to, value) {
     assert.equal(transferEvent.logs[0].event, 'Transfer');
-    assert.equal(upperCaseAddress(transferEvent.logs[0].args.from), upperCaseAddress(from));
-    assert.equal(upperCaseAddress(transferEvent.logs[0].args.to), upperCaseAddress(to));
+    assert.true(addressEquals(transferEvent.logs[0].args.from, from));
+    assert.true(addressEquals(transferEvent.logs[0].args.to, to));
     assert.equal(transferEvent.logs[0].args.value, value);
 }
 
 function checkApprovalEvent(approvalEvent, approver, spender, value) {
     assert.equal(approvalEvent.logs[0].event, 'Approval');
-    assert.equal(upperCaseAddress(approvalEvent.logs[0].args.owner), upperCaseAddress(approver));
-    assert.equal(upperCaseAddress(approvalEvent.logs[0].args.spender), upperCaseAddress(spender));
+    assert.true(addressEquals(approvalEvent.logs[0].args.owner, approver));
+    assert.true(addressEquals(approvalEvent.logs[0].args.spender, spender));
     assert.equal(approvalEvent.logs[0].args.value, value);
 }
 
 function checkBurnEvent(burnEvent, burner, amount) {
     assert.equal(burnEvent.logs[0].event, 'Burn');
-    assert.equal(upperCaseAddress(burnEvent.logs[0].args.burner), upperCaseAddress(burner));
-    assert.equal(upperCaseAddress(burnEvent.logs[0].args.amount), upperCaseAddress(amount));
+    assert.true(addressEquals(burnEvent.logs[0].args.burner, burner));
+    assert.true(addressEquals(burnEvent.logs[0].args.amount, amount));
 }
 
 function checkBlacklistEvent(blacklistEvent, account) {
     assert.equal(blacklistEvent.logs[0].event, 'Blacklisted');
-    assert.equal(upperCaseAddress(blacklistEvent.logs[0].args._account), upperCaseAddress(account));
+    assert.true(addressEquals(blacklistEvent.logs[0].args._account, account));
 }
 
 function checkUnblacklistEvent(unblacklistEvent, account) {
     assert.equal(unblacklistEvent.logs[0].event, 'UnBlacklisted');
-    assert.equal(upperCaseAddress(unblacklistEvent.logs[0].args._account), upperCaseAddress(account));
+    assert.true(addressEquals(unblacklistEvent.logs[0].args._account, account));
 }
 
 function checkBlacklisterChangedEvent(blacklisterChangedEvent, blacklister) {
     assert.equal(blacklisterChangedEvent.logs[0].event, 'BlacklisterChanged');
-    assert.equal(upperCaseAddress(blacklisterChangedEvent.logs[0].args.newBlacklister), upperCaseAddress(blacklister));
+    assert.true(addressEquals(blacklisterChangedEvent.logs[0].args.newBlacklister, blacklister));
 }
 
 function checkPauserChangedEvent(pauserChangedEvent, pauser) {
     assert.equal(pauserChangedEvent.logs[0].event, 'PauserChanged');
-    assert.equal(upperCaseAddress(pauserChangedEvent.logs[0].args.newAddress), upperCaseAddress(pauser));
+    assert.true(addressEquals(pauserChangedEvent.logs[0].args.newAddress, pauser));
 }
 
 function checkTransferOwnershipEvent(transferOwnershipEvent, previousOwner, newOwner) {
     assert.equal(transferOwnershipEvent.logs[0].event, 'OwnershipTransferred');
-    assert.equal(upperCaseAddress(transferOwnershipEvent.logs[0].args.previousOwner), upperCaseAddress(previousOwner))
-    assert.equal(upperCaseAddress(transferOwnershipEvent.logs[0].args.newOwner), upperCaseAddress(newOwner));
+    assert.true(addressEquals(transferOwnershipEvent.logs[0].args.previousOwner, previousOwner))
+    assert.true(addressEquals(transferOwnershipEvent.logs[0].args.newOwner, newOwner));
 }
 
 function checkUpdateMasterMinterEvent(checkUpdateMasterMinterEvent, newMasterMinter) {
     assert.equal(checkUpdateMasterMinterEvent.logs[0].event, 'MasterMinterChanged');
-    assert.equal(upperCaseAddress(checkUpdateMasterMinterEvent.logs[0].args.newMasterMinter), upperCaseAddress
-    (newMasterMinter));
+    assert.true(addressEquals(checkUpdateMasterMinterEvent.logs[0].args.newMasterMinter, newMasterMinter));
 }
 
 function checkAdminChangedEvent(adminChangedEvent, previousAdmin, newAdmin) {
     assert.equal(adminChangedEvent.logs[0].event, 'AdminChanged')
-    assert.equal(upperCaseAddress(adminChangedEvent.logs[0].args.previousAdmin), upperCaseAddress(previousAdmin));
-    assert.equal(upperCaseAddress(adminChangedEvent.logs[0].args.newAdmin), upperCaseAddress(newAdmin));
+    assert.true(addressEquals(adminChangedEvent.logs[0].args.previousAdmin, previousAdmin));
+    assert.true(addressEquals(adminChangedEvent.logs[0].args.newAdmin, newAdmin));
 }
 
 function checkUpgradeEvent(upgradeEvent, implementation) {
     assert.equal(upgradeEvent.logs[0].event, 'Upgraded');
-    assert.equal(upperCaseAddress(upgradeEvent.logs[0].args.implementation), upperCaseAddress(implementation));
+    assert.true(addressEquals(upgradeEvent.logs[0].args.implementation, implementation));
 }
 
 function checkTransferProxyOwnershipEvent(transferProxyOwnershipEvent, previousOwner, newOwner) {
     assert.equal(transferProxyOwnershipEvent.logs[0].event, 'ProxyOwnershipTransferred');
-    assert.equal(upperCaseAddress(transferProxyOwnershipEvent.logs[0].args.previousOwner), upperCaseAddress
-    (previousOwner));
-    assert.equal(upperCaseAddress(transferProxyOwnershipEvent.logs[0].args.newOwner), upperCaseAddress(newOwner));
+    assert.true(addressEquals(transferProxyOwnershipEvent.logs[0].args.previousOwner), previousOwner));
+    assert.true(addressEquals(transferProxyOwnershipEvent.logs[0].args.newOwner, newOwner));
 }
 
 function checkPauseEvent(pause) {
@@ -152,14 +150,14 @@ function checkUnpauseEvent(unpause) {
 function checkMintEvent(minting, to, amount, minter) {
     // Mint Event
     assert.equal(minting.logs[0].event, 'Mint');
-    assert.equal(upperCaseAddress(minting.logs[0].args.minter), upperCaseAddress(minter));
-    assert.equal(upperCaseAddress(minting.logs[0].args.to), upperCaseAddress(to));
+    assert.true(addressEquals(minting.logs[0].args.minter, minter));
+    assert.true(addressEquals(minting.logs[0].args.to, to));
     assert.equal(minting.logs[0].args.amount, amount);
 
     // Transfer from 0 Event
     assert.equal(minting.logs[1].event, 'Transfer');
-    assert.equal(upperCaseAddress(minting.logs[1].args.from), upperCaseAddress(zeroAddress));
-    assert.equal(upperCaseAddress(minting.logs[1].args.to), upperCaseAddress(to));
+    assert.true(addressEquals(minting.logs[1].args.from, zeroAddress));
+    assert.true(addressEquals(minting.logs[1].args.to, to));
     assert.equal(minting.logs[1].args.value, amount);
 
 }
@@ -167,13 +165,13 @@ function checkMintEvent(minting, to, amount, minter) {
 function checkBurnEvents(burning, amount, burner) {
     // Burn Event
     assert.equal(burning.logs[0].event, 'Burn');
-    assert.equal(upperCaseAddress(burning.logs[0].args.burner), upperCaseAddress(burner));
+    assert.true(addressEquals(burning.logs[0].args.burner, burner));
     assert.equal(burning.logs[0].args.amount, amount);
 
     // Transfer to 0 Event
     assert.equal(burning.logs[1].event, 'Transfer');
-    assert.equal(upperCaseAddress(burning.logs[1].args.from), upperCaseAddress(burner));
-    assert.equal(upperCaseAddress(burning.logs[1].args.to), upperCaseAddress(zeroAddress));
+    assert.true(addressEquals(burning.logs[1].args.from, burner));
+    assert.true(addressEquals(burning.logs[1].args.to, zeroAddress));
     assert.equal(burning.logs[1].args.value, amount);
 
 }
@@ -204,7 +202,7 @@ var fiatTokenEmptyState = {
 function buildExpectedState(token, customVars) {
     // for each item in customVars, set the item in expectedState
     var expectedState = clone(fiatTokenEmptyState);
-    expectedState.proxiedTokenAddress = upperCaseAddress(token.proxiedTokenAddress);
+    expectedState.proxiedTokenAddress = token.proxiedTokenAddress;
 
     var i;
     for (i = 0; i < customVars.length; ++i) {
@@ -227,11 +225,11 @@ function mapBNToHex(state) {
     var result = {};
     for (var name in state) {
         if(BN.isBN(state[name])) {
-            result[name] = state[name].toString(16,32);
+            result[name] = web3.utils.toHex(state[name]);
         } else if(typeof state[name] == 'object') {
             result[name] = mapBNToHex(state[name]);
         } else if(typeof state[name] == 'string' && state[name].substring(0,2)=='0x') {
-            result[name] = upperCaseAddress(state[name]);
+            result[name] = state[name].toUpperCase();
         } else {
             result[name] = state[name];
         }
@@ -342,12 +340,12 @@ async function getActualState(token) {
             'symbol': symbol,
             'currency': currency,
             'decimals': decimals,
-            'masterMinter': upperCaseAddress(masterMinter),
-            'pauser': upperCaseAddress(pauser),
-            'blacklister': upperCaseAddress(blacklister),
-            'tokenOwner': upperCaseAddress(tokenOwner),
-            'proxiedTokenAddress': upperCaseAddress(proxiedTokenAddress),
-            'proxyOwner': upperCaseAddress(proxyOwner),
+            'masterMinter': masterMinter,
+            'pauser': pauser,
+            'blacklister': blacklister,
+            'tokenOwner': tokenOwner,
+            'proxiedTokenAddress': proxiedTokenAddress,
+            'proxyOwner': proxyOwner,
             'initializedV1': initializedV1,
             'balances': balances,
             'allowance': allowances,
@@ -364,7 +362,7 @@ async function getActualState(token) {
 async function setMinter(token, minter, amount) {
     let update = await token.configureMinter(minter, amount, { from: Accounts.masterMinterAccount });
     assert.equal(update.logs[0].event, 'MinterConfigured');
-    assert.equal(upperCaseAddress(update.logs[0].args.minter), upperCaseAddress(minter));
+    assert.true(addressEquals(update.logs[0].args.minter, minter));
     assert.equal(update.logs[0].args.minterAllowedAmount, amount);
     let minterAllowance = await token.minterAllowance(minter);
 
@@ -508,8 +506,8 @@ async function redeem(token, account, amount) {
 function validateTransferEvent(transferEvent, from, to, value) {
     let eventResult = transferEvent.logs[0];
     assert.equal(eventResult.event, 'Transfer');
-    assert.equal(upperCaseAddress(eventResult.args.from), upperCaseAddress(from));
-    assert.equal(upperCaseAddress(eventResult.args.to), upperCaseAddress(to));
+    assert.true(addressEquals(eventResult.args.from, from));
+    assert.true(addressEquals(eventResult.args.to, to));
     assert.equal(eventResult.args.value, value);
 }
 
@@ -571,7 +569,7 @@ function encodeCall(name, arguments, values) {
 
 async function getAdmin(proxy) {
     var adm = await web3.eth.getStorageAt(proxy.address, adminSlot);
-    return upperCaseAddress(adm);
+    return adm;
 }
 
 async function getImplementation(proxy) {
@@ -603,7 +601,7 @@ async function getInitializedV1(token) {
         }
         masterMinterAddress = "0x" + slot8Data.substring(masterMinterStart, masterMinterStart + 40).toUpperCase();
         var tokenMMA = await token.masterMinter.call();
-        assert.equal(upperCaseAddress(tokenMMA), upperCaseAddress(masterMinterAddress));
+        assert.true(addressEquals(tokenMMA, masterMinterAddress));
     }
     return initialized;
 }

@@ -20,7 +20,7 @@ var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var getAccountState = AccountUtils.getAccountState;
 var MintControllerState = AccountUtils.MintControllerState;
-var upperCaseAddress = AccountUtils.upperCaseAddress;
+var addressEquals = AccountUtils.addressEquals;
 var initializeTokenWithProxyAndMintController = mintUtils.initializeTokenWithProxyAndMintController;
 var checkMintControllerState = mintUtils.checkMintControllerState;
 
@@ -66,7 +66,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
         // need to manually check mintController.controllers[0] because this is not a predefined account
         var actualMinter = await mintController.controllers(zeroAddress);
-        assert.equal(upperCaseAddress(Accounts.minterAccount), upperCaseAddress(actualMinter));
+        assert.true(addressEquals(Accounts.minterAccount), actualMinter));
     });
 
     it('arg004 configureController(msg.sender, M) works', async function () {
@@ -94,7 +94,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         // now make 0 a controller
         await mintController.configureController(zeroAddress, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         var actualMinter = await mintController.controllers(zeroAddress);
-        assert.equal(upperCaseAddress(Accounts.minterAccount), upperCaseAddress(actualMinter));
+        assert.true(addressEquals(Accounts.minterAccount), actualMinter));
 
         // remove 0
         await mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount});

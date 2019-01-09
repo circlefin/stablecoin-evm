@@ -21,7 +21,7 @@ var FiatToken = tokenUtils.FiatToken;
 
 var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
-var upperCaseAddress = AccountUtils.upperCaseAddress;
+var addressEquals = AccountUtils.addressEquals;
 
 var maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 var amount = 100;
@@ -33,7 +33,7 @@ async function run_tests(newToken, accounts) {
     var tokenConfig = await initializeTokenWithProxy(rawToken);
     proxy = tokenConfig.proxy;
     token = tokenConfig.token;
-    assert.equal(upperCaseAddress(proxy.address), upperCaseAddress(token.address));
+    assert.true(addressEquals(proxy.address, token.address));
   });
 
 

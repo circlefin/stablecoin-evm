@@ -40,12 +40,8 @@ var AccountPrivateKeys = {
     proxyOwnerAccount: "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46", // accounts[14]
 };
 
-function upperCaseAddress(address) {
-    if(address != null) {
-        var hex = address.substring(2, address.length).toUpperCase();
-        return "0x" + hex;
-    }
-    return address;
+function addressEquals(address1, address2) {
+    return address1.toUpperCase() == address2.toUpperCase();
 }
 
 // Returns an object with all named account values set to the default value
@@ -156,5 +152,5 @@ module.exports = {
     buildExpectedPartialState: buildExpectedPartialState,
     checkState: checkState,
     getAccountState: getAccountState,
-    upperCaseAddress: upperCaseAddress,
+    addressEquals: addressEquals,
 }

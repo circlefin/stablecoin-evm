@@ -18,7 +18,7 @@ var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var getAccountState = AccountUtils.getAccountState;
 var MintControllerState = AccountUtils.MintControllerState;
-var upperCaseAddress = AccountUtils.upperCaseAddress;
+var addressEquals = AccountUtils.addressEquals;
 var initializeTokenWithProxyAndMintController = mintUtils.initializeTokenWithProxyAndMintController;
 var checkMintControllerState = mintUtils.checkMintControllerState;
 
@@ -46,7 +46,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     it('bt001 Constructor - owner is msg.sender', async function () {
         var newMintController = await MintController.new(token.address, {from: Accounts.arbitraryAccount});
         var owner = await newMintController.owner();
-        assert.equal(upperCaseAddress(owner), upperCaseAddress(Accounts.arbitraryAccount));
+        assert.true(addressEquals(owner, Accounts.arbitraryAccount));
     });
 
     it('bt002 transferOwnership works when owner is msg.sender', async function () {
@@ -233,7 +233,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
     it('bt024 Constructor sets minterManager', async function () {
         var minterManagerAddress = await mintController.minterManager();
-        assert.equal(upperCaseAddress(token.address), upperCaseAddress(minterManagerAddress));
+        assert.true(addressEquals(token.address, minterManagerAddress));
     });
 
     it('bt025 setMinterManager(x) works when existing minterManager = 0', async function () {

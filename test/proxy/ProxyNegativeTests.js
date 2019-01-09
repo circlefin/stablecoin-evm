@@ -22,7 +22,7 @@ var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
 
 var AccountUtils = require('./../AccountUtils');
 var Accounts = AccountUtils.Accounts;
-var upperCaseAddress = AccountUtils.upperCaseAddress;
+var addressEquals = AccountUtils.addressEquals;
 
 var amount = 100;
 
@@ -33,12 +33,12 @@ async function run_tests(newToken, accounts) {
     var tokenConfig = await initializeTokenWithProxy(rawToken);
     proxy = tokenConfig.proxy;
     token = tokenConfig.token;
-    assert.equal(upperCaseAddress(proxy.address), upperCaseAddress(token.address));
+    assert.true(addressEquals(proxy.address ,token.address));
   });
 
   it('nut002 should fail to switch adminAccount with non-adminAccount as caller', async function () {
     await expectRevert(proxy.changeAdmin(Accounts.masterMinterAccount, {from: Accounts.masterMinterAccount}));
-    assert.equal(upperCaseAddress(await proxy.admin({from: Accounts.proxyOwnerAccount})), upperCaseAddress(Accounts
+    assert.true(addressEquals(await proxy.admin({from: Accounts.proxyOwnerAccount}), Accounts
     .proxyOwnerAccount));
     customVars = [];
     await checkVariables([token], [customVars]);
@@ -83,9 +83,9 @@ async function run_tests(newToken, accounts) {
 
   it('nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken', async function () {
     await rawToken.initialize(name, symbol, currency, decimals, Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount);
-    assert.equal(upperCaseAddress(await rawToken.pauser()), upperCaseAddress(Accounts.pauserAccount));
+    assert.true(addressEquals(await rawToken.pauser(), Accounts.pauserAccount));
     await rawToken.updatePauser(Accounts.masterMinterAccount, {from: Accounts.tokenOwnerAccount});
-    assert.equal(upperCaseAddress(await rawToken.pauser()), upperCaseAddress(Accounts.masterMinterAccount));
+    assert.true(addressEquals(await rawToken.pauser(), Accounts.masterMinterAccount));
 
     customVars = [];
     await checkVariables([token], [customVars]);
