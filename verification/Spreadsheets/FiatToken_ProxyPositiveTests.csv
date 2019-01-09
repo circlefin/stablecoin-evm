@@ -1,0 +1,15 @@
+Variable Name,Code,Test
+_implementation,upt001,upt001 should upgradeTo new contract and preserve data field values
+"_implementation, [new fields]",upt002,upt002 should upgradeToandCall to contract with new data fields set on initVX and ensure new fields are correct and old data is preserved
+"_implementation, [new fields]",upt003,"upt003 should upgradeToAndCall to contract with new data fields set on initVX and new logic and ensure old data preserved,new logic works, and new fields correct"
+_admin,upt004,upt004 should update proxy adminAccount with previous adminAccount
+"_implementation, balances",upt005,upt005 should receive Transfer event on transfer when proxied after upgrade
+pause,upt006,upt006 should upgrade while paused and upgraded contract should be paused as a result; then unpause should unpause contract
+should not change state,upt007,upt007 should upgrade contract to original address
+"initialization fields, _implementation",upt008,upt008 should deploy upgraded version of contract with new data fields and without previous deployment and ensure new fields correct
+_admin,upt009,upt009 should check that admin is set correctly by proxy constructor
+"initialization fields, _implementation",upt010,"upt010 should deploy upgraded version of contract with new data fields and logic without previous deployment and ensure new logic works, and new fields correct"
+"_implementation, [new fields]",upt011,upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result
+"_implementation, [new fields]",upt012,upt012 should upgradeToAndCall while proxyOwner is blacklisted
+"_implementation, [new fields]",upt013,upt013 should upgradeToAndCall while new logic is blacklisted
+_implementation,upt014,upt014 should upgradeTo while new logic is blacklisted
