@@ -69,7 +69,7 @@ contract MintController is Controller {
     );
 
     constructor(address _minterManager) public {
-        minterManager =  MinterManagementInterface(_minterManager);
+        minterManager = MinterManagementInterface(_minterManager);
     }
 
     // onlyOwner functions
