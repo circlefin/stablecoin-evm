@@ -41,7 +41,11 @@ var AccountPrivateKeys = {
 };
 
 function addressEquals(address1, address2) {
-    return address1.toUpperCase() == address2.toUpperCase();
+    if (address1.toUpperCase() == address2.toUpperCase()) {
+        return true;
+    } else {
+        assert.isFalse("expect " + address1 + " to equal " + address2);
+    }
 }
 
 // Returns an object with all named account values set to the default value
