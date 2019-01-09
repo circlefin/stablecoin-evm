@@ -35,7 +35,7 @@ contract FiatTokenV2NewFieldsTest is FiatTokenV1 {
     bool internal initializedV2;
 
     function initialize(
-      string _name,
+    string _name,
         string _symbol,
         string _currency,
         uint8 _decimals,
