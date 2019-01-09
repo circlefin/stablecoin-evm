@@ -33,7 +33,7 @@ async function run_tests(newToken, accounts) {
     var tokenConfig = await initializeTokenWithProxy(rawToken);
     proxy = tokenConfig.proxy;
     token = tokenConfig.token;
-    assert.true(addressEquals(proxy.address, token.address));
+    assert.isTrue(addressEquals(proxy.address, token.address));
   });
 
 

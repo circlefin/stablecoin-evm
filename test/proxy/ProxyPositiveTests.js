@@ -31,6 +31,7 @@ var AccountUtils = require('./../AccountUtils');
 var Accounts = AccountUtils.Accounts;
 var AccountPrivateKeys = AccountUtils.AccountPrivateKeys;
 var addressEquals = AccountUtils.addressEquals;
+var addressNotEquals = AccountUtils.addressNotEquals;
 
 var amount = 100;
 
@@ -78,7 +79,7 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: Accounts.proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
     assert.isTrue(addressEquals(newProxiedToken.address, proxy.address));
-    assert.notEqual(upperCaseAddress(newProxiedToken.address, upgradedToken.address));
+    addressNotEquals(newProxiedToken.address, upgradedToken.address);
 
     assert.equal(await newProxiedToken.newBool(), true);
     assert.isTrue(addressEquals(await newProxiedToken.newAddress(), Accounts.pauserAccount));
@@ -107,7 +108,7 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: Accounts.proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFieldsNewLogic.at(proxy.address);
     assert.isTrue(addressEquals(newProxiedToken.address, proxy.address));
-    assert.notEqual(upperCaseAddress(newProxiedToken.address, upgradedToken.address));
+    addressNotEquals(newProxiedToken.address, upgradedToken.address);
 
     assert.equal(await newProxiedToken.newBool(), true);
     assert.isTrue(addressEquals(await newProxiedToken.newAddress(), Accounts.pauserAccount));
@@ -254,7 +255,7 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, { from: Accounts.proxyOwnerAccount })
     newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
     assert.isTrue(addressEquals(newProxiedToken.address, proxy.address));
-    assert.notEqual(upperCaseAddress(newProxiedToken.address, upgradedToken.address));
+    addressNotEquals(newProxiedToken.address, upgradedToken.address);
 
     customVars = [
       { 'variable': 'paused', 'expectedValue': true, },

@@ -48,6 +48,14 @@ function addressEquals(address1, address2) {
     }
 }
 
+function addressNotEquals(address1, address2) {
+    if (address1.toUpperCase() != address2.toUpperCase()) {
+        return true;
+    } else {
+        assert.isFalse("expect " + address1 + " to not equal " + address2);
+    }
+}
+
 // Returns an object with all named account values set to the default value
 // e.g sets {owner: 0, minter: 0,...}
 function setAccountDefault(accounts, defaultValue) {
@@ -157,4 +165,5 @@ module.exports = {
     checkState: checkState,
     getAccountState: getAccountState,
     addressEquals: addressEquals,
+    addressNotEquals: addressNotEquals,
 }
