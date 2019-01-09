@@ -54,8 +54,7 @@ contract Controller is Ownable {
     // onlyOwner functions
 
     /**
-     * @dev set the controller of a particular _worker
-     *
+     * @dev set the controller of a particular _worker.
      * Argument _worker must not be 0x00. Call removeController(_controller)
      * instead to disable the controller.
      */
