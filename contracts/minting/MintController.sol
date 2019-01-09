@@ -22,8 +22,8 @@
 
 pragma solidity ^0.4.24;
 
-import './Controller.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import "./Controller.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 // Using an interface for managing minters so that MintController
 // can be used for managing minters with different contracts.
