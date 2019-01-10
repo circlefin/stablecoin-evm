@@ -52,8 +52,10 @@ module.exports = function(deployer, network, accounts) {
             console.log("initializing proxy");
             // Pretend that the proxy address is a FiatTokenV1
             // this is fine because the proxy will forward all the calls to the FiatTokenV1 impl
-            tokenProxy = FiatTokenV1.at(tokenProxy.address);
-            return tokenProxy.initialize(
+            return FiatTokenV1.at(tokenProxy.address);
+        })
+        .then(function(tokenProxyAsFiatTokenV1){
+            return tokenProxyAsFiatTokenV1.initialize(
                 "USD//C",
                 "USDC",
                 "USD",

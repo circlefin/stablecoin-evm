@@ -8,21 +8,17 @@ var clone = require('clone');
 
 // named list of all accounts
 var Accounts = {
-    deployerAccount: "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1", // accounts[0]
-    arbitraryAccount: "0xffcf8fdee72ac11b5c542428b35eef5769c409f0", // accounts[1]
-//    issuerControllerAccount: "0x22d491bde2303f2f43325b2108d26f1eaba1e32b", // accounts[2]
-    tokenOwnerAccount: "0xe11ba2b4d45eaed5996cd0823791e0c93114882d", // Accounts.arbitraryAccount
-    blacklisterAccount: "0xd03ea8624c8c5987235048901fb614fdca89b117", // accounts[4]
-    arbitraryAccount2: "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc", // accounts[5]
-    masterMinterAccount: "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9", // accounts[6]
-    minterAccount: "0x28a8746e75304c0780e011bed21c72cd78cd535e", // accounts[7]
-    pauserAccount: "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e", // accounts[8]
-    mintOwnerAccount: "0x1df62f291b2e969fb0849d99d9ce41e2f137006e", // accounts[9]
-//    mintProtectorAccount: "0x610bb1573d1046fcb8a70bbbd395754cd57c2b60", // accounts[10]
-    controller1Account: "0x855fa758c77d68a04990e992aa4dcdef899f654a", // accounts[11]
-//    controller2Account: "0xfa2435eacf10ca62ae6787ba2fb044f8733ee843", // accounts[12]
-//    issuerOwnerAccount: "0x64e078a8aa15a41b85890265648e965de686bae6", // accounts[13]
-    proxyOwnerAccount: "0x2f560290fef1b3ada194b6aa9c40aa71f8e95598", // accounts[14]
+    deployerAccount: "0x90F8BF6A479F320EAD074411A4B0E7944EA8C9C1", // accounts[0]
+    arbitraryAccount: "0xFFCF8FDEE72AC11B5C542428B35EEF5769C409F0", // accounts[1]
+    tokenOwnerAccount: "0xE11BA2B4D45EAED5996CD0823791E0C93114882D", // Accounts.arbitraryAccount
+    blacklisterAccount: "0xD03EA8624C8C5987235048901FB614FDCA89B117", // accounts[4]
+    arbitraryAccount2: "0x95CED938F7991CD0DFCB48F0A06A40FA1AF46EBC", // accounts[5]
+    masterMinterAccount: "0x3E5E9111AE8EB78FE1CC3BB8915D5D461F3EF9A9", // accounts[6]
+    minterAccount: "0x28A8746E75304C0780E011BED21C72CD78CD535E", // accounts[7]
+    pauserAccount: "0xACA94EF8BD5FFEE41947B4585A84BDA5A3D3DA6E", // accounts[8]
+    mintOwnerAccount: "0x1DF62F291B2E969FB0849D99D9CE41E2F137006E", // accounts[9]
+    controller1Account: "0x855FA758C77D68A04990E992AA4DCDEF899F654A", // accounts[11]
+    proxyOwnerAccount: "0x2F560290FEF1B3ADA194B6AA9C40AA71F8E95598", // accounts[14]
 };
 
 // named list of known private keys
@@ -43,6 +39,22 @@ var AccountPrivateKeys = {
     issuerOwnerPrivateKey: "0874049f95d55fb76916262dc70571701b5c4cc5900c0691af75f1a8a52c8268", // accounts[13]
     proxyOwnerAccount: "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46", // accounts[14]
 };
+
+function addressEquals(address1, address2) {
+    if (address1.toUpperCase() == address2.toUpperCase()) {
+        return true;
+    } else {
+        assert.isFalse("expect " + address1 + " to equal " + address2);
+    }
+}
+
+function addressNotEquals(address1, address2) {
+    if (address1.toUpperCase() != address2.toUpperCase()) {
+        return true;
+    } else {
+        assert.isFalse("expect " + address1 + " to not equal " + address2);
+    }
+}
 
 // Returns an object with all named account values set to the default value
 // e.g sets {owner: 0, minter: 0,...}
@@ -152,4 +164,6 @@ module.exports = {
     buildExpectedPartialState: buildExpectedPartialState,
     checkState: checkState,
     getAccountState: getAccountState,
+    addressEquals: addressEquals,
+    addressNotEquals: addressNotEquals,
 }
