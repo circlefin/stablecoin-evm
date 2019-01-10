@@ -556,7 +556,7 @@ async function expectError(contractPromise, errorMsg) {
         await contractPromise;
         assert.fail('Expected error ${errorMsg}, but no error received');
     } catch (error) {
-        const correctErrorMsgReceived = error.message.includes(errorMsg) >= 0;
+        const correctErrorMsgReceived = error.message.includes(errorMsg);
         assert(correctErrorMsgReceived, `Expected ${errorMsg}, got ${error} instead`);
     }
 }
