@@ -56,6 +56,13 @@ contract MintController is Controller {
         uint256 newAllowance
     );
 
+    event MinterAllowanceDecrement(
+        address indexed msgSender,
+        address indexed minter,
+        uint256 decrement,
+        uint256 newAllowance
+    );
+
     constructor(address _minterManager) public {
         minterManager = MinterManagementInterface(_minterManager);
     }
@@ -131,6 +138,23 @@ contract MintController is Controller {
             newAllowance
         );
 
+        return internal_setMinterAllowance(minter, newAllowance);
+    }
+
+    /**
+     * @dev decreases the minter allowance if and only if the minter is
+     * currently active. The controller can safely send a signed decrementMinterAllowance()
+     * transaction to a minter and not worry about it being used to undo a removeMinter()
+     * transaction.
+     */
+    function decrementMinterAllowance(uint256 allowanceDecrement) onlyController public returns (bool) {
+        address minter = controllers[msg.sender];
+        require(minterManager.isMinter(minter));
+
+        uint256 currentAllowance = minterManager.minterAllowance(minter);
+        uint256 newAllowance = (currentAllowance > _allowanceDecrement ? currentAllowance : _allowanceDecrement).sub(_allowanceDecrement);
+
+        emit MinterAllowanceDecrement(msg.sender, minter, allowanceDecrement, newAllowance);
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
