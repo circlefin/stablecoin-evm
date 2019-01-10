@@ -40,7 +40,7 @@ contract Controller is Ownable {
      * @dev ensure that the caller is the controller of a non-zero worker address
      */
     modifier onlyController() {
-        require(controllers[msg.sender] != address(0));
+        require(controllers[msg.sender] != address(0), "The value of controller[msg.sender] must be non-zero.");
         _;
     }
 
@@ -54,8 +54,8 @@ contract Controller is Ownable {
      * Argument _worker must not be 0x00, call removeController(_controller) instead.
      */
     function configureController(address _controller, address _worker) onlyOwner public returns (bool) {
-        require(_worker != address(0));
-        require(_controller != address(0));
+        require(_controller != address(0), "Controller must be a non-zero address");
+        require(_worker != address(0), "Worker must be a non-zero address.");
         controllers[_controller] = _worker;
         emit ControllerConfigured(_controller, _worker);
         return true;
@@ -65,7 +65,7 @@ contract Controller is Ownable {
      * @dev disables a controller by setting its worker to address(0);
      */
     function removeController(address _controller) onlyOwner public returns (bool) {
-        require(_controller != address(0));
+        require(_controller != address(0), "Controller must be a non-zero address");
         controllers[_controller] = address(0);
         emit ControllerRemoved(_controller);
         return true;

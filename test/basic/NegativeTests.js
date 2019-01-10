@@ -1,5 +1,5 @@
 var tokenUtils = require('./../TokenTestUtils.js');
-var BigNumber = require('bignumber.js');
+var newBigNumber = tokenUtils.newBigNumber;
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 
@@ -44,7 +44,7 @@ async function run_tests(newToken, accounts) {
     await token.pause({from: Accounts.pauserAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)},
       {'variable': 'paused', 'expectedValue': true}
     ]
     await expectRevert(token.mint(Accounts.arbitraryAccount, 50, {from: Accounts.minterAccount}));
@@ -62,7 +62,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)},
       {'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true}
     ]
     await expectRevert(token.mint(Accounts.arbitraryAccount, 50, {from: Accounts.minterAccount}));
@@ -74,7 +74,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)},
       {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
     ]
     await expectRevert(token.mint(Accounts.arbitraryAccount, 50, {from: Accounts.minterAccount}));
@@ -85,7 +85,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount - 1, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 1)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 1)}
     ]
     await expectRevert(token.mint(Accounts.arbitraryAccount, amount, {from: Accounts.minterAccount}));
     await checkVariables([token], [customVars]);
@@ -95,7 +95,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await expectRevert(token.mint("0x0", amount, {from: Accounts.minterAccount}));
     await expectRevert(token.mint("0x0000000000000000000000000000000000000000", amount, {from: Accounts.minterAccount}));
@@ -138,7 +138,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -146,10 +146,10 @@ async function run_tests(newToken, accounts) {
     await token.approve(Accounts.arbitraryAccount2, 50, {from: Accounts.arbitraryAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': new BigNumber(50)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
+      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': newBigNumber(50)}
     ]
     await expectRevert(token.transferFrom(Accounts.arbitraryAccount, "0x0", 50, {from: Accounts.arbitraryAccount2}));
     await checkVariables([token], [customVars]);
@@ -159,7 +159,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -167,10 +167,10 @@ async function run_tests(newToken, accounts) {
     await token.approve(Accounts.blacklisterAccount, amount, {from: Accounts.arbitraryAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.arbitraryAccount.blacklisterAccount', 'expectedValue': new BigNumber(amount)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
+      {'variable': 'allowance.arbitraryAccount.blacklisterAccount', 'expectedValue': newBigNumber(amount)},
     ]
     await expectRevert(token.transferFrom(Accounts.arbitraryAccount, Accounts.pauserAccount, amount, {from: Accounts.blacklisterAccount}));
     await checkVariables([token], [customVars]);
@@ -180,7 +180,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -189,10 +189,10 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.arbitraryAccount, {from: Accounts.blacklisterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.blacklisterAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.blacklisterAccount.arbitraryAccount2', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.blacklisterAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
+      {'variable': 'allowance.blacklisterAccount.arbitraryAccount2', 'expectedValue': newBigNumber(50)},
       {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
     ]
     await expectRevert(token.transferFrom(Accounts.blacklisterAccount, Accounts.arbitraryAccount, 50, {from: Accounts.arbitraryAccount2}));
@@ -203,7 +203,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -212,10 +212,10 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.arbitraryAccount, {from: Accounts.blacklisterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount2', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.arbitraryAccount2.arbitraryAccount', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount2', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
+      {'variable': 'allowance.arbitraryAccount2.arbitraryAccount', 'expectedValue': newBigNumber(50)},
       {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
     ]
     await expectRevert(token.transferFrom(Accounts.arbitraryAccount2, Accounts.pauserAccount, 50, {from: Accounts.arbitraryAccount}));
@@ -226,7 +226,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -235,10 +235,10 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.arbitraryAccount, {from: Accounts.blacklisterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
+      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': newBigNumber(50)},
       {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
     ]
     await expectRevert(token.transferFrom(Accounts.arbitraryAccount, Accounts.pauserAccount, 50, {from: Accounts.arbitraryAccount2}));
@@ -249,7 +249,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -257,10 +257,10 @@ async function run_tests(newToken, accounts) {
     await token.approve(Accounts.arbitraryAccount2, 50, {from: Accounts.arbitraryAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
+      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': newBigNumber(50)},
     ]
     await expectRevert(token.transferFrom(Accounts.arbitraryAccount, Accounts.pauserAccount, 60, {from: Accounts.arbitraryAccount2}));
     await checkVariables([token], [customVars]);
@@ -270,7 +270,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -279,10 +279,10 @@ async function run_tests(newToken, accounts) {
     await token.pause({from: Accounts.pauserAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
-      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
+      {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': newBigNumber(50)},
       {'variable': 'paused', 'expectedValue': true}
     ]
     await expectRevert(token.transferFrom(Accounts.arbitraryAccount, Accounts.pauserAccount, 50, {from: Accounts.arbitraryAccount2}));
@@ -295,16 +295,16 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
     await token.mint(Accounts.arbitraryAccount, 50, {from: Accounts.minterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)}
     ]
     await expectRevert(token.transfer("0x0", 50, {from: Accounts.arbitraryAccount}));
     await checkVariables([token], [customVars]);
@@ -314,16 +314,16 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
     await token.mint(Accounts.arbitraryAccount, 50, {from: Accounts.minterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)}
     ]
     await expectRevert(token.transfer(Accounts.pauserAccount, amount, {from: Accounts.arbitraryAccount}));
     await checkVariables([token], [customVars]);
@@ -333,7 +333,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -341,9 +341,9 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.arbitraryAccount, {from: Accounts.blacklisterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount2', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount2', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
       {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
     ]
     await expectRevert(token.transfer(Accounts.arbitraryAccount, 50, {from: Accounts.arbitraryAccount2}));
@@ -354,7 +354,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -362,9 +362,9 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.arbitraryAccount, {from: Accounts.blacklisterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
       {'variable': 'isAccountBlacklisted.arbitraryAccount', 'expectedValue': true}
     ]
     await expectRevert(token.transfer(Accounts.tokenOwnerAccount, 50, {from: Accounts.arbitraryAccount}));
@@ -375,7 +375,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -383,9 +383,9 @@ async function run_tests(newToken, accounts) {
     await token.pause({from: Accounts.pauserAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.arbitraryAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
       {'variable': 'paused', 'expectedValue': true}
     ]
     await expectRevert(token.transfer(Accounts.tokenOwnerAccount, 50, {from: Accounts.arbitraryAccount}));
@@ -416,7 +416,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await expectRevert(token.removeMinter(Accounts.minterAccount, {from: Accounts.arbitraryAccount}));
     await checkVariables([token], [customVars]);
@@ -428,7 +428,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await expectRevert(token.burn(amount, {from: Accounts.minterAccount}));
     await checkVariables([token], [customVars]);
@@ -439,9 +439,9 @@ async function run_tests(newToken, accounts) {
     await token.mint(Accounts.minterAccount, amount, {from: Accounts.minterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0)},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(0)},
+      {'variable': 'balances.minterAccount', 'expectedValue': newBigNumber(amount)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(amount)}
     ]
     await expectRevert(token.burn(-1, {from: Accounts.minterAccount}));
     await checkVariables([token], [customVars]);
@@ -451,7 +451,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -459,9 +459,9 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.minterAccount, {from: Accounts.blacklisterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.minterAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
       {'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true}
     ]
     await expectRevert(token.burn(50, {from: Accounts.minterAccount}));
@@ -472,7 +472,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
@@ -480,9 +480,9 @@ async function run_tests(newToken, accounts) {
     await token.pause({from: Accounts.pauserAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)},
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.minterAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
       {'variable': 'paused', 'expectedValue': true}
     ]
     await expectRevert(token.burn(50, {from: Accounts.minterAccount}));
@@ -493,16 +493,16 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
     await token.mint(Accounts.minterAccount, 50, {from: Accounts.minterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.minterAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)}
     ]
     await expectRevert(token.burn(50, {from: Accounts.arbitraryAccount}));
     await checkVariables([token], [customVars]);
@@ -512,25 +512,25 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, {from: Accounts.masterMinterAccount});
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
 
     await token.mint(Accounts.minterAccount, 50, {from: Accounts.minterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount - 50)},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount - 50)},
+      {'variable': 'balances.minterAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)}
     ]
     await checkVariables([token], [customVars]);
 
     await token.removeMinter(Accounts.minterAccount, {from: Accounts.masterMinterAccount});
     customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': false},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0)},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(50)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(50)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(0)},
+      {'variable': 'balances.minterAccount', 'expectedValue': newBigNumber(50)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)}
     ]
     await expectRevert(token.burn(50, {from: Accounts.minterAccount}));
     await checkVariables([token], [customVars]);
@@ -609,7 +609,7 @@ async function run_tests(newToken, accounts) {
 
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
   });
@@ -620,8 +620,8 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.burn(0, {from: Accounts.minterAccount}));
     var customVars = [
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
-      {'variable': 'balances.minterAccount', 'expectedValue': new BigNumber(amount)},
-      {'variable': 'totalSupply', 'expectedValue': new BigNumber(amount)}
+      {'variable': 'balances.minterAccount', 'expectedValue': newBigNumber(amount)},
+      {'variable': 'totalSupply', 'expectedValue': newBigNumber(amount)}
     ]
     await checkVariables([token], [customVars]);
   });

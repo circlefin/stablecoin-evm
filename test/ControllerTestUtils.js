@@ -1,11 +1,7 @@
-var BigNumber = require('bignumber.js');
 var Q = require('q');
 
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
-
-
-var tokenUtils = require('./TokenTestUtils.js');
 
 var Controller = artifacts.require('./../minting/Controller');
 var AccountUtils = require('./AccountUtils.js');

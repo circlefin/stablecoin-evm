@@ -1,7 +1,5 @@
-var BigNumber = require('bignumber.js');
-var bigZero = new BigNumber(0);
-
 var tokenUtils = require('./TokenTestUtils.js');
+var bigZero = tokenUtils.bigZero;
 var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
 var MintController = artifacts.require('./minting/MintController');
