@@ -163,18 +163,8 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('arg015 incrementMinterAllowance(0) makes no changes to allowance', async function () {
-        var amount = 897;
-        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
-        await mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account});
-
-        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
-        expectedTokenState.push(
-            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
-        );
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    it('arg015 incrementMinterAllowance(0) throws', async function () {
+        await expectRevert(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}));
     });
 
     it('arg016 incrementMinterAllowance(oldAllowance) doubles the allowance', async function () {
@@ -209,4 +199,3 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 var testWrapper = require('./../TestWrapper');
 testWrapper.execute('MINTp0_ArgumentTests MintController', run_tests_MintController);
 testWrapper.execute('MINTp0_ArgumentTests MasterMinter', run_tests_MasterMinter);
-
