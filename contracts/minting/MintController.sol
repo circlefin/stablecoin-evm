@@ -90,7 +90,7 @@ contract MintController is Controller {
      * transaction.
      */
      function incrementMinterAllowance(uint256 _allowanceIncrement) onlyController public returns (bool) {
-        require(_allowanceIncrement > 0);
+        require(_allowanceIncrement > 0, "Increment allowance must be greater than 0");
         address minter = controllers[msg.sender];
         require(minterManager.isMinter(minter), "Can only increment allowance for minters in minterManager.");
 
