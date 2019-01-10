@@ -55,6 +55,7 @@ contract Controller is Ownable {
      */
     function configureController(address _controller, address _worker) onlyOwner public returns (bool) {
         require(_worker != address(0));
+        require(_controller != address(0));
         controllers[_controller] = _worker;
         emit ControllerConfigured(_controller, _worker);
         return true;
@@ -64,6 +65,7 @@ contract Controller is Ownable {
      * @dev disables a controller by setting its worker to address(0);
      */
     function removeController(address _controller) onlyOwner public returns (bool) {
+        require(_controller != address(0));
         controllers[_controller] = address(0);
         emit ControllerRemoved(_controller);
         return true;

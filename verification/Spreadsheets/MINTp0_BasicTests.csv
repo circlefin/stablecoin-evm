@@ -46,7 +46,7 @@ MintController.sol,removeMinter,minterManager.minterAllowance[M] == X,bt054,bt05
 MintController.sol,removeMinter,minterManager.minterAllowance[M] == BIG,bt055,bt055 removeMinter works when the minterAllowance is big
 MintController.sol,setMinterManager,msg.sender == owner,bt006,bt006 setMinterManager works when owner is msg.sender
 MintController.sol,setMinterManager,msg.sender != owner,bt007,bt007 setMinterManager reverts when owner is not msg.sender
-MintController.sol,setMinterManager,minterManager == 0,bt025,bt025 setMinterManager(x) works when existing minterManager = 0
+MintController.sol,setMinterManager,minterManager == 0,bt025,bt025 setMinterManager(x) reverts when existing minterManager = 0
 MintController.sol,setMinterManager,minterManager != 0,bt026,bt026 setMinterManager(x) works when existing minterManager != 0
 MintController.sol,setMinterManager,minterManager == msg.sender,bt027,bt027 setMinterManager(x) works when x = msg.sender
 MintController.sol,setMinterManager,minterManager == newMinterManager,bt028,bt028 setMinterManager(x) works when x = minterManager
