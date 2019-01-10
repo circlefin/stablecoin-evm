@@ -2,7 +2,6 @@ var MintController = artifacts.require('minting/MintController');
 var MasterMinter = artifacts.require('minting/MasterMinter');
 var FiatToken = artifacts.require('FiatTokenV1');
 
-var BigNumber = require('bignumber.js');
 var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;

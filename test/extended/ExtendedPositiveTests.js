@@ -1,5 +1,5 @@
 var tokenUtils = require('./../TokenTestUtils.js');
-var BigNumber = require('bignumber.js');
+var newBigNumber = tokenUtils.newBigNumber;
 var assertDiff = require('assert-diff');
 assertDiff.options.strict = true;
 
@@ -31,7 +31,6 @@ async function run_tests(newToken, accounts) {
     token = tokenConfig.token;
     assert.equal(proxy.address, token.address);
   });
-
 
   // Paused
 
@@ -90,7 +89,7 @@ async function run_tests(newToken, accounts) {
     await token.pause({ from: Accounts.pauserAccount });
     var isAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) },
       { 'variable': 'paused', 'expectedValue': true }
     ];
     await checkVariables([token], [isAMinter]);
@@ -98,7 +97,7 @@ async function run_tests(newToken, accounts) {
     await token.removeMinter(Accounts.minterAccount, { from: Accounts.masterMinterAccount });
     var notAMinter = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(0) },
       { 'variable': 'paused', 'expectedValue': true }
     ];
     await checkVariables([token], [notAMinter]);
@@ -309,7 +308,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
     var result = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true }
     ];
     await checkVariables([token], [result]);
@@ -320,7 +319,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(Accounts.minterAccount, amount, { from: Accounts.masterMinterAccount });
     var result = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
     ];
     await checkVariables([token], [result]);
@@ -331,7 +330,7 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.masterMinterAccount, { from: Accounts.blacklisterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
     ];
     await checkVariables([token], [customVars]);
@@ -339,7 +338,7 @@ async function run_tests(newToken, accounts) {
     await token.removeMinter(Accounts.minterAccount, { from: Accounts.masterMinterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(0) },
       { 'variable': 'isAccountBlacklisted.masterMinterAccount', 'expectedValue': true },
     ];
     await checkVariables([token], [customVars]);
@@ -350,7 +349,7 @@ async function run_tests(newToken, accounts) {
     await token.blacklist(Accounts.minterAccount, { from: Accounts.blacklisterAccount });
     var customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) },
       { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
     ];
     await checkVariables([token], [customVars]);
@@ -358,7 +357,7 @@ async function run_tests(newToken, accounts) {
     await token.removeMinter(Accounts.minterAccount, { from: Accounts.masterMinterAccount });
     customVars = [
       { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': false },
-      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(0) },
+      { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(0) },
       { 'variable': 'isAccountBlacklisted.minterAccount', 'expectedValue': true },
     ];
     await checkVariables([token], [customVars]);

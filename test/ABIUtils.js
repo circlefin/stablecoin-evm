@@ -1,10 +1,11 @@
 
 var Tx = require('ethereumjs-tx');
 
-function makeRawTransaction(msgData, msgSender, hexPrivateKey, contractAddress) {
+async function makeRawTransaction(msgData, msgSender, hexPrivateKey, contractAddress) {
+    var nonce = web3.utils.toHex(await web3.eth.getTransactionCount(msgSender));
     var tx = new Tx({
-        nonce: web3.toHex(web3.eth.getTransactionCount(msgSender)),
-        gasPrice: web3.toHex(web3.toWei('20', 'gwei')),
+        nonce: nonce,
+        gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei')),
         gasLimit: 1000000,
         to: contractAddress,
         value: 0,
@@ -18,7 +19,7 @@ function makeRawTransaction(msgData, msgSender, hexPrivateKey, contractAddress) 
 
 function sendRawTransaction(raw) {
     return new Promise(function (resolve, reject) {
-        web3.eth.sendRawTransaction(raw, function (err, transactionHash) {
+        web3.eth.sendSignedTransaction(raw, function (err, transactionHash) {
             if (err !== null) return reject(err);
             resolve(transactionHash);
         });
@@ -26,7 +27,7 @@ function sendRawTransaction(raw) {
 }
 
 function functionSignature(methodName) {
-    return web3.sha3(methodName).substr(0, 2 + 8);
+    return web3.utils.sha3(methodName).substr(0, 2 + 8);
 }
 
 function encodeAddress(address) {
