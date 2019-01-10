@@ -2,12 +2,12 @@ File,Function,Arguments,Code,Description
 Ownable.sol,transferOwnership,newOwner == msg.sender,arg000,arg000 transferOwnership(msg.sender) works
 Ownable.sol,transferOwnership,newOwner == 0,arg001,arg001 transferOwnership(0) reverts
 Ownable.sol,transferOwnership,newOwner == owner,arg002,arg002 transferOwnership(owner) works
-Controller.sol,configureController,newController == 0,arg003,"arg003 configureController(0, M) works"
+Controller.sol,configureController,newController == 0,arg003,"arg003 configureController(0, M) throws"
 Controller.sol,configureController,newController == msg.sender,arg004,"arg004 configureController(msg.sender, M) works"
 Controller.sol,configureController,newController == newMinter,arg005,"arg005 configureController(M, M) works"
 Controller.sol,configureController,newMinter == 0,arg006,"arg006 configureController(C, 0) throws"
-Controller.sol,removeController,newController == 0,arg007,arg007 removeController(0) works
-MintController.sol,setMinterManager,newMinterManager = 0,arg008,arg008 setMinterManager(0) works
+Controller.sol,removeController,newController == 0,arg007,arg007 removeController(0) throws
+MintController.sol,setMinterManager,newMinterManager = 0,arg008,arg008 setMinterManager(0) throws
 MintController.sol,setMinterManager,newMinterManager == minterManager,arg009,arg009 setMinterManager(oldMinterManager) works
 MintController.sol,setMinterManager,newMinterManager == user,arg010,arg010 setMinterManager(user_account) works
 MintController.sol,setMinterManager,newMinterManager == newToken,arg011,arg011 setMinterManager(newToken) works
@@ -18,3 +18,5 @@ MintController.sol,incrementMinterAllowance,increment ==0,arg015,arg015 incremen
 MintController.sol,incrementMinterAllowance,increment == oldAllowance,arg016,arg016 incrementMinterAllowance(oldAllowance) doubles the allowance
 MintController.sol,incrementMinterAllowance,increment == 2^256-1,arg017,arg017 incrementMinterAllowance(MAX) throws
 MintController.sol,incrementMinterAllowance,increment + oldAllowance == 2^256 -1,arg018,arg018 incrementMinterAlllowance(BIG) throws
+Controller.sol,configureController,newController == 0,arg019,"arg019 configureController(0, 0) throws"
+Controller.sol,removeController,newController == msg.sender,arg020,arg020 removeController(C) works

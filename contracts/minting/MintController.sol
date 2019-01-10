@@ -58,6 +58,7 @@ contract MintController is Controller {
      * @dev sets the minterManager
      */
     function setMinterManager(address _newMinterManager) onlyOwner public returns (bool) {
+        require(_newMinterManager != address(0));
         emit MinterManagerSet(minterManager, _newMinterManager);
         minterManager = MinterManagementInterface(_newMinterManager);
         return true;
