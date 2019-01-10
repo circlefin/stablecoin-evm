@@ -544,7 +544,7 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
 }
 
 async function expectRevert(contractPromise) {
-    await expectError(contractPromise, 'revert');
+    await expectError(contractPromise, 'Error:');
 }
 
 async function expectJump(contractPromise) {
