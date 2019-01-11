@@ -22,7 +22,7 @@
 pragma solidity ^0.4.24;
 
 import './Controller.sol';
-import './MinterManagementInterface.sol';
+import "./MinterManagementInterface.sol";
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
