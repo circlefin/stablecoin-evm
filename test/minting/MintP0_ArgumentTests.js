@@ -199,13 +199,13 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         // now make controller1Account a controller
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         var actualMinter = await mintController.controllers(Accounts.controller1Account);
-        assert.equal(Accounts.minterAccount, actualMinter);
+        addressEquals(Accounts.minterAccount, actualMinter);
 
         // remove controller1Account
         await mintController.removeController(Accounts.controller1Account, {from : Accounts.mintOwnerAccount});
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
         actualMinter = await mintController.controllers(Accounts.controller1Account);
-        assert.equal(actualMinter, zeroAddress);
+        addressEquals(actualMinter, zeroAddress);
     });
 }
 
