@@ -9,8 +9,8 @@
   },
   "scripts": {
     "dev": "lite-server",
-    "truffle-test": "scripts/start-ganache.sh && truffle test",
-    "test": "scripts/start-ganache.sh && ./node_modules/.bin/solidity-coverage"
+    "truffle-test": "scripts/verify-environment.sh && scripts/start-ganache.sh && truffle test",
+    "test": "scripts/verify-environment.sh && scripts/start-ganache.sh && ./node_modules/.bin/solidity-coverage"
   },
   "repository": {
     "type": "git",
