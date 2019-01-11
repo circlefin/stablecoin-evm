@@ -236,10 +236,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         assert.isTrue(addressEquals(token.address, minterManagerAddress));
     });
 
-    it('bt025 setMinterManager(x) reverts when existing minterManager = 0', async function () {
-        await expectRevert(mintController.setMinterManager(zeroAddress, {from: Accounts.mintOwnerAccount}));
-    });
-
     it('bt026 setMinterManager(x) works when existing minterManager != 0', async function () {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
