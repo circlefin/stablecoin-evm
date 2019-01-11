@@ -62,7 +62,9 @@ contract Controller is Ownable {
         address _controller,
         address _worker
     )
-        onlyOwner public returns (bool)
+        onlyOwner 
+        public 
+        returns (bool)
     {
         require(_worker != address(0), "Worker must be a non-zero address.");
         controllers[_controller] = _worker;
@@ -76,7 +78,9 @@ contract Controller is Ownable {
     function removeController(
         address _controller
     )
-        onlyOwner public returns (bool)
+        onlyOwner 
+        public 
+        returns (bool)
     {
         controllers[_controller] = address(0);
         emit ControllerRemoved(_controller);
