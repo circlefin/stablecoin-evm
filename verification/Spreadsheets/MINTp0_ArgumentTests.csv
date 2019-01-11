@@ -17,7 +17,6 @@ MintController.sol,configureMinter,newAllowance == 2^256-1,arg014,arg014 configu
 MintController.sol,incrementMinterAllowance,increment ==0,arg015,arg015 incrementMinterAllowance(0) throws
 MintController.sol,incrementMinterAllowance,increment == oldAllowance,arg016,arg016 incrementMinterAllowance(oldAllowance) doubles the allowance
 MintController.sol,incrementMinterAllowance,increment == 2^256-1,arg017,arg017 incrementMinterAllowance(MAX) throws
-MintController.sol,incrementMinterAllowance,increment + oldAllowance == 2^256 -1,arg018,arg018 incrementMinterAlllowance(BIG) throws
-MintController.sol,decrementMinterAllowance,decrement ==0,arg019,arg019 decrementMinterAllowance(0) makes no changes to allowance
-MintController.sol,decrementMinterAllowance,decrement == oldAllowance,arg020,arg020 decrementMinterAllowance(oldAllowance) sets the allowance to 0
-MintController.sol,decrementMinterAllowance,oldAllowance - decrement == 0 - 1,arg021,arg021 decrementMinterAllowance(MIN) throws
+MintController.sol,incrementMinterAllowance,increment + oldAllowance == 2^256 -1,arg018,arg018 incrementMinterAllowance(BIG) throws
+MintController.sol,decrementMinterAllowance,decrement == oldAllowance,arg019,arg019 decrementMinterAllowance(oldAllowance) sets the allowance to 0
+MintController.sol,decrementMinterAllowance,oldAllowance - decrement == 0 - 1,arg020,arg020 decrementMinterAllowance(MIN) throws

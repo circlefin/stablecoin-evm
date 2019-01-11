@@ -645,11 +645,11 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
         // now configure minter
         var amount = 1;
-        await mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account});
+        await mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account});
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         expectedTokenState.push(
             { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) }
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(6788) }
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
@@ -693,8 +693,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         var amount = 0;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
 
-        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterManager = await FiatToken.at(await mintController.minterManager());
         var isMinter = await minterManager.isMinter(Accounts.minterAccount);
+
         assert.isFalse(isMinter);
 
         await expectError(mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account}));
@@ -707,7 +708,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
 
-        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterManager = await FiatToken.at(await mintController.minterManager());
         var isMinter = await minterManager.isMinter(Accounts.minterAccount);
         assert.isTrue(isMinter);
 
@@ -725,10 +726,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
 
-        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterManager = await FiatToken.at(await mintController.minterManager());
         var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
-        assert((newBigNumber(minterAllowance)).isEqualTo(newBigNumber(maxAmount)));
-
+        assert(minterAllowance.cmp(newBigNumber(maxAmount))==0);
         await mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account});
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         expectedTokenState.push(
@@ -744,9 +744,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(initialAmount, {from: Accounts.controller1Account});
 
-        var minterManager = FiatToken.at(await mintController.minterManager());
+        var minterManager = await FiatToken.at(await mintController.minterManager());
         var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
-        assert((newBigNumber(minterAllowance)).isEqualTo(newBigNumber(initialAmount)));
+        assert(minterAllowance.cmp(newBigNumber(initialAmount))==0);
 
         await mintController.decrementMinterAllowance(decrementAmount, {from: Accounts.controller1Account});
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
