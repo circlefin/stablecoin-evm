@@ -30,11 +30,14 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 interface MinterManagementInterface {
     function isMinter(address account) external view returns (bool);
     function minterAllowance(address minter) external view returns (uint256);
+
     function configureMinter(
         address minter,
         uint256 minterAllowedAmount
     )
-    external returns (bool);
+    external 
+    returns (bool);
+
     function removeMinter(address minter) external returns (bool);
 }
 
@@ -94,7 +97,7 @@ contract MintController is Controller {
     /**
      * @dev remove the controller's minter.
      */
-    function removeMinter() onlyController public returns (bool) {
+    function removeMinter() public onlyController returns (bool) {
         address minter = controllers[msg.sender];
         emit MinterRemoved(msg.sender, minter);
         return minterManager.removeMinter(minter);
