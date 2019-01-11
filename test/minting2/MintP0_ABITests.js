@@ -4,8 +4,7 @@ var FiatToken = artifacts.require('FiatTokenV1');
 
 var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
-var expectRevert = tokenUtils.expectRevert;
-var expectJump = tokenUtils.expectJump;
+var expectError = tokenUtils.expectError;
 var bigZero = tokenUtils.bigZero;
 var maxAmount = tokenUtils.maxAmount;
 var solidityErrors = tokenUtils.solidityErrors;

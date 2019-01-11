@@ -10,7 +10,7 @@ var BigNumber = require('bignumber.js');
 var trueInStorageFormat = "0x01";
 var decimals = newBigNumber(10);
 var bigZero = newBigNumber(0);
-var zeroAddress = '0x' + bigZero.toString(16, 40);
+var zeroAddress = '0x0000000000000000000000000000000000000000';
 var bigHundred = newBigNumber(100);
 var maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 var assertDiff = require('assert-diff');
@@ -623,6 +623,7 @@ module.exports = {
     currency: currency,
     decimals: decimals,
     bigZero: bigZero,
+    zeroAddress: zeroAddress,
     bigHundred: bigHundred,
     debugLogging: debugLogging,
     solidityErrors: solidityErrors,
