@@ -80,8 +80,8 @@ contract MintController is Controller {
     function setMinterManager(
         address _newMinterManager
     )
-        onlyOwner 
         public 
+        onlyOwner 
         returns (bool)
     {
         emit MinterManagerSet(minterManager, _newMinterManager);
@@ -106,8 +106,8 @@ contract MintController is Controller {
     function configureMinter(
         uint256 newAllowance
     )
-        onlyController 
         public 
+        onlyController 
         returns (bool)
     {
         address minter = controllers[msg.sender];
@@ -124,8 +124,8 @@ contract MintController is Controller {
     function incrementMinterAllowance(
         uint256 allowanceIncrement
     )
-        onlyController 
         public 
+        onlyController 
         returns (bool)
     {
         address minter = controllers[msg.sender];
