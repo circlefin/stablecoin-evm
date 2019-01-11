@@ -301,17 +301,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('bt033 configureMinter reverts when minterManager is 0', async function () {
-         // set minterManager
-         var minterManagerAddress = await mintController.minterManager();
-         await mintController.setMinterManager(minterManagerAddress, {from:Accounts.mintOwnerAccount});
-         expectedMintControllerState.minterManager = minterManagerAddress;
-         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-         // configure minter will fail with any args
-         await(expectRevert(mintController.configureMinter(50, {from: Accounts.controller1Account})));
-    });
-
     it('bt034 configureMinter reverts when minterManager is a user account', async function () {
          // set minterManager to user account
          await mintController.setMinterManager(Accounts.arbitraryAccount, {from:Accounts.mintOwnerAccount});
@@ -332,17 +321,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
             { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) }
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-    });
-
-    it('bt036 incrementMinterAllowance reverts when minterManager is 0', async function () {
-         // set minterManager
-         var minterManagerAddress = await mintController.minterManager();
-         await mintController.setMinterManager(minterManagerAddress, {from:Accounts.mintOwnerAccount});
-         expectedMintControllerState.minterManager = minterManagerAddress;
-         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-         // incrementMinterAllowance will fail with any args
-         await(expectRevert(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account})));
     });
 
     it('bt037 incrementMinterAllowance reverts when minterManager is a user account', async function () {
