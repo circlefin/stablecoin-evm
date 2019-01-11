@@ -81,7 +81,6 @@ async function run_tests(newToken, accounts) {
              AccountPrivateKeys.pauserPrivateKey,
              token.address);
         await expectRevert(sendRawTransaction(raw));
-        await expectRevert(sendRawTransaction(raw));
     });
 
     it('abi005 Pausable constructor is not a function', async function () {
@@ -206,7 +205,7 @@ async function run_tests(newToken, accounts) {
 
     it('abi028 UpgradeabilityProxy._upgradeTo is internal', async function () {
         let badData = mockStringAddressEncode('_upgradeTo(string,address)', Accounts.pauserAccount);
-        let raw = makeRawTransaction(
+        let raw = await makeRawTransaction(
             badData,
             Accounts.tokenOwnerAccount,
             AccountPrivateKeys.tokenOwnerPrivateKey,

@@ -38,6 +38,11 @@ var implSlot = "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
 
+// Common solidity error messages 
+var solidityErrors = {
+    "argumentType": "argument must be a string, Buffer, ArrayBuffer, Array, or array-like object."
+}
+
 // Returns a new BN object
 function newBigNumber(value) {
     var hex = new BigNumber(value).toString(16);
@@ -544,11 +549,11 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
 }
 
 async function expectRevert(contractPromise) {
-    await expectError(contractPromise, 'error:');
+    await expectError(contractPromise, "revert");
 }
 
 async function expectJump(contractPromise) {
-    await expectError(contractPromise, 'invalid opcode');
+    await expectError(contractPromise, "invalid opcode");
 }
 
 async function expectError(contractPromise, errorMsg) {
@@ -556,9 +561,8 @@ async function expectError(contractPromise, errorMsg) {
         await contractPromise;
         assert.fail('Expected error ${errorMsg}, but no error received');
     } catch (error) {
-//      Todo: perform error message check in separate PR
-//        var correctErrorMsgReceived = error.message.includes(errorMsg);
-//        assert(correctErrorMsgReceived, `Expected ${errorMsg}, got ${error.message} instead`);
+        var correctErrorMsgReceived = error.message.includes(errorMsg);
+        assert(correctErrorMsgReceived, `Expected ${errorMsg}, got ${error.message} instead`);
     }
 }
 
@@ -621,6 +625,7 @@ module.exports = {
     bigZero: bigZero,
     bigHundred: bigHundred,
     debugLogging: debugLogging,
+    solidityErrors: solidityErrors,
     calculateFeeAmount: calculateFeeAmount,
     checkTransferEventsWithFee: checkTransferEventsWithFee,
     checkTransferEvents: checkTransferEvents,

@@ -5,6 +5,7 @@ var currency = tokenUtils.currency;
 var decimals = tokenUtils.decimals
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
+var zeroAddress = tokenUtils.zeroAddress;
 var mint = tokenUtils.mint;
 var burn = tokenUtils.burn;
 var setMinter = tokenUtils.setMinter;
@@ -204,7 +205,7 @@ async function run_tests(newToken, accounts) {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(allowed.cmp(newBigNumber(100))==0);
 
-    await expectRevert(token.transferFrom(accounts[0], 0, 50, { from: accounts[3] }));
+    await expectRevert(token.transferFrom(accounts[0], zeroAddress, 50, { from: accounts[3] }));
 
     let balance0 = await token.balanceOf(accounts[0]);
     assert.equal(balance0, 500);
