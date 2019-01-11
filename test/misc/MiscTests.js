@@ -445,7 +445,7 @@ async function run_tests(newToken, accounts) {
     var newProxy = await FiatTokenProxy.new(rawToken.address, { from: Accounts.arbitraryAccount });
     var token = await FiatToken.at(newProxy.address);
     var initialized = await getInitializedV1(token);
-    assert.equal("0x00", initialized);
+    assert.equal("0x0", initialized);
   });
 
   it('ms047 configureMinter works on amount=2^256-1', async function() {
