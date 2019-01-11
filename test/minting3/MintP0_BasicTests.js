@@ -636,7 +636,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt056 decrementMinterAllowance reverts if msg.sender is not a controller', async function () {
-        await expectRevert(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}));
+        await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}));
     });
 
     it('bt057 decrementMinterAllowance works when controllers[msg.sender]=M', async function () {
@@ -649,7 +649,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         expectedTokenState.push(
             { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(amount) }
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) }
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
@@ -661,7 +661,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         // decrementMinterAllowance will fail with any args
-        await(expectRevert(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account})));
+        await(expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account})));
     });
 
     it('bt059 decrementMinterAllowance reverts when minterManager is a user account', async function () {
@@ -671,7 +671,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         // decrementMinterAllowance will fail with any args
-        await(expectRevert(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account})));
+        await(expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account})));
     });
 
     it('bt060 decrementMinterAllowance works when minterManager is ok', async function () {
@@ -684,7 +684,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         expectedTokenState.push(
             { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new bigZero }
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': bigZero }
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
@@ -697,7 +697,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         var isMinter = await minterManager.isMinter(Accounts.minterAccount);
         assert.isFalse(isMinter);
 
-        await expectRevert(mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account}));
+        await expectError(mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account}));
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
@@ -715,7 +715,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         expectedTokenState.push(
             { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new bigZero}
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': bigZero}
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
@@ -727,7 +727,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
         var minterManager = FiatToken.at(await mintController.minterManager());
         var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
-        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(maxAmount)));
+        assert((newBigNumber(minterAllowance)).isEqualTo(newBigNumber(maxAmount)));
 
         await mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account});
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
@@ -746,19 +746,19 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
         var minterManager = FiatToken.at(await mintController.minterManager());
         var minterAllowance = await minterManager.minterAllowance(Accounts.minterAccount);
-        assert((new BigNumber(minterAllowance)).isEqualTo(new BigNumber(initialAmount)));
+        assert((newBigNumber(minterAllowance)).isEqualTo(newBigNumber(initialAmount)));
 
         await mintController.decrementMinterAllowance(decrementAmount, {from: Accounts.controller1Account});
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         expectedTokenState.push(
             { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(initialAmount - decrementAmount) }
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(initialAmount - decrementAmount) }
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
     it('bt065 decrementMinterAllowance(M,amt) reverts when minterAllowance[M] - amt < 0', async function () {
-        var initialAmount = "0x" + ((new BigNumber(45))).toString(16);
+        var initialAmount = 45;
         var decrementAmount = 64;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(initialAmount, {from: Accounts.controller1Account});
@@ -766,7 +766,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         expectedTokenState.push(
             { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': new BigNumber(initialAmount) }
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(initialAmount) }
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 

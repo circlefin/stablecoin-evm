@@ -147,14 +147,15 @@ contract MintController is Controller {
      * transaction to a minter and not worry about it being used to undo a removeMinter()
      * transaction.
      */
-    function decrementMinterAllowance(uint256 allowanceDecrement) onlyController public returns (bool) {
+    function decrementMinterAllowance(uint256 _allowanceDecrement) onlyController public returns (bool) {
         address minter = controllers[msg.sender];
         require(minterManager.isMinter(minter));
+        require(_allowanceDecrement > 0);
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
         uint256 newAllowance = (currentAllowance > _allowanceDecrement ? currentAllowance : _allowanceDecrement).sub(_allowanceDecrement);
 
-        emit MinterAllowanceDecrement(msg.sender, minter, allowanceDecrement, newAllowance);
+        emit MinterAllowanceDecrement(msg.sender, minter, _allowanceDecrement, newAllowance);
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
