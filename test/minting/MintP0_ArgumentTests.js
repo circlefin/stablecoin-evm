@@ -167,7 +167,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg015 incrementMinterAllowance(0) throws', async function () {
-        await expectError(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}));
+        await expectError(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}), "Increment allowance must be greater than 0.");
     });
 
     it('arg016 incrementMinterAllowance(oldAllowance) doubles the allowance', async function () {
