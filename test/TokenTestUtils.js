@@ -588,10 +588,10 @@ async function getInitializedV1(token) {
     var initialized;
     var masterMinterStart;
     var masterMinterAddress;
-    if (slot8DataLength == 4) {
+    if (slot8DataLength == 3) {
         //Validate proxy not yet initialized
         for (var i = 0; i <= 20; i++) {
-            assert.equal("0x00", await web3.eth.getStorageAt(token.address, i));
+            assert.equal("0x0", await web3.eth.getStorageAt(token.address, i));
         }
         initialized = slot8Data;
     } else {
