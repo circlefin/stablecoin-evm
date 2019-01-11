@@ -10,7 +10,7 @@ var BigNumber = require('bignumber.js');
 var trueInStorageFormat = "0x01";
 var decimals = newBigNumber(10);
 var bigZero = newBigNumber(0);
-var zeroAddress = '0x' + bigZero.toString(16, 40);
+var zeroAddress = '0x0000000000000000000000000000000000000000';
 var bigHundred = newBigNumber(100);
 var maxAmount = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 var assertDiff = require('assert-diff');
@@ -37,6 +37,11 @@ var implSlot = "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8
 
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
+
+// Common solidity error messages 
+var solidityErrors = {
+    "argumentType": "argument must be a string, Buffer, ArrayBuffer, Array, or array-like object."
+}
 
 // Returns a new BN object
 function newBigNumber(value) {
@@ -544,11 +549,11 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
 }
 
 async function expectRevert(contractPromise) {
-    await expectError(contractPromise, 'error:');
+    await expectError(contractPromise, "revert");
 }
 
 async function expectJump(contractPromise) {
-    await expectError(contractPromise, 'invalid opcode');
+    await expectError(contractPromise, "invalid opcode");
 }
 
 async function expectError(contractPromise, errorMsg) {
@@ -556,9 +561,8 @@ async function expectError(contractPromise, errorMsg) {
         await contractPromise;
         assert.fail('Expected error ${errorMsg}, but no error received');
     } catch (error) {
-//      Todo: perform error message check in separate PR
-//        var correctErrorMsgReceived = error.message.includes(errorMsg);
-//        assert(correctErrorMsgReceived, `Expected ${errorMsg}, got ${error.message} instead`);
+        var correctErrorMsgReceived = error.message.includes(errorMsg);
+        assert(correctErrorMsgReceived, `Expected ${errorMsg}, got ${error.message} instead`);
     }
 }
 
@@ -584,10 +588,10 @@ async function getInitializedV1(token) {
     var initialized;
     var masterMinterStart;
     var masterMinterAddress;
-    if (slot8DataLength == 4) {
+    if (slot8DataLength == 3) {
         //Validate proxy not yet initialized
         for (var i = 0; i <= 20; i++) {
-            assert.equal("0x00", await web3.eth.getStorageAt(token.address, i));
+            assert.equal("0x0", await web3.eth.getStorageAt(token.address, i));
         }
         initialized = slot8Data;
     } else {
@@ -619,8 +623,10 @@ module.exports = {
     currency: currency,
     decimals: decimals,
     bigZero: bigZero,
+    zeroAddress: zeroAddress,
     bigHundred: bigHundred,
     debugLogging: debugLogging,
+    solidityErrors: solidityErrors,
     calculateFeeAmount: calculateFeeAmount,
     checkTransferEventsWithFee: checkTransferEventsWithFee,
     checkTransferEvents: checkTransferEvents,
