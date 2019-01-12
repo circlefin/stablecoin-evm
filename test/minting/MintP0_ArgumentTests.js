@@ -46,14 +46,14 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         expectedTokenState = [{ 'variable': 'masterMinter', 'expectedValue': mintController.address }];
     });
 
-    // it('arg000 transferOwnership(msg.sender) works', async function () {
-    //     await mintController.transferOwnership(Accounts.mintOwnerAccount, {from: Accounts.mintOwnerAccount});
-    //     await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-    // });
-    //
-    // it('arg001 transferOwnership(0) reverts', async function () {
-    //     await expectRevert(mintController.transferOwnership(zeroAddress, {from: Accounts.mintOwnerAccount}));
-    // });
+    it('arg000 transferOwnership(msg.sender) works', async function () {
+        await mintController.transferOwnership(Accounts.mintOwnerAccount, {from: Accounts.mintOwnerAccount});
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('arg001 transferOwnership(0) reverts', async function () {
+        await expectRevert(mintController.transferOwnership(zeroAddress, {from: Accounts.mintOwnerAccount}));
+    });
 
     it('arg002 transferOwnership(owner) works', async function () {
         await mintController.transferOwnership(Accounts.mintOwnerAccount, {from: Accounts.mintOwnerAccount});
