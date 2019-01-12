@@ -23,8 +23,7 @@ var AccountUtils = require('./../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 
 var amount = 100;
-let longZero = 0x0000000000000000000000000000000000000000;
-let shortZero = 0x00;
+var zeroAddress = tokenUtils.zeroAddress;
 
 async function run_tests(newToken, accounts) {
 
@@ -97,9 +96,7 @@ async function run_tests(newToken, accounts) {
       {'variable': 'isAccountMinter.minterAccount', 'expectedValue': true},
       {'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount)}
     ]
-    await expectRevert(token.mint("0x0", amount, {from: Accounts.minterAccount}));
-    await expectRevert(token.mint("0x0000000000000000000000000000000000000000", amount, {from: Accounts.minterAccount}));
-    await expectRevert(token.mint(0x0000000000000000000000000000000000000000, amount, {from: Accounts.minterAccount}));
+    await expectRevert(token.mint(zeroAddress, amount, {from: Accounts.minterAccount}));
     await checkVariables([token], [customVars]);
   });
 
@@ -151,7 +148,7 @@ async function run_tests(newToken, accounts) {
       {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)},
       {'variable': 'allowance.arbitraryAccount.arbitraryAccount2', 'expectedValue': newBigNumber(50)}
     ]
-    await expectRevert(token.transferFrom(Accounts.arbitraryAccount, "0x0", 50, {from: Accounts.arbitraryAccount2}));
+    await expectRevert(token.transferFrom(Accounts.arbitraryAccount, zeroAddress, 50, {from: Accounts.arbitraryAccount2}));
     await checkVariables([token], [customVars]);
   });
 
@@ -306,7 +303,7 @@ async function run_tests(newToken, accounts) {
       {'variable': 'balances.arbitraryAccount', 'expectedValue': newBigNumber(50)},
       {'variable': 'totalSupply', 'expectedValue': newBigNumber(50)}
     ]
-    await expectRevert(token.transfer("0x0", 50, {from: Accounts.arbitraryAccount}));
+    await expectRevert(token.transfer(zeroAddress, 50, {from: Accounts.arbitraryAccount}));
     await checkVariables([token], [customVars]);
   });
 
@@ -627,47 +624,39 @@ async function run_tests(newToken, accounts) {
   });
 
   it('nt064 transferOwnership should fail on 0x0', async function () {
-    await expectRevert(token.transferOwnership(longZero, { from: Accounts.tokenOwnerAccount }));
-    await expectRevert(token.transferOwnership(shortZero, { from: Accounts.tokenOwnerAccount }));
+    await expectRevert(token.transferOwnership(zeroAddress, { from: Accounts.tokenOwnerAccount }));
   });
 
   it('nt057 updateMasterMinter should fail on 0x0', async function () {
-    await expectRevert(token.updateMasterMinter(longZero, { from: Accounts.tokenOwnerAccount }));
-    await expectRevert(token.updateMasterMinter(shortZero, { from: Accounts.tokenOwnerAccount }));
+    await expectRevert(token.updateMasterMinter(zeroAddress, { from: Accounts.tokenOwnerAccount }));
   });
 
   it('nt058 updatePauser should fail on 0x0', async function () {
-    await expectRevert(token.updatePauser(longZero, { from: Accounts.tokenOwnerAccount }));
-    await expectRevert(token.updatePauser(shortZero, { from: Accounts.tokenOwnerAccount }));
+    await expectRevert(token.updatePauser(zeroAddress, { from: Accounts.tokenOwnerAccount }));
   });
 
   it('nt059 updateBlacklister should fail on 0x0', async function () {
-    await expectRevert(token.updateBlacklister(longZero, { from: Accounts.tokenOwnerAccount }));
-    await expectRevert(token.updateBlacklister(shortZero, { from: Accounts.tokenOwnerAccount }));
+    await expectRevert(token.updateBlacklister(zeroAddress, { from: Accounts.tokenOwnerAccount }));
   });
 
   it('nt060 initialize should fail when _masterMinter is 0x0', async function () {
     rawToken = await newToken();
-    await expectRevert(customInitializeTokenWithProxy(rawToken, longZero, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount));
-    await expectRevert(customInitializeTokenWithProxy(rawToken, shortZero, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount));
+    await expectRevert(customInitializeTokenWithProxy(rawToken, zeroAddress, Accounts.pauserAccount, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount));
   });
 
   it('nt061 initialize should fail when _pauser is 0x0', async function () {
     rawToken = await newToken();
-    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, longZero, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount));
-    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, shortZero, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount));
+    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, zeroAddress, Accounts.blacklisterAccount, Accounts.tokenOwnerAccount));
   });
 
   it('nt062 initialize should fail when _blacklister is 0x0', async function () {
     rawToken = await newToken();
-    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, Accounts.pauserAccount, longZero, Accounts.tokenOwnerAccount));
-    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, Accounts.pauserAccount, shortZero, Accounts.tokenOwnerAccount));
+    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, Accounts.pauserAccount, zeroAddress, Accounts.tokenOwnerAccount));
   });
 
   it('nt063 initialize should fail when _owner is 0x0', async function () {
     rawToken = await newToken();
-    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, longZero));
-    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, shortZero));
+    await expectRevert(customInitializeTokenWithProxy(rawToken, Accounts.masterMinterAccount, Accounts.pauserAccount, Accounts.blacklisterAccount, zeroAddress));
   });
 }
 
