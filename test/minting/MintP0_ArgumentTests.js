@@ -166,18 +166,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('arg015 incrementMinterAllowance(0) makes no changes to allowance', async function () {
-        var amount = 897;
+    it('arg015 incrementMinterAllowance(0) throws', async function () {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
-        await mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account});
-
-        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
-        expectedTokenState.push(
-            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
-            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) }
-        );
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+        await expectError(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}), "Allowance increment must be greater than 0.");
     });
 
     it('arg016 incrementMinterAllowance(oldAllowance) doubles the allowance', async function () {
