@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
 
-yarn check
-
+echo "Verifying integrity"
+yarn check --integrity
+echo "Verifying tree"
+yarn check --verify-tree
