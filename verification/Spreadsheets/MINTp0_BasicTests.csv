@@ -62,4 +62,4 @@ MintController.sol,decrementMinterAllowance,minterManager.isMinter == false,bt06
 MintController.sol,decrementMinterAllowance,minterManager.isMinter == true,bt062,"bt062 decrementMinterAllowance(M, amt) works when minterManager.isMinter(M)=true"
 MintController.sol,decrementMinterAllowance,minterManager.minterAllowance[M] == 0,bt063,"bt063 decrementMinterAllowance(M,amt) works when minterAllowance is MAX"
 MintController.sol,decrementMinterAllowance,minterManager.minterAllowance[M] == X,bt064,"bt064 decrementMinterAllowance(M, amt) works when minterAllowance > 0"
-MintController.sol,decrementMinterAllowance,minterManager.minterAllowance[M] == BIG,bt065,"bt065 decrementMinterAllowance(M,amt) reverts when minterAllowance[M] - amt < 0"
+MintController.sol,decrementMinterAllowance,minterManager.minterAllowance[M] == BIG,bt065,"bt065 decrementMinterAllowance(M,amt) sets allowance to 0 when minterAllowance[M] - amt < 0"
