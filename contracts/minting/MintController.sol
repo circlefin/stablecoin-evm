@@ -80,8 +80,8 @@ contract MintController is Controller {
     function setMinterManager(
         address _newMinterManager
     )
-        public 
-        onlyOwner 
+        public
+        onlyOwner
         returns (bool)
     {
         emit MinterManagerSet(minterManager, _newMinterManager);
@@ -106,8 +106,8 @@ contract MintController is Controller {
     function configureMinter(
         uint256 newAllowance
     )
-        public 
-        onlyController 
+        public
+        onlyController
         returns (bool)
     {
         address minter = controllers[msg.sender];
@@ -123,10 +123,10 @@ contract MintController is Controller {
      */
 
     function incrementMinterAllowance(
-        uint256 allowanceIncrement
+        uint256 _allowanceIncrement
     )
-        public 
-        onlyController 
+        public
+        onlyController
         returns (bool)
     {
         require(_allowanceIncrement > 0, "Allowance increment must be greater than 0.");
@@ -139,10 +139,10 @@ contract MintController is Controller {
         emit MinterAllowanceIncrement(
             msg.sender,
             minter,
-            allowanceIncrement,
+            _allowanceIncrement,
             newAllowance
         );
-        
+
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
@@ -156,7 +156,7 @@ contract MintController is Controller {
         address minter,
         uint256 newAllowance
     )
-        internal 
+        internal
         returns (bool)
     {
         return minterManager.configureMinter(minter, newAllowance);
