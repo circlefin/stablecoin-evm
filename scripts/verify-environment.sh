@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 
-yarn check
+yarn check --integrity
 
