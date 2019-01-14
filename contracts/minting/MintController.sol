@@ -23,20 +23,8 @@
 pragma solidity ^0.4.24;
 
 import "./Controller.sol";
+import "./MinterManagementInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
-// Using an interface for managing minters so that MintController
-// can be used for managing minters with different contracts.
-interface MinterManagementInterface {
-    function isMinter(address account) external view returns (bool);
-    function minterAllowance(address minter) external view returns (uint256);
-    function configureMinter(
-        address minter,
-        uint256 minterAllowedAmount
-    )
-    external returns (bool);
-    function removeMinter(address minter) external returns (bool);
-}
 
 /**
  * @title MintController
