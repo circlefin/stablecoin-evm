@@ -212,4 +212,3 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 var testWrapper = require('./../TestWrapper');
 testWrapper.execute('MINTp0_ArgumentTests MintController', run_tests_MintController);
 testWrapper.execute('MINTp0_ArgumentTests MasterMinter', run_tests_MasterMinter);
-
