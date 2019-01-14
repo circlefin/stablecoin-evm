@@ -61,7 +61,8 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg003 configureController(0, M) throws', async function () {
-        await expectError(mintController.configureController(zeroAddress, Accounts.minterAccount, {from: Accounts.mintOwnerAccount}));
+        await expectError(mintController.configureController(zeroAddress, Accounts.minterAccount, {from: Accounts.mintOwnerAccount}),
+        "Controller must be a non-zero address");
     });
 
     it('arg004 configureController(msg.sender, M) works', async function () {
@@ -82,11 +83,13 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg007 removeController(0) throws', async function () {
-        await expectError(mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount}));
+        await expectError(mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount}),
+        "Controller must be a non-zero address");
     });
 
     it('arg008 setMinterManager(0) throws', async function () {
-        await expectError(mintController.setMinterManager(zeroAddress, {from: Accounts.mintOwnerAccount}));
+        await expectError(mintController.setMinterManager(zeroAddress, {from: Accounts.mintOwnerAccount}),
+        "Minter manager must be a non-zero address");
     });
 
     it('arg009 setMinterManager(oldMinterManager) works', async function () {
@@ -188,7 +191,8 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg019 configureController(0, 0) throws', async function () {
-        await expectError(mintController.configureController(zeroAddress, zeroAddress, {from: Accounts.mintOwnerAccount}));
+        await expectError(mintController.configureController(zeroAddress, zeroAddress, {from: Accounts.mintOwnerAccount}),
+        "Controller must be a non-zero address");
     });
 
     it('arg020 removeController(C) works', async function() {
