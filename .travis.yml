@@ -9,7 +9,7 @@ before_install:
 
 install:
   - npm install -g truffle@5.0.0
-  - yarn install --frozen-lockfile
+  - yarn install --force --frozen-lockfile
 
 env:
   - TEST_SUITE=test/assert/*
