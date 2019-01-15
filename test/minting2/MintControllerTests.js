@@ -163,7 +163,7 @@ async function run_tests(newToken, accounts) {
    });
 
    it('only controller decrements allowance', async function () {
-        await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}));
+        await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
    });
 
    it('only active minters can have allowance decremented', async function () {
@@ -174,7 +174,7 @@ async function run_tests(newToken, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         // decrement minter allowance
-        await expectError(mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account}));
+        await expectError(mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only decrement allowance for minters in minterManager.");
    });
 }
 

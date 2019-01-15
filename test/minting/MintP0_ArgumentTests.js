@@ -212,11 +212,22 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('arg020 decrementMinterAllowance(MIN) throws', async function () {
+    it('arg020 decrementMinterAllowance(MIN) sets the allowance to 0', async function () {
         var amount = 0;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
-        await expectJump(mintController.decrementMinterAllowance(1, {from: Accounts.controller1Account}));
+        await mintController.decrementMinterAllowance(1, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': bigZero }
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+    });
+
+    it('arg021 decrementMinterAllowance(0) throws', async function () {
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}), "Allowance decrement must be greater than 0.");
     });
 
 }
