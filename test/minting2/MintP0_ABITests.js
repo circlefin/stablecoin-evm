@@ -4,10 +4,10 @@ var FiatToken = artifacts.require('FiatTokenV1');
 
 var tokenUtils = require('./../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
-var expectRevert = tokenUtils.expectRevert;
-var expectJump = tokenUtils.expectJump;
+var expectError = tokenUtils.expectError;
 var bigZero = tokenUtils.bigZero;
 var maxAmount = tokenUtils.maxAmount;
+var solidityErrors = tokenUtils.solidityErrors;
 
 var clone = require('clone');
 
@@ -19,8 +19,6 @@ var getAccountState = AccountUtils.getAccountState;
 var MintControllerState = AccountUtils.MintControllerState;
 var initializeTokenWithProxyAndMintController = mintUtils.initializeTokenWithProxyAndMintController;
 var checkMintControllerState = mintUtils.checkMintControllerState;
-
-var zeroAddress = "0x0000000000000000000000000000000000000000";
 
 var abiUtils = require('./../ABIUtils.js');
 var makeRawTransaction = abiUtils.makeRawTransaction;
@@ -55,7 +53,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
              Accounts.mintOwnerAccount,
              AccountPrivateKeys.mintOwnerPrivateKey,
              mintController.address);
-         await expectRevert(sendRawTransaction(raw));
+        await expectError(sendRawTransaction(raw), solidityErrors.argumentType);
     });
 
     it('abi101 setOwner is internal', async function () {
@@ -65,7 +63,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
             Accounts.mintOwnerAccount,
             AccountPrivateKeys.mintOwnerPrivateKey,
             mintController.address);
-        await expectRevert(sendRawTransaction(raw));
+        await expectError(sendRawTransaction(raw), solidityErrors.argumentType);
     });
 
 }

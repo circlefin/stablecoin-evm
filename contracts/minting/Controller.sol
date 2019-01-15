@@ -44,7 +44,7 @@ contract Controller is Ownable {
      * @dev ensure that caller is the controller of a non-zero worker address
      */
     modifier onlyController() {
-        require(controllers[msg.sender] != address(0), "The value of controller[msg.sender] must be non-zero.");
+        require(controllers[msg.sender] != address(0), "The value of controllers[msg.sender] must be non-zero.");
         _;
     }
 

@@ -5,6 +5,7 @@ assertDiff.options.strict = true;
 
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
+var zeroAddress = tokenUtils.zeroAddress;
 var mint = tokenUtils.mint;
 var expectRevert = tokenUtils.expectRevert;
 var checkVariables = tokenUtils.checkVariables;
@@ -46,7 +47,7 @@ async function run_tests(newToken, accounts) {
 
   it('nut003 should fail to upgradeTo to null contract address', async function () {
     var upgradedToken = await UpgradedFiatToken.new();
-    await expectRevert(proxy.upgradeTo("0x0", token, {from: Accounts.proxyOwnerAccount}));
+    await expectRevert(proxy.upgradeTo(zeroAddress, {from: Accounts.proxyOwnerAccount}));
 
     customVars = [];
     await checkVariables([token], [customVars]);
@@ -55,7 +56,7 @@ async function run_tests(newToken, accounts) {
   it('nut004 should fail to upgradeToAndCall to null contract address', async function () {
     var upgradedToken = await UpgradedFiatToken.new();
     const initializeData = encodeCall('pauser', [], []);
-    await expectRevert(proxy.upgradeToAndCall("0x0", initializeData, { from: Accounts.proxyOwnerAccount }));
+    await expectRevert(proxy.upgradeToAndCall(zeroAddress, initializeData, { from: Accounts.proxyOwnerAccount }));
 
     customVars = [];
     await checkVariables([token], [customVars]);

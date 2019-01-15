@@ -23,23 +23,8 @@
 pragma solidity ^0.4.24;
 
 import "./Controller.sol";
+import "./MinterManagementInterface.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-
-// Using an interface for managing minters so that MintController
-// can be used for managing minters with different contracts.
-interface MinterManagementInterface {
-    function isMinter(address account) external view returns (bool);
-    function minterAllowance(address minter) external view returns (uint256);
-
-    function configureMinter(
-        address minter,
-        uint256 minterAllowedAmount
-    )
-    external 
-    returns (bool);
-
-    function removeMinter(address minter) external returns (bool);
-}
 
 /**
  * @title MintController
@@ -83,11 +68,11 @@ contract MintController is Controller {
     function setMinterManager(
         address _newMinterManager
     )
-        public 
-        onlyOwner 
+        public
+        onlyOwner
         returns (bool)
     {
-        emit MinterManagerSet(minterManager, _newMinterManager);
+        emit MinterManagerSet(address(minterManager), _newMinterManager);
         minterManager = MinterManagementInterface(_newMinterManager);
         return true;
     }
@@ -109,8 +94,8 @@ contract MintController is Controller {
     function configureMinter(
         uint256 newAllowance
     )
-        public 
-        onlyController 
+        public
+        onlyController
         returns (bool)
     {
         address minter = controllers[msg.sender];
@@ -124,25 +109,28 @@ contract MintController is Controller {
      * incrementMinterAllowance() transaction to a minter and not worry
      * about it being used to undo a removeMinter() transaction.
      */
+
     function incrementMinterAllowance(
-        uint256 allowanceIncrement
+        uint256 _allowanceIncrement
     )
-        public 
-        onlyController 
+        public
+        onlyController
         returns (bool)
     {
+        require(_allowanceIncrement > 0, "Allowance increment must be greater than 0.");
         address minter = controllers[msg.sender];
         require(minterManager.isMinter(minter), "Can only increment allowance for minters in minterManager.");
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
-        uint256 newAllowance = currentAllowance.add(allowanceIncrement);
+        uint256 newAllowance = currentAllowance.add(_allowanceIncrement);
 
         emit MinterAllowanceIncrement(
             msg.sender,
             minter,
-            allowanceIncrement,
+            _allowanceIncrement,
             newAllowance
         );
+
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
@@ -156,7 +144,7 @@ contract MintController is Controller {
         address minter,
         uint256 newAllowance
     )
-        internal 
+        internal
         returns (bool)
     {
         return minterManager.configureMinter(minter, newAllowance);
