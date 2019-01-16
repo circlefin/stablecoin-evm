@@ -15,7 +15,6 @@ FiatTokenV1.sol,constructor,minterManager.isMinter[ALL] == false,bt045,bt045 con
 FiatTokenV1.sol,constructor,minterManager.minterAllowance[ALL] == 0,bt046,bt046 constructor - minterManager.minterAllowance[ALL] = 0
 MintController.sol,configureMinter,controllers[msg.sender]==0,bt012,bt012 configureMinter reverts when msg.sender is not a controller
 MintController.sol,configureMinter,controllers[msg.sender]==M,bt013,bt013 configureMinter works when controllers[msg.sender]=M
-MintController.sol,configureMinter,minterManager = 0,bt033,bt033 configureMinter reverts when minterManager is 0
 MintController.sol,configureMinter,minterManager != MinterManagerInterface,bt034,bt034 configureMinter reverts when minterManager is a user account
 MintController.sol,configureMinter,minterManager == OK,bt035,bt035 configureMinter works when minterManager is ok
 MintController.sol,configureMinter,minterManager.isMinter == false,bt039,"bt039 configureMinter(M, amt) works when minterManager.isMinter(M)=false"
@@ -26,7 +25,6 @@ MintController.sol,configureMinter,minterManager.minterAllowance[M] == BIG,bt052
 MintController.sol,constructor,minterManager == init,bt024,bt024 Constructor sets minterManager
 MintController.sol,incrementMinterAllowance,controllers[msg.sender]==0,bt014,bt014 incrementMinterAllowance reverts if msg.sender is not a controller
 MintController.sol,incrementMinterAllowance,controllers[msg.sender]==M,bt015,bt015 incrementMinterAllowance works when controllers[msg.sender]=M
-MintController.sol,incrementMinterAllowance,minterManager = 0,bt036,bt036 incrementMinterAllowance reverts when minterManager is 0
 MintController.sol,incrementMinterAllowance,minterManager != MinterManagerInterface,bt037,bt037 incrementMinterAllowance reverts when minterManager is a user account
 MintController.sol,incrementMinterAllowance,minterManager == OK,bt038,bt038 incrementMinterAllowance works when minterManager is ok
 MintController.sol,incrementMinterAllowance,minterManager.isMinter == false,bt043,"bt043 incrementMinterAllowance(M, amt) reverts when minterManager.isMinter(M)=false"
@@ -46,7 +44,6 @@ MintController.sol,removeMinter,minterManager.minterAllowance[M] == X,bt054,bt05
 MintController.sol,removeMinter,minterManager.minterAllowance[M] == BIG,bt055,bt055 removeMinter works when the minterAllowance is big
 MintController.sol,setMinterManager,msg.sender == owner,bt006,bt006 setMinterManager works when owner is msg.sender
 MintController.sol,setMinterManager,msg.sender != owner,bt007,bt007 setMinterManager reverts when owner is not msg.sender
-MintController.sol,setMinterManager,minterManager == 0,bt025,bt025 setMinterManager(x) works when existing minterManager = 0
 MintController.sol,setMinterManager,minterManager != 0,bt026,bt026 setMinterManager(x) works when existing minterManager != 0
 MintController.sol,setMinterManager,minterManager == msg.sender,bt027,bt027 setMinterManager(x) works when x = msg.sender
 MintController.sol,setMinterManager,minterManager == newMinterManager,bt028,bt028 setMinterManager(x) works when x = minterManager
