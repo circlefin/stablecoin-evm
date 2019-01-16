@@ -45,7 +45,7 @@ contract Controller is Ownable {
      */
     modifier onlyController() {
         require(controllers[msg.sender] != address(0), 
-            "The value of controllers[msg.sender] must be non-zero.");
+            "The value of controllers[msg.sender] must be non-zero");
         _;
     }
 
@@ -68,7 +68,7 @@ contract Controller is Ownable {
         returns (bool)
     {
         require(_controller != address(0), "Controller must be a non-zero address");
-        require(_worker != address(0), "Worker must be a non-zero address.");
+        require(_worker != address(0), "Worker must be a non-zero address");
         controllers[_controller] = _worker;
         emit ControllerConfigured(_controller, _worker);
         return true;
@@ -85,7 +85,7 @@ contract Controller is Ownable {
         returns (bool)
     {
         require(_controller != address(0), "Controller must be a non-zero address");
-        require(controllers[_controller] != address(0), "Worker must be a non-zero address.");
+        require(controllers[_controller] != address(0), "Worker must be a non-zero address");
         controllers[_controller] = address(0);
         emit ControllerRemoved(_controller);
         return true;
