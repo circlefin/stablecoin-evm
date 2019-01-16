@@ -2,7 +2,7 @@ var MintController = artifacts.require('minting/MintController');
 var MasterMinter = artifacts.require('minting/MasterMinter');
 var FiatToken = artifacts.require('FiatTokenV1');
 
-var tokenUtils = require('./../TokenTestUtils.js');
+var tokenUtils = require('../TokenTestUtils.js');
 var newBigNumber = tokenUtils.newBigNumber;
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
@@ -13,8 +13,8 @@ var maxAmount = tokenUtils.maxAmount;
 
 var clone = require('clone');
 
-var mintUtils = require('./../MintControllerUtils.js');
-var AccountUtils = require('./../AccountUtils.js');
+var mintUtils = require('../MintControllerUtils.js');
+var AccountUtils = require('../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var getAccountState = AccountUtils.getAccountState;
 var MintControllerState = AccountUtils.MintControllerState;
@@ -105,7 +105,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt010 removeMinter reverts when msg.sender is not a controller', async function () {
-        await expectError(mintController.removeMinter({from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
+        await expectError(mintController.removeMinter({from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero");
     });
 
     it('bt011 removeMinter sets minters[M] to 0', async function () {
@@ -129,7 +129,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt012 configureMinter reverts when msg.sender is not a controller', async function () {
-        await expectError(mintController.configureMinter(50, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
+        await expectError(mintController.configureMinter(50, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero");
     });
 
     it('bt013 configureMinter works when controllers[msg.sender]=M', async function () {
@@ -148,7 +148,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt014 incrementMinterAllowance reverts if msg.sender is not a controller', async function () {
-        await expectError(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
+        await expectError(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero");
     });
 
     it('bt015 incrementMinterAllowance works when controllers[msg.sender]=M', async function () {
@@ -171,9 +171,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
          await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('bt017 removeController does not revert when controllers[C] is 0', async function () {
+    it('bt017 removeController reverts when controllers[C] is 0', async function () {
         //  "remove" a controller that does not exist
-        await mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount});
+        await expectError(mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount}), "Worker must be a non-zero address");        
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
@@ -414,7 +414,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         var isMinter = await minterManager.isMinter(Accounts.minterAccount);
         assert.isFalse(isMinter);
 
-        await expectError(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only increment allowance for minters in minterManager.");
+        await expectError(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only increment allowance for minters in minterManager");
         expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
@@ -607,6 +607,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 }
 
-var testWrapper = require('./../TestWrapper');
+var testWrapper = require('../TestWrapper');
 testWrapper.execute('MINTp0_BasicTests MintController', run_tests_MintController);
 testWrapper.execute('MINTp0_BasicTests MasterMinter', run_tests_MasterMinter);

@@ -12,3 +12,4 @@ token.json
 credentials.json
 echidna/
 validate/apikey.infura
+ganache-blockchain-log.txt

@@ -96,11 +96,11 @@ async function run_tests(newToken, accounts) {
    });
 
    it('only controller removes a minter', async function () {
-        await expectError(mintController.removeMinter({from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
+        await expectError(mintController.removeMinter({from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero");
    });
 
    it('only controller configures a minter', async function () {
-        await expectError(mintController.configureMinter(0, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
+        await expectError(mintController.configureMinter(0, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero");
    });
 
    it('increment minter allowance', async function () {
@@ -126,7 +126,7 @@ async function run_tests(newToken, accounts) {
    });
 
    it('only controller increments allowance', async function () {
-        await expectError(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
+        await expectError(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero");
    });
 
    it('only active minters can have allowance incremented', async function () {
@@ -137,11 +137,11 @@ async function run_tests(newToken, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
         // increment minter allowance
-        await expectError(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only increment allowance for minters in minterManager.");
+        await expectError(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only increment allowance for minters in minterManager");
    });
 }
 
-var testWrapper = require('./../TestWrapper');
+var testWrapper = require('../TestWrapper');
 testWrapper.execute('MintController_Tests', run_tests);
 
 module.exports = {

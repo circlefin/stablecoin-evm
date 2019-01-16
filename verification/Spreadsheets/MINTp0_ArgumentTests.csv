@@ -6,7 +6,7 @@ Controller.sol,configureController,newController == 0,arg003,"arg003 configureCo
 Controller.sol,configureController,newController == msg.sender,arg004,"arg004 configureController(msg.sender, M) works"
 Controller.sol,configureController,newController == newMinter,arg005,"arg005 configureController(M, M) works"
 Controller.sol,configureController,newMinter == 0,arg006,"arg006 configureController(C, 0) throws"
-Controller.sol,removeController,newController == 0,arg007,arg007 removeController(0) throws
+Controller.sol,removeController,controller == 0,arg007,arg007 removeController(0) throws
 MintController.sol,setMinterManager,newMinterManager = 0,arg008,arg008 setMinterManager(0) works
 MintController.sol,setMinterManager,newMinterManager == minterManager,arg009,arg009 setMinterManager(oldMinterManager) works
 MintController.sol,setMinterManager,newMinterManager == user,arg010,arg010 setMinterManager(user_account) works
@@ -19,4 +19,5 @@ MintController.sol,incrementMinterAllowance,increment == oldAllowance,arg016,arg
 MintController.sol,incrementMinterAllowance,increment == 2^256-1,arg017,arg017 incrementMinterAllowance(MAX) throws
 MintController.sol,incrementMinterAllowance,increment + oldAllowance == 2^256 -1,arg018,arg018 incrementMinterAlllowance(BIG) throws
 Controller.sol,configureController,newController == 0,arg019,"arg019 configureController(0, 0) throws"
-Controller.sol,removeController,newController == msg.sender,arg020,arg020 removeController(C) works
+Controller.sol,removeController,controller == msg.sender,arg020,arg020 removeController(C) works
+Controller.sol,removeController,controller where controllers[controller] == 0,arg021,arg021 removeController throws if worker is already address(0)
