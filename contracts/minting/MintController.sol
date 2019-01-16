@@ -28,16 +28,22 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title MintController
- * @dev Implementation of the abstract Controller contract, in which
- * the workers represent minters. A controller can manage many
- * minters, and all controllers are managed by a single owner.
+ * @notice The MintController contract manages minters for a contract that 
+ * implements the MinterManagerInterface. It lets the owner designate certain 
+ * addresses as controllers, and these controllers then manage the 
+ * minters by adding and removing minters, as well as modifying their minting 
+ * allowance. A controller may manage exactly one minter, but the same minter 
+ * address may be managed by multiple controllers.
+ * @dev MintController inherits from the Controller contract. It treats the 
+ * Controller workers as minters.
  */
 contract MintController is Controller {
     using SafeMath for uint256;
 
     /**
     * @title MinterManagementInterface
-    * @dev Interface for managing the allowances of minters.
+    * @notice MintController calls the minterManager to execute/record minter 
+    * management tasks, as well as to query the status of a minter address.
     */
     MinterManagementInterface public minterManager;
 
@@ -62,7 +68,7 @@ contract MintController is Controller {
     );
 
     /**
-     * @dev Initializes the minterManager.
+     * @notice Initializes the minterManager.
      * @param _minterManager The address of the minterManager contract.
      */
     constructor(address _minterManager) public {
@@ -72,7 +78,7 @@ contract MintController is Controller {
     // onlyOwner functions
 
     /**
-     * @dev Sets the minterManager.
+     * @notice Sets the minterManager.
      * @param _newMinterManager The address of the new minterManager contract.
      */
     function setMinterManager(
@@ -90,7 +96,7 @@ contract MintController is Controller {
     // onlyController functions
 
     /**
-     * @dev Removes the controller's own minter.
+     * @notice Removes the controller's own minter.
      */
     function removeMinter() onlyController public returns (bool) {
         address minter = controllers[msg.sender];
@@ -99,7 +105,7 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev Enables the minter and sets its allowance.
+     * @notice Enables the minter and sets its allowance.
      * @param newAllowance New allowance to be set for minter.
      */
     function configureMinter(
@@ -115,10 +121,10 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev Increases the minter's allowance if and only if the minter is
-     * an active minter in minterManager. An active minter is defined as a 
-     * minter where minterManager.isMinter(minter) returns true.
-     * @param _allowanceIncrement Amount to increase the minter allowance by.
+     * @notice Increases the minter's allowance if and only if the minter is an 
+     * active minter.
+     * @dev An minter is considered active if minterManager.isMinter(minter) 
+     * returns true.
      */
     function incrementMinterAllowance(
         uint256 _allowanceIncrement

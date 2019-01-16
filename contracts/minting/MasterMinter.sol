@@ -26,7 +26,9 @@ import "./MintController.sol";
 
 /**
  * @title MasterMinter
- * @dev Default implementation of the MintController contract.
+ * @notice MasterMinter uses multiple controllers to manage minters for a 
+ * contract that implements the MinterManagerInterface.
+ * @dev MasterMinter inherits all its functionality from MintController.
  */
 contract MasterMinter is MintController {
 

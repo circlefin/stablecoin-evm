@@ -44,7 +44,7 @@ contract Controller is Ownable {
     event ControllerRemoved(address indexed _controller);
 
     /**
-     * @dev ensure that caller is the controller of a non-zero worker address.
+     * @dev ensures that caller is the controller of a non-zero worker address.
      */
     modifier onlyController() {
         require(controllers[msg.sender] != address(0), 
@@ -58,7 +58,7 @@ contract Controller is Ownable {
     // onlyOwner functions
 
     /**
-     * @dev configure a controller with the given worker.
+     * @notice configure a controller with the given worker.
      * @param _controller The controller to be configured with a worker.
      * @param _worker The worker to be set for the newly configured controller.
      * _worker must not be a non-zero address. To disable a worker,
@@ -79,7 +79,7 @@ contract Controller is Ownable {
     }
 
     /**
-     * @dev disables a controller by setting its worker to address(0).
+     * @notice disables a controller by setting its worker to address(0).
      * @param _controller The controller to disable.
      */
     function removeController(
