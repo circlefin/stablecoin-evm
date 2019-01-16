@@ -106,7 +106,7 @@ contract MintController is Controller {
 
     /**
      * @notice Enables the minter and sets its allowance.
-     * @param newAllowance New allowance to be set for minter.
+     * @param _newAllowance New allowance to be set for minter.
      */
     function configureMinter(
         uint256 _newAllowance
@@ -157,8 +157,8 @@ contract MintController is Controller {
     /**
      * @dev Uses the MinterManagementInterface to enable the minter and
      * set its allowance.
-     * @param minter Minter to set new allowance of.
-     * @param newAllowance New allowance to be set for minter.
+     * @param _minter Minter to set new allowance of.
+     * @param _newAllowance New allowance to be set for minter.
      */
     function internal_setMinterAllowance(
         address _minter,
