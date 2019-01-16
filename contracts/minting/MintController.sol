@@ -70,11 +70,9 @@ contract MintController is Controller {
     )
         public
         onlyOwner
-        returns (bool)
     {
         emit MinterManagerSet(address(minterManager), _newMinterManager);
         minterManager = MinterManagementInterface(_newMinterManager);
-        return true;
     }
 
     // onlyController functions
