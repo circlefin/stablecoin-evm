@@ -171,9 +171,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
          await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('bt017 removeController does not revert when controllers[C] is 0', async function () {
+    it('bt017 removeController reverts when controllers[C] is 0', async function () {
         //  "remove" a controller that does not exist
-        await mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount});
+        await expectError(mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount}), "Controller must be a non-zero address");        
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
@@ -607,6 +607,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 }
 
-var testWrapper = require('./../TestWrapper');
+var testWrapper = require('../TestWrapper');
 testWrapper.execute('MINTp0_BasicTests MintController', run_tests_MintController);
 testWrapper.execute('MINTp0_BasicTests MasterMinter', run_tests_MasterMinter);

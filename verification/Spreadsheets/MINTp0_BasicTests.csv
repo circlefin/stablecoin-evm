@@ -9,7 +9,7 @@ Controller.sol,configureController,controllers[C] == newM,bt023,"bt023 configure
 Controller.sol,constructor,controllers[ALL] = 0,bt016,bt016 Constructor sets all controllers to 0
 Controller.sol,removeController,msg.sender == owner,bt008,bt008 removeController works when owner is msg.sender
 Controller.sol,removeController,msg.sender != owner,bt009,bt009 removeController reverts when owner is not msg.sender
-Controller.sol,removeController,controllers[C]=0,bt017,bt017 removeController does not revert when controllers[C] is 0
+Controller.sol,removeController,controllers[C]=0,bt017,bt017 removeController reverts when controllers[C] is 0
 Controller.sol,removeController,controllers[C]=M,bt018,bt018 removeController removes an arbitrary controller
 FiatTokenV1.sol,constructor,minterManager.isMinter[ALL] == false,bt045,bt045 constructor - minterManager.isMinter[ALL] is false
 FiatTokenV1.sol,constructor,minterManager.minterAllowance[ALL] == 0,bt046,bt046 constructor - minterManager.minterAllowance[ALL] = 0
