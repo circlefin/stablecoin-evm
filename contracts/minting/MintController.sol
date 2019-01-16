@@ -82,7 +82,7 @@ contract MintController is Controller {
     /**
      * @dev remove the controller's minter.
      */
-    function removeMinter() onlyController public returns (bool) {
+    function removeMinter() public onlyController returns (bool) {
         address minter = controllers[msg.sender];
         emit MinterRemoved(msg.sender, minter);
         return minterManager.removeMinter(minter);
