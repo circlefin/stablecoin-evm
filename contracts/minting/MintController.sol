@@ -49,14 +49,14 @@ contract MintController is Controller {
         address indexed _msgSender,
         address indexed _minter
     );
-    event MinterAllowanceIncrement(
+    event MinterAllowanceIncremented(
         address indexed _msgSender,
         address indexed _minter,
         uint256 _increment,
         uint256 _newAllowance
     );
 
-    event MinterAllowanceDecrement(
+    event MinterAllowanceDecremented(
         address indexed msgSender,
         address indexed minter,
         uint256 decrement,
@@ -132,7 +132,7 @@ contract MintController is Controller {
         uint256 currentAllowance = minterManager.minterAllowance(minter);
         uint256 newAllowance = currentAllowance.add(_allowanceIncrement);
 
-        emit MinterAllowanceIncrement(
+        emit MinterAllowanceIncremented(
             msg.sender,
             minter,
             _allowanceIncrement,
@@ -151,22 +151,22 @@ contract MintController is Controller {
     function decrementMinterAllowance(
         uint256 _allowanceDecrement
     )
-    public
-    onlyController
-    returns (bool)
+        public
+        onlyController
+        returns (bool)
     {
         require(_allowanceDecrement > 0, "Allowance decrement must be greater than 0.");
         address minter = controllers[msg.sender];
         require(minterManager.isMinter(minter), "Can only decrement allowance for minters in minterManager.");
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
-        uint256 newAllowance = (currentAllowance > _allowanceDecrement ? currentAllowance : _allowanceDecrement)
-            .sub(_allowanceDecrement);
+        uint256 actualAllowanceDecrement = (currentAllowance > _allowanceDecrement ? _allowanceDecrement : currentAllowance);
+        uint256 newAllowance = currentAllowance.sub(actualAllowanceDecrement);
 
-        emit MinterAllowanceDecrement(
+        emit MinterAllowanceDecremented(
             msg.sender,
             minter,
-            _allowanceDecrement,
+            actualAllowanceDecrement,
             newAllowance
         );
 

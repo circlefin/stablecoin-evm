@@ -40,7 +40,8 @@ var debugLogging = false;
 
 // Common solidity error messages 
 var solidityErrors = {
-    "argumentType": "argument must be a string, Buffer, ArrayBuffer, Array, or array-like object."
+    "argumentType": "argument must be a string, Buffer, ArrayBuffer, Array, or array-like object.",
+    "argumentArrayType": "The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type object"
 }
 
 // Returns a new BN object

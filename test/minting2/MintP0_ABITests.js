@@ -53,7 +53,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
              Accounts.mintOwnerAccount,
              AccountPrivateKeys.mintOwnerPrivateKey,
              mintController.address);
-        await expectError(sendRawTransaction(raw), solidityErrors.argumentType);
+        await expectError(sendRawTransaction(raw), solidityErrors.argumentArrayType);
     });
 
     it('abi101 setOwner is internal', async function () {
@@ -63,7 +63,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
             Accounts.mintOwnerAccount,
             AccountPrivateKeys.mintOwnerPrivateKey,
             mintController.address);
-        await expectError(sendRawTransaction(raw), solidityErrors.argumentType);
+        await expectError(sendRawTransaction(raw), solidityErrors.argumentArrayType);
     });
 
 }
