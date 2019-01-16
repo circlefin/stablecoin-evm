@@ -60,13 +60,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('arg003 configureController(0, M) works', async function () {
-        await mintController.configureController(zeroAddress, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-        // need to manually check mintController.controllers[0] because this is not a predefined account
-        var actualMinter = await mintController.controllers(zeroAddress);
-        assert.isTrue(addressEquals(Accounts.minterAccount, actualMinter));
+    it('arg003 configureController(0, M) throws', async function () {
+        await expectError(mintController.configureController(zeroAddress, Accounts.minterAccount, {from: Accounts.mintOwnerAccount}),
+        "Controller must be a non-zero address");
     });
 
     it('arg004 configureController(msg.sender, M) works', async function () {
@@ -86,21 +82,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         .mintOwnerAccount}), "Worker must be a non-zero address");
     });
 
-    it('arg007 removeController(0) works', async function () {
-        // expect no changes
-        await mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount});
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-        // now make 0 a controller
-        await mintController.configureController(zeroAddress, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        var actualMinter = await mintController.controllers(zeroAddress);
-        assert.isTrue(addressEquals(Accounts.minterAccount, actualMinter));
-
-        // remove 0
-        await mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount});
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-        actualMinter = await mintController.controllers(zeroAddress);
-        assert.equal(actualMinter, zeroAddress);
+    it('arg007 removeController(0) throws', async function () {
+        await expectError(mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount}),
+        "Controller must be a non-zero address");
     });
 
     it('arg008 setMinterManager(0) works', async function () {
@@ -198,6 +182,27 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await expectJump(mintController.incrementMinterAllowance(1, {from: Accounts.controller1Account}));
     });
 
+    it('arg019 configureController(0, 0) throws', async function () {
+        await expectError(mintController.configureController(zeroAddress, zeroAddress, {from: Accounts.mintOwnerAccount}),
+        "Controller must be a non-zero address");
+    });
+
+    it('arg020 removeController(C) works', async function() {
+        // expect no changes
+        await mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount});
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        // now make controller1Account a controller
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        var actualMinter = await mintController.controllers(Accounts.controller1Account);
+        addressEquals(Accounts.minterAccount, actualMinter);
+
+        // remove controller1Account
+        await mintController.removeController(Accounts.controller1Account, {from : Accounts.mintOwnerAccount});
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+        actualMinter = await mintController.controllers(Accounts.controller1Account);
+        addressEquals(actualMinter, zeroAddress);
+    });
 }
 
 var testWrapper = require('./../TestWrapper');
