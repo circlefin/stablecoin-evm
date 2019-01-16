@@ -24,7 +24,7 @@ pragma solidity ^0.4.24;
 
 /** 
 * @title MinterManagementInterface
-* Interface for managing the allowances of minters.
+* @dev Interface for managing the allowances of minters.
 */
 interface MinterManagementInterface {
     function isMinter(address account) external view returns (bool);

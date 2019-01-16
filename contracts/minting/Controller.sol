@@ -27,6 +27,8 @@ import "../Ownable.sol";
 /**
  * @title Controller
  * @dev Generic implementation of the owner-controller-worker model.
+ * One owner manages many controllers. Each controller manages one worker.
+ * Workers may be reused across different controllers.
  */
 contract Controller is Ownable {
     /**
@@ -42,7 +44,7 @@ contract Controller is Ownable {
     event ControllerRemoved(address indexed _controller);
 
     /**
-     * @dev ensure that caller has a non-zero worker address.
+     * ensure that caller is the controller of a non-zero worker address.
      */
     modifier onlyController() {
         require(controllers[msg.sender] != address(0), 

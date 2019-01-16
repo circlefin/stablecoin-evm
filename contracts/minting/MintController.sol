@@ -35,6 +35,10 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract MintController is Controller {
     using SafeMath for uint256;
 
+    /**
+    * @title MinterManagementInterface
+    * @dev Interface for managing the allowances of minters.
+    */
     MinterManagementInterface public minterManager;
 
     event MinterManagerSet(
@@ -57,6 +61,10 @@ contract MintController is Controller {
         uint256 newAllowance
     );
 
+    /**
+     * @dev Initializes the minterManager.
+     * @param _minterManager The address of the minterManager contract.
+     */
     constructor(address _minterManager) public {
         minterManager = MinterManagementInterface(_minterManager);
     }
@@ -107,8 +115,9 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev Increases the minter allowance if and only if the minter is
-     * configured.
+     * @dev Increases the minter's allowance if and only if the minter is
+     * an active minter in minterManager. An active minter is defined as a 
+     * minter where minterManager.isMinter(minter) returns true.
      * @param _allowanceIncrement Amount to increase the minter allowance by.
      */
     function incrementMinterAllowance(
