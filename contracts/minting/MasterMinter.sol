@@ -26,7 +26,7 @@ import "./MintController.sol";
 
 /**
  * @title MasterMinter
- * Default implementation of the MintController contract.
+ * @dev Default implementation of the MintController contract.
  */
 contract MasterMinter is MintController {
 

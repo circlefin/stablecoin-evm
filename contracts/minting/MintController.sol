@@ -30,7 +30,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
  * @title MintController
  * @dev Implementation of the abstract Controller contract, in which
  * the workers represent minters. A controller can manage many
- * minters' allowances, and all controllers are managed by a single owner.
+ * minters, and all controllers are managed by a single owner.
  */
 contract MintController is Controller {
     using SafeMath for uint256;
