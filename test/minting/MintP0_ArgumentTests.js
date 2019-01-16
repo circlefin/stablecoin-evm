@@ -4,7 +4,7 @@ var MintController = artifacts.require('minting/MintController');
 var MasterMinter = artifacts.require('minting/MasterMinter');
 var FiatToken = artifacts.require('FiatTokenV1');
 
-var tokenUtils = require('./../TokenTestUtils.js');
+var tokenUtils = require('../TokenTestUtils.js');
 var newBigNumber = tokenUtils.newBigNumber;
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectRevert = tokenUtils.expectRevert;
@@ -15,8 +15,8 @@ var maxAmount = tokenUtils.maxAmount;
 
 var clone = require('clone');
 
-var mintUtils = require('./../MintControllerUtils.js');
-var AccountUtils = require('./../AccountUtils.js');
+var mintUtils = require('../MintControllerUtils.js');
+var AccountUtils = require('../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var getAccountState = AccountUtils.getAccountState;
 var MintControllerState = AccountUtils.MintControllerState;
@@ -83,8 +83,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg007 removeController(0) throws', async function () {
-        await expectError(mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount}),
-        "Controller must be a non-zero address");
+        // expect no changes
+        await expectError(mintController.removeController(zeroAddress, {from: Accounts.mintOwnerAccount}), "Controller must be a non-zero address");
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
     it('arg008 setMinterManager(0) works', async function () {
@@ -189,11 +190,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('arg020 removeController(C) works', async function() {
-        // expect no changes
-        await mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount});
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-        // now make controller1Account a controller
+        // make controller1Account a controller
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         var actualMinter = await mintController.controllers(Accounts.controller1Account);
         addressEquals(Accounts.minterAccount, actualMinter);
@@ -205,7 +202,24 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         addressEquals(actualMinter, zeroAddress);
     });
 
-    it('arg021 decrementMinterAllowance(oldAllowance) sets the allowance to 0', async function () {
+    it('arg021 removeController throws if worker is already address(0)', async function () {
+        // make controller1Account a controller
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        var actualMinter = await mintController.controllers(Accounts.controller1Account);
+        addressEquals(Accounts.minterAccount, actualMinter);
+
+        // remove controller1Account
+        await mintController.removeController(Accounts.controller1Account, {from : Accounts.mintOwnerAccount});
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+        actualMinter = await mintController.controllers(Accounts.controller1Account);
+        addressEquals(actualMinter, zeroAddress);
+
+        // attempting to remove the controller1Account again should throw because the worker is already set to address(0).
+        await expectError(mintController.removeController(Accounts.controller1Account, {from: Accounts.mintOwnerAccount}),
+            "Worker must be a non-zero address");
+    })
+
+    it('arg022 decrementMinterAllowance(oldAllowance) sets the allowance to 0', async function () {
         var amount = 897;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
@@ -219,7 +233,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('arg022 decrementMinterAllowance(MIN) sets the allowance to 0', async function () {
+    it('arg023 decrementMinterAllowance(MIN) sets the allowance to 0', async function () {
         var amount = 0;
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await mintController.configureMinter(amount, {from: Accounts.controller1Account});
@@ -232,10 +246,12 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('arg023 decrementMinterAllowance(0) throws', async function () {
+    it('arg024 decrementMinterAllowance(0) throws', async function () {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
         await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}), "Allowance decrement must be greater than 0.");
-    });}
+    });
+
+}
 
 var testWrapper = require('./../TestWrapper');
 testWrapper.execute('MINTp0_ArgumentTests MintController', run_tests_MintController);

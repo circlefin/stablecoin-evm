@@ -41,6 +41,7 @@ var debugLogging = false;
 // Common solidity error messages 
 var solidityErrors = {
     "argumentType": "argument must be",
+
 }
 
 // Returns a new BN object
