@@ -24,6 +24,10 @@ pragma solidity ^0.4.24;
 
 import "./MintController.sol";
 
+/**
+ * @title MasterMinter
+ * Default implementation of the MintController contract.
+ */
 contract MasterMinter is MintController {
 
     constructor(address _minterManager) MintController(_minterManager) public {

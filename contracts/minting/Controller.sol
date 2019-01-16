@@ -27,11 +27,12 @@ import "../Ownable.sol";
 /**
  * @title Controller
  * @dev Generic implementation of the owner-controller-worker model.
- *
  */
 contract Controller is Ownable {
-    // controllers[controller] = worker
-    // The controller manages a single worker address.
+    /**
+    * @dev A controller manages a single worker address.
+    * controllers[controller] = worker
+    */
     mapping(address => address) public controllers;
 
     event ControllerConfigured(
@@ -41,10 +42,11 @@ contract Controller is Ownable {
     event ControllerRemoved(address indexed _controller);
 
     /**
-     * @dev ensure that caller is the controller of a non-zero worker address
+     * @dev ensure that caller has a non-zero worker address.
      */
     modifier onlyController() {
-        require(controllers[msg.sender] != address(0), "The value of controllers[msg.sender] must be non-zero.");
+        require(controllers[msg.sender] != address(0), 
+            "The value of controllers[msg.sender] must be non-zero.");
         _;
     }
 
@@ -54,9 +56,11 @@ contract Controller is Ownable {
     // onlyOwner functions
 
     /**
-     * @dev set the controller of a particular _worker.
-     * Argument _worker must not be 0x00. Call removeController(_controller)
-     * instead to disable the controller.
+     * @dev configure a controller with the given worker.
+     * Argument _worker must not be a non-zero address. To disable a worker,
+     * use removeController instead.
+     * @param _controller The controller to be configured with a worker.
+     * @param _worker The worker to be set for the newly configured controller.
      */
     function configureController(
         address _controller,
@@ -73,7 +77,8 @@ contract Controller is Ownable {
     }
 
     /**
-     * @dev disables a controller by setting its worker to address(0);
+     * @dev disables a controller by setting its worker to address(0).
+     * @param _controller The controller to disable.
      */
     function removeController(
         address _controller

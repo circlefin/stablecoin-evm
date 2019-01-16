@@ -28,8 +28,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title MintController
- * @dev allows control of configure/remove minter by different addresses
- *
+ * @dev Implementation of the abstract Controller contract, in which
+ * the workers represent minters. A controller can manage many
+ * minters' allowances, and all controllers are managed by a single owner.
  */
 contract MintController is Controller {
     using SafeMath for uint256;
@@ -63,7 +64,8 @@ contract MintController is Controller {
     // onlyOwner functions
 
     /**
-     * @dev sets the minterManager
+     * @dev Sets the minterManager.
+     * @param _newMinterManager The address of the new minterManager contract.
      */
     function setMinterManager(
         address _newMinterManager
@@ -80,7 +82,7 @@ contract MintController is Controller {
     // onlyController functions
 
     /**
-     * @dev remove the controller's minter.
+     * @dev Removes the controller's own minter.
      */
     function removeMinter() onlyController public returns (bool) {
         address minter = controllers[msg.sender];
@@ -89,7 +91,8 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev Enables the minter and sets its allowance
+     * @dev Enables the minter and sets its allowance.
+     * @param newAllowance New allowance to be set for minter.
      */
     function configureMinter(
         uint256 newAllowance
@@ -105,11 +108,9 @@ contract MintController is Controller {
 
     /**
      * @dev Increases the minter allowance if and only if the minter is
-     * currently active. The controller can safely send a signed
-     * incrementMinterAllowance() transaction to a minter and not worry
-     * about it being used to undo a removeMinter() transaction.
+     * configured.
+     * @param _allowanceIncrement Amount to increase the minter allowance by.
      */
-
     function incrementMinterAllowance(
         uint256 _allowanceIncrement
     )
@@ -117,9 +118,11 @@ contract MintController is Controller {
         onlyController
         returns (bool)
     {
-        require(_allowanceIncrement > 0, "Allowance increment must be greater than 0.");
+        require(_allowanceIncrement > 0, 
+            "Allowance increment must be greater than 0.");
         address minter = controllers[msg.sender];
-        require(minterManager.isMinter(minter), "Can only increment allowance for minters in minterManager.");
+        require(minterManager.isMinter(minter), 
+            "Can only increment allowance for minters in minterManager.");
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
         uint256 newAllowance = currentAllowance.add(_allowanceIncrement);
@@ -134,11 +137,13 @@ contract MintController is Controller {
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
-   // Internal functions
+    // Internal functions
 
     /**
      * @dev Uses the MinterManagementInterface to enable the minter and
      * set its allowance.
+     * @param minter Minter to set new allowance of.
+     * @param newAllowance New allowance to be set for minter.
      */
     function internal_setMinterAllowance(
         address minter,
