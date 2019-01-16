@@ -236,16 +236,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         assert.isTrue(addressEquals(token.address, minterManagerAddress));
     });
 
-    it('bt025 setMinterManager(x) works when existing minterManager = 0', async function () {
-        await mintController.setMinterManager(zeroAddress, {from: Accounts.mintOwnerAccount});
-        expectedMintControllerState.minterManager = zeroAddress;
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-        await mintController.setMinterManager(Accounts.arbitraryAccount, {from: Accounts.mintOwnerAccount});
-        expectedMintControllerState.minterManager = Accounts.arbitraryAccount;
-        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-    });
-
     it('bt026 setMinterManager(x) works when existing minterManager != 0', async function () {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
@@ -267,9 +257,10 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     });
 
     it('bt030 removeMinter reverts when minterManager is 0', async function () {
-         // set minterManager to 0
-         await mintController.setMinterManager(zeroAddress, {from:Accounts.mintOwnerAccount});
-         expectedMintControllerState.minterManager = zeroAddress;
+         // set minterManager
+         var minterManagerAddress = await mintController.minterManager();
+         await mintController.setMinterManager(minterManagerAddress, {from:Accounts.mintOwnerAccount});
+         expectedMintControllerState.minterManager = minterManagerAddress;
          await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
 
          // configure minter will fail with any args
@@ -306,16 +297,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
     });
 
-    it('bt033 configureMinter reverts when minterManager is 0', async function () {
-         // set minterManager to 0
-         await mintController.setMinterManager(zeroAddress, {from:Accounts.mintOwnerAccount});
-         expectedMintControllerState.minterManager = zeroAddress;
-         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-         // configure minter will fail with any args
-         await(expectRevert(mintController.configureMinter(50, {from: Accounts.controller1Account})));
-    });
-
     it('bt034 configureMinter reverts when minterManager is a user account', async function () {
          // set minterManager to user account
          await mintController.setMinterManager(Accounts.arbitraryAccount, {from:Accounts.mintOwnerAccount});
@@ -336,16 +317,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
             { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) }
         );
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-    });
-
-    it('bt036 incrementMinterAllowance reverts when minterManager is 0', async function () {
-         // set minterManager to zero
-         await mintController.setMinterManager(zeroAddress, {from:Accounts.mintOwnerAccount});
-         expectedMintControllerState.minterManager = zeroAddress;
-         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-
-         // incrementMinterAllowance will fail with any args
-         await(expectRevert(mintController.incrementMinterAllowance(50, {from: Accounts.controller1Account})));
     });
 
     it('bt037 incrementMinterAllowance reverts when minterManager is a user account', async function () {
