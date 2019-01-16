@@ -8,11 +8,11 @@ Depends on truffle and testrpc for testing.
 install truffle:
 ```npm install -g truffle```
 
-install ganache-cli:
-```npm install -g ganache-cli```
+install yarn:
+```npm install -g yarn```
 
 install project npm dependencies:
-```npm install```
+```yarn install```
 
 # Testing
 All tests are run with:
