@@ -139,6 +139,43 @@ async function run_tests(newToken, accounts) {
         // increment minter allowance
         await expectError(mintController.incrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only increment allowance for minters in minterManager");
    });
+
+   it('decrement minter allowance', async function () {
+        // configure controller & minter
+        var amount = 500;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        await mintController.configureMinter(amount, {from: Accounts.controller1Account});
+        expectedMintControllerState.controllers['controller1Account'] = Accounts.minterAccount;
+        expectedTokenState.push(
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': newBigNumber(amount) },
+        );
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        // decrement minter allowance
+        await mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account});
+        expectedTokenState = [
+            { 'variable': 'masterMinter', 'expectedValue': mintController.address },
+            { 'variable': 'isAccountMinter.minterAccount', 'expectedValue': true },
+            { 'variable': 'minterAllowance.minterAccount', 'expectedValue': bigZero },
+        ];
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+   });
+
+   it('only controller decrements allowance', async function () {
+        await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}), "The value of controllers[msg.sender] must be non-zero.");
+   });
+
+   it('only active minters can have allowance decremented', async function () {
+        // configure controller but not minter
+        var amount = 500;
+        await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
+        expectedMintControllerState.controllers['controller1Account']= Accounts.minterAccount;
+        await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
+
+        // decrement minter allowance
+        await expectError(mintController.decrementMinterAllowance(amount, {from: Accounts.controller1Account}), "Can only decrement allowance for minters in minterManager.");
+   });
 }
 
 var testWrapper = require('../TestWrapper');
