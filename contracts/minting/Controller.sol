@@ -49,9 +49,6 @@ contract Controller is Ownable {
         _;
     }
 
-    constructor() public {
-    }
-
     // onlyOwner functions
 
     /**
