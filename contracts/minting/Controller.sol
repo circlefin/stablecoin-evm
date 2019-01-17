@@ -32,7 +32,7 @@ import "../Ownable.sol";
 contract Controller is Ownable {
     // controllers[controller] = worker
     // The controller manages a single worker address.
-    mapping(address => address) public controllers;
+    mapping(address => address) internal controllers;
 
     event ControllerConfigured(
         address indexed _controller,
@@ -49,7 +49,17 @@ contract Controller is Ownable {
         _;
     }
 
-    constructor() public {
+    /**
+    * @dev gets the worker at address _controller
+    */
+    function getWorker(
+        address _controller
+    )
+        external
+        view
+        returns (address)
+    {
+        return controllers[_controller];
     }
 
     // onlyOwner functions
