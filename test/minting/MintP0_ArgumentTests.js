@@ -192,26 +192,26 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     it('arg020 removeController(C) works', async function() {
         // make controller1Account a controller
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        var actualMinter = await mintController.controllers(Accounts.controller1Account);
+        var actualMinter = await mintController.getWorker(Accounts.controller1Account);
         addressEquals(Accounts.minterAccount, actualMinter);
 
         // remove controller1Account
         await mintController.removeController(Accounts.controller1Account, {from : Accounts.mintOwnerAccount});
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-        actualMinter = await mintController.controllers(Accounts.controller1Account);
+        actualMinter = await mintController.getWorker(Accounts.controller1Account);
         addressEquals(actualMinter, zeroAddress);
     });
 
     it('arg021 removeController throws if worker is already address(0)', async function () {
         // make controller1Account a controller
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        var actualMinter = await mintController.controllers(Accounts.controller1Account);
+        var actualMinter = await mintController.getWorker(Accounts.controller1Account);
         addressEquals(Accounts.minterAccount, actualMinter);
 
         // remove controller1Account
         await mintController.removeController(Accounts.controller1Account, {from : Accounts.mintOwnerAccount});
         await checkMINTp0([token, mintController], [expectedTokenState, expectedMintControllerState]);
-        actualMinter = await mintController.controllers(Accounts.controller1Account);
+        actualMinter = await mintController.getWorker(Accounts.controller1Account);
         addressEquals(actualMinter, zeroAddress);
 
         // attempting to remove the controller1Account again should throw because the worker is already set to address(0).
