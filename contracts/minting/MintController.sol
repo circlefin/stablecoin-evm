@@ -34,7 +34,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract MintController is Controller {
     using SafeMath for uint256;
 
-    MinterManagementInterface public minterManager;
+    MinterManagementInterface internal minterManager;
 
     event MinterManagerSet(
         address indexed _oldMinterManager,
@@ -65,6 +65,18 @@ contract MintController is Controller {
 
     constructor(address _minterManager) public {
         minterManager = MinterManagementInterface(_minterManager);
+    }
+
+    /**
+     * @dev gets the minterManager
+     */
+    function getMinterManager(
+    )
+        external
+        view
+        returns (MinterManagementInterface)
+    {
+        return minterManager;
     }
 
     // onlyOwner functions
