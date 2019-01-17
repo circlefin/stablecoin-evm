@@ -17,7 +17,10 @@ MintController.sol,configureMinter,newAllowance == 2^256-1,arg014,arg014 configu
 MintController.sol,incrementMinterAllowance,increment ==0,arg015,arg015 incrementMinterAllowance(0) throws
 MintController.sol,incrementMinterAllowance,increment == oldAllowance,arg016,arg016 incrementMinterAllowance(oldAllowance) doubles the allowance
 MintController.sol,incrementMinterAllowance,increment == 2^256-1,arg017,arg017 incrementMinterAllowance(MAX) throws
-MintController.sol,incrementMinterAllowance,increment + oldAllowance == 2^256 -1,arg018,arg018 incrementMinterAlllowance(BIG) throws
+MintController.sol,incrementMinterAllowance,increment + oldAllowance == 2^256 -1,arg018,arg018 incrementMinterAllowance(BIG) throws
 Controller.sol,configureController,newController == 0,arg019,"arg019 configureController(0, 0) throws"
 Controller.sol,removeController,controller == msg.sender,arg020,arg020 removeController(C) works
 Controller.sol,removeController,controller where controllers[controller] == 0,arg021,arg021 removeController throws if worker is already address(0)
+MintController.sol,decrementMinterAllowance,decrement == oldAllowance,arg022,arg022 decrementMinterAllowance(oldAllowance) sets the allowance to 0
+MintController.sol,decrementMinterAllowance,oldAllowance - decrement == 0 - 1,arg023,arg023 decrementMinterAllowance(MIN) sets the allowance to 0
+MintController.sol,decrementMinterAllowance,decrement ==0,arg024,arg024 decrementMinterAllowance(0) throws

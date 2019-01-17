@@ -49,11 +49,18 @@ contract MintController is Controller {
         address indexed _msgSender,
         address indexed _minter
     );
-    event MinterAllowanceIncrement(
+    event MinterAllowanceIncremented(
         address indexed _msgSender,
         address indexed _minter,
         uint256 _increment,
         uint256 _newAllowance
+    );
+
+    event MinterAllowanceDecremented(
+        address indexed msgSender,
+        address indexed minter,
+        uint256 decrement,
+        uint256 newAllowance
     );
 
     constructor(address _minterManager) public {
@@ -125,10 +132,41 @@ contract MintController is Controller {
         uint256 currentAllowance = minterManager.minterAllowance(minter);
         uint256 newAllowance = currentAllowance.add(_allowanceIncrement);
 
-        emit MinterAllowanceIncrement(
+        emit MinterAllowanceIncremented(
             msg.sender,
             minter,
             _allowanceIncrement,
+            newAllowance
+        );
+
+        return internal_setMinterAllowance(minter, newAllowance);
+    }
+
+    /**
+     * @dev decreases the minter allowance if and only if the minter is
+     * currently active. The controller can safely send a signed decrementMinterAllowance()
+     * transaction to a minter and not worry about it being used to undo a removeMinter()
+     * transaction.
+     */
+    function decrementMinterAllowance(
+        uint256 _allowanceDecrement
+    )
+        public
+        onlyController
+        returns (bool)
+    {
+        require(_allowanceDecrement > 0, "Allowance decrement must be greater than 0.");
+        address minter = controllers[msg.sender];
+        require(minterManager.isMinter(minter), "Can only decrement allowance for minters in minterManager.");
+
+        uint256 currentAllowance = minterManager.minterAllowance(minter);
+        uint256 actualAllowanceDecrement = (currentAllowance > _allowanceDecrement ? _allowanceDecrement : currentAllowance);
+        uint256 newAllowance = currentAllowance.sub(actualAllowanceDecrement);
+
+        emit MinterAllowanceDecremented(
+            msg.sender,
+            minter,
+            actualAllowanceDecrement,
             newAllowance
         );
 

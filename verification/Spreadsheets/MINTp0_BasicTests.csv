@@ -50,3 +50,13 @@ MintController.sol,setMinterManager,minterManager == newMinterManager,bt028,bt02
 Ownable.sol,constructor,msg.sender == owner,bt001,bt001 Constructor - owner is msg.sender
 Ownable.sol,transferOwnership,msg.sender == owner,bt002,bt002 transferOwnership works when owner is msg.sender
 Ownable.sol,transferOwnership,msg.sender != owner,bt003,bt003 transferOwnership reverts when owner is not msg.sender
+MintController.sol,decrementMinterAllowance,controllers[msg.sender]==0,bt056,bt056 decrementMinterAllowance reverts if msg.sender is not a controller
+MintController.sol,decrementMinterAllowance,controllers[msg.sender]==M,bt057,bt057 decrementMinterAllowance works when controllers[msg.sender]=M
+MintController.sol,decrementMinterAllowance,minterManager = 0,bt058,bt058 decrementMinterAllowance reverts when minterManager is 0
+MintController.sol,decrementMinterAllowance,minterManager != MinterManagerInterface,bt059,bt059 decrementMinterAllowance reverts when minterManager is a user account
+MintController.sol,decrementMinterAllowance,minterManager == OK,bt060,bt060 decrementMinterAllowance works when minterManager is ok
+MintController.sol,decrementMinterAllowance,minterManager.isMinter == false,bt061,"bt061 decrementMinterAllowance(M, amt) reverts when minterManager.isMinter(M)=false"
+MintController.sol,decrementMinterAllowance,minterManager.isMinter == true,bt062,"bt062 decrementMinterAllowance(M, amt) works when minterManager.isMinter(M)=true"
+MintController.sol,decrementMinterAllowance,minterManager.minterAllowance[M] == 0,bt063,"bt063 decrementMinterAllowance(M,amt) works when minterAllowance is MAX"
+MintController.sol,decrementMinterAllowance,minterManager.minterAllowance[M] == X,bt064,"bt064 decrementMinterAllowance(M, amt) works when minterAllowance > 0"
+MintController.sol,decrementMinterAllowance,minterManager.minterAllowance[M] == BIG,bt065,"bt065 decrementMinterAllowance(M,amt) sets allowance to 0 when minterAllowance[M] - amt < 0"
