@@ -83,7 +83,7 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev gets the minterManager
+     * @notice gets the minterManager
      */
     function getMinterManager(
     )
@@ -170,7 +170,7 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev decreases the minter allowance if and only if the minter is
+     * @notice decreases the minter allowance if and only if the minter is
      * currently active. The controller can safely send a signed 
      * decrementMinterAllowance() transaction to a minter and not worry 
      * about it being used to undo a removeMinter() transaction.
@@ -206,7 +206,7 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev Uses the MinterManagementInterface to enable the minter and
+     * @notice Uses the MinterManagementInterface to enable the minter and
      * set its allowance.
      * @param _minter Minter to set new allowance of.
      * @param _newAllowance New allowance to be set for minter.

@@ -26,15 +26,15 @@ import "../Ownable.sol";
 
 /**
  * @title Controller
- * @dev Generic implementation of the owner-controller-worker model.
+ * @notice Generic implementation of the owner-controller-worker model.
  * One owner manages many controllers. Each controller manages one worker.
  * Workers may be reused across different controllers.
  */
 contract Controller is Ownable {
     /**
-    * @dev A controller manages a single worker address.
-    * controllers[controller] = worker
-    */
+     * @notice A controller manages a single worker address.
+     * controllers[controller] = worker
+     */
     mapping(address => address) internal controllers;
 
     event ControllerConfigured(
@@ -44,7 +44,8 @@ contract Controller is Ownable {
     event ControllerRemoved(address indexed _controller);
 
     /**
-     * @dev ensures that caller is the controller of a non-zero worker address.
+     * @notice Ensures that caller is the controller of a non-zero worker 
+     * address.
      */
     modifier onlyController() {
         require(controllers[msg.sender] != address(0), 
@@ -53,8 +54,8 @@ contract Controller is Ownable {
     }
 
     /**
-    * @dev gets the worker at address _controller
-    */
+     * @notice Gets the worker at address _controller.
+     */
     function getWorker(
         address _controller
     )
@@ -68,7 +69,7 @@ contract Controller is Ownable {
     // onlyOwner functions
 
     /**
-     * @notice configure a controller with the given worker.
+     * @notice Configure a controller with the given worker.
      * @param _controller The controller to be configured with a worker.
      * @param _worker The worker to be set for the newly configured controller.
      * _worker must not be a non-zero address. To disable a worker,
