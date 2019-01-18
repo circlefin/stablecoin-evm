@@ -171,9 +171,9 @@ contract MintController is Controller {
 
     /**
      * @dev decreases the minter allowance if and only if the minter is
-     * currently active. The controller can safely send a signed decrementMinterAllowance()
-     * transaction to a minter and not worry about it being used to undo a removeMinter()
-     * transaction.
+     * currently active. The controller can safely send a signed 
+     * decrementMinterAllowance() transaction to a minter and not worry 
+     * about it being used to undo a removeMinter() transaction.
      */
     function decrementMinterAllowance(
         uint256 _allowanceDecrement
@@ -182,12 +182,17 @@ contract MintController is Controller {
         onlyController
         returns (bool)
     {
-        require(_allowanceDecrement > 0, "Allowance decrement must be greater than 0.");
+        require(_allowanceDecrement > 0, 
+            "Allowance decrement must be greater than 0.");
         address minter = controllers[msg.sender];
-        require(minterManager.isMinter(minter), "Can only decrement allowance for minters in minterManager.");
+        require(minterManager.isMinter(minter), 
+            "Can only decrement allowance for minters in minterManager.");
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
-        uint256 actualAllowanceDecrement = (currentAllowance > _allowanceDecrement ? _allowanceDecrement : currentAllowance);
+        uint256 actualAllowanceDecrement = (
+            currentAllowance > _allowanceDecrement ? 
+            _allowanceDecrement : currentAllowance
+        );
         uint256 newAllowance = currentAllowance.sub(actualAllowanceDecrement);
 
         emit MinterAllowanceDecremented(

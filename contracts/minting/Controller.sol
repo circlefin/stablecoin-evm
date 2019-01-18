@@ -81,7 +81,8 @@ contract Controller is Ownable {
         public 
         onlyOwner 
     {
-        require(_controller != address(0), "Controller must be a non-zero address");
+        require(_controller != address(0), 
+            "Controller must be a non-zero address");
         require(_worker != address(0), "Worker must be a non-zero address");
         controllers[_controller] = _worker;
         emit ControllerConfigured(_controller, _worker);
@@ -97,8 +98,10 @@ contract Controller is Ownable {
         public 
         onlyOwner 
     {
-        require(_controller != address(0), "Controller must be a non-zero address");
-        require(controllers[_controller] != address(0), "Worker must be a non-zero address");
+        require(_controller != address(0), 
+            "Controller must be a non-zero address");
+        require(controllers[_controller] != address(0), 
+            "Worker must be a non-zero address");
         controllers[_controller] = address(0);
         emit ControllerRemoved(_controller);
     }
