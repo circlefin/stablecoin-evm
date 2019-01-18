@@ -2,7 +2,7 @@ var MintController = artifacts.require('minting/MintController');
 var MasterMinter = artifacts.require('minting/MasterMinter');
 var FiatToken = artifacts.require('FiatTokenV1');
 
-var tokenUtils = require('./../TokenTestUtils.js');
+var tokenUtils = require('../TokenTestUtils.js');
 var checkMINTp0 = tokenUtils.checkMINTp0;
 var expectError = tokenUtils.expectError;
 var bigZero = tokenUtils.bigZero;
@@ -11,8 +11,8 @@ var solidityErrors = tokenUtils.solidityErrors;
 
 var clone = require('clone');
 
-var mintUtils = require('./../MintControllerUtils.js');
-var AccountUtils = require('./../AccountUtils.js');
+var mintUtils = require('../MintControllerUtils.js');
+var AccountUtils = require('../AccountUtils.js');
 var Accounts = AccountUtils.Accounts;
 var AccountPrivateKeys = AccountUtils.AccountPrivateKeys;
 var getAccountState = AccountUtils.getAccountState;
@@ -20,7 +20,7 @@ var MintControllerState = AccountUtils.MintControllerState;
 var initializeTokenWithProxyAndMintController = mintUtils.initializeTokenWithProxyAndMintController;
 var checkMintControllerState = mintUtils.checkMintControllerState;
 
-var abiUtils = require('./../ABIUtils.js');
+var abiUtils = require('../ABIUtils.js');
 var makeRawTransaction = abiUtils.makeRawTransaction;
 var sendRawTransaction = abiUtils.sendRawTransaction;
 var msgData = abiUtils.msgData;

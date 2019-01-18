@@ -35,7 +35,7 @@ contract Controller is Ownable {
     * @dev A controller manages a single worker address.
     * controllers[controller] = worker
     */
-    mapping(address => address) public controllers;
+    mapping(address => address) internal controllers;
 
     event ControllerConfigured(
         address indexed _controller,
@@ -48,11 +48,21 @@ contract Controller is Ownable {
      */
     modifier onlyController() {
         require(controllers[msg.sender] != address(0), 
-            "The value of controllers[msg.sender] must be non-zero.");
+            "The value of controllers[msg.sender] must be non-zero");
         _;
     }
 
-    constructor() public {
+    /**
+    * @dev gets the worker at address _controller
+    */
+    function getWorker(
+        address _controller
+    )
+        external
+        view
+        returns (address)
+    {
+        return controllers[_controller];
     }
 
     // onlyOwner functions
@@ -70,13 +80,11 @@ contract Controller is Ownable {
     )
         public 
         onlyOwner 
-        returns (bool)
     {
         require(_controller != address(0), "Controller must be a non-zero address");
-        require(_worker != address(0), "Worker must be a non-zero address.");
+        require(_worker != address(0), "Worker must be a non-zero address");
         controllers[_controller] = _worker;
         emit ControllerConfigured(_controller, _worker);
-        return true;
     }
 
     /**
@@ -88,11 +96,10 @@ contract Controller is Ownable {
     )
         public 
         onlyOwner 
-        returns (bool)
     {
         require(_controller != address(0), "Controller must be a non-zero address");
+        require(controllers[_controller] != address(0), "Worker must be a non-zero address");
         controllers[_controller] = address(0);
         emit ControllerRemoved(_controller);
-        return true;
     }
 }
