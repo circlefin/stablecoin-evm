@@ -22,8 +22,11 @@
 
 pragma solidity ^0.4.24;
 
-// Using an interface for managing minters so that MintController
-// can be used for managing minters with different contracts.
+/** 
+ * @notice A contract that implements the MinterManagementInterface has external 
+ * functions for adding and removing minters and modifying their allowances. 
+ * An example is the FiatTokenV1 contract that implements USDC.
+ */
 interface MinterManagementInterface {
     function isMinter(address _account) external view returns (bool);
     function minterAllowance(address _minter) external view returns (uint256);

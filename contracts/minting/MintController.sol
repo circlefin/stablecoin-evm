@@ -28,12 +28,23 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title MintController
- * @dev allows control of configure/remove minter by different addresses
- *
+ * @notice The MintController contract manages minters for a contract that 
+ * implements the MinterManagerInterface. It lets the owner designate certain 
+ * addresses as controllers, and these controllers then manage the 
+ * minters by adding and removing minters, as well as modifying their minting 
+ * allowance. A controller may manage exactly one minter, but the same minter 
+ * address may be managed by multiple controllers.
+ * @dev MintController inherits from the Controller contract. It treats the 
+ * Controller workers as minters.
  */
 contract MintController is Controller {
     using SafeMath for uint256;
 
+    /**
+    * @title MinterManagementInterface
+    * @notice MintController calls the minterManager to execute/record minter 
+    * management tasks, as well as to query the status of a minter address.
+    */
     MinterManagementInterface internal minterManager;
 
     event MinterManagerSet(
@@ -63,12 +74,16 @@ contract MintController is Controller {
         uint256 newAllowance
     );
 
+    /**
+     * @notice Initializes the minterManager.
+     * @param _minterManager The address of the minterManager contract.
+     */
     constructor(address _minterManager) public {
         minterManager = MinterManagementInterface(_minterManager);
     }
 
     /**
-     * @dev gets the minterManager
+     * @notice gets the minterManager
      */
     function getMinterManager(
     )
@@ -82,7 +97,8 @@ contract MintController is Controller {
     // onlyOwner functions
 
     /**
-     * @dev sets the minterManager
+     * @notice Sets the minterManager.
+     * @param _newMinterManager The address of the new minterManager contract.
      */
     function setMinterManager(
         address _newMinterManager
@@ -97,7 +113,7 @@ contract MintController is Controller {
     // onlyController functions
 
     /**
-     * @dev remove the controller's minter.
+     * @notice Removes the controller's own minter.
      */
     function removeMinter() public onlyController returns (bool) {
         address minter = controllers[msg.sender];
@@ -106,7 +122,8 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev Enables the minter and sets its allowance
+     * @notice Enables the minter and sets its allowance.
+     * @param _newAllowance New allowance to be set for minter.
      */
     function configureMinter(
         uint256 _newAllowance
@@ -121,12 +138,11 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev Increases the minter allowance if and only if the minter is
-     * currently active. The controller can safely send a signed
-     * incrementMinterAllowance() transaction to a minter and not worry
-     * about it being used to undo a removeMinter() transaction.
+     * @notice Increases the minter's allowance if and only if the minter is an 
+     * active minter.
+     * @dev An minter is considered active if minterManager.isMinter(minter) 
+     * returns true.
      */
-
     function incrementMinterAllowance(
         uint256 _allowanceIncrement
     )
@@ -134,7 +150,8 @@ contract MintController is Controller {
         onlyController
         returns (bool)
     {
-        require(_allowanceIncrement > 0, "Allowance increment must be greater than 0");
+        require(_allowanceIncrement > 0, 
+            "Allowance increment must be greater than 0");
         address minter = controllers[msg.sender];
         require(minterManager.isMinter(minter), 
             "Can only increment allowance for minters in minterManager");
@@ -153,10 +170,10 @@ contract MintController is Controller {
     }
 
     /**
-     * @dev decreases the minter allowance if and only if the minter is
-     * currently active. The controller can safely send a signed decrementMinterAllowance()
-     * transaction to a minter and not worry about it being used to undo a removeMinter()
-     * transaction.
+     * @notice decreases the minter allowance if and only if the minter is
+     * currently active. The controller can safely send a signed 
+     * decrementMinterAllowance() transaction to a minter and not worry 
+     * about it being used to undo a removeMinter() transaction.
      */
     function decrementMinterAllowance(
         uint256 _allowanceDecrement
@@ -165,12 +182,17 @@ contract MintController is Controller {
         onlyController
         returns (bool)
     {
-        require(_allowanceDecrement > 0, "Allowance decrement must be greater than 0.");
+        require(_allowanceDecrement > 0, 
+            "Allowance decrement must be greater than 0");
         address minter = controllers[msg.sender];
-        require(minterManager.isMinter(minter), "Can only decrement allowance for minters in minterManager.");
+        require(minterManager.isMinter(minter), 
+            "Can only decrement allowance for minters in minterManager");
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
-        uint256 actualAllowanceDecrement = (currentAllowance > _allowanceDecrement ? _allowanceDecrement : currentAllowance);
+        uint256 actualAllowanceDecrement = (
+            currentAllowance > _allowanceDecrement ? 
+            _allowanceDecrement : currentAllowance
+        );
         uint256 newAllowance = currentAllowance.sub(actualAllowanceDecrement);
 
         emit MinterAllowanceDecremented(
@@ -183,11 +205,13 @@ contract MintController is Controller {
         return internal_setMinterAllowance(minter, newAllowance);
     }
 
-   // Internal functions
+    // Internal functions
 
     /**
-     * @dev Uses the MinterManagementInterface to enable the minter and
+     * @notice Uses the MinterManagementInterface to enable the minter and
      * set its allowance.
+     * @param _minter Minter to set new allowance of.
+     * @param _newAllowance New allowance to be set for minter.
      */
     function internal_setMinterAllowance(
         address _minter,
