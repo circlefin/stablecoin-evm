@@ -183,10 +183,10 @@ contract MintController is Controller {
         returns (bool)
     {
         require(_allowanceDecrement > 0, 
-            "Allowance decrement must be greater than 0.");
+            "Allowance decrement must be greater than 0");
         address minter = controllers[msg.sender];
         require(minterManager.isMinter(minter), 
-            "Can only decrement allowance for minters in minterManager.");
+            "Can only decrement allowance for minters in minterManager");
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
         uint256 actualAllowanceDecrement = (
@@ -204,6 +204,8 @@ contract MintController is Controller {
 
         return internal_setMinterAllowance(minter, newAllowance);
     }
+
+    // Internal functions
 
     /**
      * @notice Uses the MinterManagementInterface to enable the minter and

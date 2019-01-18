@@ -153,7 +153,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
     it('arg015 incrementMinterAllowance(0) throws', async function () {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        await expectError(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}), "Allowance increment must be greater than 0.");
+        await expectError(mintController.incrementMinterAllowance(0, {from: Accounts.controller1Account}), "Allowance increment must be greater than 0");
     });
 
     it('arg016 incrementMinterAllowance(oldAllowance) doubles the allowance', async function () {
@@ -248,7 +248,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
     it('arg024 decrementMinterAllowance(0) throws', async function () {
         await mintController.configureController(Accounts.controller1Account, Accounts.minterAccount, {from: Accounts.mintOwnerAccount});
-        await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}), "Allowance decrement must be greater than 0.");
+        await expectError(mintController.decrementMinterAllowance(0, {from: Accounts.controller1Account}), "Allowance decrement must be greater than 0");
     });
 
 }
