@@ -112,7 +112,7 @@ All functionality will be restored when the contract is unpaused.
 - Unpausing emits an `Unpause()` event
 
 ## Upgrading
-The Fiat Token uses the zeppelinos Unstructured-Storage Proxy pattern [https://docs.zeppelinos.org/docs/upgradeability_AdminUpgradeabilityProxy.html]. [FiatToken.sol](../contracts/FiatToken.sol) is the implementation, the actual token will be a 
+The Fiat Token uses the zeppelinos Unstructured-Storage Proxy pattern [https://docs.zeppelinos.org/docs/upgradeability_AdminUpgradeabilityProxy.html]. [FiatTokenV1.sol](../contracts/FiatTokenV1.sol) and [FiatTokenV2.sol](../contracts/FiatTokenV2.sol) are implementations, the actual token will be a 
  Proxy contract ([FiatTokenProxy.sol](../contracts/FiatTokenProxy.sol)) which will forward all calls to `FiatToken` via 
  delegatecall. This pattern allows CENTRE to upgrade the logic of any deployed tokens seamlessly.
 
