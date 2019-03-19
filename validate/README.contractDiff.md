@@ -19,16 +19,16 @@ At the end of the run, `checkDiff` will output which files it was able to proces
 means that the Etherscan file could be read AND all the included files could be read. 
 Validity should be determined by actually looking at the diffs.
 
-# Running checkDiff.js
+# Running contractDiff.js
 To run the script, type
 
 `node validate/contractDiff.js <filename1> <filename2> ... <filename3>`
 
 Where the `filename` is the location of source code downloaded from Etherscan.
-Copies of `FiatTokenProxy` and `FiatTokenV1` are included for testing purposes.
+Copies of `FiatTokenProxy`, `FiatTokenV1`, and  `MasterMinter` are included for testing purposes.
 You can test them:
 
-`node validate/contractDiff.js validate/FiatTokenProxy.etherscan validate/FiatTokenV1.etherscan`
+`node validate/contractDiff.js validate/FiatTokenProxy.etherscan validate/FiatTokenV1.etherscan validate/MasterMinter.etherscan`
 
 # Finding code on Etherscan
 1. Go to [https://etherscan.io](https://etherscan.io)
