@@ -1,5 +1,5 @@
-# CENTRE Fiat Token
-The CENTRE Fiat Token contract is an ERC-20 compatible token. 
+# FutureCarbon {FCo2 ERC20 token} Fiat Token
+The FutureCarbon Fiat Token contract is an ERC-20 compatible token. 
 It allows minting/burning of tokens by multiple entities, pausing all activity, freezing of individual addresses, 
 and a way to upgrade the contract so that bugs can be fixed or features added.
 
@@ -12,8 +12,8 @@ The `FiatToken` has a number of roles (addresses) which control different functi
 - `owner` - re-assign any of the roles except for `admin`
 - `admin` - upgrade the contract, and re-assign itself
 
-CENTRE will control the address of all roles except for minters, which will be controlled by the entities that 
-CENTRE elects to make minters
+Sky Solutions will control the address of all roles except for minters, which will be controlled by the entities that 
+Sky Solutions elects to make minters, such as FCC LLC, who is the FiatToken Reserve Partner Company Sky Solutions has chosen to be the 3rd party to manage the debt bond-like tokens and country debts of the cleanup costs of the global services to cut pollution 50% globally once active.
 
 ## ERC-20
 The `FiatToken` implements the standard methods of the ERC-20 interface with some changes: 
@@ -23,17 +23,15 @@ The `FiatToken` implements the standard methods of the ERC-20 interface with som
 
 ## Issuing and Destroying tokens
 The Fiat Token allows multiple entities to create and destroy tokens. 
-These entities will have to be members of CENTRE, and will be vetted by CENTRE before they are allowed to create new 
-tokens. CENTRE will not mint any tokens itself, it will approve members to mint and burn tokens.
+These entities will have to be members of FutureCarbonCredit LLC {FCC LLC}, and will be vetted by Sky Solutions before they are allowed to create new tokens. Sky Solutions, the partner of FutureCarbonCredit LLC, will not mint any tokens itself, it will approve members to mint and burn tokens to be part of FCC LLC's network of minters.
 
-Each `minter` has a `mintingAllowance`, which CENTRE configures. The `mintingAllowance` is how many tokens that minter 
+Each `minter` has a `mintingAllowance`, which FCC LLC configures. The `mintingAllowance` is how many tokens that minter 
 may issue, and as a `minter` issues tokens, its `mintingAllowance` declines. 
-CENTRE will periodically reset the `mintingAllowance` as long as a `minter` remains in good standing with CENTRE and maintains 
-adequate reserves for the tokens it has issued. The `mintingAllowance` is to limit the damage if any particular
-`minter` is compromised.
+FCC LLC will periodically reset the `mintingAllowance` as long as a `minter` remains in good standing with SS/FCC LLC and maintains 
+adequate reserves for the tokens it has issued. The `mintingAllowance` is to limit the damage if any particular `minter` is compromised.
 
 ### Adding Minters
-CENTRE adds minters via the `configureMinter` method. When a minter is configured a `mintingAllowance` is specified, 
+FCC LLC adds minters via the `configureMinter` method as admin. When a minter is configured a `mintingAllowance` is specified, 
 which is the number of tokens that address is allowed to mint. As a `minter` mints tokens, the `mintingAllowance` will decline.
 
 - Only the `masterMinter` role may call configureMinter.
@@ -44,7 +42,7 @@ minting. When a `minter`'s allowance is low, CENTRE can make another call to `co
 `mintingAllowance` to a higher value.
 
 ### Removing Minters
-CENTRE removes minters via the `removeMinter` method. This will remove the `minter` from the list of `minters` and set 
+FCC LLC removes minters via the `removeMinter` method. This will remove the `minter` from the list of `minters` and set 
 its `mintingAllowance` to 0. Once a `minter` is removed it will no longer be able to mint or burn tokens.
 
  - Only the `masterMinter` role may call `removeMinter`. 
@@ -79,13 +77,13 @@ Burning tokens will not increase the mintingAllowance of the address doing the b
 ## Blacklisting
 Addresses can be blacklisted. A blacklisted address will be unable to transfer tokens, approve, mint, or burn tokens. 
 ### Adding a blacklisted address
-CENTRE blacklists an address via the `blacklist` method. The specified `account` will be added to the blacklist.
+When Sky Solutions or FCC LLC blacklists an address via the `blacklist` method. The specified `account` will be added to the blacklist.
 
 - Only the `blacklister` role may call `blacklist`.
 - Blacklisting emits a `Blacklist(account)` event
 
 ### Removing a blacklisted address
-CENTRE removes an address from the blacklist via the `unblacklist` method. The specified `account` will be removed from the blacklist.
+When Admin Sky Solutions or Owner/Partner of debt token c-GAS Carbon Global Accountability System, FCC LLC, removes an address from the blacklist via the `unblacklist` method. The specified `account` will be removed from the blacklist.
 
 - Only the `blacklister` role may call `unblacklist`.
 - Unblacklisting emits an `UnBlacklist(account)` event.
@@ -97,14 +95,14 @@ the blacklist, removing minters, changing roles, and upgrading will remain opera
 required to fix or mitigate the issue that caused CENTRE to pause the contract.
 
 ### Pause
-CENTRE will pause the contract via the `pause` method. This method will set the paused flag to true.
+Sky Solutions or FCC LLC will pause the contract via the `pause` method. This method will set the paused flag to true.
 
 - Only the `pauser` role may call pause.
 
 - Pausing emits a `Pause()` event
 
 ### Unpause
-CENTRE will unpause the contract via the `unpause` method. This method will set the `paused` flag to false. 
+Sky Solutions or FCC LLC will unpause the contract via the `unpause` method. This method will set the `paused` flag to false. 
 All functionality will be restored when the contract is unpaused.
 
 - Only the `pauser` role may call unpause.
@@ -116,7 +114,7 @@ The Fiat Token uses the zeppelinos Unstructured-Storage Proxy pattern [https://d
  Proxy contract ([FiatTokenProxy.sol](../contracts/FiatTokenProxy.sol)) which will forward all calls to `FiatToken` via 
  delegatecall. This pattern allows CENTRE to upgrade the logic of any deployed tokens seamlessly.
 
-- CENTRE will upgrade the token via a call to `upgradeTo` or `upgradeToAndCall` if initialization is required for the new version.
+- FCC LLC or Sky Solutions will upgrade the token via a call to `upgradeTo` or `upgradeToAndCall` if initialization is required for the new version.
 - Only the `admin` role may call `upgradeTo` or `upgradeToAndCall`. 
 
 ## Reassigning Roles
