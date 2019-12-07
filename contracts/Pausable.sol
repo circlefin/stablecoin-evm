@@ -1,5 +1,5 @@
 /**
-* Copyright CENTRE SECZ 2018
+* Copyright FutureCarbonCredits DAO/later to be LLC 2020
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal 
@@ -27,12 +27,13 @@ import "./Ownable.sol";
  * @title Pausable
  * @dev Base contract which allows children to implement an emergency stop mechanism.
  * Based on openzeppelin tag v1.10.0 commit: feb665136c0dae9912e08397c1a21c4af3651ef3
- * Modifications:
+ * Modifications from original codebase:
  * 1) Added pauser role, switched pause/unpause to be onlyPauser (6/14/2018)
  * 2) Removed whenNotPause/whenPaused from pause/unpause (6/14/2018)
  * 3) Removed whenPaused (6/14/2018)
  * 4) Switches ownable library to use zeppelinos (7/12/18)
  * 5) Remove constructor (7/13/18)
+ * 6) Fork to FCo2 token, a carbon credit based fiat token.
  */
 contract Pausable is Ownable {
   event Pause();
