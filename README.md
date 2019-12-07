@@ -1,5 +1,5 @@
 # FCo2-tokens
-Fiat tokens on the [FCC LLC](<website to be named later) network.
+Fiat tokens on the [FutureCarbonCredits LLC] network.
 
 # Setup
 Tests need node v8.0.0 or higher, as they depend on async/await functionality. Interacting with eth is very async-y so await makes it much easier to write tests.
