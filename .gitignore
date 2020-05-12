@@ -12,3 +12,6 @@ token.json
 credentials.json
 echidna/
 validate/apikey.infura
+ganache-blockchain-log.txt
+.coverage_artifacts
+.coverage_contracts

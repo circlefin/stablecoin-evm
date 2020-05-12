@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "lite-server",
     "fmt": "prettier --write **/*.sol **/*.js **/*.json *.js *.json",
-    "truffle-test": "scripts/start-ganache.sh && truffle test",
-    "test": "scripts/start-ganache.sh && ./node_modules/.bin/solidity-coverage"
+    "coverage": "yarn run coverage",
+    "test": "scripts/start-ganache.sh && truffle test"
   },
   "repository": {
     "type": "git",
