@@ -1,5 +1,5 @@
 // INFURA Setup - see validate/README.validate.md for more info
-var HDWalletProvider = require("truffle-hdwallet-provider"); // These keys will be used only for CALL
+var HDWalletProvider = require("@truffle/hdwallet-provider");
 var mnemonic = "talisman";
 var fs = require("fs");
 var access_token = "none";
