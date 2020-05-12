@@ -1,4 +1,4 @@
-var fs = require("fs");
+const fs = require("fs");
 const chalk = require("chalk");
 const diff = require("diff");
 
@@ -6,14 +6,10 @@ function readFileSync(filename) {
   return fs.readFileSync(filename, "utf8");
 }
 
-function writeFileSync(filename, text) {
-  fs.writeFileSync(filename, text);
-}
-
 function getFilenamesFromCode(code) {
   // find all lines with prefix "// File:"
-  var filenames = code.match(/\/\/\s*File:\s*\S+\n/gi);
-  for (var i = 0; i < filenames.length; i++) {
+  const filenames = code.match(/\/\/\s*File:\s*\S+\n/gi);
+  for (let i = 0; i < filenames.length; i++) {
     // remove prefix "// File: ".
     filenames[i] = filenames[i].replace(/\/\/\s*File:\s*/i, "");
     filenames[i] = filenames[i].replace(/\s+/i, "");
@@ -36,8 +32,8 @@ function getFilenamesFromCode(code) {
 }
 
 function createCodeFile(filenames) {
-  var code = "";
-  for (var i = 0; i < filenames.length; i++) {
+  let code = "";
+  for (let i = 0; i < filenames.length; i++) {
     try {
       console.log("Reading file " + filenames[i]);
     } catch (err) {
@@ -51,8 +47,8 @@ function createCodeFile(filenames) {
 
 function diffText(code1, code2) {
   const diffOutput = diff.diffTrimmedLines(code1, code2);
-  for (var i = 0; i < diffOutput.length; i++) {
-    var diffLine = diffOutput[i];
+  for (let i = 0; i < diffOutput.length; i++) {
+    const diffLine = diffOutput[i];
     if (diffLine.added) {
       process.stdout.write(chalk.green(`+ ${diffLine.value}`));
     } else if (diffLine.removed) {
@@ -62,15 +58,15 @@ function diffText(code1, code2) {
 }
 
 function removeExtraComments(code) {
-  var modified = code.replace(/\/\/\s*File:\s*\S+\n/gi, "");
+  const modified = code.replace(/\/\/\s*File:\s*\S+\n/gi, "");
   return modified;
 }
 
 function validate(filename) {
-  var code = readFileSync(filename);
+  let code = readFileSync(filename);
 
-  var filenames = getFilenamesFromCode(code);
-  var expectedCode = createCodeFile(filenames);
+  const filenames = getFilenamesFromCode(code);
+  const expectedCode = createCodeFile(filenames);
 
   code = removeExtraComments(code);
   diffText(code, expectedCode);
@@ -86,13 +82,13 @@ function main() {
     return;
   }
 
-  var fail = 0;
-  var total = process.argv.length - 2;
-  var goodFiles = "";
-  var badFiles = "";
+  let fail = 0;
+  const total = process.argv.length - 2;
+  let goodFiles = "";
+  let badFiles = "";
 
-  for (var i = 2; i < process.argv.length; i++) {
-    var filename = process.argv[i];
+  for (let i = 2; i < process.argv.length; i++) {
+    const filename = process.argv[i];
     console.log("Checking: " + filename);
     try {
       validate(filename);

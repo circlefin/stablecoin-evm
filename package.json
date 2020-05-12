@@ -9,9 +9,9 @@
   "scripts": {
     "lint": "eslint '**/*.js' '*.js'",
     "fmt": "prettier --write '**/*.sol' '**/*.js' '**/*.json' '**/*.md' '*.js' '*.json' '*.md'",
-    "coverage": "truffle run coverage",
     "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
-    "test": "truffle test"
+    "test": "truffle test",
+    "coverage": "truffle run coverage"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/centrehq/centre-tokens/issues"
   },
@@ -41,8 +41,8 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "ethereumjs-abi": "^0.6.8",
-    "ethereumjs-tx": "2.1.2",
-    "ganache-cli": "6.9.1",
+    "ethereumjs-tx": "^2.1.2",
+    "ganache-cli": "^6.9.1",
     "googleapis": "^50.0.0",
     "lodash": "^4.17.15",
     "prettier": "2.0.5",

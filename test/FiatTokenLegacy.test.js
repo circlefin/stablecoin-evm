@@ -1,120 +1,118 @@
-var BN = require("bn.js");
-var tokenUtils = require("./TokenTestUtils");
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals;
-var BigNumber = require("bignumber.js");
-var bigZero = tokenUtils.bigZero;
-var bigHundred = tokenUtils.bigHundred;
-var mint = tokenUtils.mint;
-var burn = tokenUtils.burn;
-var setMinter = tokenUtils.setMinter;
-var expectRevert = tokenUtils.expectRevert;
-var blacklist = tokenUtils.blacklist;
-var sampleTransferFrom = tokenUtils.sampleTransferFrom;
-var approve = tokenUtils.approve;
-var unBlacklist = tokenUtils.unBlacklist;
-var sampleTransfer = tokenUtils.sampleTransfer;
-var checkTransferEvents = tokenUtils.checkTransferEvents;
-var nullAccount = tokenUtils.nullAccount;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var minterAccount = tokenUtils.minterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
-var upgradeTo = tokenUtils.upgradeTo;
-var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
-var FiatToken = tokenUtils.FiatToken;
-var getAdmin = tokenUtils.getAdmin;
+const assert = require("chai").assert;
+const BN = require("bn.js");
+const {
+  name,
+  symbol,
+  currency,
+  decimals,
+  mint,
+  burn,
+  setMinter,
+  expectRevert,
+  blacklist,
+  sampleTransferFrom,
+  approve,
+  unBlacklist,
+  sampleTransfer,
+  checkTransferEvents,
+  nullAccount,
+  deployerAccount,
+  tokenOwnerAccount,
+  arbitraryAccount2,
+  masterMinterAccount,
+  minterAccount,
+  pauserAccount,
+  blacklisterAccount,
+  proxyOwnerAccount,
+  initializeTokenWithProxy,
+  upgradeTo,
+  UpgradedFiatToken,
+  FiatToken,
+  getAdmin,
+} = require("./TokenTestUtils");
 
 // these tests are for reference and do not track side effects on all variables
 async function run_tests(newToken, accounts) {
-  beforeEach(async function () {
-    rawToken = await FiatToken.new();
-    var tokenConfig = await initializeTokenWithProxy(rawToken);
-    proxy = tokenConfig.proxy;
-    token = tokenConfig.token;
-    assert.equal(proxy.address, token.address);
+  let proxy, token;
+
+  beforeEach(async () => {
+    const rawToken = await FiatToken.new();
+    const tokenConfig = await initializeTokenWithProxy(rawToken);
+    ({ proxy, token } = tokenConfig);
+    assert.strictEqual(proxy.address, token.address);
   });
 
-  it("should start with a totalSupply of 0", async function () {
-    let totalSupply = await token.totalSupply();
-    assert.isTrue(new BN(totalSupply).eq(new BN(0)));
+  it("should start with a totalSupply of 0", async () => {
+    const totalSupply = await token.totalSupply();
+    assert.isTrue(new BN(totalSupply).eqn(0));
   });
 
-  it("should add multiple mints to a given address in address balance", async function () {
+  it("should add multiple mints to a given address in address balance", async () => {
     await mint(token, accounts[0], 100, minterAccount);
     await mint(token, accounts[0], 200, minterAccount);
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 300);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(new BN(balance0).eqn(300));
   });
 
-  it("should fail to mint to a null address", async function () {
-    let initialTotalSupply = await token.totalSupply();
+  it("should fail to mint to a null address", async () => {
+    const initialTotalSupply = await token.totalSupply();
 
     await expectRevert(mint(token, nullAccount, 100, minterAccount));
 
-    totalSupply = await token.totalSupply();
+    const totalSupply = await token.totalSupply();
     assert.isTrue(new BN(totalSupply).eq(new BN(initialTotalSupply)));
   });
 
-  it("should add multiple mints to a given address in address balance", async function () {
+  it("should add multiple mints to a given address in address balance", async () => {
     await mint(token, accounts[0], 100, minterAccount);
     await mint(token, accounts[0], 200, minterAccount);
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BN(balance0).eq(new BN(300)));
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(new BN(balance0).eqn(300));
   });
 
-  it("should add multiple mints to total supply", async function () {
-    let initialTotalSupply = await token.totalSupply();
+  it("should add multiple mints to total supply", async () => {
+    const initialTotalSupply = await token.totalSupply();
     await mint(token, accounts[0], 100, minterAccount);
     await mint(token, accounts[0], 400, minterAccount);
     await mint(token, accounts[1], 600, minterAccount);
 
-    let totalSupply = await token.totalSupply();
+    const totalSupply = await token.totalSupply();
     assert.isTrue(
-      new BN(totalSupply).sub(new BN(initialTotalSupply)).eq(new BN(1100))
+      new BN(totalSupply).sub(new BN(initialTotalSupply)).eqn(1100)
     );
   });
 
-  it("should fail to mint from blacklisted minter", async function () {
+  it("should fail to mint from blacklisted minter", async () => {
     await setMinter(token, accounts[2], 200);
     await blacklist(token, accounts[2]);
 
     await expectRevert(token.mint(accounts[0], 100, { from: accounts[2] }));
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 0);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(balance0.eqn(0));
   });
 
-  it("should fail to mint to blacklisted address", async function () {
+  it("should fail to mint to blacklisted address", async () => {
     await blacklist(token, accounts[3]);
 
     await expectRevert(mint(token, accounts[3], 100, minterAccount));
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 0);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(balance0.eqn(0));
   });
 
-  it("should fail to mint from a non-minter call", async function () {
+  it("should fail to mint from a non-minter call", async () => {
     await mint(token, accounts[0], 400, minterAccount);
 
     await expectRevert(token.mint(accounts[0], 100, { from: accounts[0] }));
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 400);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(balance0.eqn(400));
   });
 
-  it("should complete transferFrom", async function () {
+  it("should complete transferFrom", async () => {
     await sampleTransferFrom(
       token,
       deployerAccount,
@@ -123,13 +121,13 @@ async function run_tests(newToken, accounts) {
     );
   });
 
-  it("should approve", async function () {
+  it("should approve", async () => {
     await approve(token, accounts[3], 100, accounts[2]);
-    let allowance = await token.allowance(accounts[2], accounts[3]);
-    assert.isTrue(new BN(allowance).eq(new BN(100)));
+    const allowance = await token.allowance(accounts[2], accounts[3]);
+    assert.isTrue(new BN(allowance).eqn(100));
   });
 
-  it("should complete sample transfer", async function () {
+  it("should complete sample transfer", async () => {
     await sampleTransfer(
       token,
       deployerAccount,
@@ -138,112 +136,112 @@ async function run_tests(newToken, accounts) {
     );
   });
 
-  it("should complete transfer from non-owner", async function () {
+  it("should complete transfer from non-owner", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    let transfer = await token.transfer(accounts[3], 1000, {
+    const transfer = await token.transfer(accounts[3], 1000, {
       from: accounts[2],
     });
 
     checkTransferEvents(transfer, accounts[2], accounts[3], 1000);
 
-    let balance0 = await token.balanceOf(accounts[2]);
-    assert.equal(balance0, 1900 - 1000);
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, 1000);
+    const balance0 = await token.balanceOf(accounts[2]);
+    assert.isTrue(balance0.eqn(1900 - 1000));
+    const balance3 = await token.balanceOf(accounts[3]);
+    assert.isTrue(balance3.eqn(1000));
   });
 
-  it("should set allowance and balances before and after approved transfer", async function () {
+  it("should set allowance and balances before and after approved transfer", async () => {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(0)));
+    assert.isTrue(new BN(allowed).eqn(0));
     await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(100)));
+    assert.isTrue(new BN(allowed).eqn(100));
 
-    let transfer = await token.transferFrom(accounts[0], accounts[3], 50, {
+    const transfer = await token.transferFrom(accounts[0], accounts[3], 50, {
       from: accounts[3],
     });
 
     checkTransferEvents(transfer, accounts[0], accounts[3], 50);
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.isTrue(new BN(balance0).eq(new BN(450)));
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BN(balance3).eq(new BN(50)));
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(new BN(balance0).eqn(450));
+    const balance3 = await token.balanceOf(accounts[3]);
+    assert.isTrue(new BN(balance3).eqn(50));
   });
 
-  it("should fail on unauthorized approved transfer and not change balances", async function () {
+  it("should fail on unauthorized approved transfer and not change balances", async () => {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(0)));
+    assert.isTrue(new BN(allowed).eqn(0));
     await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(100)));
+    assert.isTrue(new BN(allowed).eqn(100));
 
     await expectRevert(
       token.transferFrom(accounts[0], accounts[3], 50, { from: accounts[4] })
     );
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 500);
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, 0);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(balance0.eqn(500));
+    const balance3 = await token.balanceOf(accounts[3]);
+    assert.isTrue(balance3.eqn(0));
   });
 
-  it("should fail on invalid approved transfer amount and not change balances", async function () {
+  it("should fail on invalid approved transfer amount and not change balances", async () => {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(0)));
+    assert.isTrue(new BN(allowed).eqn(0));
     await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
     allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(100)));
+    assert.isTrue(new BN(allowed).eqn(100));
 
     await expectRevert(
       token.transferFrom(accounts[0], accounts[3], 450, { from: accounts[3] })
     );
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 500);
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, 0);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(balance0.eqn(500));
+    const balance3 = await token.balanceOf(accounts[3]);
+    assert.isTrue(balance3.eqn(0));
   });
 
-  it("should fail on invalid transfer recipient (zero-account) and not change balances", async function () {
+  it("should fail on invalid transfer recipient (zero-account) and not change balances", async () => {
     await mint(token, accounts[0], 500, minterAccount);
     await token.approve(accounts[3], 100);
-    let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(100)));
+    const allowed = await token.allowance.call(accounts[0], accounts[3]);
+    assert.isTrue(new BN(allowed).eqn(100));
 
     await expectRevert(
       token.transferFrom(accounts[0], nullAccount, 50, { from: accounts[3] })
     );
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, 500);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(balance0.eqn(500));
   });
 
-  it("should test consistency of transfer(x) and approve(x) + transferFrom(x)", async function () {
+  it("should test consistency of transfer(x) and approve(x) + transferFrom(x)", async () => {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
-    assert.isTrue(new BN(allowed).eq(new BN(0)));
-    let transferAmount = 650;
-    let totalAmount = transferAmount;
+    assert.isTrue(new BN(allowed).eqn(0));
+    const transferAmount = 650;
+    const totalAmount = transferAmount;
     await mint(token, accounts[0], totalAmount, minterAccount);
 
     let transfer = await token.transfer(accounts[3], transferAmount);
     checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount);
 
-    let balance0 = await token.balanceOf(accounts[0]);
-    assert.equal(balance0, totalAmount - transferAmount);
-    let balance3 = await token.balanceOf(accounts[3]);
-    assert.equal(balance3, transferAmount);
+    const balance0 = await token.balanceOf(accounts[0]);
+    assert.isTrue(balance0.eqn(totalAmount - transferAmount));
+    const balance3 = await token.balanceOf(accounts[3]);
+    assert.isTrue(balance3.eqn(transferAmount));
 
     await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BN(allowed).eq(new BN(0)));
+    assert.isTrue(new BN(allowed).eqn(0));
     await mint(token, accounts[1], totalAmount, minterAccount);
 
     await token.approve(accounts[4], transferAmount, { from: accounts[1] });
     allowed = await token.allowance.call(accounts[1], accounts[4]);
-    assert.isTrue(new BN(allowed).eq(new BN(transferAmount)));
+    assert.isTrue(allowed.eqn(transferAmount));
 
     transfer = await token.transferFrom(
       accounts[1],
@@ -254,17 +252,17 @@ async function run_tests(newToken, accounts) {
 
     checkTransferEvents(transfer, accounts[1], accounts[4], transferAmount);
 
-    let balance1 = await token.balanceOf(accounts[1]);
-    assert.equal(balance0, totalAmount - transferAmount);
-    let balance4 = await token.balanceOf(accounts[4]);
-    assert.equal(balance3, transferAmount);
+    const balance1 = await token.balanceOf(accounts[1]);
+    assert.isTrue(balance1.eqn(totalAmount - transferAmount));
+    const balance4 = await token.balanceOf(accounts[4]);
+    assert.isTrue(balance4.eqn(transferAmount));
   });
 
-  it("should pause and should not be able to transfer", async function () {
+  it("should pause and should not be able to transfer", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
-    assert.equal(await token.paused.call(), true);
+    assert.strictEqual(await token.paused.call(), true);
 
     await expectRevert(
       sampleTransferFrom(
@@ -276,11 +274,11 @@ async function run_tests(newToken, accounts) {
     );
   });
 
-  it("should pause and should not be able to transfer, then unpause and be able to transfer", async function () {
+  it("should pause and should not be able to transfer, then unpause and be able to transfer", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
-    assert.equal(await token.paused.call(), true);
+    assert.strictEqual(await token.paused.call(), true);
 
     await expectRevert(
       sampleTransferFrom(
@@ -292,7 +290,7 @@ async function run_tests(newToken, accounts) {
     );
 
     await token.unpause({ from: pauserAccount });
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
     await sampleTransferFrom(
       token,
       deployerAccount,
@@ -301,54 +299,54 @@ async function run_tests(newToken, accounts) {
     );
   });
 
-  it("should pause and should not be able to transferFrom", async function () {
+  it("should pause and should not be able to transferFrom", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
-    assert.equal(await token.paused.call(), true);
+    assert.strictEqual(await token.paused.call(), true);
 
     await expectRevert(
       sampleTransfer(token, deployerAccount, arbitraryAccount2, minterAccount)
     );
   });
 
-  it("should pause and should not be able to approve", async function () {
+  it("should pause and should not be able to approve", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
-    assert.equal(await token.paused.call(), true);
+    assert.strictEqual(await token.paused.call(), true);
 
     await expectRevert(approve(token, accounts[2], 50, accounts[3]));
   });
 
-  it("should pause and should not be able to mint", async function () {
+  it("should pause and should not be able to mint", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
     await token.pause({ from: pauserAccount });
-    assert.equal(await token.paused.call(), true);
+    assert.strictEqual(await token.paused.call(), true);
 
     await expectRevert(mint(token, accounts[2], 1900, minterAccount));
   });
 
-  it("should try to pause with non-pauser and fail to pause", async function () {
+  it("should try to pause with non-pauser and fail to pause", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
 
     await expectRevert(token.pause({ from: accounts[0] }));
 
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
   });
 
-  it("should try to pause with non-pauser and fail to pause", async function () {
+  it("should try to pause with non-pauser and fail to pause", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
 
     await expectRevert(token.pause({ from: accounts[0] }));
 
-    assert.equal(await token.paused.call(), false);
+    assert.strictEqual(await token.paused.call(), false);
   });
 
-  it("should approve and fail to transfer more than balance", async function () {
+  it("should approve and fail to transfer more than balance", async () => {
     await mint(token, accounts[2], 100, minterAccount);
     await token.approve(accounts[1], 600, { from: accounts[2] });
 
@@ -356,21 +354,21 @@ async function run_tests(newToken, accounts) {
       token.transferFrom(accounts[2], accounts[1], 600, { from: accounts[1] })
     );
 
-    let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(100)));
+    const balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BN(balance).eqn(100));
   });
 
-  it("should blacklist and make transfer impossible", async function () {
+  it("should blacklist and make transfer impossible", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await blacklist(token, accounts[2]);
 
     await expectRevert(token.transfer(accounts[3], 600, { from: accounts[2] }));
 
-    let balance = await token.balanceOf(accounts[2]);
-    assert.equal(balance, 1900);
+    const balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(balance.eqn(1900));
   });
 
-  it("should blacklist recipient and make transfer to recipient impossible", async function () {
+  it("should blacklist recipient and make transfer to recipient impossible", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await mint(token, accounts[9], 1600, minterAccount);
     await blacklist(token, accounts[2]);
@@ -378,14 +376,14 @@ async function run_tests(newToken, accounts) {
     await expectRevert(token.transfer(accounts[2], 600, { from: accounts[9] }));
 
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(1900)));
+    assert.isTrue(new BN(balance).eqn(1900));
     balance = await token.balanceOf(accounts[9]);
-    assert.isTrue(new BN(balance).eq(new BN(1600)));
+    assert.isTrue(new BN(balance).eqn(1600));
   });
 
-  it("should blacklist and make transferFrom impossible with the approved transferer", async function () {
-    let isBlacklistedBefore = await token.isBlacklisted(accounts[2]);
-    assert.equal(isBlacklistedBefore, false);
+  it("should blacklist and make transferFrom impossible with the approved transferer", async () => {
+    const isBlacklistedBefore = await token.isBlacklisted(accounts[2]);
+    assert.strictEqual(isBlacklistedBefore, false);
 
     await mint(token, accounts[2], 1900, minterAccount);
     await token.approve(accounts[1], 600, { from: accounts[2] });
@@ -395,14 +393,14 @@ async function run_tests(newToken, accounts) {
       token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] })
     );
 
-    let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(1900)));
+    const balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BN(balance).eqn(1900));
 
-    let isBlacklistedAfter = await token.isBlacklisted(accounts[2]);
-    assert.equal(isBlacklistedAfter, true);
+    const isBlacklistedAfter = await token.isBlacklisted(accounts[2]);
+    assert.strictEqual(isBlacklistedAfter, true);
   });
 
-  it("should make transferFrom impossible with the approved and blacklisted transferer", async function () {
+  it("should make transferFrom impossible with the approved and blacklisted transferer", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.approve(accounts[1], 600, { from: accounts[2] });
     await blacklist(token, accounts[1]);
@@ -411,11 +409,11 @@ async function run_tests(newToken, accounts) {
       token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[1] })
     );
 
-    let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(1900)));
+    const balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BN(balance).eqn(1900));
   });
 
-  it("should blacklist recipient and make transfer to recipient using transferFrom impossible", async function () {
+  it("should blacklist recipient and make transfer to recipient using transferFrom impossible", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.approve(accounts[3], 600, { from: accounts[2] });
     await blacklist(token, accounts[3]);
@@ -424,53 +422,53 @@ async function run_tests(newToken, accounts) {
       token.transferFrom(accounts[2], accounts[3], 600, { from: accounts[2] })
     );
 
-    let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(1900)));
+    const balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BN(balance).eqn(1900));
   });
 
-  it("should blacklist and make approve impossible", async function () {
+  it("should blacklist and make approve impossible", async () => {
     await mint(token, accounts[1], 1900, minterAccount);
     await blacklist(token, accounts[1]);
 
     await expectRevert(token.approve(accounts[2], 600, { from: accounts[1] }));
-    let approval = await token.allowance(accounts[1], accounts[2]);
-    assert.isTrue(new BN(approval).eq(new BN(0)));
+    const approval = await token.allowance(accounts[1], accounts[2]);
+    assert.isTrue(new BN(approval).eqn(0));
   });
 
-  it("should make giving approval to blacklisted account impossible", async function () {
+  it("should make giving approval to blacklisted account impossible", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await blacklist(token, accounts[1]);
 
     await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
 
-    let approval = await token.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BN(approval).eq(new BN(0)));
+    const approval = await token.allowance(accounts[2], accounts[1]);
+    assert.isTrue(new BN(approval).eqn(0));
   });
 
-  it("should blacklist then unblacklist to make a transfer possible", async function () {
+  it("should blacklist then unblacklist to make a transfer possible", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await blacklist(token, accounts[2]);
     await unBlacklist(token, accounts[2]);
     await token.transfer(accounts[3], 600, { from: accounts[2] });
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(1300)));
+    assert.isTrue(new BN(balance).eqn(1300));
     balance = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BN(balance).eq(new BN(600)));
+    assert.isTrue(new BN(balance).eqn(600));
   });
 
-  it("should fail to blacklist with non-blacklister account", async function () {
+  it("should fail to blacklist with non-blacklister account", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
 
     await expectRevert(token.blacklist(accounts[2], { from: pauserAccount }));
 
     await token.transfer(accounts[3], 600, { from: accounts[2] });
     let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(1300)));
+    assert.isTrue(new BN(balance).eqn(1300));
     balance = await token.balanceOf(accounts[3]);
-    assert.isTrue(new BN(balance).eq(new BN(600)));
+    assert.isTrue(new BN(balance).eqn(600));
   });
 
-  it("should unblacklist when paused", async function () {
+  it("should unblacklist when paused", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.blacklist(accounts[2], { from: blacklisterAccount });
     let blacklisted = await token.isBlacklisted(accounts[2]);
@@ -483,16 +481,16 @@ async function run_tests(newToken, accounts) {
     blacklisted = await token.isBlacklisted(accounts[2]);
     assert.isFalse(blacklisted);
 
-    let balance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(1900)));
+    const balance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BN(balance).eqn(1900));
   });
 
-  it("should change the minter and mint as well as fail to mint with the old minter", async function () {
+  it("should change the minter and mint as well as fail to mint with the old minter", async () => {
     let update = await token.removeMinter(minterAccount, {
       from: masterMinterAccount,
     });
-    assert.equal(update.logs[0].event, "MinterRemoved");
-    assert.equal(update.logs[0].args.oldMinter, minterAccount);
+    assert.strictEqual(update.logs[0].event, "MinterRemoved");
+    assert.strictEqual(update.logs[0].args.oldMinter, minterAccount);
     update = await setMinter(token, accounts[3], 10000, {
       from: masterMinterAccount,
     });
@@ -500,82 +498,82 @@ async function run_tests(newToken, accounts) {
 
     await expectRevert(token.mint(accounts[1], 200, { from: minterAccount }));
 
-    let isMinter = await token.isMinter(minterAccount);
-    assert.equal(isMinter, false);
-    let balance = await token.balanceOf(accounts[1]);
-    assert.equal(balance, 100);
+    const isMinter = await token.isMinter(minterAccount);
+    assert.strictEqual(isMinter, false);
+    const balance = await token.balanceOf(accounts[1]);
+    assert.isTrue(balance.eqn(100));
   });
 
-  it("should remove a minter even if the contract is paused", async function () {
+  it("should remove a minter even if the contract is paused", async () => {
     await token.configureMinter(accounts[3], 200, {
       from: masterMinterAccount,
     });
     let isAccountMinter = await token.isMinter(accounts[3]);
-    assert.equal(isAccountMinter, true);
+    assert.strictEqual(isAccountMinter, true);
     await token.pause({ from: pauserAccount });
     await token.removeMinter(accounts[3], { from: masterMinterAccount });
     isAccountMinter = await token.isMinter(accounts[3]);
-    assert.equal(isAccountMinter, false);
+    assert.strictEqual(isAccountMinter, false);
   });
 
-  it("should pause contract even when contract is already paused", async function () {
+  it("should pause contract even when contract is already paused", async () => {
     await token.pause({ from: pauserAccount });
     await token.pause({ from: pauserAccount });
-    let isPaused = await token.paused();
-    assert.equal(isPaused, true);
+    const isPaused = await token.paused();
+    assert.strictEqual(isPaused, true);
   });
 
-  it("should unpause contract even when contract is already unpaused", async function () {
+  it("should unpause contract even when contract is already unpaused", async () => {
     await token.unpause({ from: pauserAccount });
-    let isPaused = await token.paused();
-    assert.equal(isPaused, false);
+    const isPaused = await token.paused();
+    assert.strictEqual(isPaused, false);
   });
 
-  it("should fail to updateMinterAllowance from non-masterMinter", async function () {
-    let minterAllowanceBefore = await token.minterAllowance(minterAccount);
-    assert.equal(minterAllowanceBefore, 0);
+  it("should fail to updateMinterAllowance from non-masterMinter", async () => {
+    const minterAllowanceBefore = await token.minterAllowance(minterAccount);
+    assert.isTrue(minterAllowanceBefore.eqn(0));
 
     await expectRevert(
       token.configureMinter(minterAccount, 100, { from: tokenOwnerAccount })
     );
 
-    let minterAllowanceAfter = await token.minterAllowance(minterAccount);
-    assert.equal(minterAllowanceAfter, 0);
+    const minterAllowanceAfter = await token.minterAllowance(minterAccount);
+    assert.isTrue(minterAllowanceAfter.eqn(0));
   });
 
-  it("should have correct name", async function () {
-    let actual = await token.name.call();
-    assert.equal(actual, name);
+  it("should have correct name", async () => {
+    const actual = await token.name.call();
+    assert.strictEqual(actual, name);
   });
 
-  it("should have correct symbol", async function () {
-    let actual = await token.symbol.call();
-    assert.equal(actual, symbol);
+  it("should have correct symbol", async () => {
+    const actual = await token.symbol.call();
+    assert.strictEqual(actual, symbol);
   });
 
-  it("should have correct decimals", async function () {
-    let actual = await token.decimals.call();
-    assert.equal(actual, decimals);
+  it("should have correct decimals", async () => {
+    const actual = await token.decimals.call();
+    assert.isTrue(actual.eqn(decimals));
   });
 
-  it("should have correct currency", async function () {
-    let actual = await token.currency.call();
-    assert.equal(actual, currency);
+  it("should have correct currency", async () => {
+    const actual = await token.currency.call();
+    assert.strictEqual(actual, currency);
   });
 
-  it("should mint and burn tokens", async function () {
-    let burnerAddress = accounts[3];
-    let amount = 500;
+  it("should mint and burn tokens", async () => {
+    const burnerAddress = accounts[3];
+    const amount = 500;
     await setMinter(token, burnerAddress, amount);
-    let totalSupply = await token.totalSupply();
-    let minterBalance = await token.balanceOf(burnerAddress);
-    assert.isTrue(new BN(totalSupply).eq(new BN(0)));
-    assert.isTrue(new BN(minterBalance).eq(new BN(0)));
+    const totalSupply = await token.totalSupply();
+    const minterBalance = await token.balanceOf(burnerAddress);
+    assert.isTrue(new BN(totalSupply).eqn(0));
+    assert.isTrue(new BN(minterBalance).eqn(0));
 
     // mint tokens to burnerAddress
     await mint(token, burnerAddress, amount, minterAccount);
-    let totalSupply1 = await token.totalSupply();
-    let minterBalance1 = await token.balanceOf(burnerAddress);
+    const totalSupply1 = await token.totalSupply();
+    const minterBalance1 = await token.balanceOf(burnerAddress);
     assert.isTrue(
       new BN(totalSupply1).eq(new BN(totalSupply).add(new BN(amount)))
     );
@@ -585,159 +583,159 @@ async function run_tests(newToken, accounts) {
 
     // burn tokens
     await burn(token, amount, burnerAddress);
-    let totalSupply2 = await token.totalSupply();
+    const totalSupply2 = await token.totalSupply();
     assert.isTrue(
       new BN(totalSupply2).eq(new BN(totalSupply1).sub(new BN(amount)))
     );
 
     // check that minter's balance has been reduced
-    let minterBalance2 = await token.balanceOf(burnerAddress);
+    const minterBalance2 = await token.balanceOf(burnerAddress);
     assert.isTrue(
       new BN(minterBalance2).eq(new BN(minterBalance1).sub(new BN(amount)))
     );
   });
 
-  it("should try to burn tokens from a non-minter and fail", async function () {
-    let burnerAddress = accounts[3];
-    let amount = 1000;
+  it("should try to burn tokens from a non-minter and fail", async () => {
+    const burnerAddress = accounts[3];
+    const amount = 1000;
 
     await expectRevert(token.burn(amount, { from: burnerAddress }));
   });
 
-  it("should fail to burn from a blacklisted address", async function () {
-    let burnerAddress = accounts[3];
+  it("should fail to burn from a blacklisted address", async () => {
+    const burnerAddress = accounts[3];
     await setMinter(token, burnerAddress, 200);
     await mint(token, burnerAddress, 200, minterAccount);
     await blacklist(token, burnerAddress);
 
     await expectRevert(token.burn(100, { from: burnerAddress }));
-    let balance0 = await token.balanceOf(burnerAddress);
-    assert.equal(balance0, 200);
+    const balance0 = await token.balanceOf(burnerAddress);
+    assert.isTrue(balance0.eqn(200));
   });
 
-  it("should try to burn more tokens than balance and fail", async function () {
-    let burnerAddress = accounts[3];
-    let amount = 500;
+  it("should try to burn more tokens than balance and fail", async () => {
+    const burnerAddress = accounts[3];
+    const amount = 500;
     await setMinter(token, burnerAddress, 250);
     await mint(token, burnerAddress, 100, minterAccount);
 
     await expectRevert(token.burn(amount, { from: burnerAddress }));
   });
 
-  it("should upgrade and preserve data", async function () {
+  it("should upgrade and preserve data", async () => {
     await mint(token, accounts[2], 200, minterAccount);
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(initialBalance).eq(new BN(200)));
+    const initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BN(initialBalance).eqn(200));
 
-    var newRawToken = await UpgradedFiatToken.new();
-    var tokenConfig = await upgradeTo(proxy, newRawToken);
-    var newProxiedToken = tokenConfig.token;
-    var newToken = newProxiedToken;
+    const newRawToken = await UpgradedFiatToken.new();
+    const tokenConfig = await upgradeTo(proxy, newRawToken);
+    const newProxiedToken = tokenConfig.token;
+    const newToken = newProxiedToken;
 
-    let upgradedBalance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue(new BN(upgradedBalance).eq(new BN(200)));
+    const upgradedBalance = await newToken.balanceOf(accounts[2]);
+    assert.isTrue(new BN(upgradedBalance).eqn(200));
     await newToken.configureMinter(minterAccount, 500, {
       from: masterMinterAccount,
     });
     await newToken.mint(accounts[2], 200, { from: minterAccount });
-    let balance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(400)));
+    const balance = await newToken.balanceOf(accounts[2]);
+    assert.isTrue(new BN(balance).eqn(400));
   });
 
-  it("should updateRoleAddress for masterMinter", async function () {
-    let address1 = accounts[7];
-    let address2 = accounts[6];
+  it("should updateRoleAddress for masterMinter", async () => {
+    const address1 = accounts[7];
+    const address2 = accounts[6];
     await token.updateMasterMinter(address1, { from: tokenOwnerAccount });
-    let masterMinter1 = await token.masterMinter();
-    assert.equal(masterMinter1, address1);
+    const masterMinter1 = await token.masterMinter();
+    assert.strictEqual(masterMinter1, address1);
 
     await token.updateMasterMinter(address2, { from: tokenOwnerAccount });
-    let masterMinter2 = await token.masterMinter();
-    assert.equal(masterMinter2, address2);
+    const masterMinter2 = await token.masterMinter();
+    assert.strictEqual(masterMinter2, address2);
   });
 
-  it("should updateRoleAddress for blacklister", async function () {
-    let address1 = accounts[7];
-    let address2 = accounts[6];
+  it("should updateRoleAddress for blacklister", async () => {
+    const address1 = accounts[7];
+    const address2 = accounts[6];
     await token.updateBlacklister(address1, { from: tokenOwnerAccount });
-    let blacklister1 = await token.blacklister();
-    assert.equal(blacklister1, address1);
+    const blacklister1 = await token.blacklister();
+    assert.strictEqual(blacklister1, address1);
 
     await token.updateBlacklister(address2, { from: tokenOwnerAccount });
-    let blacklister2 = await token.blacklister();
-    assert.equal(blacklister2, address2);
+    const blacklister2 = await token.blacklister();
+    assert.strictEqual(blacklister2, address2);
   });
 
-  it("should updateRoleAddress for pauser", async function () {
-    let address1 = accounts[7];
-    let address2 = accounts[6];
+  it("should updateRoleAddress for pauser", async () => {
+    const address1 = accounts[7];
+    const address2 = accounts[6];
     await token.updatePauser(address1, { from: tokenOwnerAccount });
-    let pauser1 = await token.pauser();
-    assert.equal(pauser1, address1);
+    const pauser1 = await token.pauser();
+    assert.strictEqual(pauser1, address1);
 
     await token.updatePauser(address2, { from: tokenOwnerAccount });
-    let pauser2 = await token.pauser();
-    assert.equal(pauser2, address2);
+    const pauser2 = await token.pauser();
+    assert.strictEqual(pauser2, address2);
   });
 
-  it("should updateUpgraderAddress for upgrader", async function () {
+  it("should updateUpgraderAddress for upgrader", async () => {
     let upgrader = await getAdmin(proxy);
-    assert.equal(proxyOwnerAccount, upgrader);
-    let address1 = accounts[10];
-    let updated = await proxy.changeAdmin(address1, {
+    assert.strictEqual(proxyOwnerAccount, upgrader);
+    const address1 = accounts[10];
+    await proxy.changeAdmin(address1, {
       from: proxyOwnerAccount,
     });
     upgrader = await getAdmin(proxy);
-    assert.equal(upgrader, address1);
+    assert.strictEqual(upgrader, address1);
 
-    //Test upgrade with new upgrader account
+    // Test upgrade with new upgrader account
     await token.configureMinter(minterAccount, 1000, {
       from: masterMinterAccount,
     });
     await token.mint(accounts[2], 200, { from: minterAccount });
 
-    let initialBalance = await token.balanceOf(accounts[2]);
-    assert.isTrue(new BN(initialBalance).eq(new BN(200)));
+    const initialBalance = await token.balanceOf(accounts[2]);
+    assert.isTrue(new BN(initialBalance).eqn(200));
 
-    var newRawToken = await UpgradedFiatToken.new();
-    var tokenConfig = await upgradeTo(proxy, newRawToken, address1);
-    var newProxiedToken = tokenConfig.token;
-    var newToken = newProxiedToken;
+    const newRawToken = await UpgradedFiatToken.new();
+    const tokenConfig = await upgradeTo(proxy, newRawToken, address1);
+    const newProxiedToken = tokenConfig.token;
+    const newToken = newProxiedToken;
 
-    let upgradedBalance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue(new BN(upgradedBalance).eq(new BN(200)));
+    const upgradedBalance = await newToken.balanceOf(accounts[2]);
+    assert.isTrue(new BN(upgradedBalance).eqn(200));
     await newToken.configureMinter(minterAccount, 500, {
       from: masterMinterAccount,
     });
     await newToken.mint(accounts[2], 200, { from: minterAccount });
-    let balance = await newToken.balanceOf(accounts[2]);
-    assert.isTrue(new BN(balance).eq(new BN(400)));
+    const balance = await newToken.balanceOf(accounts[2]);
+    assert.isTrue(new BN(balance).eqn(400));
   });
 
-  it("should fail to updateUpgraderAddress for upgrader using non-upgrader account", async function () {
-    let address1 = accounts[7];
+  it("should fail to updateUpgraderAddress for upgrader using non-upgrader account", async () => {
+    const address1 = accounts[7];
     await expectRevert(
       proxy.changeAdmin(address1, { from: tokenOwnerAccount })
     );
-    let upgrader = await getAdmin(proxy);
+    const upgrader = await getAdmin(proxy);
     assert.notEqual(upgrader, address1);
   });
 
-  it("should updateRoleAddress for roleAddressChanger", async function () {
-    let address1 = accounts[7];
-    let address2 = accounts[6];
+  it("should updateRoleAddress for roleAddressChanger", async () => {
+    const address1 = accounts[7];
+    const address2 = accounts[6];
     await token.transferOwnership(address1, { from: tokenOwnerAccount });
-    let roleAddressChanger1 = await token.owner();
-    assert.equal(roleAddressChanger1, address1);
+    const roleAddressChanger1 = await token.owner();
+    assert.strictEqual(roleAddressChanger1, address1);
 
     await token.transferOwnership(address2, { from: address1 });
-    let roleAddressChanger2 = await token.owner();
-    assert.equal(roleAddressChanger2, address2);
+    const roleAddressChanger2 = await token.owner();
+    assert.strictEqual(roleAddressChanger2, address2);
   });
 
-  it("should fail to updateRoleAddress from a non-roleAddressChanger", async function () {
-    let nonRoleAddressChanger = accounts[2];
-    let address1 = accounts[7];
+  it("should fail to updateRoleAddress from a non-roleAddressChanger", async () => {
+    const nonRoleAddressChanger = accounts[2];
+    const address1 = accounts[7];
 
     await expectRevert(
       token.updateMasterMinter(address1, { from: nonRoleAddressChanger })
@@ -745,9 +743,9 @@ async function run_tests(newToken, accounts) {
   });
 }
 
-var testWrapper = require("./TestWrapper");
+const testWrapper = require("./TestWrapper");
 testWrapper.execute("FiatToken_LegacyTests", run_tests);
 
 module.exports = {
-  run_tests: run_tests,
+  run_tests,
 };

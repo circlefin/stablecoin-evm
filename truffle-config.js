@@ -1,10 +1,10 @@
 // INFURA Setup - see validate/README.validate.md for more info
-var HDWalletProvider = require("@truffle/hdwallet-provider");
-var mnemonic = "talisman";
-var fs = require("fs");
-var access_token = "none";
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+const mnemonic = "talisman";
+const fs = require("fs");
+let infuraKey = "none";
 try {
-  access_token = fs.readFileSync("./validate/apikey.infura", "utf8");
+  infuraKey = fs.readFileSync("./validate/apikey.infura", "utf8");
 } catch (err) {
   console.log(
     "No Infura access token detected. Unit tests will still work.  See ./validate/README.validate.md for more details."
@@ -31,10 +31,10 @@ module.exports = {
     },
     // INFURA Setup
     infura_mainnet: {
-      provider: function () {
+      provider() {
         return new HDWalletProvider(
           mnemonic,
-          "https://mainnet.infura.io/" + access_token
+          "https://mainnet.infura.io/v3/" + infuraKey
         );
       },
       network_id: 1,
@@ -46,7 +46,7 @@ module.exports = {
      * the reporter is set to 'Spec' by commenting/uncommenting the lines below.
      */
     reporter: "Spec",
-    //reporter: './verification/verification_reporter.js',
+    // reporter: './verification/verification_reporter.js',
   },
   plugins: ["solidity-coverage"],
 };

@@ -1,85 +1,87 @@
-var Pausable = artifacts.require("Pausable");
-var tokenUtils = require("./TokenTestUtils");
-var BigNumber = require("bignumber.js");
-var expectRevert = tokenUtils.expectRevert;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
+const assert = require("chai").assert;
+const {
+  expectRevert,
+  deployerAccount,
+  arbitraryAccount,
+  pauserAccount,
+} = require("./TokenTestUtils");
 
-contract("PausableTests", function (accounts) {
-  var pause;
-  beforeEach(async function checkBefore() {
-    pause = await Pausable.new();
-    await pause.updatePauser(pauserAccount);
+const Pausable = artifacts.require("Pausable");
+
+contract("PausableTests", (accounts) => {
+  let pausable;
+
+  beforeEach(async () => {
+    pausable = await Pausable.new();
+    await pausable.updatePauser(pauserAccount);
   });
 
-  it("constructor owner", async function () {
-    var actualOwner = await pause.owner.call();
-    assert.equal(deployerAccount, actualOwner, "wrong owner");
+  it("constructor owner", async () => {
+    const actualOwner = await pausable.owner.call();
+    assert.strictEqual(deployerAccount, actualOwner, "wrong owner");
   });
 
-  it("constructor pauser", async function () {
-    var actualOwner = await pause.pauser.call();
-    assert.equal(pauserAccount, actualOwner, "wrong pauser");
+  it("constructor pauser", async () => {
+    const actualOwner = await pausable.pauser.call();
+    assert.strictEqual(pauserAccount, actualOwner, "wrong pauser");
   });
 
-  it("paused after pausing", async function () {
+  it("paused after pausing", async () => {
     await checkUnPaused();
 
-    await pause.pause({ from: pauserAccount });
+    await pausable.pause({ from: pauserAccount });
     await checkPaused();
 
     // should stay paused even if we call it again
-    await pause.pause({ from: pauserAccount });
+    await pausable.pause({ from: pauserAccount });
     await checkPaused();
 
-    await pause.unpause({ from: pauserAccount });
+    await pausable.unpause({ from: pauserAccount });
     await checkUnPaused();
   });
 
-  it("update pauser", async function () {
+  it("update pauser", async () => {
     // pause from original pauser
-    await pause.pause({ from: pauserAccount });
+    await pausable.pause({ from: pauserAccount });
     await checkPaused("should have paused from original pauser account");
 
-    await pause.updatePauser(arbitraryAccount, { from: deployerAccount });
-    var newPauser = await pause.pauser.call();
-    assert.equal(arbitraryAccount, newPauser);
+    await pausable.updatePauser(arbitraryAccount, { from: deployerAccount });
+    const newPauser = await pausable.pauser.call();
+    assert.strictEqual(arbitraryAccount, newPauser);
     // double check we're still paused
     await checkPaused("should still be paused after changing pauser");
 
-    await pause.unpause({ from: arbitraryAccount });
+    await pausable.unpause({ from: arbitraryAccount });
     await checkUnPaused();
 
-    //original pauser shouldn't work anymore
-    await expectRevert(pause.pause({ from: pauserAccount }));
+    // original pauser shouldn't work anymore
+    await expectRevert(pausable.pause({ from: pauserAccount }));
   });
 
-  it("fail to update pauser from wrong account", async function () {
+  it("fail to update pauser from wrong account", async () => {
     await expectRevert(
-      pause.updatePauser(arbitraryAccount, { from: arbitraryAccount })
+      pausable.updatePauser(arbitraryAccount, { from: arbitraryAccount })
     );
   });
 
-  it("fail to pause from wrong account", async function () {
-    await expectRevert(pause.pause({ from: arbitraryAccount }));
+  it("fail to pause from wrong account", async () => {
+    await expectRevert(pausable.pause({ from: arbitraryAccount }));
   });
 
-  it("fail to unpause from wrong account", async function () {
-    await pause.pause({ from: pauserAccount });
+  it("fail to unpause from wrong account", async () => {
+    await pausable.pause({ from: pauserAccount });
     await checkPaused();
 
-    await expectRevert(pause.unpause({ from: arbitraryAccount }));
+    await expectRevert(pausable.unpause({ from: arbitraryAccount }));
   });
 
   async function checkPaused(msg) {
-    var paused = await pause.paused.call();
+    const paused = await pausable.paused.call();
     assert.isTrue(paused, msg);
   }
 
   async function checkUnPaused(msg) {
-    var paused = await pause.paused.call();
+    const paused = await pausable.paused.call();
     assert.isFalse(paused, msg);
   }
 });

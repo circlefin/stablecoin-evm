@@ -1,28 +1,23 @@
-var Transaction = require("ethereumjs-tx").Transaction;
+const { Transaction } = require("ethereumjs-tx");
 
-async function makeRawTransaction(
-  msgData,
-  msgSender,
-  hexPrivateKey,
-  contractAddress
-) {
-  var tx = new Transaction({
-    nonce: web3.utils.toHex(await web3.eth.getTransactionCount(msgSender)),
+async function makeRawTransaction(data, from, hexPrivateKey, contractAddress) {
+  const tx = new Transaction({
+    nonce: web3.utils.toHex(await web3.eth.getTransactionCount(from)),
     gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
     gasLimit: 1000000,
     to: contractAddress,
     value: 0,
-    data: msgData,
+    data,
   });
-  var privateKey = Buffer.from(hexPrivateKey, "hex");
+  const privateKey = Buffer.from(hexPrivateKey, "hex");
   tx.sign(privateKey);
-  var raw = "0x" + tx.serialize().toString("hex");
+  const raw = "0x" + tx.serialize().toString("hex");
   return raw;
 }
 
 function sendRawTransaction(raw) {
-  return new Promise(function (resolve, reject) {
-    web3.eth.sendSignedTransaction(raw, function (err, transactionHash) {
+  return new Promise((resolve, reject) => {
+    web3.eth.sendSignedTransaction(raw, (err, transactionHash) => {
       if (err !== null) return reject(err);
       resolve(transactionHash);
     });
@@ -80,14 +75,14 @@ function msgData3(methodName, address1, value1, address2, value2) {
 }
 
 module.exports = {
-  makeRawTransaction: makeRawTransaction,
-  sendRawTransaction: sendRawTransaction,
-  functionSignature: functionSignature,
-  encodeAddress: encodeAddress,
-  encodeUint: encodeUint,
-  msgData0: msgData0,
-  msgData: msgData,
-  msgData1: msgData1,
-  msgData2: msgData2,
-  msgData3: msgData3,
+  makeRawTransaction,
+  sendRawTransaction,
+  functionSignature,
+  encodeAddress,
+  encodeUint,
+  msgData0,
+  msgData,
+  msgData1,
+  msgData2,
+  msgData3,
 };

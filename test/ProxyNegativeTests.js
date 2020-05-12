@@ -1,69 +1,62 @@
-var BN = require("bn.js");
-var tokenUtils = require("./TokenTestUtils");
-var BigNumber = require("bignumber.js");
+const assert = require("chai").assert;
+const BN = require("bn.js");
+const {
+  bigZero,
+  expectRevert,
+  checkVariables,
+  name,
+  symbol,
+  currency,
+  decimals,
+  nullAccount,
+  arbitraryAccount,
+  tokenOwnerAccount,
+  blacklisterAccount,
+  masterMinterAccount,
+  minterAccount,
+  pauserAccount,
+  proxyOwnerAccount,
+  initializeTokenWithProxy,
+  encodeCall,
+  FiatToken,
+  UpgradedFiatToken,
+  UpgradedFiatTokenNewFields,
+} = require("./TokenTestUtils");
 
-var bigZero = tokenUtils.bigZero;
-var bigHundred = tokenUtils.bigHundred;
-var mint = tokenUtils.mint;
-var expectRevert = tokenUtils.expectRevert;
-var checkVariables = tokenUtils.checkVariables;
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals;
-var nullAccount = tokenUtils.nullAccount;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var upgraderAccount = tokenUtils.upgraderAccount;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var minterAccount = tokenUtils.minterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
-var upgradeTo = tokenUtils.upgradeTo;
-var encodeCall = tokenUtils.encodeCall;
-var validateTransferEvent = tokenUtils.validateTransferEvent;
-var FiatToken = tokenUtils.FiatToken;
-var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
-var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
-
-var amount = 100;
+const amount = 100;
 
 async function run_tests(newToken, accounts) {
-  beforeEach("Make fresh token contract", async function () {
+  let rawToken, proxy, token;
+
+  beforeEach(async () => {
     rawToken = await newToken();
-    var tokenConfig = await initializeTokenWithProxy(rawToken);
-    proxy = tokenConfig.proxy;
-    token = tokenConfig.token;
-    assert.equal(proxy.address, token.address);
+    const tokenConfig = await initializeTokenWithProxy(rawToken);
+    ({ proxy, token } = tokenConfig);
+    assert.strictEqual(proxy.address, token.address);
   });
 
-  it("nut002 should fail to switch adminAccount with non-adminAccount as caller", async function () {
+  it("nut002 should fail to switch adminAccount with non-adminAccount as caller", async () => {
     await expectRevert(
       proxy.changeAdmin(masterMinterAccount, { from: masterMinterAccount })
     );
-    assert.equal(
+    assert.strictEqual(
       await proxy.admin({ from: proxyOwnerAccount }),
       proxyOwnerAccount
     );
-    customVars = [];
+    const customVars = [];
     await checkVariables([token], [customVars]);
   });
 
-  it("nut003 should fail to upgradeTo to null contract address", async function () {
+  it("nut003 should fail to upgradeTo to null contract address", async () => {
     await expectRevert(
       proxy.upgradeTo(nullAccount, { from: proxyOwnerAccount })
     );
 
-    customVars = [];
+    const customVars = [];
     await checkVariables([token], [customVars]);
   });
 
-  it("nut004 should fail to upgradeToAndCall to null contract address", async function () {
-    var upgradedToken = await UpgradedFiatToken.new();
+  it("nut004 should fail to upgradeToAndCall to null contract address", async () => {
     const initializeData = encodeCall("pauser", [], []);
     await expectRevert(
       proxy.upgradeToAndCall(nullAccount, initializeData, {
@@ -71,11 +64,11 @@ async function run_tests(newToken, accounts) {
       })
     );
 
-    customVars = [];
+    const customVars = [];
     await checkVariables([token], [customVars]);
   });
 
-  it("nut005 should fail to initialize contract twice", async function () {
+  it("nut005 should fail to initialize contract twice", async () => {
     await expectRevert(
       token.initialize(
         name,
@@ -88,29 +81,30 @@ async function run_tests(newToken, accounts) {
         tokenOwnerAccount
       )
     );
-    customVars = [];
+
+    const customVars = [];
     await checkVariables([token], [customVars]);
   });
 
-  it("nut006 should fail to call contract function with adminAccount", async function () {
+  it("nut006 should fail to call contract function with adminAccount", async () => {
     await expectRevert(
       token.allowance(minterAccount, arbitraryAccount, {
         from: proxyOwnerAccount,
       })
     );
 
-    customVars = [];
+    const customVars = [];
     await checkVariables([token], [customVars]);
   });
 
-  it("nut007 should fail to call proxy function with non-adminAccount", async function () {
+  it("nut007 should fail to call proxy function with non-adminAccount", async () => {
     await expectRevert(proxy.admin({ from: masterMinterAccount }));
 
-    customVars = [];
+    const customVars = [];
     await checkVariables([token], [customVars]);
   });
 
-  it("nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken", async function () {
+  it("nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken", async () => {
     await rawToken.initialize(
       name,
       symbol,
@@ -121,33 +115,33 @@ async function run_tests(newToken, accounts) {
       blacklisterAccount,
       tokenOwnerAccount
     );
-    assert.equal(await rawToken.pauser(), pauserAccount);
+    assert.strictEqual(await rawToken.pauser(), pauserAccount);
     await rawToken.updatePauser(masterMinterAccount, {
       from: tokenOwnerAccount,
     });
-    assert.equal(await rawToken.pauser(), masterMinterAccount);
+    assert.strictEqual(await rawToken.pauser(), masterMinterAccount);
 
-    customVars = [];
+    const customVars = [];
     await checkVariables([token], [customVars]);
   });
 
-  it("nut009 should fail to call upgradeTo with non-adminAccount", async function () {
-    var upgradedToken = await UpgradedFiatToken.new();
+  it("nut009 should fail to call upgradeTo with non-adminAccount", async () => {
+    const upgradedToken = await UpgradedFiatToken.new();
     await expectRevert(
       proxy.upgradeTo(upgradedToken.address, { from: masterMinterAccount })
     );
-    var finalToken = await FiatToken.at(proxy.address);
-    var implementation = await proxy.implementation({
+    const finalToken = await FiatToken.at(proxy.address);
+    const implementation = await proxy.implementation({
       from: proxyOwnerAccount,
     });
     finalToken.proxiedTokenAddress = implementation;
 
-    customVars = [];
+    const customVars = [];
     await checkVariables([finalToken], [customVars]);
   });
 
-  it("nut010 should fail to call updateToAndCall with non-adminAccount", async function () {
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+  it("nut010 should fail to call updateToAndCall with non-adminAccount", async () => {
+    const upgradedToken = await UpgradedFiatTokenNewFields.new();
     const initializeData = encodeCall(
       "initialize",
       ["bool", "address", "uint256"],
@@ -158,18 +152,18 @@ async function run_tests(newToken, accounts) {
         from: masterMinterAccount,
       })
     );
-    var finalToken = await FiatToken.at(proxy.address);
-    var implementation = await proxy.implementation({
+    const finalToken = await FiatToken.at(proxy.address);
+    const implementation = await proxy.implementation({
       from: proxyOwnerAccount,
     });
     finalToken.proxiedTokenAddress = implementation;
 
-    customVars = [];
+    const customVars = [];
     await checkVariables([finalToken], [customVars]);
   });
 
-  it("nut011 should fail to upgradeToAndCall with initialize (already set variables)", async function () {
-    let mintAmount = 50;
+  it("nut011 should fail to upgradeToAndCall with initialize (already set variables)", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -177,8 +171,8 @@ async function run_tests(newToken, accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
-    var data = encodeCall(
+    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const data = encodeCall(
       "initialize",
       [
         "string",
@@ -213,7 +207,7 @@ async function run_tests(newToken, accounts) {
       })
     );
 
-    customVars = [
+    const customVars = [
       {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - mintAmount),
@@ -230,9 +224,9 @@ async function run_tests(newToken, accounts) {
   });
 }
 
-var testWrapper = require("./TestWrapper");
+const testWrapper = require("./TestWrapper");
 testWrapper.execute("FiatToken_ProxyNegativeTests", run_tests);
 
 module.exports = {
-  run_tests: run_tests,
+  run_tests,
 };

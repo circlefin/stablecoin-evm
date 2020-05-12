@@ -1,20 +1,22 @@
-var FiatTokenV1 = artifacts.require("./FiatTokenV1.sol");
-var FiatTokenProxy = artifacts.require("./FiatTokenProxy.sol");
+const FiatTokenV1 = artifacts.require("./FiatTokenV1.sol");
+const FiatTokenProxy = artifacts.require("./FiatTokenProxy.sol");
 
 // Any address will do, preferably one we generated
-var throwawayAddress = "0x64e078a8aa15a41b85890265648e965de686bae6";
+const throwawayAddress = "0x64e078a8aa15a41b85890265648e965de686bae6";
 
 module.exports = function (deployer, network) {
-  if (["development", "coverage", "test"].includes(network)) {
-    // Change these to the cold storage addresses provided by ops
-    // these are the deterministic addresses from ganache, so the private keys are well known
-    // and match the values we use in the tests
-    var admin = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598";
-    var masterMinter = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9";
-    var pauser = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E";
-    var blacklister = "0xd03ea8624C8C5987235048901fB614fDcA89b117";
-    var owner = "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d";
+  if (network === "mainnet") {
+    throw new Error("Please update 2_deploy_usdc.js and remove this line.");
   }
+
+  // Change these to the cold storage addresses provided by ops
+  // these are the deterministic addresses from ganache, so the private keys are well known
+  // and match the values we use in the tests
+  const admin = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598";
+  const masterMinter = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9";
+  const pauser = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E";
+  const blacklister = "0xd03ea8624C8C5987235048901fB614fDcA89b117";
+  const owner = "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d";
 
   console.log("deploying impl");
 

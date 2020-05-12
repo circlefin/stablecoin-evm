@@ -1,52 +1,42 @@
-var BN = require("bn.js");
-var tokenUtils = require("./TokenTestUtils");
-var BigNumber = require("bignumber.js");
+const assert = require("chai").assert;
+const BN = require("bn.js");
+const {
+  checkVariables,
+  expectRevert,
+  nullAccount,
+  arbitraryAccount,
+  arbitraryAccount2,
+  tokenOwnerAccount,
+  blacklisterAccount,
+  masterMinterAccount,
+  minterAccount,
+  pauserAccount,
+  initializeTokenWithProxy,
+  customInitializeTokenWithProxy,
+  upgradeTo,
+  UpgradedFiatToken,
+} = require("./TokenTestUtils");
 
-var bigZero = tokenUtils.bigZero;
-var bigHundred = tokenUtils.bigHundred;
-var mint = tokenUtils.mint;
-var checkVariables = tokenUtils.checkVariables;
-var expectRevert = tokenUtils.expectRevert;
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals;
-var nullAccount = tokenUtils.nullAccount;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var minterAccount = tokenUtils.minterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
-var customInitializeTokenWithProxy = tokenUtils.customInitializeTokenWithProxy;
-var upgradeTo = tokenUtils.upgradeTo;
-var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
-var FiatToken = tokenUtils.FiatToken;
-
-var amount = 100;
+const amount = 100;
 
 async function run_tests(newToken, accounts) {
-  beforeEach("Make fresh token contract", async function () {
-    var rawToken = await newToken();
-    var tokenConfig = await initializeTokenWithProxy(rawToken);
-    proxy = tokenConfig.proxy;
-    token = tokenConfig.token;
-    assert.equal(proxy.address, token.address);
+  let proxy, token;
+
+  beforeEach(async () => {
+    const rawToken = await newToken();
+    const tokenConfig = await initializeTokenWithProxy(rawToken);
+    ({ proxy, token } = tokenConfig);
+    assert.strictEqual(proxy.address, token.address);
   });
 
   // Mint
 
-  it("nt001 should fail to mint when paused", async function () {
+  it("nt001 should fail to mint when paused", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
     await token.pause({ from: pauserAccount });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -60,20 +50,20 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt002 should fail to mint when msg.sender is not a minter", async function () {
-    //Note: minterAccount has not yet been configured as a minter
+  it("nt002 should fail to mint when msg.sender is not a minter", async () => {
+    // Note: minterAccount has not yet been configured as a minter
     await expectRevert(
       token.mint(arbitraryAccount, 50, { from: minterAccount })
     );
     await checkVariables([token], [[]]);
   });
 
-  it("nt003 should fail to mint when msg.sender is blacklisted", async function () {
+  it("nt003 should fail to mint when msg.sender is blacklisted", async () => {
     await token.blacklist(minterAccount, { from: blacklisterAccount });
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -87,12 +77,12 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt004 should fail to mint when recipient is blacklisted", async function () {
+  it("nt004 should fail to mint when recipient is blacklisted", async () => {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -109,11 +99,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt005 should fail to mint when allowance of minter is less than amount", async function () {
+  it("nt005 should fail to mint when allowance of minter is less than amount", async () => {
     await token.configureMinter(minterAccount, amount - 1, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -126,11 +116,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt006 should fail to mint to 0x0 address", async function () {
+  it("nt006 should fail to mint to 0x0 address", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -145,9 +135,9 @@ async function run_tests(newToken, accounts) {
 
   // Approve
 
-  it("nt008 should fail to approve when spender is blacklisted", async function () {
+  it("nt008 should fail to approve when spender is blacklisted", async () => {
     await token.blacklist(minterAccount, { from: blacklisterAccount });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
     ];
     await expectRevert(
@@ -156,9 +146,9 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt009 should fail to approve when msg.sender is blacklisted", async function () {
+  it("nt009 should fail to approve when msg.sender is blacklisted", async () => {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    var customVars = [
+    const customVars = [
       {
         variable: "isAccountBlacklisted.arbitraryAccount",
         expectedValue: true,
@@ -170,9 +160,9 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt010 should fail to approve when contract is paused", async function () {
+  it("nt010 should fail to approve when contract is paused", async () => {
     await token.pause({ from: pauserAccount });
-    var customVars = [{ variable: "paused", expectedValue: true }];
+    const customVars = [{ variable: "paused", expectedValue: true }];
     await expectRevert(
       token.approve(minterAccount, 100, { from: arbitraryAccount })
     );
@@ -181,11 +171,11 @@ async function run_tests(newToken, accounts) {
 
   // TransferFrom
 
-  it("nt012 should fail to transferFrom to 0x0 address", async function () {
+  it("nt012 should fail to transferFrom to 0x0 address", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -220,11 +210,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt013 should fail to transferFrom an amount greater than balance", async function () {
+  it("nt013 should fail to transferFrom an amount greater than balance", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -259,11 +249,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt014 should fail to transferFrom to blacklisted recipient", async function () {
+  it("nt014 should fail to transferFrom to blacklisted recipient", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -303,11 +293,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt015 should fail to transferFrom from blacklisted msg.sender", async function () {
+  it("nt015 should fail to transferFrom from blacklisted msg.sender", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -347,11 +337,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt016 should fail to transferFrom when from is blacklisted", async function () {
+  it("nt016 should fail to transferFrom when from is blacklisted", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -391,11 +381,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt017 should fail to transferFrom an amount greater than allowed for msg.sender", async function () {
+  it("nt017 should fail to transferFrom an amount greater than allowed for msg.sender", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -430,11 +420,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt018 should fail to transferFrom when paused", async function () {
+  it("nt018 should fail to transferFrom when paused", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -473,11 +463,11 @@ async function run_tests(newToken, accounts) {
 
   // Transfer
 
-  it("nt020 should fail to transfer to 0x0 address", async function () {
+  it("nt020 should fail to transfer to 0x0 address", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -505,11 +495,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt021 should fail to transfer an amount greater than balance", async function () {
+  it("nt021 should fail to transfer an amount greater than balance", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -519,7 +509,7 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
 
     await token.mint(arbitraryAccount, 50, { from: minterAccount });
-    var customVars = [
+    customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -537,11 +527,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt022 should fail to transfer to blacklisted recipient", async function () {
+  it("nt022 should fail to transfer to blacklisted recipient", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -574,11 +564,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt023 should fail to transfer when sender is blacklisted", async function () {
+  it("nt023 should fail to transfer when sender is blacklisted", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -611,11 +601,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt024 should fail to transfer when paused", async function () {
+  it("nt024 should fail to transfer when paused", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -647,17 +637,17 @@ async function run_tests(newToken, accounts) {
 
   // ConfigureMinter
 
-  it("nt026 should fail to configureMinter when sender is not masterMinter", async function () {
-    assert.isFalse(arbitraryAccount == masterMinterAccount);
+  it("nt026 should fail to configureMinter when sender is not masterMinter", async () => {
+    assert.notEqual(arbitraryAccount, masterMinterAccount);
     await expectRevert(
       token.configureMinter(minterAccount, amount, { from: arbitraryAccount })
     );
     await checkVariables([token], [[]]);
   });
 
-  it("nt028 should fail to configureMinter when paused", async function () {
+  it("nt028 should fail to configureMinter when paused", async () => {
     await token.pause({ from: pauserAccount });
-    customVars = [{ variable: "paused", expectedValue: true }];
+    const customVars = [{ variable: "paused", expectedValue: true }];
     await expectRevert(
       token.configureMinter(minterAccount, amount, {
         from: masterMinterAccount,
@@ -668,11 +658,11 @@ async function run_tests(newToken, accounts) {
 
   // RemoveMinter
 
-  it("nt029 should fail to removeMinter when sender is not masterMinter", async function () {
+  it("nt029 should fail to removeMinter when sender is not masterMinter", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -687,11 +677,11 @@ async function run_tests(newToken, accounts) {
 
   // Burn
 
-  it("nt031 should fail to burn when balance is less than amount", async function () {
+  it("nt031 should fail to burn when balance is less than amount", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -702,12 +692,12 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt032 should fail to burn when amount is -1", async function () {
+  it("nt032 should fail to burn when amount is -1", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
     await token.mint(minterAccount, amount, { from: minterAccount });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -723,11 +713,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt033 should fail to burn when sender is blacklisted", async function () {
+  it("nt033 should fail to burn when sender is blacklisted", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -752,11 +742,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt034 should fail to burn when paused", async function () {
+  it("nt034 should fail to burn when paused", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -781,11 +771,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt035 should fail to burn when sender is not minter", async function () {
+  it("nt035 should fail to burn when sender is not minter", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -808,11 +798,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt036 should fail to burn after removeMinter", async function () {
+  it("nt036 should fail to burn after removeMinter", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -849,21 +839,21 @@ async function run_tests(newToken, accounts) {
 
   // Update functions
 
-  it("nt050 should fail to updatePauser when sender is not owner", async function () {
+  it("nt050 should fail to updatePauser when sender is not owner", async () => {
     await expectRevert(
       token.updatePauser(arbitraryAccount, { from: pauserAccount })
     );
     await checkVariables([token], [[]]);
   });
 
-  it("nt049 should fail to updateMasterMinter when sender is not owner", async function () {
+  it("nt049 should fail to updateMasterMinter when sender is not owner", async () => {
     await expectRevert(
       token.updateMasterMinter(arbitraryAccount, { from: pauserAccount })
     );
     await checkVariables([token], [[]]);
   });
 
-  it("nt048 should fail to updateBlacklister when sender is not owner", async function () {
+  it("nt048 should fail to updateBlacklister when sender is not owner", async () => {
     await expectRevert(
       token.updateBlacklister(arbitraryAccount, { from: pauserAccount })
     );
@@ -872,30 +862,30 @@ async function run_tests(newToken, accounts) {
 
   // Pause and Unpause
 
-  it("nt040 should fail to pause when sender is not pauser", async function () {
+  it("nt040 should fail to pause when sender is not pauser", async () => {
     await expectRevert(token.pause({ from: arbitraryAccount }));
     await checkVariables([token], [[]]);
   });
 
-  it("nt041 should fail to unpause when sender is not pauser", async function () {
+  it("nt041 should fail to unpause when sender is not pauser", async () => {
     await token.pause({ from: pauserAccount });
-    customVars = [{ variable: "paused", expectedValue: true }];
+    const customVars = [{ variable: "paused", expectedValue: true }];
     await expectRevert(token.unpause({ from: arbitraryAccount }));
     await checkVariables([token], [customVars]);
   });
 
   // Blacklist and Unblacklist
 
-  it("nt042 should fail to blacklist when sender is not blacklister", async function () {
+  it("nt042 should fail to blacklist when sender is not blacklister", async () => {
     await expectRevert(
       token.blacklist(tokenOwnerAccount, { from: arbitraryAccount })
     );
     await checkVariables([token], [[]]);
   });
 
-  it("nt043 should fail to unblacklist when sender is not blacklister", async function () {
+  it("nt043 should fail to unblacklist when sender is not blacklister", async () => {
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    customVars = [
+    const customVars = [
       {
         variable: "isAccountBlacklisted.arbitraryAccount",
         expectedValue: true,
@@ -909,14 +899,14 @@ async function run_tests(newToken, accounts) {
 
   // Upgrade
 
-  it("nt054 should fail to transferOwnership when sender is not owner", async function () {
+  it("nt054 should fail to transferOwnership when sender is not owner", async () => {
     // Create upgraded token
-    var newRawToken = await UpgradedFiatToken.new();
-    var tokenConfig = await upgradeTo(proxy, newRawToken);
-    var newProxiedToken = tokenConfig.token;
-    var newToken = newProxiedToken;
+    const newRawToken = await UpgradedFiatToken.new();
+    const tokenConfig = await upgradeTo(proxy, newRawToken);
+    const newProxiedToken = tokenConfig.token;
+    const newToken = newProxiedToken;
 
-    var newToken_result = [
+    const newTokenResult = [
       { variable: "proxiedTokenAddress", expectedValue: newRawToken.address },
     ];
 
@@ -924,16 +914,16 @@ async function run_tests(newToken, accounts) {
     await expectRevert(
       newToken.transferOwnership(arbitraryAccount, { from: arbitraryAccount2 })
     );
-    await checkVariables([newToken], [newToken_result]);
+    await checkVariables([newToken], [newTokenResult]);
   });
 
-  it("nt055 should fail to mint when amount = 0", async function () {
+  it("nt055 should fail to mint when amount = 0", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
     await expectRevert(token.mint(pauserAccount, 0, { from: minterAccount }));
 
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -943,13 +933,13 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt056 should fail to burn when amount = 0", async function () {
+  it("nt056 should fail to burn when amount = 0", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
     await token.mint(minterAccount, amount, { from: minterAccount });
     await expectRevert(token.burn(0, { from: minterAccount }));
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balances.minterAccount",
@@ -960,32 +950,32 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nt064 transferOwnership should fail on 0x0", async function () {
+  it("nt064 transferOwnership should fail on 0x0", async () => {
     await expectRevert(
       token.transferOwnership(nullAccount, { from: tokenOwnerAccount })
     );
   });
 
-  it("nt057 updateMasterMinter should fail on 0x0", async function () {
+  it("nt057 updateMasterMinter should fail on 0x0", async () => {
     await expectRevert(
       token.updateMasterMinter(nullAccount, { from: tokenOwnerAccount })
     );
   });
 
-  it("nt058 updatePauser should fail on 0x0", async function () {
+  it("nt058 updatePauser should fail on 0x0", async () => {
     await expectRevert(
       token.updatePauser(nullAccount, { from: tokenOwnerAccount })
     );
   });
 
-  it("nt059 updateBlacklister should fail on 0x0", async function () {
+  it("nt059 updateBlacklister should fail on 0x0", async () => {
     await expectRevert(
       token.updateBlacklister(nullAccount, { from: tokenOwnerAccount })
     );
   });
 
-  it("nt060 initialize should fail when _masterMinter is 0x0", async function () {
-    var rawToken = await newToken();
+  it("nt060 initialize should fail when _masterMinter is 0x0", async () => {
+    const rawToken = await newToken();
     await expectRevert(
       customInitializeTokenWithProxy(
         rawToken,
@@ -997,8 +987,8 @@ async function run_tests(newToken, accounts) {
     );
   });
 
-  it("nt061 initialize should fail when _pauser is 0x0", async function () {
-    var rawToken = await newToken();
+  it("nt061 initialize should fail when _pauser is 0x0", async () => {
+    const rawToken = await newToken();
     await expectRevert(
       customInitializeTokenWithProxy(
         rawToken,
@@ -1010,8 +1000,8 @@ async function run_tests(newToken, accounts) {
     );
   });
 
-  it("nt062 initialize should fail when _blacklister is 0x0", async function () {
-    var rawToken = await newToken();
+  it("nt062 initialize should fail when _blacklister is 0x0", async () => {
+    const rawToken = await newToken();
     await expectRevert(
       customInitializeTokenWithProxy(
         rawToken,
@@ -1023,8 +1013,8 @@ async function run_tests(newToken, accounts) {
     );
   });
 
-  it("nt063 initialize should fail when _owner is 0x0", async function () {
-    var rawToken = await newToken();
+  it("nt063 initialize should fail when _owner is 0x0", async () => {
+    const rawToken = await newToken();
     await expectRevert(
       customInitializeTokenWithProxy(
         rawToken,
@@ -1037,9 +1027,9 @@ async function run_tests(newToken, accounts) {
   });
 }
 
-var testWrapper = require("./TestWrapper");
+const testWrapper = require("./TestWrapper");
 testWrapper.execute("FiatToken_NegativeTests", run_tests);
 
 module.exports = {
-  run_tests: run_tests,
+  run_tests,
 };

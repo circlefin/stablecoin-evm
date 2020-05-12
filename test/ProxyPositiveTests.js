@@ -1,56 +1,47 @@
-var tokenUtils = require("./TokenTestUtils");
-var BN = require("bn.js");
+const assert = require("chai").assert;
+const BN = require("bn.js");
+const {
+  bigZero,
+  checkVariables,
+  name,
+  symbol,
+  currency,
+  decimals,
+  arbitraryAccount,
+  upgraderAccount,
+  tokenOwnerAccount,
+  blacklisterAccount,
+  masterMinterAccount,
+  masterMinterAccountPrivateKey,
+  minterAccount,
+  pauserAccount,
+  proxyOwnerAccount,
+  initializeTokenWithProxy,
+  upgradeTo,
+  encodeCall,
+  validateTransferEvent,
+  FiatTokenProxy,
+  UpgradedFiatToken,
+  UpgradedFiatTokenNewFields,
+  UpgradedFiatTokenNewFieldsNewLogic,
+  getAdmin,
+} = require("./TokenTestUtils");
+const { makeRawTransaction, sendRawTransaction } = require("./ABIUtils");
 
-var bigZero = tokenUtils.bigZero;
-var bigHundred = tokenUtils.bigHundred;
-var mint = tokenUtils.mint;
-var checkVariables = tokenUtils.checkVariables;
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var upgraderAccount = tokenUtils.upgraderAccount;
-var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
-var proxyOwnerAccountPrivateKey = tokenUtils.proxyOwnerAccountPrivateKey;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var masterMinterAccountPrivateKey = tokenUtils.masterMinterAccountPrivateKey;
-var minterAccount = tokenUtils.minterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var proxyOwnerAccount = tokenUtils.proxyOwnerAccount;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
-var upgradeTo = tokenUtils.upgradeTo;
-var encodeCall = tokenUtils.encodeCall;
-var validateTransferEvent = tokenUtils.validateTransferEvent;
-var FiatToken = tokenUtils.FiatToken;
-var FiatTokenProxy = tokenUtils.FiatTokenProxy;
-var UpgradedFiatToken = tokenUtils.UpgradedFiatToken;
-var UpgradedFiatTokenNewFields = tokenUtils.UpgradedFiatTokenNewFields;
-var UpgradedFiatTokenNewFieldsNewLogic =
-  tokenUtils.UpgradedFiatTokenNewFieldsNewLogic;
-var getAdmin = tokenUtils.getAdmin;
-
-var abiUtils = require("./ABIUtils");
-var makeRawTransaction = abiUtils.makeRawTransaction;
-var sendRawTransaction = abiUtils.sendRawTransaction;
-
-var amount = 100;
+const amount = 100;
 
 async function run_tests(newToken, accounts) {
-  beforeEach("Make fresh token contract", async function () {
+  let rawToken, proxy, token;
+
+  beforeEach(async () => {
     rawToken = await newToken();
-    var tokenConfig = await initializeTokenWithProxy(rawToken);
-    proxy = tokenConfig.proxy;
-    token = tokenConfig.token;
-    assert.equal(proxy.address, token.address);
+    const tokenConfig = await initializeTokenWithProxy(rawToken);
+    ({ proxy, token } = tokenConfig);
+    assert.strictEqual(proxy.address, token.address);
   });
 
-  it("upt001 should upgradeTo new contract and preserve data field values", async function () {
-    let mintAmount = 50;
+  it("upt001 should upgradeTo new contract and preserve data field values", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -58,11 +49,15 @@ async function run_tests(newToken, accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    var upgradedToken = await UpgradedFiatToken.new();
-    var tokenConfig = await upgradeTo(proxy, upgradedToken, proxyOwnerAccount);
-    var newToken = tokenConfig.token;
+    const upgradedToken = await UpgradedFiatToken.new();
+    const tokenConfig = await upgradeTo(
+      proxy,
+      upgradedToken,
+      proxyOwnerAccount
+    );
+    const newToken = tokenConfig.token;
 
-    customVars = [
+    const customVars = [
       {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - mintAmount),
@@ -76,8 +71,8 @@ async function run_tests(newToken, accounts) {
     await checkVariables([newToken], [customVars]);
   });
 
-  it("upt002 should upgradeToandCall to contract with new data fields set on initVX and ensure new fields are correct and old data is preserved", async function () {
-    let mintAmount = 50;
+  it("upt002 should upgradeToandCall to contract with new data fields set on initVX and ensure new fields are correct and old data is preserved", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -85,7 +80,7 @@ async function run_tests(newToken, accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await UpgradedFiatTokenNewFields.new();
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -94,15 +89,15 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, {
       from: proxyOwnerAccount,
     });
-    newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
-    assert.equal(newProxiedToken.address, proxy.address);
+    const newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
+    assert.strictEqual(newProxiedToken.address, proxy.address);
     assert.notEqual(newProxiedToken.address, upgradedToken.address);
 
-    assert.equal(await newProxiedToken.newBool(), true);
-    assert.equal(await newProxiedToken.newAddress(), pauserAccount);
-    assert.equal(new BN(12).eq(await newProxiedToken.newUint()), true);
+    assert.strictEqual(await newProxiedToken.newBool(), true);
+    assert.strictEqual(await newProxiedToken.newAddress(), pauserAccount);
+    assert.strictEqual(new BN(12).eq(await newProxiedToken.newUint()), true);
 
-    customVars = [
+    const customVars = [
       {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - mintAmount),
@@ -116,8 +111,8 @@ async function run_tests(newToken, accounts) {
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it("upt003 should upgradeToAndCall to contract with new data fields set on initVX and new logic and ensure old data preserved,new logic works, and new fields correct", async function () {
-    let mintAmount = 50;
+  it("upt003 should upgradeToAndCall to contract with new data fields set on initVX and new logic and ensure old data preserved,new logic works, and new fields correct", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -125,7 +120,7 @@ async function run_tests(newToken, accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    var upgradedToken = await UpgradedFiatTokenNewFieldsNewLogic.new();
+    const upgradedToken = await UpgradedFiatTokenNewFieldsNewLogic.new();
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -134,20 +129,20 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, {
       from: proxyOwnerAccount,
     });
-    newProxiedToken = await UpgradedFiatTokenNewFieldsNewLogic.at(
+    const newProxiedToken = await UpgradedFiatTokenNewFieldsNewLogic.at(
       proxy.address
     );
-    assert.equal(newProxiedToken.address, proxy.address);
+    assert.strictEqual(newProxiedToken.address, proxy.address);
     assert.notEqual(newProxiedToken.address, upgradedToken.address);
 
-    assert.equal(await newProxiedToken.newBool(), true);
-    assert.equal(await newProxiedToken.newAddress(), pauserAccount);
-    assert.equal(new BN(12).eq(await newProxiedToken.newUint()), true);
+    assert.strictEqual(await newProxiedToken.newBool(), true);
+    assert.strictEqual(await newProxiedToken.newAddress(), pauserAccount);
+    assert.strictEqual(new BN(12).eq(await newProxiedToken.newUint()), true);
 
     await newProxiedToken.setNewAddress(masterMinterAccount);
-    assert.equal(await newProxiedToken.newAddress(), masterMinterAccount);
+    assert.strictEqual(await newProxiedToken.newAddress(), masterMinterAccount);
 
-    customVars = [
+    const customVars = [
       {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - mintAmount),
@@ -164,14 +159,14 @@ async function run_tests(newToken, accounts) {
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it("upt008 should deploy upgraded version of contract with new data fields and without previous deployment and ensure new fields correct", async function () {
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+  it("upt008 should deploy upgraded version of contract with new data fields and without previous deployment and ensure new fields correct", async () => {
+    const upgradedToken = await UpgradedFiatTokenNewFields.new();
     const newProxy = await FiatTokenProxy.new(upgradedToken.address, {
       from: proxyOwnerAccount,
     });
-    proxiedToken = await UpgradedFiatTokenNewFields.at(newProxy.address);
+    const proxiedToken = await UpgradedFiatTokenNewFields.at(newProxy.address);
 
-    var data = encodeCall(
+    const data = encodeCall(
       "initialize",
       [
         "string",
@@ -200,7 +195,7 @@ async function run_tests(newToken, accounts) {
         12,
       ]
     );
-    var upgradeToRawTx = await makeRawTransaction(
+    const upgradeToRawTx = await makeRawTransaction(
       data,
       masterMinterAccount,
       masterMinterAccountPrivateKey,
@@ -208,24 +203,26 @@ async function run_tests(newToken, accounts) {
     );
     await sendRawTransaction(upgradeToRawTx);
 
-    assert.equal(await proxiedToken.newUint(), 12);
-    assert.equal(await proxiedToken.newBool(), true);
-    assert.equal(await proxiedToken.newAddress(), pauserAccount);
+    assert.isTrue((await proxiedToken.newUint()).eqn(12));
+    assert.strictEqual(await proxiedToken.newBool(), true);
+    assert.strictEqual(await proxiedToken.newAddress(), pauserAccount);
 
-    customVars = [
+    const customVars = [
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([proxiedToken], [customVars]);
   });
 
-  it("upt010 should deploy upgraded version of contract with new data fields and logic without previous deployment and ensure new logic works, and new fields correct", async function () {
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+  it("upt010 should deploy upgraded version of contract with new data fields and logic without previous deployment and ensure new logic works, and new fields correct", async () => {
+    const upgradedToken = await UpgradedFiatTokenNewFieldsNewLogic.new();
     const newProxy = await FiatTokenProxy.new(upgradedToken.address, {
       from: proxyOwnerAccount,
     });
-    proxiedToken = await UpgradedFiatTokenNewFields.at(newProxy.address);
+    const proxiedToken = await UpgradedFiatTokenNewFieldsNewLogic.at(
+      newProxy.address
+    );
 
-    var data = encodeCall(
+    const data = encodeCall(
       "initialize",
       [
         "string",
@@ -254,7 +251,7 @@ async function run_tests(newToken, accounts) {
         12,
       ]
     );
-    var upgradeToRawTx = await makeRawTransaction(
+    const upgradeToRawTx = await makeRawTransaction(
       data,
       masterMinterAccount,
       masterMinterAccountPrivateKey,
@@ -262,27 +259,29 @@ async function run_tests(newToken, accounts) {
     );
     await sendRawTransaction(upgradeToRawTx);
 
-    assert.equal(await proxiedToken.newUint(), 12);
-    assert.equal(await proxiedToken.newBool(), true);
-    assert.equal(await proxiedToken.newAddress(), pauserAccount);
+    assert.isTrue((await proxiedToken.newUint()).eqn(12));
+    assert.strictEqual(await proxiedToken.newBool(), true);
+    assert.strictEqual(await proxiedToken.newAddress(), pauserAccount);
 
-    await newProxiedToken.setNewAddress(masterMinterAccount);
-    assert.equal(await newProxiedToken.newAddress(), masterMinterAccount);
+    await proxiedToken.setNewAddress(masterMinterAccount);
+    assert.strictEqual(await proxiedToken.newAddress(), masterMinterAccount);
 
-    customVars = [
+    const customVars = [
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([proxiedToken], [customVars]);
   });
 
-  it("upt004 should update proxy adminAccount with previous adminAccount", async function () {
+  it("upt004 should update proxy adminAccount with previous adminAccount", async () => {
     await proxy.changeAdmin(masterMinterAccount, { from: proxyOwnerAccount });
-    customVars = [{ variable: "upgrader", expectedValue: masterMinterAccount }];
+    const customVars = [
+      { variable: "upgrader", expectedValue: masterMinterAccount },
+    ];
     await checkVariables([token], [customVars]);
   });
 
-  it("upt005 should receive Transfer event on transfer when proxied after upgrade", async function () {
-    let mintAmount = 50;
+  it("upt005 should receive Transfer event on transfer when proxied after upgrade", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -290,16 +289,20 @@ async function run_tests(newToken, accounts) {
     await token.mint(arbitraryAccount, mintAmount + 1, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    var upgradedToken = await UpgradedFiatToken.new();
-    var tokenConfig = await upgradeTo(proxy, upgradedToken, proxyOwnerAccount);
-    var newToken = tokenConfig.token;
+    const upgradedToken = await UpgradedFiatToken.new();
+    const tokenConfig = await upgradeTo(
+      proxy,
+      upgradedToken,
+      proxyOwnerAccount
+    );
+    const newToken = tokenConfig.token;
 
-    transfer = await newToken.transfer(pauserAccount, 1, {
+    const transfer = await newToken.transfer(pauserAccount, 1, {
       from: arbitraryAccount,
     });
-    validateTransferEvent(transfer, arbitraryAccount, pauserAccount, 1);
+    validateTransferEvent(transfer, arbitraryAccount, pauserAccount, new BN(1));
 
-    customVars = [
+    const customVars = [
       {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - mintAmount - 1),
@@ -316,13 +319,17 @@ async function run_tests(newToken, accounts) {
     await checkVariables([newToken], [customVars]);
   });
 
-  it("upt006 should upgrade while paused and upgraded contract should be paused as a result; then unpause should unpause contract", async function () {
+  it("upt006 should upgrade while paused and upgraded contract should be paused as a result; then unpause should unpause contract", async () => {
     await token.pause({ from: pauserAccount });
-    var upgradedToken = await UpgradedFiatToken.new();
-    var tokenConfig = await upgradeTo(proxy, upgradedToken, proxyOwnerAccount);
-    var newToken = tokenConfig.token;
+    const upgradedToken = await UpgradedFiatToken.new();
+    const tokenConfig = await upgradeTo(
+      proxy,
+      upgradedToken,
+      proxyOwnerAccount
+    );
+    const newToken = tokenConfig.token;
 
-    customVars = [
+    const customVars = [
       { variable: "paused", expectedValue: true },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
@@ -330,14 +337,14 @@ async function run_tests(newToken, accounts) {
 
     await newToken.unpause({ from: pauserAccount });
 
-    customVars2 = [
+    const customVars2 = [
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newToken], [customVars2]);
   });
 
-  it("upt007 should upgrade contract to original address", async function () {
-    let mintAmount = 50;
+  it("upt007 should upgrade contract to original address", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -345,11 +352,11 @@ async function run_tests(newToken, accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    var tokenConfig = await upgradeTo(proxy, rawToken, proxyOwnerAccount);
-    var sameToken = tokenConfig.token;
+    const tokenConfig = await upgradeTo(proxy, rawToken, proxyOwnerAccount);
+    const sameToken = tokenConfig.token;
     sameToken.proxiedTokenAddress = rawToken.address;
 
-    customVars = [
+    const customVars = [
       {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - mintAmount),
@@ -365,17 +372,17 @@ async function run_tests(newToken, accounts) {
     await checkVariables([sameToken], [customVars]);
   });
 
-  it("upt009 should check that admin is set correctly by proxy constructor", async function () {
-    assert.equal(
+  it("upt009 should check that admin is set correctly by proxy constructor", async () => {
+    assert.strictEqual(
       web3.utils.toChecksumAddress(await getAdmin(token)),
       upgraderAccount
     );
   });
 
-  it("upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result", async function () {
+  it("upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result", async () => {
     await token.pause({ from: pauserAccount });
 
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await UpgradedFiatTokenNewFields.new();
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -384,21 +391,21 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, {
       from: proxyOwnerAccount,
     });
-    newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
-    assert.equal(newProxiedToken.address, proxy.address);
+    const newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
+    assert.strictEqual(newProxiedToken.address, proxy.address);
     assert.notEqual(newProxiedToken.address, upgradedToken.address);
 
-    customVars = [
+    const customVars = [
       { variable: "paused", expectedValue: true },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it("upt012 should upgradeToAndCall while upgrader is blacklisted", async function () {
+  it("upt012 should upgradeToAndCall while upgrader is blacklisted", async () => {
     await token.blacklist(proxyOwnerAccount, { from: blacklisterAccount });
 
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await UpgradedFiatTokenNewFields.new();
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -407,17 +414,17 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, {
       from: proxyOwnerAccount,
     });
-    newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
+    const newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
 
-    customVars = [
+    const customVars = [
       { variable: "isAccountBlacklisted.upgraderAccount", expectedValue: true },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it("upt013 should upgradeToAndCall while new logic is blacklisted", async function () {
-    var upgradedToken = await UpgradedFiatTokenNewFields.new();
+  it("upt013 should upgradeToAndCall while new logic is blacklisted", async () => {
+    const upgradedToken = await UpgradedFiatTokenNewFields.new();
     await token.blacklist(upgradedToken.address, { from: blacklisterAccount });
 
     const initializeData = encodeCall(
@@ -428,31 +435,35 @@ async function run_tests(newToken, accounts) {
     await proxy.upgradeToAndCall(upgradedToken.address, initializeData, {
       from: proxyOwnerAccount,
     });
-    newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
+    const newProxiedToken = await UpgradedFiatTokenNewFields.at(proxy.address);
 
-    customVars = [
+    const customVars = [
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newProxiedToken], [customVars]);
   });
 
-  it("upt014 should upgradeTo while new logic is blacklisted", async function () {
-    var upgradedToken = await UpgradedFiatToken.new();
+  it("upt014 should upgradeTo while new logic is blacklisted", async () => {
+    const upgradedToken = await UpgradedFiatToken.new();
     await token.blacklist(upgradedToken.address, { from: blacklisterAccount });
 
-    var tokenConfig = await upgradeTo(proxy, upgradedToken, proxyOwnerAccount);
-    var newToken = tokenConfig.token;
+    const tokenConfig = await upgradeTo(
+      proxy,
+      upgradedToken,
+      proxyOwnerAccount
+    );
+    const newToken = tokenConfig.token;
 
-    customVars = [
+    const customVars = [
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newToken], [customVars]);
   });
 }
 
-var testWrapper = require("./TestWrapper");
+const testWrapper = require("./TestWrapper");
 testWrapper.execute("FiatToken_ProxyPositiveTests", run_tests);
 
 module.exports = {
-  run_tests: run_tests,
+  run_tests,
 };

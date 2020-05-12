@@ -1,74 +1,45 @@
-var Transaction = require("ethereumjs-tx").Transaction;
-var tokenUtils = require("./TokenTestUtils");
-var FiatToken = tokenUtils.FiatToken;
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals;
-var BigNumber = require("bignumber.js");
-var bigZero = tokenUtils.bigZero;
-var bigHundred = tokenUtils.bigHundred;
-var mint = tokenUtils.mint;
-var expectRevert = tokenUtils.expectRevert;
-var masterMinterRole = tokenUtils.masterMinterRole;
-var blacklisterRole = tokenUtils.blacklisterRole;
-var pauserRole = tokenUtils.pauserRole;
-var checkVariables = tokenUtils.checkVariables;
-var checkFailureIsExpected = tokenUtils.checkFailureIsExpected;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var upgraderAccount = tokenUtils.upgraderAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var minterAccount = tokenUtils.minterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-
-var deployerAccountPrivateKey = tokenUtils.deployerAccountPrivateKey;
-var arbitraryAccountPrivateKey = tokenUtils.arbitraryAccountPrivateKey;
-var tokenOwnerPrivateKey = tokenUtils.ownerAccountPrivateKey;
-var upgraderAccountPrivateKey = tokenUtils.upgraderAccountPrivateKey;
-var tokenOwnerPrivateKey = tokenUtils.tokenOwnerPrivateKey;
-var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
-var arbitraryAccount2PrivateKey = tokenUtils.arbitraryAccount2PrivateKey;
-var masterMinterAccountPrivateKey = tokenUtils.masterMinterAccountPrivateKey;
-var minterAccountPrivateKey = tokenUtils.minterAccountPrivateKey;
-var pauserAccountPrivateKey = tokenUtils.pauserAccountPrivateKey;
-var blacklisterAccountPrivateKey = tokenUtils.blacklisterAccountPrivateKey;
-
-var abiUtils = require("./ABIUtils");
-var makeRawTransaction = abiUtils.makeRawTransaction;
-var sendRawTransaction = abiUtils.sendRawTransaction;
-var functionSignature = abiUtils.functionSignature;
-var encodeAddress = abiUtils.encodeAddress;
-var encodeUint = abiUtils.encodeUint;
-var msgData0 = abiUtils.msgData0;
-var msgData = abiUtils.msgData;
-var msgData1 = abiUtils.msgData1;
-var msgData2 = abiUtils.msgData2;
-var msgData3 = abiUtils.msgData3;
+const assert = require("chai").assert;
+const { Transaction } = require("ethereumjs-tx");
+const {
+  expectRevert,
+  checkVariables,
+  initializeTokenWithProxy,
+  arbitraryAccount,
+  pauserAccount,
+  tokenOwnerAccount,
+  arbitraryAccountPrivateKey,
+  tokenOwnerPrivateKey,
+  pauserAccountPrivateKey,
+} = require("./TokenTestUtils");
+const {
+  makeRawTransaction,
+  sendRawTransaction,
+  functionSignature,
+  encodeAddress,
+  encodeUint,
+  msgData,
+} = require("./ABIUtils");
 
 // Encodes methodName, 32 byte string of 0, and address.
 function mockStringAddressEncode(methodName, address) {
-  var version = encodeUint(32) + encodeUint(0); // encode 32 byte string of 0's
+  const version = encodeUint(32) + encodeUint(0); // encode 32 byte string of 0's
   return functionSignature(methodName) + version + encodeAddress(address);
 }
 
 async function run_tests(newToken, accounts) {
-  beforeEach(async function checkBefore() {
-    rawToken = await newToken();
-    var tokenConfig = await initializeTokenWithProxy(rawToken);
-    proxy = tokenConfig.proxy;
-    token = tokenConfig.token;
-    assert.equal(proxy.address, token.address);
+  let proxy, token;
+
+  beforeEach(async () => {
+    const rawToken = await newToken();
+    const tokenConfig = await initializeTokenWithProxy(rawToken);
+    ({ proxy, token } = tokenConfig);
+    assert.strictEqual(proxy.address, token.address);
   });
 
   // sanity check for pausable
-  it("abi004 FiatToken pause() is public", async function () {
-    let badData = functionSignature("pause()");
-    var tx = new Transaction({
+  it("abi004 FiatToken pause() is public", async () => {
+    const badData = functionSignature("pause()");
+    const tx = new Transaction({
       nonce: web3.utils.toHex(
         await web3.eth.getTransactionCount(pauserAccount)
       ),
@@ -78,18 +49,18 @@ async function run_tests(newToken, accounts) {
       value: 0,
       data: badData,
     });
-    var privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
+    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
     tx.sign(privateKey);
-    var raw = "0x" + tx.serialize().toString("hex");
+    const raw = "0x" + tx.serialize().toString("hex");
 
     await sendRawTransaction(raw);
-    var customVars = [{ variable: "paused", expectedValue: true }];
+    const customVars = [{ variable: "paused", expectedValue: true }];
     await checkVariables([token], [customVars]);
   });
 
-  it("abi040 Blacklistable constructor is not a function", async function () {
-    let badData = functionSignature("Blacklistable()");
-    var tx = new Transaction({
+  it("abi040 Blacklistable constructor is not a function", async () => {
+    const badData = functionSignature("Blacklistable()");
+    const tx = new Transaction({
       nonce: web3.utils.toHex(
         await web3.eth.getTransactionCount(pauserAccount)
       ),
@@ -99,16 +70,16 @@ async function run_tests(newToken, accounts) {
       value: 0,
       data: badData,
     });
-    var privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
+    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
     tx.sign(privateKey);
-    var raw = "0x" + tx.serialize().toString("hex");
+    const raw = "0x" + tx.serialize().toString("hex");
 
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi042 Ownable constructor is not a function", async function () {
-    let badData = functionSignature("Ownable()");
-    var tx = new Transaction({
+  it("abi042 Ownable constructor is not a function", async () => {
+    const badData = functionSignature("Ownable()");
+    const tx = new Transaction({
       nonce: web3.utils.toHex(
         await web3.eth.getTransactionCount(pauserAccount)
       ),
@@ -118,16 +89,16 @@ async function run_tests(newToken, accounts) {
       value: 0,
       data: badData,
     });
-    var privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
+    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
     tx.sign(privateKey);
-    var raw = "0x" + tx.serialize().toString("hex");
+    const raw = "0x" + tx.serialize().toString("hex");
 
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi005 Pausable constructor is not a function", async function () {
-    let badData = functionSignature("Pausable()");
-    var tx = new Transaction({
+  it("abi005 Pausable constructor is not a function", async () => {
+    const badData = functionSignature("Pausable()");
+    const tx = new Transaction({
       nonce: web3.utils.toHex(
         await web3.eth.getTransactionCount(pauserAccount)
       ),
@@ -137,16 +108,16 @@ async function run_tests(newToken, accounts) {
       value: 0,
       data: badData,
     });
-    var privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
+    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
     tx.sign(privateKey);
-    var raw = "0x" + tx.serialize().toString("hex");
+    const raw = "0x" + tx.serialize().toString("hex");
 
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi043 FiatTokenProxy constructor is not a function", async function () {
-    let badData = functionSignature("FiatTokenProxy()");
-    var tx = new Transaction({
+  it("abi043 FiatTokenProxy constructor is not a function", async () => {
+    const badData = functionSignature("FiatTokenProxy()");
+    const tx = new Transaction({
       nonce: web3.utils.toHex(
         await web3.eth.getTransactionCount(pauserAccount)
       ),
@@ -156,16 +127,16 @@ async function run_tests(newToken, accounts) {
       value: 0,
       data: badData,
     });
-    var privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
+    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
     tx.sign(privateKey);
-    var raw = "0x" + tx.serialize().toString("hex");
+    const raw = "0x" + tx.serialize().toString("hex");
 
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi027 UpgradeabilityProxy constructor", async function () {
-    let badData = msgData("UpgradeabilityProxy(address)", arbitraryAccount);
-    let raw = await makeRawTransaction(
+  it("abi027 UpgradeabilityProxy constructor", async () => {
+    const badData = msgData("UpgradeabilityProxy(address)", arbitraryAccount);
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -174,9 +145,9 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi055 Proxy constructor is not a function", async function () {
-    let badData = functionSignature("Proxy()");
-    let raw = await makeRawTransaction(
+  it("abi055 Proxy constructor is not a function", async () => {
+    const badData = functionSignature("Proxy()");
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -185,9 +156,9 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi056 Proxy _delegate is internal", async function () {
-    let badData = msgData("_delegate(address)", arbitraryAccount);
-    let raw = await makeRawTransaction(
+  it("abi056 Proxy _delegate is internal", async () => {
+    const badData = msgData("_delegate(address)", arbitraryAccount);
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -196,9 +167,9 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi057 Proxy _willFallback is internal", async function () {
-    let badData = functionSignature("_willFallback()");
-    let raw = await makeRawTransaction(
+  it("abi057 Proxy _willFallback is internal", async () => {
+    const badData = functionSignature("_willFallback()");
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -207,9 +178,9 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi058 Proxy _fallback is internal", async function () {
-    let badData = functionSignature("_fallback()");
-    let raw = await makeRawTransaction(
+  it("abi058 Proxy _fallback is internal", async () => {
+    const badData = functionSignature("_fallback()");
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -218,9 +189,9 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi050 Upgradeability implementation is internal", async function () {
-    let badData = msgData("UpgradeabilityProxy(address)", arbitraryAccount);
-    let raw = await makeRawTransaction(
+  it("abi050 Upgradeability implementation is internal", async () => {
+    const badData = msgData("UpgradeabilityProxy(address)", arbitraryAccount);
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -229,12 +200,12 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi051 AdminUpgradeabillityProxy constructor is not a function", async function () {
-    let badData = msgData(
+  it("abi051 AdminUpgradeabillityProxy constructor is not a function", async () => {
+    const badData = msgData(
       "AdminUpgradeabillityProxy(address)",
       arbitraryAccount
     );
-    let raw = await makeRawTransaction(
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -243,12 +214,12 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi053 AdminUpgradeabillityProxy _setAdmin is internal", async function () {
-    let badData = msgData(
+  it("abi053 AdminUpgradeabillityProxy _setAdmin is internal", async () => {
+    const badData = msgData(
       "AdminUpgradeabillityProxy(address)",
       arbitraryAccount
     );
-    let raw = await makeRawTransaction(
+    const raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -257,9 +228,9 @@ async function run_tests(newToken, accounts) {
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi041 FiatToken constructor is not a function", async function () {
-    let badData = functionSignature("FiatToken()");
-    var tx = new Transaction({
+  it("abi041 FiatToken constructor is not a function", async () => {
+    const badData = functionSignature("FiatToken()");
+    const tx = new Transaction({
       nonce: web3.utils.toHex(
         await web3.eth.getTransactionCount(pauserAccount)
       ),
@@ -269,16 +240,16 @@ async function run_tests(newToken, accounts) {
       value: 0,
       data: badData,
     });
-    var privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
+    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
     tx.sign(privateKey);
-    var raw = "0x" + tx.serialize().toString("hex");
+    const raw = "0x" + tx.serialize().toString("hex");
 
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi025 setOwner is internal", async function () {
-    let badData = msgData("setOwner(address)", pauserAccount);
-    var tx = new Transaction({
+  it("abi025 setOwner is internal", async () => {
+    const badData = msgData("setOwner(address)", pauserAccount);
+    const tx = new Transaction({
       nonce: web3.utils.toHex(
         await web3.eth.getTransactionCount(tokenOwnerAccount)
       ),
@@ -288,19 +259,19 @@ async function run_tests(newToken, accounts) {
       value: 0,
       data: badData,
     });
-    var privateKey = Buffer.from(tokenOwnerPrivateKey, "hex");
+    const privateKey = Buffer.from(tokenOwnerPrivateKey, "hex");
     tx.sign(privateKey);
-    var raw = "0x" + tx.serialize().toString("hex");
+    const raw = "0x" + tx.serialize().toString("hex");
 
     await expectRevert(sendRawTransaction(raw));
   });
 
-  it("abi028 UpgradeabilityProxy._upgradeTo is internal", async function () {
-    let badData = mockStringAddressEncode(
+  it("abi028 UpgradeabilityProxy._upgradeTo is internal", async () => {
+    const badData = mockStringAddressEncode(
       "_upgradeTo(string,address)",
       pauserAccount
     );
-    let raw = await makeRawTransaction(
+    const raw = await makeRawTransaction(
       badData,
       tokenOwnerAccount,
       tokenOwnerPrivateKey,
@@ -310,9 +281,9 @@ async function run_tests(newToken, accounts) {
   });
 }
 
-var testWrapper = require("./TestWrapper");
+const testWrapper = require("./TestWrapper");
 testWrapper.execute("FiatToken_ABIHackingTests", run_tests);
 
 module.exports = {
-  run_tests: run_tests,
+  run_tests,
 };

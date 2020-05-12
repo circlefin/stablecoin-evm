@@ -1,48 +1,40 @@
-var BN = require("bn.js");
-var FiatTokenProxy = artifacts.require("FiatTokenProxy");
+const assert = require("chai").assert;
+const BN = require("bn.js");
+const {
+  checkVariables,
+  expectRevert,
+  arbitraryAccount,
+  arbitraryAccount2,
+  blacklisterAccount,
+  masterMinterAccount,
+  minterAccount,
+  pauserAccount,
+  initializeTokenWithProxy,
+  getInitializedV1,
+  FiatToken,
+} = require("./TokenTestUtils");
 
-var tokenUtils = require("./TokenTestUtils");
-var BigNumber = require("bignumber.js");
+const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
-var bigZero = tokenUtils.bigZero;
-var bigHundred = tokenUtils.bigHundred;
-var mint = tokenUtils.mint;
-var checkVariables = tokenUtils.checkVariables;
-var expectRevert = tokenUtils.expectRevert;
-var name = tokenUtils.name;
-var symbol = tokenUtils.symbol;
-var currency = tokenUtils.currency;
-var decimals = tokenUtils.decimals;
-var deployerAccount = tokenUtils.deployerAccount;
-var arbitraryAccount = tokenUtils.arbitraryAccount;
-var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
-var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-var blacklisterAccount = tokenUtils.blacklisterAccount;
-var masterMinterAccount = tokenUtils.masterMinterAccount;
-var minterAccount = tokenUtils.minterAccount;
-var pauserAccount = tokenUtils.pauserAccount;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
-var getInitializedV1 = tokenUtils.getInitializedV1;
-var FiatToken = tokenUtils.FiatToken;
-
-var maxAmount =
+const maxAmount =
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-var maxAmountBN = new BN(maxAmount.slice(2), 16);
-var amount = 100;
+const maxAmountBN = new BN(maxAmount.slice(2), 16);
+const amount = 100;
 
 async function run_tests(newToken, accounts) {
-  beforeEach("Make fresh token contract", async function () {
-    rawToken = await newToken();
-    var tokenConfig = await initializeTokenWithProxy(rawToken);
-    proxy = tokenConfig.proxy;
-    token = tokenConfig.token;
-    assert.equal(proxy.address, token.address);
+  let proxy, token;
+
+  beforeEach(async () => {
+    const rawToken = await newToken();
+    const tokenConfig = await initializeTokenWithProxy(rawToken);
+    ({ proxy, token } = tokenConfig);
+    assert.strictEqual(proxy.address, token.address);
   });
 
   // No Payable Function
 
-  it("ms001 no payable function", async function () {
-    var success = false;
+  it("ms001 no payable function", async () => {
+    let success = false;
     try {
       await web3.eth.sendTransaction({
         from: arbitraryAccount,
@@ -52,13 +44,13 @@ async function run_tests(newToken, accounts) {
     } catch (e) {
       success = true;
     }
-    assert.equal(true, success);
+    assert.strictEqual(true, success);
   });
 
   // Same Address
 
-  it("ms002 should transfer to self has correct final balance", async function () {
-    let mintAmount = 50;
+  it("ms002 should transfer to self has correct final balance", async () => {
+    const mintAmount = 50;
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
@@ -67,7 +59,7 @@ async function run_tests(newToken, accounts) {
       from: arbitraryAccount,
     });
 
-    var customVars = [
+    const customVars = [
       {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - mintAmount),
@@ -82,8 +74,8 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms003 should transferFrom to self from approved account and have correct final balance", async function () {
-    let mintAmount = 50;
+  it("ms003 should transferFrom to self from approved account and have correct final balance", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -94,7 +86,7 @@ async function run_tests(newToken, accounts) {
     await token.transferFrom(arbitraryAccount, arbitraryAccount, mintAmount, {
       from: pauserAccount,
     });
-    customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -109,8 +101,8 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms004 should transferFrom to self from approved self and have correct final balance", async function () {
-    let mintAmount = 50;
+  it("ms004 should transferFrom to self from approved self and have correct final balance", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -123,7 +115,7 @@ async function run_tests(newToken, accounts) {
     await token.transferFrom(arbitraryAccount, arbitraryAccount, mintAmount, {
       from: arbitraryAccount,
     });
-    customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -138,13 +130,13 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms005 should mint to self with correct final balance", async function () {
-    var mintAmount = 50;
+  it("ms005 should mint to self with correct final balance", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -169,13 +161,13 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms006 should approve correct allowance for self", async function () {
-    var mintAmount = 50;
+  it("ms006 should approve correct allowance for self", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -205,11 +197,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms007 should configureMinter for masterMinter", async function () {
+  it("ms007 should configureMinter for masterMinter", async () => {
     await token.configureMinter(masterMinterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.masterMinterAccount", expectedValue: true },
       {
         variable: "minterAllowance.masterMinterAccount",
@@ -221,14 +213,14 @@ async function run_tests(newToken, accounts) {
 
   // Multiple Minters
 
-  it("ms009 should configure two minters", async function () {
+  it("ms009 should configure two minters", async () => {
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
     await token.configureMinter(arbitraryAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -243,9 +235,9 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms010 should configure two minters and each mint distinct amounts", async function () {
-    var mintAmount1 = 10;
-    var mintAmount2 = 20;
+  it("ms010 should configure two minters and each mint distinct amounts", async () => {
+    const mintAmount1 = 10;
+    const mintAmount2 = 20;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -255,7 +247,7 @@ async function run_tests(newToken, accounts) {
     });
     await token.mint(pauserAccount, mintAmount1, { from: minterAccount });
     await token.mint(pauserAccount, mintAmount2, { from: arbitraryAccount });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -278,9 +270,9 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms011 should configure two minters, each minting distinct amounts and then remove one minter", async function () {
-    var mintAmount1 = 10;
-    var mintAmount2 = 20;
+  it("ms011 should configure two minters, each minting distinct amounts and then remove one minter", async () => {
+    const mintAmount1 = 10;
+    const mintAmount2 = 20;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -291,7 +283,7 @@ async function run_tests(newToken, accounts) {
     await token.mint(pauserAccount, mintAmount1, { from: minterAccount });
     await token.mint(pauserAccount, mintAmount2, { from: arbitraryAccount });
     await token.removeMinter(arbitraryAccount, { from: masterMinterAccount });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -309,8 +301,8 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms012 should configure two minters and adjust both allowances", async function () {
-    var adjustment = 10;
+  it("ms012 should configure two minters and adjust both allowances", async () => {
+    const adjustment = 10;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -318,7 +310,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(arbitraryAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -338,7 +330,7 @@ async function run_tests(newToken, accounts) {
     await token.configureMinter(arbitraryAccount, amount + adjustment, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -353,8 +345,8 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms013 should configure two minters, one with zero allowance fails to mint", async function () {
-    var mintAmount = 10;
+  it("ms013 should configure two minters, one with zero allowance fails to mint", async () => {
+    const mintAmount = 10;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -363,7 +355,7 @@ async function run_tests(newToken, accounts) {
       from: masterMinterAccount,
     });
     await token.mint(pauserAccount, mintAmount, { from: minterAccount });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -379,12 +371,12 @@ async function run_tests(newToken, accounts) {
     await expectRevert(
       token.mint(pauserAccount, mintAmount, { from: arbitraryAccount })
     );
-    //await expectRevert(token.mint(pauserAccount, 0, { from: arbitraryAccount }));
+    // await expectRevert(token.mint(pauserAccount, 0, { from: arbitraryAccount }));
     await checkVariables([token], [customVars]);
   });
 
-  it("ms014 should configure two minters and fail to mint when paused", async function () {
-    var mintAmount = 10;
+  it("ms014 should configure two minters and fail to mint when paused", async () => {
+    const mintAmount = 10;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -393,7 +385,7 @@ async function run_tests(newToken, accounts) {
       from: masterMinterAccount,
     });
     await token.pause({ from: pauserAccount });
-    var customVars = [
+    const customVars = [
       { variable: "paused", expectedValue: true },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
@@ -415,8 +407,8 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms015 should configure two minters, blacklist one and ensure it cannot mint, then unblacklist and ensure it can mint", async function () {
-    var mintAmount = 10;
+  it("ms015 should configure two minters, blacklist one and ensure it cannot mint, then unblacklist and ensure it can mint", async () => {
+    const mintAmount = 10;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -426,7 +418,7 @@ async function run_tests(newToken, accounts) {
     });
     await token.blacklist(minterAccount, { from: blacklisterAccount });
     await token.mint(pauserAccount, mintAmount, { from: arbitraryAccount });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -451,7 +443,8 @@ async function run_tests(newToken, accounts) {
 
     await token.unBlacklist(minterAccount, { from: blacklisterAccount });
     await token.mint(pauserAccount, mintAmount, { from: minterAccount });
-    var customVars = [
+
+    customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -474,10 +467,10 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms016 should configure two minters, each mints to themselves and then burns certain amount", async function () {
-    var mintAmount1 = 10;
-    var mintAmount2 = 20;
-    var burnAmount = 10;
+  it("ms016 should configure two minters, each mints to themselves and then burns certain amount", async () => {
+    const mintAmount1 = 10;
+    const mintAmount2 = 20;
+    const burnAmount = 10;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -487,7 +480,7 @@ async function run_tests(newToken, accounts) {
     });
     await token.mint(minterAccount, mintAmount1, { from: minterAccount });
     await token.mint(arbitraryAccount, mintAmount2, { from: arbitraryAccount });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -515,7 +508,7 @@ async function run_tests(newToken, accounts) {
 
     await token.burn(burnAmount, { from: minterAccount });
     await token.burn(burnAmount, { from: arbitraryAccount });
-    var customVars = [
+    customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "isAccountMinter.arbitraryAccount", expectedValue: true },
       {
@@ -546,29 +539,29 @@ async function run_tests(newToken, accounts) {
 
   // 0 Input
 
-  it("ms018 should approve 0 token allowance with unchanged state", async function () {
+  it("ms018 should approve 0 token allowance with unchanged state", async () => {
     await token.approve(minterAccount, 0, { from: arbitraryAccount });
     await checkVariables([token], [[]]);
   });
 
-  it("ms019 should transferFrom 0 tokens with unchanged state", async function () {
+  it("ms019 should transferFrom 0 tokens with unchanged state", async () => {
     await token.transferFrom(arbitraryAccount, pauserAccount, 0, {
       from: arbitraryAccount2,
     });
     await checkVariables([token], [[]]);
   });
 
-  it("ms020 should transfer 0 tokens with unchanged state", async function () {
+  it("ms020 should transfer 0 tokens with unchanged state", async () => {
     await token.transfer(arbitraryAccount, 0, { from: arbitraryAccount2 });
     await checkVariables([token], [[]]);
   });
 
-  it("ms036 should get allowance for same address", async function () {
+  it("ms036 should get allowance for same address", async () => {
     await token.approve(arbitraryAccount, amount, { from: arbitraryAccount });
-    var allowance = new BN(
+    const allowance = new BN(
       await token.allowance(arbitraryAccount, arbitraryAccount)
     );
-    assert(allowance.eq(new BN(amount)));
+    assert.isTrue(allowance.eq(new BN(amount)));
   });
 
   // Return value
@@ -588,13 +581,13 @@ async function run_tests(newToken, accounts) {
    *    (https://truffleframework.com/docs/getting_started/contracts)
    */
 
-  it("ms039 should return true on mint", async function () {
-    var mintAmount = 50;
+  it("ms039 should return true on mint", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -609,21 +602,21 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms040 should return true on approve", async function () {
-    assert(
+  it("ms040 should return true on approve", async () => {
+    assert.isTrue(
       await token.approve.call(minterAccount, amount, {
         from: arbitraryAccount,
       })
     );
   });
 
-  it("ms041 should return true on transferFrom", async function () {
-    let mintAmount = 50;
+  it("ms041 should return true on transferFrom", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -652,7 +645,7 @@ async function run_tests(newToken, accounts) {
         expectedValue: new BN(mintAmount),
       },
     ];
-    assert(
+    assert.isTrue(
       await token.transferFrom.call(
         arbitraryAccount,
         pauserAccount,
@@ -663,13 +656,13 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms042 should return true on transfer", async function () {
-    let mintAmount = 50;
+  it("ms042 should return true on transfer", async () => {
+    const mintAmount = 50;
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -691,7 +684,7 @@ async function run_tests(newToken, accounts) {
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
-    assert(
+    assert.isTrue(
       await token.transfer.call(pauserAccount, mintAmount, {
         from: arbitraryAccount,
       })
@@ -699,42 +692,42 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms043 should return true on configureMinter", async function () {
-    assert(
+  it("ms043 should return true on configureMinter", async () => {
+    assert.isTrue(
       await token.configureMinter.call(minterAccount, amount, {
         from: masterMinterAccount,
       })
     );
   });
 
-  it("ms044 should return true on removeMinter", async function () {
-    assert(
+  it("ms044 should return true on removeMinter", async () => {
+    assert.isTrue(
       await token.removeMinter.call(minterAccount, {
         from: masterMinterAccount,
       })
     );
   });
 
-  it("ms045 initialized should be in slot 8, byte 21", async function () {
-    var initialized = await getInitializedV1(token);
-    assert.equal("0x01", initialized);
+  it("ms045 initialized should be in slot 8, byte 21", async () => {
+    const initialized = await getInitializedV1(token);
+    assert.strictEqual("0x01", initialized);
   });
 
-  it("ms046 initialized should be 0 before initialization", async function () {
-    var rawToken = await newToken();
-    var newProxy = await FiatTokenProxy.new(rawToken.address, {
+  it("ms046 initialized should be 0 before initialization", async () => {
+    const rawToken = await newToken();
+    const newProxy = await FiatTokenProxy.new(rawToken.address, {
       from: arbitraryAccount,
     });
-    var token = await FiatToken.at(newProxy.address);
-    var initialized = await getInitializedV1(token);
-    assert.equal("0x00", initialized);
+    const token = await FiatToken.at(newProxy.address);
+    const initialized = await getInitializedV1(token);
+    assert.strictEqual("0x00", initialized);
   });
 
-  it("ms047 configureMinter works on amount=2^256-1", async function () {
+  it("ms047 configureMinter works on amount=2^256-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -744,11 +737,11 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms048 mint works on amount=2^256-1", async function () {
+  it("ms048 mint works on amount=2^256-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
-    var customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
@@ -773,12 +766,12 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms049 burn on works on amount=2^256-1", async function () {
+  it("ms049 burn on works on amount=2^256-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
     await token.mint(minterAccount, maxAmount, { from: minterAccount });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balances.minterAccount",
@@ -795,12 +788,12 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms050 approve works on amount=2^256-1", async function () {
+  it("ms050 approve works on amount=2^256-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
     await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balances.arbitraryAccount",
@@ -826,12 +819,12 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms051 transfer works on amount=2^256-1", async function () {
+  it("ms051 transfer works on amount=2^256-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
     await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balances.arbitraryAccount",
@@ -853,13 +846,13 @@ async function run_tests(newToken, accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms052 transferFrom works on amount=2^256-1", async function () {
+  it("ms052 transferFrom works on amount=2^256-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
     await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
     await token.approve(pauserAccount, maxAmount, { from: arbitraryAccount });
-    customVars = [
+    let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balances.arbitraryAccount",
@@ -888,9 +881,9 @@ async function run_tests(newToken, accounts) {
   });
 }
 
-var testWrapper = require("./TestWrapper");
+const testWrapper = require("./TestWrapper");
 testWrapper.execute("FiatToken_MiscTests", run_tests);
 
 module.exports = {
-  run_tests: run_tests,
+  run_tests,
 };

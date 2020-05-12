@@ -16,6 +16,21 @@ $ npm i -g yarn       # Install yarn if you don't already have it
 $ yarn install        # Install dependencies
 ```
 
+## Linting and Formatting
+
+To check code for problems:
+
+```
+$ yarn lint
+$ yarn lint --fix     # Fix problems where possible
+```
+
+To auto-format code:
+
+```
+$ yarn fmt
+```
+
 ## Testing
 
 First, make sure Ganache is running.
@@ -36,7 +51,7 @@ To run tests in a specific file, run:
 $ yarn test [path/to/file]
 ```
 
-to generate test coverage, run:
+To run tests and generate test coverage, run:
 
 ```
 $ yarn coverage
