@@ -23,8 +23,7 @@ module.exports = {
       port: 8545,
       network_id: "*", // Match any network id
     },
-    // network to refer to ganache by name so it works with truffle/ganache in separate docker containers
-    localTestNet: {
+    local_testnet: {
       host: "ganache",
       port: 8545,
       network_id: "*", // Match any network id
