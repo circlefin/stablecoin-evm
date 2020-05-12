@@ -1,8 +1,8 @@
-FROM node:9-alpine
+FROM node:12-alpine
 
 RUN npm i npm@latest -g \
- && npm install -g truffle@^4.1.0 \
- && npm install -g ganache-cli
+ && npm install -g truffle@^5.1.24 \
+ && npm install -g ganache-cli@^6.9.1
 
 ENTRYPOINT ["truffle"]
 CMD ["--help"]
