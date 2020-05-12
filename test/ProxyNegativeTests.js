@@ -1,7 +1,6 @@
+var BN = require("bn.js");
 var tokenUtils = require("./TokenTestUtils");
 var BigNumber = require("bignumber.js");
-var assertDiff = require("assert-diff");
-assertDiff.options.strict = true;
 
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
@@ -12,6 +11,7 @@ var name = tokenUtils.name;
 var symbol = tokenUtils.symbol;
 var currency = tokenUtils.currency;
 var decimals = tokenUtils.decimals;
+var nullAccount = tokenUtils.nullAccount;
 var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var arbitraryAccount2 = tokenUtils.arbitraryAccount2;
@@ -54,9 +54,8 @@ async function run_tests(newToken, accounts) {
   });
 
   it("nut003 should fail to upgradeTo to null contract address", async function () {
-    var upgradedToken = await UpgradedFiatToken.new();
     await expectRevert(
-      proxy.upgradeTo("0x0", token, { from: proxyOwnerAccount })
+      proxy.upgradeTo(nullAccount, { from: proxyOwnerAccount })
     );
 
     customVars = [];
@@ -67,7 +66,9 @@ async function run_tests(newToken, accounts) {
     var upgradedToken = await UpgradedFiatToken.new();
     const initializeData = encodeCall("pauser", [], []);
     await expectRevert(
-      proxy.upgradeToAndCall("0x0", initializeData, { from: proxyOwnerAccount })
+      proxy.upgradeToAndCall(nullAccount, initializeData, {
+        from: proxyOwnerAccount,
+      })
     );
 
     customVars = [];
@@ -135,7 +136,7 @@ async function run_tests(newToken, accounts) {
     await expectRevert(
       proxy.upgradeTo(upgradedToken.address, { from: masterMinterAccount })
     );
-    var finalToken = FiatToken.at(proxy.address);
+    var finalToken = await FiatToken.at(proxy.address);
     var implementation = await proxy.implementation({
       from: proxyOwnerAccount,
     });
@@ -157,7 +158,7 @@ async function run_tests(newToken, accounts) {
         from: masterMinterAccount,
       })
     );
-    var finalToken = FiatToken.at(proxy.address);
+    var finalToken = await FiatToken.at(proxy.address);
     var implementation = await proxy.implementation({
       from: proxyOwnerAccount,
     });
@@ -215,15 +216,15 @@ async function run_tests(newToken, accounts) {
     customVars = [
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
         variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
   });

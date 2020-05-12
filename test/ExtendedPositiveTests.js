@@ -1,7 +1,5 @@
+var BN = require("bn.js");
 var tokenUtils = require("./TokenTestUtils");
-var BigNumber = require("bignumber.js");
-var assertDiff = require("assert-diff");
-assertDiff.options.strict = true;
 
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
@@ -103,7 +101,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
       { variable: "paused", expectedValue: true },
     ];
@@ -114,7 +112,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: false },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(0),
+        expectedValue: new BN(0),
       },
       { variable: "paused", expectedValue: true },
     ];
@@ -379,7 +377,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
       {
         variable: "isAccountBlacklisted.masterMinterAccount",
@@ -398,7 +396,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
       { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
     ];
@@ -414,7 +412,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
       {
         variable: "isAccountBlacklisted.masterMinterAccount",
@@ -428,7 +426,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: false },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(0),
+        expectedValue: new BN(0),
       },
       {
         variable: "isAccountBlacklisted.masterMinterAccount",
@@ -447,7 +445,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
       { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
     ];
@@ -458,7 +456,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: false },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(0),
+        expectedValue: new BN(0),
       },
       { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
     ];

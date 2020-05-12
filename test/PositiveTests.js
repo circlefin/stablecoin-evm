@@ -1,7 +1,6 @@
+var BN = require("bn.js");
 var tokenUtils = require("./TokenTestUtils");
 var BigNumber = require("bignumber.js");
-var assertDiff = require("assert-diff");
-assertDiff.options.strict = true;
 
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
@@ -62,7 +61,7 @@ async function run_tests(newToken, accounts) {
     var customVars = [
       {
         variable: "allowance.arbitraryAccount.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
     ];
     await checkVariables([token], [customVars]);
@@ -105,7 +104,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
     ];
     await checkVariables([token], [customVars]);
@@ -123,7 +122,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
     ];
     await checkVariables([token], [customVars]);
@@ -133,13 +132,13 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       {
         variable: "balances.arbitraryAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
   });
@@ -156,13 +155,13 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(0),
+        expectedValue: new BN(0),
       },
       {
         variable: "balances.minterAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [setup]);
 
@@ -171,15 +170,15 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(0),
+        expectedValue: new BN(0),
       },
       {
         variable: "balances.minterAccount",
-        expectedValue: new BigNumber(mintAmount - burnAmount),
+        expectedValue: new BN(mintAmount - burnAmount),
       },
       {
         variable: "totalSupply",
-        expectedValue: new BigNumber(mintAmount - burnAmount),
+        expectedValue: new BN(mintAmount - burnAmount),
       },
     ];
     await checkVariables([token], [afterBurn]);
@@ -198,13 +197,13 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       {
         variable: "balances.arbitraryAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
 
@@ -212,9 +211,9 @@ async function run_tests(newToken, accounts) {
     customVars = [
       {
         variable: "balances.arbitraryAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
   });
@@ -231,7 +230,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
     ];
     await checkVariables([token], [customVars]);
@@ -241,13 +240,13 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       {
         variable: "balances.arbitraryAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
 
@@ -255,15 +254,15 @@ async function run_tests(newToken, accounts) {
     customVars = [
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
         variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
   });
@@ -278,7 +277,7 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount),
+        expectedValue: new BN(amount),
       },
     ];
     await checkVariables([token], [customVars]);
@@ -288,13 +287,13 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       {
         variable: "balances.arbitraryAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
 
@@ -308,14 +307,14 @@ async function run_tests(newToken, accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
         variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([token], [customVars]);
   });

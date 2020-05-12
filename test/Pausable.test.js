@@ -1,5 +1,3 @@
-var Tx = require("ethereumjs-tx");
-
 var Pausable = artifacts.require("Pausable");
 var tokenUtils = require("./TokenTestUtils");
 var BigNumber = require("bignumber.js");
@@ -8,11 +6,6 @@ var deployerAccount = tokenUtils.deployerAccount;
 var arbitraryAccount = tokenUtils.arbitraryAccount;
 var pauserAccount = tokenUtils.pauserAccount;
 var tokenOwnerAccount = tokenUtils.tokenOwnerAccount;
-
-const should = require("chai")
-  .use(require("chai-as-promised"))
-  .use(require("chai-bignumber")(BigNumber))
-  .should();
 
 contract("PausableTests", function (accounts) {
   var pause;

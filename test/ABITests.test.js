@@ -1,4 +1,4 @@
-var Tx = require("ethereumjs-tx");
+var Transaction = require("ethereumjs-tx").Transaction;
 var tokenUtils = require("./TokenTestUtils");
 var FiatToken = tokenUtils.FiatToken;
 var name = tokenUtils.name;
@@ -68,9 +68,11 @@ async function run_tests(newToken, accounts) {
   // sanity check for pausable
   it("abi004 FiatToken pause() is public", async function () {
     let badData = functionSignature("pause()");
-    var tx = new Tx({
-      nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-      gasPrice: web3.toHex(web3.toWei("20", "gwei")),
+    var tx = new Transaction({
+      nonce: web3.utils.toHex(
+        await web3.eth.getTransactionCount(pauserAccount)
+      ),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
       gasLimit: 100000,
       to: token.address,
       value: 0,
@@ -87,9 +89,11 @@ async function run_tests(newToken, accounts) {
 
   it("abi040 Blacklistable constructor is not a function", async function () {
     let badData = functionSignature("Blacklistable()");
-    var tx = new Tx({
-      nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-      gasPrice: web3.toHex(web3.toWei("20", "gwei")),
+    var tx = new Transaction({
+      nonce: web3.utils.toHex(
+        await web3.eth.getTransactionCount(pauserAccount)
+      ),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
       gasLimit: 100000,
       to: token.address,
       value: 0,
@@ -104,9 +108,11 @@ async function run_tests(newToken, accounts) {
 
   it("abi042 Ownable constructor is not a function", async function () {
     let badData = functionSignature("Ownable()");
-    var tx = new Tx({
-      nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-      gasPrice: web3.toHex(web3.toWei("20", "gwei")),
+    var tx = new Transaction({
+      nonce: web3.utils.toHex(
+        await web3.eth.getTransactionCount(pauserAccount)
+      ),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
       gasLimit: 100000,
       to: token.address,
       value: 0,
@@ -121,9 +127,11 @@ async function run_tests(newToken, accounts) {
 
   it("abi005 Pausable constructor is not a function", async function () {
     let badData = functionSignature("Pausable()");
-    var tx = new Tx({
-      nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-      gasPrice: web3.toHex(web3.toWei("20", "gwei")),
+    var tx = new Transaction({
+      nonce: web3.utils.toHex(
+        await web3.eth.getTransactionCount(pauserAccount)
+      ),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
       gasLimit: 100000,
       to: token.address,
       value: 0,
@@ -138,9 +146,11 @@ async function run_tests(newToken, accounts) {
 
   it("abi043 FiatTokenProxy constructor is not a function", async function () {
     let badData = functionSignature("FiatTokenProxy()");
-    var tx = new Tx({
-      nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-      gasPrice: web3.toHex(web3.toWei("20", "gwei")),
+    var tx = new Transaction({
+      nonce: web3.utils.toHex(
+        await web3.eth.getTransactionCount(pauserAccount)
+      ),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
       gasLimit: 100000,
       to: token.address,
       value: 0,
@@ -155,7 +165,7 @@ async function run_tests(newToken, accounts) {
 
   it("abi027 UpgradeabilityProxy constructor", async function () {
     let badData = msgData("UpgradeabilityProxy(address)", arbitraryAccount);
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -166,7 +176,7 @@ async function run_tests(newToken, accounts) {
 
   it("abi055 Proxy constructor is not a function", async function () {
     let badData = functionSignature("Proxy()");
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -177,7 +187,7 @@ async function run_tests(newToken, accounts) {
 
   it("abi056 Proxy _delegate is internal", async function () {
     let badData = msgData("_delegate(address)", arbitraryAccount);
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -188,7 +198,7 @@ async function run_tests(newToken, accounts) {
 
   it("abi057 Proxy _willFallback is internal", async function () {
     let badData = functionSignature("_willFallback()");
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -199,7 +209,7 @@ async function run_tests(newToken, accounts) {
 
   it("abi058 Proxy _fallback is internal", async function () {
     let badData = functionSignature("_fallback()");
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -210,7 +220,7 @@ async function run_tests(newToken, accounts) {
 
   it("abi050 Upgradeability implementation is internal", async function () {
     let badData = msgData("UpgradeabilityProxy(address)", arbitraryAccount);
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -224,7 +234,7 @@ async function run_tests(newToken, accounts) {
       "AdminUpgradeabillityProxy(address)",
       arbitraryAccount
     );
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -238,7 +248,7 @@ async function run_tests(newToken, accounts) {
       "AdminUpgradeabillityProxy(address)",
       arbitraryAccount
     );
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       arbitraryAccount,
       arbitraryAccountPrivateKey,
@@ -249,9 +259,11 @@ async function run_tests(newToken, accounts) {
 
   it("abi041 FiatToken constructor is not a function", async function () {
     let badData = functionSignature("FiatToken()");
-    var tx = new Tx({
-      nonce: web3.toHex(web3.eth.getTransactionCount(pauserAccount)),
-      gasPrice: web3.toHex(web3.toWei("20", "gwei")),
+    var tx = new Transaction({
+      nonce: web3.utils.toHex(
+        await web3.eth.getTransactionCount(pauserAccount)
+      ),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
       gasLimit: 100000,
       to: token.address,
       value: 0,
@@ -266,9 +278,11 @@ async function run_tests(newToken, accounts) {
 
   it("abi025 setOwner is internal", async function () {
     let badData = msgData("setOwner(address)", pauserAccount);
-    var tx = new Tx({
-      nonce: web3.toHex(web3.eth.getTransactionCount(tokenOwnerAccount)),
-      gasPrice: web3.toHex(web3.toWei("20", "gwei")),
+    var tx = new Transaction({
+      nonce: web3.utils.toHex(
+        await web3.eth.getTransactionCount(tokenOwnerAccount)
+      ),
+      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
       gasLimit: 100000,
       to: token.address,
       value: 0,
@@ -286,7 +300,7 @@ async function run_tests(newToken, accounts) {
       "_upgradeTo(string,address)",
       pauserAccount
     );
-    let raw = makeRawTransaction(
+    let raw = await makeRawTransaction(
       badData,
       tokenOwnerAccount,
       tokenOwnerPrivateKey,

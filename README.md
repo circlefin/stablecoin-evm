@@ -2,34 +2,54 @@
 
 Fiat tokens on the [CENTRE](https://centre.io) network.
 
-# Setup
+## Setup
 
-Tests need node v8.0.0 or higher, as they depend on async/await functionality.
-Interacting with eth is very async-y so await makes it much easier to write
-tests. Depends on truffle and testrpc for testing.
+Requirements:
 
-install truffle: `npm install -g truffle`
+- Node >= v12
+- Yarn
 
-install ganache-cli: `npm install -g ganache-cli`
+```
+$ git clone git@github.com:centrehq/centre-tokens.git
+$ cd centre-tokens
+$ npm i -g yarn       # Install yarn if you don't already have it
+$ yarn install        # Install dependencies
+```
 
-install project npm dependencies: `npm install`
+## Testing
 
-# Testing
+First, make sure Ganache is running.
 
-All tests are run with: `npm run truffle-test`
+```
+$ yarn ganache
+```
 
-or run a specific file of tests with: `npm run truffle-test -- [file]`
+Run all tests:
 
-to generate test coverage on all tests run: `npm test`
+```
+$ yarn test
+```
 
-# Contracts
+To run tests in a specific file, run:
+
+```
+$ yarn test [path/to/file]
+```
+
+to generate test coverage, run:
+
+```
+$ yarn coverage
+```
+
+## Contracts
 
 The implementation uses 2 separate contracts - a proxy contract
-(`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`). This
+(`FiatTokenProxy.sol`) and an implementation contract (`FiatToken.sol`). This
 allows upgrading the contract, as a new implementation contact can be deployed
 and the Proxy updated to point to it.
 
-## FiatToken
+### FiatToken
 
 The FiatToken offers a number of capabilities, which briefly are described
 below. There are more [detailed design docs](./doc/tokendesign.md) in the `doc`

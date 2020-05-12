@@ -7,10 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "dev": "lite-server",
-    "coverage": "yarn run coverage",
-    "test": "scripts/start-ganache.sh && truffle test"
     "fmt": "prettier --write **/*.sol **/*.js **/*.json **/*.md *.js *.json *.md",
+    "coverage": "truffle run coverage",
+    "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
+    "test": "truffle test"
   },
   "repository": {
     "type": "git",

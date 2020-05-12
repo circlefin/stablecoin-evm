@@ -1,7 +1,5 @@
 var tokenUtils = require("./TokenTestUtils");
-var BigNumber = require("bignumber.js");
-var assertDiff = require("assert-diff");
-assertDiff.options.strict = true;
+var BN = require("bn.js");
 
 var bigZero = tokenUtils.bigZero;
 var bigHundred = tokenUtils.bigHundred;
@@ -67,15 +65,12 @@ async function run_tests(newToken, accounts) {
     customVars = [
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
-      {
-        variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount),
-      },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "balances.pauserAccount", expectedValue: new BN(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newToken], [customVars]);
@@ -105,23 +100,17 @@ async function run_tests(newToken, accounts) {
 
     assert.equal(await newProxiedToken.newBool(), true);
     assert.equal(await newProxiedToken.newAddress(), pauserAccount);
-    assert.equal(
-      new BigNumber(12).isEqualTo(await newProxiedToken.newUint()),
-      true
-    );
+    assert.equal(new BN(12).eq(await newProxiedToken.newUint()), true);
 
     customVars = [
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
-      {
-        variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount),
-      },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "balances.pauserAccount", expectedValue: new BN(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newProxiedToken], [customVars]);
@@ -153,10 +142,7 @@ async function run_tests(newToken, accounts) {
 
     assert.equal(await newProxiedToken.newBool(), true);
     assert.equal(await newProxiedToken.newAddress(), pauserAccount);
-    assert.equal(
-      new BigNumber(12).isEqualTo(await newProxiedToken.newUint()),
-      true
-    );
+    assert.equal(new BN(12).eq(await newProxiedToken.newUint()), true);
 
     await newProxiedToken.setNewAddress(masterMinterAccount);
     assert.equal(await newProxiedToken.newAddress(), masterMinterAccount);
@@ -164,15 +150,15 @@ async function run_tests(newToken, accounts) {
     customVars = [
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
         variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newProxiedToken], [customVars]);
@@ -316,15 +302,15 @@ async function run_tests(newToken, accounts) {
     customVars = [
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount - 1),
+        expectedValue: new BN(amount - mintAmount - 1),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
         variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount + 1),
+        expectedValue: new BN(mintAmount + 1),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount + 1) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount + 1) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
     await checkVariables([newToken], [customVars]);
@@ -366,21 +352,24 @@ async function run_tests(newToken, accounts) {
     customVars = [
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: new BigNumber(amount - mintAmount),
+        expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
         variable: "balances.pauserAccount",
-        expectedValue: new BigNumber(mintAmount),
+        expectedValue: new BN(mintAmount),
       },
-      { variable: "totalSupply", expectedValue: new BigNumber(mintAmount) },
+      { variable: "totalSupply", expectedValue: new BN(mintAmount) },
     ];
     await checkVariables([sameToken], [customVars]);
   });
 
   it("upt009 should check that admin is set correctly by proxy constructor", async function () {
-    assert.equal(await getAdmin(token), upgraderAccount);
+    assert.equal(
+      web3.utils.toChecksumAddress(await getAdmin(token)),
+      upgraderAccount
+    );
   });
 
   it("upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result", async function () {

@@ -5,12 +5,10 @@ var name = "Sample Fiat Token";
 var symbol = "C-USD";
 var currency = "USD";
 var decimals = 2;
-var BigNumber = require("bignumber.js");
+var BN = require("bn.js");
 var trueInStorageFormat = "0x01";
-var bigZero = new BigNumber(0);
-var bigHundred = new BigNumber(100);
-var assertDiff = require("assert-diff");
-assertDiff.options.strict = true;
+var bigZero = new BN(0);
+var bigHundred = new BN(100);
 var Q = require("q");
 var FiatToken = artifacts.require("FiatTokenV1");
 var UpgradedFiatToken = artifacts.require("FiatTokenV2");
@@ -22,19 +20,20 @@ var FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
 // TODO: test really big numbers  Does this still have to be done??
 
-var deployerAccount = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // accounts[0]
-var arbitraryAccount = "0xffcf8fdee72ac11b5c542428b35eef5769c409f0"; // accounts[1]
+const nullAccount = "0x0000000000000000000000000000000000000000";
+var deployerAccount = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"; // accounts[0]
+var arbitraryAccount = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // accounts[1]
 var arbitraryAccountPrivateKey =
   "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-var tokenOwnerAccount = "0xe11ba2b4d45eaed5996cd0823791e0c93114882d"; // accounts[3]
-var blacklisterAccount = "0xd03ea8624c8c5987235048901fb614fdca89b117"; // accounts[4] Why Multiple blacklisterAccount??
-var arbitraryAccount2 = "0x95ced938f7991cd0dfcb48f0a06a40fa1af46ebc"; // accounts[5]
-var masterMinterAccount = "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9"; // accounts[6]
-var minterAccount = "0x28a8746e75304c0780e011bed21c72cd78cd535e"; // accounts[7]
-var pauserAccount = "0xaca94ef8bd5ffee41947b4585a84bda5a3d3da6e"; // accounts[8]
-//var blacklisterAccount = "0x1df62f291b2e969fb0849d99d9ce41e2f137006e"; // accounts[9]
+var tokenOwnerAccount = "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d"; // accounts[3]
+var blacklisterAccount = "0xd03ea8624C8C5987235048901fB614fDcA89b117"; // accounts[4] Why Multiple blacklisterAccount??
+var arbitraryAccount2 = "0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC"; // accounts[5]
+var masterMinterAccount = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // accounts[6]
+var minterAccount = "0x28a8746e75304c0780E011BEd21C72cD78cd535E"; // accounts[7]
+var pauserAccount = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"; // accounts[8]
+//var blacklisterAccount = "0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e"; // accounts[9]
 
-var proxyOwnerAccount = "0x2f560290fef1b3ada194b6aa9c40aa71f8e95598"; // accounts[14]
+var proxyOwnerAccount = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598"; // accounts[14]
 var upgraderAccount = proxyOwnerAccount; // accounts[14]
 
 var deployerAccountPrivateKey =
@@ -66,12 +65,6 @@ var adminSlot =
   "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
 var implSlot =
   "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3";
-const should = require("chai")
-  .use(require("chai-as-promised"))
-  .use(require("chai-bignumber")(BigNumber))
-  .should();
-
-var BigNumber = require("bignumber.js");
 
 // set to true to enable verbose logging in the tests
 var debugLogging = false;
@@ -249,7 +242,7 @@ function buildExpectedState(token, customVars) {
     name: name,
     symbol: symbol,
     currency: currency,
-    decimals: new BigNumber(decimals),
+    decimals: new BN(decimals),
     masterMinter: masterMinterAccount,
     pauser: pauserAccount,
     blacklister: blacklisterAccount,
@@ -391,6 +384,27 @@ function buildExpectedState(token, customVars) {
   return expectedState;
 }
 
+// BN-aware deep comparison
+function checkState(actual, expected, prefix) {
+  for (const k in actual) {
+    if (actual.hasOwnProperty(k)) {
+      const path = prefix ? prefix + "." + k : k;
+      const actualV = actual[k];
+      const expectedV = expected[k];
+      if (typeof actualV === "object" && !BN.isBN(actualV)) {
+        checkState(actualV, expectedV, path);
+      } else {
+        const msg = `expected ${path} to equal ${expectedV}, got ${actualV}`;
+        if (BN.isBN(actualV)) {
+          assert.isTrue(actualV.eq(expectedV), msg);
+        } else {
+          assert.equal(actualV, expectedV, msg);
+        }
+      }
+    }
+  }
+}
+
 // For testing variance of specific variables from their default values.
 // customVars is an array of objects of the form,
 // {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
@@ -411,11 +425,7 @@ async function checkVariables(_tokens, _customVars) {
     }
 
     let actualState = await getActualState(token);
-    assertDiff.deepEqual(
-      actualState,
-      expectedState,
-      "difference between expected and actual state"
-    );
+    checkState(actualState, expectedState);
 
     // Check that sum of individual balances equals totalSupply
     var accounts = [
@@ -430,13 +440,17 @@ async function checkVariables(_tokens, _customVars) {
     var balanceSum = bigZero;
     var x;
     for (x = 0; x < accounts.length; x++) {
-      balanceSum = balanceSum.plus(
-        new BigNumber(await token.balanceOf(accounts[x]))
-      );
+      balanceSum = balanceSum.add(await token.balanceOf(accounts[x]));
     }
-    var totalSupply = new BigNumber(await token.totalSupply());
-    assert(balanceSum.isEqualTo(totalSupply));
+    var totalSupply = await token.totalSupply();
+    assert(balanceSum.eq(totalSupply));
   }
+}
+
+function hexToAddress(hex) {
+  return web3.utils.toChecksumAddress(
+    "0x" + hex.replace(/^0x/, "").padStart(40, "0")
+  );
 }
 
 // build up actualState object to compare to expectedState object
@@ -629,12 +643,12 @@ async function getActualState(token) {
       symbol: symbol,
       currency: currency,
       decimals: decimals,
-      masterMinter: masterMinter,
-      pauser: pauser,
-      blacklister: blacklister,
-      tokenOwner: tokenOwner,
-      proxiedTokenAddress: proxiedTokenAddress,
-      upgrader: upgrader,
+      masterMinter: hexToAddress(masterMinter),
+      pauser: hexToAddress(pauser),
+      blacklister: hexToAddress(blacklister),
+      tokenOwner: hexToAddress(tokenOwner),
+      proxiedTokenAddress: hexToAddress(proxiedTokenAddress),
+      upgrader: hexToAddress(upgrader),
       initializedV1: initializedV1,
       balances: {
         arbitraryAccount: balancesA,
@@ -776,7 +790,7 @@ async function mintRaw(token, to, amount, minter) {
   /*  let totalSupply = await token.totalSupply();
       totalSupply.should.be.bignumber.equal(initialTotalSupply);
       let minterAllowance = await token.minterAllowance(minter);
-      assert.isTrue(new BigNumber(initialMinterAllowance).minus(new BigNumber(amount)).isEqualTo(new BigNumber(minterAllowance)));*/
+      assert.isTrue(new BN(initialMinterAllowance).sub(new BN(amount)).eq(new BN(minterAllowance)));*/
 }
 
 async function blacklist(token, account) {
@@ -800,13 +814,13 @@ async function setLongDecimalFeesTransferWithFees(
   feeBase = 1000000;
   await token.updateTransferFee(fee, feeBase);
   let allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+  assert.isTrue(new BN(allowed).eq(new BN(0)));
   await mint(token, ownerAccount, 1900);
   let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
 
   await token.approve(arbitraryAccount, 1500);
   allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(1500)));
+  assert.isTrue(new BN(allowed).eq(new BN(1500)));
 
   let transfer = await token.transfer(arbitraryAccount, 1000, {
     from: ownerAccount,
@@ -827,20 +841,20 @@ async function setLongDecimalFeesTransferWithFees(
   assert.equal(balance3, 1000);
   let balanceFeeAccount = await token.balanceOf(feeAccount);
   assert.isTrue(
-    new BigNumber(balanceFeeAccount)
-      .minus(new BigNumber(initialBalanceFeeAccount))
-      .isEqualTo(new BigNumber(feeAmount))
+    new BN(balanceFeeAccount)
+      .sub(new BN(initialBalanceFeeAccount))
+      .eq(new BN(feeAmount))
   );
 }
 
 async function sampleTransfer(token, ownerAccount, arbitraryAccount, minter) {
   let allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+  assert.isTrue(new BN(allowed).eq(new BN(0)));
   await mint(token, ownerAccount, 1900, minter);
 
   await token.approve(arbitraryAccount, 1500);
   allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(1500)));
+  assert.isTrue(new BN(allowed).eq(new BN(1500)));
 
   let transfer = await token.transfer(arbitraryAccount, 1000, {
     from: ownerAccount,
@@ -864,12 +878,12 @@ async function transferFromWithFees(
   feeBase = 10000;
   await token.updateTransferFee(fee, feeBase);
   let allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+  assert.isTrue(new BN(allowed).eq(new BN(0)));
   await mint(token, ownerAccount, 900, minter);
   let initialBalanceFeeAccount = await token.balanceOf(feeAccount);
   await token.approve(arbitraryAccount, 634);
   allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(634)));
+  assert.isTrue(new BN(allowed).eq(new BN(634)));
 
   transfer = await token.transferFrom(ownerAccount, arbitraryAccount, 534, {
     from: arbitraryAccount,
@@ -880,19 +894,15 @@ async function transferFromWithFees(
 
   let balance0 = await token.balanceOf(ownerAccount);
   assert.isTrue(
-    new BigNumber(balance0).isEqualTo(
-      new BigNumber(900)
-        .minus(new BigNumber(534))
-        .minus(new BigNumber(feeAmount))
-    )
+    new BN(balance0).eq(new BN(900).sub(new BN(534)).sub(new BN(feeAmount)))
   );
   let balance3 = await token.balanceOf(arbitraryAccount);
-  assert.isTrue(new BigNumber(balance3).isEqualTo(new BigNumber(534)));
+  assert.isTrue(new BN(balance3).eq(new BN(534)));
   let balanceFeeAccount = await token.balanceOf(feeAccount);
   assert.isTrue(
-    new BigNumber(balanceFeeAccount)
-      .minus(new BigNumber(initialBalanceFeeAccount))
-      .isEqualTo(new BigNumber(feeAmount))
+    new BN(balanceFeeAccount)
+      .sub(new BN(initialBalanceFeeAccount))
+      .eq(new BN(feeAmount))
   );
 }
 
@@ -903,11 +913,11 @@ async function sampleTransferFrom(
   minter
 ) {
   let allowed = await token.allowance.call(ownerAccount, arbitraryAccount); // TODO not this
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(0)));
+  assert.isTrue(new BN(allowed).eq(new BN(0)));
   await mint(token, ownerAccount, 900, minter); // TODO maybe this
   await token.approve(arbitraryAccount, 634); // TODO not this
   allowed = await token.allowance.call(ownerAccount, arbitraryAccount); // TODO not this
-  assert.isTrue(new BigNumber(allowed).isEqualTo(new BigNumber(634)));
+  assert.isTrue(new BN(allowed).eq(new BN(634)));
 
   let transfer = await token.transferFrom(ownerAccount, arbitraryAccount, 534, {
     from: arbitraryAccount,
@@ -916,13 +926,9 @@ async function sampleTransferFrom(
   checkTransferEvents(transfer, ownerAccount, arbitraryAccount, 534);
 
   let balance0 = await token.balanceOf(ownerAccount);
-  assert.isTrue(
-    new BigNumber(balance0).isEqualTo(
-      new BigNumber(900).minus(new BigNumber(534))
-    )
-  );
+  assert.isTrue(new BN(balance0).eq(new BN(900).sub(new BN(534))));
   let balance3 = await token.balanceOf(arbitraryAccount);
-  assert.isTrue(new BigNumber(balance3).isEqualTo(new BigNumber(534)));
+  assert.isTrue(new BN(balance3).eq(new BN(534)));
 }
 
 async function approve(token, to, amount, from) {
@@ -964,7 +970,7 @@ async function customInitializeTokenWithProxy(
   const proxy = await FiatTokenProxy.new(rawToken.address, {
     from: proxyOwnerAccount,
   });
-  proxiedToken = await FiatToken.at(proxy.address);
+  const proxiedToken = await FiatToken.at(proxy.address);
   await proxiedToken.initialize(
     name,
     symbol,
@@ -990,7 +996,7 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
     proxyUpgraderAccount = proxyOwnerAccount;
   }
   await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
-  proxiedToken = await FiatToken.at(proxy.address);
+  const proxiedToken = await FiatToken.at(proxy.address);
   assert.equal(proxiedToken.address, proxy.address);
   return (tokenConfig = {
     proxy: proxy,
@@ -1031,41 +1037,37 @@ function encodeCall(name, arguments, values) {
   return "0x" + methodId + params;
 }
 
-function getAdmin(proxy) {
-  let adm = web3.eth.getStorageAt(proxy.address, adminSlot);
-  return adm;
+async function getAdmin(proxy) {
+  let adm = await web3.eth.getStorageAt(proxy.address, adminSlot);
+  return web3.utils.toChecksumAddress("0x" + adm.slice(2).padStart(40, "0"));
 }
 
-function getImplementation(proxy) {
-  let impl = web3.eth.getStorageAt(proxy.address, implSlot);
-  return impl;
+async function getImplementation(proxy) {
+  let impl = await web3.eth.getStorageAt(proxy.address, implSlot);
+  return web3.utils.toChecksumAddress("0x" + impl.slice(2).padStart(40, "0"));
 }
 
 async function getInitializedV1(token) {
-  var slot8Data = await web3.eth.getStorageAt(token.address, 8);
-  var slot8DataLength = slot8Data.length;
-  var initialized;
-  var masterMinterStart;
-  var masterMinterAddress;
-  if (slot8DataLength == 4) {
-    //Validate proxy not yet initialized
+  const slot8Data = await web3.eth.getStorageAt(token.address, 8);
+  let initialized;
+
+  if (slot8Data === "0x0") {
+    // validate proxy not yet initialized
     for (var i = 0; i <= 20; i++) {
-      assert.equal("0x00", await web3.eth.getStorageAt(token.address, i));
+      assert.equal("0x0", await web3.eth.getStorageAt(token.address, i));
     }
-    initialized = slot8Data;
+    initialized = "0x00";
   } else {
-    if (slot8DataLength == 44) {
-      initialized = "0x" + slot8Data.substring(2, 4); // first 2 hex-chars after 0x
-      masterMinterStart = 4;
-    } else if (slot8DataLength == 40) {
-      initialized = "0x00";
-      masterMinterStart = 2;
-    } else {
-      assert.fail("slot8Data incorrect size");
+    const slot8DataPadded = slot8Data.slice(2).padStart(42, "0");
+    if (slot8DataPadded.length != 42) {
+      assert.fail("slot8Data unexpected size");
     }
-    masterMinterAddress =
-      "0x" + slot8Data.substring(masterMinterStart, masterMinterStart + 40);
-    assert.equal(await token.masterMinter.call(), masterMinterAddress);
+    const masterMinterAddress = await token.masterMinter.call();
+    assert.isTrue(
+      slot8DataPadded.indexOf(masterMinterAddress.slice(2).toLowerCase()) === 2
+    );
+
+    initialized = "0x" + slot8DataPadded.slice(0, 2);
   }
   return initialized;
 }
@@ -1124,6 +1126,7 @@ module.exports = {
   expectJump: expectJump,
   encodeCall: encodeCall,
   getInitializedV1: getInitializedV1,
+  nullAccount: nullAccount,
   deployerAccount: deployerAccount,
   arbitraryAccount: arbitraryAccount,
   tokenOwnerAccount: tokenOwnerAccount,
