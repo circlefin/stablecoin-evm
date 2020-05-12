@@ -1,32 +1,34 @@
 /**
-* Copyright CENTRE SECZ 2018
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
-* of this software and associated documentation files (the "Software"), to deal 
-* in the Software without restriction, including without limitation the rights 
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is furnished to 
-* do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all 
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
-* CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ * Copyright CENTRE SECZ 2018-2020
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 pragma solidity ^0.4.24;
 
-import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
-import './Ownable.sol';
-import './Blacklistable.sol';
+import "./Ownable.sol";
+import "./Blacklistable.sol";
 import "./Pausable.sol";
+
 
 /**
  * @title FiatToken
@@ -83,7 +85,7 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
 
     /**
      * @dev Throws if called by any account other than a minter
-    */
+     */
     modifier onlyMinters() {
         require(minters[msg.sender] == true);
         _;
@@ -92,10 +94,18 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
     /**
      * @dev Function to mint tokens
      * @param _to The address that will receive the minted tokens.
-     * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
+     * @param _amount The amount of tokens to mint. Must be less than or equal
+     * to the minterAllowance of the caller.
      * @return A boolean that indicates if the operation was successful.
-    */
-    function mint(address _to, uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) notBlacklisted(_to) public returns (bool) {
+     */
+    function mint(address _to, uint256 _amount)
+        public
+        whenNotPaused
+        onlyMinters
+        notBlacklisted(msg.sender)
+        notBlacklisted(_to)
+        returns (bool)
+    {
         require(_to != address(0));
         require(_amount > 0);
 
@@ -112,7 +122,7 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
 
     /**
      * @dev Throws if called by any account other than the masterMinter
-    */
+     */
     modifier onlyMasterMinter() {
         require(msg.sender == masterMinter);
         _;
@@ -121,15 +131,15 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
     /**
      * @dev Get minter allowance for an account
      * @param minter The address of the minter
-    */
+     */
     function minterAllowance(address minter) public view returns (uint256) {
         return minterAllowed[minter];
     }
 
     /**
      * @dev Checks if account is a minter
-     * @param account The address to check    
-    */
+     * @param account The address to check
+     */
     function isMinter(address account) public view returns (bool) {
         return minters[account];
     }
@@ -138,14 +148,18 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
      * @dev Get allowed amount for an account
      * @param owner address The account owner
      * @param spender address The account spender
-    */
-    function allowance(address owner, address spender) public view returns (uint256) {
+     */
+    function allowance(address owner, address spender)
+        public
+        view
+        returns (uint256)
+    {
         return allowed[owner][spender];
     }
 
     /**
      * @dev Get totalSupply of token
-    */
+     */
     function totalSupply() public view returns (uint256) {
         return totalSupply_;
     }
@@ -153,7 +167,7 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
     /**
      * @dev Get token balance of an account
      * @param account address The account
-    */
+     */
     function balanceOf(address account) public view returns (uint256) {
         return balances[account];
     }
@@ -161,8 +175,14 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
     /**
      * @dev Adds blacklisted check to approve
      * @return True if the operation was successful.
-    */
-    function approve(address _spender, uint256 _value) whenNotPaused notBlacklisted(msg.sender) notBlacklisted(_spender) public returns (bool) {
+     */
+    function approve(address _spender, uint256 _value)
+        public
+        whenNotPaused
+        notBlacklisted(msg.sender)
+        notBlacklisted(_spender)
+        returns (bool)
+    {
         allowed[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
@@ -174,8 +194,19 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
      * @return bool success
-    */
-    function transferFrom(address _from, address _to, uint256 _value) whenNotPaused notBlacklisted(_to) notBlacklisted(msg.sender) notBlacklisted(_from) public returns (bool) {
+     */
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    )
+        public
+        whenNotPaused
+        notBlacklisted(_to)
+        notBlacklisted(msg.sender)
+        notBlacklisted(_from)
+        returns (bool)
+    {
         require(_to != address(0));
         require(_value <= balances[_from]);
         require(_value <= allowed[_from][msg.sender]);
@@ -192,8 +223,14 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
      * @param _to The address to transfer to.
      * @param _value The amount to be transferred.
      * @return bool success
-    */
-    function transfer(address _to, uint256 _value) whenNotPaused notBlacklisted(msg.sender) notBlacklisted(_to) public returns (bool) {
+     */
+    function transfer(address _to, uint256 _value)
+        public
+        whenNotPaused
+        notBlacklisted(msg.sender)
+        notBlacklisted(_to)
+        returns (bool)
+    {
         require(_to != address(0));
         require(_value <= balances[msg.sender]);
 
@@ -208,8 +245,13 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
      * @param minter The address of the minter
      * @param minterAllowedAmount The minting amount allowed for the minter
      * @return True if the operation was successful.
-    */
-    function configureMinter(address minter, uint256 minterAllowedAmount) whenNotPaused onlyMasterMinter public returns (bool) {
+     */
+    function configureMinter(address minter, uint256 minterAllowedAmount)
+        public
+        whenNotPaused
+        onlyMasterMinter
+        returns (bool)
+    {
         minters[minter] = true;
         minterAllowed[minter] = minterAllowedAmount;
         emit MinterConfigured(minter, minterAllowedAmount);
@@ -220,8 +262,12 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
      * @dev Function to remove a minter
      * @param minter The address of the minter to remove
      * @return True if the operation was successful.
-    */
-    function removeMinter(address minter) onlyMasterMinter public returns (bool) {
+     */
+    function removeMinter(address minter)
+        public
+        onlyMasterMinter
+        returns (bool)
+    {
         minters[minter] = false;
         minterAllowed[minter] = 0;
         emit MinterRemoved(minter);
@@ -233,8 +279,13 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
      * Validates that caller is a minter and that sender is not blacklisted
      * amount is less than or equal to the minter's account balance
      * @param _amount uint256 the amount of tokens to be burned
-    */
-    function burn(uint256 _amount) whenNotPaused onlyMinters notBlacklisted(msg.sender) public {
+     */
+    function burn(uint256 _amount)
+        public
+        whenNotPaused
+        onlyMinters
+        notBlacklisted(msg.sender)
+    {
         uint256 balance = balances[msg.sender];
         require(_amount > 0);
         require(balance >= _amount);
@@ -245,7 +296,7 @@ contract FiatTokenV1 is Ownable, ERC20, Pausable, Blacklistable {
         emit Transfer(msg.sender, address(0), _amount);
     }
 
-    function updateMasterMinter(address _newMasterMinter) onlyOwner public {
+    function updateMasterMinter(address _newMasterMinter) public onlyOwner {
         require(_newMasterMinter != address(0));
         masterMinter = _newMasterMinter;
         emit MasterMinterChanged(masterMinter);

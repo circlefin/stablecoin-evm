@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "lite-server",
+    "fmt": "prettier --write **/*.sol **/*.js **/*.json *.js *.json",
     "truffle-test": "scripts/start-ganache.sh && truffle test",
     "test": "scripts/start-ganache.sh && ./node_modules/.bin/solidity-coverage"
   },
@@ -48,6 +49,8 @@
     "googleapis": "^27.0.0",
     "lite-server": "^2.4.0",
     "mocha": "^5.2.0",
+    "prettier": "2.0.5",
+    "prettier-plugin-solidity": "^1.0.0-alpha.51",
     "solidity-coverage": "^0.5.0"
   }
 }
