@@ -19,6 +19,12 @@
         "tabWidth": 4,
         "explicitTypes": "always"
       }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "proseWrap": "always"
+      }
     }
   ]
 }
