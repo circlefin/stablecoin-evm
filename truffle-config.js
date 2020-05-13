@@ -1,7 +1,13 @@
-// INFURA Setup - see validate/README.validate.md for more info
+process.env.TS_NODE_FILES = "true";
+require("ts-node/register/transpile-only");
+// Fix Typescript callsite reporting
+Object.defineProperty(Error, "prepareStackTrace", { writable: false });
+
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const mnemonic = "talisman";
 const fs = require("fs");
+
+// INFURA Setup - see validate/README.validate.md for more info
 let infuraKey = "none";
 try {
   infuraKey = fs.readFileSync("./validate/apikey.infura", "utf8");

@@ -21,7 +21,8 @@ $ yarn install        # Install dependencies
 To check code for problems:
 
 ```
-$ yarn lint
+$ yarn typecheck      # Type-check TypeScript code
+$ yarn lint           # Check JavaScript and TypeScript code
 $ yarn lint --fix     # Fix problems where possible
 ```
 
@@ -29,6 +30,14 @@ To auto-format code:
 
 ```
 $ yarn fmt
+```
+
+## TypeScript type definition files for the contracts
+
+To generate type definitions:
+
+```
+$ yarn compile && yarn typechain
 ```
 
 ## Testing

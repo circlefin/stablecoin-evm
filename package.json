@@ -7,8 +7,11 @@
     "test": "test"
   },
   "scripts": {
-    "lint": "eslint '**/*.js' '*.js'",
-    "fmt": "prettier --write '**/*.sol' '**/*.js' '**/*.json' '**/*.md' '*.js' '*.json' '*.md'",
+    "compile": "rm -rf './build' && truffle compile",
+    "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
+    "typecheck": "tsc -p . --noEmit",
+    "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
+    "fmt": "prettier --write './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
     "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
     "test": "truffle test",
     "coverage": "truffle run coverage"
@@ -30,6 +33,11 @@
   },
   "devDependencies": {
     "@truffle/hdwallet-provider": "^1.0.35",
+    "@typechain/truffle-v5": "^2.0.1",
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
     "chai": "^4.2.0",
     "diff": "^4.0.2",
     "eslint": "^7.0.0",
@@ -43,13 +51,17 @@
     "ethereumjs-abi": "^0.6.8",
     "ethereumjs-tx": "^2.1.2",
     "ganache-cli": "^6.9.1",
-    "googleapis": "^50.0.0",
+    "googleapis": "^51.0.0",
     "lodash": "^4.17.15",
     "prettier": "2.0.5",
     "prettier-plugin-solidity": "1.0.0-alpha.51",
     "q": "^1.5.1",
     "solidity-coverage": "^0.7.5",
-    "truffle": "^5.1.24"
+    "truffle": "^5.1.24",
+    "ts-node": "^8.10.1",
+    "typechain": "^2.0.0",
+    "typescript": "^3.9.2",
+    "web3": "^1.2.7"
   },
   "engines": {
     "node": ">= 12.0.0",
