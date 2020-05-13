@@ -17,7 +17,7 @@ const {
   proxyOwnerAccount,
   initializeTokenWithProxy,
   encodeCall,
-  FiatToken,
+  FiatTokenV1,
   UpgradedFiatToken,
   UpgradedFiatTokenNewFields,
 } = require("./TokenTestUtils");
@@ -129,7 +129,7 @@ async function run_tests(newToken, _accounts) {
     await expectRevert(
       proxy.upgradeTo(upgradedToken.address, { from: masterMinterAccount })
     );
-    const finalToken = await FiatToken.at(proxy.address);
+    const finalToken = await FiatTokenV1.at(proxy.address);
     const implementation = await proxy.implementation({
       from: proxyOwnerAccount,
     });
@@ -151,7 +151,7 @@ async function run_tests(newToken, _accounts) {
         from: masterMinterAccount,
       })
     );
-    const finalToken = await FiatToken.at(proxy.address);
+    const finalToken = await FiatTokenV1.at(proxy.address);
     const implementation = await proxy.implementation({
       from: proxyOwnerAccount,
     });

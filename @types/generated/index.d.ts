@@ -8,13 +8,14 @@ import { Erc20BasicContract } from "./Erc20Basic";
 import { FiatTokenProxyContract } from "./FiatTokenProxy";
 import { FiatTokenV1Contract } from "./FiatTokenV1";
 import { FiatTokenV2Contract } from "./FiatTokenV2";
-import { FiatTokenV2NewFieldsNewLogicTestContract } from "./FiatTokenV2NewFieldsNewLogicTest";
-import { FiatTokenV2NewFieldsTestContract } from "./FiatTokenV2NewFieldsTest";
 import { MigrationsContract } from "./Migrations";
 import { OwnableContract } from "./Ownable";
 import { PausableContract } from "./Pausable";
 import { ProxyContract } from "./Proxy";
 import { UpgradeabilityProxyContract } from "./UpgradeabilityProxy";
+import { UpgradedFiatTokenContract } from "./UpgradedFiatToken";
+import { UpgradedFiatTokenNewFieldsNewLogicTestContract } from "./UpgradedFiatTokenNewFieldsNewLogicTest";
+import { UpgradedFiatTokenNewFieldsTestContract } from "./UpgradedFiatTokenNewFieldsTest";
 
 declare global {
   namespace Truffle {
@@ -28,17 +29,18 @@ declare global {
       require(name: "FiatTokenProxy"): FiatTokenProxyContract;
       require(name: "FiatTokenV1"): FiatTokenV1Contract;
       require(name: "FiatTokenV2"): FiatTokenV2Contract;
-      require(
-        name: "FiatTokenV2NewFieldsNewLogicTest"
-      ): FiatTokenV2NewFieldsNewLogicTestContract;
-      require(
-        name: "FiatTokenV2NewFieldsTest"
-      ): FiatTokenV2NewFieldsTestContract;
       require(name: "Migrations"): MigrationsContract;
       require(name: "Ownable"): OwnableContract;
       require(name: "Pausable"): PausableContract;
       require(name: "Proxy"): ProxyContract;
       require(name: "UpgradeabilityProxy"): UpgradeabilityProxyContract;
+      require(name: "UpgradedFiatToken"): UpgradedFiatTokenContract;
+      require(
+        name: "UpgradedFiatTokenNewFieldsNewLogicTest"
+      ): UpgradedFiatTokenNewFieldsNewLogicTestContract;
+      require(
+        name: "UpgradedFiatTokenNewFieldsTest"
+      ): UpgradedFiatTokenNewFieldsTestContract;
     }
   }
 }
@@ -56,14 +58,6 @@ export {
 } from "./FiatTokenProxy";
 export { FiatTokenV1Contract, FiatTokenV1Instance } from "./FiatTokenV1";
 export { FiatTokenV2Contract, FiatTokenV2Instance } from "./FiatTokenV2";
-export {
-  FiatTokenV2NewFieldsNewLogicTestContract,
-  FiatTokenV2NewFieldsNewLogicTestInstance
-} from "./FiatTokenV2NewFieldsNewLogicTest";
-export {
-  FiatTokenV2NewFieldsTestContract,
-  FiatTokenV2NewFieldsTestInstance
-} from "./FiatTokenV2NewFieldsTest";
 export { MigrationsContract, MigrationsInstance } from "./Migrations";
 export { OwnableContract, OwnableInstance } from "./Ownable";
 export { PausableContract, PausableInstance } from "./Pausable";
@@ -72,3 +66,15 @@ export {
   UpgradeabilityProxyContract,
   UpgradeabilityProxyInstance
 } from "./UpgradeabilityProxy";
+export {
+  UpgradedFiatTokenContract,
+  UpgradedFiatTokenInstance
+} from "./UpgradedFiatToken";
+export {
+  UpgradedFiatTokenNewFieldsNewLogicTestContract,
+  UpgradedFiatTokenNewFieldsNewLogicTestInstance
+} from "./UpgradedFiatTokenNewFieldsNewLogicTest";
+export {
+  UpgradedFiatTokenNewFieldsTestContract,
+  UpgradedFiatTokenNewFieldsTestInstance
+} from "./UpgradedFiatTokenNewFieldsTest";

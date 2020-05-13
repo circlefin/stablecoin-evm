@@ -10,7 +10,7 @@ const {
   pauserAccount,
   initializeTokenWithProxy,
   getInitializedV1,
-  FiatToken,
+  FiatTokenV1,
 } = require("./TokenTestUtils");
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -717,7 +717,7 @@ async function run_tests(newToken, _accounts) {
     const newProxy = await FiatTokenProxy.new(rawToken.address, {
       from: arbitraryAccount,
     });
-    const token = await FiatToken.at(newProxy.address);
+    const token = await FiatTokenV1.at(newProxy.address);
     const initialized = await getInitializedV1(token);
     assert.strictEqual("0x00", initialized);
   });

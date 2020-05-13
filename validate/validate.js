@@ -23,7 +23,7 @@ const TOTALSUPPLY = 0;
 const PAUSED = false;
 
 // Name of current implementation artifact as stored in ./build/contracts/*.json
-const FiatToken = artifacts.require("FiatTokenV1");
+const FiatTokenV1 = artifacts.require("FiatTokenV1");
 
 // Name of current proxy artifact as stored in ./build/contracts/*.json
 artifacts.require("FiatTokenProxy");
@@ -86,9 +86,9 @@ function print(name, actual, expected) {
 
 async function Validate() {
   console.log("Connecting to contract...");
-  await FiatToken.at(fiatTokenAddress);
+  await FiatTokenV1.at(fiatTokenAddress);
   console.log("Token found.");
-  const proxiedToken = await FiatToken.at(fiatTokenProxyAddress);
+  const proxiedToken = await FiatTokenV1.at(fiatTokenProxyAddress);
   console.log("Proxied token created.");
 
   // initialized needs to retrieved manually

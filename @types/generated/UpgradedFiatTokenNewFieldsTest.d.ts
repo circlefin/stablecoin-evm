@@ -4,11 +4,11 @@
 import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
-export interface FiatTokenV2NewFieldsTestContract
-  extends Truffle.Contract<FiatTokenV2NewFieldsTestInstance> {
+export interface UpgradedFiatTokenNewFieldsTestContract
+  extends Truffle.Contract<UpgradedFiatTokenNewFieldsTestInstance> {
   "new"(
     meta?: Truffle.TransactionDetails
-  ): Promise<FiatTokenV2NewFieldsTestInstance>;
+  ): Promise<UpgradedFiatTokenNewFieldsTestInstance>;
 }
 
 export interface Mint {
@@ -151,7 +151,7 @@ type AllEvents =
   | OwnershipTransferred
   | Transfer;
 
-export interface FiatTokenV2NewFieldsTestInstance
+export interface UpgradedFiatTokenNewFieldsTestInstance
   extends Truffle.ContractInstance {
   name(txDetails?: Truffle.TransactionDetails): Promise<string>;
 

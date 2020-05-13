@@ -22,54 +22,13 @@
 
 pragma solidity ^0.4.24;
 
-import "./../FiatTokenV1.sol";
+import "../FiatTokenV1.sol";
 
 
 /**
- * @title FiatTokenV2NewFieldsTest
+ * @title UpgradedFiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatTokenV2NewFieldsTest is FiatTokenV1 {
-    bool public newBool;
-    address public newAddress;
-    uint256 public newUint;
-    bool internal initializedV2;
+contract UpgradedFiatToken is FiatTokenV1 {
 
-    function initialize(
-        string _name,
-        string _symbol,
-        string _currency,
-        uint8 _decimals,
-        address _masterMinter,
-        address _pauser,
-        address _blacklister,
-        address _owner,
-        bool _newBool,
-        address _newAddress,
-        uint256 _newUint
-    ) public {
-        super.initialize(
-            _name,
-            _symbol,
-            _currency,
-            _decimals,
-            _masterMinter,
-            _pauser,
-            _blacklister,
-            _owner
-        );
-        initV2(_newBool, _newAddress, _newUint);
-    }
-
-    function initV2(
-        bool _newBool,
-        address _newAddress,
-        uint256 _newUint
-    ) public {
-        require(!initializedV2);
-        newBool = _newBool;
-        newAddress = _newAddress;
-        newUint = _newUint;
-        initializedV2 = true;
-    }
 }

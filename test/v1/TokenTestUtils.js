@@ -4,13 +4,13 @@ const _ = require("lodash");
 const BN = require("bn.js");
 const Q = require("q");
 
-const FiatToken = artifacts.require("FiatTokenV1");
-const UpgradedFiatToken = artifacts.require("FiatTokenV2");
+const FiatTokenV1 = artifacts.require("FiatTokenV1");
+const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
 const UpgradedFiatTokenNewFields = artifacts.require(
-  "FiatTokenV2NewFieldsTest"
+  "UpgradedFiatTokenNewFieldsTest"
 );
 const UpgradedFiatTokenNewFieldsNewLogic = artifacts.require(
-  "FiatTokenV2NewFieldsNewLogicTest"
+  "UpgradedFiatTokenNewFieldsNewLogicTest"
 );
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
@@ -871,7 +871,7 @@ async function customInitializeTokenWithProxy(
   const proxy = await FiatTokenProxy.new(rawToken.address, {
     from: proxyOwnerAccount,
   });
-  const proxiedToken = await FiatToken.at(proxy.address);
+  const proxiedToken = await FiatTokenV1.at(proxy.address);
   await proxiedToken.initialize(
     name,
     symbol,
@@ -897,7 +897,7 @@ async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
     proxyUpgraderAccount = proxyOwnerAccount;
   }
   await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
-  const proxiedToken = await FiatToken.at(proxy.address);
+  const proxiedToken = await FiatTokenV1.at(proxy.address);
   assert.strictEqual(proxiedToken.address, proxy.address);
   return {
     proxy,
@@ -972,7 +972,7 @@ async function getInitializedV1(token) {
 }
 
 module.exports = {
-  FiatToken,
+  FiatTokenV1,
   FiatTokenProxy,
   UpgradedFiatToken,
   UpgradedFiatTokenNewFields,

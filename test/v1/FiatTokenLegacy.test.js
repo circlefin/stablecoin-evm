@@ -26,7 +26,7 @@ const {
   initializeTokenWithProxy,
   upgradeTo,
   UpgradedFiatToken,
-  FiatToken,
+  FiatTokenV1,
   getAdmin,
 } = require("./TokenTestUtils");
 
@@ -35,7 +35,7 @@ async function run_tests(_newToken, accounts) {
   let proxy, token;
 
   beforeEach(async () => {
-    const rawToken = await FiatToken.new();
+    const rawToken = await FiatTokenV1.new();
     const tokenConfig = await initializeTokenWithProxy(rawToken);
     ({ proxy, token } = tokenConfig);
     assert.strictEqual(proxy.address, token.address);

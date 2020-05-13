@@ -1,9 +1,9 @@
-const { UpgradedFiatToken, FiatToken } = require("./TokenTestUtils");
+const { UpgradedFiatToken, FiatTokenV1 } = require("./TokenTestUtils");
 
 // The following helpers make fresh original/upgraded tokens before each test.
 
 async function newToken() {
-  const token = await FiatToken.new();
+  const token = await FiatTokenV1.new();
   return token;
 }
 

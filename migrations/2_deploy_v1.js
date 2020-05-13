@@ -1,5 +1,5 @@
-const FiatTokenV1 = artifacts.require("./FiatTokenV1.sol");
-const FiatTokenProxy = artifacts.require("./FiatTokenProxy.sol");
+const FiatTokenV1 = artifacts.require("FiatTokenV1");
+const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
 // Any address will do, preferably one we generated
 const throwawayAddress = "0x64e078a8aa15a41b85890265648e965de686bae6";

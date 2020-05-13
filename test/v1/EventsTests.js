@@ -1,5 +1,5 @@
 const {
-  FiatToken,
+  FiatTokenV1,
   minterAccount,
   masterMinterAccount,
   arbitraryAccount,
@@ -35,7 +35,7 @@ async function run_tests(_newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {
-    const rawToken = await FiatToken.new();
+    const rawToken = await FiatTokenV1.new();
     const tokenConfig = await initializeTokenWithProxy(rawToken);
     ({ proxy, token } = tokenConfig);
     assert.strictEqual(proxy.address, token.address);
