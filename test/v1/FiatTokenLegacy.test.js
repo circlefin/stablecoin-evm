@@ -1,4 +1,3 @@
-const assert = require("chai").assert;
 const BN = require("bn.js");
 const {
   name,
@@ -32,7 +31,7 @@ const {
 } = require("./TokenTestUtils");
 
 // these tests are for reference and do not track side effects on all variables
-async function run_tests(newToken, accounts) {
+async function run_tests(_newToken, accounts) {
   let proxy, token;
 
   beforeEach(async () => {

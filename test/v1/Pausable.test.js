@@ -1,4 +1,3 @@
-const assert = require("chai").assert;
 const {
   expectRevert,
   deployerAccount,
@@ -8,7 +7,7 @@ const {
 
 const Pausable = artifacts.require("Pausable");
 
-contract("PausableTests", (accounts) => {
+contract("PausableTests", (_accounts) => {
   let pausable;
 
   beforeEach(async () => {

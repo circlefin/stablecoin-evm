@@ -1,4 +1,3 @@
-const assert = require("chai").assert;
 const { Transaction } = require("ethereumjs-tx");
 const {
   expectRevert,
@@ -26,7 +25,7 @@ function mockStringAddressEncode(methodName, address) {
   return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-async function run_tests(newToken, accounts) {
+async function run_tests(newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {

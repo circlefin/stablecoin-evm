@@ -1,4 +1,3 @@
-const assert = require("chai").assert;
 const BN = require("bn.js");
 const {
   checkVariables,
@@ -21,7 +20,7 @@ const maxAmount =
 const maxAmountBN = new BN(maxAmount.slice(2), 16);
 const amount = 100;
 
-async function run_tests(newToken, accounts) {
+async function run_tests(newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {

@@ -1,4 +1,3 @@
-const assert = require("chai").assert;
 const util = require("util");
 const abi = require("ethereumjs-abi");
 const _ = require("lodash");
