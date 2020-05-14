@@ -14,7 +14,8 @@
     "fmt": "prettier --write './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
     "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
     "test": "truffle test",
-    "coverage": "truffle run coverage"
+    "coverage": "truffle run coverage",
+    "solhint": "solhint 'contracts/**/*.sol'"
   },
   "repository": {
     "type": "git",
@@ -56,6 +57,8 @@
     "prettier": "2.0.5",
     "prettier-plugin-solidity": "1.0.0-alpha.51",
     "q": "^1.5.1",
+    "solc": "0.6.7",
+    "solhint": "^3.0.0",
     "solidity-coverage": "^0.7.5",
     "truffle": "^5.1.24",
     "ts-node": "^8.10.1",

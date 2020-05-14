@@ -24,6 +24,7 @@ To check code for problems:
 $ yarn typecheck      # Type-check TypeScript code
 $ yarn lint           # Check JavaScript and TypeScript code
 $ yarn lint --fix     # Fix problems where possible
+$ yarn solhint        # Check Solidity code
 ```
 
 To auto-format code:
