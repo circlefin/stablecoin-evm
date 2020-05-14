@@ -33,6 +33,8 @@ export interface Upgraded {
 type AllEvents = AdminChanged | Upgraded;
 
 export interface FiatTokenProxyInstance extends Truffle.ContractInstance {
+  /**
+   */
   admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
@@ -57,6 +59,8 @@ export interface FiatTokenProxyInstance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
+  /**
+   */
   implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
@@ -111,6 +115,8 @@ export interface FiatTokenProxyInstance extends Truffle.ContractInstance {
   };
 
   methods: {
+    /**
+     */
     admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
@@ -135,6 +141,8 @@ export interface FiatTokenProxyInstance extends Truffle.ContractInstance {
       ): Promise<number>;
     };
 
+    /**
+     */
     implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**

@@ -14,6 +14,7 @@ $ git clone git@github.com:centrehq/centre-tokens.git
 $ cd centre-tokens
 $ npm i -g yarn       # Install yarn if you don't already have it
 $ yarn install        # Install dependencies
+$ yarn setup          # Setup Git hooks
 ```
 
 ## Linting and Formatting

@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "setup": "git config core.hooksPath .githooks",
     "compile": "rm -rf './build' && truffle compile",
     "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
     "typecheck": "tsc -p . --noEmit",
@@ -15,7 +16,8 @@
     "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
     "test": "truffle test",
     "coverage": "truffle run coverage",
-    "solhint": "solhint 'contracts/**/*.sol'"
+    "solhint": "solhint 'contracts/**/*.sol'",
+    "precommit": "yarn typechain && yarn fmt && yarn typecheck && yarn lint && yarn solhint"
   },
   "repository": {
     "type": "git",
