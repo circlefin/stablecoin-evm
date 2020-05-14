@@ -11,15 +11,31 @@ export interface UpgradedFiatTokenNewFieldsTestContract
   ): Promise<UpgradedFiatTokenNewFieldsTestInstance>;
 }
 
-export interface Mint {
-  name: "Mint";
+export interface Approval {
+  name: "Approval";
   args: {
-    minter: string;
-    to: string;
-    amount: BN;
+    owner: string;
+    spender: string;
+    value: BN;
     0: string;
     1: string;
     2: BN;
+  };
+}
+
+export interface Blacklisted {
+  name: "Blacklisted";
+  args: {
+    _account: string;
+    0: string;
+  };
+}
+
+export interface BlacklisterChanged {
+  name: "BlacklisterChanged";
+  args: {
+    newBlacklister: string;
+    0: string;
   };
 }
 
@@ -30,6 +46,26 @@ export interface Burn {
     amount: BN;
     0: string;
     1: BN;
+  };
+}
+
+export interface MasterMinterChanged {
+  name: "MasterMinterChanged";
+  args: {
+    newMasterMinter: string;
+    0: string;
+  };
+}
+
+export interface Mint {
+  name: "Mint";
+  args: {
+    minter: string;
+    to: string;
+    amount: BN;
+    0: string;
+    1: string;
+    2: BN;
   };
 }
 
@@ -51,35 +87,13 @@ export interface MinterRemoved {
   };
 }
 
-export interface MasterMinterChanged {
-  name: "MasterMinterChanged";
+export interface OwnershipTransferred {
+  name: "OwnershipTransferred";
   args: {
-    newMasterMinter: string;
+    previousOwner: string;
+    newOwner: string;
     0: string;
-  };
-}
-
-export interface Blacklisted {
-  name: "Blacklisted";
-  args: {
-    _account: string;
-    0: string;
-  };
-}
-
-export interface UnBlacklisted {
-  name: "UnBlacklisted";
-  args: {
-    _account: string;
-    0: string;
-  };
-}
-
-export interface BlacklisterChanged {
-  name: "BlacklisterChanged";
-  args: {
-    newBlacklister: string;
-    0: string;
+    1: string;
   };
 }
 
@@ -88,38 +102,11 @@ export interface Pause {
   args: {};
 }
 
-export interface Unpause {
-  name: "Unpause";
-  args: {};
-}
-
 export interface PauserChanged {
   name: "PauserChanged";
   args: {
     newAddress: string;
     0: string;
-  };
-}
-
-export interface Approval {
-  name: "Approval";
-  args: {
-    owner: string;
-    spender: string;
-    value: BN;
-    0: string;
-    1: string;
-    2: BN;
-  };
-}
-
-export interface OwnershipTransferred {
-  name: "OwnershipTransferred";
-  args: {
-    previousOwner: string;
-    newOwner: string;
-    0: string;
-    1: string;
   };
 }
 
@@ -135,29 +122,50 @@ export interface Transfer {
   };
 }
 
+export interface UnBlacklisted {
+  name: "UnBlacklisted";
+  args: {
+    _account: string;
+    0: string;
+  };
+}
+
+export interface Unpause {
+  name: "Unpause";
+  args: {};
+}
+
 type AllEvents =
-  | Mint
+  | Approval
+  | Blacklisted
+  | BlacklisterChanged
   | Burn
+  | MasterMinterChanged
+  | Mint
   | MinterConfigured
   | MinterRemoved
-  | MasterMinterChanged
-  | Blacklisted
-  | UnBlacklisted
-  | BlacklisterChanged
-  | Pause
-  | Unpause
-  | PauserChanged
-  | Approval
   | OwnershipTransferred
-  | Transfer;
+  | Pause
+  | PauserChanged
+  | Transfer
+  | UnBlacklisted
+  | Unpause;
 
 export interface UpgradedFiatTokenNewFieldsTestInstance
   extends Truffle.ContractInstance {
-  name(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  /**
+   * Get allowed amount for an account
+   * @param owner address The account owner
+   * @param spender address The account spender
+   */
+  allowance(
+    owner: string,
+    spender: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
 
   /**
    * Adds blacklisted check to approve
-   * @returns True if the operation was successful.
    */
   approve: {
     (
@@ -182,18 +190,20 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
     ): Promise<number>;
   };
 
-  newBool(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+  /**
+   * Get token balance of an account
+   * @param account address The account
+   */
+  balanceOf(
+    account: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
 
   /**
-   * Get totalSupply of token
+   * Adds account to blacklist
+   * @param _account The address to blacklist
    */
-  totalSupply(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-  /**
-   * Removes account from blacklist
-   * @param _account The address to remove from the blacklist
-   */
-  unBlacklist: {
+  blacklist: {
     (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
       Truffle.TransactionResponse<AllEvents>
     >;
@@ -211,12 +221,211 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
     ): Promise<number>;
   };
 
+  blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  /**
+   * allows a minter to burn some of its own tokens Validates that caller is a minter and that sender is not blacklisted amount is less than or equal to the minter's account balance
+   * @param _amount uint256 the amount of tokens to be burned
+   */
+  burn: {
+    (
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Function to add/update a new minter
+   * @param minter The address of the minter
+   * @param minterAllowedAmount The minting amount allowed for the minter
+   */
+  configureMinter: {
+    (
+      minter: string,
+      minterAllowedAmount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      minter: string,
+      minterAllowedAmount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      minter: string,
+      minterAllowedAmount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      minter: string,
+      minterAllowedAmount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  decimals(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+  /**
+   * Checks if account is blacklisted
+   * @param _account The address to check
+   */
+  isBlacklisted(
+    _account: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
+  /**
+   * Checks if account is a minter
+   * @param account The address to check
+   */
+  isMinter(
+    account: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
+
+  masterMinter(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  /**
+   * Function to mint tokens
+   * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
+   * @param _to The address that will receive the minted tokens.
+   */
+  mint: {
+    (
+      _to: string,
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      _to: string,
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      _to: string,
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _to: string,
+      _amount: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Get minter allowance for an account
+   * @param minter The address of the minter
+   */
+  minterAllowance(
+    minter: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
+
+  name(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  newAddress(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  newBool(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+
+  newUint(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+  /**
+   * Tells the address of the owner
+   */
+  owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  /**
+   * called by the owner to pause, triggers stopped state
+   */
+  pause: {
+    (txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+  };
+
+  paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+
+  pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  /**
+   * Function to remove a minter
+   * @param minter The address of the minter to remove
+   */
+  removeMinter: {
+    (minter: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      minter: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      minter: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      minter: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  /**
+   * Get totalSupply of token
+   */
+  totalSupply(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+  /**
+   * transfer token for a specified address
+   * @param _to The address to transfer to.
+   * @param _value The amount to be transferred.
+   */
+  transfer: {
+    (
+      _to: string,
+      _value: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      _to: string,
+      _value: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      _to: string,
+      _value: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _to: string,
+      _value: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
   /**
    * Transfer tokens from one address to another.
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
-   * @returns bool success
    */
   transferFrom: {
     (
@@ -246,31 +455,48 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
   };
 
   /**
-   * Function to remove a minter
-   * @param minter The address of the minter to remove
-   * @returns True if the operation was successful.
+   * Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
    */
-  removeMinter: {
-    (minter: string, txDetails?: Truffle.TransactionDetails): Promise<
+  transferOwnership: {
+    (newOwner: string, txDetails?: Truffle.TransactionDetails): Promise<
       Truffle.TransactionResponse<AllEvents>
     >;
     call(
-      minter: string,
+      newOwner: string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
+    ): Promise<void>;
     sendTransaction(
-      minter: string,
+      newOwner: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      minter: string,
+      newOwner: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
-  decimals(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-  masterMinter(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  /**
+   * Removes account from blacklist
+   * @param _account The address to remove from the blacklist
+   */
+  unBlacklist: {
+    (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      _account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      _account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   /**
    * called by the owner to unpause, returns to normal state
@@ -284,83 +510,38 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
     estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
   };
 
-  /**
-   * Function to mint tokens
-   * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
-   * @param _to The address that will receive the minted tokens.
-   * @returns A boolean that indicates if the operation was successful.
-   */
-  mint: {
-    (
-      _to: string,
-      _amount: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+  updateBlacklister: {
+    (_newBlacklister: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
     call(
-      _to: string,
-      _amount: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
-    sendTransaction(
-      _to: string,
-      _amount: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      _to: string,
-      _amount: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * allows a minter to burn some of its own tokens Validates that caller is a minter and that sender is not blacklisted amount is less than or equal to the minter's account balance
-   * @param _amount uint256 the amount of tokens to be burned
-   */
-  burn: {
-    (
-      _amount: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      _amount: number | BN | string,
+      _newBlacklister: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      _amount: number | BN | string,
+      _newBlacklister: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _amount: number | BN | string,
+      _newBlacklister: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
-  /**
-   * Function to add/update a new minter
-   * @param minter The address of the minter
-   * @param minterAllowedAmount The minting amount allowed for the minter
-   * @returns True if the operation was successful.
-   */
-  configureMinter: {
-    (
-      minter: string,
-      minterAllowedAmount: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+  updateMasterMinter: {
+    (_newMasterMinter: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
     call(
-      minter: string,
-      minterAllowedAmount: number | BN | string,
+      _newMasterMinter: string,
       txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
+    ): Promise<void>;
     sendTransaction(
-      minter: string,
-      minterAllowedAmount: number | BN | string,
+      _newMasterMinter: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      minter: string,
-      minterAllowedAmount: number | BN | string,
+      _newMasterMinter: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -385,194 +566,6 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
-
-  paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
-
-  /**
-   * Get token balance of an account
-   * @param account address The account
-   */
-  balanceOf(
-    account: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
-
-  /**
-   * called by the owner to pause, triggers stopped state
-   */
-  pause: {
-    (txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
-  };
-
-  /**
-   * Get minter allowance for an account
-   * @param minter The address of the minter
-   */
-  minterAllowance(
-    minter: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
-
-  /**
-   * Tells the address of the owner
-   * @returns the address of the owner
-   */
-  owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  /**
-   * transfer token for a specified address
-   * @param _to The address to transfer to.
-   * @param _value The amount to be transferred.
-   * @returns bool success
-   */
-  transfer: {
-    (
-      _to: string,
-      _value: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<Truffle.TransactionResponse<AllEvents>>;
-    call(
-      _to: string,
-      _value: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
-    sendTransaction(
-      _to: string,
-      _value: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      _to: string,
-      _value: number | BN | string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  updateMasterMinter: {
-    (_newMasterMinter: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      _newMasterMinter: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      _newMasterMinter: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      _newMasterMinter: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * Checks if account is a minter
-   * @param account The address to check
-   */
-  isMinter(
-    account: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<boolean>;
-
-  updateBlacklister: {
-    (_newBlacklister: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      _newBlacklister: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      _newBlacklister: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      _newBlacklister: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  newAddress(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  /**
-   * Get allowed amount for an account
-   * @param owner address The account owner
-   * @param spender address The account spender
-   */
-  allowance(
-    owner: string,
-    spender: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
-
-  currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  /**
-   * Allows the current owner to transfer control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
-   */
-  transferOwnership: {
-    (newOwner: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      newOwner: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      newOwner: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      newOwner: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  newUint(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-  /**
-   * Adds account to blacklist
-   * @param _account The address to blacklist
-   */
-  blacklist: {
-    (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      _account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      _account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      _account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * Checks if account is blacklisted
-   * @param _account The address to check
-   */
-  isBlacklisted(
-    _account: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<boolean>;
 
   initV2: {
     (
@@ -602,11 +595,19 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
   };
 
   methods: {
-    name(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    /**
+     * Get allowed amount for an account
+     * @param owner address The account owner
+     * @param spender address The account spender
+     */
+    allowance(
+      owner: string,
+      spender: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
 
     /**
      * Adds blacklisted check to approve
-     * @returns True if the operation was successful.
      */
     approve: {
       (
@@ -631,18 +632,20 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
       ): Promise<number>;
     };
 
-    newBool(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+    /**
+     * Get token balance of an account
+     * @param account address The account
+     */
+    balanceOf(
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
 
     /**
-     * Get totalSupply of token
+     * Adds account to blacklist
+     * @param _account The address to blacklist
      */
-    totalSupply(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-    /**
-     * Removes account from blacklist
-     * @param _account The address to remove from the blacklist
-     */
-    unBlacklist: {
+    blacklist: {
       (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
         Truffle.TransactionResponse<AllEvents>
       >;
@@ -660,12 +663,211 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
       ): Promise<number>;
     };
 
+    blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    /**
+     * allows a minter to burn some of its own tokens Validates that caller is a minter and that sender is not blacklisted amount is less than or equal to the minter's account balance
+     * @param _amount uint256 the amount of tokens to be burned
+     */
+    burn: {
+      (
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Function to add/update a new minter
+     * @param minter The address of the minter
+     * @param minterAllowedAmount The minting amount allowed for the minter
+     */
+    configureMinter: {
+      (
+        minter: string,
+        minterAllowedAmount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        minter: string,
+        minterAllowedAmount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        minter: string,
+        minterAllowedAmount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        minter: string,
+        minterAllowedAmount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    decimals(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+    /**
+     * Checks if account is blacklisted
+     * @param _account The address to check
+     */
+    isBlacklisted(
+      _account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
+    /**
+     * Checks if account is a minter
+     * @param account The address to check
+     */
+    isMinter(
+      account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+
+    masterMinter(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    /**
+     * Function to mint tokens
+     * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
+     * @param _to The address that will receive the minted tokens.
+     */
+    mint: {
+      (
+        _to: string,
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        _to: string,
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        _to: string,
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _to: string,
+        _amount: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Get minter allowance for an account
+     * @param minter The address of the minter
+     */
+    minterAllowance(
+      minter: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
+
+    name(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    newAddress(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    newBool(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+
+    newUint(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+    /**
+     * Tells the address of the owner
+     */
+    owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    /**
+     * called by the owner to pause, triggers stopped state
+     */
+    pause: {
+      (txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+    };
+
+    paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+
+    pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    /**
+     * Function to remove a minter
+     * @param minter The address of the minter to remove
+     */
+    removeMinter: {
+      (minter: string, txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(
+        minter: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        minter: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        minter: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    /**
+     * Get totalSupply of token
+     */
+    totalSupply(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+    /**
+     * transfer token for a specified address
+     * @param _to The address to transfer to.
+     * @param _value The amount to be transferred.
+     */
+    transfer: {
+      (
+        _to: string,
+        _value: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        _to: string,
+        _value: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        _to: string,
+        _value: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _to: string,
+        _value: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
     /**
      * Transfer tokens from one address to another.
      * @param _from address The address which you want to send tokens from
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
-     * @returns bool success
      */
     transferFrom: {
       (
@@ -695,31 +897,48 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
     };
 
     /**
-     * Function to remove a minter
-     * @param minter The address of the minter to remove
-     * @returns True if the operation was successful.
+     * Allows the current owner to transfer control of the contract to a newOwner.
+     * @param newOwner The address to transfer ownership to.
      */
-    removeMinter: {
-      (minter: string, txDetails?: Truffle.TransactionDetails): Promise<
+    transferOwnership: {
+      (newOwner: string, txDetails?: Truffle.TransactionDetails): Promise<
         Truffle.TransactionResponse<AllEvents>
       >;
       call(
-        minter: string,
+        newOwner: string,
         txDetails?: Truffle.TransactionDetails
-      ): Promise<boolean>;
+      ): Promise<void>;
       sendTransaction(
-        minter: string,
+        newOwner: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        minter: string,
+        newOwner: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
 
-    decimals(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-    masterMinter(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    /**
+     * Removes account from blacklist
+     * @param _account The address to remove from the blacklist
+     */
+    unBlacklist: {
+      (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(
+        _account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        _account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _account: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     /**
      * called by the owner to unpause, returns to normal state
@@ -733,175 +952,21 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
       estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
     };
 
-    /**
-     * Function to mint tokens
-     * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
-     * @param _to The address that will receive the minted tokens.
-     * @returns A boolean that indicates if the operation was successful.
-     */
-    mint: {
+    updateBlacklister: {
       (
-        _to: string,
-        _amount: number | BN | string,
+        _newBlacklister: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _to: string,
-        _amount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<boolean>;
-      sendTransaction(
-        _to: string,
-        _amount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        _to: string,
-        _amount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * allows a minter to burn some of its own tokens Validates that caller is a minter and that sender is not blacklisted amount is less than or equal to the minter's account balance
-     * @param _amount uint256 the amount of tokens to be burned
-     */
-    burn: {
-      (
-        _amount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        _amount: number | BN | string,
+        _newBlacklister: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        _amount: number | BN | string,
+        _newBlacklister: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _amount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Function to add/update a new minter
-     * @param minter The address of the minter
-     * @param minterAllowedAmount The minting amount allowed for the minter
-     * @returns True if the operation was successful.
-     */
-    configureMinter: {
-      (
-        minter: string,
-        minterAllowedAmount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        minter: string,
-        minterAllowedAmount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<boolean>;
-      sendTransaction(
-        minter: string,
-        minterAllowedAmount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        minter: string,
-        minterAllowedAmount: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * update the pauser role
-     */
-    updatePauser: {
-      (_newPauser: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(
-        _newPauser: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        _newPauser: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        _newPauser: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
-
-    /**
-     * Get token balance of an account
-     * @param account address The account
-     */
-    balanceOf(
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
-
-    /**
-     * called by the owner to pause, triggers stopped state
-     */
-    pause: {
-      (txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
-    };
-
-    /**
-     * Get minter allowance for an account
-     * @param minter The address of the minter
-     */
-    minterAllowance(
-      minter: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
-
-    /**
-     * Tells the address of the owner
-     * @returns the address of the owner
-     */
-    owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    /**
-     * transfer token for a specified address
-     * @param _to The address to transfer to.
-     * @param _value The amount to be transferred.
-     * @returns bool success
-     */
-    transfer: {
-      (
-        _to: string,
-        _value: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        _to: string,
-        _value: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<boolean>;
-      sendTransaction(
-        _to: string,
-        _value: number | BN | string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        _to: string,
-        _value: number | BN | string,
+        _newBlacklister: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
@@ -926,104 +991,25 @@ export interface UpgradedFiatTokenNewFieldsTestInstance
     };
 
     /**
-     * Checks if account is a minter
-     * @param account The address to check
+     * update the pauser role
      */
-    isMinter(
-      account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
-
-    updateBlacklister: {
-      (
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    newAddress(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    /**
-     * Get allowed amount for an account
-     * @param owner address The account owner
-     * @param spender address The account spender
-     */
-    allowance(
-      owner: string,
-      spender: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
-
-    currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    /**
-     * Allows the current owner to transfer control of the contract to a newOwner.
-     * @param newOwner The address to transfer ownership to.
-     */
-    transferOwnership: {
-      (newOwner: string, txDetails?: Truffle.TransactionDetails): Promise<
+    updatePauser: {
+      (_newPauser: string, txDetails?: Truffle.TransactionDetails): Promise<
         Truffle.TransactionResponse<AllEvents>
       >;
       call(
-        newOwner: string,
+        _newPauser: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        newOwner: string,
+        _newPauser: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        newOwner: string,
+        _newPauser: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
-
-    newUint(txDetails?: Truffle.TransactionDetails): Promise<BN>;
-
-    /**
-     * Adds account to blacklist
-     * @param _account The address to blacklist
-     */
-    blacklist: {
-      (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(
-        _account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        _account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        _account: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * Checks if account is blacklisted
-     * @param _account The address to check
-     */
-    isBlacklisted(
-      _account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
 
     initV2: {
       (

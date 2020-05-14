@@ -20,10 +20,14 @@
  * SOFTWARE.
  */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.6.8;
 
-import "zos-lib/contracts/upgradeability/AdminUpgradeabilityProxy.sol";
+import {
+    AdminUpgradeabilityProxy
+} from "./upgradeability/AdminUpgradeabilityProxy.sol";
 
+
+// solhint-disable no-empty-blocks
 
 /**
  * @title FiatTokenProxy

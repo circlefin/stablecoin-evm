@@ -8,13 +8,18 @@ export interface PausableContract extends Truffle.Contract<PausableInstance> {
   "new"(meta?: Truffle.TransactionDetails): Promise<PausableInstance>;
 }
 
-export interface Pause {
-  name: "Pause";
-  args: {};
+export interface OwnershipTransferred {
+  name: "OwnershipTransferred";
+  args: {
+    previousOwner: string;
+    newOwner: string;
+    0: string;
+    1: string;
+  };
 }
 
-export interface Unpause {
-  name: "Unpause";
+export interface Pause {
+  name: "Pause";
   args: {};
 }
 
@@ -26,26 +31,20 @@ export interface PauserChanged {
   };
 }
 
-export interface OwnershipTransferred {
-  name: "OwnershipTransferred";
-  args: {
-    previousOwner: string;
-    newOwner: string;
-    0: string;
-    1: string;
-  };
+export interface Unpause {
+  name: "Unpause";
+  args: {};
 }
 
-type AllEvents = Pause | Unpause | PauserChanged | OwnershipTransferred;
+type AllEvents = OwnershipTransferred | Pause | PauserChanged | Unpause;
 
 export interface PausableInstance extends Truffle.ContractInstance {
-  paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
-
   /**
    * Tells the address of the owner
-   * @returns the address of the owner
    */
   owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
 
   pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -117,13 +116,12 @@ export interface PausableInstance extends Truffle.ContractInstance {
   };
 
   methods: {
-    paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
-
     /**
      * Tells the address of the owner
-     * @returns the address of the owner
      */
     owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
 
     pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
 

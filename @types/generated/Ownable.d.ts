@@ -23,7 +23,6 @@ type AllEvents = OwnershipTransferred;
 export interface OwnableInstance extends Truffle.ContractInstance {
   /**
    * Tells the address of the owner
-   * @returns the address of the owner
    */
   owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
@@ -52,7 +51,6 @@ export interface OwnableInstance extends Truffle.ContractInstance {
   methods: {
     /**
      * Tells the address of the owner
-     * @returns the address of the owner
      */
     owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
 

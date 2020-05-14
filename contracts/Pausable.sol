@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.6.8;
 
-import "./Ownable.sol";
+import { Ownable } from "./Ownable.sol";
 
 
 /**
@@ -48,7 +48,7 @@ contract Pausable is Ownable {
      * @dev Modifier to make a function callable only when the contract is not paused.
      */
     modifier whenNotPaused() {
-        require(!paused);
+        require(!paused, "Pausable: paused");
         _;
     }
 
@@ -56,7 +56,7 @@ contract Pausable is Ownable {
      * @dev throws if called by any account other than the pauser
      */
     modifier onlyPauser() {
-        require(msg.sender == pauser);
+        require(msg.sender == pauser, "Pausable: caller is not the pauser");
         _;
     }
 
@@ -80,7 +80,10 @@ contract Pausable is Ownable {
      * @dev update the pauser role
      */
     function updatePauser(address _newPauser) public onlyOwner {
-        require(_newPauser != address(0));
+        require(
+            _newPauser != address(0),
+            "Pausable: new pauser is the zero address"
+        );
         pauser = _newPauser;
         emit PauserChanged(pauser);
     }

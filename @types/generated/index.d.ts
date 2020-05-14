@@ -3,11 +3,10 @@
 
 import { AdminUpgradeabilityProxyContract } from "./AdminUpgradeabilityProxy";
 import { BlacklistableContract } from "./Blacklistable";
-import { Erc20Contract } from "./Erc20";
-import { Erc20BasicContract } from "./Erc20Basic";
 import { FiatTokenProxyContract } from "./FiatTokenProxy";
 import { FiatTokenV1Contract } from "./FiatTokenV1";
 import { FiatTokenV2Contract } from "./FiatTokenV2";
+import { Ierc20Contract } from "./Ierc20";
 import { MigrationsContract } from "./Migrations";
 import { OwnableContract } from "./Ownable";
 import { PausableContract } from "./Pausable";
@@ -24,11 +23,10 @@ declare global {
         name: "AdminUpgradeabilityProxy"
       ): AdminUpgradeabilityProxyContract;
       require(name: "Blacklistable"): BlacklistableContract;
-      require(name: "ERC20"): Erc20Contract;
-      require(name: "ERC20Basic"): Erc20BasicContract;
       require(name: "FiatTokenProxy"): FiatTokenProxyContract;
       require(name: "FiatTokenV1"): FiatTokenV1Contract;
       require(name: "FiatTokenV2"): FiatTokenV2Contract;
+      require(name: "IERC20"): Ierc20Contract;
       require(name: "Migrations"): MigrationsContract;
       require(name: "Ownable"): OwnableContract;
       require(name: "Pausable"): PausableContract;
@@ -50,14 +48,13 @@ export {
   AdminUpgradeabilityProxyInstance
 } from "./AdminUpgradeabilityProxy";
 export { BlacklistableContract, BlacklistableInstance } from "./Blacklistable";
-export { Erc20Contract, Erc20Instance } from "./Erc20";
-export { Erc20BasicContract, Erc20BasicInstance } from "./Erc20Basic";
 export {
   FiatTokenProxyContract,
   FiatTokenProxyInstance
 } from "./FiatTokenProxy";
 export { FiatTokenV1Contract, FiatTokenV1Instance } from "./FiatTokenV1";
 export { FiatTokenV2Contract, FiatTokenV2Instance } from "./FiatTokenV2";
+export { Ierc20Contract, Ierc20Instance } from "./Ierc20";
 export { MigrationsContract, MigrationsInstance } from "./Migrations";
 export { OwnableContract, OwnableInstance } from "./Ownable";
 export { PausableContract, PausableInstance } from "./Pausable";
