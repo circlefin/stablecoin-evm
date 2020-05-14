@@ -9,15 +9,31 @@ export interface FiatTokenV1Contract
   "new"(meta?: Truffle.TransactionDetails): Promise<FiatTokenV1Instance>;
 }
 
-export interface Mint {
-  name: "Mint";
+export interface Approval {
+  name: "Approval";
   args: {
-    minter: string;
-    to: string;
-    amount: BN;
+    owner: string;
+    spender: string;
+    value: BN;
     0: string;
     1: string;
     2: BN;
+  };
+}
+
+export interface Blacklisted {
+  name: "Blacklisted";
+  args: {
+    _account: string;
+    0: string;
+  };
+}
+
+export interface BlacklisterChanged {
+  name: "BlacklisterChanged";
+  args: {
+    newBlacklister: string;
+    0: string;
   };
 }
 
@@ -28,6 +44,26 @@ export interface Burn {
     amount: BN;
     0: string;
     1: BN;
+  };
+}
+
+export interface MasterMinterChanged {
+  name: "MasterMinterChanged";
+  args: {
+    newMasterMinter: string;
+    0: string;
+  };
+}
+
+export interface Mint {
+  name: "Mint";
+  args: {
+    minter: string;
+    to: string;
+    amount: BN;
+    0: string;
+    1: string;
+    2: BN;
   };
 }
 
@@ -49,35 +85,13 @@ export interface MinterRemoved {
   };
 }
 
-export interface MasterMinterChanged {
-  name: "MasterMinterChanged";
+export interface OwnershipTransferred {
+  name: "OwnershipTransferred";
   args: {
-    newMasterMinter: string;
+    previousOwner: string;
+    newOwner: string;
     0: string;
-  };
-}
-
-export interface Blacklisted {
-  name: "Blacklisted";
-  args: {
-    _account: string;
-    0: string;
-  };
-}
-
-export interface UnBlacklisted {
-  name: "UnBlacklisted";
-  args: {
-    _account: string;
-    0: string;
-  };
-}
-
-export interface BlacklisterChanged {
-  name: "BlacklisterChanged";
-  args: {
-    newBlacklister: string;
-    0: string;
+    1: string;
   };
 }
 
@@ -86,38 +100,11 @@ export interface Pause {
   args: {};
 }
 
-export interface Unpause {
-  name: "Unpause";
-  args: {};
-}
-
 export interface PauserChanged {
   name: "PauserChanged";
   args: {
     newAddress: string;
     0: string;
-  };
-}
-
-export interface Approval {
-  name: "Approval";
-  args: {
-    owner: string;
-    spender: string;
-    value: BN;
-    0: string;
-    1: string;
-    2: BN;
-  };
-}
-
-export interface OwnershipTransferred {
-  name: "OwnershipTransferred";
-  args: {
-    previousOwner: string;
-    newOwner: string;
-    0: string;
-    1: string;
   };
 }
 
@@ -133,30 +120,41 @@ export interface Transfer {
   };
 }
 
+export interface UnBlacklisted {
+  name: "UnBlacklisted";
+  args: {
+    _account: string;
+    0: string;
+  };
+}
+
+export interface Unpause {
+  name: "Unpause";
+  args: {};
+}
+
 type AllEvents =
-  | Mint
+  | Approval
+  | Blacklisted
+  | BlacklisterChanged
   | Burn
+  | MasterMinterChanged
+  | Mint
   | MinterConfigured
   | MinterRemoved
-  | MasterMinterChanged
-  | Blacklisted
-  | UnBlacklisted
-  | BlacklisterChanged
-  | Pause
-  | Unpause
-  | PauserChanged
-  | Approval
   | OwnershipTransferred
-  | Transfer;
+  | Pause
+  | PauserChanged
+  | Transfer
+  | UnBlacklisted
+  | Unpause;
 
 export interface FiatTokenV1Instance extends Truffle.ContractInstance {
-  name(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
   /**
-   * Removes account from blacklist
-   * @param _account The address to remove from the blacklist
+   * Adds account to blacklist
+   * @param _account The address to blacklist
    */
-  unBlacklist: {
+  blacklist: {
     (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
       Truffle.TransactionResponse<AllEvents>
     >;
@@ -174,44 +172,29 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
+  blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
   decimals(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+  /**
+   * Checks if account is blacklisted
+   * @param _account The address to check
+   */
+  isBlacklisted(
+    _account: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<boolean>;
 
   masterMinter(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  /**
-   * called by the owner to unpause, returns to normal state
-   */
-  unpause: {
-    (txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
-  };
+  name(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
-   * update the pauser role
+   * Tells the address of the owner
    */
-  updatePauser: {
-    (_newPauser: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      _newPauser: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      _newPauser: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      _newPauser: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+  owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
    * called by the owner to pause, triggers stopped state
@@ -225,37 +208,11 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
     estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
   };
 
-  /**
-   * Tells the address of the owner
-   * @returns the address of the owner
-   */
-  owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
 
   pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  updateBlacklister: {
-    (_newBlacklister: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      _newBlacklister: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      _newBlacklister: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      _newBlacklister: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
+  symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
    * Allows the current owner to transfer control of the contract to a newOwner.
@@ -280,10 +237,10 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
   };
 
   /**
-   * Adds account to blacklist
-   * @param _account The address to blacklist
+   * Removes account from blacklist
+   * @param _account The address to remove from the blacklist
    */
-  blacklist: {
+  unBlacklist: {
     (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
       Truffle.TransactionResponse<AllEvents>
     >;
@@ -302,13 +259,55 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
   };
 
   /**
-   * Checks if account is blacklisted
-   * @param _account The address to check
+   * called by the owner to unpause, returns to normal state
    */
-  isBlacklisted(
-    _account: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<boolean>;
+  unpause: {
+    (txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+    sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+  };
+
+  updateBlacklister: {
+    (_newBlacklister: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      _newBlacklister: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      _newBlacklister: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _newBlacklister: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * update the pauser role
+   */
+  updatePauser: {
+    (_newPauser: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      _newPauser: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      _newPauser: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      _newPauser: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
 
   initialize: {
     (
@@ -361,7 +360,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
    * Function to mint tokens
    * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
    * @param _to The address that will receive the minted tokens.
-   * @returns A boolean that indicates if the operation was successful.
    */
   mint: {
     (
@@ -431,7 +429,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
 
   /**
    * Adds blacklisted check to approve
-   * @returns True if the operation was successful.
    */
   approve: {
     (
@@ -461,7 +458,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
-   * @returns bool success
    */
   transferFrom: {
     (
@@ -494,7 +490,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
    * transfer token for a specified address
    * @param _to The address to transfer to.
    * @param _value The amount to be transferred.
-   * @returns bool success
    */
   transfer: {
     (
@@ -523,7 +518,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
    * Function to add/update a new minter
    * @param minter The address of the minter
    * @param minterAllowedAmount The minting amount allowed for the minter
-   * @returns True if the operation was successful.
    */
   configureMinter: {
     (
@@ -551,7 +545,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
   /**
    * Function to remove a minter
    * @param minter The address of the minter to remove
-   * @returns True if the operation was successful.
    */
   removeMinter: {
     (minter: string, txDetails?: Truffle.TransactionDetails): Promise<
@@ -613,13 +606,11 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
   };
 
   methods: {
-    name(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
     /**
-     * Removes account from blacklist
-     * @param _account The address to remove from the blacklist
+     * Adds account to blacklist
+     * @param _account The address to blacklist
      */
-    unBlacklist: {
+    blacklist: {
       (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
         Truffle.TransactionResponse<AllEvents>
       >;
@@ -637,44 +628,29 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
       ): Promise<number>;
     };
 
+    blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
     decimals(txDetails?: Truffle.TransactionDetails): Promise<BN>;
+
+    /**
+     * Checks if account is blacklisted
+     * @param _account The address to check
+     */
+    isBlacklisted(
+      _account: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
 
     masterMinter(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    /**
-     * called by the owner to unpause, returns to normal state
-     */
-    unpause: {
-      (txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
-      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
-      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
-    };
+    name(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
-     * update the pauser role
+     * Tells the address of the owner
      */
-    updatePauser: {
-      (_newPauser: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(
-        _newPauser: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        _newPauser: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        _newPauser: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
+    owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
      * called by the owner to pause, triggers stopped state
@@ -688,38 +664,11 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
       estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
     };
 
-    /**
-     * Tells the address of the owner
-     * @returns the address of the owner
-     */
-    owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    paused(txDetails?: Truffle.TransactionDetails): Promise<boolean>;
 
     pauser(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    updateBlacklister: {
-      (
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<Truffle.TransactionResponse<AllEvents>>;
-      call(
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        _newBlacklister: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    currency(txDetails?: Truffle.TransactionDetails): Promise<string>;
+    symbol(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
      * Allows the current owner to transfer control of the contract to a newOwner.
@@ -744,10 +693,10 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
     };
 
     /**
-     * Adds account to blacklist
-     * @param _account The address to blacklist
+     * Removes account from blacklist
+     * @param _account The address to remove from the blacklist
      */
-    blacklist: {
+    unBlacklist: {
       (_account: string, txDetails?: Truffle.TransactionDetails): Promise<
         Truffle.TransactionResponse<AllEvents>
       >;
@@ -766,13 +715,56 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
     };
 
     /**
-     * Checks if account is blacklisted
-     * @param _account The address to check
+     * called by the owner to unpause, returns to normal state
      */
-    isBlacklisted(
-      _account: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<boolean>;
+    unpause: {
+      (txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(txDetails?: Truffle.TransactionDetails): Promise<void>;
+      sendTransaction(txDetails?: Truffle.TransactionDetails): Promise<string>;
+      estimateGas(txDetails?: Truffle.TransactionDetails): Promise<number>;
+    };
+
+    updateBlacklister: {
+      (
+        _newBlacklister: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        _newBlacklister: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        _newBlacklister: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _newBlacklister: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * update the pauser role
+     */
+    updatePauser: {
+      (_newPauser: string, txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(
+        _newPauser: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        _newPauser: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        _newPauser: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
 
     initialize: {
       (
@@ -825,7 +817,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
      * Function to mint tokens
      * @param _amount The amount of tokens to mint. Must be less than or equal to the minterAllowance of the caller.
      * @param _to The address that will receive the minted tokens.
-     * @returns A boolean that indicates if the operation was successful.
      */
     mint: {
       (
@@ -895,7 +886,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
 
     /**
      * Adds blacklisted check to approve
-     * @returns True if the operation was successful.
      */
     approve: {
       (
@@ -925,7 +915,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
      * @param _from address The address which you want to send tokens from
      * @param _to address The address which you want to transfer to
      * @param _value uint256 the amount of tokens to be transferred
-     * @returns bool success
      */
     transferFrom: {
       (
@@ -958,7 +947,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
      * transfer token for a specified address
      * @param _to The address to transfer to.
      * @param _value The amount to be transferred.
-     * @returns bool success
      */
     transfer: {
       (
@@ -987,7 +975,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
      * Function to add/update a new minter
      * @param minter The address of the minter
      * @param minterAllowedAmount The minting amount allowed for the minter
-     * @returns True if the operation was successful.
      */
     configureMinter: {
       (
@@ -1015,7 +1002,6 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
     /**
      * Function to remove a minter
      * @param minter The address of the minter to remove
-     * @returns True if the operation was successful.
      */
     removeMinter: {
       (minter: string, txDetails?: Truffle.TransactionDetails): Promise<

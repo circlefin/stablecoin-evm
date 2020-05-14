@@ -17,14 +17,6 @@ export interface Blacklisted {
   };
 }
 
-export interface UnBlacklisted {
-  name: "UnBlacklisted";
-  args: {
-    _account: string;
-    0: string;
-  };
-}
-
 export interface BlacklisterChanged {
   name: "BlacklisterChanged";
   args: {
@@ -43,20 +35,27 @@ export interface OwnershipTransferred {
   };
 }
 
+export interface UnBlacklisted {
+  name: "UnBlacklisted";
+  args: {
+    _account: string;
+    0: string;
+  };
+}
+
 type AllEvents =
   | Blacklisted
-  | UnBlacklisted
   | BlacklisterChanged
-  | OwnershipTransferred;
+  | OwnershipTransferred
+  | UnBlacklisted;
 
 export interface BlacklistableInstance extends Truffle.ContractInstance {
+  blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
   /**
    * Tells the address of the owner
-   * @returns the address of the owner
    */
   owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
    * Allows the current owner to transfer control of the contract to a newOwner.
@@ -152,13 +151,12 @@ export interface BlacklistableInstance extends Truffle.ContractInstance {
   };
 
   methods: {
+    blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
     /**
      * Tells the address of the owner
-     * @returns the address of the owner
      */
     owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    blacklister(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
      * Allows the current owner to transfer control of the contract to a newOwner.

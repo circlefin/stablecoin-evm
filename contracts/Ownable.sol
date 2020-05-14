@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-pragma solidity ^0.4.24;
+pragma solidity 0.6.7;
 
 
 /**
@@ -67,7 +67,7 @@ contract Ownable {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(msg.sender == owner());
+        require(msg.sender == owner(), "Ownable: caller is not the owner");
         _;
     }
 
@@ -76,7 +76,10 @@ contract Ownable {
      * @param newOwner The address to transfer ownership to.
      */
     function transferOwnership(address newOwner) public onlyOwner {
-        require(newOwner != address(0));
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
         emit OwnershipTransferred(owner(), newOwner);
         setOwner(newOwner);
     }

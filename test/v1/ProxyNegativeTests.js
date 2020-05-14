@@ -96,13 +96,6 @@ async function run_tests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nut007 should fail to call proxy function with non-adminAccount", async () => {
-    await expectRevert(proxy.admin({ from: masterMinterAccount }));
-
-    const customVars = [];
-    await checkVariables([token], [customVars]);
-  });
-
   it("nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken", async () => {
     await rawToken.initialize(
       name,

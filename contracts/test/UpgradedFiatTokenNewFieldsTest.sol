@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.6.7;
 
-import "../FiatTokenV1.sol";
+import { FiatTokenV1 } from "../FiatTokenV1.sol";
 
 
 /**
@@ -36,9 +36,9 @@ contract UpgradedFiatTokenNewFieldsTest is FiatTokenV1 {
     bool internal initializedV2;
 
     function initialize(
-        string _name,
-        string _symbol,
-        string _currency,
+        string memory _name,
+        string memory _symbol,
+        string memory _currency,
         uint8 _decimals,
         address _masterMinter,
         address _pauser,
@@ -66,7 +66,7 @@ contract UpgradedFiatTokenNewFieldsTest is FiatTokenV1 {
         address _newAddress,
         uint256 _newUint
     ) public {
-        require(!initializedV2);
+        require(!initializedV2, "contract is already initialized");
         newBool = _newBool;
         newAddress = _newAddress;
         newUint = _newUint;

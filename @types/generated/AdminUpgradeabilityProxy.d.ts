@@ -34,14 +34,8 @@ type AllEvents = AdminChanged | Upgraded;
 
 export interface AdminUpgradeabilityProxyInstance
   extends Truffle.ContractInstance {
-  /**
-   * @returns The address of the proxy admin.
-   */
   admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-  /**
-   * @returns The address of the implementation.
-   */
   implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
@@ -118,14 +112,8 @@ export interface AdminUpgradeabilityProxyInstance
   };
 
   methods: {
-    /**
-     * @returns The address of the proxy admin.
-     */
     admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
-    /**
-     * @returns The address of the implementation.
-     */
     implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**

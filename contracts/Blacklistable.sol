@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.6.7;
 
-import "./Ownable.sol";
+import { Ownable } from "./Ownable.sol";
 
 
 /**
@@ -41,7 +41,10 @@ contract Blacklistable is Ownable {
      * @dev Throws if called by any account other than the blacklister
      */
     modifier onlyBlacklister() {
-        require(msg.sender == blacklister);
+        require(
+            msg.sender == blacklister,
+            "Blacklistable: caller is not the blacklister"
+        );
         _;
     }
 
@@ -50,7 +53,10 @@ contract Blacklistable is Ownable {
      * @param _account The address to check
      */
     modifier notBlacklisted(address _account) {
-        require(blacklisted[_account] == false);
+        require(
+            blacklisted[_account] == false,
+            "Blacklistable: account is blacklisted"
+        );
         _;
     }
 
@@ -81,7 +87,10 @@ contract Blacklistable is Ownable {
     }
 
     function updateBlacklister(address _newBlacklister) public onlyOwner {
-        require(_newBlacklister != address(0));
+        require(
+            _newBlacklister != address(0),
+            "Blacklistable: new blacklister is the zero address"
+        );
         blacklister = _newBlacklister;
         emit BlacklisterChanged(blacklister);
     }

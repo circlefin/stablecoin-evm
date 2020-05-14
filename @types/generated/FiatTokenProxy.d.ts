@@ -33,6 +33,32 @@ export interface Upgraded {
 type AllEvents = AdminChanged | Upgraded;
 
 export interface FiatTokenProxyInstance extends Truffle.ContractInstance {
+  admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  /**
+   * Changes the admin of the proxy. Only the current admin can call this function.
+   * @param newAdmin Address to transfer proxy administration to.
+   */
+  changeAdmin: {
+    (newAdmin: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      newAdmin: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      newAdmin: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      newAdmin: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
   /**
    * Upgrade the backing implementation of the proxy. Only the admin can call this function.
    * @param newImplementation Address of the new implementation.
@@ -84,39 +110,33 @@ export interface FiatTokenProxyInstance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
-  /**
-   * @returns The address of the implementation.
-   */
-  implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  /**
-   * Changes the admin of the proxy. Only the current admin can call this function.
-   * @param newAdmin Address to transfer proxy administration to.
-   */
-  changeAdmin: {
-    (newAdmin: string, txDetails?: Truffle.TransactionDetails): Promise<
-      Truffle.TransactionResponse<AllEvents>
-    >;
-    call(
-      newAdmin: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<void>;
-    sendTransaction(
-      newAdmin: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-    estimateGas(
-      newAdmin: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<number>;
-  };
-
-  /**
-   * @returns The address of the proxy admin.
-   */
-  admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
   methods: {
+    admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    /**
+     * Changes the admin of the proxy. Only the current admin can call this function.
+     * @param newAdmin Address to transfer proxy administration to.
+     */
+    changeAdmin: {
+      (newAdmin: string, txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(
+        newAdmin: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        newAdmin: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        newAdmin: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
     /**
      * Upgrade the backing implementation of the proxy. Only the admin can call this function.
      * @param newImplementation Address of the new implementation.
@@ -167,38 +187,6 @@ export interface FiatTokenProxyInstance extends Truffle.ContractInstance {
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
-
-    /**
-     * @returns The address of the implementation.
-     */
-    implementation(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    /**
-     * Changes the admin of the proxy. Only the current admin can call this function.
-     * @param newAdmin Address to transfer proxy administration to.
-     */
-    changeAdmin: {
-      (newAdmin: string, txDetails?: Truffle.TransactionDetails): Promise<
-        Truffle.TransactionResponse<AllEvents>
-      >;
-      call(
-        newAdmin: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<void>;
-      sendTransaction(
-        newAdmin: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<string>;
-      estimateGas(
-        newAdmin: string,
-        txDetails?: Truffle.TransactionDetails
-      ): Promise<number>;
-    };
-
-    /**
-     * @returns The address of the proxy admin.
-     */
-    admin(txDetails?: Truffle.TransactionDetails): Promise<string>;
   };
 
   getPastEvents(event: string): Promise<EventData[]>;

@@ -28,11 +28,9 @@
     "url": "https://github.com/centrehq/centre-tokens/issues"
   },
   "homepage": "https://github.com/centrehq/centre-tokens#readme",
-  "dependencies": {
-    "openzeppelin-solidity": "1.11.0",
-    "zos-lib": "1.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@openzeppelin/contracts": "^3.0.1",
     "@truffle/hdwallet-provider": "^1.0.35",
     "@typechain/truffle-v5": "^2.0.1",
     "@types/chai": "^4.2.11",

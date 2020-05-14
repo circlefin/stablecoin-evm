@@ -20,10 +20,12 @@
  * SOFTWARE.
  */
 
-pragma solidity ^0.4.24;
+pragma solidity 0.6.7;
 
-import "../FiatTokenV1.sol";
+import { FiatTokenV1 } from "../FiatTokenV1.sol";
 
+
+// solhint-disable no-empty-blocks
 
 /**
  * @title UpgradedFiatToken
