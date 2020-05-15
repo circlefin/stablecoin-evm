@@ -1,4 +1,5 @@
 const BN = require("bn.js");
+const wrapTests = require("./helpers/wrapTests");
 const {
   name,
   symbol,
@@ -28,10 +29,10 @@ const {
   UpgradedFiatToken,
   FiatTokenV1,
   getAdmin,
-} = require("./TokenTestUtils");
+} = require("./helpers/tokenTest");
 
 // these tests are for reference and do not track side effects on all variables
-async function run_tests(_newToken, accounts) {
+function runTests(_newToken, accounts) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -153,7 +154,7 @@ async function run_tests(_newToken, accounts) {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BN(allowed).eqn(0));
     await mint(token, accounts[0], 500, minterAccount);
-    await token.approve(accounts[3], 100);
+    await token.approve(accounts[3], 100, { from: accounts[0] });
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BN(allowed).eqn(100));
 
@@ -173,7 +174,7 @@ async function run_tests(_newToken, accounts) {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BN(allowed).eqn(0));
     await mint(token, accounts[0], 500, minterAccount);
-    await token.approve(accounts[3], 100);
+    await token.approve(accounts[3], 100, { from: accounts[0] });
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BN(allowed).eqn(100));
 
@@ -191,7 +192,7 @@ async function run_tests(_newToken, accounts) {
     let allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BN(allowed).eqn(0));
     await mint(token, accounts[0], 500, minterAccount);
-    await token.approve(accounts[3], 100);
+    await token.approve(accounts[3], 100, { from: accounts[0] });
     allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BN(allowed).eqn(100));
 
@@ -207,7 +208,7 @@ async function run_tests(_newToken, accounts) {
 
   it("should fail on invalid transfer recipient (zero-account) and not change balances", async () => {
     await mint(token, accounts[0], 500, minterAccount);
-    await token.approve(accounts[3], 100);
+    await token.approve(accounts[3], 100, { from: accounts[0] });
     const allowed = await token.allowance.call(accounts[0], accounts[3]);
     assert.isTrue(new BN(allowed).eqn(100));
 
@@ -226,7 +227,9 @@ async function run_tests(_newToken, accounts) {
     const totalAmount = transferAmount;
     await mint(token, accounts[0], totalAmount, minterAccount);
 
-    let transfer = await token.transfer(accounts[3], transferAmount);
+    let transfer = await token.transfer(accounts[3], transferAmount, {
+      from: accounts[0],
+    });
     checkTransferEvents(transfer, accounts[0], accounts[3], transferAmount);
 
     const balance0 = await token.balanceOf(accounts[0]);
@@ -742,9 +745,4 @@ async function run_tests(_newToken, accounts) {
   });
 }
 
-const testWrapper = require("./TestWrapper");
-testWrapper.execute("FiatToken_LegacyTests", run_tests);
-
-module.exports = {
-  run_tests,
-};
+wrapTests("legacy", runTests);

@@ -1,4 +1,5 @@
 const { Transaction } = require("ethereumjs-tx");
+const wrapTests = require("./helpers/wrapTests");
 const {
   expectRevert,
   checkVariables,
@@ -9,7 +10,7 @@ const {
   arbitraryAccountPrivateKey,
   tokenOwnerPrivateKey,
   pauserAccountPrivateKey,
-} = require("./TokenTestUtils");
+} = require("./helpers/tokenTest");
 const {
   makeRawTransaction,
   sendRawTransaction,
@@ -17,7 +18,7 @@ const {
   encodeAddress,
   encodeUint,
   msgData,
-} = require("./ABIUtils");
+} = require("./helpers/abi");
 
 // Encodes methodName, 32 byte string of 0, and address.
 function mockStringAddressEncode(methodName, address) {
@@ -25,7 +26,7 @@ function mockStringAddressEncode(methodName, address) {
   return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-async function run_tests(newToken, _accounts) {
+function runTests(newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -280,9 +281,4 @@ async function run_tests(newToken, _accounts) {
   });
 }
 
-const testWrapper = require("./TestWrapper");
-testWrapper.execute("FiatToken_ABIHackingTests", run_tests);
-
-module.exports = {
-  run_tests,
-};
+wrapTests("FiatToken ABI hacking", runTests);

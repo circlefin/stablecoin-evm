@@ -46,6 +46,7 @@ module.exports = {
     },
   },
   mocha: {
+    timeout: 10000, // prevents tests from failing when pc is under heavy load
     /*
      * To disable the spreadsheet verification tool ensure that
      * the reporter is set to 'Spec' by commenting/uncommenting the lines below.

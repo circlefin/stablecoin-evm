@@ -1,4 +1,5 @@
 const BN = require("bn.js");
+const wrapTests = require("./helpers/wrapTests");
 const {
   bigZero,
   expectRevert,
@@ -20,11 +21,11 @@ const {
   FiatTokenV1,
   UpgradedFiatToken,
   UpgradedFiatTokenNewFields,
-} = require("./TokenTestUtils");
+} = require("./helpers/tokenTest");
 
 const amount = 100;
 
-async function run_tests(newToken, _accounts) {
+function runTests(newToken, _accounts) {
   let rawToken, proxy, token;
 
   beforeEach(async () => {
@@ -216,9 +217,4 @@ async function run_tests(newToken, _accounts) {
   });
 }
 
-const testWrapper = require("./TestWrapper");
-testWrapper.execute("FiatToken_ProxyNegativeTests", run_tests);
-
-module.exports = {
-  run_tests,
-};
+wrapTests("FiatToken proxy negative", runTests);

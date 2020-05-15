@@ -1,3 +1,4 @@
+const wrapTests = require("./helpers/wrapTests");
 const {
   FiatTokenV1,
   minterAccount,
@@ -27,11 +28,11 @@ const {
   UpgradedFiatTokenNewFields,
   checkPauseEvent,
   checkTransferEvents,
-} = require("./TokenTestUtils");
+} = require("./helpers/tokenTest");
 
 const amount = 100;
 
-async function run_tests(_newToken, _accounts) {
+function runTests(_newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -197,9 +198,4 @@ async function run_tests(_newToken, _accounts) {
   });
 }
 
-const testWrapper = require("./TestWrapper");
-testWrapper.execute("FiatToken_EventTests", run_tests);
-
-module.exports = {
-  run_tests,
-};
+wrapTests("FiatToken events", runTests);

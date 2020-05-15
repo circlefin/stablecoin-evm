@@ -1,4 +1,5 @@
 const BN = require("bn.js");
+const wrapTests = require("./helpers/wrapTests");
 const {
   checkVariables,
   expectRevert,
@@ -11,16 +12,15 @@ const {
   initializeTokenWithProxy,
   getInitializedV1,
   FiatTokenV1,
-} = require("./TokenTestUtils");
-
-const FiatTokenProxy = artifacts.require("FiatTokenProxy");
+  FiatTokenProxy,
+} = require("./helpers/tokenTest");
 
 const maxAmount =
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 const maxAmountBN = new BN(maxAmount.slice(2), 16);
 const amount = 100;
 
-async function run_tests(newToken, _accounts) {
+function runTests(newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -880,9 +880,4 @@ async function run_tests(newToken, _accounts) {
   });
 }
 
-const testWrapper = require("./TestWrapper");
-testWrapper.execute("FiatToken_MiscTests", run_tests);
-
-module.exports = {
-  run_tests,
-};
+wrapTests("FiatToken misc", runTests);

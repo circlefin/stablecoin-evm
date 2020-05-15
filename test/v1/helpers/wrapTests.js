@@ -1,4 +1,4 @@
-const { UpgradedFiatToken, FiatTokenV1 } = require("./TokenTestUtils");
+const { UpgradedFiatToken, FiatTokenV1 } = require("./tokenTest");
 
 // The following helpers make fresh original/upgraded tokens before each test.
 
@@ -14,16 +14,14 @@ async function newUpgradedToken() {
 
 // Executes the run_tests_function using an original and
 // an upgraded token. The test_suite_name is printed standard output.
-function execute(test_suite_name, run_tests_function) {
-  contract(test_suite_name, async (accounts) => {
-    await run_tests_function(newToken, accounts);
+function wrapTests(testSuiteName, runTestsFunction) {
+  contract(testSuiteName, (accounts) => {
+    runTestsFunction(newToken, accounts);
   });
 
-  contract(test_suite_name + " Upgraded", async (accounts) => {
-    await run_tests_function(newUpgradedToken, accounts);
+  contract(testSuiteName + " (upgraded)", (accounts) => {
+    runTestsFunction(newUpgradedToken, accounts);
   });
 }
 
-module.exports = {
-  execute,
-};
+module.exports = wrapTests;

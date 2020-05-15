@@ -3,16 +3,16 @@ const {
   deployerAccount,
   arbitraryAccount,
   pauserAccount,
-} = require("./TokenTestUtils");
+} = require("./helpers/tokenTest");
 
 const Pausable = artifacts.require("Pausable");
 
-contract("PausableTests", (_accounts) => {
+contract("Pausable", (_accounts) => {
   let pausable;
 
   beforeEach(async () => {
-    pausable = await Pausable.new();
-    await pausable.updatePauser(pauserAccount);
+    pausable = await Pausable.new({ from: deployerAccount });
+    await pausable.updatePauser(pauserAccount, { from: deployerAccount });
   });
 
   it("constructor owner", async () => {

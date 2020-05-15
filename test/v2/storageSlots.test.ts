@@ -9,7 +9,7 @@ const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
-contract("StorageSlotTest", (accounts) => {
+contract("Storage slots", (accounts) => {
   const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
   const [mintAllowance, minted, transferred, allowance] = [
     1000e6,
@@ -209,7 +209,10 @@ async function readSlot(
   address: string,
   slot: number | string
 ): Promise<string> {
-  const data = await web3.eth.getStorageAt(address, slot);
+  const data = await web3.eth.getStorageAt(
+    address,
+    slot as number // does support string, but type definition file is wrong
+  );
   return data.replace(/^0x/, "");
 }
 

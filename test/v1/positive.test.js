@@ -1,5 +1,5 @@
 const BN = require("bn.js");
-
+const wrapTests = require("./helpers/wrapTests");
 const {
   bigZero,
   checkVariables,
@@ -10,11 +10,11 @@ const {
   minterAccount,
   pauserAccount,
   initializeTokenWithProxy,
-} = require("./TokenTestUtils");
+} = require("./helpers/tokenTest");
 
 const amount = 100;
 
-async function run_tests(newToken, _accounts) {
+function runTests(newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -350,9 +350,4 @@ async function run_tests(newToken, _accounts) {
   });
 }
 
-const testWrapper = require("./TestWrapper");
-testWrapper.execute("FiatToken_PositiveTests", run_tests);
-
-module.exports = {
-  run_tests,
-};
+wrapTests("FiatToken positive", runTests);

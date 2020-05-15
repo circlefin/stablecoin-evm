@@ -42,10 +42,7 @@ module.exports = {
         "plugin:prettier/recommended",
       ],
       rules: {
-        camelcase: [
-          "error",
-          { properties: "never", allow: ["run_tests", "test_suite_name"] },
-        ],
+        camelcase: "error",
         "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
         "prettier/prettier": "warn",
         "no-var": "error",
