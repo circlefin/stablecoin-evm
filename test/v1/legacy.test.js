@@ -1,3 +1,5 @@
+import { accounts } from "@openzeppelin/test-environment";
+const { assert } = require("chai");
 const BN = require("bn.js");
 const wrapTests = require("./helpers/wrapTests");
 const {
@@ -32,7 +34,7 @@ const {
 } = require("./helpers/tokenTest");
 
 // these tests are for reference and do not track side effects on all variables
-function runTests(_newToken, accounts) {
+function runTests(_newToken) {
   let proxy, token;
 
   beforeEach(async () => {

@@ -1,3 +1,4 @@
+import { web3 } from "@openzeppelin/test-environment";
 const { Transaction } = require("ethereumjs-tx");
 
 async function makeRawTransaction(data, from, hexPrivateKey, contractAddress) {

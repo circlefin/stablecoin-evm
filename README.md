@@ -44,12 +44,6 @@ $ yarn compile && yarn typechain
 
 ## Testing
 
-First, make sure Ganache is running.
-
-```
-$ yarn ganache
-```
-
 Run all tests:
 
 ```

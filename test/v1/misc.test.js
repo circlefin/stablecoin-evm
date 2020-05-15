@@ -1,3 +1,5 @@
+import { web3 } from "@openzeppelin/test-environment";
+const { assert } = require("chai");
 const BN = require("bn.js");
 const wrapTests = require("./helpers/wrapTests");
 const {
@@ -20,7 +22,7 @@ const maxAmount =
 const maxAmountBN = new BN(maxAmount.slice(2), 16);
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken) {
   let proxy, token;
 
   beforeEach(async () => {

@@ -15,12 +15,12 @@ async function newUpgradedToken() {
 // Executes the run_tests_function using an original and
 // an upgraded token. The test_suite_name is printed standard output.
 function wrapTests(testSuiteName, runTestsFunction) {
-  contract(testSuiteName, (accounts) => {
-    runTestsFunction(newToken, accounts);
+  describe(testSuiteName, () => {
+    runTestsFunction(newToken);
   });
 
-  contract(testSuiteName + " (upgraded)", (accounts) => {
-    runTestsFunction(newUpgradedToken, accounts);
+  describe(testSuiteName + " (upgraded)", async () => {
+    runTestsFunction(newUpgradedToken);
   });
 }
 

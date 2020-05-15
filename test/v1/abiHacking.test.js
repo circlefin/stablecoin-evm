@@ -1,3 +1,5 @@
+import { web3 } from "@openzeppelin/test-environment";
+const { assert } = require("chai");
 const { Transaction } = require("ethereumjs-tx");
 const wrapTests = require("./helpers/wrapTests");
 const {
@@ -26,7 +28,7 @@ function mockStringAddressEncode(methodName, address) {
   return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-function runTests(newToken, _accounts) {
+function runTests(newToken) {
   let proxy, token;
 
   beforeEach(async () => {

@@ -1,3 +1,5 @@
+import { web3 } from "@openzeppelin/test-environment";
+const { assert } = require("chai");
 const wrapTests = require("./helpers/wrapTests");
 const BN = require("bn.js");
 const {
@@ -30,7 +32,7 @@ const { makeRawTransaction, sendRawTransaction } = require("./helpers/abi");
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken) {
   let rawToken, proxy, token;
 
   beforeEach(async () => {

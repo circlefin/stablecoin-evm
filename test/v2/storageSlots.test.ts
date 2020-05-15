@@ -1,3 +1,6 @@
+import { accounts, contract, web3 } from "@openzeppelin/test-environment";
+import { expect } from "chai";
+
 import BN from "bn.js";
 import {
   FiatTokenProxyInstance,
@@ -5,11 +8,11 @@ import {
   FiatTokenV2Instance,
 } from "../../@types/generated";
 
-const FiatTokenV1 = artifacts.require("FiatTokenV1");
-const FiatTokenV2 = artifacts.require("FiatTokenV2");
-const FiatTokenProxy = artifacts.require("FiatTokenProxy");
+const FiatTokenV1 = contract.fromArtifact("FiatTokenV1");
+const FiatTokenV2 = contract.fromArtifact("FiatTokenV2");
+const FiatTokenProxy = contract.fromArtifact("FiatTokenProxy");
 
-contract("Storage slots", (accounts) => {
+describe("Storage slots", () => {
   const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
   const [mintAllowance, minted, transferred, allowance] = [
     1000e6,

@@ -1,3 +1,4 @@
+const { assert } = require("chai");
 const wrapTests = require("./helpers/wrapTests");
 const {
   FiatTokenV1,
@@ -32,7 +33,7 @@ const {
 
 const amount = 100;
 
-function runTests(_newToken, _accounts) {
+function runTests(_newToken) {
   let proxy, token;
 
   beforeEach(async () => {

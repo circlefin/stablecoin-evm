@@ -1,3 +1,6 @@
+import { contract } from "@openzeppelin/test-environment";
+const { assert } = require("chai");
+
 const {
   expectRevert,
   deployerAccount,
@@ -5,9 +8,9 @@ const {
   pauserAccount,
 } = require("./helpers/tokenTest");
 
-const Pausable = artifacts.require("Pausable");
+const Pausable = contract.fromArtifact("Pausable");
 
-contract("Pausable", (_accounts) => {
+describe("Pausable", () => {
   let pausable;
 
   beforeEach(async () => {

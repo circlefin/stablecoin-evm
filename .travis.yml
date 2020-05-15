@@ -10,5 +10,5 @@ install:
   - yarn install --frozen-lockfile
 
 script:
-  - yarn ganache & sleep 5 && yarn test
+  - yarn compile && yarn test
 
