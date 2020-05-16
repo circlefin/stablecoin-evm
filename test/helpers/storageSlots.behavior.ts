@@ -5,33 +5,31 @@ import {
   FiatTokenV2Instance,
 } from "../../@types/generated";
 
-const FiatTokenV1 = artifacts.require("FiatTokenV1");
-const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
-contract("Storage slots", (accounts) => {
-  const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
-  const [mintAllowance, minted, transferred, allowance] = [
-    1000e6,
-    100e6,
-    30e6,
-    10e6,
-  ];
-  const [
-    owner,
-    proxyAdmin,
-    masterMinter,
-    pauser,
-    blacklister,
-    minter,
-    alice,
-    bob,
-    charlie,
-  ] = accounts;
+export function usesOriginalStorageSlotPositions<
+  T extends FiatTokenV1Instance | FiatTokenV2Instance
+>(FiatTokenContract: Truffle.Contract<T>, accounts: Truffle.Accounts): void {
+  describe("uses original storage slot positions", () => {
+    const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
+    const [mintAllowance, minted, transferred, allowance] = [
+      1000e6,
+      100e6,
+      30e6,
+      10e6,
+    ];
+    const [
+      owner,
+      proxyAdmin,
+      masterMinter,
+      pauser,
+      blacklister,
+      minter,
+      alice,
+      bob,
+      charlie,
+    ] = accounts;
 
-  const testWithContract = function <
-    T extends FiatTokenV1Instance | FiatTokenV2Instance
-  >(FiatTokenContract: Truffle.Contract<T>): void {
     let fiatToken: T;
     let proxy: FiatTokenProxyInstance;
     let proxyAsFiatToken: T;
@@ -194,16 +192,8 @@ contract("Storage slots", (accounts) => {
       );
       expect(v).to.equal(0);
     });
-  };
-
-  context("FiatTokenV1", () => {
-    testWithContract(FiatTokenV1);
   });
-
-  context("FiatTokenV2", () => {
-    testWithContract(FiatTokenV2);
-  });
-});
+}
 
 async function readSlot(
   address: string,

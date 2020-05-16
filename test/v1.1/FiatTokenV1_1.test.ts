@@ -3,6 +3,7 @@ import {
   FiatTokenV11Instance,
   RescuableInstance,
 } from "../../@types/generated";
+import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
 
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 
@@ -25,4 +26,5 @@ contract("FiatTokenV1_1", (accounts) => {
   });
 
   behavesLikeRescuable(() => fiatToken as RescuableInstance, accounts);
+  usesOriginalStorageSlotPositions(FiatTokenV1_1, accounts);
 });
