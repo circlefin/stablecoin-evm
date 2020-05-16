@@ -3,7 +3,10 @@
 
 import { AdminUpgradeabilityProxyContract } from "./AdminUpgradeabilityProxy";
 import { BlacklistableContract } from "./Blacklistable";
+import { DummyErc20Contract } from "./DummyErc20";
+import { Erc20Contract } from "./Erc20";
 import { FiatTokenProxyContract } from "./FiatTokenProxy";
+import { FiatTokenV11Contract } from "./FiatTokenV11";
 import { FiatTokenV1Contract } from "./FiatTokenV1";
 import { FiatTokenV2Contract } from "./FiatTokenV2";
 import { Ierc20Contract } from "./Ierc20";
@@ -11,6 +14,7 @@ import { MigrationsContract } from "./Migrations";
 import { OwnableContract } from "./Ownable";
 import { PausableContract } from "./Pausable";
 import { ProxyContract } from "./Proxy";
+import { RescuableContract } from "./Rescuable";
 import { UpgradeabilityProxyContract } from "./UpgradeabilityProxy";
 import { UpgradedFiatTokenContract } from "./UpgradedFiatToken";
 import { UpgradedFiatTokenNewFieldsNewLogicTestContract } from "./UpgradedFiatTokenNewFieldsNewLogicTest";
@@ -23,7 +27,10 @@ declare global {
         name: "AdminUpgradeabilityProxy"
       ): AdminUpgradeabilityProxyContract;
       require(name: "Blacklistable"): BlacklistableContract;
+      require(name: "DummyERC20"): DummyErc20Contract;
+      require(name: "ERC20"): Erc20Contract;
       require(name: "FiatTokenProxy"): FiatTokenProxyContract;
+      require(name: "FiatTokenV1_1"): FiatTokenV11Contract;
       require(name: "FiatTokenV1"): FiatTokenV1Contract;
       require(name: "FiatTokenV2"): FiatTokenV2Contract;
       require(name: "IERC20"): Ierc20Contract;
@@ -31,6 +38,7 @@ declare global {
       require(name: "Ownable"): OwnableContract;
       require(name: "Pausable"): PausableContract;
       require(name: "Proxy"): ProxyContract;
+      require(name: "Rescuable"): RescuableContract;
       require(name: "UpgradeabilityProxy"): UpgradeabilityProxyContract;
       require(name: "UpgradedFiatToken"): UpgradedFiatTokenContract;
       require(
@@ -48,10 +56,13 @@ export {
   AdminUpgradeabilityProxyInstance
 } from "./AdminUpgradeabilityProxy";
 export { BlacklistableContract, BlacklistableInstance } from "./Blacklistable";
+export { DummyErc20Contract, DummyErc20Instance } from "./DummyErc20";
+export { Erc20Contract, Erc20Instance } from "./Erc20";
 export {
   FiatTokenProxyContract,
   FiatTokenProxyInstance
 } from "./FiatTokenProxy";
+export { FiatTokenV11Contract, FiatTokenV11Instance } from "./FiatTokenV11";
 export { FiatTokenV1Contract, FiatTokenV1Instance } from "./FiatTokenV1";
 export { FiatTokenV2Contract, FiatTokenV2Instance } from "./FiatTokenV2";
 export { Ierc20Contract, Ierc20Instance } from "./Ierc20";
@@ -59,6 +70,7 @@ export { MigrationsContract, MigrationsInstance } from "./Migrations";
 export { OwnableContract, OwnableInstance } from "./Ownable";
 export { PausableContract, PausableInstance } from "./Pausable";
 export { ProxyContract, ProxyInstance } from "./Proxy";
+export { RescuableContract, RescuableInstance } from "./Rescuable";
 export {
   UpgradeabilityProxyContract,
   UpgradeabilityProxyInstance

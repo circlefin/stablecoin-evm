@@ -24,15 +24,17 @@
 
 pragma solidity 0.6.8;
 
-import { FiatTokenV1_1 } from "./FiatTokenV1_1.sol";
+import { FiatTokenV1 } from "./FiatTokenV1.sol";
+import { Rescuable } from "./Rescuable.sol";
 
 
 // solhint-disable no-empty-blocks
+// solhint-disable contract-name-camelcase
 
 /**
- * @title FiatTokenV2
+ * @title FiatTokenV1_1
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatTokenV2 is FiatTokenV1_1 {
+contract FiatTokenV1_1 is FiatTokenV1, Rescuable {
 
 }

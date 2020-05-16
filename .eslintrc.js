@@ -15,6 +15,7 @@ module.exports = {
     {
       files: ["**/*.ts"],
       parser: "@typescript-eslint/parser",
+      parserOptions: { project: "./tsconfig.json" },
       plugins: ["@typescript-eslint"],
       extends: [
         "eslint:recommended",
@@ -32,6 +33,11 @@ module.exports = {
           { functions: false, classes: false },
         ],
         "prettier/prettier": "warn",
+        "@typescript-eslint/camelcase": "off",
+        "@typescript-eslint/no-floating-promises": [
+          "error",
+          { ignoreVoid: true, ignoreIIFE: true },
+        ],
       },
     },
     {
@@ -42,10 +48,10 @@ module.exports = {
         "plugin:prettier/recommended",
       ],
       rules: {
-        camelcase: "error",
         "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
         "prettier/prettier": "warn",
         "no-var": "error",
+        camelcase: "off",
       },
     },
   ],
