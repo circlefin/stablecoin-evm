@@ -1,4 +1,6 @@
 /**
+ * SPDX-License-Identifier: MIT
+ *
  * Copyright (c) 2018 zOS Global Limited.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
