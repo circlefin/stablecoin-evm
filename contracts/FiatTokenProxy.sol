@@ -29,8 +29,6 @@ import {
 } from "./upgradeability/AdminUpgradeabilityProxy.sol";
 
 
-// solhint-disable no-empty-blocks
-
 /**
  * @title FiatTokenProxy
  * @dev This contract proxies FiatToken calls and enables FiatToken upgrades

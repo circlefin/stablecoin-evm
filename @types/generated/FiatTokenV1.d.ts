@@ -403,9 +403,9 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
   ): Promise<boolean>;
 
   /**
-   * Get allowed amount for an account
-   * @param owner address The account owner
-   * @param spender address The account spender
+   * Amount of remaining tokens spender is allowed to transfer on behalf of the token owner
+   * @param owner Token owner's address
+   * @param spender Spender's address
    */
   allowance(
     owner: string,
@@ -428,88 +428,90 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
   ): Promise<BN>;
 
   /**
-   * Adds blacklisted check to approve
+   * Set spender's allowance over the caller's tokens to be a given value.
+   * @param spender Spender's address
+   * @param value Allowance amount
    */
   approve: {
     (
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
   /**
-   * Transfer tokens from one address to another.
-   * @param _from address The address which you want to send tokens from
-   * @param _to address The address which you want to transfer to
-   * @param _value uint256 the amount of tokens to be transferred
+   * Transfer tokens by spending allowance
+   * @param from Payer's address
+   * @param to Payee's address
+   * @param value Transfer amount
    */
   transferFrom: {
     (
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
   /**
-   * transfer token for a specified address
-   * @param _to The address to transfer to.
-   * @param _value The amount to be transferred.
+   * Transfer tokens from the caller
+   * @param to Payee's address
+   * @param value Transfer amount
    */
   transfer: {
     (
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -860,9 +862,9 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
     ): Promise<boolean>;
 
     /**
-     * Get allowed amount for an account
-     * @param owner address The account owner
-     * @param spender address The account spender
+     * Amount of remaining tokens spender is allowed to transfer on behalf of the token owner
+     * @param owner Token owner's address
+     * @param spender Spender's address
      */
     allowance(
       owner: string,
@@ -885,88 +887,90 @@ export interface FiatTokenV1Instance extends Truffle.ContractInstance {
     ): Promise<BN>;
 
     /**
-     * Adds blacklisted check to approve
+     * Set spender's allowance over the caller's tokens to be a given value.
+     * @param spender Spender's address
+     * @param value Allowance amount
      */
     approve: {
       (
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
 
     /**
-     * Transfer tokens from one address to another.
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
+     * Transfer tokens by spending allowance
+     * @param from Payer's address
+     * @param to Payee's address
+     * @param value Transfer amount
      */
     transferFrom: {
       (
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
 
     /**
-     * transfer token for a specified address
-     * @param _to The address to transfer to.
-     * @param _value The amount to be transferred.
+     * Transfer tokens from the caller
+     * @param to Payee's address
+     * @param value Transfer amount
      */
     transfer: {
       (
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
