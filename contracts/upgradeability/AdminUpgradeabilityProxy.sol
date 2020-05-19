@@ -143,7 +143,6 @@ contract AdminUpgradeabilityProxy is UpgradeabilityProxy {
     function _admin() internal view returns (address adm) {
         bytes32 slot = ADMIN_SLOT;
 
-        // solhint-disable-next-line no-inline-assembly
         assembly {
             adm := sload(slot)
         }
@@ -156,7 +155,6 @@ contract AdminUpgradeabilityProxy is UpgradeabilityProxy {
     function _setAdmin(address newAdmin) internal {
         bytes32 slot = ADMIN_SLOT;
 
-        // solhint-disable-next-line no-inline-assembly
         assembly {
             sstore(slot, newAdmin)
         }

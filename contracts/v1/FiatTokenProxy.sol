@@ -26,7 +26,7 @@ pragma solidity 0.6.8;
 
 import {
     AdminUpgradeabilityProxy
-} from "./upgradeability/AdminUpgradeabilityProxy.sol";
+} from "../upgradeability/AdminUpgradeabilityProxy.sol";
 
 
 /**

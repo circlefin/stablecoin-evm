@@ -24,7 +24,7 @@
 
 pragma solidity 0.6.8;
 
-import { Ownable } from "./Ownable.sol";
+import { Ownable } from "../v1/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 

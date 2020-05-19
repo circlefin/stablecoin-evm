@@ -25,8 +25,6 @@
 pragma solidity 0.6.8;
 
 
-// solhint-disable var-name-mixedcase
-
 contract Migrations {
     address public owner;
     uint256 public last_completed_migration;
