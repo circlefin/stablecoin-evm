@@ -1,6 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
+ * Copyright (c) 2018 zOS Global Limited.
  * Copyright (c) CENTRE SECZ 2018-2020
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,12 +26,12 @@ pragma solidity 0.6.8;
 
 
 /**
- * @title Ownable
- * @dev The Ownable contract from https://github.com/zeppelinos/labs/blob/master/upgradeability_ownership/contracts/ownership/Ownable.sol
- * branch: master commit: 3887ab77b8adafba4a26ace002f3a684c1a3388b modified to:
- * 1) Add emit prefix to OwnershipTransferred event (7/13/18)
- * 2) Replace constructor with constructor syntax (7/13/18)
- * 3) consolidate OwnableStorage into this contract
+ * @notice The Ownable contract has an owner address, and provides basic
+ * authorization control functions
+ * @dev Forked from https://github.com/OpenZeppelin/openzeppelin-labs/blob/3887ab77b8adafba4a26ace002f3a684c1a3388b/upgradeability_ownership/contracts/ownership/Ownable.sol
+ * Modifications:
+ * 1. Consolidate OwnableStorage into this contract (7/13/18)
+ * 2. Reformat, conform to Solidity 0.6 syntax, and add error messages (5/13/20)
  */
 contract Ownable {
     // Owner of the contract

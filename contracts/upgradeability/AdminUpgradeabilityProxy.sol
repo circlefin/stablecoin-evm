@@ -28,12 +28,12 @@ import { UpgradeabilityProxy } from "./UpgradeabilityProxy.sol";
 
 
 /**
- * @title AdminUpgradeabilityProxy
- * @dev This contract combines an upgradeability proxy with an authorization
+ * @notice This contract combines an upgradeability proxy with an authorization
  * mechanism for administrative tasks.
- * All external functions in this contract must be guarded by the
- * `ifAdmin` modifier. See ethereum/solidity#3864 for a Solidity
- * feature proposal that would enable this to be done automatically.
+ * @dev Forked from https://github.com/zeppelinos/zos-lib/blob/8a16ef3ad17ec7430e3a9d2b5e3f39b8204f8c8d/contracts/upgradeability/AdminUpgradeabilityProxy.sol
+ * Modifications:
+ * 1. Reformat, conform to Solidity 0.6 syntax, and add error messages (5/13/20)
+ * 2. Remove ifAdmin modifier from admin() and implementation() (5/13/20)
  */
 contract AdminUpgradeabilityProxy is UpgradeabilityProxy {
     /**

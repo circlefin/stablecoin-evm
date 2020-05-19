@@ -26,11 +26,13 @@ pragma solidity 0.6.8;
 
 
 /**
- * @title Proxy
- * @dev Implements delegation of calls to other contracts, with proper
+ * @notice Implements delegation of calls to other contracts, with proper
  * forwarding of return values and bubbling of failures.
  * It defines a fallback function that delegates all calls to the address
  * returned by the abstract _implementation() internal function.
+ * @dev Forked from https://github.com/zeppelinos/zos-lib/blob/8a16ef3ad17ec7430e3a9d2b5e3f39b8204f8c8d/contracts/upgradeability/Proxy.sol
+ * Modifications:
+ * 1. Reformat and conform to Solidity 0.6 syntax (5/13/20)
  */
 abstract contract Proxy {
     /**

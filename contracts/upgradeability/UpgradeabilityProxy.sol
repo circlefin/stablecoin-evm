@@ -28,13 +28,14 @@ import { Proxy } from "./Proxy.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
 
-// import "openzeppelin-solidity/contracts/AddressUtils.sol";
-
 /**
- * @title UpgradeabilityProxy
- * @dev This contract implements a proxy that allows to change the
+ * @notice This contract implements a proxy that allows to change the
  * implementation address to which it will delegate.
  * Such a change is called an implementation upgrade.
+ * @dev Forked from https://github.com/zeppelinos/zos-lib/blob/8a16ef3ad17ec7430e3a9d2b5e3f39b8204f8c8d/contracts/upgradeability/UpgradeabilityProxy.sol
+ * Modifications:
+ * 1. Reformat, conform to Solidity 0.6 syntax, and add error messages (5/13/20)
+ * 2. Use Address utility library from the latest OpenZeppelin (5/13/20)
  */
 contract UpgradeabilityProxy is Proxy {
     /**
