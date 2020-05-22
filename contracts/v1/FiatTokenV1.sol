@@ -24,8 +24,8 @@
 
 pragma solidity 0.6.8;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { AbstractFiatTokenV1 } from "./AbstractFiatTokenV1.sol";
 import { Ownable } from "./Ownable.sol";
 import { Pausable } from "./Pausable.sol";
 import { Blacklistable } from "./Blacklistable.sol";
@@ -35,7 +35,7 @@ import { Blacklistable } from "./Blacklistable.sol";
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatTokenV1 is IERC20, Ownable, Pausable, Blacklistable {
+contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
     using SafeMath for uint256;
 
     string public name;
@@ -228,7 +228,7 @@ contract FiatTokenV1 is IERC20, Ownable, Pausable, Blacklistable {
         address owner,
         address spender,
         uint256 value
-    ) internal {
+    ) internal override {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
         allowed[owner][spender] = value;
@@ -292,7 +292,7 @@ contract FiatTokenV1 is IERC20, Ownable, Pausable, Blacklistable {
         address from,
         address to,
         uint256 value
-    ) internal {
+    ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(

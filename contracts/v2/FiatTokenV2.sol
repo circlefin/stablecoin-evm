@@ -25,12 +25,120 @@
 pragma solidity 0.6.8;
 
 import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
+import { EIP712 } from "../util/EIP712.sol";
+import { EIP712Domain } from "./EIP712Domain.sol";
+import { GasAbstraction } from "./GasAbstraction.sol";
 
 
 /**
- * @title FiatTokenV2
- * @dev ERC20 Token backed by fiat reserves
+ * @title FiatToken V2
  */
-contract FiatTokenV2 is FiatTokenV1_1 {
+contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
+    bool internal _initializedV2;
 
+    /**
+     * @notice Initialize V2 contract
+     * @dev When upgrading to V2, this function must also be invoked
+     * simultaneously by using upgradeAndCall instead of upgradeTo.
+     */
+    function initializeV2(string calldata newName) external {
+        require(
+            !_initializedV2,
+            "FiatTokenV2: contract is already initialized"
+        );
+        name = newName;
+        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator("FiatToken", "2");
+        _initializedV2 = true;
+    }
+
+    /**
+     * @notice Execute a transfer with a signed authorization
+     * @param from        Payer's address (Authorizer)
+     * @param to          Payee's address
+     * @param value       Amount to be transferred
+     * @param validAfter  Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, secondss since the epoch
+     * @param nonce       Unique nonce
+     * @param v           v of the signature
+     * @param r           r of the signature
+     * @param s           s of the signature
+     */
+    function transferWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+        _transferWithAuthorization(
+            from,
+            to,
+            value,
+            validAfter,
+            validBefore,
+            nonce,
+            v,
+            r,
+            s
+        );
+    }
+
+    /**
+     * @notice Update allowance with a signed authorization
+     * @param owner       Token owner's address (Authorizer)
+     * @param spender     Spender's address
+     * @param value       Amount of allowance
+     * @param validAfter  Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     * @param nonce       Unique nonce
+     * @param v           v of the signature
+     * @param r           r of the signature
+     * @param s           s of the signature
+     */
+    function approveWithAuthorization(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+        _approveWithAuthorization(
+            owner,
+            spender,
+            value,
+            validAfter,
+            validBefore,
+            nonce,
+            v,
+            r,
+            s
+        );
+    }
+
+    /**
+     * @notice Attempt to cancel an authorization
+     * @dev Works only if the authorization is not yet used.
+     * @param authorizer    Authorizer's address
+     * @param nonce         Nonce of the authorization
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
+     */
+    function cancelAuthorization(
+        address authorizer,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external whenNotPaused {
+        _cancelAuthorization(authorizer, nonce, v, r, s);
+    }
 }

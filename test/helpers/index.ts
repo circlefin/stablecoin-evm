@@ -27,3 +27,19 @@ export async function expectRevert(
     assert.include(errMsg, reason);
   }
 }
+
+export function prepend0x(v: string): string {
+  return v.replace(/^(0x)?/, "0x");
+}
+
+export function strip0x(v: string): string {
+  return v.replace(/^0x/, "");
+}
+
+export function hexStringFromBuffer(buf: Buffer): string {
+  return "0x" + buf.toString("hex");
+}
+
+export function bufferFromHexString(hex: string): Buffer {
+  return Buffer.from(strip0x(hex), "hex");
+}
