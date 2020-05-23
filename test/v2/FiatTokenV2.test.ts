@@ -1,6 +1,7 @@
 import { behavesLikeRescuable } from "../v1.1/Rescuable.behavior";
 import { FiatTokenV2Instance, RescuableInstance } from "../../@types/generated";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
+import { hasSafeAllowance } from "./safeAllowance.behavior";
 import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
 
 const ECRecover = artifacts.require("ECRecover");
@@ -65,6 +66,8 @@ contract("FiatTokenV2", (accounts) => {
   it("has the expected domain separator", async () => {
     expect(await fiatToken.DOMAIN_SEPARATOR()).to.equal(domainSeparator);
   });
+
+  hasSafeAllowance(() => fiatToken, fiatTokenOwner, accounts);
 
   hasGasAbstraction(
     () => fiatToken,

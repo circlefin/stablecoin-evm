@@ -52,6 +52,40 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
     }
 
     /**
+     * @notice Increase the allowance by a given increment
+     * @param spender   Spender's address
+     * @param increment Amount of increase in allowance
+     * @return True if successful
+     */
+    function increaseAllowance(address spender, uint256 increment)
+        external
+        whenNotPaused
+        notBlacklisted(msg.sender)
+        notBlacklisted(spender)
+        returns (bool)
+    {
+        _increaseAllowance(msg.sender, spender, increment);
+        return true;
+    }
+
+    /**
+     * @notice Decrease the allowance by a given decrement
+     * @param spender   Spender's address
+     * @param decrement Amount of decrease in allowance
+     * @return True if successful
+     */
+    function decreaseAllowance(address spender, uint256 decrement)
+        external
+        whenNotPaused
+        notBlacklisted(msg.sender)
+        notBlacklisted(spender)
+        returns (bool)
+    {
+        _decreaseAllowance(msg.sender, spender, decrement);
+        return true;
+    }
+
+    /**
      * @notice Execute a transfer with a signed authorization
      * @param from        Payer's address (Authorizer)
      * @param to          Payee's address
@@ -140,5 +174,40 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
         bytes32 s
     ) external whenNotPaused {
         _cancelAuthorization(authorizer, nonce, v, r, s);
+    }
+
+    /**
+     * @notice Internal function to increase the allowance by a given increment
+     * @param owner     Token owner's address
+     * @param spender   Spender's address
+     * @param increment Amount of increase
+     */
+    function _increaseAllowance(
+        address owner,
+        address spender,
+        uint256 increment
+    ) internal {
+        _approve(owner, spender, allowed[owner][spender].add(increment));
+    }
+
+    /**
+     * @notice Internal function to decrease the allowance by a given decrement
+     * @param owner     Token owner's address
+     * @param spender   Spender's address
+     * @param decrement Amount of decrease
+     */
+    function _decreaseAllowance(
+        address owner,
+        address spender,
+        uint256 decrement
+    ) internal {
+        _approve(
+            owner,
+            spender,
+            allowed[owner][spender].sub(
+                decrement,
+                "ERC20: decreased allowance below zero"
+            )
+        );
     }
 }

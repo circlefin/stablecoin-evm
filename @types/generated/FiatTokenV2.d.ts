@@ -746,6 +746,62 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
   };
 
   /**
+   * Increase the allowance by a given increment
+   * @param increment Amount of increase in allowance
+   * @param spender Spender's address
+   */
+  increaseAllowance: {
+    (
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Decrease the allowance by a given decrement
+   * @param decrement Amount of decrease in allowance
+   * @param spender Spender's address
+   */
+  decreaseAllowance: {
+    (
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
    * Execute a transfer with a signed authorization
    * @param from Payer's address (Authorizer)
    * @param nonce Unique nonce
@@ -1478,6 +1534,62 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
       ): Promise<string>;
       estimateGas(
         newName: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Increase the allowance by a given increment
+     * @param increment Amount of increase in allowance
+     * @param spender Spender's address
+     */
+    increaseAllowance: {
+      (
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Decrease the allowance by a given decrement
+     * @param decrement Amount of decrease in allowance
+     * @param spender Spender's address
+     */
+    decreaseAllowance: {
+      (
+        spender: string,
+        decrement: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        spender: string,
+        decrement: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        spender: string,
+        decrement: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        spender: string,
+        decrement: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
