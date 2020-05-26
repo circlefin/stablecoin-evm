@@ -2,6 +2,7 @@
 /* tslint:disable */
 
 import { AbstractFiatTokenV1Contract } from "./AbstractFiatTokenV1";
+import { AbstractFiatTokenV2Contract } from "./AbstractFiatTokenV2";
 import { AdminUpgradeabilityProxyContract } from "./AdminUpgradeabilityProxy";
 import { BlacklistableContract } from "./Blacklistable";
 import { ContractThatCallsPublicFunctionsContract } from "./ContractThatCallsPublicFunctions";
@@ -32,6 +33,7 @@ declare global {
   namespace Truffle {
     interface Artifacts {
       require(name: "AbstractFiatTokenV1"): AbstractFiatTokenV1Contract;
+      require(name: "AbstractFiatTokenV2"): AbstractFiatTokenV2Contract;
       require(
         name: "AdminUpgradeabilityProxy"
       ): AdminUpgradeabilityProxyContract;
@@ -77,6 +79,10 @@ export {
   AbstractFiatTokenV1Contract,
   AbstractFiatTokenV1Instance
 } from "./AbstractFiatTokenV1";
+export {
+  AbstractFiatTokenV2Contract,
+  AbstractFiatTokenV2Instance
+} from "./AbstractFiatTokenV2";
 export {
   AdminUpgradeabilityProxyContract,
   AdminUpgradeabilityProxyInstance

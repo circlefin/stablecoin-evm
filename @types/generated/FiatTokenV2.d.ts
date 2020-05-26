@@ -189,7 +189,15 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
     txDetails?: Truffle.TransactionDetails
   ): Promise<string>;
 
+  DECREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
   DOMAIN_SEPARATOR(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  INCREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
 
   TRANSFER_WITH_AUTHORIZATION_TYPEHASH(
     txDetails?: Truffle.TransactionDetails
@@ -810,7 +818,7 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
    * @param to Payee's address
    * @param v v of the signature
    * @param validAfter Earliest time this is valid, seconds since the epoch
-   * @param validBefore Expiration time, secondss since the epoch
+   * @param validBefore Expiration time, seconds since the epoch
    * @param value Amount to be transferred
    */
   transferWithAuthorization: {
@@ -928,6 +936,132 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
   };
 
   /**
+   * Increase allowance with a signed authorization
+   * @param increment Amount of increase in allowance
+   * @param nonce Unique nonce
+   * @param owner Token owner's address (Authorizer)
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param spender Spender's address
+   * @param v v of the signature
+   * @param validAfter Earliest time this is valid, seconds since the epoch
+   * @param validBefore Expiration time, seconds since the epoch
+   */
+  increaseAllowanceWithAuthorization: {
+    (
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Decrease allowance with a signed authorization
+   * @param decrement Amount of decrease in allowance
+   * @param nonce Unique nonce
+   * @param owner Token owner's address (Authorizer)
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param spender Spender's address
+   * @param v v of the signature
+   * @param validAfter Earliest time this is valid, seconds since the epoch
+   * @param validBefore Expiration time, seconds since the epoch
+   */
+  decreaseAllowanceWithAuthorization: {
+    (
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
    * Works only if the authorization is not yet used.
    * Attempt to cancel an authorization
    * @param authorizer Authorizer's address
@@ -980,7 +1114,15 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
 
+    DECREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
     DOMAIN_SEPARATOR(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    INCREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
 
     TRANSFER_WITH_AUTHORIZATION_TYPEHASH(
       txDetails?: Truffle.TransactionDetails
@@ -1603,7 +1745,7 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
      * @param to Payee's address
      * @param v v of the signature
      * @param validAfter Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, secondss since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
      * @param value Amount to be transferred
      */
     transferWithAuthorization: {
@@ -1710,6 +1852,132 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
         owner: string,
         spender: string,
         value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Increase allowance with a signed authorization
+     * @param increment Amount of increase in allowance
+     * @param nonce Unique nonce
+     * @param owner Token owner's address (Authorizer)
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param spender Spender's address
+     * @param v v of the signature
+     * @param validAfter Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     */
+    increaseAllowanceWithAuthorization: {
+      (
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Decrease allowance with a signed authorization
+     * @param decrement Amount of decrease in allowance
+     * @param nonce Unique nonce
+     * @param owner Token owner's address (Authorizer)
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param spender Spender's address
+     * @param v v of the signature
+     * @param validAfter Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     */
+    decreaseAllowanceWithAuthorization: {
+      (
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
         validAfter: number | BN | string,
         validBefore: number | BN | string,
         nonce: string,

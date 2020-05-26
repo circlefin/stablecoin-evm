@@ -4,9 +4,11 @@
 import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
-export interface GasAbstractionContract
-  extends Truffle.Contract<GasAbstractionInstance> {
-  "new"(meta?: Truffle.TransactionDetails): Promise<GasAbstractionInstance>;
+export interface AbstractFiatTokenV2Contract
+  extends Truffle.Contract<AbstractFiatTokenV2Instance> {
+  "new"(
+    meta?: Truffle.TransactionDetails
+  ): Promise<AbstractFiatTokenV2Instance>;
 }
 
 export interface Approval {
@@ -18,26 +20,6 @@ export interface Approval {
     0: string;
     1: string;
     2: BN;
-  };
-}
-
-export interface AuthorizationCanceled {
-  name: "AuthorizationCanceled";
-  args: {
-    authorizer: string;
-    nonce: string;
-    0: string;
-    1: string;
-  };
-}
-
-export interface AuthorizationUsed {
-  name: "AuthorizationUsed";
-  args: {
-    authorizer: string;
-    nonce: string;
-    0: string;
-    1: string;
   };
 }
 
@@ -53,35 +35,9 @@ export interface Transfer {
   };
 }
 
-type AllEvents =
-  | Approval
-  | AuthorizationCanceled
-  | AuthorizationUsed
-  | Transfer;
+type AllEvents = Approval | Transfer;
 
-export interface GasAbstractionInstance extends Truffle.ContractInstance {
-  APPROVE_WITH_AUTHORIZATION_TYPEHASH(
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
-
-  CANCEL_AUTHORIZATION_TYPEHASH(
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
-
-  DECREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
-
-  DOMAIN_SEPARATOR(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-  INCREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
-
-  TRANSFER_WITH_AUTHORIZATION_TYPEHASH(
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<string>;
-
+export interface AbstractFiatTokenV2Instance extends Truffle.ContractInstance {
   /**
    * Returns the remaining number of tokens that `spender` will be allowed to spend on behalf of `owner` through {transferFrom}. This is zero by default.     * This value changes when {approve} or {transferFrom} are called.
    */
@@ -186,40 +142,7 @@ export interface GasAbstractionInstance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
-  /**
-   * Returns the state of an authorization
-   * @param authorizer Authorizer's address
-   * @param nonce Nonce of the authorization
-   */
-  authorizationState(
-    authorizer: string,
-    nonce: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
-
   methods: {
-    APPROVE_WITH_AUTHORIZATION_TYPEHASH(
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-
-    CANCEL_AUTHORIZATION_TYPEHASH(
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-
-    DECREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-
-    DOMAIN_SEPARATOR(txDetails?: Truffle.TransactionDetails): Promise<string>;
-
-    INCREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-
-    TRANSFER_WITH_AUTHORIZATION_TYPEHASH(
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<string>;
-
     /**
      * Returns the remaining number of tokens that `spender` will be allowed to spend on behalf of `owner` through {transferFrom}. This is zero by default.     * This value changes when {approve} or {transferFrom} are called.
      */
@@ -323,17 +246,6 @@ export interface GasAbstractionInstance extends Truffle.ContractInstance {
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
-
-    /**
-     * Returns the state of an authorization
-     * @param authorizer Authorizer's address
-     * @param nonce Nonce of the authorization
-     */
-    authorizationState(
-      authorizer: string,
-      nonce: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
   };
 
   getPastEvents(event: string): Promise<EventData[]>;

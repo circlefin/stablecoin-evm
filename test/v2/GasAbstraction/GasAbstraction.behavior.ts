@@ -1,6 +1,8 @@
 import { FiatTokenV2Instance } from "../../../@types/generated";
 import { testTransferWithAuthorization } from "./testTransferWithAuthorization";
 import { testApproveWithAuthorization } from "./testApproveWithAuthorization";
+import { testIncreaseAllowanceWithAuthorization } from "./testIncreaseAllowanceWithAuthorization";
+import { testDecreaseAllowanceWithAuthorization } from "./testDecreaseAllowanceWithAuthorization";
 import { testCancelAuthorization } from "./testCancelAuthorization";
 import { TestParams } from "./helpers";
 
@@ -20,6 +22,8 @@ export function hasGasAbstraction(
 
     testTransferWithAuthorization(testParams);
     testApproveWithAuthorization(testParams);
+    testIncreaseAllowanceWithAuthorization(testParams);
+    testDecreaseAllowanceWithAuthorization(testParams);
     testCancelAuthorization(testParams);
   });
 }

@@ -25,6 +25,7 @@
 pragma solidity 0.6.8;
 
 import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
+import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712 } from "../util/EIP712.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
 import { GasAbstraction } from "./GasAbstraction.sol";
@@ -33,7 +34,12 @@ import { GasAbstraction } from "./GasAbstraction.sol";
 /**
  * @title FiatToken V2
  */
-contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
+contract FiatTokenV2 is
+    FiatTokenV1_1,
+    AbstractFiatTokenV2,
+    EIP712Domain,
+    GasAbstraction
+{
     bool internal _initializedV2;
 
     /**
@@ -91,7 +97,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
      * @param to          Payee's address
      * @param value       Amount to be transferred
      * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, secondss since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
      * @param nonce       Unique nonce
      * @param v           v of the signature
      * @param r           r of the signature
@@ -158,6 +164,78 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
     }
 
     /**
+     * @notice Increase allowance with a signed authorization
+     * @param owner       Token owner's address (Authorizer)
+     * @param spender     Spender's address
+     * @param increment   Amount of increase in allowance
+     * @param validAfter  Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     * @param nonce       Unique nonce
+     * @param v           v of the signature
+     * @param r           r of the signature
+     * @param s           s of the signature
+     */
+    function increaseAllowanceWithAuthorization(
+        address owner,
+        address spender,
+        uint256 increment,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+        _increaseAllowanceWithAuthorization(
+            owner,
+            spender,
+            increment,
+            validAfter,
+            validBefore,
+            nonce,
+            v,
+            r,
+            s
+        );
+    }
+
+    /**
+     * @notice Decrease allowance with a signed authorization
+     * @param owner       Token owner's address (Authorizer)
+     * @param spender     Spender's address
+     * @param decrement   Amount of decrease in allowance
+     * @param validAfter  Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     * @param nonce       Unique nonce
+     * @param v           v of the signature
+     * @param r           r of the signature
+     * @param s           s of the signature
+     */
+    function decreaseAllowanceWithAuthorization(
+        address owner,
+        address spender,
+        uint256 decrement,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+        _decreaseAllowanceWithAuthorization(
+            owner,
+            spender,
+            decrement,
+            validAfter,
+            validBefore,
+            nonce,
+            v,
+            r,
+            s
+        );
+    }
+
+    /**
      * @notice Attempt to cancel an authorization
      * @dev Works only if the authorization is not yet used.
      * @param authorizer    Authorizer's address
@@ -186,7 +264,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
         address owner,
         address spender,
         uint256 increment
-    ) internal {
+    ) internal override {
         _approve(owner, spender, allowed[owner][spender].add(increment));
     }
 
@@ -200,7 +278,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP712Domain, GasAbstraction {
         address owner,
         address spender,
         uint256 decrement
-    ) internal {
+    ) internal override {
         _approve(
             owner,
             spender,

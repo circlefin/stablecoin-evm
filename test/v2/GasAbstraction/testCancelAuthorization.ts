@@ -7,6 +7,8 @@ import {
   signTransferAuthorization,
   signApproveAuthorization,
   signCancelAuthorization,
+  signIncreaseAllowanceAuthorization,
+  signDecreaseAllowanceAuthorization,
   TestParams,
 } from "./helpers";
 
@@ -134,6 +136,116 @@ export function testCancelAuthorization({
       // attempt to use the canceled authorization
       await expectRevert(
         fiatToken.approveWithAuthorization(
+          owner,
+          spender,
+          value,
+          validAfter,
+          validBefore,
+          nonce,
+          authorization.v,
+          authorization.r,
+          authorization.s,
+          { from: charlie }
+        ),
+        "authorization is used or canceled"
+      );
+    });
+
+    it("cancels unused increaseAllowance authorization if signature is valid", async () => {
+      const owner = alice.address;
+      const spender = bob.address;
+      const value = 1e6;
+      const validAfter = 0;
+      const validBefore = MAX_UINT256;
+
+      // create a signed authorization
+      const authorization = signIncreaseAllowanceAuthorization(
+        owner,
+        spender,
+        value,
+        validAfter,
+        validBefore,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      // create cancellation
+      const cancellation = signCancelAuthorization(
+        owner,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      // cancel the authorization
+      await fiatToken.cancelAuthorization(
+        owner,
+        nonce,
+        cancellation.v,
+        cancellation.r,
+        cancellation.s,
+        { from: charlie }
+      );
+
+      // attempt to use the canceled authorization
+      await expectRevert(
+        fiatToken.increaseAllowanceWithAuthorization(
+          owner,
+          spender,
+          value,
+          validAfter,
+          validBefore,
+          nonce,
+          authorization.v,
+          authorization.r,
+          authorization.s,
+          { from: charlie }
+        ),
+        "authorization is used or canceled"
+      );
+    });
+
+    it("cancels unused decreaseAllowance authorization if signature is valid", async () => {
+      const owner = alice.address;
+      const spender = bob.address;
+      const value = 1e6;
+      const validAfter = 0;
+      const validBefore = MAX_UINT256;
+
+      // create a signed authorization
+      const authorization = signDecreaseAllowanceAuthorization(
+        owner,
+        spender,
+        value,
+        validAfter,
+        validBefore,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      // create cancellation
+      const cancellation = signCancelAuthorization(
+        owner,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      // cancel the authorization
+      await fiatToken.cancelAuthorization(
+        owner,
+        nonce,
+        cancellation.v,
+        cancellation.r,
+        cancellation.s,
+        { from: charlie }
+      );
+
+      // attempt to use the canceled authorization
+      await expectRevert(
+        fiatToken.decreaseAllowanceWithAuthorization(
           owner,
           spender,
           value,
