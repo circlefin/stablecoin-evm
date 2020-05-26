@@ -1,15 +1,21 @@
 import BN from "bn.js";
-import {
-  FiatTokenProxyInstance,
-  FiatTokenV1Instance,
-  FiatTokenV2Instance,
-} from "../../@types/generated";
+import { FiatTokenProxyInstance } from "../../@types/generated";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
+const FiatTokenV1 = artifacts.require("FiatTokenV1");
+const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 
 export function usesOriginalStorageSlotPositions<
-  T extends FiatTokenV1Instance | FiatTokenV2Instance
->(FiatTokenContract: Truffle.Contract<T>, accounts: Truffle.Accounts): void {
+  T extends Truffle.ContractInstance
+>({
+  Contract,
+  version,
+  accounts,
+}: {
+  Contract: Truffle.Contract<T>;
+  version: 1 | 1.1 | 2;
+  accounts: Truffle.Accounts;
+}): void {
   describe("uses original storage slot positions", () => {
     const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
     const [mintAllowance, minted, transferred, allowance] = [
@@ -25,6 +31,7 @@ export function usesOriginalStorageSlotPositions<
       pauser,
       blacklister,
       minter,
+      rescuer,
       alice,
       bob,
       charlie,
@@ -32,16 +39,14 @@ export function usesOriginalStorageSlotPositions<
 
     let fiatToken: T;
     let proxy: FiatTokenProxyInstance;
-    let proxyAsFiatToken: T;
 
     beforeEach(async () => {
-      fiatToken = await FiatTokenContract.new();
+      fiatToken = await Contract.new();
       proxy = await FiatTokenProxy.new(fiatToken.address);
-      proxyAsFiatToken = await FiatTokenContract.at(proxy.address);
-
       await proxy.changeAdmin(proxyAdmin);
 
-      await proxyAsFiatToken.initialize(
+      const proxyAsFiatTokenV1 = await FiatTokenV1.at(proxy.address);
+      await proxyAsFiatTokenV1.initialize(
         name,
         symbol,
         currency,
@@ -52,14 +57,21 @@ export function usesOriginalStorageSlotPositions<
         owner
       );
 
-      await proxyAsFiatToken.configureMinter(minter, mintAllowance, {
+      await proxyAsFiatTokenV1.configureMinter(minter, mintAllowance, {
         from: masterMinter,
       });
-      await proxyAsFiatToken.mint(alice, minted, { from: minter });
-      await proxyAsFiatToken.transfer(bob, transferred, { from: alice });
-      await proxyAsFiatToken.approve(charlie, allowance, { from: alice });
-      await proxyAsFiatToken.blacklist(charlie, { from: blacklister });
-      await proxyAsFiatToken.pause({ from: pauser });
+      await proxyAsFiatTokenV1.mint(alice, minted, { from: minter });
+      await proxyAsFiatTokenV1.transfer(bob, transferred, { from: alice });
+      await proxyAsFiatTokenV1.approve(charlie, allowance, { from: alice });
+      await proxyAsFiatTokenV1.blacklist(charlie, { from: blacklister });
+      await proxyAsFiatTokenV1.pause({ from: pauser });
+
+      if (version >= 1.1) {
+        const proxyAsFiatTokenV1_1 = await FiatTokenV1_1.at(proxy.address);
+        await proxyAsFiatTokenV1_1.updateRescuer(rescuer, {
+          from: owner,
+        });
+      }
     });
 
     it("retains original storage slots 0 through 13", async () => {
@@ -113,6 +125,13 @@ export function usesOriginalStorageSlotPositions<
       // slot 13 - minterAllowed (mapping, slot is unused)
       expect(slots[13]).to.equal("0");
     });
+
+    if (version >= 1.1) {
+      it("retains slot 14 for rescuer", async () => {
+        const slot = await readSlot(proxy.address, 14);
+        expect(parseAddress(slot)).to.equal(rescuer);
+      });
+    }
 
     it("retains original storage slots for blacklisted mapping", async () => {
       // blacklisted[alice]

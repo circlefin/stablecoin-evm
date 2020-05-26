@@ -3,5 +3,9 @@ import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavi
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 
 contract("FiatTokenV1", (accounts) => {
-  usesOriginalStorageSlotPositions(FiatTokenV1, accounts);
+  usesOriginalStorageSlotPositions({
+    Contract: FiatTokenV1,
+    version: 1,
+    accounts,
+  });
 });

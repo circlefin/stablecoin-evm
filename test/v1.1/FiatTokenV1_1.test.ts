@@ -26,5 +26,9 @@ contract("FiatTokenV1_1", (accounts) => {
   });
 
   behavesLikeRescuable(() => fiatToken as RescuableInstance, accounts);
-  usesOriginalStorageSlotPositions(FiatTokenV1_1, accounts);
+  usesOriginalStorageSlotPositions({
+    Contract: FiatTokenV1_1,
+    version: 1.1,
+    accounts,
+  });
 });
