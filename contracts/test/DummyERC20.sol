@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) CENTRE SECZ 2018-2020
+ * Copyright (c) 2018 zOS Global Limited.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,15 +24,15 @@
 
 pragma solidity 0.6.8;
 
-import { FiatTokenV1_1 } from "./FiatTokenV1_1.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 
-// solhint-disable no-empty-blocks
-
-/**
- * @title FiatTokenV2
- * @dev ERC20 Token backed by fiat reserves
- */
-contract FiatTokenV2 is FiatTokenV1_1 {
-
+contract DummyERC20 is ERC20 {
+    constructor(
+        string memory name,
+        string memory symbol,
+        uint256 initialSupply
+    ) public ERC20(name, symbol) {
+        _mint(msg.sender, initialSupply);
+    }
 }

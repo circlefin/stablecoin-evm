@@ -4,9 +4,9 @@
 import BN from "bn.js";
 import { EventData, PastEventOptions } from "web3-eth-contract";
 
-export interface FiatTokenV2Contract
-  extends Truffle.Contract<FiatTokenV2Instance> {
-  "new"(meta?: Truffle.TransactionDetails): Promise<FiatTokenV2Instance>;
+export interface FiatTokenV11Contract
+  extends Truffle.Contract<FiatTokenV11Instance> {
+  "new"(meta?: Truffle.TransactionDetails): Promise<FiatTokenV11Instance>;
 }
 
 export interface Approval {
@@ -158,7 +158,7 @@ type AllEvents =
   | UnBlacklisted
   | Unpause;
 
-export interface FiatTokenV2Instance extends Truffle.ContractInstance {
+export interface FiatTokenV11Instance extends Truffle.ContractInstance {
   /**
    * Get allowed amount for an account
    * @param owner address The account owner
