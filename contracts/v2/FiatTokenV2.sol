@@ -29,6 +29,7 @@ import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712 } from "../util/EIP712.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
 import { GasAbstraction } from "./GasAbstraction.sol";
+import { Permit } from "./Permit.sol";
 
 
 /**
@@ -38,7 +39,8 @@ contract FiatTokenV2 is
     FiatTokenV1_1,
     AbstractFiatTokenV2,
     EIP712Domain,
-    GasAbstraction
+    GasAbstraction,
+    Permit
 {
     bool internal _initializedV2;
 
@@ -252,6 +254,28 @@ contract FiatTokenV2 is
         bytes32 s
     ) external whenNotPaused {
         _cancelAuthorization(authorizer, nonce, v, r, s);
+    }
+
+    /**
+     * @notice Update allowance with a signed permit
+     * @param owner       Token owner's address (Authorizer)
+     * @param spender     Spender's address
+     * @param value       Amount of allowance
+     * @param deadline    Expiration time, seconds since the epoch
+     * @param v           v of the signature
+     * @param r           r of the signature
+     * @param s           s of the signature
+     */
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+        _permit(owner, spender, value, deadline, v, r, s);
     }
 
     /**

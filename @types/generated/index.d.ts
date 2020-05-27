@@ -22,6 +22,7 @@ import { Ierc20Contract } from "./Ierc20";
 import { MigrationsContract } from "./Migrations";
 import { OwnableContract } from "./Ownable";
 import { PausableContract } from "./Pausable";
+import { PermitContract } from "./Permit";
 import { ProxyContract } from "./Proxy";
 import { RescuableContract } from "./Rescuable";
 import { UpgradeabilityProxyContract } from "./UpgradeabilityProxy";
@@ -61,6 +62,7 @@ declare global {
       require(name: "Migrations"): MigrationsContract;
       require(name: "Ownable"): OwnableContract;
       require(name: "Pausable"): PausableContract;
+      require(name: "Permit"): PermitContract;
       require(name: "Proxy"): ProxyContract;
       require(name: "Rescuable"): RescuableContract;
       require(name: "UpgradeabilityProxy"): UpgradeabilityProxyContract;
@@ -120,6 +122,7 @@ export { Ierc20Contract, Ierc20Instance } from "./Ierc20";
 export { MigrationsContract, MigrationsInstance } from "./Migrations";
 export { OwnableContract, OwnableInstance } from "./Ownable";
 export { PausableContract, PausableInstance } from "./Pausable";
+export { PermitContract, PermitInstance } from "./Permit";
 export { ProxyContract, ProxyInstance } from "./Proxy";
 export { RescuableContract, RescuableInstance } from "./Rescuable";
 export {

@@ -33,6 +33,10 @@ export const cancelAuthorizationTypeHash = web3.utils.keccak256(
   "CancelAuthorization(address authorizer,bytes32 nonce)"
 );
 
+export const permitTypeHash = web3.utils.keccak256(
+  "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+);
+
 export interface Signature {
   v: number;
   r: string;
@@ -126,6 +130,24 @@ export function signCancelAuthorization(
     cancelAuthorizationTypeHash,
     ["address", "bytes32"],
     [signer, nonce],
+    privateKey
+  );
+}
+
+export function signPermit(
+  owner: string,
+  spender: string,
+  value: number | string,
+  nonce: number,
+  deadline: number | string,
+  domainSeparator: string,
+  privateKey: string
+): Signature {
+  return signEIP712(
+    domainSeparator,
+    permitTypeHash,
+    ["address", "address", "uint256", "uint256", "uint256"],
+    [owner, spender, value, nonce, deadline],
     privateKey
   );
 }

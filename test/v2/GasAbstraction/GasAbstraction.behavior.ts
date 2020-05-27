@@ -5,6 +5,7 @@ import { testIncreaseAllowanceWithAuthorization } from "./testIncreaseAllowanceW
 import { testDecreaseAllowanceWithAuthorization } from "./testDecreaseAllowanceWithAuthorization";
 import { testCancelAuthorization } from "./testCancelAuthorization";
 import { TestParams } from "./helpers";
+import { testPermit } from "./testPermit";
 
 export function hasGasAbstraction(
   getFiatToken: () => FiatTokenV2Instance,
@@ -25,5 +26,6 @@ export function hasGasAbstraction(
     testIncreaseAllowanceWithAuthorization(testParams);
     testDecreaseAllowanceWithAuthorization(testParams);
     testCancelAuthorization(testParams);
+    testPermit(testParams);
   });
 }
