@@ -56,7 +56,7 @@ contract Blacklistable is Ownable {
      */
     modifier notBlacklisted(address _account) {
         require(
-            blacklisted[_account] == false,
+            !blacklisted[_account],
             "Blacklistable: account is blacklisted"
         );
         _;

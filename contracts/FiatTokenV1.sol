@@ -100,10 +100,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @dev Throws if called by any account other than a minter
      */
     modifier onlyMinters() {
-        require(
-            minters[msg.sender] == true,
-            "FiatToken: caller is not a minter"
-        );
+        require(minters[msg.sender], "FiatToken: caller is not a minter");
         _;
     }
 
