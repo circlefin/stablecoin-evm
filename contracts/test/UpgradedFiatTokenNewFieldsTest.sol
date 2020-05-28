@@ -38,9 +38,9 @@ contract UpgradedFiatTokenNewFieldsTest is FiatTokenV1 {
     bool internal initializedV2;
 
     function initialize(
-        string memory _name,
-        string memory _symbol,
-        string memory _currency,
+        string calldata _name,
+        string calldata _symbol,
+        string calldata _currency,
         uint8 _decimals,
         address _masterMinter,
         address _pauser,
@@ -49,7 +49,7 @@ contract UpgradedFiatTokenNewFieldsTest is FiatTokenV1 {
         bool _newBool,
         address _newAddress,
         uint256 _newUint
-    ) public {
+    ) external {
         super.initialize(
             _name,
             _symbol,

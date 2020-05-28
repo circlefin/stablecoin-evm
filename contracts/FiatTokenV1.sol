@@ -112,7 +112,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @return A boolean that indicates if the operation was successful.
      */
     function mint(address _to, uint256 _amount)
-        public
+        external
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -151,7 +151,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @dev Get minter allowance for an account
      * @param minter The address of the minter
      */
-    function minterAllowance(address minter) public view returns (uint256) {
+    function minterAllowance(address minter) external view returns (uint256) {
         return minterAllowed[minter];
     }
 
@@ -159,7 +159,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @dev Checks if account is a minter
      * @param account The address to check
      */
-    function isMinter(address account) public view returns (bool) {
+    function isMinter(address account) external view returns (bool) {
         return minters[account];
     }
 
@@ -169,7 +169,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @param spender address The account spender
      */
     function allowance(address owner, address spender)
-        public
+        external
         override
         view
         returns (uint256)
@@ -180,7 +180,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
     /**
      * @dev Get totalSupply of token
      */
-    function totalSupply() public override view returns (uint256) {
+    function totalSupply() external override view returns (uint256) {
         return totalSupply_;
     }
 
@@ -188,7 +188,12 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @dev Get token balance of an account
      * @param account address The account
      */
-    function balanceOf(address account) public override view returns (uint256) {
+    function balanceOf(address account)
+        external
+        override
+        view
+        returns (uint256)
+    {
         return balances[account];
     }
 
@@ -197,7 +202,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @return True if the operation was successful.
      */
     function approve(address _spender, uint256 _value)
-        public
+        external
         override
         whenNotPaused
         notBlacklisted(msg.sender)
@@ -221,7 +226,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
         address _to,
         uint256 _value
     )
-        public
+        external
         override
         whenNotPaused
         notBlacklisted(_to)
@@ -253,7 +258,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @return bool success
      */
     function transfer(address _to, uint256 _value)
-        public
+        external
         override
         whenNotPaused
         notBlacklisted(msg.sender)
@@ -279,7 +284,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @return True if the operation was successful.
      */
     function configureMinter(address minter, uint256 minterAllowedAmount)
-        public
+        external
         whenNotPaused
         onlyMasterMinter
         returns (bool)
@@ -296,7 +301,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @return True if the operation was successful.
      */
     function removeMinter(address minter)
-        public
+        external
         onlyMasterMinter
         returns (bool)
     {
@@ -313,7 +318,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
      * @param _amount uint256 the amount of tokens to be burned
      */
     function burn(uint256 _amount)
-        public
+        external
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -328,7 +333,7 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
         emit Transfer(msg.sender, address(0), _amount);
     }
 
-    function updateMasterMinter(address _newMasterMinter) public onlyOwner {
+    function updateMasterMinter(address _newMasterMinter) external onlyOwner {
         require(
             _newMasterMinter != address(0),
             "FiatToken: new masterMinter is the zero address"

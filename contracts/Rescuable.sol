@@ -40,7 +40,7 @@ contract Rescuable is Ownable {
      * @notice Returns current rescuer
      * @return Rescuer's address
      */
-    function rescuer() public view returns (address) {
+    function rescuer() external view returns (address) {
         return _rescuer;
     }
 
