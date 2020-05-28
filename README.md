@@ -26,6 +26,7 @@ $ yarn typecheck      # Type-check TypeScript code
 $ yarn lint           # Check JavaScript and TypeScript code
 $ yarn lint --fix     # Fix problems where possible
 $ yarn solhint        # Check Solidity code
+$ yarn slither        # Run Slither
 ```
 
 To auto-format code:
