@@ -36,8 +36,8 @@ import {
  * @dev This contract proxies FiatToken calls and enables FiatToken upgrades
  */
 contract FiatTokenProxy is AdminUpgradeabilityProxy {
-    constructor(address _implementation)
+    constructor(address implementationContract)
         public
-        AdminUpgradeabilityProxy(_implementation)
+        AdminUpgradeabilityProxy(implementationContract)
     {}
 }

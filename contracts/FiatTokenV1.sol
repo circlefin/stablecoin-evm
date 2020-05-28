@@ -58,41 +58,41 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
     event MasterMinterChanged(address indexed newMasterMinter);
 
     function initialize(
-        string memory _name,
-        string memory _symbol,
-        string memory _currency,
-        uint8 _decimals,
-        address _masterMinter,
-        address _pauser,
-        address _blacklister,
-        address _owner
+        string memory tokenName,
+        string memory tokenSymbol,
+        string memory tokenCurrency,
+        uint8 tokenDecimals,
+        address newMasterMinter,
+        address newPauser,
+        address newBlacklister,
+        address newOwner
     ) public {
         require(!initialized, "FiatToken: contract is already initialized");
         require(
-            _masterMinter != address(0),
+            newMasterMinter != address(0),
             "FiatToken: new masterMinter is the zero address"
         );
         require(
-            _pauser != address(0),
+            newPauser != address(0),
             "FiatToken: new pauser is the zero address"
         );
         require(
-            _blacklister != address(0),
+            newBlacklister != address(0),
             "FiatToken: new blacklister is the zero address"
         );
         require(
-            _owner != address(0),
+            newOwner != address(0),
             "FiatToken: new owner is the zero address"
         );
 
-        name = _name;
-        symbol = _symbol;
-        currency = _currency;
-        decimals = _decimals;
-        masterMinter = _masterMinter;
-        pauser = _pauser;
-        blacklister = _blacklister;
-        setOwner(_owner);
+        name = tokenName;
+        symbol = tokenSymbol;
+        currency = tokenCurrency;
+        decimals = tokenDecimals;
+        masterMinter = newMasterMinter;
+        pauser = newPauser;
+        blacklister = newBlacklister;
+        setOwner(newOwner);
         initialized = true;
     }
 
