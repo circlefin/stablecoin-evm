@@ -24,27 +24,37 @@
 
 pragma solidity 0.6.8;
 
+import { ContractWithPublicFunctions } from "./ContractWithPublicFunctions.sol";
 
-// solhint-disable var-name-mixedcase
 
-contract Migrations {
-    address public owner;
-    uint256 public last_completed_migration;
-
-    modifier restricted() {
-        if (msg.sender == owner) _;
+contract ContractThatCallsPublicFunctions {
+    function callSetFoo(address contractAddress, string calldata foo)
+        external
+        returns (bool)
+    {
+        return ContractWithPublicFunctions(contractAddress).setFoo(foo);
     }
 
-    constructor() public {
-        owner = msg.sender;
+    function callGetFoo(address contractAddress)
+        external
+        view
+        returns (string memory)
+    {
+        return ContractWithPublicFunctions(contractAddress).getFoo();
     }
 
-    function setCompleted(uint256 completed) external restricted {
-        last_completed_migration = completed;
+    function callSetBar(address contractAddress, uint256 bar)
+        external
+        returns (bool)
+    {
+        return ContractWithPublicFunctions(contractAddress).setBar(bar);
     }
 
-    function upgrade(address new_address) external restricted {
-        Migrations upgraded = Migrations(new_address);
-        upgraded.setCompleted(last_completed_migration);
+    function callGetBar(address contractAddress)
+        external
+        view
+        returns (uint256)
+    {
+        return ContractWithPublicFunctions(contractAddress).getBar();
     }
 }

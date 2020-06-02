@@ -7,7 +7,7 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 export interface AdminUpgradeabilityProxyContract
   extends Truffle.Contract<AdminUpgradeabilityProxyInstance> {
   "new"(
-    _implementation: string,
+    implementationContract: string,
     meta?: Truffle.TransactionDetails
   ): Promise<AdminUpgradeabilityProxyInstance>;
 }

@@ -7,7 +7,7 @@ import { EventData, PastEventOptions } from "web3-eth-contract";
 export interface FiatTokenProxyContract
   extends Truffle.Contract<FiatTokenProxyInstance> {
   "new"(
-    _implementation: string,
+    implementationContract: string,
     meta?: Truffle.TransactionDetails
   ): Promise<FiatTokenProxyInstance>;
 }

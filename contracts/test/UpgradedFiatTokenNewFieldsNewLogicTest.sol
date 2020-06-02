@@ -38,27 +38,27 @@ contract UpgradedFiatTokenNewFieldsNewLogicTest is FiatTokenV1 {
     bool internal initializedV2;
 
     function initialize(
-        string memory _name,
-        string memory _symbol,
-        string memory _currency,
-        uint8 _decimals,
-        address _masterMinter,
-        address _pauser,
-        address _blacklister,
-        address _owner,
+        string calldata tokenName,
+        string calldata tokenSymbol,
+        string calldata tokenCurrency,
+        uint8 tokenDecimals,
+        address newMasterMinter,
+        address newPauser,
+        address newBlacklister,
+        address newOwner,
         bool _newBool,
         address _newAddress,
         uint256 _newUint
-    ) public {
+    ) external {
         super.initialize(
-            _name,
-            _symbol,
-            _currency,
-            _decimals,
-            _masterMinter,
-            _pauser,
-            _blacklister,
-            _owner
+            tokenName,
+            tokenSymbol,
+            tokenCurrency,
+            tokenDecimals,
+            newMasterMinter,
+            newPauser,
+            newBlacklister,
+            newOwner
         );
         initV2(_newBool, _newAddress, _newUint);
     }
@@ -75,7 +75,7 @@ contract UpgradedFiatTokenNewFieldsNewLogicTest is FiatTokenV1 {
         initializedV2 = true;
     }
 
-    function setNewAddress(address _newAddress) public {
+    function setNewAddress(address _newAddress) external {
         newAddress = _newAddress;
     }
 }

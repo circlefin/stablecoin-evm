@@ -39,6 +39,7 @@ import { Ownable } from "./Ownable.sol";
  * 4. Switches ownable library to use ZeppelinOS (7/12/18)
  * 5. Remove constructor (7/13/18)
  * 6. Reformat, conform to Solidity 0.6 syntax and add error messages (5/13/20)
+ * 7. Make public functions external (5/27/20)
  */
 contract Pausable is Ownable {
     event Pause();
@@ -67,7 +68,7 @@ contract Pausable is Ownable {
     /**
      * @dev called by the owner to pause, triggers stopped state
      */
-    function pause() public onlyPauser {
+    function pause() external onlyPauser {
         paused = true;
         emit Pause();
     }
@@ -75,7 +76,7 @@ contract Pausable is Ownable {
     /**
      * @dev called by the owner to unpause, returns to normal state
      */
-    function unpause() public onlyPauser {
+    function unpause() external onlyPauser {
         paused = false;
         emit Unpause();
     }
@@ -83,7 +84,7 @@ contract Pausable is Ownable {
     /**
      * @dev update the pauser role
      */
-    function updatePauser(address _newPauser) public onlyOwner {
+    function updatePauser(address _newPauser) external onlyOwner {
         require(
             _newPauser != address(0),
             "Pausable: new pauser is the zero address"

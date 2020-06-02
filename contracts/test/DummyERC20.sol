@@ -29,10 +29,10 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract DummyERC20 is ERC20 {
     constructor(
-        string memory name,
-        string memory symbol,
+        string memory tokenName,
+        string memory tokenSymbol,
         uint256 initialSupply
-    ) public ERC20(name, symbol) {
+    ) public ERC20(tokenName, tokenSymbol) {
         _mint(msg.sender, initialSupply);
     }
 }

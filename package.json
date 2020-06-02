@@ -17,7 +17,8 @@
     "test": "truffle test",
     "coverage": "truffle run coverage",
     "solhint": "solhint 'contracts/**/*.sol'",
-    "precommit": "yarn typechain && yarn fmt && yarn typecheck && yarn lint && yarn solhint"
+    "precommit": "yarn typechain && yarn fmt && yarn typecheck && yarn lint && yarn solhint",
+    "slither": "slither --solc-disable-warnings --disable-color --exclude-dependencies ."
   },
   "repository": {
     "type": "git",

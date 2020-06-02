@@ -286,47 +286,47 @@ export interface FiatTokenV11Instance extends Truffle.ContractInstance {
 
   initialize: {
     (
-      _name: string,
-      _symbol: string,
-      _currency: string,
-      _decimals: number | BN | string,
-      _masterMinter: string,
-      _pauser: string,
-      _blacklister: string,
-      _owner: string,
+      tokenName: string,
+      tokenSymbol: string,
+      tokenCurrency: string,
+      tokenDecimals: number | BN | string,
+      newMasterMinter: string,
+      newPauser: string,
+      newBlacklister: string,
+      newOwner: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      _name: string,
-      _symbol: string,
-      _currency: string,
-      _decimals: number | BN | string,
-      _masterMinter: string,
-      _pauser: string,
-      _blacklister: string,
-      _owner: string,
+      tokenName: string,
+      tokenSymbol: string,
+      tokenCurrency: string,
+      tokenDecimals: number | BN | string,
+      newMasterMinter: string,
+      newPauser: string,
+      newBlacklister: string,
+      newOwner: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<void>;
     sendTransaction(
-      _name: string,
-      _symbol: string,
-      _currency: string,
-      _decimals: number | BN | string,
-      _masterMinter: string,
-      _pauser: string,
-      _blacklister: string,
-      _owner: string,
+      tokenName: string,
+      tokenSymbol: string,
+      tokenCurrency: string,
+      tokenDecimals: number | BN | string,
+      newMasterMinter: string,
+      newPauser: string,
+      newBlacklister: string,
+      newOwner: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _name: string,
-      _symbol: string,
-      _currency: string,
-      _decimals: number | BN | string,
-      _masterMinter: string,
-      _pauser: string,
-      _blacklister: string,
-      _owner: string,
+      tokenName: string,
+      tokenSymbol: string,
+      tokenCurrency: string,
+      tokenDecimals: number | BN | string,
+      newMasterMinter: string,
+      newPauser: string,
+      newBlacklister: string,
+      newOwner: string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -802,47 +802,47 @@ export interface FiatTokenV11Instance extends Truffle.ContractInstance {
 
     initialize: {
       (
-        _name: string,
-        _symbol: string,
-        _currency: string,
-        _decimals: number | BN | string,
-        _masterMinter: string,
-        _pauser: string,
-        _blacklister: string,
-        _owner: string,
+        tokenName: string,
+        tokenSymbol: string,
+        tokenCurrency: string,
+        tokenDecimals: number | BN | string,
+        newMasterMinter: string,
+        newPauser: string,
+        newBlacklister: string,
+        newOwner: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _name: string,
-        _symbol: string,
-        _currency: string,
-        _decimals: number | BN | string,
-        _masterMinter: string,
-        _pauser: string,
-        _blacklister: string,
-        _owner: string,
+        tokenName: string,
+        tokenSymbol: string,
+        tokenCurrency: string,
+        tokenDecimals: number | BN | string,
+        newMasterMinter: string,
+        newPauser: string,
+        newBlacklister: string,
+        newOwner: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<void>;
       sendTransaction(
-        _name: string,
-        _symbol: string,
-        _currency: string,
-        _decimals: number | BN | string,
-        _masterMinter: string,
-        _pauser: string,
-        _blacklister: string,
-        _owner: string,
+        tokenName: string,
+        tokenSymbol: string,
+        tokenCurrency: string,
+        tokenDecimals: number | BN | string,
+        newMasterMinter: string,
+        newPauser: string,
+        newBlacklister: string,
+        newOwner: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _name: string,
-        _symbol: string,
-        _currency: string,
-        _decimals: number | BN | string,
-        _masterMinter: string,
-        _pauser: string,
-        _blacklister: string,
-        _owner: string,
+        tokenName: string,
+        tokenSymbol: string,
+        tokenCurrency: string,
+        tokenDecimals: number | BN | string,
+        newMasterMinter: string,
+        newPauser: string,
+        newBlacklister: string,
+        newOwner: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

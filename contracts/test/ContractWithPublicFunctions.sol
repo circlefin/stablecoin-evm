@@ -25,26 +25,30 @@
 pragma solidity 0.6.8;
 
 
-// solhint-disable var-name-mixedcase
+contract ContractWithPublicFunctions {
+    string private _foo;
+    uint256 private _bar;
 
-contract Migrations {
-    address public owner;
-    uint256 public last_completed_migration;
-
-    modifier restricted() {
-        if (msg.sender == owner) _;
+    function setFoo(string memory foo) public returns (bool) {
+        _foo = foo;
+        return true;
     }
 
-    constructor() public {
-        owner = msg.sender;
+    function getFoo() public view returns (string memory) {
+        return _foo;
     }
 
-    function setCompleted(uint256 completed) external restricted {
-        last_completed_migration = completed;
+    function setBar(uint256 bar) public returns (bool) {
+        _bar = bar;
+        return true;
     }
 
-    function upgrade(address new_address) external restricted {
-        Migrations upgraded = Migrations(new_address);
-        upgraded.setCompleted(last_completed_migration);
+    function getBar() public view returns (uint256) {
+        return _bar;
+    }
+
+    function hushLinters() external {
+        require(setFoo(getFoo()), "hush");
+        require(setBar(getBar()), "hush");
     }
 }

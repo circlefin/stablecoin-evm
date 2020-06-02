@@ -32,6 +32,7 @@ pragma solidity 0.6.8;
  * Modifications:
  * 1. Consolidate OwnableStorage into this contract (7/13/18)
  * 2. Reformat, conform to Solidity 0.6 syntax, and add error messages (5/13/20)
+ * 3. Make public functions external (5/27/20)
  */
 contract Ownable {
     // Owner of the contract
@@ -55,7 +56,7 @@ contract Ownable {
      * @dev Tells the address of the owner
      * @return the address of the owner
      */
-    function owner() public view returns (address) {
+    function owner() external view returns (address) {
         return _owner;
     }
 
@@ -70,7 +71,7 @@ contract Ownable {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(msg.sender == owner(), "Ownable: caller is not the owner");
+        require(msg.sender == _owner, "Ownable: caller is not the owner");
         _;
     }
 
@@ -78,12 +79,12 @@ contract Ownable {
      * @dev Allows the current owner to transfer control of the contract to a newOwner.
      * @param newOwner The address to transfer ownership to.
      */
-    function transferOwnership(address newOwner) public onlyOwner {
+    function transferOwnership(address newOwner) external onlyOwner {
         require(
             newOwner != address(0),
             "Ownable: new owner is the zero address"
         );
-        emit OwnershipTransferred(owner(), newOwner);
+        emit OwnershipTransferred(_owner, newOwner);
         setOwner(newOwner);
     }
 }
