@@ -3,6 +3,9 @@
 
 import { AdminUpgradeabilityProxyContract } from "./AdminUpgradeabilityProxy";
 import { BlacklistableContract } from "./Blacklistable";
+import { ContractThatCallsPublicFunctionsContract } from "./ContractThatCallsPublicFunctions";
+import { ContractWithExternalFunctionsContract } from "./ContractWithExternalFunctions";
+import { ContractWithPublicFunctionsContract } from "./ContractWithPublicFunctions";
 import { DummyErc20Contract } from "./DummyErc20";
 import { Erc20Contract } from "./Erc20";
 import { FiatTokenProxyContract } from "./FiatTokenProxy";
@@ -27,6 +30,15 @@ declare global {
         name: "AdminUpgradeabilityProxy"
       ): AdminUpgradeabilityProxyContract;
       require(name: "Blacklistable"): BlacklistableContract;
+      require(
+        name: "ContractThatCallsPublicFunctions"
+      ): ContractThatCallsPublicFunctionsContract;
+      require(
+        name: "ContractWithExternalFunctions"
+      ): ContractWithExternalFunctionsContract;
+      require(
+        name: "ContractWithPublicFunctions"
+      ): ContractWithPublicFunctionsContract;
       require(name: "DummyERC20"): DummyErc20Contract;
       require(name: "ERC20"): Erc20Contract;
       require(name: "FiatTokenProxy"): FiatTokenProxyContract;
@@ -56,6 +68,18 @@ export {
   AdminUpgradeabilityProxyInstance
 } from "./AdminUpgradeabilityProxy";
 export { BlacklistableContract, BlacklistableInstance } from "./Blacklistable";
+export {
+  ContractThatCallsPublicFunctionsContract,
+  ContractThatCallsPublicFunctionsInstance
+} from "./ContractThatCallsPublicFunctions";
+export {
+  ContractWithExternalFunctionsContract,
+  ContractWithExternalFunctionsInstance
+} from "./ContractWithExternalFunctions";
+export {
+  ContractWithPublicFunctionsContract,
+  ContractWithPublicFunctionsInstance
+} from "./ContractWithPublicFunctions";
 export { DummyErc20Contract, DummyErc20Instance } from "./DummyErc20";
 export { Erc20Contract, Erc20Instance } from "./Erc20";
 export {
