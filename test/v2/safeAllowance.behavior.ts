@@ -1,6 +1,7 @@
 import { FiatTokenV2Instance } from "../../@types/generated";
 import { Approval } from "../../@types/generated/FiatTokenV2";
 import { expectRevert } from "../helpers";
+import { MAX_UINT256 } from "../helpers/constants";
 
 export function hasSafeAllowance(
   getFiatToken: () => FiatTokenV2Instance,
@@ -46,6 +47,19 @@ export function hasSafeAllowance(
         expect(log.args[0]).to.equal(alice);
         expect(log.args[1]).to.equal(bob);
         expect(log.args[2].toNumber()).to.equal(15e6);
+      });
+
+      it("reverts if the increase causes an integer overflow", async () => {
+        await fiatToken.increaseAllowance(bob, 1, {
+          from: alice,
+        });
+
+        await expectRevert(
+          fiatToken.increaseAllowance(bob, MAX_UINT256, {
+            from: alice,
+          }),
+          "addition overflow"
+        );
       });
 
       it("reverts if the contract is paused", async () => {
@@ -121,6 +135,18 @@ export function hasSafeAllowance(
         // try to decrease allowance by 10e6 + 1
         await expectRevert(
           fiatToken.decreaseAllowance(bob, 10e6 + 1, {
+            from: alice,
+          }),
+          "decreased allowance below zero"
+        );
+      });
+
+      it("reverts if the decrease causes an integer overflow", async () => {
+        // a subtraction causing overflow does not actually happen because
+        // it catches that the given decrement is greater than the current
+        // allowance
+        await expectRevert(
+          fiatToken.decreaseAllowance(bob, MAX_UINT256, {
             from: alice,
           }),
           "decreased allowance below zero"

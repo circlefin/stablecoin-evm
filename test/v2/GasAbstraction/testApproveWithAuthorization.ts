@@ -30,6 +30,7 @@ export function testApproveWithAuthorization({
     const charlie = accounts[1];
     let nonce: string;
 
+    const initialBalance = 10e6;
     const approveParams = {
       owner: alice.address,
       spender: bob.address,
@@ -45,7 +46,9 @@ export function testApproveWithAuthorization({
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
-      await fiatToken.mint(alice.address, 10e6, { from: fiatTokenOwner });
+      await fiatToken.mint(approveParams.owner, initialBalance, {
+        from: fiatTokenOwner,
+      });
     });
 
     it("has the expected type hash", async () => {
@@ -70,8 +73,13 @@ export function testApproveWithAuthorization({
       );
 
       // check that the allowance is initially zero
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        0
+      );
+
+      // check that the authorization state is 0 = Unused
       expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
+        (await fiatToken.authorizationState(owner, nonce)).toNumber()
       ).to.equal(0);
 
       // a third-party, Charlie (not Alice) submits the authorization
@@ -89,22 +97,27 @@ export function testApproveWithAuthorization({
       );
 
       // check that allowance is updated
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(7e6);
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        value
+      );
 
       // check that Approval event is emitted
       const log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
       expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(alice.address);
-      expect(log0.args[1]).to.equal(bob.address);
-      expect(log0.args[2].toNumber()).to.equal(7e6);
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(spender);
+      expect(log0.args[2].toNumber()).to.equal(value);
 
       // check that AuthorizationUsed event is emitted
       const log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
       expect(log1.event).to.equal("AuthorizationUsed");
-      expect(log1.args[0]).to.equal(alice.address);
+      expect(log1.args[0]).to.equal(owner);
       expect(log1.args[1]).to.equal(nonce);
+
+      // check that the authorization state is now 1 = Used
+      expect(
+        (await fiatToken.authorizationState(owner, nonce)).toNumber()
+      ).to.equal(1);
     });
 
     it("reverts if the signature does not match given parameters", async () => {

@@ -3,6 +3,7 @@ import { FiatTokenV2Instance, RescuableInstance } from "../../@types/generated";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
 import { hasSafeAllowance } from "./safeAllowance.behavior";
 import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
+import { expectRevert } from "../helpers";
 
 const ECRecover = artifacts.require("ECRecover");
 const EIP712 = artifacts.require("EIP712");
@@ -75,4 +76,12 @@ contract("FiatTokenV2", (accounts) => {
     fiatTokenOwner,
     accounts
   );
+
+  it("disallows calling initializeV2 twice", async () => {
+    // It was called once in beforeEach. Try to call again.
+    await expectRevert(
+      fiatToken.initializeV2("Not USD Coin", { from: fiatTokenOwner }),
+      "contract is already initialized"
+    );
+  });
 });

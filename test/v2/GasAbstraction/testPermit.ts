@@ -26,6 +26,7 @@ export function testPermit({
     const [alice, bob] = ACCOUNTS_AND_KEYS;
     const charlie = accounts[1];
 
+    const initialBalance = 10e6;
     const permitParams = {
       owner: alice.address,
       spender: bob.address,
@@ -40,7 +41,9 @@ export function testPermit({
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
-      await fiatToken.mint(alice.address, 10e6, { from: fiatTokenOwner });
+      await fiatToken.mint(permitParams.owner, initialBalance, {
+        from: fiatTokenOwner,
+      });
     });
 
     it("has the expected type hash", async () => {
@@ -64,9 +67,11 @@ export function testPermit({
       );
 
       // check that the allowance is initially zero
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(0);
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        0
+      );
+      // check that the next nonce expected is zero
+      expect((await fiatToken.nonces(owner)).toNumber()).to.equal(0);
 
       // a third-party, Charlie (not Alice) submits the permit
       let result = await fiatToken.permit(
@@ -81,16 +86,19 @@ export function testPermit({
       );
 
       // check that allowance is updated
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(7e6);
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        value
+      );
 
       // check that Approval event is emitted
       let log = result.logs[0] as Truffle.TransactionLog<Approval>;
       expect(log.event).to.equal("Approval");
-      expect(log.args[0]).to.equal(alice.address);
-      expect(log.args[1]).to.equal(bob.address);
-      expect(log.args[2].toNumber()).to.equal(7e6);
+      expect(log.args[0]).to.equal(owner);
+      expect(log.args[1]).to.equal(spender);
+      expect(log.args[2].toNumber()).to.equal(value);
+
+      // check that the next nonce expected is now 1
+      expect((await fiatToken.nonces(owner)).toNumber()).to.equal(1);
 
       // increment nonce
       nonce = 1;
@@ -118,15 +126,15 @@ export function testPermit({
       );
 
       // check that allowance is updated
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(1e6);
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        1e6
+      );
 
       // check that Approval event is emitted
       log = result.logs[0] as Truffle.TransactionLog<Approval>;
       expect(log.event).to.equal("Approval");
-      expect(log.args[0]).to.equal(alice.address);
-      expect(log.args[1]).to.equal(bob.address);
+      expect(log.args[0]).to.equal(owner);
+      expect(log.args[1]).to.equal(spender);
       expect(log.args[2].toNumber()).to.equal(1e6);
     });
 
@@ -204,6 +212,31 @@ export function testPermit({
           from: charlie,
         }),
         "permit is expired"
+      );
+    });
+
+    it("reverts if the nonce given does not match the next nonce expected", async () => {
+      const { owner, spender, value, deadline } = permitParams;
+      const nonce = 1;
+      // create a signed permit
+      const { v, r, s } = signPermit(
+        owner,
+        spender,
+        value,
+        nonce,
+        deadline,
+        domainSeparator,
+        alice.key
+      );
+      // check that the next nonce expected is 0, not 1
+      expect((await fiatToken.nonces(owner)).toNumber()).to.equal(0);
+
+      // try to submit the permit
+      await expectRevert(
+        fiatToken.permit(owner, spender, value, deadline, v, r, s, {
+          from: charlie,
+        }),
+        "invalid signature"
       );
     });
 

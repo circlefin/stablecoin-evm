@@ -30,6 +30,7 @@ export function testIncreaseAllowanceWithAuthorization({
     const charlie = accounts[1];
     let nonce: string;
 
+    const initialBalance = 10e6;
     const increaseAllowanceParams = {
       owner: alice.address,
       spender: bob.address,
@@ -45,7 +46,9 @@ export function testIncreaseAllowanceWithAuthorization({
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
-      await fiatToken.mint(alice.address, 10e6, { from: fiatTokenOwner });
+      await fiatToken.mint(increaseAllowanceParams.owner, initialBalance, {
+        from: fiatTokenOwner,
+      });
     });
 
     it("has the expected type hash", async () => {
@@ -58,10 +61,10 @@ export function testIncreaseAllowanceWithAuthorization({
       const {
         owner,
         spender,
+        increment,
         validAfter,
         validBefore,
       } = increaseAllowanceParams;
-      let { increment } = increaseAllowanceParams;
       // create a signed authorization to increase the allowance granted to Bob
       // to spend Alice's funds on behalf, and sign with Alice's key
       let { v, r, s } = signIncreaseAllowanceAuthorization(
@@ -76,8 +79,13 @@ export function testIncreaseAllowanceWithAuthorization({
       );
 
       // check that the allowance is initially zero
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        0
+      );
+
+      // check that the authorization state is 0 = Unused
       expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
+        (await fiatToken.authorizationState(owner, nonce)).toNumber()
       ).to.equal(0);
 
       // a third-party, Charlie (not Alice) submits the authorization
@@ -94,27 +102,119 @@ export function testIncreaseAllowanceWithAuthorization({
         { from: charlie }
       );
 
-      // check that the allowance is increased by 3e6
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(3e6);
+      // check that the allowance is increased
+      let newAllowance = increment;
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        newAllowance
+      );
 
       // check that Approval event is emitted
       let log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
       expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(alice.address);
-      expect(log0.args[1]).to.equal(bob.address);
-      expect(log0.args[2].toNumber()).to.equal(3e6);
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(spender);
+      expect(log0.args[2].toNumber()).to.equal(newAllowance);
 
       // check that AuthorizationUsed event is emitted
       let log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
       expect(log1.event).to.equal("AuthorizationUsed");
-      expect(log1.args[0]).to.equal(alice.address);
+      expect(log1.args[0]).to.equal(owner);
       expect(log1.args[1]).to.equal(nonce);
 
       // create another signed authorization to increase the allowance by
       // another 2e6
-      increment = 2e6;
+      const increment2 = 2e6;
+      const nonce2 = hexStringFromBuffer(crypto.randomBytes(32));
+      ({ v, r, s } = signIncreaseAllowanceAuthorization(
+        owner,
+        spender,
+        increment2,
+        validAfter,
+        validBefore,
+        nonce2,
+        domainSeparator,
+        alice.key
+      ));
+
+      // check that the authorization state is 0 = Unused
+      expect(
+        (await fiatToken.authorizationState(owner, nonce2)).toNumber()
+      ).to.equal(0);
+
+      // submit the second authorization
+      result = await fiatToken.increaseAllowanceWithAuthorization(
+        owner,
+        spender,
+        increment2,
+        validAfter,
+        validBefore,
+        nonce2,
+        v,
+        r,
+        s,
+        { from: charlie }
+      );
+
+      // check that the allowance is increased
+      newAllowance += increment2;
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        newAllowance
+      );
+
+      // check that Approval event is emitted
+      log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
+      expect(log0.event).to.equal("Approval");
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(spender);
+      expect(log0.args[2].toNumber()).to.equal(newAllowance);
+
+      // check that AuthorizationUsed event is emitted
+      log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
+      expect(log1.event).to.equal("AuthorizationUsed");
+      expect(log1.args[0]).to.equal(owner);
+      expect(log1.args[1]).to.equal(nonce2);
+
+      // check that the authorization state is now 1 = Used
+      expect(
+        (await fiatToken.authorizationState(owner, nonce2)).toNumber()
+      ).to.equal(1);
+    });
+
+    it("reverts if the decrease causes an integer overflow", async () => {
+      const {
+        owner,
+        spender,
+        validAfter,
+        validBefore,
+      } = increaseAllowanceParams;
+
+      // set initial allowance of 1
+      let { v, r, s } = signIncreaseAllowanceAuthorization(
+        owner,
+        spender,
+        1,
+        validAfter,
+        validBefore,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      await fiatToken.increaseAllowanceWithAuthorization(
+        owner,
+        spender,
+        1,
+        validAfter,
+        validBefore,
+        nonce,
+        v,
+        r,
+        s,
+        { from: charlie }
+      );
+
+      // try to increase by max uint256 which will trigger addition overflow
+      const increment = MAX_UINT256;
       nonce = hexStringFromBuffer(crypto.randomBytes(32));
       ({ v, r, s } = signIncreaseAllowanceAuthorization(
         owner,
@@ -127,37 +227,22 @@ export function testIncreaseAllowanceWithAuthorization({
         alice.key
       ));
 
-      // submit the second authorization
-      result = await fiatToken.increaseAllowanceWithAuthorization(
-        owner,
-        spender,
-        increment,
-        validAfter,
-        validBefore,
-        nonce,
-        v,
-        r,
-        s,
-        { from: charlie }
+      // submit the authorization causing overflow
+      await expectRevert(
+        fiatToken.increaseAllowanceWithAuthorization(
+          owner,
+          spender,
+          increment,
+          validAfter,
+          validBefore,
+          nonce,
+          v,
+          r,
+          s,
+          { from: charlie }
+        ),
+        "addition overflow"
       );
-
-      // check that the allowance is increased by 2e6 to 5e6
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(5e6);
-
-      // check that Approval event is emitted
-      log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
-      expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(alice.address);
-      expect(log0.args[1]).to.equal(bob.address);
-      expect(log0.args[2].toNumber()).to.equal(5e6);
-
-      // check that AuthorizationUsed event is emitted
-      log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
-      expect(log1.event).to.equal("AuthorizationUsed");
-      expect(log1.args[0]).to.equal(alice.address);
-      expect(log1.args[1]).to.equal(nonce);
     });
 
     it("reverts if the signature does not match given parameters", async () => {

@@ -1,3 +1,4 @@
+import { ecsign } from "ethereumjs-util";
 import { assert } from "chai";
 
 export async function expectRevert(
@@ -42,4 +43,19 @@ export function hexStringFromBuffer(buf: Buffer): string {
 
 export function bufferFromHexString(hex: string): Buffer {
   return Buffer.from(strip0x(hex), "hex");
+}
+
+export interface Signature {
+  v: number;
+  r: string;
+  s: string;
+}
+
+export function ecSign(digest: string, privateKey: string): Signature {
+  const { v, r, s } = ecsign(
+    bufferFromHexString(digest),
+    bufferFromHexString(privateKey)
+  );
+
+  return { v, r: hexStringFromBuffer(r), s: hexStringFromBuffer(s) };
 }

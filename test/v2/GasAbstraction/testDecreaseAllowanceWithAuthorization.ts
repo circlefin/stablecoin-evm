@@ -31,6 +31,8 @@ export function testDecreaseAllowanceWithAuthorization({
     const charlie = accounts[1];
     let nonce: string;
 
+    const initialBalance = 10e6;
+    const initialAllowance = 10e6;
     const decreaseAllowanceParams = {
       owner: alice.address,
       spender: bob.address,
@@ -43,17 +45,21 @@ export function testDecreaseAllowanceWithAuthorization({
       fiatToken = getFiatToken();
       domainSeparator = getDomainSeparator();
       nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+      const { owner, spender } = decreaseAllowanceParams;
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
-      await fiatToken.mint(alice.address, 10e6, { from: fiatTokenOwner });
+      await fiatToken.mint(owner, initialBalance, {
+        from: fiatTokenOwner,
+      });
 
       // set initial allowance to be 10e6
       const nonceForIncrease = hexStringFromBuffer(crypto.randomBytes(32));
       const { v, r, s } = signIncreaseAllowanceAuthorization(
-        alice.address,
-        bob.address,
-        10e6,
+        owner,
+        spender,
+        initialAllowance,
         0,
         MAX_UINT256,
         nonceForIncrease,
@@ -62,9 +68,9 @@ export function testDecreaseAllowanceWithAuthorization({
       );
 
       await fiatToken.increaseAllowanceWithAuthorization(
-        alice.address,
-        bob.address,
-        10e6,
+        owner,
+        spender,
+        initialAllowance,
         0,
         MAX_UINT256,
         nonceForIncrease,
@@ -85,10 +91,10 @@ export function testDecreaseAllowanceWithAuthorization({
       const {
         owner,
         spender,
+        decrement,
         validAfter,
         validBefore,
       } = decreaseAllowanceParams;
-      let { decrement } = decreaseAllowanceParams;
       // create a signed authorization to decrease the allowance granted to Bob
       // to spend Alice's funds on behalf, and sign with Alice's key
       let { v, r, s } = signDecreaseAllowanceAuthorization(
@@ -101,6 +107,16 @@ export function testDecreaseAllowanceWithAuthorization({
         domainSeparator,
         alice.key
       );
+
+      // check the initial allowance
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        initialAllowance
+      );
+
+      // check that the authorization state is 0 = Unused
+      expect(
+        (await fiatToken.authorizationState(owner, nonce)).toNumber()
+      ).to.equal(0);
 
       // a third-party, Charlie (not Alice) submits the authorization
       let result = await fiatToken.decreaseAllowanceWithAuthorization(
@@ -116,70 +132,87 @@ export function testDecreaseAllowanceWithAuthorization({
         { from: charlie }
       );
 
-      // check that the allowance is decreased from 10e6 by 3e6
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(7e6);
+      // check that the allowance is decreased
+      let newAllowance = initialAllowance - decrement;
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        newAllowance
+      );
 
       // check that Approval event is emitted
       let log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
       expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(alice.address);
-      expect(log0.args[1]).to.equal(bob.address);
-      expect(log0.args[2].toNumber()).to.equal(7e6);
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(spender);
+      expect(log0.args[2].toNumber()).to.equal(newAllowance);
 
       // check that AuthorizationUsed event is emitted
       let log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
       expect(log1.event).to.equal("AuthorizationUsed");
-      expect(log1.args[0]).to.equal(alice.address);
+      expect(log1.args[0]).to.equal(owner);
       expect(log1.args[1]).to.equal(nonce);
+
+      // check that the authorization state is now 1 = Used
+      expect(
+        (await fiatToken.authorizationState(owner, nonce)).toNumber()
+      ).to.equal(1);
 
       // create another signed authorization to decrease the allowance by
       // another 2e6
-      decrement = 2e6;
-      nonce = hexStringFromBuffer(crypto.randomBytes(32));
+      const decrement2 = 2e6;
+      const nonce2 = hexStringFromBuffer(crypto.randomBytes(32));
       ({ v, r, s } = signDecreaseAllowanceAuthorization(
         owner,
         spender,
-        decrement,
+        decrement2,
         validAfter,
         validBefore,
-        nonce,
+        nonce2,
         domainSeparator,
         alice.key
       ));
+
+      // check that the authorization state is 0 = Unused
+      expect(
+        (await fiatToken.authorizationState(owner, nonce2)).toNumber()
+      ).to.equal(0);
 
       // submit the second authorization
       result = await fiatToken.decreaseAllowanceWithAuthorization(
         owner,
         spender,
-        decrement,
+        decrement2,
         validAfter,
         validBefore,
-        nonce,
+        nonce2,
         v,
         r,
         s,
         { from: charlie }
       );
 
-      // check that the allowance is decreased by 2e6 to 5e6
-      expect(
-        (await fiatToken.allowance(alice.address, bob.address)).toNumber()
-      ).to.equal(5e6);
+      // check that the allowance is decreased
+      newAllowance -= decrement2;
+      expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+        newAllowance
+      );
 
       // check that Approval event is emitted
       log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
       expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(alice.address);
-      expect(log0.args[1]).to.equal(bob.address);
-      expect(log0.args[2].toNumber()).to.equal(5e6);
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(spender);
+      expect(log0.args[2].toNumber()).to.equal(newAllowance);
 
       // check that AuthorizationUsed event is emitted
       log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
       expect(log1.event).to.equal("AuthorizationUsed");
-      expect(log1.args[0]).to.equal(alice.address);
-      expect(log1.args[1]).to.equal(nonce);
+      expect(log1.args[0]).to.equal(owner);
+      expect(log1.args[1]).to.equal(nonce2);
+
+      // check that the authorization state is now 1 = Used
+      expect(
+        (await fiatToken.authorizationState(owner, nonce2)).toNumber()
+      ).to.equal(1);
     });
 
     it("reverts if the decrease is greater than current allowance", async () => {
@@ -189,7 +222,7 @@ export function testDecreaseAllowanceWithAuthorization({
         validAfter,
         validBefore,
       } = decreaseAllowanceParams;
-      const decrement = 10e6 + 1;
+      const decrement = initialAllowance + 1;
       const { v, r, s } = signDecreaseAllowanceAuthorization(
         owner,
         spender,
@@ -202,6 +235,45 @@ export function testDecreaseAllowanceWithAuthorization({
       );
 
       // try to submit the authorization with invalid approval parameters
+      await expectRevert(
+        fiatToken.decreaseAllowanceWithAuthorization(
+          owner,
+          spender,
+          decrement,
+          validAfter,
+          validBefore,
+          nonce,
+          v,
+          r,
+          s,
+          { from: charlie }
+        ),
+        "decreased allowance below zero"
+      );
+    });
+
+    it("reverts if the decrease causes an integer overflow", async () => {
+      const {
+        owner,
+        spender,
+        validAfter,
+        validBefore,
+      } = decreaseAllowanceParams;
+      const decrement = MAX_UINT256;
+      const { v, r, s } = signDecreaseAllowanceAuthorization(
+        owner,
+        spender,
+        decrement,
+        validAfter,
+        validBefore,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      // a subtraction causing overflow does not actually happen because
+      // it catches that the given decrement is greater than the current
+      // allowance
       await expectRevert(
         fiatToken.decreaseAllowanceWithAuthorization(
           owner,

@@ -34,7 +34,8 @@ import { EIP712 } from "../util/EIP712.sol";
  * @dev An alternative to approveWithAuthorization, provided for compatibility
  * with the draft EIP2612 proposed by Uniswap.
  * Differences:
- * - Nonce is sequential and requires strict ordering
+ * - Uses sequential nonce, which restricts transaction submission to one at a
+ *   time, or else it will revert
  * - Has deadline (= validBefore - 1) but does not have validAfter
  * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple
  *   withdrawal attacks

@@ -1,10 +1,5 @@
-import { ecsign } from "ethereumjs-util";
 import { FiatTokenV2Instance } from "../../../@types/generated";
-import {
-  strip0x,
-  hexStringFromBuffer,
-  bufferFromHexString,
-} from "../../helpers";
+import { Signature, ecSign, strip0x } from "../../helpers";
 
 export interface TestParams {
   getFiatToken: () => FiatTokenV2Instance;
@@ -36,12 +31,6 @@ export const cancelAuthorizationTypeHash = web3.utils.keccak256(
 export const permitTypeHash = web3.utils.keccak256(
   "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
 );
-
-export interface Signature {
-  v: number;
-  r: string;
-  s: string;
-}
 
 export function signTransferAuthorization(
   from: string,
@@ -159,7 +148,7 @@ function signEIP712(
   parameters: (string | number)[],
   privateKey: string
 ): Signature {
-  const message = web3.utils.keccak256(
+  const digest = web3.utils.keccak256(
     "0x1901" +
       strip0x(domainSeparator) +
       strip0x(
@@ -172,10 +161,5 @@ function signEIP712(
       )
   );
 
-  const { v, r, s } = ecsign(
-    bufferFromHexString(message),
-    bufferFromHexString(privateKey)
-  );
-
-  return { v, r: hexStringFromBuffer(r), s: hexStringFromBuffer(s) };
+  return ecSign(digest, privateKey);
 }
