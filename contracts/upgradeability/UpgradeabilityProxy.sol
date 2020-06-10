@@ -70,7 +70,6 @@ contract UpgradeabilityProxy is Proxy {
      */
     function _implementation() internal override view returns (address impl) {
         bytes32 slot = IMPLEMENTATION_SLOT;
-        // solhint-disable-next-line no-inline-assembly
         assembly {
             impl := sload(slot)
         }
@@ -97,7 +96,6 @@ contract UpgradeabilityProxy is Proxy {
 
         bytes32 slot = IMPLEMENTATION_SLOT;
 
-        // solhint-disable-next-line no-inline-assembly
         assembly {
             sstore(slot, newImplementation)
         }

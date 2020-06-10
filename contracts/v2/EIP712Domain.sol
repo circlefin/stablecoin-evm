@@ -25,24 +25,12 @@
 pragma solidity 0.6.8;
 
 
-contract Migrations {
-    address public owner;
-    uint256 public last_completed_migration;
-
-    modifier restricted() {
-        if (msg.sender == owner) _;
-    }
-
-    constructor() public {
-        owner = msg.sender;
-    }
-
-    function setCompleted(uint256 completed) external restricted {
-        last_completed_migration = completed;
-    }
-
-    function upgrade(address new_address) external restricted {
-        Migrations upgraded = Migrations(new_address);
-        upgraded.setCompleted(last_completed_migration);
-    }
+/**
+ * @title EIP712 Domain
+ */
+contract EIP712Domain {
+    /**
+     * @dev EIP712 Domain Separator
+     */
+    bytes32 public DOMAIN_SEPARATOR;
 }

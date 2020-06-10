@@ -24,15 +24,19 @@
 
 pragma solidity 0.6.8;
 
-import { FiatTokenV1_1 } from "./FiatTokenV1_1.sol";
+import { AbstractFiatTokenV1 } from "../v1/AbstractFiatTokenV1.sol";
 
 
-// solhint-disable no-empty-blocks
+abstract contract AbstractFiatTokenV2 is AbstractFiatTokenV1 {
+    function _increaseAllowance(
+        address owner,
+        address spender,
+        uint256 increment
+    ) internal virtual;
 
-/**
- * @title FiatTokenV2
- * @dev ERC20 Token backed by fiat reserves
- */
-contract FiatTokenV2 is FiatTokenV1_1 {
-
+    function _decreaseAllowance(
+        address owner,
+        address spender,
+        uint256 decrement
+    ) internal virtual;
 }

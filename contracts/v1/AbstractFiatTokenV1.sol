@@ -24,20 +24,19 @@
 
 pragma solidity 0.6.8;
 
-import {
-    AdminUpgradeabilityProxy
-} from "./upgradeability/AdminUpgradeabilityProxy.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 
-// solhint-disable no-empty-blocks
+abstract contract AbstractFiatTokenV1 is IERC20 {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal virtual;
 
-/**
- * @title FiatTokenProxy
- * @dev This contract proxies FiatToken calls and enables FiatToken upgrades
- */
-contract FiatTokenProxy is AdminUpgradeabilityProxy {
-    constructor(address implementationContract)
-        public
-        AdminUpgradeabilityProxy(implementationContract)
-    {}
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual;
 }

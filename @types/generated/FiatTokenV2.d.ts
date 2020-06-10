@@ -21,6 +21,26 @@ export interface Approval {
   };
 }
 
+export interface AuthorizationCanceled {
+  name: "AuthorizationCanceled";
+  args: {
+    authorizer: string;
+    nonce: string;
+    0: string;
+    1: string;
+  };
+}
+
+export interface AuthorizationUsed {
+  name: "AuthorizationUsed";
+  args: {
+    authorizer: string;
+    nonce: string;
+    0: string;
+    1: string;
+  };
+}
+
 export interface Blacklisted {
   name: "Blacklisted";
   args: {
@@ -143,6 +163,8 @@ export interface Unpause {
 
 type AllEvents =
   | Approval
+  | AuthorizationCanceled
+  | AuthorizationUsed
   | Blacklisted
   | BlacklisterChanged
   | Burn
@@ -159,10 +181,34 @@ type AllEvents =
   | Unpause;
 
 export interface FiatTokenV2Instance extends Truffle.ContractInstance {
+  APPROVE_WITH_AUTHORIZATION_TYPEHASH(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  CANCEL_AUTHORIZATION_TYPEHASH(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  DECREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  DOMAIN_SEPARATOR(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  INCREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
+  PERMIT_TYPEHASH(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+  TRANSFER_WITH_AUTHORIZATION_TYPEHASH(
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<string>;
+
   /**
-   * Get allowed amount for an account
-   * @param owner address The account owner
-   * @param spender address The account spender
+   * Amount of remaining tokens spender is allowed to transfer on behalf of the token owner
+   * @param owner Token owner's address
+   * @param spender Spender's address
    */
   allowance(
     owner: string,
@@ -171,30 +217,43 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
   ): Promise<BN>;
 
   /**
-   * Adds blacklisted check to approve
+   * Set spender's allowance over the caller's tokens to be a given value.
+   * @param spender Spender's address
+   * @param value Allowance amount
    */
   approve: {
     (
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _spender: string,
-      _value: number | BN | string,
+      spender: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
+
+  /**
+   * Returns the state of an authorization
+   * @param authorizer Authorizer's address
+   * @param nonce Nonce of the authorization
+   */
+  authorizationState(
+    authorizer: string,
+    nonce: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
 
   /**
    * Get token balance of an account
@@ -391,6 +450,15 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
   name(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
   /**
+   * Nonces for permit
+   * @param permitter Permitter's address
+   */
+  nonces(
+    permitter: string,
+    txDetails?: Truffle.TransactionDetails
+  ): Promise<BN>;
+
+  /**
    * Tells the address of the owner
    */
   owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
@@ -479,62 +547,62 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
   totalSupply(txDetails?: Truffle.TransactionDetails): Promise<BN>;
 
   /**
-   * transfer token for a specified address
-   * @param _to The address to transfer to.
-   * @param _value The amount to be transferred.
+   * Transfer tokens from the caller
+   * @param to Payee's address
+   * @param value Transfer amount
    */
   transfer: {
     (
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _to: string,
-      _value: number | BN | string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
 
   /**
-   * Transfer tokens from one address to another.
-   * @param _from address The address which you want to send tokens from
-   * @param _to address The address which you want to transfer to
-   * @param _value uint256 the amount of tokens to be transferred
+   * Transfer tokens by spending allowance
+   * @param from Payer's address
+   * @param to Payee's address
+   * @param value Transfer amount
    */
   transferFrom: {
     (
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<Truffle.TransactionResponse<AllEvents>>;
     call(
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<boolean>;
     sendTransaction(
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<string>;
     estimateGas(
-      _from: string,
-      _to: string,
-      _value: number | BN | string,
+      from: string,
+      to: string,
+      value: number | BN | string,
       txDetails?: Truffle.TransactionDetails
     ): Promise<number>;
   };
@@ -674,11 +742,462 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
     ): Promise<number>;
   };
 
+  /**
+   * When upgrading to V2, this function must also be invoked simultaneously by using upgradeAndCall instead of upgradeTo.
+   * Initialize V2 contract
+   */
+  initializeV2: {
+    (newName: string, txDetails?: Truffle.TransactionDetails): Promise<
+      Truffle.TransactionResponse<AllEvents>
+    >;
+    call(
+      newName: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      newName: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      newName: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Increase the allowance by a given increment
+   * @param increment Amount of increase in allowance
+   * @param spender Spender's address
+   */
+  increaseAllowance: {
+    (
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      spender: string,
+      increment: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Decrease the allowance by a given decrement
+   * @param decrement Amount of decrease in allowance
+   * @param spender Spender's address
+   */
+  decreaseAllowance: {
+    (
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<boolean>;
+    sendTransaction(
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      spender: string,
+      decrement: number | BN | string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Execute a transfer with a signed authorization
+   * @param from Payer's address (Authorizer)
+   * @param nonce Unique nonce
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param to Payee's address
+   * @param v v of the signature
+   * @param validAfter Earliest time this is valid, seconds since the epoch
+   * @param validBefore Expiration time, seconds since the epoch
+   * @param value Amount to be transferred
+   */
+  transferWithAuthorization: {
+    (
+      from: string,
+      to: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      from: string,
+      to: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      from: string,
+      to: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      from: string,
+      to: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Update allowance with a signed authorization
+   * @param nonce Unique nonce
+   * @param owner Token owner's address (Authorizer)
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param spender Spender's address
+   * @param v v of the signature
+   * @param validAfter Earliest time this is valid, seconds since the epoch
+   * @param validBefore Expiration time, seconds since the epoch
+   * @param value Amount of allowance
+   */
+  approveWithAuthorization: {
+    (
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Increase allowance with a signed authorization
+   * @param increment Amount of increase in allowance
+   * @param nonce Unique nonce
+   * @param owner Token owner's address (Authorizer)
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param spender Spender's address
+   * @param v v of the signature
+   * @param validAfter Earliest time this is valid, seconds since the epoch
+   * @param validBefore Expiration time, seconds since the epoch
+   */
+  increaseAllowanceWithAuthorization: {
+    (
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      owner: string,
+      spender: string,
+      increment: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Decrease allowance with a signed authorization
+   * @param decrement Amount of decrease in allowance
+   * @param nonce Unique nonce
+   * @param owner Token owner's address (Authorizer)
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param spender Spender's address
+   * @param v v of the signature
+   * @param validAfter Earliest time this is valid, seconds since the epoch
+   * @param validBefore Expiration time, seconds since the epoch
+   */
+  decreaseAllowanceWithAuthorization: {
+    (
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      owner: string,
+      spender: string,
+      decrement: number | BN | string,
+      validAfter: number | BN | string,
+      validBefore: number | BN | string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Works only if the authorization is not yet used.
+   * Attempt to cancel an authorization
+   * @param authorizer Authorizer's address
+   * @param nonce Nonce of the authorization
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param v v of the signature
+   */
+  cancelAuthorization: {
+    (
+      authorizer: string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      authorizer: string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      authorizer: string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      authorizer: string,
+      nonce: string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
+  /**
+   * Update allowance with a signed permit
+   * @param deadline Expiration time, seconds since the epoch
+   * @param owner Token owner's address (Authorizer)
+   * @param r r of the signature
+   * @param s s of the signature
+   * @param spender Spender's address
+   * @param v v of the signature
+   * @param value Amount of allowance
+   */
+  permit: {
+    (
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      deadline: number | BN | string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<Truffle.TransactionResponse<AllEvents>>;
+    call(
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      deadline: number | BN | string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<void>;
+    sendTransaction(
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      deadline: number | BN | string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+    estimateGas(
+      owner: string,
+      spender: string,
+      value: number | BN | string,
+      deadline: number | BN | string,
+      v: number | BN | string,
+      r: string,
+      s: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<number>;
+  };
+
   methods: {
+    APPROVE_WITH_AUTHORIZATION_TYPEHASH(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    CANCEL_AUTHORIZATION_TYPEHASH(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    DECREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    DOMAIN_SEPARATOR(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    INCREASE_ALLOWANCE_WITH_AUTHORIZATION_TYPEHASH(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
+    PERMIT_TYPEHASH(txDetails?: Truffle.TransactionDetails): Promise<string>;
+
+    TRANSFER_WITH_AUTHORIZATION_TYPEHASH(
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<string>;
+
     /**
-     * Get allowed amount for an account
-     * @param owner address The account owner
-     * @param spender address The account spender
+     * Amount of remaining tokens spender is allowed to transfer on behalf of the token owner
+     * @param owner Token owner's address
+     * @param spender Spender's address
      */
     allowance(
       owner: string,
@@ -687,30 +1206,43 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
     ): Promise<BN>;
 
     /**
-     * Adds blacklisted check to approve
+     * Set spender's allowance over the caller's tokens to be a given value.
+     * @param spender Spender's address
+     * @param value Allowance amount
      */
     approve: {
       (
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _spender: string,
-        _value: number | BN | string,
+        spender: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
+
+    /**
+     * Returns the state of an authorization
+     * @param authorizer Authorizer's address
+     * @param nonce Nonce of the authorization
+     */
+    authorizationState(
+      authorizer: string,
+      nonce: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
 
     /**
      * Get token balance of an account
@@ -907,6 +1439,15 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
     name(txDetails?: Truffle.TransactionDetails): Promise<string>;
 
     /**
+     * Nonces for permit
+     * @param permitter Permitter's address
+     */
+    nonces(
+      permitter: string,
+      txDetails?: Truffle.TransactionDetails
+    ): Promise<BN>;
+
+    /**
      * Tells the address of the owner
      */
     owner(txDetails?: Truffle.TransactionDetails): Promise<string>;
@@ -995,62 +1536,62 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
     totalSupply(txDetails?: Truffle.TransactionDetails): Promise<BN>;
 
     /**
-     * transfer token for a specified address
-     * @param _to The address to transfer to.
-     * @param _value The amount to be transferred.
+     * Transfer tokens from the caller
+     * @param to Payee's address
+     * @param value Transfer amount
      */
     transfer: {
       (
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _to: string,
-        _value: number | BN | string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
 
     /**
-     * Transfer tokens from one address to another.
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
+     * Transfer tokens by spending allowance
+     * @param from Payer's address
+     * @param to Payee's address
+     * @param value Transfer amount
      */
     transferFrom: {
       (
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<Truffle.TransactionResponse<AllEvents>>;
       call(
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<boolean>;
       sendTransaction(
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<string>;
       estimateGas(
-        _from: string,
-        _to: string,
-        _value: number | BN | string,
+        from: string,
+        to: string,
+        value: number | BN | string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };
@@ -1188,6 +1729,433 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
       ): Promise<string>;
       estimateGas(
         newRescuer: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * When upgrading to V2, this function must also be invoked simultaneously by using upgradeAndCall instead of upgradeTo.
+     * Initialize V2 contract
+     */
+    initializeV2: {
+      (newName: string, txDetails?: Truffle.TransactionDetails): Promise<
+        Truffle.TransactionResponse<AllEvents>
+      >;
+      call(
+        newName: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        newName: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        newName: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Increase the allowance by a given increment
+     * @param increment Amount of increase in allowance
+     * @param spender Spender's address
+     */
+    increaseAllowance: {
+      (
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        spender: string,
+        increment: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Decrease the allowance by a given decrement
+     * @param decrement Amount of decrease in allowance
+     * @param spender Spender's address
+     */
+    decreaseAllowance: {
+      (
+        spender: string,
+        decrement: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        spender: string,
+        decrement: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<boolean>;
+      sendTransaction(
+        spender: string,
+        decrement: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        spender: string,
+        decrement: number | BN | string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Execute a transfer with a signed authorization
+     * @param from Payer's address (Authorizer)
+     * @param nonce Unique nonce
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param to Payee's address
+     * @param v v of the signature
+     * @param validAfter Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     * @param value Amount to be transferred
+     */
+    transferWithAuthorization: {
+      (
+        from: string,
+        to: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        from: string,
+        to: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        from: string,
+        to: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        from: string,
+        to: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Update allowance with a signed authorization
+     * @param nonce Unique nonce
+     * @param owner Token owner's address (Authorizer)
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param spender Spender's address
+     * @param v v of the signature
+     * @param validAfter Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     * @param value Amount of allowance
+     */
+    approveWithAuthorization: {
+      (
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Increase allowance with a signed authorization
+     * @param increment Amount of increase in allowance
+     * @param nonce Unique nonce
+     * @param owner Token owner's address (Authorizer)
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param spender Spender's address
+     * @param v v of the signature
+     * @param validAfter Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     */
+    increaseAllowanceWithAuthorization: {
+      (
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        owner: string,
+        spender: string,
+        increment: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Decrease allowance with a signed authorization
+     * @param decrement Amount of decrease in allowance
+     * @param nonce Unique nonce
+     * @param owner Token owner's address (Authorizer)
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param spender Spender's address
+     * @param v v of the signature
+     * @param validAfter Earliest time this is valid, seconds since the epoch
+     * @param validBefore Expiration time, seconds since the epoch
+     */
+    decreaseAllowanceWithAuthorization: {
+      (
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        owner: string,
+        spender: string,
+        decrement: number | BN | string,
+        validAfter: number | BN | string,
+        validBefore: number | BN | string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Works only if the authorization is not yet used.
+     * Attempt to cancel an authorization
+     * @param authorizer Authorizer's address
+     * @param nonce Nonce of the authorization
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param v v of the signature
+     */
+    cancelAuthorization: {
+      (
+        authorizer: string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        authorizer: string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        authorizer: string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        authorizer: string,
+        nonce: string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<number>;
+    };
+
+    /**
+     * Update allowance with a signed permit
+     * @param deadline Expiration time, seconds since the epoch
+     * @param owner Token owner's address (Authorizer)
+     * @param r r of the signature
+     * @param s s of the signature
+     * @param spender Spender's address
+     * @param v v of the signature
+     * @param value Amount of allowance
+     */
+    permit: {
+      (
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        deadline: number | BN | string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<Truffle.TransactionResponse<AllEvents>>;
+      call(
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        deadline: number | BN | string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<void>;
+      sendTransaction(
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        deadline: number | BN | string,
+        v: number | BN | string,
+        r: string,
+        s: string,
+        txDetails?: Truffle.TransactionDetails
+      ): Promise<string>;
+      estimateGas(
+        owner: string,
+        spender: string,
+        value: number | BN | string,
+        deadline: number | BN | string,
+        v: number | BN | string,
+        r: string,
+        s: string,
         txDetails?: Truffle.TransactionDetails
       ): Promise<number>;
     };

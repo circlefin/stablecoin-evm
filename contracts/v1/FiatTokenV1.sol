@@ -24,18 +24,18 @@
 
 pragma solidity 0.6.8;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { AbstractFiatTokenV1 } from "./AbstractFiatTokenV1.sol";
 import { Ownable } from "./Ownable.sol";
-import { Blacklistable } from "./Blacklistable.sol";
 import { Pausable } from "./Pausable.sol";
+import { Blacklistable } from "./Blacklistable.sol";
 
 
 /**
  * @title FiatToken
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
+contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
     using SafeMath for uint256;
 
     string public name;
@@ -164,9 +164,11 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
     }
 
     /**
-     * @dev Get allowed amount for an account
-     * @param owner address The account owner
-     * @param spender address The account spender
+     * @notice Amount of remaining tokens spender is allowed to transfer on
+     * behalf of the token owner
+     * @param owner     Token owner's address
+     * @param spender   Spender's address
+     * @return Allowance amount
      */
     function allowance(address owner, address spender)
         external
@@ -198,83 +200,109 @@ contract FiatTokenV1 is Ownable, IERC20, Pausable, Blacklistable {
     }
 
     /**
-     * @dev Adds blacklisted check to approve
-     * @return True if the operation was successful.
+     * @notice Set spender's allowance over the caller's tokens to be a given
+     * value.
+     * @param spender   Spender's address
+     * @param value     Allowance amount
+     * @return True if successful
      */
-    function approve(address _spender, uint256 _value)
+    function approve(address spender, uint256 value)
         external
         override
         whenNotPaused
         notBlacklisted(msg.sender)
-        notBlacklisted(_spender)
+        notBlacklisted(spender)
         returns (bool)
     {
-        allowed[msg.sender][_spender] = _value;
-        emit Approval(msg.sender, _spender, _value);
+        _approve(msg.sender, spender, value);
         return true;
     }
 
     /**
-     * @dev Transfer tokens from one address to another.
-     * @param _from address The address which you want to send tokens from
-     * @param _to address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @return bool success
+     * @dev Internal function to set allowance
+     * @param owner     Token owner's address
+     * @param spender   Spender's address
+     * @param value     Allowance amount
+     */
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal override {
+        require(owner != address(0), "ERC20: approve from the zero address");
+        require(spender != address(0), "ERC20: approve to the zero address");
+        allowed[owner][spender] = value;
+        emit Approval(owner, spender, value);
+    }
+
+    /**
+     * @notice Transfer tokens by spending allowance
+     * @param from  Payer's address
+     * @param to    Payee's address
+     * @param value Transfer amount
+     * @return True if successful
      */
     function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
+        address from,
+        address to,
+        uint256 value
     )
         external
         override
         whenNotPaused
-        notBlacklisted(_to)
         notBlacklisted(msg.sender)
-        notBlacklisted(_from)
+        notBlacklisted(from)
+        notBlacklisted(to)
         returns (bool)
     {
-        require(_to != address(0), "ERC20: transfer to the zero address");
         require(
-            _value <= balances[_from],
-            "ERC20: transfer amount exceeds balance"
-        );
-        require(
-            _value <= allowed[_from][msg.sender],
+            value <= allowed[from][msg.sender],
             "ERC20: transfer amount exceeds allowance"
         );
-
-        balances[_from] = balances[_from].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-        emit Transfer(_from, _to, _value);
+        _transfer(from, to, value);
+        allowed[from][msg.sender] = allowed[from][msg.sender].sub(value);
         return true;
     }
 
     /**
-     * @dev transfer token for a specified address
-     * @param _to The address to transfer to.
-     * @param _value The amount to be transferred.
-     * @return bool success
+     * @notice Transfer tokens from the caller
+     * @param to    Payee's address
+     * @param value Transfer amount
+     * @return True if successful
      */
-    function transfer(address _to, uint256 _value)
+    function transfer(address to, uint256 value)
         external
         override
         whenNotPaused
         notBlacklisted(msg.sender)
-        notBlacklisted(_to)
+        notBlacklisted(to)
         returns (bool)
     {
-        require(_to != address(0), "ERC20: transfer to the zero address");
+        _transfer(msg.sender, to, value);
+        return true;
+    }
+
+    /**
+     * @notice Internal function to process transfers
+     * @param from  Payer's address
+     * @param to    Payee's address
+     * @param value Transfer amount
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal override {
+        require(from != address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
         require(
-            _value <= balances[msg.sender],
+            value <= balances[from],
             "ERC20: transfer amount exceeds balance"
         );
 
-        balances[msg.sender] = balances[msg.sender].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        emit Transfer(msg.sender, _to, _value);
-        return true;
+        balances[from] = balances[from].sub(value);
+        balances[to] = balances[to].add(value);
+        emit Transfer(from, to, value);
     }
 
     /**

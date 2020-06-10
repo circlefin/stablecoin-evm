@@ -24,25 +24,18 @@
 
 pragma solidity 0.6.8;
 
+import {
+    AdminUpgradeabilityProxy
+} from "../upgradeability/AdminUpgradeabilityProxy.sol";
 
-contract Migrations {
-    address public owner;
-    uint256 public last_completed_migration;
 
-    modifier restricted() {
-        if (msg.sender == owner) _;
-    }
-
-    constructor() public {
-        owner = msg.sender;
-    }
-
-    function setCompleted(uint256 completed) external restricted {
-        last_completed_migration = completed;
-    }
-
-    function upgrade(address new_address) external restricted {
-        Migrations upgraded = Migrations(new_address);
-        upgraded.setCompleted(last_completed_migration);
-    }
+/**
+ * @title FiatTokenProxy
+ * @dev This contract proxies FiatToken calls and enables FiatToken upgrades
+ */
+contract FiatTokenProxy is AdminUpgradeabilityProxy {
+    constructor(address implementationContract)
+        public
+        AdminUpgradeabilityProxy(implementationContract)
+    {}
 }
