@@ -138,18 +138,18 @@ export function testDecreaseAllowanceWithAuthorization({
         newAllowance
       );
 
-      // check that Approval event is emitted
-      let log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
-      expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(owner);
-      expect(log0.args[1]).to.equal(spender);
-      expect(log0.args[2].toNumber()).to.equal(newAllowance);
-
       // check that AuthorizationUsed event is emitted
-      let log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
-      expect(log1.event).to.equal("AuthorizationUsed");
+      let log0 = result.logs[0] as Truffle.TransactionLog<AuthorizationUsed>;
+      expect(log0.event).to.equal("AuthorizationUsed");
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(nonce);
+
+      // check that Approval event is emitted
+      let log1 = result.logs[1] as Truffle.TransactionLog<Approval>;
+      expect(log1.event).to.equal("Approval");
       expect(log1.args[0]).to.equal(owner);
-      expect(log1.args[1]).to.equal(nonce);
+      expect(log1.args[1]).to.equal(spender);
+      expect(log1.args[2].toNumber()).to.equal(newAllowance);
 
       // check that the authorization state is now 1 = Used
       expect(
@@ -196,18 +196,18 @@ export function testDecreaseAllowanceWithAuthorization({
         newAllowance
       );
 
-      // check that Approval event is emitted
-      log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
-      expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(owner);
-      expect(log0.args[1]).to.equal(spender);
-      expect(log0.args[2].toNumber()).to.equal(newAllowance);
-
       // check that AuthorizationUsed event is emitted
-      log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
-      expect(log1.event).to.equal("AuthorizationUsed");
+      log0 = result.logs[0] as Truffle.TransactionLog<AuthorizationUsed>;
+      expect(log0.event).to.equal("AuthorizationUsed");
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(nonce2);
+
+      // check that Approval event is emitted
+      log1 = result.logs[1] as Truffle.TransactionLog<Approval>;
+      expect(log1.event).to.equal("Approval");
       expect(log1.args[0]).to.equal(owner);
-      expect(log1.args[1]).to.equal(nonce2);
+      expect(log1.args[1]).to.equal(spender);
+      expect(log1.args[2].toNumber()).to.equal(newAllowance);
 
       // check that the authorization state is now 1 = Used
       expect(
