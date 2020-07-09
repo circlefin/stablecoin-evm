@@ -55,7 +55,7 @@ contract FiatTokenV2 is
             "FiatTokenV2: contract is already initialized"
         );
         name = newName;
-        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator("FiatToken", "2");
+        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
         _initializedV2 = true;
     }
 
