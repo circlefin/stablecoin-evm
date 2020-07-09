@@ -31,9 +31,9 @@ import { EIP712 } from "../util/EIP712.sol";
 
 /**
  * @title Permit
- * @dev An alternative to approveWithAuthorization, provided for compatibility
- * with the draft EIP2612 proposed by Uniswap.
- * Differences:
+ * @notice An alternative to approveWithAuthorization, provided for
+ * compatibility with the draft EIP2612 proposed by Uniswap.
+ * @dev Differences:
  * - Uses sequential nonce, which restricts transaction submission to one at a
  *   time, or else it will revert
  * - Has deadline (= validBefore - 1) but does not have validAfter
@@ -49,6 +49,7 @@ abstract contract Permit is AbstractFiatTokenV2, EIP712Domain {
     /**
      * @notice Nonces for permit
      * @param permitter Permitter's address
+     * @return Next nonce
      */
     function nonces(address permitter) external view returns (uint256) {
         return _permitNonces[permitter];
@@ -59,7 +60,7 @@ abstract contract Permit is AbstractFiatTokenV2, EIP712Domain {
      * @param owner     Token owner's address (Authorizer)
      * @param spender   Spender's address
      * @param value     Amount of allowance
-     * @param deadline  Time after which it will expire, seconds since the epoch
+     * @param deadline  The time at which this expires (unix time)
      * @param v         v of the signature
      * @param r         r of the signature
      * @param s         s of the signature
