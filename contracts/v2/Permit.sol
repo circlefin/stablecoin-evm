@@ -48,10 +48,10 @@ abstract contract Permit is AbstractFiatTokenV2, EIP712Domain {
 
     /**
      * @notice Nonces for permit
-     * @param permitter Permitter's address
+     * @param owner Token owner's address (Authorizer)
      */
-    function nonces(address permitter) external view returns (uint256) {
-        return _permitNonces[permitter];
+    function nonces(address owner) external view returns (uint256) {
+        return _permitNonces[owner];
     }
 
     /**
