@@ -14,6 +14,7 @@ import { Eip712Contract } from "./Eip712";
 import { Eip712DomainContract } from "./Eip712Domain";
 import { Erc20Contract } from "./Erc20";
 import { FiatTokenProxyContract } from "./FiatTokenProxy";
+import { FiatTokenUtilContract } from "./FiatTokenUtil";
 import { FiatTokenV11Contract } from "./FiatTokenV11";
 import { FiatTokenV1Contract } from "./FiatTokenV1";
 import { FiatTokenV2Contract } from "./FiatTokenV2";
@@ -54,6 +55,7 @@ declare global {
       require(name: "EIP712Domain"): Eip712DomainContract;
       require(name: "ERC20"): Erc20Contract;
       require(name: "FiatTokenProxy"): FiatTokenProxyContract;
+      require(name: "FiatTokenUtil"): FiatTokenUtilContract;
       require(name: "FiatTokenV1_1"): FiatTokenV11Contract;
       require(name: "FiatTokenV1"): FiatTokenV1Contract;
       require(name: "FiatTokenV2"): FiatTokenV2Contract;
@@ -111,6 +113,7 @@ export {
   FiatTokenProxyContract,
   FiatTokenProxyInstance
 } from "./FiatTokenProxy";
+export { FiatTokenUtilContract, FiatTokenUtilInstance } from "./FiatTokenUtil";
 export { FiatTokenV11Contract, FiatTokenV11Instance } from "./FiatTokenV11";
 export { FiatTokenV1Contract, FiatTokenV1Instance } from "./FiatTokenV1";
 export { FiatTokenV2Contract, FiatTokenV2Instance } from "./FiatTokenV2";
