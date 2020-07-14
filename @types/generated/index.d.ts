@@ -6,6 +6,7 @@ import { AbstractFiatTokenV2Contract } from "./AbstractFiatTokenV2";
 import { AdminUpgradeabilityProxyContract } from "./AdminUpgradeabilityProxy";
 import { BlacklistableContract } from "./Blacklistable";
 import { ContractThatCallsPublicFunctionsContract } from "./ContractThatCallsPublicFunctions";
+import { ContractThatRevertsContract } from "./ContractThatReverts";
 import { ContractWithExternalFunctionsContract } from "./ContractWithExternalFunctions";
 import { ContractWithPublicFunctionsContract } from "./ContractWithPublicFunctions";
 import { DummyErc20Contract } from "./DummyErc20";
@@ -43,6 +44,7 @@ declare global {
       require(
         name: "ContractThatCallsPublicFunctions"
       ): ContractThatCallsPublicFunctionsContract;
+      require(name: "ContractThatReverts"): ContractThatRevertsContract;
       require(
         name: "ContractWithExternalFunctions"
       ): ContractWithExternalFunctionsContract;
@@ -96,6 +98,10 @@ export {
   ContractThatCallsPublicFunctionsContract,
   ContractThatCallsPublicFunctionsInstance
 } from "./ContractThatCallsPublicFunctions";
+export {
+  ContractThatRevertsContract,
+  ContractThatRevertsInstance
+} from "./ContractThatReverts";
 export {
   ContractWithExternalFunctionsContract,
   ContractWithExternalFunctionsInstance

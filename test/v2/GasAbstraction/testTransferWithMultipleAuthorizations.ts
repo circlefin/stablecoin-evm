@@ -15,6 +15,7 @@ import { signTransferAuthorization, TestParams } from "./helpers";
 import { TransactionRawLog } from "../../../@types/TransactionRawLog";
 
 const FiatTokenUtil = artifacts.require("FiatTokenUtil");
+const ContractThatReverts = artifacts.require("ContractThatReverts");
 
 export function testTransferWithMultipleAuthorizations({
   getFiatToken,
@@ -470,6 +471,68 @@ export function testTransferWithMultipleAuthorizations({
           { from: charlie }
         ),
         "transfer amount exceeds balance"
+      );
+    });
+
+    it("reverts with a generic message if the call fails with a reason string", async () => {
+      const reverter = await ContractThatReverts.new();
+      fiatTokenUtil = await FiatTokenUtil.new(reverter.address);
+
+      const { from, to, value, validAfter, validBefore } = transferParams;
+
+      const { v, r, s } = signTransferAuthorization(
+        from,
+        to,
+        value,
+        validAfter,
+        validBefore,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      await reverter.setReason("something went wrong");
+
+      await expectRevert(
+        fiatTokenUtil.transferWithMultipleAuthorizations(
+          prepend0x(
+            packParams(from, to, value, validAfter, validBefore, nonce)
+          ),
+          prepend0x(packSignatures(v, r, s)),
+          true,
+          { from: charlie }
+        ),
+        "something went wrong"
+      );
+    });
+
+    it("reverts with a generic message if the call fails with no reason string", async () => {
+      const reverter = await ContractThatReverts.new();
+      fiatTokenUtil = await FiatTokenUtil.new(reverter.address);
+
+      const { from, to, value, validAfter, validBefore } = transferParams;
+
+      const { v, r, s } = signTransferAuthorization(
+        from,
+        to,
+        value,
+        validAfter,
+        validBefore,
+        nonce,
+        domainSeparator,
+        alice.key
+      );
+
+      await expectRevert(
+        fiatTokenUtil.transferWithMultipleAuthorizations(
+          prepend0x(
+            packParams(from, to, value, validAfter, validBefore, nonce)
+          ),
+          prepend0x(packSignatures(v, r, s)),
+          true,
+          { from: charlie }
+        ),
+        "call failed"
       );
     });
   });

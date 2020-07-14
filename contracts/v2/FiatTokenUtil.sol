@@ -111,7 +111,7 @@ contract FiatTokenUtil {
 
             // Revert if atomic is true, and the call was not successful
             if (atomic && !success) {
-                revertWithReasonFromReturnData(returnData);
+                _revertWithReasonFromReturnData(returnData);
             }
 
             // Increment the number of successful transfers
@@ -157,10 +157,14 @@ contract FiatTokenUtil {
      * @dev Revert with reason string extracted from the return data
      * @param returnData    Return data from a call
      */
-    function revertWithReasonFromReturnData(bytes memory returnData)
+    function _revertWithReasonFromReturnData(bytes memory returnData)
         private
         pure
     {
+        if (returnData.length <= 68) {
+            revert("FiatTokenUtil: call failed");
+        }
+
         assembly {
             // Skip over the first four bytes (the selector)
             returnData := add(returnData, 0x04)
