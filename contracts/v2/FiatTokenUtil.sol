@@ -24,8 +24,6 @@
 
 pragma solidity 0.6.8;
 
-import { FiatTokenV2 } from "./FiatTokenV2.sol";
-
 
 contract FiatTokenUtil {
     // (address,address,uint256,uint256,uint256,bytes32) = 20*2 + 32*4 = 168
@@ -35,7 +33,7 @@ contract FiatTokenUtil {
     // keccak256("transferWithAuthorization(address,address,uint256,uint256,uint256,bytes32,uint8,bytes32,bytes32)")[0:4]
     bytes4 private constant _TRANSFER_WITH_AUTHORIZATION_SELECTOR = 0xe3ee160e;
 
-    FiatTokenV2 private _fiatToken;
+    address private _fiatToken;
 
     event TransferFailed(address indexed authorizer, bytes32 indexed nonce);
 
@@ -45,7 +43,7 @@ contract FiatTokenUtil {
      * proxy's address should be provided, not the implementation address
      * @param fiatToken Address of the FiatToken contract
      */
-    constructor(FiatTokenV2 fiatToken) public {
+    constructor(address fiatToken) public {
         _fiatToken = fiatToken;
     }
 
@@ -66,8 +64,6 @@ contract FiatTokenUtil {
         bytes calldata signatures,
         bool atomic
     ) external returns (bool) {
-        require(!_fiatToken.paused(), "FiatTokenUtil: paused");
-
         uint256 num = params.length / _TRANSFER_PARAM_SIZE;
         require(num > 0, "FiatTokenUtil: no transfer provided");
         require(
@@ -103,7 +99,7 @@ contract FiatTokenUtil {
 
             // Call transferWithAuthorization with the extracted parameters
             // solhint-disable-next-line avoid-low-level-calls
-            (bool success, bytes memory returnData) = address(_fiatToken).call(
+            (bool success, bytes memory returnData) = _fiatToken.call(
                 abi.encodePacked(
                     _TRANSFER_WITH_AUTHORIZATION_SELECTOR,
                     fromTo,
