@@ -26,11 +26,11 @@ type AllEvents = TransferFailed;
 
 export interface FiatTokenUtilInstance extends Truffle.ContractInstance {
   /**
-   * The length of params must be multiples of 168 and the lenght of signatures must be multiples of 65
+   * The length of params must be multiples of 168, each representing encode-packed data containing from[20] + to[20] + value[32] + validAfter[32] + validBefore[32] + nonce[32], and the length of signatures must be multiples of 65, each representing encode-packed data containing v[1] + r[32] + s[32].
    * Execute multiple authorized ERC20 Transfers
    * @param atomic If true, revert if any of the transfers fail
-   * @param params Concatenated, encode-packed transfer parameters
-   * @param signatures Concatenated, encode-packed secp256k1 signatures
+   * @param params Concatenated, encode-packed parameters
+   * @param signatures Concatenated, encode-packed signatures
    */
   transferWithMultipleAuthorizations: {
     (
@@ -61,11 +61,11 @@ export interface FiatTokenUtilInstance extends Truffle.ContractInstance {
 
   methods: {
     /**
-     * The length of params must be multiples of 168 and the lenght of signatures must be multiples of 65
+     * The length of params must be multiples of 168, each representing encode-packed data containing from[20] + to[20] + value[32] + validAfter[32] + validBefore[32] + nonce[32], and the length of signatures must be multiples of 65, each representing encode-packed data containing v[1] + r[32] + s[32].
      * Execute multiple authorized ERC20 Transfers
      * @param atomic If true, revert if any of the transfers fail
-     * @param params Concatenated, encode-packed transfer parameters
-     * @param signatures Concatenated, encode-packed secp256k1 signatures
+     * @param params Concatenated, encode-packed parameters
+     * @param signatures Concatenated, encode-packed signatures
      */
     transferWithMultipleAuthorizations: {
       (

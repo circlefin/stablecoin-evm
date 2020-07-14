@@ -51,10 +51,13 @@ contract FiatTokenUtil {
 
     /**
      * @notice Execute multiple authorized ERC20 Transfers
-     * @dev The length of params must be multiples of 168 and the lenght of
-     * signatures must be multiples of 65
-     * @param params      Concatenated, encode-packed transfer parameters
-     * @param signatures  Concatenated, encode-packed secp256k1 signatures
+     * @dev The length of params must be multiples of 168, each representing
+     * encode-packed data containing from[20] + to[20] + value[32] +
+     * validAfter[32] + validBefore[32] + nonce[32], and the length of
+     * signatures must be multiples of 65, each representing encode-packed data
+     * containing v[1] + r[32] + s[32].
+     * @param params      Concatenated, encode-packed parameters
+     * @param signatures  Concatenated, encode-packed signatures
      * @param atomic      If true, revert if any of the transfers fail
      * @return            True if every transfer was successful
      */
