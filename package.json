@@ -54,7 +54,7 @@
     "ethereumjs-tx": "^2.1.2",
     "ganache-cli": "^6.9.1",
     "googleapis": "^51.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "prettier": "2.0.5",
     "prettier-plugin-solidity": "1.0.0-alpha.51",
     "q": "^1.5.1",
