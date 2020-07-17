@@ -101,18 +101,18 @@ export function testApproveWithAuthorization({
         value
       );
 
-      // check that Approval event is emitted
-      const log0 = result.logs[0] as Truffle.TransactionLog<Approval>;
-      expect(log0.event).to.equal("Approval");
-      expect(log0.args[0]).to.equal(owner);
-      expect(log0.args[1]).to.equal(spender);
-      expect(log0.args[2].toNumber()).to.equal(value);
-
       // check that AuthorizationUsed event is emitted
-      const log1 = result.logs[1] as Truffle.TransactionLog<AuthorizationUsed>;
-      expect(log1.event).to.equal("AuthorizationUsed");
+      const log0 = result.logs[0] as Truffle.TransactionLog<AuthorizationUsed>;
+      expect(log0.event).to.equal("AuthorizationUsed");
+      expect(log0.args[0]).to.equal(owner);
+      expect(log0.args[1]).to.equal(nonce);
+
+      // check that Approval event is emitted
+      const log1 = result.logs[1] as Truffle.TransactionLog<Approval>;
+      expect(log1.event).to.equal("Approval");
       expect(log1.args[0]).to.equal(owner);
-      expect(log1.args[1]).to.equal(nonce);
+      expect(log1.args[1]).to.equal(spender);
+      expect(log1.args[2].toNumber()).to.equal(value);
 
       // check that the authorization state is now 1 = Used
       expect(

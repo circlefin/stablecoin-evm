@@ -59,3 +59,7 @@ export function ecSign(digest: string, privateKey: string): Signature {
 
   return { v, r: hexStringFromBuffer(r), s: hexStringFromBuffer(s) };
 }
+
+export function bytes32FromAddress(address: string): string {
+  return prepend0x(strip0x(address).toLowerCase().padStart(64, "0"));
+}

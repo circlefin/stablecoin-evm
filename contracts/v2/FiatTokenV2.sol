@@ -34,20 +34,16 @@ import { Permit } from "./Permit.sol";
 
 /**
  * @title FiatToken V2
+ * @notice ERC20 Token backed by fiat reserves, version 2
  */
-contract FiatTokenV2 is
-    FiatTokenV1_1,
-    AbstractFiatTokenV2,
-    EIP712Domain,
-    GasAbstraction,
-    Permit
-{
+contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
     bool internal _initializedV2;
 
     /**
      * @notice Initialize V2 contract
      * @dev When upgrading to V2, this function must also be invoked
-     * simultaneously by using upgradeAndCall instead of upgradeTo.
+     * simultaneously by using upgradeToAndCall instead of upgradeTo.
+     * @param newName   New token name
      */
     function initializeV2(string calldata newName) external {
         require(
@@ -55,7 +51,7 @@ contract FiatTokenV2 is
             "FiatTokenV2: contract is already initialized"
         );
         name = newName;
-        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator("FiatToken", "2");
+        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
         _initializedV2 = true;
     }
 
@@ -95,15 +91,15 @@ contract FiatTokenV2 is
 
     /**
      * @notice Execute a transfer with a signed authorization
-     * @param from        Payer's address (Authorizer)
-     * @param to          Payee's address
-     * @param value       Amount to be transferred
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function transferWithAuthorization(
         address from,
@@ -131,15 +127,15 @@ contract FiatTokenV2 is
 
     /**
      * @notice Update allowance with a signed authorization
-     * @param owner       Token owner's address (Authorizer)
-     * @param spender     Spender's address
-     * @param value       Amount of allowance
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param owner         Token owner's address (Authorizer)
+     * @param spender       Spender's address
+     * @param value         Amount of allowance
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function approveWithAuthorization(
         address owner,
@@ -167,15 +163,15 @@ contract FiatTokenV2 is
 
     /**
      * @notice Increase allowance with a signed authorization
-     * @param owner       Token owner's address (Authorizer)
-     * @param spender     Spender's address
-     * @param increment   Amount of increase in allowance
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param owner         Token owner's address (Authorizer)
+     * @param spender       Spender's address
+     * @param increment     Amount of increase in allowance
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function increaseAllowanceWithAuthorization(
         address owner,
@@ -203,15 +199,15 @@ contract FiatTokenV2 is
 
     /**
      * @notice Decrease allowance with a signed authorization
-     * @param owner       Token owner's address (Authorizer)
-     * @param spender     Spender's address
-     * @param decrement   Amount of decrease in allowance
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param owner         Token owner's address (Authorizer)
+     * @param spender       Spender's address
+     * @param decrement     Amount of decrease in allowance
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function decreaseAllowanceWithAuthorization(
         address owner,
