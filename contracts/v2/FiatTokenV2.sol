@@ -36,13 +36,7 @@ import { Permit } from "./Permit.sol";
  * @title FiatToken V2
  * @notice ERC20 Token backed by fiat reserves, version 2
  */
-contract FiatTokenV2 is
-    FiatTokenV1_1,
-    AbstractFiatTokenV2,
-    EIP712Domain,
-    GasAbstraction,
-    Permit
-{
+contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
     bool internal _initializedV2;
 
     /**
