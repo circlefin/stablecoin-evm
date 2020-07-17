@@ -451,12 +451,9 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
 
   /**
    * Nonces for permit
-   * @param permitter Permitter's address
+   * @param owner Token owner's address (Authorizer)
    */
-  nonces(
-    permitter: string,
-    txDetails?: Truffle.TransactionDetails
-  ): Promise<BN>;
+  nonces(owner: string, txDetails?: Truffle.TransactionDetails): Promise<BN>;
 
   /**
    * Tells the address of the owner
@@ -1441,12 +1438,9 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
 
     /**
      * Nonces for permit
-     * @param permitter Permitter's address
+     * @param owner Token owner's address (Authorizer)
      */
-    nonces(
-      permitter: string,
-      txDetails?: Truffle.TransactionDetails
-    ): Promise<BN>;
+    nonces(owner: string, txDetails?: Truffle.TransactionDetails): Promise<BN>;
 
     /**
      * Tells the address of the owner
