@@ -31,6 +31,10 @@ import { EIP712 } from "../util/EIP712.sol";
 
 /**
  * @title Gas Abstraction
+ * @notice Provide internal implementation for gas-abstracted transfers and
+ * approvals
+ * @dev Contracts that inherit from this must wrap these with publicly
+ * accessible functions, optionally adding modifiers where necessary
  */
 abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
     bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = 0x7c7c6cdb67a18743f49ec6fa9b35f50d52ed05cbed4cc592e13b44501c1a2267;
@@ -61,7 +65,7 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
      * @notice Returns the state of an authorization
      * @param authorizer    Authorizer's address
      * @param nonce         Nonce of the authorization
-     * @return Nonce state
+     * @return Authorization state
      */
     function authorizationState(address authorizer, bytes32 nonce)
         external
@@ -73,15 +77,15 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
 
     /**
      * @notice Verify a signed transfer authorization and execute if valid
-     * @param from        Payer's address (Authorizer)
-     * @param to          Payee's address
-     * @param value       Amount to be transferred
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function _transferWithAuthorization(
         address from,
@@ -114,15 +118,15 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
     /**
      * @notice Verify a signed authorization for an increase in the allowance
      * granted to the spender and execute if valid
-     * @param owner       Token owner's address (Authorizer)
-     * @param spender     Spender's address
-     * @param increment   Amount of increase in allowance
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param owner         Token owner's address (Authorizer)
+     * @param spender       Spender's address
+     * @param increment     Amount of increase in allowance
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function _increaseAllowanceWithAuthorization(
         address owner,
@@ -155,15 +159,15 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
     /**
      * @notice Verify a signed authorization for a decrease in the allowance
      * granted to the spender and execute if valid
-     * @param owner       Token owner's address (Authorizer)
-     * @param spender     Spender's address
-     * @param decrement   Amount of decrease in allowance
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param owner         Token owner's address (Authorizer)
+     * @param spender       Spender's address
+     * @param decrement     Amount of decrease in allowance
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function _decreaseAllowanceWithAuthorization(
         address owner,
@@ -195,15 +199,15 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
 
     /**
      * @notice Verify a signed approval authorization and execute if valid
-     * @param owner       Token owner's address (Authorizer)
-     * @param spender     Spender's address
-     * @param value       Amount of allowance
-     * @param validAfter  Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
-     * @param nonce       Unique nonce
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
+     * @param owner         Token owner's address (Authorizer)
+     * @param spender       Spender's address
+     * @param value         Amount of allowance
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param v             v of the signature
+     * @param r             r of the signature
+     * @param s             s of the signature
      */
     function _approveWithAuthorization(
         address owner,
@@ -281,8 +285,8 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
      * @notice Check that authorization is valid
      * @param authorizer    Authorizer's address
      * @param nonce         Nonce of the authorization
-     * @param validAfter    Earliest time this is valid, seconds since the epoch
-     * @param validBefore   Expiration time, seconds since the epoch
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
      */
     function _requireValidAuthorization(
         address authorizer,

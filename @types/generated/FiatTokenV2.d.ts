@@ -743,8 +743,9 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
   };
 
   /**
-   * When upgrading to V2, this function must also be invoked simultaneously by using upgradeAndCall instead of upgradeTo.
+   * When upgrading to V2, this function must also be invoked simultaneously by using upgradeToAndCall instead of upgradeTo.
    * Initialize V2 contract
+   * @param newName New token name
    */
   initializeV2: {
     (newName: string, txDetails?: Truffle.TransactionDetails): Promise<
@@ -828,8 +829,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
    * @param s s of the signature
    * @param to Payee's address
    * @param v v of the signature
-   * @param validAfter Earliest time this is valid, seconds since the epoch
-   * @param validBefore Expiration time, seconds since the epoch
+   * @param validAfter The time after which this is valid (unix time)
+   * @param validBefore The time before which this is valid (unix time)
    * @param value Amount to be transferred
    */
   transferWithAuthorization: {
@@ -891,8 +892,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
    * @param s s of the signature
    * @param spender Spender's address
    * @param v v of the signature
-   * @param validAfter Earliest time this is valid, seconds since the epoch
-   * @param validBefore Expiration time, seconds since the epoch
+   * @param validAfter The time after which this is valid (unix time)
+   * @param validBefore The time before which this is valid (unix time)
    * @param value Amount of allowance
    */
   approveWithAuthorization: {
@@ -955,8 +956,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
    * @param s s of the signature
    * @param spender Spender's address
    * @param v v of the signature
-   * @param validAfter Earliest time this is valid, seconds since the epoch
-   * @param validBefore Expiration time, seconds since the epoch
+   * @param validAfter The time after which this is valid (unix time)
+   * @param validBefore The time before which this is valid (unix time)
    */
   increaseAllowanceWithAuthorization: {
     (
@@ -1018,8 +1019,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
    * @param s s of the signature
    * @param spender Spender's address
    * @param v v of the signature
-   * @param validAfter Earliest time this is valid, seconds since the epoch
-   * @param validBefore Expiration time, seconds since the epoch
+   * @param validAfter The time after which this is valid (unix time)
+   * @param validBefore The time before which this is valid (unix time)
    */
   decreaseAllowanceWithAuthorization: {
     (
@@ -1734,8 +1735,9 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
     };
 
     /**
-     * When upgrading to V2, this function must also be invoked simultaneously by using upgradeAndCall instead of upgradeTo.
+     * When upgrading to V2, this function must also be invoked simultaneously by using upgradeToAndCall instead of upgradeTo.
      * Initialize V2 contract
+     * @param newName New token name
      */
     initializeV2: {
       (newName: string, txDetails?: Truffle.TransactionDetails): Promise<
@@ -1819,8 +1821,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
      * @param s s of the signature
      * @param to Payee's address
      * @param v v of the signature
-     * @param validAfter Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
+     * @param validAfter The time after which this is valid (unix time)
+     * @param validBefore The time before which this is valid (unix time)
      * @param value Amount to be transferred
      */
     transferWithAuthorization: {
@@ -1882,8 +1884,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
      * @param s s of the signature
      * @param spender Spender's address
      * @param v v of the signature
-     * @param validAfter Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
+     * @param validAfter The time after which this is valid (unix time)
+     * @param validBefore The time before which this is valid (unix time)
      * @param value Amount of allowance
      */
     approveWithAuthorization: {
@@ -1946,8 +1948,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
      * @param s s of the signature
      * @param spender Spender's address
      * @param v v of the signature
-     * @param validAfter Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
+     * @param validAfter The time after which this is valid (unix time)
+     * @param validBefore The time before which this is valid (unix time)
      */
     increaseAllowanceWithAuthorization: {
       (
@@ -2009,8 +2011,8 @@ export interface FiatTokenV2Instance extends Truffle.ContractInstance {
      * @param s s of the signature
      * @param spender Spender's address
      * @param v v of the signature
-     * @param validAfter Earliest time this is valid, seconds since the epoch
-     * @param validBefore Expiration time, seconds since the epoch
+     * @param validAfter The time after which this is valid (unix time)
+     * @param validBefore The time before which this is valid (unix time)
      */
     decreaseAllowanceWithAuthorization: {
       (
