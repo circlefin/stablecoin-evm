@@ -111,8 +111,8 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
         );
         EIP712.verifySignature(DOMAIN_SEPARATOR, from, v, r, s, data);
 
-        _transfer(from, to, value);
         _markAuthorizationAsUsed(from, nonce);
+        _transfer(from, to, value);
     }
 
     /**
@@ -151,9 +151,9 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
             nonce
         );
         EIP712.verifySignature(DOMAIN_SEPARATOR, owner, v, r, s, data);
-        _increaseAllowance(owner, spender, increment);
 
         _markAuthorizationAsUsed(owner, nonce);
+        _increaseAllowance(owner, spender, increment);
     }
 
     /**
@@ -192,9 +192,9 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
             nonce
         );
         EIP712.verifySignature(DOMAIN_SEPARATOR, owner, v, r, s, data);
-        _decreaseAllowance(owner, spender, decrement);
 
         _markAuthorizationAsUsed(owner, nonce);
+        _decreaseAllowance(owner, spender, decrement);
     }
 
     /**
@@ -233,8 +233,8 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
         );
         EIP712.verifySignature(DOMAIN_SEPARATOR, owner, v, r, s, data);
 
-        _approve(owner, spender, value);
         _markAuthorizationAsUsed(owner, nonce);
+        _approve(owner, spender, value);
     }
 
     /**
