@@ -47,7 +47,7 @@ contract("FiatTokenV2", (accounts) => {
           web3.utils.keccak256(
             "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
           ),
-          web3.utils.keccak256("FiatToken"),
+          web3.utils.keccak256("USD Coin"),
           web3.utils.keccak256("2"),
           chainId,
           fiatToken.address,
