@@ -187,25 +187,25 @@ export function testTransferWithMultipleAuthorizations({
       );
       expect((await fiatToken.balanceOf(to)).toNumber()).to.equal(value);
 
-      // check that Transfer event is emitted
-      const log0 = result.receipt.rawLogs[0] as TransactionRawLog;
-      expect(log0.address).to.equal(fiatToken.address);
-      expect(log0.topics[0]).to.equal(
-        web3.utils.keccak256("Transfer(address,address,uint256)")
-      );
-      expect(log0.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log0.topics[2]).to.equal(bytes32FromAddress(to));
-      expect(
-        Number(web3.eth.abi.decodeParameters(["uint256"], log0.data)[0])
-      ).to.equal(value);
-
       // check that AuthorizationUsed event is emitted
-      const log1 = result.receipt.rawLogs[1] as TransactionRawLog;
-      expect(log1.topics[0]).to.equal(
+      const log0 = result.receipt.rawLogs[0] as TransactionRawLog;
+      expect(log0.topics[0]).to.equal(
         web3.utils.keccak256("AuthorizationUsed(address,bytes32)")
       );
+      expect(log0.topics[1]).to.equal(bytes32FromAddress(from));
+      expect(log0.topics[2]).to.equal(nonce);
+
+      // check that Transfer event is emitted
+      const log1 = result.receipt.rawLogs[1] as TransactionRawLog;
+      expect(log1.address).to.equal(fiatToken.address);
+      expect(log1.topics[0]).to.equal(
+        web3.utils.keccak256("Transfer(address,address,uint256)")
+      );
       expect(log1.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log1.topics[2]).to.equal(nonce);
+      expect(log1.topics[2]).to.equal(bytes32FromAddress(to));
+      expect(
+        Number(web3.eth.abi.decodeParameters(["uint256"], log1.data)[0])
+      ).to.equal(value);
 
       // check that the authorization state is now 1 = Used
       expect(
@@ -279,45 +279,45 @@ export function testTransferWithMultipleAuthorizations({
       expect((await fiatToken.balanceOf(to)).toNumber()).to.equal(value);
       expect((await fiatToken.balanceOf(to2)).toNumber()).to.equal(value2);
 
-      // check that Transfer event for transfer 1 is emitted
+      // check that AuthorizationUsed event for transfer 1 is emitted
       const log0 = result.receipt.rawLogs[0] as TransactionRawLog;
-      expect(log0.address).to.equal(fiatToken.address);
       expect(log0.topics[0]).to.equal(
-        web3.utils.keccak256("Transfer(address,address,uint256)")
+        web3.utils.keccak256("AuthorizationUsed(address,bytes32)")
       );
       expect(log0.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log0.topics[2]).to.equal(bytes32FromAddress(to));
-      expect(
-        Number(web3.eth.abi.decodeParameters(["uint256"], log0.data)[0])
-      ).to.equal(value);
+      expect(log0.topics[2]).to.equal(nonce);
 
-      // check that AuthorizationUsed event for transfer 1 is emitted
+      // check that Transfer event for transfer 1 is emitted
       const log1 = result.receipt.rawLogs[1] as TransactionRawLog;
+      expect(log1.address).to.equal(fiatToken.address);
       expect(log1.topics[0]).to.equal(
-        web3.utils.keccak256("AuthorizationUsed(address,bytes32)")
-      );
-      expect(log1.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log1.topics[2]).to.equal(nonce);
-
-      // check that Transfer event for transfer 2 is emitted
-      const log2 = result.receipt.rawLogs[2] as TransactionRawLog;
-      expect(log2.address).to.equal(fiatToken.address);
-      expect(log2.topics[0]).to.equal(
         web3.utils.keccak256("Transfer(address,address,uint256)")
       );
-      expect(log2.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log2.topics[2]).to.equal(bytes32FromAddress(to2));
+      expect(log1.topics[1]).to.equal(bytes32FromAddress(from));
+      expect(log1.topics[2]).to.equal(bytes32FromAddress(to));
       expect(
-        Number(web3.eth.abi.decodeParameters(["uint256"], log2.data)[0])
-      ).to.equal(value2);
+        Number(web3.eth.abi.decodeParameters(["uint256"], log1.data)[0])
+      ).to.equal(value);
 
       // check that AuthorizationUsed event for transfer 2 is emitted
-      const log3 = result.receipt.rawLogs[3] as TransactionRawLog;
-      expect(log3.topics[0]).to.equal(
+      const log2 = result.receipt.rawLogs[2] as TransactionRawLog;
+      expect(log2.topics[0]).to.equal(
         web3.utils.keccak256("AuthorizationUsed(address,bytes32)")
       );
+      expect(log2.topics[1]).to.equal(bytes32FromAddress(from));
+      expect(log2.topics[2]).to.equal(nonce2);
+
+      // check that Transfer event for transfer 2 is emitted
+      const log3 = result.receipt.rawLogs[3] as TransactionRawLog;
+      expect(log3.address).to.equal(fiatToken.address);
+      expect(log3.topics[0]).to.equal(
+        web3.utils.keccak256("Transfer(address,address,uint256)")
+      );
       expect(log3.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log3.topics[2]).to.equal(nonce2);
+      expect(log3.topics[2]).to.equal(bytes32FromAddress(to2));
+      expect(
+        Number(web3.eth.abi.decodeParameters(["uint256"], log3.data)[0])
+      ).to.equal(value2);
 
       // check that the authorization state is now 1 = Used
       expect(
@@ -394,25 +394,25 @@ export function testTransferWithMultipleAuthorizations({
       expect((await fiatToken.balanceOf(to)).toNumber()).to.equal(value);
       expect((await fiatToken.balanceOf(to2)).toNumber()).to.equal(0);
 
-      // check that Transfer event for transfer 1 is emitted
-      const log0 = result.receipt.rawLogs[0] as TransactionRawLog;
-      expect(log0.address).to.equal(fiatToken.address);
-      expect(log0.topics[0]).to.equal(
-        web3.utils.keccak256("Transfer(address,address,uint256)")
-      );
-      expect(log0.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log0.topics[2]).to.equal(bytes32FromAddress(to));
-      expect(
-        Number(web3.eth.abi.decodeParameters(["uint256"], log0.data)[0])
-      ).to.equal(value);
-
       // check that AuthorizationUsed event for transfer 1 is emitted
-      const log1 = result.receipt.rawLogs[1] as TransactionRawLog;
-      expect(log1.topics[0]).to.equal(
+      const log0 = result.receipt.rawLogs[0] as TransactionRawLog;
+      expect(log0.topics[0]).to.equal(
         web3.utils.keccak256("AuthorizationUsed(address,bytes32)")
       );
+      expect(log0.topics[1]).to.equal(bytes32FromAddress(from));
+      expect(log0.topics[2]).to.equal(nonce);
+
+      // check that Transfer event for transfer 1 is emitted
+      const log1 = result.receipt.rawLogs[1] as TransactionRawLog;
+      expect(log1.address).to.equal(fiatToken.address);
+      expect(log1.topics[0]).to.equal(
+        web3.utils.keccak256("Transfer(address,address,uint256)")
+      );
       expect(log1.topics[1]).to.equal(bytes32FromAddress(from));
-      expect(log1.topics[2]).to.equal(nonce);
+      expect(log1.topics[2]).to.equal(bytes32FromAddress(to));
+      expect(
+        Number(web3.eth.abi.decodeParameters(["uint256"], log1.data)[0])
+      ).to.equal(value);
 
       // check that TransferFailed event for transfer 2 is emitted
       const log2 = result.receipt.rawLogs[2] as TransactionRawLog;
