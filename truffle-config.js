@@ -4,17 +4,13 @@ require("ts-node/register/transpile-only");
 Object.defineProperty(Error, "prepareStackTrace", { writable: false });
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
-const mnemonic = "talisman";
 const fs = require("fs");
+const path = require("path");
 
-// INFURA Setup - see validate/README.validate.md for more info
-let infuraKey = "none";
-try {
-  infuraKey = fs.readFileSync("./validate/apikey.infura", "utf8");
-} catch (err) {
-  console.log(
-    "No Infura access token detected. Unit tests will still work.  See ./validate/README.validate.md for more details."
-  );
+// Read config file if it exists
+let config = { MNEMONIC: "", INFURA_KEY: "" };
+if (fs.existsSync(path.join(__dirname, "config.js"))) {
+  config = require("./config.js");
 }
 
 module.exports = {
@@ -40,25 +36,35 @@ module.exports = {
       port: 8545,
       network_id: "*", // Match any network id
     },
-    // INFURA Setup
-    infura_mainnet: {
-      provider() {
-        return new HDWalletProvider(
-          mnemonic,
-          "https://mainnet.infura.io/v3/" + infuraKey
-        );
-      },
+    mainnet: {
+      provider: infuraProvider("mainnet"),
       network_id: 1,
+    },
+    ropsten: {
+      provider: infuraProvider("ropsten"),
+      network_id: 3,
     },
   },
   mocha: {
     timeout: 10000, // prevents tests from failing when pc is under heavy load
-    /*
-     * To disable the spreadsheet verification tool ensure that
-     * the reporter is set to 'Spec' by commenting/uncommenting the lines below.
-     */
     reporter: "Spec",
-    // reporter: './verification/verification_reporter.js',
   },
   plugins: ["solidity-coverage"],
 };
+
+function infuraProvider(network) {
+  return () => {
+    if (!config.MNEMONIC) {
+      console.error("A valid MNEMONIC must be provided in config.js");
+      process.exit(1);
+    }
+    if (!config.INFURA_KEY) {
+      console.error("A valid INFURA_KEY must be provided in config.js");
+      process.exit(1);
+    }
+    return new HDWalletProvider(
+      config.MNEMONIC,
+      `https://${network}.infura.io/v3/${config.INFURA_KEY}`
+    );
+  };
+}

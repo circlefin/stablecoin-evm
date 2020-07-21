@@ -16,3 +16,4 @@ ganache-blockchain-log.txt
 .coverage_contracts
 yarn-error.log
 @types/generated/
+config.js

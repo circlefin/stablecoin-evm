@@ -69,6 +69,27 @@ To run tests and generate test coverage, run:
 $ yarn coverage
 ```
 
+## Deployment
+
+Create a copy of the file `config.js.example`, and name it `config.js`. Enter
+the BIP39 mnemonic phrase and the INFURA API key to use for deployment in
+`config.js`:
+
+```
+module.exports = {
+  // BIP39 mnemonic phrase
+  MNEMONIC: "YOUR_MNEMONIC_PHRASE",
+  // INFURA API key
+  INFURA_KEY: "YOUR_INFURA_API_KEY",
+};
+```
+
+Do not check this file into the repo. To prevent accidental check-ins,
+`config.js` is in `.gitignore`.
+
+Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
+`ropsten`.
+
 ## Contracts
 
 The implementation uses 2 separate contracts - a proxy contract
