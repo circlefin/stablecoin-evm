@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) CENTRE SECZ 2018-2020
+ * Copyright (c) 2018-2020 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,6 @@ import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
 import { EIP712 } from "../util/EIP712.sol";
 
-
 /**
  * @title Permit
  * @notice An alternative to approveWithAuthorization, provided for
@@ -41,7 +40,8 @@ import { EIP712 } from "../util/EIP712.sol";
  *   withdrawal attacks
  */
 abstract contract Permit is AbstractFiatTokenV2, EIP712Domain {
-    bytes32 public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+    bytes32
+        public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
     // = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
 
     mapping(address => uint256) private _permitNonces;

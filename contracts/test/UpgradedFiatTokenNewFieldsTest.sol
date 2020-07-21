@@ -26,7 +26,6 @@ pragma solidity 0.6.8;
 
 import { FiatTokenV1 } from "../v1/FiatTokenV1.sol";
 
-
 /**
  * @title UpgradedFiatTokenNewFieldsTest
  * @dev ERC20 Token backed by fiat reserves

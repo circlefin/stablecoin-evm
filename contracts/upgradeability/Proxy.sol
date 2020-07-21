@@ -24,7 +24,6 @@
 
 pragma solidity 0.6.8;
 
-
 /**
  * @notice Implements delegation of calls to other contracts, with proper
  * forwarding of return values and bubbling of failures.
