@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { FiatTokenV1 } from "../../v1/FiatTokenV1.sol";
 

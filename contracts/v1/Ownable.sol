@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 /**
  * @notice The Ownable contract has an owner address, and provides basic

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 // solhint-disable no-unused-vars
 // solhint-disable no-complex-fallback
@@ -48,6 +48,13 @@ contract ContractThatReverts {
     }
 
     fallback() external payable {
+        if (bytes(_reason).length > 0) {
+            revert(_reason);
+        }
+        revert();
+    }
+
+    receive() external payable {
         if (bytes(_reason).length > 0) {
             revert(_reason);
         }
