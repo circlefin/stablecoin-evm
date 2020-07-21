@@ -3,4 +3,14 @@ module.exports = {
   MNEMONIC: "",
   // INFURA API key
   INFURA_KEY: "",
+  // FiatTokenProxy admin - can upgrade implementation contract
+  PROXY_ADMIN_ADDRESS: "",
+  // Owner - can configure master minter, pauser, and blacklister
+  OWNER_ADDRESS: "",
+  // Master Minter - can configure minters and minter allowance
+  MASTERMINTER_ADDRESS: "",
+  // Pauser - can pause the contract
+  PAUSER_ADDRESS: "",
+  // Blacklister - can blacklist addresses
+  BLACKLISTER_ADDRESS: "",
 };

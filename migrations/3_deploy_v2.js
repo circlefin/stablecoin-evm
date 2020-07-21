@@ -6,7 +6,7 @@ const FiatTokenUtil = artifacts.require("FiatTokenUtil");
 const V2Upgrader = artifacts.require("V2Upgrader");
 const V2UpgraderHelper = artifacts.require("V2UpgraderHelper");
 
-const throwawayAddress = "0x0000000000000000000000000000000000000001";
+const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 
 module.exports = async (deployer, _network) => {
   console.log("Deploying Library contracts...");
@@ -30,10 +30,10 @@ module.exports = async (deployer, _network) => {
     "",
     "",
     0,
-    throwawayAddress,
-    throwawayAddress,
-    throwawayAddress,
-    throwawayAddress
+    THROWAWAY_ADDRESS,
+    THROWAWAY_ADDRESS,
+    THROWAWAY_ADDRESS,
+    THROWAWAY_ADDRESS
   );
   await fiatTokenV2.initializeV2("");
 

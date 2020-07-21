@@ -72,20 +72,10 @@ $ yarn coverage
 ## Deployment
 
 Create a copy of the file `config.js.example`, and name it `config.js`. Enter
-the BIP39 mnemonic phrase and the INFURA API key to use for deployment in
-`config.js`:
-
-```
-module.exports = {
-  // BIP39 mnemonic phrase
-  MNEMONIC: "YOUR_MNEMONIC_PHRASE",
-  // INFURA API key
-  INFURA_KEY: "YOUR_INFURA_API_KEY",
-};
-```
-
-Do not check this file into the repo. To prevent accidental check-ins,
-`config.js` is in `.gitignore`.
+the BIP39 mnemonic phrase, the INFURA API key to use for deployment, and the
+addresses of proxy admin, owner, master minter, blacklister, and pauser in
+`config.js`. This file must not be checked into the repository. To prevent
+accidental check-ins, `config.js` is in `.gitignore`.
 
 Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 `ropsten`.
