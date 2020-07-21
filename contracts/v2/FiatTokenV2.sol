@@ -41,8 +41,9 @@ contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
 
     /**
      * @notice Initialize V2 contract
-     * @dev When upgrading to V2, this function must also be invoked
-     * simultaneously by using upgradeToAndCall instead of upgradeTo.
+     * @dev When upgrading to V2, this function must also be invoked by using
+     * upgradeToAndCall instead of upgradeTo, or by calling both from a contract
+     * in a single transaction.
      * @param newName   New token name
      */
     function initializeV2(string calldata newName) external {
