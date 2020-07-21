@@ -60,22 +60,21 @@ library EIP712 {
     }
 
     /**
-     * @notice Verify a EIP712 signature
+     * @notice Recover signer's address from a EIP712 signature
      * @param domainSeparator   Domain separator
-     * @param signer            Expected signer's address
      * @param v                 v of the signature
      * @param r                 r of the signature
      * @param s                 s of the signature
      * @param typeHashAndData   Type hash concatenated with data
+     * @return Signer's address
      */
-    function verifySignature(
+    function recover(
         bytes32 domainSeparator,
-        address signer,
         uint8 v,
         bytes32 r,
         bytes32 s,
         bytes calldata typeHashAndData
-    ) external pure {
+    ) external pure returns (address) {
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
@@ -83,9 +82,6 @@ library EIP712 {
                 keccak256(typeHashAndData)
             )
         );
-        require(
-            ECRecover.recover(digest, v, r, s) == signer,
-            "EIP712: invalid signature"
-        );
+        return ECRecover.recover(digest, v, r, s);
     }
 }

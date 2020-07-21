@@ -84,7 +84,10 @@ abstract contract Permit is AbstractFiatTokenV2, EIP712Domain {
             _permitNonces[owner]++,
             deadline
         );
-        EIP712.verifySignature(DOMAIN_SEPARATOR, owner, v, r, s, data);
+        require(
+            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+            "FiatTokenV2: invalid signature"
+        );
 
         _approve(owner, spender, value);
     }

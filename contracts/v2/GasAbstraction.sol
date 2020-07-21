@@ -114,7 +114,10 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
             validBefore,
             nonce
         );
-        EIP712.verifySignature(DOMAIN_SEPARATOR, from, v, r, s, data);
+        require(
+            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == from,
+            "FiatTokenV2: invalid signature"
+        );
 
         _markAuthorizationAsUsed(from, nonce);
         _transfer(from, to, value);
@@ -155,7 +158,10 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
             validBefore,
             nonce
         );
-        EIP712.verifySignature(DOMAIN_SEPARATOR, owner, v, r, s, data);
+        require(
+            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+            "FiatTokenV2: invalid signature"
+        );
 
         _markAuthorizationAsUsed(owner, nonce);
         _increaseAllowance(owner, spender, increment);
@@ -196,7 +202,10 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
             validBefore,
             nonce
         );
-        EIP712.verifySignature(DOMAIN_SEPARATOR, owner, v, r, s, data);
+        require(
+            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+            "FiatTokenV2: invalid signature"
+        );
 
         _markAuthorizationAsUsed(owner, nonce);
         _decreaseAllowance(owner, spender, decrement);
@@ -236,7 +245,10 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
             validBefore,
             nonce
         );
-        EIP712.verifySignature(DOMAIN_SEPARATOR, owner, v, r, s, data);
+        require(
+            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+            "FiatTokenV2: invalid signature"
+        );
 
         _markAuthorizationAsUsed(owner, nonce);
         _approve(owner, spender, value);
@@ -264,7 +276,10 @@ abstract contract GasAbstraction is AbstractFiatTokenV2, EIP712Domain {
             authorizer,
             nonce
         );
-        EIP712.verifySignature(DOMAIN_SEPARATOR, authorizer, v, r, s, data);
+        require(
+            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == authorizer,
+            "FiatTokenV2: invalid signature"
+        );
 
         _authorizationStates[authorizer][nonce] = AuthorizationState.Canceled;
         emit AuthorizationCanceled(authorizer, nonce);
