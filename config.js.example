@@ -13,4 +13,6 @@ module.exports = {
   PAUSER_ADDRESS: "",
   // Blacklister - can blacklist addresses
   BLACKLISTER_ADDRESS: "",
+  // FiatTokenProxy contract - override the contract address used in migrations
+  PROXY_CONTRACT_ADDRESS: "",
 };

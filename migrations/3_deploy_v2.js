@@ -11,19 +11,27 @@ const V2Upgrader = artifacts.require("V2Upgrader");
 const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 
 let proxyAdminAddress = "";
+let proxyContractAddress = "";
 
 // Read config file if it exists
 if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
-  ({ PROXY_ADMIN_ADDRESS: proxyAdminAddress } = require("../config.js"));
+  ({
+    PROXY_ADMIN_ADDRESS: proxyAdminAddress,
+    PROXY_CONTRACT_ADDRESS: proxyContractAddress,
+  } = require("../config.js"));
 }
 
 module.exports = async (deployer, network) => {
   if (network.toLowerCase().includes("development")) {
-    // DO NOT USE THIS ADDRESS FOR PRODUCTION
+    // DO NOT USE THIS ADDRESS IN PRODUCTION
     proxyAdminAddress = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598";
+    proxyContractAddress = (await FiatTokenProxy.deployed()).address;
   }
+  proxyContractAddress =
+    proxyContractAddress || (await FiatTokenProxy.deployed()).address;
 
-  console.log(`Proxy Admin:   ${proxyAdminAddress}`);
+  console.log(`Proxy Admin:     ${proxyAdminAddress}`);
+  console.log(`FiatTokenProxy:  ${proxyContractAddress}`);
 
   if (!proxyAdminAddress) {
     throw new Error("PROXY_ADMIN_ADDRESS must be provided in config.js");
@@ -57,13 +65,10 @@ module.exports = async (deployer, network) => {
   );
   await fiatTokenV2.initializeV2("");
 
-  const fiatTokenProxy = await FiatTokenProxy.deployed();
-  console.log("Using FiatTokenProxy address:", fiatTokenProxy.address);
-
   console.log("Deploying FiatTokenUtil contract...");
   const fiatTokenUtil = await deployer.deploy(
     FiatTokenUtil,
-    fiatTokenProxy.address
+    proxyContractAddress
   );
   console.log("Deployed FiatTokenUtil at", fiatTokenUtil.address);
 
@@ -71,7 +76,7 @@ module.exports = async (deployer, network) => {
 
   const v2Upgrader = await deployer.deploy(
     V2Upgrader,
-    fiatTokenProxy.address,
+    proxyContractAddress,
     fiatTokenV2.address,
     proxyAdminAddress,
     "USD Coin"
