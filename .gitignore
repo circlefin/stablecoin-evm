@@ -15,3 +15,4 @@ ganache-blockchain-log.txt
 .coverage_artifacts
 .coverage_contracts
 yarn-error.log
+@types/generated/
