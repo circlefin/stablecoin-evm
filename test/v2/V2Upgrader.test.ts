@@ -13,7 +13,6 @@ const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const V2Upgrader = artifacts.require("V2Upgrader");
-const V2UpgraderHelper = artifacts.require("V2UpgraderHelper");
 
 contract("V2Upgrader", (accounts) => {
   let fiatTokenProxy: FiatTokenProxyInstance;
@@ -45,6 +44,14 @@ contract("V2Upgrader", (accounts) => {
       const upgrader = await V2Upgrader.deployed();
       const upgraderOwner = await upgrader.owner();
 
+      expect(await upgrader.proxy()).to.equal(fiatTokenProxy.address);
+      expect(await upgrader.implementation()).to.equal(
+        v2Implementation.address
+      );
+      expect(await upgrader.helper()).not.to.be.empty;
+      expect(await upgrader.newProxyAdmin()).to.equal(originalProxyAdmin);
+      expect(await upgrader.newName()).to.equal("USD Coin");
+
       // Transfer 0.2 USDC to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
@@ -54,9 +61,7 @@ contract("V2Upgrader", (accounts) => {
       });
 
       // Call upgrade
-      await upgrader.upgrade("USD Coin", originalProxyAdmin, {
-        from: upgraderOwner,
-      });
+      await upgrader.upgrade({ from: upgraderOwner });
 
       // The proxy admin role is transferred back to originalProxyAdmin
       expect(await fiatTokenProxy.admin()).to.equal(originalProxyAdmin);
@@ -94,6 +99,7 @@ contract("V2Upgrader", (accounts) => {
         await proxyAsV2.DOMAIN_SEPARATOR(),
         user2.key // Signed with someone else's key
       );
+      // Fails when given an invalid authorization
       await expectRevert(
         proxyAsV2.transferWithAuthorization(
           user.address,
@@ -121,6 +127,7 @@ contract("V2Upgrader", (accounts) => {
         user.key
       );
 
+      // Succeeds when given a valid authorization
       await proxyAsV2.transferWithAuthorization(
         user.address,
         minter,
@@ -145,13 +152,13 @@ contract("V2Upgrader", (accounts) => {
         from: originalProxyAdmin,
       });
       const fiatTokenV1_1 = await FiatTokenV1_1.new();
-      const helper = await V2UpgraderHelper.deployed();
       const upgraderOwner = accounts[0];
 
       const upgrader = await V2Upgrader.new(
         fiatTokenProxy.address,
         fiatTokenV1_1.address, // provide V1.1 implementation instead of V2
-        helper.address,
+        originalProxyAdmin,
+        "USD Coin",
         { from: upgraderOwner }
       );
 
@@ -164,12 +171,7 @@ contract("V2Upgrader", (accounts) => {
       });
 
       // Upgrade should fail because initializeV2 function doesn't exist on V1.1
-      await expectRevert(
-        upgrader.upgrade("USD Coin", originalProxyAdmin, {
-          from: upgraderOwner,
-        }),
-        "revert"
-      );
+      await expectRevert(upgrader.upgrade({ from: upgraderOwner }), "revert");
 
       // The proxy admin role is not transferred
       expect(await fiatTokenProxy.admin()).to.equal(upgrader.address);
@@ -186,12 +188,12 @@ contract("V2Upgrader", (accounts) => {
       fiatTokenProxy = await FiatTokenProxy.new(v1Implementation.address, {
         from: originalProxyAdmin,
       });
-      const helper = await V2UpgraderHelper.deployed();
       const upgraderOwner = accounts[0];
       const upgrader = await V2Upgrader.new(
         fiatTokenProxy.address,
         v2Implementation.address,
-        helper.address,
+        originalProxyAdmin,
+        "USD Coin",
         { from: upgraderOwner }
       );
 
@@ -204,7 +206,7 @@ contract("V2Upgrader", (accounts) => {
       });
 
       // Call abortUpgrade
-      await upgrader.abortUpgrade(originalProxyAdmin, { from: upgraderOwner });
+      await upgrader.abortUpgrade({ from: upgraderOwner });
 
       // The proxy admin role is transferred back to originalProxyAdmin
       expect(await fiatTokenProxy.admin()).to.equal(originalProxyAdmin);

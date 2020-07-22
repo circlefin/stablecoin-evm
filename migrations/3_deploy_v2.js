@@ -1,14 +1,34 @@
+const fs = require("fs");
+const path = require("path");
+
 const EIP712 = artifacts.require("EIP712");
 const ECRecover = artifacts.require("ECRecover");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenUtil = artifacts.require("FiatTokenUtil");
 const V2Upgrader = artifacts.require("V2Upgrader");
-const V2UpgraderHelper = artifacts.require("V2UpgraderHelper");
 
 const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 
-module.exports = async (deployer, _network) => {
+let proxyAdminAddress = "";
+
+// Read config file if it exists
+if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+  ({ PROXY_ADMIN_ADDRESS: proxyAdminAddress } = require("../config.js"));
+}
+
+module.exports = async (deployer, network) => {
+  if (network.toLowerCase().includes("development")) {
+    // DO NOT USE THIS ADDRESS FOR PRODUCTION
+    proxyAdminAddress = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598";
+  }
+
+  console.log(`Proxy Admin:   ${proxyAdminAddress}`);
+
+  if (!proxyAdminAddress) {
+    throw new Error("PROXY_ADMIN_ADDRESS must be provided in config.js");
+  }
+
   console.log("Deploying Library contracts...");
   await deployer.deploy(ECRecover);
   console.log("Deployed ECRecover at", (await ECRecover.deployed()).address);
@@ -49,15 +69,12 @@ module.exports = async (deployer, _network) => {
 
   console.log("Deploying V2Upgrader contract...");
 
-  const v2UpgraderHelper = await deployer.deploy(
-    V2UpgraderHelper,
-    fiatTokenProxy.address
-  );
   const v2Upgrader = await deployer.deploy(
     V2Upgrader,
     fiatTokenProxy.address,
     fiatTokenV2.address,
-    v2UpgraderHelper.address
+    proxyAdminAddress,
+    "USD Coin"
   );
 
   console.log(`>>>>>>> Deployed V2Upgrader at ${v2Upgrader.address} <<<<<<<`);

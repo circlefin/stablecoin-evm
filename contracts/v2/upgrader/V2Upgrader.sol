@@ -45,35 +45,77 @@ contract V2Upgrader is Ownable {
 
     FiatTokenProxy private _proxy;
     FiatTokenV2 private _implementation;
+    address private _newProxyAdmin;
+    string private _newName;
     V2UpgraderHelper private _helper;
 
     /**
      * @notice Constructor
      * @param proxy             FiatTokenProxy contract
      * @param implementation    FiatTokenV2 implementation contract
-     * @param helper            V2UpgraderHelper contract
+     * @param newProxyAdmin     Grantee of proxy admin role after upgrade
+     * @param newName           New ERC20 name (e.g. "USD//C" -> "USD Coin")
      */
     constructor(
         FiatTokenProxy proxy,
         FiatTokenV2 implementation,
-        V2UpgraderHelper helper
+        address newProxyAdmin,
+        string memory newName
     ) public Ownable() {
         _proxy = proxy;
         _implementation = implementation;
-        _helper = helper;
+        _newProxyAdmin = newProxyAdmin;
+        _newName = newName;
+        _helper = new V2UpgraderHelper(address(proxy));
+    }
+
+    /**
+     * @notice The address of the FiatTokenProxy contract
+     * @return Contract address
+     */
+    function proxy() external view returns (address) {
+        return address(_proxy);
+    }
+
+    /**
+     * @notice The address of the FiatTokenV2 implementation contract
+     * @return Contract address
+     */
+    function implementation() external view returns (address) {
+        return address(_implementation);
+    }
+
+    /**
+     * @notice The address of the V2UpgraderHelper contract
+     * @return Contract address
+     */
+    function helper() external view returns (address) {
+        return address(_helper);
+    }
+
+    /**
+     * @notice The address to which the proxy admin role will be transferred
+     * after the upgrade is completed
+     * @return Address
+     */
+    function newProxyAdmin() external view returns (address) {
+        return _newProxyAdmin;
+    }
+
+    /**
+     * @notice New ERC20 token name
+     * @return New Name
+     */
+    function newName() external view returns (string memory) {
+        return _newName;
     }
 
     /**
      * @notice Upgrade, transfer proxy admin role to a given address, run a
      * sanity test, and tear down the upgrader contract, in a single atomic
      * transaction. It rolls back if there is an error.
-     * @param newName       New ERC20 name (e.g. "USD//C" -> "USD Coin")
-     * @param newProxyAdmin Grantee of the proxy admin role
      */
-    function upgrade(string calldata newName, address newProxyAdmin)
-        external
-        onlyOwner
-    {
+    function upgrade() external onlyOwner {
         // The helper needs to be used to read contract state because
         // AdminUpgradeabilityProxy does not allow the proxy admin to make
         // proxy calls.
@@ -89,24 +131,24 @@ contract V2Upgrader is Ownable {
         uint8 decimals = _helper.decimals();
         string memory currency = _helper.currency();
         address masterMinter = _helper.masterMinter();
-        address owner = _helper.owner();
+        address owner = _helper.fiatTokenOwner();
         address pauser = _helper.pauser();
         address blacklister = _helper.blacklister();
 
         // Change implementation contract address
         _proxy.upgradeTo(address(_implementation));
 
-        // Transfer admin role
-        _proxy.changeAdmin(newProxyAdmin);
+        // Transfer proxy admin role
+        _proxy.changeAdmin(_newProxyAdmin);
 
         // Initialize V2 contract
         FiatTokenV2 v2 = FiatTokenV2(address(_proxy));
-        v2.initializeV2(newName);
+        v2.initializeV2(_newName);
 
         // Sanity test
         // Check metadata
         require(
-            keccak256(bytes(newName)) == keccak256(bytes(newName)) &&
+            keccak256(bytes(_newName)) == keccak256(bytes(v2.name())) &&
                 keccak256(bytes(symbol)) == keccak256(bytes(v2.symbol())) &&
                 decimals == v2.decimals() &&
                 keccak256(bytes(currency)) == keccak256(bytes(v2.currency())) &&
@@ -145,6 +187,8 @@ contract V2Upgrader is Ownable {
         // Transfer any remaining USDC to the caller
         withdrawUSDC();
 
+        // Tear down
+        _helper.tearDown();
         selfdestruct(msg.sender);
     }
 
@@ -153,18 +197,24 @@ contract V2Upgrader is Ownable {
      */
     function withdrawUSDC() public onlyOwner {
         IERC20 usdc = IERC20(address(_proxy));
-        require(
-            usdc.transfer(msg.sender, usdc.balanceOf(address(this))),
-            "V2Upgrader: failed to withdraw USDC"
-        );
+        uint256 balance = usdc.balanceOf(address(this));
+        if (balance > 0) {
+            require(
+                usdc.transfer(msg.sender, balance),
+                "V2Upgrader: failed to withdraw USDC"
+            );
+        }
     }
 
     /**
      * @notice Transfer proxy admin role to newProxyAdmin, and self-destruct
-     * @param newProxyAdmin Grantee of the proxy admin role
      */
-    function abortUpgrade(address newProxyAdmin) external onlyOwner {
-        _proxy.changeAdmin(newProxyAdmin);
+    function abortUpgrade() external onlyOwner {
+        // Transfer proxy admin role
+        _proxy.changeAdmin(_newProxyAdmin);
+
+        // Tear down
+        _helper.tearDown();
         selfdestruct(msg.sender);
     }
 }
