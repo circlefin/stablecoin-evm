@@ -15,7 +15,7 @@
    to prevent accidental copying-and-pasting of an incorrect address.
 
    ```
-   $ yarn migrate --network mainnet --f 3 --to 5
+   $ yarn migrate --network mainnet --f 3 --to 4
    ...
    ...
    Dry-run successful. Do you want to proceed with real deployment?  >> (y/n): y

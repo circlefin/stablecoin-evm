@@ -37,8 +37,8 @@ library EIP712 {
      * @param version   Contract version
      * @return Domain separator
      */
-    function makeDomainSeparator(string calldata name, string calldata version)
-        external
+    function makeDomainSeparator(string memory name, string memory version)
+        internal
         view
         returns (bytes32)
     {
@@ -73,8 +73,8 @@ library EIP712 {
         uint8 v,
         bytes32 r,
         bytes32 s,
-        bytes calldata typeHashAndData
-    ) external pure returns (address) {
+        bytes memory typeHashAndData
+    ) internal pure returns (address) {
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",

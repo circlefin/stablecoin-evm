@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const some = require("lodash/some");
 
-const EIP712 = artifacts.require("EIP712");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenUtil = artifacts.require("FiatTokenUtil");
@@ -24,11 +23,9 @@ module.exports = async (deployer, network) => {
   proxyContractAddress =
     proxyContractAddress || (await FiatTokenProxy.deployed()).address;
 
-  console.log(`EIP712:          ${(await EIP712.deployed()).address}`);
   console.log(`FiatTokenProxy:  ${proxyContractAddress}`);
 
   console.log("Deploying FiatTokenV2 implementation contract...");
-  await deployer.link(EIP712, FiatTokenV2);
   await deployer.deploy(FiatTokenV2);
 
   const fiatTokenV2 = await FiatTokenV2.deployed();

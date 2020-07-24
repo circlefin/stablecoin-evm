@@ -5,8 +5,6 @@ import { hasSafeAllowance } from "./safeAllowance.behavior";
 import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
 import { expectRevert } from "../helpers";
 
-const ECRecover = artifacts.require("ECRecover");
-const EIP712 = artifacts.require("EIP712");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 
 contract("FiatTokenV2", (accounts) => {
@@ -16,12 +14,6 @@ contract("FiatTokenV2", (accounts) => {
   let chainId: number;
 
   beforeEach(async () => {
-    const ecRecover = await ECRecover.new();
-    EIP712.link("ECRecover", ecRecover.address);
-
-    const eip712 = await EIP712.new();
-    FiatTokenV2.link("EIP712", eip712.address);
-
     fiatToken = await FiatTokenV2.new();
     await fiatToken.initialize(
       "USD Coin",

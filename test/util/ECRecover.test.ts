@@ -1,14 +1,14 @@
 import { ecSign, expectRevert } from "../helpers";
 import { ACCOUNTS_AND_KEYS, ZERO_BYTES32 } from "../helpers/constants";
-import { EcRecoverInstance } from "../../@types/generated/EcRecover";
+import { EcRecoverTestInstance } from "../../@types/generated/EcRecoverTest";
 
-const ECRecover = artifacts.require("ECRecover");
+const ECRecoverTest = artifacts.require("ECRecoverTest");
 
 contract("ECRecover", (_accounts) => {
-  let ecRecover: EcRecoverInstance;
+  let ecRecover: EcRecoverTestInstance;
 
   beforeEach(async () => {
-    ecRecover = await ECRecover.new();
+    ecRecover = await ECRecoverTest.new();
   });
 
   describe("recover", () => {
