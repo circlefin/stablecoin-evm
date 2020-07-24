@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const some = require("lodash/some");
 
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -17,7 +18,7 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
 }
 
 module.exports = async (deployer, network) => {
-  if (network.toLowerCase().includes("development")) {
+  if (some(["development", "coverage"], (v) => network.includes(v))) {
     // DO NOT USE THIS ADDRESS IN PRODUCTION
     proxyAdminAddress = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598";
     proxyContractAddress = (await FiatTokenProxy.deployed()).address;

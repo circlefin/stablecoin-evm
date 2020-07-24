@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const some = require("lodash/some");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -24,7 +25,7 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
 }
 
 module.exports = async (deployer, network) => {
-  if (network.toLowerCase().includes("development")) {
+  if (some(["development", "coverage"], (v) => network.includes(v))) {
     // DO NOT USE THESE ADDRESSES IN PRODUCTION - these are the deterministic
     // addresses from ganache, so the private keys are well known and match the
     // values we use in the tests
