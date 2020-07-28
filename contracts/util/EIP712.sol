@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) CENTRE SECZ 2018-2020
+ * Copyright (c) 2018-2020 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { ECRecover } from "./ECRecover.sol";
-
 
 /**
  * @title EIP712
@@ -38,8 +37,8 @@ library EIP712 {
      * @param version   Contract version
      * @return Domain separator
      */
-    function makeDomainSeparator(string calldata name, string calldata version)
-        external
+    function makeDomainSeparator(string memory name, string memory version)
+        internal
         view
         returns (bytes32)
     {
@@ -61,22 +60,21 @@ library EIP712 {
     }
 
     /**
-     * @notice Verify a EIP712 signature
+     * @notice Recover signer's address from a EIP712 signature
      * @param domainSeparator   Domain separator
-     * @param signer            Expected signer's address
      * @param v                 v of the signature
      * @param r                 r of the signature
      * @param s                 s of the signature
      * @param typeHashAndData   Type hash concatenated with data
+     * @return Signer's address
      */
-    function verifySignature(
+    function recover(
         bytes32 domainSeparator,
-        address signer,
         uint8 v,
         bytes32 r,
         bytes32 s,
-        bytes calldata typeHashAndData
-    ) external pure {
+        bytes memory typeHashAndData
+    ) internal pure returns (address) {
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
@@ -84,9 +82,6 @@ library EIP712 {
                 keccak256(typeHashAndData)
             )
         );
-        require(
-            ECRecover.recover(digest, v, r, s) == signer,
-            "EIP712: invalid signature"
-        );
+        return ECRecover.recover(digest, v, r, s);
     }
 }

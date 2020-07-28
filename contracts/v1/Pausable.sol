@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: MIT
  *
  * Copyright (c) 2016 Smart Contract Solutions, Inc.
- * Copyright (c) CENTRE SECZ 2018-20200
+ * Copyright (c) 2018-2020 CENTRE SECZ0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,9 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { Ownable } from "./Ownable.sol";
-
 
 /**
  * @notice Base contract which allows children to implement an emergency stop

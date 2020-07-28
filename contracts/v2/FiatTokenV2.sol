@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) CENTRE SECZ 2018-2020
+ * Copyright (c) 2018-2020 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
 import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
@@ -30,7 +30,6 @@ import { EIP712 } from "../util/EIP712.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
 import { GasAbstraction } from "./GasAbstraction.sol";
 import { Permit } from "./Permit.sol";
-
 
 /**
  * @title FiatToken V2
@@ -41,8 +40,9 @@ contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
 
     /**
      * @notice Initialize V2 contract
-     * @dev When upgrading to V2, this function must also be invoked
-     * simultaneously by using upgradeToAndCall instead of upgradeTo.
+     * @dev When upgrading to V2, this function must also be invoked by using
+     * upgradeToAndCall instead of upgradeTo, or by calling both from a contract
+     * in a single transaction.
      * @param newName   New token name
      */
     function initializeV2(string calldata newName) external {

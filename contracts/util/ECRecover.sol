@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: MIT
  *
  * Copyright (c) 2016-2019 zOS Global Limited
- * Copyright (c) CENTRE SECZ 2018-2020
+ * Copyright (c) 2018-2020 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
-
+pragma solidity 0.6.12;
 
 /**
  * @title ECRecover
@@ -46,7 +45,7 @@ library ECRecover {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external pure returns (address) {
+    ) internal pure returns (address) {
         // EIP-2 still allows signature malleability for ecrecover(). Remove this possibility and make the signature
         // unique. Appendix F in the Ethereum Yellow paper (https://ethereum.github.io/yellowpaper/paper.pdf), defines
         // the valid range for s in (281): 0 < s < secp256k1n ÷ 2 + 1, and for v in (282): v ∈ {27, 28}. Most

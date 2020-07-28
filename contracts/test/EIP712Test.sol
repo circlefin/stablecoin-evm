@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2018 zOS Global Limited.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,25 +24,24 @@
 
 pragma solidity 0.6.12;
 
-contract ContractWithExternalFunctions {
-    string private _foo;
-    uint256 private _bar;
+import { EIP712 } from "../util/EIP712.sol";
 
-    function setFoo(string calldata foo) external returns (bool) {
-        _foo = foo;
-        return true;
+contract EIP712Test {
+    function makeDomainSeparator(string calldata name, string calldata version)
+        external
+        view
+        returns (bytes32)
+    {
+        return EIP712.makeDomainSeparator(name, version);
     }
 
-    function getFoo() external view returns (string memory) {
-        return _foo;
-    }
-
-    function setBar(uint256 bar) external returns (bool) {
-        _bar = bar;
-        return true;
-    }
-
-    function getBar() external view returns (uint256) {
-        return _bar;
+    function recover(
+        bytes32 domainSeparator,
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        bytes calldata typeHashAndData
+    ) external pure returns (address) {
+        return EIP712.recover(domainSeparator, v, r, s, typeHashAndData);
     }
 }

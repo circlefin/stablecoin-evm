@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2018 zOS Global Limited.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,25 +24,15 @@
 
 pragma solidity 0.6.12;
 
-contract ContractWithExternalFunctions {
-    string private _foo;
-    uint256 private _bar;
+import { ECRecover } from "../util/ECRecover.sol";
 
-    function setFoo(string calldata foo) external returns (bool) {
-        _foo = foo;
-        return true;
-    }
-
-    function getFoo() external view returns (string memory) {
-        return _foo;
-    }
-
-    function setBar(uint256 bar) external returns (bool) {
-        _bar = bar;
-        return true;
-    }
-
-    function getBar() external view returns (uint256) {
-        return _bar;
+contract ECRecoverTest {
+    function recover(
+        bytes32 digest,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external pure returns (address) {
+        return ECRecover.recover(digest, v, r, s);
     }
 }

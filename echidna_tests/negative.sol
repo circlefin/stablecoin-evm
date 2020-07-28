@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 import "contracts/FiatTokenV1.sol";
 
-
 contract Test is FiatTokenV1 {
     //Note: These are special addresses used by echidna––please don't change.
     address testerAddr = 0x00a329c0648769a73afac7f9381e08fb43dbea70;

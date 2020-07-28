@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) CENTRE SECZ 2018-2020
+ * Copyright (c) 2018-2020 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { AbstractFiatTokenV1 } from "../v1/AbstractFiatTokenV1.sol";
-
 
 abstract contract AbstractFiatTokenV2 is AbstractFiatTokenV1 {
     function _increaseAllowance(

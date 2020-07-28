@@ -22,11 +22,10 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { Proxy } from "./Proxy.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
-
 
 /**
  * @notice This contract implements a proxy that allows to change the
@@ -49,7 +48,8 @@ contract UpgradeabilityProxy is Proxy {
      * This is the keccak-256 hash of "org.zeppelinos.proxy.implementation", and is
      * validated in the constructor.
      */
-    bytes32 private constant IMPLEMENTATION_SLOT = 0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3;
+    bytes32
+        private constant IMPLEMENTATION_SLOT = 0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3;
 
     /**
      * @dev Contract constructor.

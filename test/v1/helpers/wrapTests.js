@@ -1,30 +1,19 @@
-const ECRecover = artifacts.require("ECRecover");
-const EIP712 = artifacts.require("EIP712");
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 
 // The following helpers make fresh original/upgraded tokens before each test.
 
-async function newFiatTokenV1() {
-  const token = await FiatTokenV1.new();
-  return token;
+function newFiatTokenV1() {
+  return FiatTokenV1.new();
 }
 
-async function newFiatTokenV1_1() {
-  const token = await FiatTokenV1_1.new();
-  return token;
+function newFiatTokenV1_1() {
+  return FiatTokenV1_1.new();
 }
 
-async function newFiatTokenV2() {
-  const ecRecover = await ECRecover.new();
-  EIP712.link("ECRecover", ecRecover.address);
-
-  const eip712 = await EIP712.new();
-  FiatTokenV2.link("EIP712", eip712.address);
-
-  const token = await FiatTokenV2.new();
-  return token;
+function newFiatTokenV2() {
+  return FiatTokenV2.new();
 }
 
 // Executes the run_tests_function using an original and
