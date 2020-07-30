@@ -16,8 +16,8 @@ Note: Infura is a 3rd party provider.
 3. Create a new project - give it any name you want. Then whitelist the Token
    Proxy and the current Token Implementation addresses.
 
-4. Create a local file `./validate/apikey.infura`. Copy the API Key from your
-   project dashboard into the file and save.
+4. Follow the instructions under the "Deployment" section in `README.md` to
+   configure the mnemonic phrase and the Infura API key in `config.js`.
 
 # Configure Expected Values
 
@@ -26,7 +26,7 @@ well as any other constants.
 
 # Validation
 
-Run `truffle exec ./validate/validate.js --network infura_mainnet`
+Run `truffle exec ./validate/validate.js --network mainnet`
 
-You can replace `infura_mainnet` with any other network defined in `truffle.js`
-under `networks`.
+You can replace `mainnet` with any other network defined in `truffle.js` under
+`networks`.

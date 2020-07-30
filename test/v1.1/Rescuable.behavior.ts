@@ -1,6 +1,7 @@
 import { RescuableInstance } from "../../@types/generated/Rescuable";
 import { expectRevert } from "../helpers";
 import { DummyErc20Instance } from "../../@types/generated";
+import { ZERO_ADDRESS } from "../helpers/constants";
 const DummyERC20 = artifacts.require("DummyERC20");
 
 export function behavesLikeRescuable(
@@ -27,6 +28,13 @@ export function behavesLikeRescuable(
         await expectRevert(
           rescuable.updateRescuer(accounts[1], { from: accounts[1] }),
           "caller is not the owner"
+        );
+      });
+
+      it("does not allow updating the rescuer to the zero address", async () => {
+        await expectRevert(
+          rescuable.updateRescuer(ZERO_ADDRESS, { from: owner }),
+          "new rescuer is the zero address"
         );
       });
     });

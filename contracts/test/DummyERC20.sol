@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
 
 contract DummyERC20 is ERC20 {
     constructor(

@@ -5,6 +5,6 @@ module.exports = {
     total_accounts: 15,
     default_balance_ether: 1000000,
   },
-  skipFiles: ["test/"],
+  skipFiles: ["test/", "v2/upgrader/"],
   copyPackages: ["openzeppelin-solidity", "zos-lib"],
 };

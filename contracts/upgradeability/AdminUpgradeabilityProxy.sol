@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-pragma solidity 0.6.8;
+pragma solidity 0.6.12;
 
 import { UpgradeabilityProxy } from "./UpgradeabilityProxy.sol";
-
 
 /**
  * @notice This contract combines an upgradeability proxy with an authorization
@@ -48,7 +47,8 @@ contract AdminUpgradeabilityProxy is UpgradeabilityProxy {
      * This is the keccak-256 hash of "org.zeppelinos.proxy.admin", and is
      * validated in the constructor.
      */
-    bytes32 private constant ADMIN_SLOT = 0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b;
+    bytes32
+        private constant ADMIN_SLOT = 0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b;
 
     /**
      * @dev Modifier to check whether the `msg.sender` is the admin.
@@ -143,7 +143,6 @@ contract AdminUpgradeabilityProxy is UpgradeabilityProxy {
     function _admin() internal view returns (address adm) {
         bytes32 slot = ADMIN_SLOT;
 
-        // solhint-disable-next-line no-inline-assembly
         assembly {
             adm := sload(slot)
         }
@@ -156,7 +155,6 @@ contract AdminUpgradeabilityProxy is UpgradeabilityProxy {
     function _setAdmin(address newAdmin) internal {
         bytes32 slot = ADMIN_SLOT;
 
-        // solhint-disable-next-line no-inline-assembly
         assembly {
             sstore(slot, newAdmin)
         }
