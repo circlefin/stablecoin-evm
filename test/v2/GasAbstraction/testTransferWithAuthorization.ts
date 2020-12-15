@@ -10,7 +10,6 @@ import {
   transferWithAuthorizationTypeHash,
   signTransferAuthorization,
   TestParams,
-  signApproveAuthorization,
 } from "./helpers";
 
 export function testTransferWithAuthorization({
@@ -386,44 +385,6 @@ export function testTransferWithAuthorization({
           { from: charlie }
         ),
         "transfer amount exceeds balance"
-      );
-    });
-
-    it("reverts if the authorization is not for a transfer", async () => {
-      const {
-        from: owner,
-        to: spender,
-        value,
-        validAfter,
-        validBefore,
-      } = transferParams;
-      // create a signed authorization for an approval (granting allowance)
-      const { v, r, s } = signApproveAuthorization(
-        owner,
-        spender,
-        value,
-        validAfter,
-        validBefore,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // try to submit the approval authorization
-      await expectRevert(
-        fiatToken.transferWithAuthorization(
-          owner,
-          spender,
-          value,
-          validAfter,
-          validBefore,
-          nonce,
-          v,
-          r,
-          s,
-          { from: charlie }
-        ),
-        "invalid signature"
       );
     });
 
