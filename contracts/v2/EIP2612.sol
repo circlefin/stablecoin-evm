@@ -29,20 +29,13 @@ import { EIP712Domain } from "./EIP712Domain.sol";
 import { EIP712 } from "../util/EIP712.sol";
 
 /**
- * @title Permit
- * @notice An alternative to approveWithAuthorization, provided for
- * compatibility with the draft EIP2612 proposed by Uniswap.
- * @dev Differences:
- * - Uses sequential nonce, which restricts transaction submission to one at a
- *   time, or else it will revert
- * - Has deadline (= validBefore - 1) but does not have validAfter
- * - Doesn't have a way to change allowance atomically to prevent ERC20 multiple
- *   withdrawal attacks
+ * @title EIP-2612
+ * @notice Provide internal implementation for gas-abstracted approvals
  */
-abstract contract Permit is AbstractFiatTokenV2, EIP712Domain {
+abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
+    // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
     bytes32
         public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
-    // = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
 
     mapping(address => uint256) private _permitNonces;
 
@@ -86,7 +79,7 @@ abstract contract Permit is AbstractFiatTokenV2, EIP712Domain {
         );
         require(
             EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
-            "FiatTokenV2: invalid signature"
+            "EIP2612: invalid signature"
         );
 
         _approve(owner, spender, value);

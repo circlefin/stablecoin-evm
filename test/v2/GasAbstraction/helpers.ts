@@ -12,6 +12,10 @@ export const transferWithAuthorizationTypeHash = web3.utils.keccak256(
   "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
 );
 
+export const receiveWithAuthorizationTypeHash = web3.utils.keccak256(
+  "ReceiveWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+);
+
 export const cancelAuthorizationTypeHash = web3.utils.keccak256(
   "CancelAuthorization(address authorizer,bytes32 nonce)"
 );
@@ -33,6 +37,25 @@ export function signTransferAuthorization(
   return signEIP712(
     domainSeparator,
     transferWithAuthorizationTypeHash,
+    ["address", "address", "uint256", "uint256", "uint256", "bytes32"],
+    [from, to, value, validAfter, validBefore, nonce],
+    privateKey
+  );
+}
+
+export function signReceiveAuthorization(
+  from: string,
+  to: string,
+  value: number | string,
+  validAfter: number | string,
+  validBefore: number | string,
+  nonce: string,
+  domainSeparator: string,
+  privateKey: string
+): Signature {
+  return signEIP712(
+    domainSeparator,
+    receiveWithAuthorizationTypeHash,
     ["address", "address", "uint256", "uint256", "uint256", "bytes32"],
     [from, to, value, validAfter, validBefore, nonce],
     privateKey

@@ -65,10 +65,8 @@ export function testCancelAuthorization({
         alice.key
       );
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // cancel the authorization
       await fiatToken.cancelAuthorization(
@@ -80,10 +78,8 @@ export function testCancelAuthorization({
         { from: charlie }
       );
 
-      // check that the authorization state is now 2 = Canceled
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(2);
+      // check that the authorization state is now true
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(true);
 
       // attempt to use the canceled authorization
       await expectRevert(
@@ -122,10 +118,8 @@ export function testCancelAuthorization({
         alice.key
       );
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // create cancellation
       const cancellation = signCancelAuthorization(
@@ -148,10 +142,8 @@ export function testCancelAuthorization({
         "invalid signature"
       );
 
-      // check that the authorization state is still 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is still false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // authorization should not have been canceled
       await fiatToken.transferWithAuthorization(
