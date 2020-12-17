@@ -36,23 +36,18 @@ import { EIP2612 } from "./EIP2612.sol";
  * @notice ERC20 Token backed by fiat reserves, version 2
  */
 contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
-    bool internal _initializedV2;
+    uint8 internal _initializedVersion;
 
     /**
-     * @notice Initialize V2 contract
-     * @dev When upgrading to V2, this function must also be invoked by using
-     * upgradeToAndCall instead of upgradeTo, or by calling both from a contract
-     * in a single transaction.
+     * @notice Initialize v2
      * @param newName   New token name
      */
     function initializeV2(string calldata newName) external {
-        require(
-            !_initializedV2,
-            "FiatTokenV2: contract is already initialized"
-        );
+        // solhint-disable-next-line reason-string
+        require(initialized && _initializedVersion == 0);
         name = newName;
         DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
-        _initializedV2 = true;
+        _initializedVersion = 1;
     }
 
     /**

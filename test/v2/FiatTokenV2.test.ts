@@ -3,6 +3,7 @@ import { FiatTokenV2Instance, RescuableInstance } from "../../@types/generated";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
 import { hasSafeAllowance } from "./safeAllowance.behavior";
 import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
+import { makeDomainSeparator } from "./GasAbstraction/helpers";
 import { expectRevert } from "../helpers";
 
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
@@ -10,8 +11,6 @@ const FiatTokenV2 = artifacts.require("FiatTokenV2");
 contract("FiatTokenV2", (accounts) => {
   const fiatTokenOwner = accounts[9];
   let fiatToken: FiatTokenV2Instance;
-  let domainSeparator: string;
-  let chainId: number;
 
   beforeEach(async () => {
     fiatToken = await FiatTokenV2.new();
@@ -26,29 +25,28 @@ contract("FiatTokenV2", (accounts) => {
       fiatTokenOwner
     );
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
+  });
 
-    // hardcode chainId to be 1 due to ganache bug
-    // https://github.com/trufflesuite/ganache/issues/1643
-    // chainId = await web3.eth.getChainId();
-    chainId = 1;
+  behavesLikeFiatTokenV2(accounts, () => fiatToken, fiatTokenOwner);
+});
 
-    domainSeparator = web3.utils.keccak256(
-      web3.eth.abi.encodeParameters(
-        ["bytes32", "bytes32", "bytes32", "uint256", "address"],
-        [
-          web3.utils.keccak256(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-          ),
-          web3.utils.keccak256("USD Coin"),
-          web3.utils.keccak256("2"),
-          chainId,
-          fiatToken.address,
-        ]
-      )
+export function behavesLikeFiatTokenV2(
+  accounts: Truffle.Accounts,
+  getFiatToken: () => FiatTokenV2Instance,
+  fiatTokenOwner: string
+): void {
+  let domainSeparator: string;
+
+  beforeEach(async () => {
+    domainSeparator = makeDomainSeparator(
+      "USD Coin",
+      "2",
+      1, // hardcoded to 1 because of ganache bug: https://github.com/trufflesuite/ganache/issues/1643
+      getFiatToken().address
     );
   });
 
-  behavesLikeRescuable(() => fiatToken as RescuableInstance, accounts);
+  behavesLikeRescuable(getFiatToken as () => RescuableInstance, accounts);
 
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV2,
@@ -57,13 +55,13 @@ contract("FiatTokenV2", (accounts) => {
   });
 
   it("has the expected domain separator", async () => {
-    expect(await fiatToken.DOMAIN_SEPARATOR()).to.equal(domainSeparator);
+    expect(await getFiatToken().DOMAIN_SEPARATOR()).to.equal(domainSeparator);
   });
 
-  hasSafeAllowance(() => fiatToken, fiatTokenOwner, accounts);
+  hasSafeAllowance(getFiatToken, fiatTokenOwner, accounts);
 
   hasGasAbstraction(
-    () => fiatToken,
+    getFiatToken,
     () => domainSeparator,
     fiatTokenOwner,
     accounts
@@ -72,8 +70,7 @@ contract("FiatTokenV2", (accounts) => {
   it("disallows calling initializeV2 twice", async () => {
     // It was called once in beforeEach. Try to call again.
     await expectRevert(
-      fiatToken.initializeV2("Not USD Coin", { from: fiatTokenOwner }),
-      "contract is already initialized"
+      getFiatToken().initializeV2("Not USD Coin", { from: fiatTokenOwner })
     );
   });
-});
+}
