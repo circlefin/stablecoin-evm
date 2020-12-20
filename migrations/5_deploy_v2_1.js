@@ -2,9 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const some = require("lodash/some");
 
-const FiatTokenV2 = artifacts.require("FiatTokenV2");
+const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-const FiatTokenUtil = artifacts.require("FiatTokenUtil");
 
 const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 
@@ -25,15 +24,15 @@ module.exports = async (deployer, network) => {
 
   console.log(`FiatTokenProxy: ${proxyContractAddress}`);
 
-  console.log("Deploying FiatTokenV2 implementation contract...");
-  await deployer.deploy(FiatTokenV2);
+  console.log("Deploying FiatTokenV2_1 implementation contract...");
+  await deployer.deploy(FiatTokenV2_1);
 
-  const fiatTokenV2 = await FiatTokenV2.deployed();
-  console.log("Deployed FiatTokenV2 at", fiatTokenV2.address);
+  const fiatTokenV2_1 = await FiatTokenV2_1.deployed();
+  console.log("Deployed FiatTokenV2_1 at", fiatTokenV2_1.address);
   console.log(
-    "Initializing FiatTokenV2 implementation contract with dummy values..."
+    "Initializing FiatTokenV2_1 implementation contract with dummy values..."
   );
-  await fiatTokenV2.initialize(
+  await fiatTokenV2_1.initialize(
     "",
     "",
     "",
@@ -43,12 +42,6 @@ module.exports = async (deployer, network) => {
     THROWAWAY_ADDRESS,
     THROWAWAY_ADDRESS
   );
-  await fiatTokenV2.initializeV2("");
-
-  console.log("Deploying FiatTokenUtil contract...");
-  const fiatTokenUtil = await deployer.deploy(
-    FiatTokenUtil,
-    proxyContractAddress
-  );
-  console.log("Deployed FiatTokenUtil at", fiatTokenUtil.address);
+  await fiatTokenV2_1.initializeV2("");
+  await fiatTokenV2_1.initializeV2_1(THROWAWAY_ADDRESS);
 };
