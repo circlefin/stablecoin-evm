@@ -19,7 +19,8 @@
     "solhint": "solhint 'contracts/**/*.sol'",
     "precommit": "yarn typechain && yarn fmt && yarn typecheck && yarn lint && yarn solhint",
     "slither": "slither --solc-disable-warnings --disable-color --exclude-dependencies .",
-    "migrate": "truffle migrate --interactive"
+    "migrate": "truffle migrate --interactive",
+    "migrate:fuse": "truffle migrate --interactive --network fuse"
   },
   "repository": {
     "type": "git",
@@ -35,7 +36,7 @@
   "dependencies": {},
   "devDependencies": {
     "@openzeppelin/contracts": "^3.1.0",
-    "@truffle/hdwallet-provider": "^1.0.39",
+    "truffle-hdwallet-provider": "^1.0.8",
     "@typechain/truffle-v5": "^2.0.2",
     "@types/chai": "^4.2.11",
     "@types/lodash": "^4.14.158",

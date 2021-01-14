@@ -42,10 +42,7 @@ library EIP712 {
         view
         returns (bytes32)
     {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
+        uint256 chainId = 122;
         return
             keccak256(
                 abi.encode(

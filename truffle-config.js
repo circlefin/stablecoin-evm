@@ -3,7 +3,7 @@ require("ts-node/register/transpile-only");
 // Fix Typescript callsite reporting
 Object.defineProperty(Error, "prepareStackTrace", { writable: false });
 
-const HDWalletProvider = require("@truffle/hdwallet-provider");
+const HDWalletProvider = require("truffle-hdwallet-provider");
 const fs = require("fs");
 const path = require("path");
 
@@ -44,6 +44,10 @@ module.exports = {
       provider: infuraProvider("ropsten"),
       network_id: 3,
     },
+    fuse: {
+      provider: fuseRpcProvider(),
+      network_id: 122,
+    },
   },
   mocha: {
     timeout: 10000, // prevents tests from failing when pc is under heavy load
@@ -52,7 +56,7 @@ module.exports = {
   plugins: ["solidity-coverage"],
 };
 
-function infuraProvider(network) {
+function infuraProvider (network) {
   return () => {
     if (!config.MNEMONIC) {
       console.error("A valid MNEMONIC must be provided in config.js");
@@ -66,5 +70,15 @@ function infuraProvider(network) {
       config.MNEMONIC,
       `https://${network}.infura.io/v3/${config.INFURA_KEY}`
     );
+  };
+}
+
+function fuseRpcProvider () {
+  return () => {
+    if (!config.MNEMONIC) {
+      console.error("A valid MNEMONIC must be provided in config.js");
+      process.exit(1);
+    }
+    return new HDWalletProvider(config.MNEMONIC, `https://rpc.fuse.io`);
   };
 }
