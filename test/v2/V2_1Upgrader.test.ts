@@ -18,8 +18,7 @@ contract("V2_1Upgrader", (accounts) => {
   let v2Implementation: FiatTokenV2Instance;
   let v2_1Implementation: FiatTokenV21Instance;
   let originalProxyAdmin: string;
-  const minter = accounts[9];
-  const lostAndFound = "0x610Bb1573d1046FCb8A70Bbbd395754cD57C2b60";
+  const [minter, lostAndFound, alice, bob] = accounts.slice(9);
 
   before(async () => {
     fiatTokenProxy = await FiatTokenProxy.deployed();
@@ -103,6 +102,54 @@ contract("V2_1Upgrader", (accounts) => {
       // token proxy contract is blacklisted
       expect(await proxyAsV2_1.isBlacklisted(proxyAsV2_1.address)).to.equal(
         true
+      );
+
+      // mint works as expected
+      await proxyAsV2_1.configureMinter(minter, 1000e6, {
+        from: await proxyAsV2_1.masterMinter(),
+      });
+      await proxyAsV2_1.mint(alice, 1000e6, { from: minter });
+      expect((await proxyAsV2_1.balanceOf(alice)).toNumber()).to.equal(1000e6);
+
+      await expectRevert(
+        proxyAsV2_1.mint(alice, 1, { from: alice }),
+        "caller is not a minter"
+      );
+
+      // transfer works as expected
+      await proxyAsV2_1.transfer(bob, 200e6, { from: alice });
+      expect((await proxyAsV2_1.balanceOf(alice)).toNumber()).to.equal(800e6);
+      expect((await proxyAsV2_1.balanceOf(bob)).toNumber()).to.equal(200e6);
+
+      await expectRevert(
+        proxyAsV2_1.transfer(proxyAsV2_1.address, 1, { from: alice }),
+        "account is blacklisted"
+      );
+
+      // approve/transferFrom work as expected
+      await proxyAsV2_1.approve(bob, 250e6, { from: alice });
+      expect((await proxyAsV2_1.allowance(alice, bob)).toNumber()).to.equal(
+        250e6
+      );
+      await proxyAsV2_1.transferFrom(alice, bob, 250e6, { from: bob });
+      expect((await proxyAsV2_1.allowance(alice, bob)).toNumber()).to.equal(0);
+      expect((await proxyAsV2_1.balanceOf(alice)).toNumber()).to.equal(550e6);
+      expect((await proxyAsV2_1.balanceOf(bob)).toNumber()).to.equal(450e6);
+
+      await expectRevert(
+        proxyAsV2_1.approve(proxyAsV2_1.address, 1, { from: alice }),
+        "account is blacklisted"
+      );
+
+      // burn works as expected
+      await proxyAsV2_1.transfer(minter, 100e6, { from: alice });
+      expect((await proxyAsV2_1.balanceOf(minter)).toNumber()).to.equal(100e6);
+      await proxyAsV2_1.burn(100e6, { from: minter });
+      expect((await proxyAsV2_1.balanceOf(minter)).toNumber()).to.equal(0);
+
+      await expectRevert(
+        proxyAsV2_1.burn(1, { from: alice }),
+        "caller is not a minter"
       );
     });
 
