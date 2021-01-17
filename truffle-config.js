@@ -56,7 +56,7 @@ module.exports = {
   plugins: ["solidity-coverage"],
 };
 
-function infuraProvider (network) {
+function infuraProvider(network) {
   return () => {
     if (!config.MNEMONIC) {
       console.error("A valid MNEMONIC must be provided in config.js");
@@ -73,7 +73,7 @@ function infuraProvider (network) {
   };
 }
 
-function fuseRpcProvider () {
+function fuseRpcProvider() {
   return () => {
     if (!config.MNEMONIC) {
       console.error("A valid MNEMONIC must be provided in config.js");

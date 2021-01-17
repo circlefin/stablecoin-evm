@@ -15,10 +15,10 @@ const BLACKLISTER = 0x063d13783a0a2ce65b1ca00d9e897e6c8b1ec86b;
 // If replacing with real minters need to modify printMinterInfo
 const minters = ["0x0000", "0x0001"];
 
-const NAME = "USD//C";
-const SYMBOL = "USDC";
+const NAME = "Fuse Dollar";
+const SYMBOL = "fUSD";
 const CURRENCY = "USD";
-const DECIMALS = 6;
+const DECIMALS = 18;
 const TOTALSUPPLY = 0;
 const PAUSED = false;
 
@@ -49,7 +49,7 @@ const asyncGetStorageAt = (address, slot) =>
     });
   });
 
-async function printMinterInfo(proxiedToken) {
+async function printMinterInfo (proxiedToken) {
   for (const minter of minters) {
     console.log("\nMinter: " + minter);
 
@@ -67,12 +67,12 @@ async function printMinterInfo(proxiedToken) {
   }
 }
 
-function getAddressFromSlotData(slotData) {
+function getAddressFromSlotData (slotData) {
   const rawAddress = slotData.substring(26, 86);
   return "0x" + rawAddress;
 }
 
-function compare(actual, expected) {
+function compare (actual, expected) {
   if (actual === expected) {
     return "(ok)";
   } else {
@@ -80,11 +80,11 @@ function compare(actual, expected) {
   }
 }
 
-function print(name, actual, expected) {
+function print (name, actual, expected) {
   console.log(name + "\t" + actual + "\t" + compare(actual, expected));
 }
 
-async function Validate() {
+async function Validate () {
   console.log("Connecting to contract...");
   await FiatTokenV1.at(fiatTokenAddress);
   console.log("Token found.");

@@ -17,7 +17,7 @@ export function usesOriginalStorageSlotPositions<
   accounts: Truffle.Accounts;
 }): void {
   describe("uses original storage slot positions", () => {
-    const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
+    const [name, symbol, currency, decimals] = ["Fuse Dollar", "fUSD", "USD", 6];
     const [mintAllowance, minted, transferred, allowance] = [
       1000e6,
       100e6,

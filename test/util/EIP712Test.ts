@@ -20,7 +20,7 @@ contract("EIP712", (_accounts) => {
     // hardcode chainId to be 1 due to ganache bug
     // https://github.com/trufflesuite/ganache/issues/1643
     // chainId = await web3.eth.getChainId();
-    chainId = 1;
+    chainId = 122;
 
     randomName = sampleSize(wordlist, 3).join(" ");
     randomVersion = (Math.floor(Math.random() * 10) + 1).toString();

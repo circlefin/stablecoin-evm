@@ -16,8 +16,8 @@ contract("FiatTokenV2", (accounts) => {
   beforeEach(async () => {
     fiatToken = await FiatTokenV2.new();
     await fiatToken.initialize(
-      "USD Coin",
-      "USDC",
+      "Fuse Dollar",
+      "fUSD",
       "USD",
       6,
       fiatTokenOwner,
@@ -25,7 +25,7 @@ contract("FiatTokenV2", (accounts) => {
       fiatTokenOwner,
       fiatTokenOwner
     );
-    await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
+    await fiatToken.initializeV2("Fuse Dollar", { from: fiatTokenOwner });
 
     // hardcode chainId to be 1 due to ganache bug
     // https://github.com/trufflesuite/ganache/issues/1643
@@ -39,7 +39,7 @@ contract("FiatTokenV2", (accounts) => {
           web3.utils.keccak256(
             "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
           ),
-          web3.utils.keccak256("USD Coin"),
+          web3.utils.keccak256("Fuse Dollar"),
           web3.utils.keccak256("2"),
           chainId,
           fiatToken.address,
@@ -72,7 +72,7 @@ contract("FiatTokenV2", (accounts) => {
   it("disallows calling initializeV2 twice", async () => {
     // It was called once in beforeEach. Try to call again.
     await expectRevert(
-      fiatToken.initializeV2("Not USD Coin", { from: fiatTokenOwner }),
+      fiatToken.initializeV2("Not Fuse Dollar", { from: fiatTokenOwner }),
       "contract is already initialized"
     );
   });

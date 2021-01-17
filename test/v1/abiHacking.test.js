@@ -21,12 +21,12 @@ const {
 } = require("./helpers/abi");
 
 // Encodes methodName, 32 byte string of 0, and address.
-function mockStringAddressEncode(methodName, address) {
+function mockStringAddressEncode (methodName, address) {
   const version = encodeUint(32) + encodeUint(0); // encode 32 byte string of 0's
   return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-function runTests(newToken, _accounts) {
+function runTests (newToken, _accounts) {
   let proxy, token;
 
   beforeEach(async () => {

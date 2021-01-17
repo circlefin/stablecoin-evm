@@ -50,7 +50,7 @@ contract("V2Upgrader", (accounts) => {
       );
       expect(await upgrader.helper()).not.to.be.empty;
       expect(await upgrader.newProxyAdmin()).to.equal(originalProxyAdmin);
-      expect(await upgrader.newName()).to.equal("USD Coin");
+      expect(await upgrader.newName()).to.equal("Fuse Dollar");
 
       // Transfer 0.2 USDC to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
@@ -72,7 +72,7 @@ contract("V2Upgrader", (accounts) => {
       );
 
       // Test that things work as expected
-      expect(await proxyAsV2.name()).to.equal("USD Coin");
+      expect(await proxyAsV2.name()).to.equal("Fuse Dollar");
       expect((await proxyAsV2.balanceOf(upgrader.address)).toNumber()).to.equal(
         0
       );
@@ -158,7 +158,7 @@ contract("V2Upgrader", (accounts) => {
         fiatTokenProxy.address,
         fiatTokenV1_1.address, // provide V1.1 implementation instead of V2
         originalProxyAdmin,
-        "USD Coin",
+        "Fuse Dollar",
         { from: upgraderOwner }
       );
 
@@ -193,7 +193,7 @@ contract("V2Upgrader", (accounts) => {
         fiatTokenProxy.address,
         v2Implementation.address,
         originalProxyAdmin,
-        "USD Coin",
+        "Fuse Dollar",
         { from: upgraderOwner }
       );
 
