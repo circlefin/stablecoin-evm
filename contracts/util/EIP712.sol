@@ -49,8 +49,8 @@ library EIP712 {
         return
             keccak256(
                 abi.encode(
+                    // keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
                     0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f,
-                    // = keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
                     keccak256(bytes(name)),
                     keccak256(bytes(version)),
                     chainId,

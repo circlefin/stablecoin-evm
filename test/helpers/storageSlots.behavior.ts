@@ -13,7 +13,7 @@ export function usesOriginalStorageSlotPositions<
   accounts,
 }: {
   Contract: Truffle.Contract<T>;
-  version: 1 | 1.1 | 2;
+  version: 1 | 1.1 | 2 | 2.1;
   accounts: Truffle.Accounts;
 }): void {
   describe("uses original storage slot positions", () => {

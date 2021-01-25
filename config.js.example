@@ -15,4 +15,6 @@ module.exports = {
   BLACKLISTER_ADDRESS: "",
   // FiatTokenProxy contract - override the contract address used in migrations
   PROXY_CONTRACT_ADDRESS: "",
+  // LostAndFound - tokens that were locked in the contract are sent to this
+  LOST_AND_FOUND_ADDRESS: "",
 };

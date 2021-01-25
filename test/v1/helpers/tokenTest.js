@@ -31,6 +31,8 @@ const arbitraryAccount2 = "0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC"; // accou
 const masterMinterAccount = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // accounts[6]
 const minterAccount = "0x28a8746e75304c0780E011BEd21C72cD78cd535E"; // accounts[7]
 const pauserAccount = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"; // accounts[8]
+const rescuerAccount = "0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e"; // accounts[9]
+const lostAndFoundAccount = "0x610Bb1573d1046FCb8A70Bbbd395754cD57C2b60"; // accounts[10]
 
 const proxyOwnerAccount = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598"; // accounts[14]
 const upgraderAccount = proxyOwnerAccount;
@@ -50,7 +52,11 @@ const masterMinterAccountPrivateKey =
 const minterAccountPrivateKey =
   "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"; // accounts[7]
 const pauserAccountPrivateKey =
-  "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9]
+  "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[8]
+const rescuerAccountPrivateKey =
+  "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
+const lostAndFoundAccountPrivateKey =
+  "77c5495fbb039eed474fc940f29955ed0531693cc9212911efd35dff0373153f"; // accounts[10]
 const proxyOwnerAccountPrivateKey =
   "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46"; // accounts[14]
 const upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
@@ -1024,6 +1030,8 @@ module.exports = {
   masterMinterAccount,
   minterAccount,
   pauserAccount,
+  rescuerAccount,
+  lostAndFoundAccount,
   blacklisterAccount,
   proxyOwnerAccount,
   proxyOwnerAccountPrivateKey,
@@ -1038,4 +1046,6 @@ module.exports = {
   minterAccountPrivateKey,
   pauserAccountPrivateKey,
   deployerAccountPrivateKey,
+  rescuerAccountPrivateKey,
+  lostAndFoundAccountPrivateKey,
 };

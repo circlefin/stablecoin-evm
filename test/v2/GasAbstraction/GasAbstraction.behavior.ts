@@ -1,12 +1,10 @@
 import { FiatTokenV2Instance } from "../../../@types/generated";
 import { TestParams } from "./helpers";
 import { testTransferWithAuthorization } from "./testTransferWithAuthorization";
-import { testApproveWithAuthorization } from "./testApproveWithAuthorization";
-import { testIncreaseAllowanceWithAuthorization } from "./testIncreaseAllowanceWithAuthorization";
-import { testDecreaseAllowanceWithAuthorization } from "./testDecreaseAllowanceWithAuthorization";
 import { testCancelAuthorization } from "./testCancelAuthorization";
 import { testPermit } from "./testPermit";
 import { testTransferWithMultipleAuthorizations } from "./testTransferWithMultipleAuthorizations";
+import { testReceiveWithAuthorization } from "./testReceiveWithAuthorization";
 
 export function hasGasAbstraction(
   getFiatToken: () => FiatTokenV2Instance,
@@ -22,12 +20,15 @@ export function hasGasAbstraction(
       accounts,
     };
 
-    testTransferWithAuthorization(testParams);
-    testApproveWithAuthorization(testParams);
-    testIncreaseAllowanceWithAuthorization(testParams);
-    testDecreaseAllowanceWithAuthorization(testParams);
-    testCancelAuthorization(testParams);
-    testPermit(testParams);
-    testTransferWithMultipleAuthorizations(testParams);
+    describe("EIP-3009", () => {
+      testTransferWithAuthorization(testParams);
+      testReceiveWithAuthorization(testParams);
+      testCancelAuthorization(testParams);
+      testTransferWithMultipleAuthorizations(testParams);
+    });
+
+    describe("EIP-2612", () => {
+      testPermit(testParams);
+    });
   });
 }

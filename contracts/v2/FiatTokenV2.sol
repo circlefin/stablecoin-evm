@@ -28,31 +28,26 @@ import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
 import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712 } from "../util/EIP712.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
-import { GasAbstraction } from "./GasAbstraction.sol";
-import { Permit } from "./Permit.sol";
+import { EIP3009 } from "./EIP3009.sol";
+import { EIP2612 } from "./EIP2612.sol";
 
 /**
  * @title FiatToken V2
  * @notice ERC20 Token backed by fiat reserves, version 2
  */
-contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
-    bool internal _initializedV2;
+contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
+    uint8 internal _initializedVersion;
 
     /**
-     * @notice Initialize V2 contract
-     * @dev When upgrading to V2, this function must also be invoked by using
-     * upgradeToAndCall instead of upgradeTo, or by calling both from a contract
-     * in a single transaction.
+     * @notice Initialize v2
      * @param newName   New token name
      */
     function initializeV2(string calldata newName) external {
-        require(
-            !_initializedV2,
-            "FiatTokenV2: contract is already initialized"
-        );
+        // solhint-disable-next-line reason-string
+        require(initialized && _initializedVersion == 0);
         name = newName;
         DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
-        _initializedV2 = true;
+        _initializedVersion = 1;
     }
 
     /**
@@ -126,10 +121,12 @@ contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
     }
 
     /**
-     * @notice Update allowance with a signed authorization
-     * @param owner         Token owner's address (Authorizer)
-     * @param spender       Spender's address
-     * @param value         Amount of allowance
+     * @notice Receive a transfer with a signed authorization from the payer
+     * @dev This has an additional check to ensure that the payee's address
+     * matches the caller of this function to prevent front-running attacks.
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
      * @param validAfter    The time after which this is valid (unix time)
      * @param validBefore   The time before which this is valid (unix time)
      * @param nonce         Unique nonce
@@ -137,9 +134,9 @@ contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
      * @param r             r of the signature
      * @param s             s of the signature
      */
-    function approveWithAuthorization(
-        address owner,
-        address spender,
+    function receiveWithAuthorization(
+        address from,
+        address to,
         uint256 value,
         uint256 validAfter,
         uint256 validBefore,
@@ -147,83 +144,11 @@ contract FiatTokenV2 is FiatTokenV1_1, GasAbstraction, Permit {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
-        _approveWithAuthorization(
-            owner,
-            spender,
+    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+        _receiveWithAuthorization(
+            from,
+            to,
             value,
-            validAfter,
-            validBefore,
-            nonce,
-            v,
-            r,
-            s
-        );
-    }
-
-    /**
-     * @notice Increase allowance with a signed authorization
-     * @param owner         Token owner's address (Authorizer)
-     * @param spender       Spender's address
-     * @param increment     Amount of increase in allowance
-     * @param validAfter    The time after which this is valid (unix time)
-     * @param validBefore   The time before which this is valid (unix time)
-     * @param nonce         Unique nonce
-     * @param v             v of the signature
-     * @param r             r of the signature
-     * @param s             s of the signature
-     */
-    function increaseAllowanceWithAuthorization(
-        address owner,
-        address spender,
-        uint256 increment,
-        uint256 validAfter,
-        uint256 validBefore,
-        bytes32 nonce,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
-        _increaseAllowanceWithAuthorization(
-            owner,
-            spender,
-            increment,
-            validAfter,
-            validBefore,
-            nonce,
-            v,
-            r,
-            s
-        );
-    }
-
-    /**
-     * @notice Decrease allowance with a signed authorization
-     * @param owner         Token owner's address (Authorizer)
-     * @param spender       Spender's address
-     * @param decrement     Amount of decrease in allowance
-     * @param validAfter    The time after which this is valid (unix time)
-     * @param validBefore   The time before which this is valid (unix time)
-     * @param nonce         Unique nonce
-     * @param v             v of the signature
-     * @param r             r of the signature
-     * @param s             s of the signature
-     */
-    function decreaseAllowanceWithAuthorization(
-        address owner,
-        address spender,
-        uint256 decrement,
-        uint256 validAfter,
-        uint256 validBefore,
-        bytes32 nonce,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
-        _decreaseAllowanceWithAuthorization(
-            owner,
-            spender,
-            decrement,
             validAfter,
             validBefore,
             nonce,
