@@ -74,4 +74,10 @@ contract("FiatTokenV2_1", (accounts) => {
       );
     });
   });
+
+  describe("version", () => {
+    it("returns the version string", async () => {
+      expect(await fiatToken.version()).to.equal("2");
+    });
+  });
 });
