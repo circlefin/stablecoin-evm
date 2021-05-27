@@ -71,3 +71,26 @@ Pending Tests:
       reporter: 'verification/verification_reporter.js',
   Then, uncomment the line above it.
       //reporter: 'Spec',
+
+- To ENABLE the spreadsheet verification tool FOR THE FIRST TIME.
+
+  1) Ensure your browser is signed in to your Google account and visit
+  https://developers.google.com/sheets/api/quickstart/nodejs .
+
+  2) Press the blue 'ENABLE THE GOOGLE SHEETS API' button.
+
+  3) Enter a project name (i.e. 'spreadsheet-verification') and product name
+  (i.e 'centre-tokens') and download the credentials.json file.
+
+  4) Move your credentials.json file into the verification/GoogleSheets folder.
+
+  5) Run 'npm run truffle-test'. You should be prompted to visit a URL and enter a code
+  that you find there into your terminal. This will create a token.json file
+  inside the GoogleSheets folder. Note, if a token.json file already exists in
+  this folder, you will encounter an error.
+
+  From there, you should be good to go. This process only needs to be completed
+  the first time you use the tool.
+
+  Note: Ensure that credentials.json and token.json are included in .gitignore
+  before committing.

@@ -1,15 +1,22 @@
+.DS_Store
 build/
 node_modules/
 coverage/
 coverage.json
 package-lock.json
 .idea/
-#local codebuild results
 artifacts/
-.DS_Store
 contracts/.DS_Store
 token.json
 credentials.json
 echidna/
 validate/apikey.infura
 ganache-blockchain-log.txt
+<<<<<<< HEAD
+=======
+.coverage_artifacts
+.coverage_contracts
+yarn-error.log
+@types/generated/
+config.js
+>>>>>>> b5aba6ce7b5a867fda355a54a8449818b313bf1a

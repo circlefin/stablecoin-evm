@@ -1,0 +1,12 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "compiler-version": ["error", "^0.6.0"],
+    "contract-name-camelcase": "off",
+    "no-empty-blocks": "off",
+    "no-inline-assembly": "off",
+    "not-rely-on-time": "off",
+    "reason-string": ["warn", { "maxLength": 64 }],
+    "var-name-mixedcase": "off"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/node_modules/": true
+  },
+  "solidity.packageDefaultDependenciesContractsDirectory": "",
+  "solidity.packageDefaultDependenciesDirectory": "node_modules",
+  "solidity.formatter": "none",
+  "files.trimTrailingWhitespace": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.formatOnSave": true
+  },
+  "[markdown]": {
+    "editor.formatOnSave": true
+  },
+  "[solidity]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true
+  }
+}

@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+coverage/
+coverage.json
+@types/generated/
+build/
+.coverage_contracts/
+.coverage_artifacts/

@@ -1,8 +1,10 @@
 module.exports = {
+  providerOptions: {
     port: 8555,
-    testrpcOptions: '-p 8555 -d --accounts 15',
-    skipFiles: [
-        'test/'
-    ],
-    copyPackages: ['openzeppelin-solidity', 'zos-lib']
+    seed: "TestRPC is awesome!",
+    total_accounts: 15,
+    default_balance_ether: 1000000,
+  },
+  skipFiles: ["test/", "v2/upgrader/"],
+  copyPackages: ["openzeppelin-solidity", "zos-lib"],
 };

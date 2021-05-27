@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 *.sol linguist-language=Solidity
+=======
+@types/generated/**/* linguist-generated=true
+
+>>>>>>> b5aba6ce7b5a867fda355a54a8449818b313bf1a
