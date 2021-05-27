@@ -1,20 +1,19 @@
-<<<<<<< HEAD
-const util = require('util');
-const mocha = require('mocha');
+const util = require("util");
+const mocha = require("mocha");
 const spec_reporter = mocha.reporters.Spec;
 const base_reporter = mocha.reporters.Base;
 const color = base_reporter.color;
 const inherits = mocha.utils.inherits;
-const sheets = require('./spreadsheet_parser');
-const _ = require('lodash');
-const jsdiff = require('diff');
-const colors = require('colors');
+const sheets = require("./spreadsheet_parser");
+const _ = require("lodash");
+const jsdiff = require("diff");
+const colors = require("colors");
 
 // Global variables for text output.
-const red_x = color('bright fail', base_reporter.symbols.err);
-const green_ok = color('green', base_reporter.symbols.ok);
-const red_ok = color('bright fail', base_reporter.symbols.ok);
-const indent = '    ';
+const red_x = color("bright fail", base_reporter.symbols.err);
+const green_ok = color("green", base_reporter.symbols.ok);
+const red_ok = color("bright fail", base_reporter.symbols.ok);
+const indent = "    ";
 const mocha = require("mocha");
 const specReporter = mocha.reporters.Spec;
 const baseReporter = mocha.reporters.Base;
@@ -226,6 +225,7 @@ function verificationReporter(runner) {
             )
         );
       }
+    }
   });
 
   // Runs at the end of test suite execution. Prints verification summary.
@@ -273,23 +273,23 @@ function verificationReporter(runner) {
     }
 
     // Report missing unit tests for files that were executed
-    for(var testSuite in missingUnitTests){
-        if(! _.has(executedTestSuites, testSuite)) {
-            console.log(color('fail', 'Did not run: ' + testSuite));
-            delete missingUnitTests[testSuite];
-        }
+    for (var testSuite in missingUnitTests) {
+      if (!_.has(executedTestSuites, testSuite)) {
+        console.log(color("fail", "Did not run: " + testSuite));
+        delete missingUnitTests[testSuite];
+      }
     }
 
     // report missing Completeness unit tests ONLY if every test file ran
     var onlyCompletenessTestsAreMissing = true;
-    for(var testSuite in missingUnitTests){
-        if(! testSuite.match(/Completeness/))
-            onlyCompletenessTestsAreMissing = false;
+    for (var testSuite in missingUnitTests) {
+      if (!testSuite.match(/Completeness/))
+        onlyCompletenessTestsAreMissing = false;
     }
-    if(onlyCompletenessTestsAreMissing){
-        for(var testSuite in missingUnitTests){
-           console.log(color('fail', 'Did not run: ' + testSuite));
-        }
+    if (onlyCompletenessTestsAreMissing) {
+      for (var testSuite in missingUnitTests) {
+        console.log(color("fail", "Did not run: " + testSuite));
+      }
     }
 
     // If all tests are 'crossed-off', print success.

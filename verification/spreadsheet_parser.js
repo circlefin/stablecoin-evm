@@ -1,12 +1,12 @@
-var fs = require('fs');
-var parse = require('csv-parse/lib/sync');
+var fs = require("fs");
+var parse = require("csv-parse/lib/sync");
 // NOTE: SPREADSHEETS_DIR must be relative to truffle.js
-var SPREADSHEETS_DIR = './verification/Spreadsheets'
+var SPREADSHEETS_DIR = "./verification/Spreadsheets";
 
-function UnitTest(code, description, pending){
-    this.code = code;
-    this.description = description;
-    this.pending = pending;
+function UnitTest(code, description, pending) {
+  this.code = code;
+  this.description = description;
+  this.pending = pending;
 }
 
 /*
@@ -26,118 +26,121 @@ function UnitTest(code, description, pending){
 * TODO: handle errors, null objects
 */
 function load() {
-    var unitTestDirectory = {};
+  var unitTestDirectory = {};
 
-    // get names of all files in SPREADSHEETS_DIR
-    var files = fs.readdirSync(SPREADSHEETS_DIR, (err, data) => {
-        if(err){
-            console.log("error reading " + SPREADSHEETS_DIR + " " + err);
-            return null;
+  // get names of all files in SPREADSHEETS_DIR
+  var files = fs.readdirSync(SPREADSHEETS_DIR, (err, data) => {
+    if (err) {
+      console.log("error reading " + SPREADSHEETS_DIR + " " + err);
+      return null;
+    }
+    return data;
+  });
+  // process each file into a unitTestSet, then add the
+  // unitTestSet to unitTestDirectory
+  files.forEach((file) => {
+    var csvFileContents = fs.readFileSync(
+      SPREADSHEETS_DIR + "/" + file,
+      "utf8"
+    );
+    if (csvFileContents != null) {
+      var unitTestSet = {};
+      var spreadsheet = parse(csvFileContents, { columns: true });
+      spreadsheet.forEach((row) => {
+        if (file.match("Completeness")) {
+          var unitTestArray = parseCompletenessRow(row);
+          unitTestArray.forEach((unitTest) => {
+            unitTestSet[unitTest.code] = unitTest;
+          });
+        } else {
+          var unitTest = parseRow(row);
+          unitTestSet[unitTest.code] = unitTest;
         }
-        return data;
-    });
-    // process each file into a unitTestSet, then add the
-    // unitTestSet to unitTestDirectory
-    files.forEach(file => {
-        var csvFileContents = fs.readFileSync(SPREADSHEETS_DIR + "/" + file, "utf8");
-        if(csvFileContents != null) {
-            var unitTestSet = {};
-            var spreadsheet = parse(csvFileContents, {columns: true});
-            spreadsheet.forEach(row => {
-                if(file.match("Completeness")){
-                    var unitTestArray = parseCompletenessRow(row);
-                    unitTestArray.forEach(unitTest => {unitTestSet[unitTest.code] = unitTest});
-                } else {
-                    var unitTest = parseRow(row);
-                    unitTestSet[unitTest.code] = unitTest;
-                }
-            });
-            var unittestfilename = getTestSuiteTitle(file);
-            unitTestDirectory[unittestfilename] = unitTestSet;
-        }
-    });
+      });
+      var unittestfilename = getTestSuiteTitle(file);
+      unitTestDirectory[unittestfilename] = unitTestSet;
+    }
+  });
 
-    // return array of unitTestDirectory objects
-    return unitTestDirectory;
+  // return array of unitTestDirectory objects
+  return unitTestDirectory;
 }
 
 //
 // spreadsheet: UnitTestDirectory
 function isPending(spreadsheet, filename, code) {
-    if((filename in spreadsheet ) && (code in spreadsheet[filename]))
-    {
-        return spreadsheet[filename][code].pending;
-    }
-    return false;
+  if (filename in spreadsheet && code in spreadsheet[filename]) {
+    return spreadsheet[filename][code].pending;
+  }
+  return false;
 }
 
 // Reads a row and tries to find one or more test codes inside the row
 // Returns an array of UnitTest objects
-function parseCompletenessRow(row){
-    var unitTests = [];
-    var index =0;
-    for(var columnName in row) {
-        var rowValues = row[columnName].split(",");
-        for(var potentialCodeIndex in rowValues) {
-            var codes = rowValues[potentialCodeIndex].match(/([a-z]{2,4})([0-9]+)/g);
-            for(var codeIndex in codes) {
-                unitTests[index] = new UnitTest(codes[codeIndex], "", false);
-                ++index;
-            }
-        }
+function parseCompletenessRow(row) {
+  var unitTests = [];
+  var index = 0;
+  for (var columnName in row) {
+    var rowValues = row[columnName].split(",");
+    for (var potentialCodeIndex in rowValues) {
+      var codes = rowValues[potentialCodeIndex].match(/([a-z]{2,4})([0-9]+)/g);
+      for (var codeIndex in codes) {
+        unitTests[index] = new UnitTest(codes[codeIndex], "", false);
+        ++index;
+      }
     }
-    return unitTests;
+  }
+  return unitTests;
 }
 
 // Transforms a row in spreadsheet into a UnitTest object
 // row: a literal object. One of the keys must be 'code/Code' and another 'description/Description'
 // Returns a UnitTest object or null if cannot find appropriate keys.
 function parseRow(row) {
-    var test_code = "";
-    var testCodeKey = "";
-    var pending = false;
-    var description = "";
-    for(var columnName in row) {
-        if(columnName.trim() == 'code' || columnName.trim() == 'Code') {
-            test_code = row[columnName].trim();
-            testCodeKey = columnName.trim();
-            pending = test_code.match(/ -p/);
-            if (pending) {
-                test_code = test_code.replace(pending[0], '');
-                pending = true;
-            } else {
-                pending = false;
-            }
-        }
+  var test_code = "";
+  var testCodeKey = "";
+  var pending = false;
+  var description = "";
+  for (var columnName in row) {
+    if (columnName.trim() == "code" || columnName.trim() == "Code") {
+      test_code = row[columnName].trim();
+      testCodeKey = columnName.trim();
+      pending = test_code.match(/ -p/);
+      if (pending) {
+        test_code = test_code.replace(pending[0], "");
+        pending = true;
+      } else {
+        pending = false;
+      }
     }
-    var descriptionKey = getDescriptionKey(row, testCodeKey);
-    description = row[descriptionKey].trim();
-    if(test_code == '' || description == '') return null;
-    return new UnitTest(test_code, description, pending);
+  }
+  var descriptionKey = getDescriptionKey(row, testCodeKey);
+  description = row[descriptionKey].trim();
+  if (test_code == "" || description == "") return null;
+  return new UnitTest(test_code, description, pending);
 }
 
 function getDescriptionKey(row, testCodeKey) {
-    // get the index of the testCodeKey
-    var testCodeKeyIndex = 0;
-    for(var i=0; i<Object.keys(row).length; ++i) {
-        if(Object.keys(row)[i] == testCodeKey) {
-            return Object.keys(row)[i+1];
-         }
+  // get the index of the testCodeKey
+  var testCodeKeyIndex = 0;
+  for (var i = 0; i < Object.keys(row).length; ++i) {
+    if (Object.keys(row)[i] == testCodeKey) {
+      return Object.keys(row)[i + 1];
     }
-    // return last column
-    return Object.keys(row)[i];;
+  }
+  // return last column
+  return Object.keys(row)[i];
 }
 
 // Returns the raw name of the unit test suite associated with this csv file
 // csvFileName: filename in the format `/path/to/file/spreadsheetname - unittestfilename.csv`
 // returns 'spreadsheetname - unittestfilename'
 function getTestSuiteTitle(csvFileName) {
-    return csvFileName.replace(/\.csv/, "" );
+  return csvFileName.replace(/\.csv/, "");
 }
-
 
 module.exports = {
   load: load,
   UnitTest: UnitTest,
   isPending: isPending,
-}
+};
