@@ -3,6 +3,7 @@ const abi = require("ethereumjs-abi");
 const _ = require("lodash");
 const BN = require("bn.js");
 const Q = require("q");
+const BigNumber = require("bignumber.js");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
@@ -56,7 +57,6 @@ const pauserAccountPrivateKey =
 const proxyOwnerAccountPrivateKey =
   "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46"; // accounts[14]
 const upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
-// var blacklisterAccountPrivateKey = "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
 
 const adminSlot =
   "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
@@ -65,6 +65,25 @@ const implSlot =
 
 // set to true to enable verbose logging in the tests
 const debugLogging = false;
+
+// Returns a new BN object
+function newBigNumber(value) {
+  const hex = new BigNumber(value).toString(16);
+  return new BN(hex, 16);
+}
+
+async function expectError(contractPromise, errorMsg) {
+  try {
+    await contractPromise;
+    assert.fail("Expected error " + errorMsg + ", but no error received");
+  } catch (error) {
+    const correctErrorMsgReceived = error.message.includes(errorMsg);
+    assert(
+      correctErrorMsgReceived,
+      `Expected ${errorMsg}, got ${error.message} instead`
+    );
+  }
+}
 
 function calculateFeeAmount(amount, fee, feeBase) {
   return Math.floor((fee / feeBase) * amount);
@@ -971,6 +990,20 @@ async function getInitializedV1(token) {
   return initialized;
 }
 
+// _contracts is an array of exactly two values: a FiatTokenV1 and a MintController
+// _customVars is an array of exactly two values: the expected state of the FiatTokenV1
+// and the expected state of the MintController
+async function checkMINTp0(_contracts, _customVars) {
+  assert.equal(_contracts.length, 2);
+  assert.equal(_customVars.length, 2);
+
+  // the first is a FiatTokenV1
+  await checkVariables([_contracts[0]], [_customVars[0]]);
+
+  // the second is a MintController
+  await _customVars[1].checkState(_contracts[1]);
+}
+
 module.exports = {
   FiatTokenV1,
   FiatTokenProxy,
@@ -1004,6 +1037,7 @@ module.exports = {
   checkAdminChangedEvent,
   buildExpectedState,
   checkVariables,
+  checkMINTp0,
   setMinter,
   mint,
   burn,
@@ -1020,6 +1054,7 @@ module.exports = {
   upgradeTo,
   expectRevert,
   expectJump,
+  expectError,
   encodeCall,
   getInitializedV1,
   nullAccount,
@@ -1044,4 +1079,5 @@ module.exports = {
   minterAccountPrivateKey,
   pauserAccountPrivateKey,
   deployerAccountPrivateKey,
+  newBigNumber,
 };

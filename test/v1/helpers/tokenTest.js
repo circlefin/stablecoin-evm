@@ -918,18 +918,6 @@ async function expectRevert(contractPromise) {
   assert.fail("Expected error of type revert, but no error was received");
 }
 
-async function expectJump(contractPromise) {
-  try {
-    await contractPromise;
-    assert.fail("Expected invalid opcode not received");
-  } catch (error) {
-    assert.isTrue(
-      error.message.includes("invalid opcode"),
-      `Expected "invalid opcode", got ${error} instead`
-    );
-  }
-}
-
 function encodeCall(name, args, values) {
   const methodId = abi.methodID(name, args).toString("hex");
   const params = abi.rawEncode(args, values).toString("hex");
@@ -1019,7 +1007,6 @@ module.exports = {
   customInitializeTokenWithProxy,
   upgradeTo,
   expectRevert,
-  expectJump,
   encodeCall,
   getInitializedV1,
   nullAccount,
