@@ -1,32 +1,5 @@
 language: node_js
 node_js:
-<<<<<<< HEAD
-  - 8
-
-before_install:
-  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.9.2
-  - export PATH="$HOME/.yarn/bin:$PATH"
-
-
-install:
-  - npm install -g truffle@5.0.0
-  - yarn install --frozen-lockfile
-
-env:
-  - TEST_SUITE=test/assert/*
-  - TEST_SUITE=test/basic/*
-  - TEST_SUITE=test/extended/*
-  - TEST_SUITE=test/minting/*
-  - TEST_SUITE=test/minting2/*
-  - TEST_SUITE=test/minting3/*
-  - TEST_SUITE=test/misc/*
-  - TEST_SUITE=test/proxy/*
-
-script:
-  - "truffle compile && npm run truffle-test $TEST_SUITE"
-
-
-=======
   - 12
 
 before_install:
@@ -39,4 +12,3 @@ install:
 script:
   - yarn compile && yarn typechain
   - yarn ganache & sleep 5 && yarn test
->>>>>>> b5aba6ce7b5a867fda355a54a8449818b313bf1a

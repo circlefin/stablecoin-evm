@@ -1,20 +1,12 @@
 # centre-tokens
 
-<<<<<<< HEAD Fiat tokens on the [CENTRE](https://centre.io) network. =======
-
-> > > > > > > b5aba6ce7b5a867fda355a54a8449818b313bf1a
-
 Fiat tokens on the [CENTRE](https://centre.io) network.
 
 ## Setup
 
-<<<<<<< HEAD install yarn: `npm install -g yarn`
-
-install project npm dependencies: `yarn install` ======= Requirements:
-
+Requirements:
 - Node >= v12
 - Yarn
-  > > > > > > > b5aba6ce7b5a867fda355a54a8449818b313bf1a
 
 ```
 $ git clone git@github.com:centrehq/centre-tokens.git
@@ -31,21 +23,6 @@ To generate type definitions:
 ```
 $ yarn compile && yarn typechain
 ```
-
-<<<<<<< HEAD
-
-# Contracts
-
-The implementation uses 2 separate contracts - a proxy contract
-(`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`). This
-allows upgrading the contract, as a new implementation contact can be deployed
-and the Proxy updated to point to it.
-
-## FiatToken
-
-The FiatToken offers a number of capabilities, which briefly are described
-below. There are more [detailed design docs](./doc/tokendesign.md) in the `doc`
-folder. =======
 
 ## Linting and Formatting
 
@@ -102,20 +79,18 @@ accidental check-ins, `config.js` is in `.gitignore`.
 Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 `ropsten`.
 
-## Contracts
+# Contracts
 
 The implementation uses 2 separate contracts - a proxy contract
-(`FiatTokenProxy.sol`) and an implementation contract (`FiatToken.sol`). This
+(`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`). This
 allows upgrading the contract, as a new implementation contact can be deployed
 and the Proxy updated to point to it.
 
-### FiatToken
+## FiatToken
 
 The FiatToken offers a number of capabilities, which briefly are described
 below. There are more [detailed design docs](./doc/tokendesign.md) in the `doc`
-folder.
-
-> > > > > > > b5aba6ce7b5a867fda355a54a8449818b313bf1a
+folder. =======
 
 ### ERC20 compatible
 
@@ -150,15 +125,6 @@ decreases. When it gets too low they will need the allowance increased again by
 the `masterMinter`.
 
 ### Ownable
-
-<<<<<<< HEAD The contract has an Owner, who can change the `owner`, `pauser`,
-`blacklister`, or `masterMinter` addresses. The `owner` can not change the
-`proxyOwner` address.
-
-=======
-
 The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`,
 or `masterMinter` addresses. The `owner` can not change the `proxyOwner`
 address.
-
-> > > > > > > b5aba6ce7b5a867fda355a54a8449818b313bf1a
