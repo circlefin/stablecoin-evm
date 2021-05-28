@@ -83,7 +83,8 @@ Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 ## Contracts
 
 The implementation uses 2 separate contracts - a proxy contract
-(`FiatTokenProxy.sol`) and an implementation contract(`FiatToken.sol`). This
+(`FiatTokenProxy.sol`) and an implementation contract  (`FiatToken.sol`). This
+(`FiatTokenProxy.sol`) and an implementation contract (`FiatToken.sol`). This
 allows upgrading the contract, as a new implementation contact can be deployed
 and the Proxy updated to point to it.
 

@@ -22,13 +22,13 @@ module.exports = function (deployer, network) {
   }
   console.log("deploying MasterMinter for fiat token at " + fiatTokenAddress);
   deployer
-      .deploy(MasterMinter, fiatTokenAddress)
-      .then(function (mm) {
-        console.log("master minter deployed at " + mm.address);
-        console.log("reassigning owner to " + masterMinterAddress);
-        return mm.transferOwnership(masterMinterAddress);
-      })
-      .then(function () {
-        console.log("All done.");
-      });
+    .deploy(MasterMinter, fiatTokenAddress)
+    .then(function (mm) {
+      console.log("master minter deployed at " + mm.address);
+      console.log("reassigning owner to " + masterMinterAddress);
+      return mm.transferOwnership(masterMinterAddress);
+    })
+    .then(function () {
+      console.log("All done.");
+    });
 };
