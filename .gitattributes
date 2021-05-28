@@ -1,2 +1,1 @@
-*.sol linguist-language=Solidity
 @types/generated/**/* linguist-generated=true

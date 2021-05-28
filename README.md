@@ -5,6 +5,7 @@ Fiat tokens on the [CENTRE](https://centre.io) network.
 ## Setup
 
 Requirements:
+
 - Node >= v12
 - Yarn
 
@@ -79,18 +80,18 @@ accidental check-ins, `config.js` is in `.gitignore`.
 Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 `ropsten`.
 
-# Contracts
+## Contracts
 
 The implementation uses 2 separate contracts - a proxy contract
-(`FiatTokenProxy.sol`)and an implementation contract(`FiatToken.sol`). This
+(`FiatTokenProxy.sol`) and an implementation contract(`FiatToken.sol`). This
 allows upgrading the contract, as a new implementation contact can be deployed
 and the Proxy updated to point to it.
 
-## FiatToken
+### FiatToken
 
 The FiatToken offers a number of capabilities, which briefly are described
 below. There are more [detailed design docs](./doc/tokendesign.md) in the `doc`
-folder. =======
+folder.
 
 ### ERC20 compatible
 
@@ -125,6 +126,7 @@ decreases. When it gets too low they will need the allowance increased again by
 the `masterMinter`.
 
 ### Ownable
+
 The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`,
 or `masterMinter` addresses. The `owner` can not change the `proxyOwner`
 address.
