@@ -1,13 +1,14 @@
 // set to true to enable verbose logging in the tests
-var debugLogging = false;
-var assertDiff = require("assert-diff");
+const debugLogging = false;
+const assertDiff = require("assert-diff");
 assertDiff.options.strict = true;
 
-var Q = require("q");
-var clone = require("clone");
+const Q = require("q");
+const clone = require("clone");
+const util = require("util");
 
 // named list of all accounts
-var Accounts = {
+const Accounts = {
   deployerAccount: "0x90F8BF6A479F320EAD074411A4B0E7944EA8C9C1", // accounts[0]
   arbitraryAccount: "0xFFCF8FDEE72AC11B5C542428B35EEF5769C409F0", // accounts[1]
   tokenOwnerAccount: "0xE11BA2B4D45EAED5996CD0823791E0C93114882D", // Accounts.arbitraryAccount
@@ -22,7 +23,7 @@ var Accounts = {
 };
 
 // named list of known private keys
-var AccountPrivateKeys = {
+const AccountPrivateKeys = {
   deployerPrivateKey:
     "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d", // accounts[0]
   arbitraryPrivateKey:
@@ -56,38 +57,19 @@ var AccountPrivateKeys = {
 };
 
 function addressEquals(address1, address2) {
-  if (address1.toUpperCase() == address2.toUpperCase()) {
+  if (address1.toUpperCase() === address2.toUpperCase()) {
     return true;
   } else {
     assert.isFalse("expect " + address1 + " to equal " + address2);
   }
 }
 
-function addressNotEquals(address1, address2) {
-  if (address1.toUpperCase() != address2.toUpperCase()) {
-    return true;
-  } else {
-    assert.isFalse("expect " + address1 + " to not equal " + address2);
-  }
-}
-
 // Returns an object with all named account values set to the default value
 // e.g sets {owner: 0, minter: 0,...}
 function setAccountDefault(accounts, defaultValue) {
-  var result = {};
-  for (var accountName in accounts) {
+  const result = {};
+  for (const accountName in accounts) {
     result[accountName] = defaultValue;
-  }
-  return result;
-}
-
-// Returns an object with all named account values set to
-// an object containing all named account values set to default
-// e.g. sets {owner: setAccountDefault(accounts, 0), minter: setAccountDefault(accounts, 0),...}
-function recursiveSetAccountDefault(accounts, value) {
-  var result = {};
-  for (var account in accounts) {
-    result[account] = setAccountDefault(accounts, value);
   }
   return result;
 }
@@ -99,17 +81,17 @@ function buildExpectedPartialState(
   ignoreExtraCustomVars
 ) {
   // for each item in customVars, set the item in expectedState
-  var expectedState = clone(emptyState);
+  const expectedState = clone(emptyState);
 
-  for (var variableName in customState) {
+  for (const variableName in customState) {
     // do I ignore extra values
-    if (expectedState.hasOwnProperty(variableName)) {
-      var variableValue = customState[variableName];
+    if (Object.prototype.hasOwnProperty.call(expectedState, variableName)) {
+      const variableValue = customState[variableName];
       if (isLiteral(variableValue)) {
         expectedState[variableName] = variableValue;
       } else {
         // assume variableValue is a mapping evaluated on 1 or more accounts
-        for (var accountName in variableValue) {
+        for (const accountName in variableValue) {
           expectedState[variableName][accountName] = variableValue[accountName];
         }
       }
@@ -139,13 +121,13 @@ async function checkState(
   ignoreExtraCustomVars
 ) {
   // Iterate over array of tokens.
-  var numTokens = _tokens.length;
+  const numTokens = _tokens.length;
   assert.equal(numTokens, _customVars.length);
-  var n;
+  let n;
   for (n = 0; n < numTokens; n++) {
-    var token = _tokens[n];
-    var customVars = _customVars[n];
-    let expectedState = buildExpectedPartialState(
+    const token = _tokens[n];
+    const customVars = _customVars[n];
+    const expectedState = buildExpectedPartialState(
       emptyState,
       customVars,
       ignoreExtraCustomVars
@@ -157,7 +139,7 @@ async function checkState(
       );
     }
 
-    let actualState = await getActualState(token, accounts);
+    const actualState = await getActualState(token, accounts);
     assertDiff.deepEqual(
       actualState,
       expectedState,
@@ -173,15 +155,15 @@ async function checkState(
 //        E.g. {owner: value1, minter: value2}
 async function getAccountState(accountQuery, accounts) {
   // create an array of promises
-  var promises = [];
-  for (var account in accounts) {
-    var promiseQuery = accountQuery(Accounts[account]);
+  const promises = [];
+  for (const account in accounts) {
+    const promiseQuery = accountQuery(Accounts[account]);
     promises.push(promiseQuery);
   }
-  var results = await Q.allSettled(promises);
-  var state = {};
-  var u = 0;
-  for (var account in accounts) {
+  const results = await Q.allSettled(promises);
+  const state = {};
+  let u = 0;
+  for (const account in accounts) {
     state[account] = results[u].value;
     ++u;
   }
@@ -189,7 +171,7 @@ async function getAccountState(accountQuery, accounts) {
 }
 
 function isLiteral(object) {
-  if (typeof object == "object" && !object._isBigNumber) return false;
+  if (typeof object === "object" && !object._isBigNumber) return false;
   return true;
 }
 
@@ -197,10 +179,7 @@ module.exports = {
   Accounts: Accounts,
   AccountPrivateKeys: AccountPrivateKeys,
   setAccountDefault: setAccountDefault,
-  recursiveSetAccountDefault: recursiveSetAccountDefault,
-  buildExpectedPartialState: buildExpectedPartialState,
   checkState: checkState,
   getAccountState: getAccountState,
   addressEquals: addressEquals,
-  addressNotEquals: addressNotEquals,
 };

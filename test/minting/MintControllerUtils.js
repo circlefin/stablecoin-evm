@@ -1,15 +1,13 @@
-var tokenUtils = require("./TokenTestUtils.js");
-var bigZero = tokenUtils.bigZero;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+const tokenUtils = require("../v1/TokenTestUtils.js");
+const bigZero = tokenUtils.bigZero;
+const initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
-var MintController = artifacts.require("./minting/MintController");
-var AccountUtils = require("./AccountUtils.js");
-var Accounts = AccountUtils.Accounts;
-var checkState = AccountUtils.checkState;
-var getAccountState = AccountUtils.getAccountState;
+const AccountUtils = require("./AccountUtils.js");
+const Accounts = AccountUtils.Accounts;
+const checkState = AccountUtils.checkState;
 
-var ControllerUtils = require("./ControllerTestUtils.js");
-var checkControllerState = ControllerUtils.checkControllerState;
+const ControllerUtils = require("./ControllerTestUtils.js");
+const checkControllerState = ControllerUtils.checkControllerState;
 
 function MintControllerState(owner, controllers, minterManager) {
   this.owner = owner;
@@ -21,8 +19,7 @@ function MintControllerState(owner, controllers, minterManager) {
 }
 
 // Default state of MintController when it is deployed
-var mintControllerEmptyState = new MintControllerState(null, {}, bigZero);
-
+const mintControllerEmptyState = new MintControllerState(null, {}, bigZero);
 // Checks the state of the mintController contract
 async function checkMintControllerState(mintController, customState) {
   await checkControllerState(mintController, customState);
@@ -38,8 +35,8 @@ async function checkMintControllerState(mintController, customState) {
 
 // Gets the actual state of the mintController contract.
 // Evaluates all mappings on the provided accounts.
-async function getActualMintControllerState(mintController, accounts) {
-  var minterManager = await mintController.minterManager.call();
+async function getActualMintControllerState(mintController) {
+  const minterManager = await mintController.minterManager.call();
   return new MintControllerState(null, {}, minterManager);
 }
 
@@ -49,15 +46,15 @@ async function initializeTokenWithProxyAndMintController(
   rawToken,
   MintControllerArtifact
 ) {
-  var tokenConfig = await initializeTokenWithProxy(rawToken);
-  var mintController = await MintControllerArtifact.new(
+  const tokenConfig = await initializeTokenWithProxy(rawToken);
+  const mintController = await MintControllerArtifact.new(
     tokenConfig.token.address,
     { from: Accounts.mintOwnerAccount }
   );
   await tokenConfig.token.updateMasterMinter(mintController.address, {
     from: Accounts.tokenOwnerAccount,
   });
-  var tokenConfigWithMinter = {
+  const tokenConfigWithMinter = {
     proxy: tokenConfig.proxy,
     token: tokenConfig.token,
     mintController: mintController,

@@ -1,34 +1,27 @@
-var MintController = artifacts.require("minting/MintController");
-var MasterMinter = artifacts.require("minting/MasterMinter");
-var MintController = artifacts.require("minting/MintController");
-var MasterMinter = artifacts.require("minting/MasterMinter");
-var FiatToken = artifacts.require("FiatTokenV1");
+const MintController = artifacts.require("minting/MintController");
+const MasterMinter = artifacts.require("minting/MasterMinter");
 
-var tokenUtils = require("../TokenTestUtils.js");
-var newBigNumber = tokenUtils.newBigNumber;
-var checkMINTp0 = tokenUtils.checkMINTp0;
-var expectRevert = tokenUtils.expectRevert;
-var expectJump = tokenUtils.expectJump;
-var expectError = tokenUtils.expectError;
-var bigZero = tokenUtils.bigZero;
-var maxAmount = tokenUtils.maxAmount;
-var initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+const tokenUtils = require("../v1/TokenTestUtils.js");
+const newBigNumber = tokenUtils.newBigNumber;
+const checkMINTp0 = tokenUtils.checkMINTp0;
+const expectRevert = tokenUtils.expectRevert;
+const expectError = tokenUtils.expectError;
+const initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
 
-var clone = require("clone");
+const clone = require("clone");
 
-var mintUtils = require("../MintControllerUtils.js");
-var AccountUtils = require("../AccountUtils.js");
-var Accounts = AccountUtils.Accounts;
-var getAccountState = AccountUtils.getAccountState;
-var MintControllerState = AccountUtils.MintControllerState;
-var addressEquals = AccountUtils.addressEquals;
-var initializeTokenWithProxyAndMintController =
+const mintUtils = require("../minting/MintControllerUtils.js");
+const AccountUtils = require("../minting/AccountUtils.js");
+const Accounts = AccountUtils.Accounts;
+const initializeTokenWithProxyAndMintController =
   mintUtils.initializeTokenWithProxyAndMintController;
-var checkMintControllerState = mintUtils.checkMintControllerState;
 
-var zeroAddress = "0x0000000000000000000000000000000000000000";
-var maxAmount =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+let mintController;
+let expectedMintControllerState;
+let expectedTokenState;
+let token;
+let rawToken;
+let tokenConfig;
 
 async function run_tests_MintController(newToken, accounts) {
   run_MINT_tests(newToken, MintController, accounts);
@@ -38,7 +31,7 @@ async function run_tests_MasterMinter(newToken, accounts) {
   run_MINT_tests(newToken, MasterMinter, accounts);
 }
 
-async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
+async function run_MINT_tests(newToken, MintControllerArtifact) {
   beforeEach("Make fresh token contract", async function () {
     rawToken = await newToken();
     tokenConfig = await initializeTokenWithProxyAndMintController(
@@ -62,7 +55,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.minterAccount,
       { from: Accounts.arbitraryAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount2"] =
+    expectedMintControllerState.controllers.arbitraryAccount2 =
       Accounts.minterAccount;
     expectedMintControllerState.owner = Accounts.arbitraryAccount;
     await checkMINTp0(
@@ -99,7 +92,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.configureMinter(10, {
       from: Accounts.arbitraryAccount,
     });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
@@ -125,9 +118,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
-    expectedMintControllerState.controllers["arbitraryAccount2"] =
+    expectedMintControllerState.controllers.arbitraryAccount2 =
       Accounts.minterAccount;
 
     // first controller configures minter
@@ -171,9 +164,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
-    expectedMintControllerState.controllers["arbitraryAccount2"] =
+    expectedMintControllerState.controllers.arbitraryAccount2 =
       Accounts.minterAccount;
 
     // first controller configures minter
@@ -218,9 +211,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.pauserAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
-    expectedMintControllerState.controllers["arbitraryAccount2"] =
+    expectedMintControllerState.controllers.arbitraryAccount2 =
       Accounts.minterAccount;
 
     // first controller configures minter
@@ -258,9 +251,9 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.pauserAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
-    expectedMintControllerState.controllers["arbitraryAccount2"] =
+    expectedMintControllerState.controllers.arbitraryAccount2 =
       Accounts.minterAccount;
 
     // second controller fails to configure minter (configures pauser instead)
@@ -305,12 +298,12 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
 
     // change minterManager to a new token
-    var newTokenConfig = await initializeTokenWithProxy(rawToken);
-    var newToken = newTokenConfig.token;
+    const newTokenConfig = await initializeTokenWithProxy(rawToken);
+    const newToken = newTokenConfig.token;
     await newToken.updateMasterMinter(mintController.address, {
       from: Accounts.tokenOwnerAccount,
     });
@@ -323,7 +316,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.configureMinter(10, {
       from: Accounts.arbitraryAccount,
     });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
@@ -344,12 +337,12 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
 
     // change minterManager to a new token
-    var newTokenConfig = await initializeTokenWithProxy(rawToken);
-    var newToken = newTokenConfig.token;
+    const newTokenConfig = await initializeTokenWithProxy(rawToken);
+    const newToken = newTokenConfig.token;
     await newToken.updateMasterMinter(mintController.address, {
       from: Accounts.tokenOwnerAccount,
     });
@@ -363,7 +356,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       from: Accounts.arbitraryAccount,
     });
     await mintController.removeMinter({ from: Accounts.arbitraryAccount });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     await checkMINTp0(
       [newToken, mintController],
@@ -377,12 +370,12 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
 
     // change minterManager to a new token
-    var newTokenConfig = await initializeTokenWithProxy(rawToken);
-    var newToken = newTokenConfig.token;
+    const newTokenConfig = await initializeTokenWithProxy(rawToken);
+    const newToken = newTokenConfig.token;
     await newToken.updateMasterMinter(mintController.address, {
       from: Accounts.tokenOwnerAccount,
     });
@@ -398,7 +391,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.incrementMinterAllowance(20, {
       from: Accounts.arbitraryAccount,
     });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
@@ -425,7 +418,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.incrementMinterAllowance(10, {
       from: Accounts.arbitraryAccount,
     });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
@@ -450,7 +443,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       from: Accounts.arbitraryAccount,
     });
     await mintController.removeMinter({ from: Accounts.arbitraryAccount });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     await checkMINTp0(
       [token, mintController],
@@ -464,12 +457,12 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
 
     // change minterManager to a new token
-    var newTokenConfig = await initializeTokenWithProxy(rawToken);
-    var newToken = newTokenConfig.token;
+    const newTokenConfig = await initializeTokenWithProxy(rawToken);
+    const newToken = newTokenConfig.token;
     await newToken.updateMasterMinter(mintController.address, {
       from: Accounts.tokenOwnerAccount,
     });
@@ -482,7 +475,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.configureMinter(10, {
       from: Accounts.arbitraryAccount,
     });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
@@ -525,7 +518,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       from: Accounts.arbitraryAccount,
     });
     await mintController.removeMinter({ from: Accounts.arbitraryAccount });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
 
     // now verify that incrementing its allowance reverts
@@ -556,7 +549,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await token.mint(Accounts.arbitraryAccount, 5, {
       from: Accounts.minterAccount,
     });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
@@ -584,7 +577,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       from: Accounts.arbitraryAccount,
     });
     await mintController.removeMinter({ from: Accounts.arbitraryAccount });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
 
     // now verify that minter cannot mint
@@ -615,7 +608,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       from: Accounts.minterAccount,
     });
     await token.burn(5, { from: Accounts.minterAccount });
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
@@ -647,7 +640,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
     // now verify that minter cannot burn
     expectRevert(token.burn(5, { from: Accounts.minterAccount }));
-    expectedMintControllerState.controllers["arbitraryAccount"] =
+    expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
       { variable: "balances.minterAccount", expectedValue: newBigNumber(5) },
@@ -660,12 +653,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
   });
 }
 
-var testWrapper = require("./../TestWrapper");
-testWrapper.execute(
-  "MINTp0_EndToEndTests MintController",
-  run_tests_MintController
-);
-testWrapper.execute(
-  "MINTp0_EndToEndTests MasterMinter",
-  run_tests_MasterMinter
-);
+const wrapTests = require("../v1/helpers/wrapTests");
+wrapTests("MINTp0_EndToEndTests MintController", run_tests_MintController);
+wrapTests("MINTp0_EndToEndTests MasterMinter", run_tests_MasterMinter);

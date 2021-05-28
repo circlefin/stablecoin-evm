@@ -1,35 +1,18 @@
-var MintController = artifacts.require("minting/MintController");
-var MasterMinter = artifacts.require("minting/MasterMinter");
-var MintController = artifacts.require("minting/MintController");
-var MasterMinter = artifacts.require("minting/MasterMinter");
-var FiatToken = artifacts.require("FiatTokenV1");
+const MintController = artifacts.require("minting/MintController");
+const MasterMinter = artifacts.require("minting/MasterMinter");
 
-var tokenUtils = require("../TokenTestUtils.js");
-var newBigNumber = tokenUtils.newBigNumber;
-var checkMINTp0 = tokenUtils.checkMINTp0;
-var expectRevert = tokenUtils.expectRevert;
-var expectJump = tokenUtils.expectJump;
-var expectError = tokenUtils.expectError;
-var bigZero = tokenUtils.bigZero;
-var maxAmount = tokenUtils.maxAmount;
-
-var clone = require("clone");
-
-var mintUtils = require("../MintControllerUtils.js");
-var AccountUtils = require("../AccountUtils.js");
-var Accounts = AccountUtils.Accounts;
-var getAccountState = AccountUtils.getAccountState;
-var MintControllerState = AccountUtils.MintControllerState;
-var addressEquals = AccountUtils.addressEquals;
-var initializeTokenWithProxyAndMintController =
+const mintUtils = require("./MintControllerUtils.js");
+const AccountUtils = require("./AccountUtils.js");
+const Accounts = AccountUtils.Accounts;
+const initializeTokenWithProxyAndMintController =
   mintUtils.initializeTokenWithProxyAndMintController;
-var checkMintControllerState = mintUtils.checkMintControllerState;
 
-var zeroAddress = "0x0000000000000000000000000000000000000000";
-var maxAmount =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+let rawToken;
+let tokenConfig;
+let token;
+let mintController;
 
-var mintControllerEvents = {
+const mintControllerEvents = {
   ownershipTransferred: "OwnershipTransferred",
   controllerConfigured: "ControllerConfigured",
   controllerRemoved: "ControllerRemoved",
@@ -48,7 +31,7 @@ async function run_tests_MasterMinter(newToken, accounts) {
   run_MINT_tests(newToken, MasterMinter, accounts);
 }
 
-async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
+async function run_MINT_tests(newToken, MintControllerArtifact) {
   beforeEach("Make fresh token contract", async function () {
     rawToken = await newToken();
     tokenConfig = await initializeTokenWithProxyAndMintController(
@@ -57,15 +40,11 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     );
     token = tokenConfig.token;
     mintController = tokenConfig.mintController;
-    expectedMintControllerState = clone(tokenConfig.customState);
-    expectedTokenState = [
-      { variable: "masterMinter", expectedValue: mintController.address },
-    ];
   });
 
   it("et100 transferOwnership emits OwnershipTransferred event", async function () {
     // get all previous transfer ownership events
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.ownershipTransferred,
       {
         filter: {
@@ -79,7 +58,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.transferOwnership(Accounts.arbitraryAccount, {
       from: Accounts.mintOwnerAccount,
     });
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.ownershipTransferred,
       {
         filter: {
@@ -95,7 +74,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
   it("et101 configureController emits ControllerConfigured event", async function () {
     // get all previous configure controller events
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.controllerConfigured,
       {
         filter: {
@@ -111,7 +90,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.arbitraryAccount2,
       { from: Accounts.mintOwnerAccount }
     );
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.controllerConfigured,
       {
         filter: {
@@ -132,7 +111,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
       Accounts.arbitraryAccount2,
       { from: Accounts.mintOwnerAccount }
     );
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.controllerRemoved,
       { filter: { _controller: Accounts.arbitraryAccount } }
     );
@@ -141,7 +120,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.removeController(Accounts.arbitraryAccount, {
       from: Accounts.mintOwnerAccount,
     });
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.controllerRemoved,
       { filter: { _controller: Accounts.arbitraryAccount } }
     );
@@ -152,7 +131,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
   it("et103 setMinterManager emits MinterManagerSet event", async function () {
     // get all previous set minter manager events
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.minterManagerSet,
       {
         filter: {
@@ -166,7 +145,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.setMinterManager(Accounts.arbitraryAccount, {
       from: Accounts.mintOwnerAccount,
     });
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.minterManagerSet,
       {
         filter: {
@@ -182,7 +161,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
   it("et104 removeMinter emits MinterRemoved event", async function () {
     // get all previous remove minter events
-    var allowance = 10;
+    const allowance = 10;
     await mintController.configureController(
       Accounts.arbitraryAccount,
       Accounts.minterAccount,
@@ -191,7 +170,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.configureMinter(allowance, {
       from: Accounts.arbitraryAccount,
     });
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.minterRemoved,
       {
         filter: {
@@ -203,7 +182,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
     // now remove minter and test again
     await mintController.removeMinter({ from: Accounts.arbitraryAccount });
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.minterRemoved,
       {
         filter: {
@@ -219,13 +198,13 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
   it("et105 configureMinter emits MinterConfigured event", async function () {
     // get all previous configureMinter events
-    var allowance = 10;
+    const allowance = 10;
     await mintController.configureController(
       Accounts.arbitraryAccount,
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.minterCofigured,
       {
         filter: {
@@ -240,7 +219,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.configureMinter(allowance, {
       from: Accounts.arbitraryAccount,
     });
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.minterCofigured,
       {
         filter: {
@@ -257,7 +236,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
   it("et106 incrementMinterAllowance emits MinterAllowanceIncremented event", async function () {
     // get all previous increment minter allowance events
-    var allowance = 10;
+    const allowance = 10;
     await mintController.configureController(
       Accounts.arbitraryAccount,
       Accounts.minterAccount,
@@ -266,7 +245,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.configureMinter(allowance, {
       from: Accounts.arbitraryAccount,
     });
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.minterAllowanceIncremented,
       {
         filter: {
@@ -282,7 +261,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.incrementMinterAllowance(allowance, {
       from: Accounts.arbitraryAccount,
     });
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.minterAllowanceIncremented,
       {
         filter: {
@@ -300,7 +279,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
 
   it("et107 decrementMinterAllowance emits MinterAllowanceDecremented event", async function () {
     // get all previous decrement minter allowance events
-    var allowance = 10;
+    const allowance = 10;
     await mintController.configureController(
       Accounts.arbitraryAccount,
       Accounts.minterAccount,
@@ -309,7 +288,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.configureMinter(allowance, {
       from: Accounts.arbitraryAccount,
     });
-    var preEvents = await mintController.getPastEvents(
+    const preEvents = await mintController.getPastEvents(
       mintControllerEvents.minterAllowanceDecremented,
       {
         filter: {
@@ -325,7 +304,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
     await mintController.decrementMinterAllowance(allowance, {
       from: Accounts.arbitraryAccount,
     });
-    var postEvents = await mintController.getPastEvents(
+    const postEvents = await mintController.getPastEvents(
       mintControllerEvents.minterAllowanceDecremented,
       {
         filter: {
@@ -342,9 +321,6 @@ async function run_MINT_tests(newToken, MintControllerArtifact, accounts) {
   });
 }
 
-var testWrapper = require("./../TestWrapper");
-testWrapper.execute(
-  "MINTp0_EventTests MintController",
-  run_tests_MintController
-);
-testWrapper.execute("MINTp0_EventTests MasterMinter", run_tests_MasterMinter);
+const wrapTests = require("../v1/helpers/wrapTests");
+wrapTests("MINTp0_EventTests MintController", run_tests_MintController);
+wrapTests("MINTp0_EventTests MasterMinter", run_tests_MasterMinter);

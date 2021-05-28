@@ -1,19 +1,3 @@
-const util = require("util");
-const mocha = require("mocha");
-const spec_reporter = mocha.reporters.Spec;
-const base_reporter = mocha.reporters.Base;
-const color = base_reporter.color;
-const inherits = mocha.utils.inherits;
-const sheets = require("./spreadsheet_parser");
-const _ = require("lodash");
-const jsdiff = require("diff");
-const colors = require("colors");
-
-// Global variables for text output.
-const red_x = color("bright fail", base_reporter.symbols.err);
-const green_ok = color("green", base_reporter.symbols.ok);
-const red_ok = color("bright fail", base_reporter.symbols.ok);
-const indent = "    ";
 const mocha = require("mocha");
 const specReporter = mocha.reporters.Spec;
 const baseReporter = mocha.reporters.Base;
@@ -184,8 +168,8 @@ function verificationReporter(runner) {
             );
           }
           // If test is included in spreadsheet, 'cross-off' by deleting.
-          if (missingUnitTests[suite][id]) {
-            delete missingUnitTests[suite][id];
+          if (spreadsheet[file][id]) {
+            delete spreadsheet[file][id];
           }
         } else {
           // If test is not in spreadsheet.
@@ -264,34 +248,13 @@ function verificationReporter(runner) {
           )
       );
     }
-
+    delete spreadsheet.completeness;
     // If all the tests in a tab are present, 'cross-off' tab by deleting.
     for (const file in spreadsheet) {
       if (_.isEmpty(spreadsheet[file])) {
         delete spreadsheet[file];
       }
     }
-
-    // Report missing unit tests for files that were executed
-    for (var testSuite in missingUnitTests) {
-      if (!_.has(executedTestSuites, testSuite)) {
-        console.log(color("fail", "Did not run: " + testSuite));
-        delete missingUnitTests[testSuite];
-      }
-    }
-
-    // report missing Completeness unit tests ONLY if every test file ran
-    var onlyCompletenessTestsAreMissing = true;
-    for (var testSuite in missingUnitTests) {
-      if (!testSuite.match(/Completeness/))
-        onlyCompletenessTestsAreMissing = false;
-    }
-    if (onlyCompletenessTestsAreMissing) {
-      for (var testSuite in missingUnitTests) {
-        console.log(color("fail", "Did not run: " + testSuite));
-      }
-    }
-
     // If all tests are 'crossed-off', print success.
     if (_.isEmpty(spreadsheet)) {
       console.log(
