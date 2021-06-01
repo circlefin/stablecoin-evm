@@ -1,9 +1,0 @@
-File,Function,Event,Code,Description
-Ownable.sol,transferOwnership,OwnershipTransferred,et100,et100 transferOwnership emits OwnershipTransferred event
-Controller.sol,configureController,ControllerConfigured,et101,et101 configureController emits ControllerConfigured event
-Controller.sol,removeController,ControllerRemoved,et102,et102 removeController emits ControllerRemoved event
-MintController,setMinterManager,MinterManagerSet,et103,et103 setMinterManager emits MinterManagerSet event
-MintController,removeMinter,MinterRemoved,et104,et104 removeMinter emits MinterRemoved event
-MintController,configureMinter,MinterConfigured,et105,et105 configureMinter emits MinterConfigured event
-MintController,incrementMinterAllowance,MinterAllowanceIncremented,et106,et106 incrementMinterAllowance emits MinterAllowanceIncremented event
-MintController,decrementMinterAllowance,MinterAllowanceDecremented,et107,et107 decrementMinterAllowance emits MinterAllowanceDecremented event
