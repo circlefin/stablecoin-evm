@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
-const MasterMinter = artifacts.require("./MasterMinter.sol");
-const FiatToken = artifacts.require("./FiatTokenProxy.sol");
+const MasterMinter = artifacts.require("MasterMinter.sol");
+const FiatTokenProxy = artifacts.require("FiatTokenProxy.sol");
 let masterMinterAddress = "";
 let fiatTokenAddress = "";
 
@@ -18,7 +18,7 @@ module.exports = function (deployer, network) {
     // Change these if deploying for real, these are deterministic
     // address from ganache
     masterMinterAddress = "0x3e5e9111ae8eb78fe1cc3bb8915d5d461f3ef9a9";
-    fiatTokenAddress = FiatToken.address;
+    fiatTokenAddress = FiatTokenProxy.address;
   }
   console.log("deploying MasterMinter for fiat token at " + fiatTokenAddress);
   deployer
