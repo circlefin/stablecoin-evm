@@ -1,8 +1,8 @@
 const util = require("util");
-const abi = require("ethereumjs-abi");
 const _ = require("lodash");
 const BN = require("bn.js");
 const Q = require("q");
+const BigNumber = require("bignumber.js");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
@@ -21,9 +21,8 @@ const decimals = 2;
 const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
 const bigHundred = new BN(100);
-
-// TODO: test really big numbers  Does this still have to be done??
-
+const maxAmount =
+  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 const nullAccount = "0x0000000000000000000000000000000000000000";
 const deployerAccount = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"; // accounts[0]
 const arbitraryAccount = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // accounts[1]
@@ -66,47 +65,23 @@ const implSlot =
 // set to true to enable verbose logging in the tests
 const debugLogging = false;
 
-function calculateFeeAmount(amount, fee, feeBase) {
-  return Math.floor((fee / feeBase) * amount);
+// Returns a new BN object
+function newBigNumber(value) {
+  const hex = new BigNumber(value).toString(16);
+  return new BN(hex, 16);
 }
 
-function checkMinterConfiguredEvent(
-  configureMinterEvent,
-  minter,
-  minterAllowedAmount
-) {
-  assert.strictEqual(configureMinterEvent.logs[0].event, "MinterConfigured");
-  assert.strictEqual(configureMinterEvent.logs[0].args.minter, minter);
-  assert.isTrue(
-    configureMinterEvent.logs[0].args.minterAllowedAmount.eq(
-      new BN(minterAllowedAmount)
-    )
-  );
-}
-
-function checkMinterRemovedEvent(minterRemovedEvent, minter) {
-  assert.strictEqual(minterRemovedEvent.logs[0].event, "MinterRemoved");
-  assert.strictEqual(minterRemovedEvent.logs[0].args.oldMinter, minter);
-}
-
-function checkTransferEvents(transferEvent, from, to, value) {
-  assert.strictEqual(transferEvent.logs[0].event, "Transfer");
-  assert.strictEqual(transferEvent.logs[0].args.from, from);
-  assert.strictEqual(transferEvent.logs[0].args.to, to);
-  assert.isTrue(transferEvent.logs[0].args.value.eq(new BN(value)));
-}
-
-function checkApprovalEvent(approvalEvent, approver, spender, value) {
-  assert.strictEqual(approvalEvent.logs[0].event, "Approval");
-  assert.strictEqual(approvalEvent.logs[0].args.owner, approver);
-  assert.strictEqual(approvalEvent.logs[0].args.spender, spender);
-  assert.isTrue(approvalEvent.logs[0].args.value.eq(new BN(value)));
-}
-
-function checkBurnEvent(burnEvent, burner, amount) {
-  assert.strictEqual(burnEvent.logs[0].event, "Burn");
-  assert.strictEqual(burnEvent.logs[0].args.burner, burner);
-  assert.isTrue(burnEvent.logs[0].args.amount.eq(new BN(amount)));
+async function expectError(contractPromise, errorMsg) {
+  try {
+    await contractPromise;
+    assert.fail("Expected error " + errorMsg + ", but no error received");
+  } catch (error) {
+    const correctErrorMsgReceived = error.message.includes(errorMsg);
+    assert(
+      correctErrorMsgReceived,
+      `Expected ${errorMsg}, got ${error.message} instead`
+    );
+  }
 }
 
 function checkBlacklistEvent(blacklistEvent, account) {
@@ -117,68 +92,6 @@ function checkBlacklistEvent(blacklistEvent, account) {
 function checkUnblacklistEvent(unblacklistEvent, account) {
   assert.strictEqual(unblacklistEvent.logs[0].event, "UnBlacklisted");
   assert.strictEqual(unblacklistEvent.logs[0].args._account, account);
-}
-
-function checkBlacklisterChangedEvent(blacklisterChangedEvent, blacklister) {
-  assert.strictEqual(
-    blacklisterChangedEvent.logs[0].event,
-    "BlacklisterChanged"
-  );
-  assert.strictEqual(
-    blacklisterChangedEvent.logs[0].args.newBlacklister,
-    blacklister
-  );
-}
-
-function checkPauserChangedEvent(pauserChangedEvent, pauser) {
-  assert.strictEqual(pauserChangedEvent.logs[0].event, "PauserChanged");
-  assert.strictEqual(pauserChangedEvent.logs[0].args.newAddress, pauser);
-}
-
-function checkTransferOwnershipEvent(
-  transferOwnershipEvent,
-  previousOwner,
-  newOwner
-) {
-  assert.strictEqual(
-    transferOwnershipEvent.logs[0].event,
-    "OwnershipTransferred"
-  );
-  assert.strictEqual(
-    transferOwnershipEvent.logs[0].args.previousOwner,
-    previousOwner
-  );
-  assert.strictEqual(transferOwnershipEvent.logs[0].args.newOwner, newOwner);
-}
-
-function checkUpdateMasterMinterEvent(updateMasterMinter, newMasterMinter) {
-  assert.strictEqual(updateMasterMinter.logs[0].event, "MasterMinterChanged");
-  assert.strictEqual(
-    updateMasterMinter.logs[0].args.newMasterMinter,
-    newMasterMinter
-  );
-}
-
-function checkAdminChangedEvent(adminChangedEvent, previousAdmin, newAdmin) {
-  assert.strictEqual(adminChangedEvent.logs[0].event, "AdminChanged");
-  assert.strictEqual(
-    adminChangedEvent.logs[0].args.previousAdmin,
-    previousAdmin
-  );
-  assert.strictEqual(adminChangedEvent.logs[0].args.newAdmin, newAdmin);
-}
-
-function checkUpgradeEvent(upgradeEvent, implementation) {
-  assert.strictEqual(upgradeEvent.logs[0].event, "Upgraded");
-  assert.strictEqual(upgradeEvent.logs[0].args.implementation, implementation);
-}
-
-function checkPauseEvent(pause) {
-  assert.strictEqual(pause.logs[0].event, "Pause");
-}
-
-function checkUnpauseEvent(unpause) {
-  assert.strictEqual(unpause.logs[0].event, "Unpause");
 }
 
 function checkMintEvent(minting, to, amount, minter) {
@@ -781,57 +694,6 @@ async function unBlacklist(token, account) {
   checkUnblacklistEvent(unblacklist, account);
 }
 
-async function sampleTransfer(token, ownerAccount, arbitraryAccount, minter) {
-  let allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BN(allowed).eqn(0));
-  await mint(token, ownerAccount, 1900, minter);
-
-  await token.approve(arbitraryAccount, 1500);
-  allowed = await token.allowance.call(ownerAccount, arbitraryAccount);
-  assert.isTrue(new BN(allowed).eqn(1500));
-
-  const transfer = await token.transfer(arbitraryAccount, 1000, {
-    from: ownerAccount,
-  });
-
-  checkTransferEvents(transfer, ownerAccount, arbitraryAccount, 1000);
-
-  const balance0 = await token.balanceOf(ownerAccount);
-  assert.isTrue(balance0.eqn(1900 - 1000));
-  const balance3 = await token.balanceOf(arbitraryAccount);
-  assert.isTrue(balance3.eqn(1000));
-}
-
-async function sampleTransferFrom(
-  token,
-  ownerAccount,
-  arbitraryAccount,
-  minter
-) {
-  let allowed = await token.allowance.call(ownerAccount, arbitraryAccount); // TODO not this
-  assert.isTrue(new BN(allowed).eqn(0));
-  await mint(token, ownerAccount, 900, minter); // TODO maybe this
-  await token.approve(arbitraryAccount, 634); // TODO not this
-  allowed = await token.allowance.call(ownerAccount, arbitraryAccount); // TODO not this
-  assert.isTrue(new BN(allowed).eqn(634));
-
-  const transfer = await token.transferFrom(
-    ownerAccount,
-    arbitraryAccount,
-    534,
-    {
-      from: arbitraryAccount,
-    }
-  ); // TODO not this
-
-  checkTransferEvents(transfer, ownerAccount, arbitraryAccount, 534);
-
-  const balance0 = await token.balanceOf(ownerAccount);
-  assert.isTrue(new BN(balance0).eqn(900 - 534));
-  const balance3 = await token.balanceOf(arbitraryAccount);
-  assert.isTrue(new BN(balance3).eqn(534));
-}
-
 async function approve(token, to, amount, from) {
   await token.approve(to, amount, { from });
 }
@@ -841,14 +703,6 @@ async function redeem(token, account, amount) {
   assert.strictEqual(redeemResult.logs[0].event, "Redeem");
   assert.strictEqual(redeemResult.logs[0].args.redeemedAddress, account);
   assert.isTrue(redeemResult.logs[0].args.amount.eq(new BN(amount)));
-}
-
-function validateTransferEvent(transferEvent, from, to, value) {
-  const eventResult = transferEvent.logs[0];
-  assert.strictEqual(eventResult.event, "Transfer");
-  assert.strictEqual(eventResult.args.from, from);
-  assert.strictEqual(eventResult.args.to, to);
-  assert.isTrue(eventResult.args.value.eq(new BN(value)));
 }
 
 async function initializeTokenWithProxy(rawToken) {
@@ -918,24 +772,6 @@ async function expectRevert(contractPromise) {
   assert.fail("Expected error of type revert, but no error was received");
 }
 
-async function expectJump(contractPromise) {
-  try {
-    await contractPromise;
-    assert.fail("Expected invalid opcode not received");
-  } catch (error) {
-    assert.isTrue(
-      error.message.includes("invalid opcode"),
-      `Expected "invalid opcode", got ${error} instead`
-    );
-  }
-}
-
-function encodeCall(name, args, values) {
-  const methodId = abi.methodID(name, args).toString("hex");
-  const params = abi.rawEncode(args, values).toString("hex");
-  return "0x" + methodId + params;
-}
-
 async function getAdmin(proxy) {
   const adm = await web3.eth.getStorageAt(proxy.address, adminSlot);
   return web3.utils.toChecksumAddress("0x" + adm.slice(2).padStart(40, "0"));
@@ -971,6 +807,20 @@ async function getInitializedV1(token) {
   return initialized;
 }
 
+// _contracts is an array of exactly two values: a FiatTokenV1 and a MintController
+// _customVars is an array of exactly two values: the expected state of the FiatTokenV1
+// and the expected state of the MintController
+async function checkMINTp0(_contracts, _customVars) {
+  assert.equal(_contracts.length, 2);
+  assert.equal(_customVars.length, 2);
+
+  // the first is a FiatTokenV1
+  await checkVariables([_contracts[0]], [_customVars[0]]);
+
+  // the second is a MintController
+  await _customVars[1].checkState(_contracts[1]);
+}
+
 module.exports = {
   FiatTokenV1,
   FiatTokenProxy,
@@ -984,44 +834,18 @@ module.exports = {
   bigZero,
   bigHundred,
   debugLogging,
-  calculateFeeAmount,
-  checkTransferEvents,
-  checkMinterConfiguredEvent,
-  checkMintEvent,
-  checkApprovalEvent,
-  checkBurnEvents,
-  checkBurnEvent,
-  checkMinterRemovedEvent,
-  checkBlacklistEvent,
-  checkUnblacklistEvent,
-  checkPauseEvent,
-  checkUnpauseEvent,
-  checkPauserChangedEvent,
-  checkTransferOwnershipEvent,
-  checkUpdateMasterMinterEvent,
-  checkBlacklisterChangedEvent,
-  checkUpgradeEvent,
-  checkAdminChangedEvent,
-  buildExpectedState,
-  checkVariables,
-  setMinter,
+  maxAmount,
+  checkMINTp0,
   mint,
   burn,
-  mintRaw,
   blacklist,
   unBlacklist,
-  sampleTransfer,
-  sampleTransferFrom,
   approve,
   redeem,
-  validateTransferEvent,
   initializeTokenWithProxy,
-  customInitializeTokenWithProxy,
   upgradeTo,
   expectRevert,
-  expectJump,
-  encodeCall,
-  getInitializedV1,
+  expectError,
   nullAccount,
   deployerAccount,
   arbitraryAccount,
@@ -1034,7 +858,6 @@ module.exports = {
   proxyOwnerAccount,
   proxyOwnerAccountPrivateKey,
   upgraderAccount,
-  getAdmin,
   arbitraryAccountPrivateKey,
   upgraderAccountPrivateKey,
   tokenOwnerPrivateKey,
@@ -1044,4 +867,5 @@ module.exports = {
   minterAccountPrivateKey,
   pauserAccountPrivateKey,
   deployerAccountPrivateKey,
+  newBigNumber,
 };
