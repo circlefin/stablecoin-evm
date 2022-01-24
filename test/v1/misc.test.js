@@ -20,7 +20,7 @@ const maxAmount =
 const maxAmountBN = new BN(maxAmount.slice(2), 16);
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, _version) {
   let proxy, token;
 
   beforeEach(async () => {

@@ -4,6 +4,7 @@ import { FiatTokenProxyInstance } from "../../@types/generated";
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
+const FiatTokenV3 = artifacts.require("FiatTokenV3");
 
 export function usesOriginalStorageSlotPositions<
   T extends Truffle.ContractInstance
@@ -13,16 +14,17 @@ export function usesOriginalStorageSlotPositions<
   accounts,
 }: {
   Contract: Truffle.Contract<T>;
-  version: 1 | 1.1 | 2 | 2.1;
+  version: 1 | 1.1 | 2 | 2.1 | 3;
   accounts: Truffle.Accounts;
 }): void {
   describe("uses original storage slot positions", () => {
     const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
-    const [mintAllowance, minted, transferred, allowance] = [
+    const [mintAllowance, minted, transferred, allowance, frozen] = [
       1000e6,
       100e6,
       30e6,
       10e6,
+      32e6,
     ];
     const [
       owner,
@@ -35,6 +37,7 @@ export function usesOriginalStorageSlotPositions<
       alice,
       bob,
       charlie,
+      sketchyMcSketcherton,
     ] = accounts;
 
     let fiatToken: T;
@@ -64,12 +67,22 @@ export function usesOriginalStorageSlotPositions<
       await proxyAsFiatTokenV1.transfer(bob, transferred, { from: alice });
       await proxyAsFiatTokenV1.approve(charlie, allowance, { from: alice });
       await proxyAsFiatTokenV1.blacklist(charlie, { from: blacklister });
+      await proxyAsFiatTokenV1.mint(sketchyMcSketcherton, frozen, {
+        from: minter,
+      });
       await proxyAsFiatTokenV1.pause({ from: pauser });
 
       if (version >= 1.1) {
         const proxyAsFiatTokenV1_1 = await FiatTokenV1_1.at(proxy.address);
         await proxyAsFiatTokenV1_1.updateRescuer(rescuer, {
           from: owner,
+        });
+      }
+
+      if (version >= 3) {
+        const proxyAsFiatTokenV3 = await FiatTokenV3.at(proxy.address);
+        await proxyAsFiatTokenV3.freezeBalance(sketchyMcSketcherton, {
+          from: blacklister,
         });
       }
     });
@@ -117,7 +130,12 @@ export function usesOriginalStorageSlotPositions<
       expect(slots[10]).to.equal("0");
 
       // slot 11 - totalSupply
-      expect(parseUint(slots[11]).toNumber()).to.equal(minted);
+      if (version >= 3) {
+        // for version 3 some of the supply is frozen and removed
+        expect(parseUint(slots[11]).toNumber()).to.equal(minted);
+      } else {
+        expect(parseUint(slots[11]).toNumber()).to.equal(minted + frozen);
+      }
 
       // slot 12 - minters (mapping, slot is unused)
       expect(slots[12]).to.equal("0");
@@ -130,6 +148,25 @@ export function usesOriginalStorageSlotPositions<
       it("retains slot 14 for rescuer", async () => {
         const slot = await readSlot(proxy.address, 14);
         expect(parseAddress(slot)).to.equal(rescuer);
+      });
+    }
+
+    if (version >= 3) {
+      it("retains slot 19 for frozen balances", async () => {
+        const slot = await readSlot(proxy.address, 19);
+        expect(slot).to.equal("0");
+      });
+
+      it("retains storage slots for frozen balances mapping", async () => {
+        const v = parseInt(
+          await readSlot(
+            proxy.address,
+            addressMappingSlot(sketchyMcSketcherton, 19)
+          ),
+          16
+        );
+
+        expect(v).to.equal(frozen);
       });
     }
 
@@ -202,7 +239,7 @@ export function usesOriginalStorageSlotPositions<
         await readSlot(proxy.address, addressMappingSlot(minter, 13)),
         16
       );
-      expect(v).to.equal(mintAllowance - minted);
+      expect(v).to.equal(mintAllowance - minted - frozen);
 
       // minterAllowed[alice]
       v = parseInt(
