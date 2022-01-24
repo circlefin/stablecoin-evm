@@ -1,8 +1,6 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -24,30 +22,120 @@
 
 pragma solidity 0.6.12;
 
-import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
-import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
+import { FiatTokenV2_1 } from "../v2/FiatTokenV2_1.sol";
 import { EIP712 } from "../util/EIP712.sol";
-import { EIP712Domain } from "./EIP712Domain.sol";
-import { EIP3009 } from "./EIP3009.sol";
-import { EIP2612 } from "./EIP2612.sol";
 
 /**
- * @title FiatToken V2
- * @notice ERC20 Token backed by fiat reserves, version 2
+ * @title FiatToken
+ * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
-    uint8 internal _initializedVersion;
+contract FiatTokenV3 is FiatTokenV2_1 {
+    mapping(address => uint256) internal frozenBalances;
+
+    event BalanceFrozen(address indexed _account, uint256 amountFrozen);
+    event BalanceUnfrozen(address indexed _account, uint256 amountUnfrozen);
 
     /**
-     * @notice Initialize v2
-     * @param newName   New token name
+     * @notice Initialize v3
      */
-    function initializeV2(string calldata newName) external {
-        // solhint-disable-next-line reason-string
-        require(initialized && _initializedVersion == 0);
-        name = newName;
-        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
-        _initializedVersion = 1;
+    function initializeV3() external {
+        require(_initializedVersion == 2, "v3 initialized out of order");
+
+        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(name, "3");
+
+        _initializedVersion = 3;
+    }
+
+    /**
+     * @dev Freezes an account's balance
+     * @param _account The address whose balance will be frozen
+     */
+    function freezeBalance(address _account) external onlyBlacklister {
+        uint256 amountFrozen = balances[_account];
+
+        totalSupply_ = totalSupply_.sub(amountFrozen);
+        frozenBalances[_account] = frozenBalances[_account].add(amountFrozen);
+        balances[_account] = 0;
+
+        emit BalanceFrozen(_account, amountFrozen);
+        emit Transfer(_account, address(0), amountFrozen);
+    }
+
+    /**
+     * @dev Unfreezes an account's balance
+     * @param _account The address whose balance will be unfrozen
+     */
+    function unfreezeBalance(address _account) external onlyBlacklister {
+        uint256 amountUnfrozen = frozenBalances[_account];
+
+        totalSupply_ = totalSupply_.add(amountUnfrozen);
+        frozenBalances[_account] = 0;
+        balances[_account] = balances[_account].add(amountUnfrozen);
+
+        emit BalanceUnfrozen(_account, amountUnfrozen);
+        emit Transfer(address(0), _account, amountUnfrozen);
+    }
+
+    /**
+     * @dev Get frozen token balance of an account
+     * @param account address The account
+     */
+    function frozenBalanceOf(address account) external view returns (uint256) {
+        return frozenBalances[account];
+    }
+
+    /**
+     * @notice Set spender's allowance over the caller's tokens to be a given
+     * value.
+     * @param spender   Spender's address
+     * @param value     Allowance amount
+     * @return True if successful
+     */
+    function approve(address spender, uint256 value)
+        external
+        override
+        whenNotPaused
+        returns (bool)
+    {
+        _approve(msg.sender, spender, value);
+        return true;
+    }
+
+    /**
+     * @notice Transfer tokens by spending allowance
+     * @param from  Payer's address
+     * @param to    Payee's address
+     * @param value Transfer amount
+     * @return True if successful
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external override whenNotPaused returns (bool) {
+        require(
+            value <= allowed[from][msg.sender],
+            "ERC20: transfer amount exceeds allowance"
+        );
+        _transfer(from, to, value);
+        allowed[from][msg.sender] = allowed[from][msg.sender].sub(value);
+        return true;
+    }
+
+    /**
+     * @notice Transfer tokens from the caller
+     * @param to    Payee's address
+     * @param value Transfer amount
+     * @return True if successful
+     */
+    function transfer(address to, uint256 value)
+        external
+        override
+        whenNotPaused
+        returns (bool)
+    {
+        _transfer(msg.sender, to, value);
+        return true;
     }
 
     /**
@@ -58,10 +146,8 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      */
     function increaseAllowance(address spender, uint256 increment)
         external
-        virtual
+        override
         whenNotPaused
-        notBlacklisted(msg.sender)
-        notBlacklisted(spender)
         returns (bool)
     {
         _increaseAllowance(msg.sender, spender, increment);
@@ -76,10 +162,8 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      */
     function decreaseAllowance(address spender, uint256 decrement)
         external
-        virtual
+        override
         whenNotPaused
-        notBlacklisted(msg.sender)
-        notBlacklisted(spender)
         returns (bool)
     {
         _decreaseAllowance(msg.sender, spender, decrement);
@@ -108,7 +192,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external override whenNotPaused {
         _transferWithAuthorization(
             from,
             to,
@@ -146,7 +230,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external override whenNotPaused {
         _receiveWithAuthorization(
             from,
             to,
@@ -158,25 +242,6 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
             r,
             s
         );
-    }
-
-    /**
-     * @notice Attempt to cancel an authorization
-     * @dev Works only if the authorization is not yet used.
-     * @param authorizer    Authorizer's address
-     * @param nonce         Nonce of the authorization
-     * @param v             v of the signature
-     * @param r             r of the signature
-     * @param s             s of the signature
-     */
-    function cancelAuthorization(
-        address authorizer,
-        bytes32 nonce,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external whenNotPaused {
-        _cancelAuthorization(authorizer, nonce, v, r, s);
     }
 
     /**
@@ -197,48 +262,15 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    )
-        external
-        virtual
-        whenNotPaused
-        notBlacklisted(owner)
-        notBlacklisted(spender)
-    {
+    ) external override whenNotPaused {
         _permit(owner, spender, value, deadline, v, r, s);
     }
 
     /**
-     * @notice Internal function to increase the allowance by a given increment
-     * @param owner     Token owner's address
-     * @param spender   Spender's address
-     * @param increment Amount of increase
+     * @notice Version string for the EIP712 domain separator
+     * @return Version string
      */
-    function _increaseAllowance(
-        address owner,
-        address spender,
-        uint256 increment
-    ) internal override {
-        _approve(owner, spender, allowed[owner][spender].add(increment));
-    }
-
-    /**
-     * @notice Internal function to decrease the allowance by a given decrement
-     * @param owner     Token owner's address
-     * @param spender   Spender's address
-     * @param decrement Amount of decrease
-     */
-    function _decreaseAllowance(
-        address owner,
-        address spender,
-        uint256 decrement
-    ) internal override {
-        _approve(
-            owner,
-            spender,
-            allowed[owner][spender].sub(
-                decrement,
-                "ERC20: decreased allowance below zero"
-            )
-        );
+    function version() external override view returns (string memory) {
+        return "3";
     }
 }

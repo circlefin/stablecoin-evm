@@ -19,7 +19,7 @@ const {
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, _version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -136,6 +136,9 @@ function runTests(newToken, _accounts) {
   // Approve
 
   it("nt008 should fail to approve when spender is blacklisted", async () => {
+    if (_version >= 3) {
+      return;
+    }
     await token.blacklist(minterAccount, { from: blacklisterAccount });
     const customVars = [
       { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
@@ -147,6 +150,9 @@ function runTests(newToken, _accounts) {
   });
 
   it("nt009 should fail to approve when msg.sender is blacklisted", async () => {
+    if (_version >= 3) {
+      return;
+    }
     await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
     const customVars = [
       {
@@ -250,6 +256,9 @@ function runTests(newToken, _accounts) {
   });
 
   it("nt014 should fail to transferFrom to blacklisted recipient", async () => {
+    if (_version >= 3) {
+      return;
+    }
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
@@ -294,6 +303,9 @@ function runTests(newToken, _accounts) {
   });
 
   it("nt015 should fail to transferFrom from blacklisted msg.sender", async () => {
+    if (_version >= 3) {
+      return;
+    }
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
@@ -338,6 +350,9 @@ function runTests(newToken, _accounts) {
   });
 
   it("nt016 should fail to transferFrom when from is blacklisted", async () => {
+    if (_version >= 3) {
+      return;
+    }
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
@@ -528,6 +543,9 @@ function runTests(newToken, _accounts) {
   });
 
   it("nt022 should fail to transfer to blacklisted recipient", async () => {
+    if (_version >= 3) {
+      return;
+    }
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
@@ -565,6 +583,9 @@ function runTests(newToken, _accounts) {
   });
 
   it("nt023 should fail to transfer when sender is blacklisted", async () => {
+    if (_version >= 3) {
+      return;
+    }
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });

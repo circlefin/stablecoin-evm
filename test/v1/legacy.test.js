@@ -32,7 +32,7 @@ const {
 } = require("./helpers/tokenTest");
 
 // these tests are for reference and do not track side effects on all variables
-function runTests(_newToken, accounts) {
+function runTests(_newToken, accounts, _version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -745,4 +745,6 @@ function runTests(_newToken, accounts) {
   });
 }
 
+// NOTE: these tests are run for each version but just
+// use the v1 contract each time
 wrapTests("legacy", runTests);
