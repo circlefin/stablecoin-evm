@@ -18,3 +18,29 @@ module.exports = {
   // LostAndFound - tokens that were locked in the contract are sent to this
   LOST_AND_FOUND_ADDRESS: "",
 };
+version: '2.1'
+services:
+
+##################################
+### Ganache (ethereum-testrpc) ###
+##################################  
+  ganache:
+    build:
+      context: .
+      dockerfile: Dockerfile.ganache
+    ports:
+      - "8545:8545"
+
+##################################
+### Truffle ###
+##################################  
+  truffle:
+    build:
+      context: .
+      dockerfile: Dockerfile.truffle
+    volumes:
+      - ./:/usr/local/solidity
+    working_dir: /usr/local/solidity
+    command: compile
+    depends_on:
+      - "ganache"=Software emergency recovery in extreme cases
