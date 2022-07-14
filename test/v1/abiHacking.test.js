@@ -26,7 +26,7 @@ function mockStringAddressEncode(methodName, address) {
   return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, _version) {
   let proxy, token;
 
   beforeEach(async () => {

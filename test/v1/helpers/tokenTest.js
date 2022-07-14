@@ -6,8 +6,12 @@ const Q = require("q");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
+const UpgradedFiatTokenV3 = artifacts.require("UpgradedFiatTokenV3");
 const UpgradedFiatTokenNewFields = artifacts.require(
   "UpgradedFiatTokenNewFieldsTest"
+);
+const UpgradedFiatTokenNewFieldsV3 = artifacts.require(
+  "UpgradedFiatTokenNewFieldsV3Test"
 );
 const UpgradedFiatTokenNewFieldsNewLogic = artifacts.require(
   "UpgradedFiatTokenNewFieldsNewLogicTest"
@@ -963,7 +967,9 @@ module.exports = {
   FiatTokenV1,
   FiatTokenProxy,
   UpgradedFiatToken,
+  UpgradedFiatTokenV3,
   UpgradedFiatTokenNewFields,
+  UpgradedFiatTokenNewFieldsV3,
   UpgradedFiatTokenNewFieldsNewLogic,
   name,
   symbol,

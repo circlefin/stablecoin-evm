@@ -23,6 +23,7 @@ const {
   FiatTokenProxy,
   UpgradedFiatToken,
   UpgradedFiatTokenNewFields,
+  UpgradedFiatTokenNewFieldsV3,
   UpgradedFiatTokenNewFieldsNewLogic,
   getAdmin,
 } = require("./helpers/tokenTest");
@@ -30,7 +31,7 @@ const { makeRawTransaction, sendRawTransaction } = require("./helpers/abi");
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, _version) {
   let rawToken, proxy, token;
 
   beforeEach(async () => {
@@ -405,7 +406,12 @@ function runTests(newToken, _accounts) {
   it("upt012 should upgradeToAndCall while upgrader is blacklisted", async () => {
     await token.blacklist(proxyOwnerAccount, { from: blacklisterAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    let upgradedToken;
+    if (_version < 3) {
+      upgradedToken = await UpgradedFiatTokenNewFields.new();
+    } else {
+      upgradedToken = await UpgradedFiatTokenNewFieldsV3.new();
+    }
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],

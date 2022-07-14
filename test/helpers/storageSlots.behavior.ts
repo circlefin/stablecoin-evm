@@ -13,7 +13,7 @@ export function usesOriginalStorageSlotPositions<
   accounts,
 }: {
   Contract: Truffle.Contract<T>;
-  version: 1 | 1.1 | 2 | 2.1;
+  version: 1 | 1.1 | 2 | 2.1 | 3;
   accounts: Truffle.Accounts;
 }): void {
   describe("uses original storage slot positions", () => {
@@ -134,19 +134,39 @@ export function usesOriginalStorageSlotPositions<
     }
 
     it("retains original storage slots for blacklisted mapping", async () => {
-      // blacklisted[alice]
-      let v = parseInt(
-        await readSlot(proxy.address, addressMappingSlot(alice, 3)),
-        16
-      );
-      expect(v).to.equal(0);
+      if (version < 3) {
+        // blacklisted[alice]
+        let v = parseInt(
+          await readSlot(proxy.address, addressMappingSlot(alice, 3)),
+          16
+        );
+        expect(v).to.equal(0);
 
-      // blacklisted[charlie]
-      v = parseInt(
-        await readSlot(proxy.address, addressMappingSlot(charlie, 3)),
-        16
-      );
-      expect(v).to.equal(1);
+        // blacklisted[charlie]
+        v = parseInt(
+          await readSlot(proxy.address, addressMappingSlot(charlie, 3)),
+          16
+        );
+        expect(v).to.equal(1);
+      } else {
+        // balances[alice] high bit
+        let v = parseInt(
+          await readSlot(proxy.address, addressMappingSlot(alice, 9)),
+          16
+        )
+          .toString(2)
+          .padStart(256, "0")[0];
+        expect(v).to.equal("0");
+
+        // balances[charlie] high bit
+        v = parseInt(
+          await readSlot(proxy.address, addressMappingSlot(charlie, 9)),
+          16
+        )
+          .toString(2)
+          .padStart(256, "0")[0];
+        expect(v).to.equal("1");
+      }
     });
 
     it("retains original storage slots for balances mapping", async () => {

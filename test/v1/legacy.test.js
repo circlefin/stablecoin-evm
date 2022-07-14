@@ -745,4 +745,6 @@ function runTests(_newToken, accounts) {
   });
 }
 
+// NOTE: these tests are run for each version but just
+// use the v1 contract each time
 wrapTests("legacy", runTests);
