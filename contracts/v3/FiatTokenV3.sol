@@ -121,7 +121,7 @@ contract FiatTokenV3 is FiatTokenV2_1 {
         address from,
         address to,
         uint256 value
-    ) internal override notBlacklisted(to) {
+    ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
 
@@ -135,7 +135,12 @@ contract FiatTokenV3 is FiatTokenV2_1 {
         );
 
         balances[from] = fromBalance.sub(value);
-        balances[to] = balances[to].add(value);
+
+        (uint256 toBalance, bool isToBlacklisted) = _getBalanceAndBlacklistStatus(to);
+        require(!isToBlacklisted, "Blacklistable: account is blacklisted");
+
+        balances[to] = toBalance.add(value);
+
         emit Transfer(from, to, value);
     }
 
