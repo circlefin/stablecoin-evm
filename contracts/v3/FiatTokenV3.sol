@@ -1,8 +1,6 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -38,8 +36,17 @@ contract FiatTokenV3 is FiatTokenV2_1 {
     /**
      * @notice Initialize v3
      */
-    function initializeV3() external {
+    function initializeV3(address[] calldata accountsToBlacklist) external {
         require(_initializedVersion == 2, "v3 initialized out of order");
+
+        // re-add previously blacklisted accounts to the blacklist
+        // by setting the high bit of their balance to 1
+        for (uint256 i = 0; i < accountsToBlacklist.length; i++) {
+            _blacklist(accountsToBlacklist[i]);
+        }
+
+        // additionally blacklist the contract address itself
+        _blacklist(address(this));
 
         DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(name, "3");
 
@@ -51,6 +58,14 @@ contract FiatTokenV3 is FiatTokenV2_1 {
      * @param _account The address to blacklist
      */
     function blacklist(address _account) override external onlyBlacklister {
+        _blacklist(_account);
+    }
+
+    /**
+     * @dev Internal function to process additions to the blacklist
+     * @param _account The address to blacklist
+     */
+    function _blacklist(address _account) internal {
         balances[_account] = balances[_account] | (uint256(1) << 255);
         emit Blacklisted(_account);
     }
@@ -60,6 +75,14 @@ contract FiatTokenV3 is FiatTokenV2_1 {
      * @param _account The address to remove from the blacklist
      */
     function unBlacklist(address _account) override external onlyBlacklister {
+       _unBlacklist(_account);
+    }
+
+    /**
+     * @dev Internal function to process removals from the blacklist
+     * @param _account The address to remove from the blacklist
+     */
+    function _unBlacklist(address _account) internal {
         balances[_account] = balances[_account] & ~(uint256(1) << 255);
         emit UnBlacklisted(_account);
     }

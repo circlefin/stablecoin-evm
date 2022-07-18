@@ -5,7 +5,7 @@ import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavi
 import { expectRevert } from "../helpers";
 import { makeDomainSeparator } from "../v2/GasAbstraction/helpers";
 import { MAX_UINT256 } from "../helpers/constants";
-import { assert } from "chai";
+import { assert, expect } from "chai";
 
 const FiatTokenV3 = artifacts.require("FiatTokenV3");
 
@@ -17,6 +17,8 @@ contract("FiatTokenV3", (accounts) => {
   const mintable = 1000000e6;
   const infiniteAllower = accounts[10];
   const infiniteSpender = accounts[11];
+  const blacklist1 = accounts[12];
+  const blacklist2 = accounts[13];
 
   beforeEach(async () => {
     fiatToken = await FiatTokenV3.new();
@@ -32,7 +34,6 @@ contract("FiatTokenV3", (accounts) => {
     );
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
     await fiatToken.initializeV2_1(lostAndFound, { from: fiatTokenOwner });
-    await fiatToken.initializeV3({ from: fiatTokenOwner });
 
     await fiatToken.configureMinter(fiatTokenOwner, mintable, {
       from: fiatTokenOwner,
@@ -44,7 +45,8 @@ contract("FiatTokenV3", (accounts) => {
     () => fiatToken,
     fiatTokenOwner,
     infiniteAllower,
-    infiniteSpender
+    infiniteSpender,
+    [blacklist1, blacklist2]
   );
 });
 
@@ -53,7 +55,8 @@ export function behavesLikeFiatTokenV3(
   getFiatToken: () => FiatTokenV3Instance,
   fiatTokenOwner: string,
   infiniteAllower: string,
-  infiniteSpender: string
+  infiniteSpender: string,
+  accountsToBlacklist: string[]
 ): void {
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV3,
@@ -62,6 +65,7 @@ export function behavesLikeFiatTokenV3(
   });
 
   it("has the expected domain separator", async () => {
+    await getFiatToken().initializeV3([], { from: fiatTokenOwner });
     const expectedDomainSeparator = makeDomainSeparator(
       "USD Coin",
       "3",
@@ -74,6 +78,7 @@ export function behavesLikeFiatTokenV3(
   });
 
   it("it allows user to set and remove an infinite allowance", async () => {
+    await getFiatToken().initializeV3([], { from: fiatTokenOwner });
     const maxAllowanceBN = new BN(MAX_UINT256.slice(2), 16);
     const zeroBN = new BN(0);
 
@@ -106,7 +111,30 @@ export function behavesLikeFiatTokenV3(
   });
 
   it("disallows calling initializeV3 twice", async () => {
-    // It was called once in beforeEach. Try to call again.
-    await expectRevert(getFiatToken().initializeV3({ from: fiatTokenOwner }));
+    await getFiatToken().initializeV3([], { from: fiatTokenOwner });
+
+    await expectRevert(
+      getFiatToken().initializeV3([], { from: fiatTokenOwner })
+    );
+  });
+
+  it("blacklists accounts passed into initializeV3", async () => {
+    await getFiatToken().initializeV3(accountsToBlacklist, {
+      from: fiatTokenOwner,
+    });
+
+    for (const account of accountsToBlacklist) {
+      expect(await getFiatToken().isBlacklisted(account)).to.eq(true);
+    }
+  });
+
+  it("initializeV3 blacklists the contract address itself", async () => {
+    await getFiatToken().initializeV3([], {
+      from: fiatTokenOwner,
+    });
+
+    expect(await getFiatToken().isBlacklisted(getFiatToken().address)).to.eq(
+      true
+    );
   });
 }

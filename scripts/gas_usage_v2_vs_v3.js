@@ -80,7 +80,7 @@ async function initializeV3(fiatTokenOwner) {
   );
   await fiatTokenV3.initializeV2("USD Coin", { from: fiatTokenOwner });
   await fiatTokenV3.initializeV2_1(fiatTokenOwner, { from: fiatTokenOwner });
-  await fiatTokenV3.initializeV3({ from: fiatTokenOwner });
+  await fiatTokenV3.initializeV3([], { from: fiatTokenOwner });
 
   await fiatTokenV3.configureMinter(fiatTokenOwner, 1000000e6, {
     from: fiatTokenOwner,
