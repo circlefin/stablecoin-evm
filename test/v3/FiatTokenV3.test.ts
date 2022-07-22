@@ -90,24 +90,30 @@ export function behavesLikeFiatTokenV3(
       from: infiniteAllower,
     });
 
+    const allowanceAfterApprove = await getFiatToken().allowance(
+      infiniteAllower,
+      infiniteSpender
+    );
+    assert.isTrue(allowanceAfterApprove.eq(maxAllowanceBN));
+
     // spend allower's balance
     await getFiatToken().transferFrom(infiniteAllower, infiniteSpender, 50e6, {
       from: infiniteSpender,
     });
 
-    const allowance1 = await getFiatToken().allowance(
+    const allowanceAfterSpend = await getFiatToken().allowance(
       infiniteAllower,
       infiniteSpender
     );
-    assert.isTrue(allowance1.eq(maxAllowanceBN));
+    assert.isTrue(allowanceAfterSpend.eq(maxAllowanceBN));
 
     // revoke approval
     await getFiatToken().approve(infiniteSpender, 0, { from: infiniteAllower });
-    const allowance2 = await getFiatToken().allowance(
+    const allowanceAfterRevoke = await getFiatToken().allowance(
       infiniteAllower,
       infiniteSpender
     );
-    assert.isTrue(allowance2.eq(zeroBN));
+    assert.isTrue(allowanceAfterRevoke.eq(zeroBN));
   });
 
   it("disallows calling initializeV3 twice", async () => {
