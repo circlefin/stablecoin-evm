@@ -32,7 +32,6 @@ import { EIP712 } from "../util/EIP712.sol";
  * @dev ERC20 Token backed by fiat reserves
  */
 contract FiatTokenV3 is FiatTokenV2_1 {
-
     /**
      * @notice Initialize v3
      */
@@ -288,6 +287,47 @@ contract FiatTokenV3 is FiatTokenV2_1 {
             r,
             s
         );
+    }
+
+    /**
+     * @dev Function to mint tokens
+     * @param _to The address that will receive the minted tokens.
+     * @param _amount The amount of tokens to mint. Must be less than or equal
+     * to the minterAllowance of the caller.
+     * @return A boolean that indicates if the operation was successful.
+     */
+    function mint(address _to, uint256 _amount)
+        override
+        external
+        whenNotPaused
+        onlyMinters
+        notBlacklisted(msg.sender)
+        notBlacklisted(_to)
+        returns (bool)
+    {
+        require(_to != address(0), "FiatToken: mint to the zero address");
+        require(_amount > 0, "FiatToken: mint amount not greater than 0");
+
+        uint256 mintingAllowedAmount = minterAllowed[msg.sender];
+        require(
+            _amount <= mintingAllowedAmount,
+            "FiatToken: mint amount exceeds minterAllowance"
+        );
+
+        uint256 newTotalSupply = totalSupply_.add(_amount);
+        // The supply cap ensures that no account can be unintentionally blacklisted
+        // with a high balance
+        // Hardcoding the value here as opposed to setting it in storage since it's
+        // expected to be static and this avoids an SLOAD
+        require(newTotalSupply <= (uint256(1) << 255) - 1, "mint causes total supply to supply cap");
+
+        totalSupply_ = newTotalSupply;
+
+        balances[_to] = balances[_to].add(_amount);
+        minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
+        emit Mint(msg.sender, _to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;
     }
 
     /**

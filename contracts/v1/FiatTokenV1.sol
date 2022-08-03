@@ -111,6 +111,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @return A boolean that indicates if the operation was successful.
      */
     function mint(address _to, uint256 _amount)
+        virtual
         external
         whenNotPaused
         onlyMinters

@@ -9,12 +9,19 @@ import { assert, expect } from "chai";
 
 const FiatTokenV3 = artifacts.require("FiatTokenV3");
 
+// 2^255 - 1 is the max token supply
+const maxTotalSupply =
+  "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+const maxTotalSupplyBN = new BN(maxTotalSupply.slice(2), 16);
+const maxUint256 =
+  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
 contract("FiatTokenV3", (accounts) => {
   const fiatTokenOwner = accounts[0];
   const blacklister = accounts[4];
   let fiatToken: FiatTokenV3Instance;
   const lostAndFound = accounts[2];
-  const mintable = 1000000e6;
+  const mintable = maxUint256;
   const infiniteAllower = accounts[10];
   const infiniteSpender = accounts[11];
   const blacklist1 = accounts[12];
@@ -114,6 +121,33 @@ export function behavesLikeFiatTokenV3(
       infiniteSpender
     );
     assert.isTrue(allowanceAfterRevoke.eq(zeroBN));
+  });
+
+  it("allows minting up to the maximum total supply", async () => {
+    await getFiatToken().initializeV3([], { from: fiatTokenOwner });
+
+    await getFiatToken().mint(infiniteAllower, maxTotalSupply, {
+      from: fiatTokenOwner,
+    });
+
+    assert.isTrue((await getFiatToken().totalSupply()).eq(maxTotalSupplyBN));
+  });
+
+  it("disallows minting beyond maximum total supply", async () => {
+    await getFiatToken().initializeV3([], { from: fiatTokenOwner });
+
+    // mint max total supply
+    await getFiatToken().mint(infiniteAllower, maxTotalSupply, {
+      from: fiatTokenOwner,
+    });
+
+    // minting one more should fail
+    await expectRevert(
+      getFiatToken().mint(infiniteAllower, 1, {
+        from: fiatTokenOwner,
+      }),
+      "mint causes total supply to supply cap"
+    );
   });
 
   it("disallows calling initializeV3 twice", async () => {

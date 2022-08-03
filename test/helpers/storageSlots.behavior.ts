@@ -4,6 +4,7 @@ import { FiatTokenProxyInstance } from "../../@types/generated";
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
+const FiatTokenV3 = artifacts.require("FiatTokenV3");
 
 export function usesOriginalStorageSlotPositions<
   T extends Truffle.ContractInstance
