@@ -4,7 +4,6 @@ import { FiatTokenProxyInstance } from "../../@types/generated";
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
-const FiatTokenV3 = artifacts.require("FiatTokenV3");
 
 export function usesOriginalStorageSlotPositions<
   T extends Truffle.ContractInstance
@@ -135,7 +134,7 @@ export function usesOriginalStorageSlotPositions<
     }
 
     it("retains original storage slots for blacklisted mapping", async () => {
-      if (version < 3) {
+      if (version < 2.2) {
         // blacklisted[alice]
         let v = parseInt(
           await readSlot(proxy.address, addressMappingSlot(alice, 3)),

@@ -28,15 +28,15 @@ import { EIP712 } from "../util/EIP712.sol";
 // solhint-disable func-name-mixedcase
 
 /**
- * @title FiatTokenV3
+ * @title FiatTokenV2_2
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatTokenV3 is FiatTokenV2_1 {
+contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
-     * @notice Initialize v3
+     * @notice Initialize v2.2
      */
-    function initializeV3(address[] calldata accountsToBlacklist) external {
-        require(_initializedVersion == 2, "v3 initialized out of order");
+    function initializeV2_2(address[] calldata accountsToBlacklist) external {
+        require(_initializedVersion == 2, "v2.2 initialized out of order");
 
         // re-add previously blacklisted accounts to the blacklist
         // by setting the high bit of their balance to 1
@@ -46,8 +46,6 @@ contract FiatTokenV3 is FiatTokenV2_1 {
 
         // additionally blacklist the contract address itself
         _blacklist(address(this));
-
-        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(name, "3");
 
         _initializedVersion = 3;
     }
@@ -328,13 +326,5 @@ contract FiatTokenV3 is FiatTokenV2_1 {
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
         return true;
-    }
-
-    /**
-     * @notice Version string for the EIP712 domain separator
-     * @return Version string
-     */
-    function version() external override view returns (string memory) {
-        return "3";
     }
 }

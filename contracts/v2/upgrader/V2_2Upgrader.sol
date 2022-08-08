@@ -25,20 +25,20 @@ pragma solidity 0.6.12;
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "../../v1/Ownable.sol";
-import { FiatTokenV3 } from "../FiatTokenV3.sol";
+import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
 import { V2UpgraderHelper } from "../../v2/upgrader/V2UpgraderHelper.sol";
 
 /**
- * @title V3 Upgrader
- * @notice Performs USDC v3 upgrade
- * @dev Read docs/v3_upgrade.md
+ * @title v2.2 Upgrader
+ * @notice Performs USDC v2.2 upgrade
+ * @dev docs TBD
  */
-contract V3Upgrader is Ownable {
+contract V2_2Upgrader is Ownable {
     using SafeMath for uint256;
 
     FiatTokenProxy private _proxy;
-    FiatTokenV3 private _implementation;
+    FiatTokenV2_2 private _implementation;
     address private _newProxyAdmin;
     string private _newName;
     V2UpgraderHelper private _helper;
@@ -47,13 +47,13 @@ contract V3Upgrader is Ownable {
     /**
      * @notice Constructor
      * @param proxy                 FiatTokenProxy contract
-     * @param implementation        FiatTokenV3 implementation contract
+     * @param implementation        FiatTokenV2_2 implementation contract
      * @param newProxyAdmin         Grantee of proxy admin role after upgrade
      * @param accountsToBlacklist   Accounts to re-add to the blacklist
      */
     constructor(
         FiatTokenProxy proxy,
-        FiatTokenV3 implementation,
+        FiatTokenV2_2 implementation,
         address newProxyAdmin,
         address[] memory accountsToBlacklist
     ) public Ownable() {
@@ -73,7 +73,7 @@ contract V3Upgrader is Ownable {
     }
 
     /**
-     * @notice The address of the FiatTokenV3 implementation contract
+     * @notice The address of the FiatTokenV2_2 implementation contract
      * @return Contract address
      */
     function implementation() external view returns (address) {
@@ -117,7 +117,7 @@ contract V3Upgrader is Ownable {
 
         // Check that this contract sufficient funds to run the tests
         uint256 contractBal = _helper.balanceOf(address(this));
-        require(contractBal >= 2e5, "V3Upgrader: 0.2 USDC needed");
+        require(contractBal >= 2e5, "V2_2Upgrader: 0.2 USDC needed");
 
         uint256 callerBal = _helper.balanceOf(msg.sender);
 
@@ -137,52 +137,52 @@ contract V3Upgrader is Ownable {
         // Transfer proxy admin role
         _proxy.changeAdmin(_newProxyAdmin);
 
-        // Initialize V3 contract
-        FiatTokenV3 v3 = FiatTokenV3(address(_proxy));
-        v3.initializeV3(_accountsToBlacklist);
+        // Initialize V2_2 contract
+        FiatTokenV2_2 v2_2 = FiatTokenV2_2(address(_proxy));
+        v2_2.initializeV2_2(_accountsToBlacklist);
 
         // Sanity test
         // Check metadata
         require(
-            keccak256(bytes(name)) == keccak256(bytes(v3.name())) &&
-                keccak256(bytes(symbol)) == keccak256(bytes(v3.symbol())) &&
-                decimals == v3.decimals() &&
-                keccak256(bytes(currency)) == keccak256(bytes(v3.currency())) &&
-                masterMinter == v3.masterMinter() &&
-                owner == v3.owner() &&
-                pauser == v3.pauser() &&
-                blacklister == v3.blacklister(),
-            "V3Upgrader: metadata test failed"
+            keccak256(bytes(name)) == keccak256(bytes(v2_2.name())) &&
+                keccak256(bytes(symbol)) == keccak256(bytes(v2_2.symbol())) &&
+                decimals == v2_2.decimals() &&
+                keccak256(bytes(currency)) == keccak256(bytes(v2_2.currency())) &&
+                masterMinter == v2_2.masterMinter() &&
+                owner == v2_2.owner() &&
+                pauser == v2_2.pauser() &&
+                blacklister == v2_2.blacklister(),
+            "V2_2Upgrader: metadata test failed"
         );
 
         // Test balanceOf
         require(
-            v3.balanceOf(address(this)) == contractBal,
-            "V3Upgrader: balanceOf test failed"
+            v2_2.balanceOf(address(this)) == contractBal,
+            "V2_2Upgrader: balanceOf test failed"
         );
 
         // Test transfer
         require(
-            v3.transfer(msg.sender, 1e5) &&
-                v3.balanceOf(msg.sender) == callerBal.add(1e5) &&
-                v3.balanceOf(address(this)) == contractBal.sub(1e5),
-            "V3Upgrader: transfer test failed"
+            v2_2.transfer(msg.sender, 1e5) &&
+                v2_2.balanceOf(msg.sender) == callerBal.add(1e5) &&
+                v2_2.balanceOf(address(this)) == contractBal.sub(1e5),
+            "V2_2Upgrader: transfer test failed"
         );
 
         // Test approve/transferFrom
         require(
-            v3.approve(address(_helper), 1e5) &&
-                v3.allowance(address(this), address(_helper)) == 1e5 &&
+            v2_2.approve(address(_helper), 1e5) &&
+                v2_2.allowance(address(this), address(_helper)) == 1e5 &&
                 _helper.transferFrom(address(this), msg.sender, 1e5) &&
-                v3.allowance(address(this), msg.sender) == 0 &&
-                v3.balanceOf(msg.sender) == callerBal.add(2e5) &&
-                v3.balanceOf(address(this)) == contractBal.sub(2e5),
-            "V3Upgrader: approve/transferFrom test failed"
+                v2_2.allowance(address(this), msg.sender) == 0 &&
+                v2_2.balanceOf(msg.sender) == callerBal.add(2e5) &&
+                v2_2.balanceOf(address(this)) == contractBal.sub(2e5),
+            "V2_2Upgrader: approve/transferFrom test failed"
         );
 
         // Check that addresses that should be blacklisted are
         for (uint256 i = 0; i < _accountsToBlacklist.length; i++) {
-            require(v3.isBlacklisted(_accountsToBlacklist[i]), "V3Upgrader: blacklist test failed");
+            require(v2_2.isBlacklisted(_accountsToBlacklist[i]), "V2_2Upgrader: blacklist test failed");
         }
 
         // Transfer any remaining USDC to the caller
@@ -202,7 +202,7 @@ contract V3Upgrader is Ownable {
         if (balance > 0) {
             require(
                 usdc.transfer(msg.sender, balance),
-                "V3Upgrader: failed to withdraw USDC"
+                "V2_2Upgrader: failed to withdraw USDC"
             );
         }
     }

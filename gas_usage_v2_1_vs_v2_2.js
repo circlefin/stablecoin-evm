@@ -1,7 +1,7 @@
-// run with `yarn truffle exec scripts/gas_usage_v2_vs_v3.js`
+// run with `yarn truffle exec scripts/gas_usage_v2_1_vs_v2_2.js`
 
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
-const FiatTokenV3 = artifacts.require("FiatTokenV3");
+const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 
 module.exports = async function (callback) {
   try {
@@ -9,14 +9,14 @@ module.exports = async function (callback) {
     const mintAmount = 50e6;
     const transferAmount = 10e6;
 
-    const fiatTokenV3 = await initializeV3(fiatTokenOwner);
+    const fiatTokenV2_2 = await initializeV2_2(fiatTokenOwner);
     const fiatTokenV2_1 = await initializeV2_1(fiatTokenOwner);
 
-    await fiatTokenV3.mint(alice, mintAmount, { from: fiatTokenOwner });
-    const transferTxV3 = await fiatTokenV3.transfer(bob, transferAmount, {
+    await FiatTokenV2_2.mint(alice, mintAmount, { from: fiatTokenOwner });
+    const transferTxV2_2 = await FiatTokenV2_2.transfer(bob, transferAmount, {
       from: alice,
     });
-    console.log("V3 transfer gas usage:", transferTxV3.receipt.gasUsed);
+    console.log("V2.2 transfer gas usage:", transferTxV2_2.receipt.gasUsed);
 
     await fiatTokenV2_1.mint(alice, mintAmount, {
       from: fiatTokenOwner,
@@ -26,17 +26,17 @@ module.exports = async function (callback) {
     });
     console.log("V2.1 transfer gas usage:", transferTxV2_1.receipt.gasUsed);
 
-    const approvalTxV3 = await fiatTokenV3.approve(bob, transferAmount, {
+    const approvalTxV2_2 = await fiatTokenV2_2.approve(bob, transferAmount, {
       from: alice,
     });
-    console.log("V3 approve gas usage:", approvalTxV3.receipt.gasUsed);
+    console.log("V2.2 approve gas usage:", approvalTxV2_2.receipt.gasUsed);
 
     const approvalTxV2_1 = await fiatTokenV2_1.approve(bob, transferAmount, {
       from: alice,
     });
     console.log("V2.1 approve gas usage:", approvalTxV2_1.receipt.gasUsed);
 
-    const transferFromTxV3 = await fiatTokenV3.transferFrom(
+    const transferFromTxV2_2 = await fiatTokenV2_2.transferFrom(
       alice,
       bob,
       transferAmount,
@@ -44,7 +44,10 @@ module.exports = async function (callback) {
         from: bob,
       }
     );
-    console.log("V3 transferFrom gas usage:", transferFromTxV3.receipt.gasUsed);
+    console.log(
+      "V2.2 transferFrom gas usage:",
+      transferFromTxV2_2.receipt.gasUsed
+    );
 
     const transferFromTxV2_1 = await fiatTokenV2_1.transferFrom(
       alice,
@@ -65,10 +68,10 @@ module.exports = async function (callback) {
   callback();
 };
 
-async function initializeV3(fiatTokenOwner) {
-  const fiatTokenV3 = await FiatTokenV3.new();
+async function initializeV2_2(fiatTokenOwner) {
+  const fiatTokenV2_2 = await FiatTokenV2_2.new();
 
-  await fiatTokenV3.initialize(
+  await fiatTokenV2_2.initialize(
     "USD Coin",
     "USDC",
     "USD",
@@ -78,15 +81,15 @@ async function initializeV3(fiatTokenOwner) {
     fiatTokenOwner,
     fiatTokenOwner
   );
-  await fiatTokenV3.initializeV2("USD Coin", { from: fiatTokenOwner });
-  await fiatTokenV3.initializeV2_1(fiatTokenOwner, { from: fiatTokenOwner });
-  await fiatTokenV3.initializeV3([], { from: fiatTokenOwner });
+  await fiatTokenV2_2.initializeV2("USD Coin", { from: fiatTokenOwner });
+  await fiatTokenV2_2.initializeV2_1(fiatTokenOwner, { from: fiatTokenOwner });
+  await fiatTokenV2_2.initializeV2_2([], { from: fiatTokenOwner });
 
-  await fiatTokenV3.configureMinter(fiatTokenOwner, 1000000e6, {
+  await fiatTokenV2_2.configureMinter(fiatTokenOwner, 1000000e6, {
     from: fiatTokenOwner,
   });
 
-  return fiatTokenV3;
+  return fiatTokenV2_2;
 }
 
 async function initializeV2_1(fiatTokenOwner) {

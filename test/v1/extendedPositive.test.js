@@ -11,7 +11,7 @@ const {
   pauserAccount,
   initializeTokenWithProxy,
   UpgradedFiatToken,
-  UpgradedFiatTokenV3,
+  UpgradedFiatTokenV2_2,
   upgradeTo,
 } = require("./helpers/tokenTest");
 
@@ -250,10 +250,10 @@ function runTests(newToken, _accounts, _version) {
   it("ept022 should upgrade when msg.sender blacklisted", async () => {
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
     let newRawToken;
-    if (_version < 3) {
+    if (_version < 2.2) {
       newRawToken = await UpgradedFiatToken.new();
     } else {
-      newRawToken = await UpgradedFiatTokenV3.new();
+      newRawToken = await UpgradedFiatTokenV2_2.new();
     }
 
     const tokenConfig = await upgradeTo(proxy, newRawToken);
@@ -268,10 +268,10 @@ function runTests(newToken, _accounts, _version) {
 
   it("ept023 should upgrade to blacklisted address", async () => {
     let newRawToken;
-    if (_version < 3) {
+    if (_version < 2.2) {
       newRawToken = await UpgradedFiatToken.new();
     } else {
-      newRawToken = await UpgradedFiatTokenV3.new();
+      newRawToken = await UpgradedFiatTokenV2_2.new();
     }
 
     await token.blacklist(newRawToken.address, { from: blacklisterAccount });

@@ -1,8 +1,6 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018 zOS Global Limited.
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -24,13 +22,13 @@
 
 pragma solidity 0.6.12;
 
-import { FiatTokenV3 } from "../v3/FiatTokenV3.sol";
+import { FiatTokenV2_2 } from "../v2/FiatTokenV2_2.sol";
 
 /**
  * @title UpgradedFiatTokenNewFieldsTest
  * @dev ERC20 Token backed by fiat reserves
  */
-contract UpgradedFiatTokenNewFieldsV3Test is FiatTokenV3 {
+contract UpgradedFiatTokenNewFieldsV2_2Test is FiatTokenV2_2 {
     bool public newBool;
     address public newAddress;
     uint256 public newUint;

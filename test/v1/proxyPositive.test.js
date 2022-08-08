@@ -23,7 +23,7 @@ const {
   FiatTokenProxy,
   UpgradedFiatToken,
   UpgradedFiatTokenNewFields,
-  UpgradedFiatTokenNewFieldsV3,
+  UpgradedFiatTokenNewFieldsV2_2,
   UpgradedFiatTokenNewFieldsNewLogic,
   getAdmin,
 } = require("./helpers/tokenTest");
@@ -407,10 +407,10 @@ function runTests(newToken, _accounts, _version) {
     await token.blacklist(proxyOwnerAccount, { from: blacklisterAccount });
 
     let upgradedToken;
-    if (_version < 3) {
+    if (_version < 2.2) {
       upgradedToken = await UpgradedFiatTokenNewFields.new();
     } else {
-      upgradedToken = await UpgradedFiatTokenNewFieldsV3.new();
+      upgradedToken = await UpgradedFiatTokenNewFieldsV2_2.new();
     }
     const initializeData = encodeCall(
       "initV2",
