@@ -146,7 +146,7 @@ export function behavesLikeFiatTokenV2_2(
       getFiatToken().mint(infiniteAllower, 1, {
         from: fiatTokenOwner,
       }),
-      "mint causes total supply to supply cap"
+      "mint causes total supply to exceed supply cap"
     );
   });
 

@@ -317,7 +317,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         // with a high balance
         // Hardcoding the value here as opposed to setting it in storage since it's
         // expected to be static and this avoids an SLOAD
-        require(newTotalSupply <= (uint256(1) << 255) - 1, "mint causes total supply to supply cap");
+        require(newTotalSupply <= (uint256(1) << 255) - 1, "mint causes total supply to exceed supply cap");
 
         totalSupply_ = newTotalSupply;
 
