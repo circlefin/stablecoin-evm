@@ -15,12 +15,14 @@ const {
   FiatTokenProxy,
 } = require("./helpers/tokenTest");
 
+// When using the high bit for blacklisting, 2^255 is the max
+// usable amount
 const maxAmount =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+  "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 const maxAmountBN = new BN(maxAmount.slice(2), 16);
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, _version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -722,7 +724,7 @@ function runTests(newToken, _accounts) {
     assert.strictEqual("0x00", initialized);
   });
 
-  it("ms047 configureMinter works on amount=2^256-1", async () => {
+  it("ms047 configureMinter works on amount=2^255-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
@@ -736,7 +738,7 @@ function runTests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms048 mint works on amount=2^256-1", async () => {
+  it("ms048 mint works on amount=2^255-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
@@ -765,7 +767,7 @@ function runTests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms049 burn on works on amount=2^256-1", async () => {
+  it("ms049 burn on works on amount=2^255-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
@@ -787,7 +789,7 @@ function runTests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms050 approve works on amount=2^256-1", async () => {
+  it("ms050 approve works on amount=2^255-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
@@ -818,7 +820,7 @@ function runTests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms051 transfer works on amount=2^256-1", async () => {
+  it("ms051 transfer works on amount=2^255-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });
@@ -845,7 +847,7 @@ function runTests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms052 transferFrom works on amount=2^256-1", async () => {
+  it("ms052 transferFrom works on amount=2^255-1", async () => {
     await token.configureMinter(minterAccount, maxAmount, {
       from: masterMinterAccount,
     });

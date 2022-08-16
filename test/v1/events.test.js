@@ -32,7 +32,7 @@ const {
 
 const amount = 100;
 
-function runTests(_newToken, _accounts) {
+function runTests(_newToken, _accounts, _version) {
   let proxy, token;
 
   beforeEach(async () => {

@@ -22,11 +22,11 @@ const zeroAddress = "0x0000000000000000000000000000000000000000";
 const maxAmount =
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
-async function run_tests_MintController(newToken, accounts) {
+async function run_tests_MintController(newToken, accounts, _version) {
   run_MINT_tests(newToken, MintController, accounts);
 }
 
-async function run_tests_MasterMinter(newToken, accounts) {
+async function run_tests_MasterMinter(newToken, accounts, _version) {
   run_MINT_tests(newToken, MasterMinter, accounts);
 }
 

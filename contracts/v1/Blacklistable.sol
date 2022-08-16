@@ -53,7 +53,7 @@ contract Blacklistable is Ownable {
      * @dev Throws if argument account is blacklisted
      * @param _account The address to check
      */
-    modifier notBlacklisted(address _account) {
+    modifier notBlacklisted(address _account) virtual {
         require(
             !blacklisted[_account],
             "Blacklistable: account is blacklisted"
@@ -65,7 +65,7 @@ contract Blacklistable is Ownable {
      * @dev Checks if account is blacklisted
      * @param _account The address to check
      */
-    function isBlacklisted(address _account) external view returns (bool) {
+    function isBlacklisted(address _account) virtual external view returns (bool) {
         return blacklisted[_account];
     }
 
@@ -73,7 +73,7 @@ contract Blacklistable is Ownable {
      * @dev Adds account to blacklist
      * @param _account The address to blacklist
      */
-    function blacklist(address _account) external onlyBlacklister {
+    function blacklist(address _account) virtual external onlyBlacklister {
         blacklisted[_account] = true;
         emit Blacklisted(_account);
     }
@@ -82,7 +82,7 @@ contract Blacklistable is Ownable {
      * @dev Removes account from blacklist
      * @param _account The address to remove from the blacklist
      */
-    function unBlacklist(address _account) external onlyBlacklister {
+    function unBlacklist(address _account) virtual external onlyBlacklister {
         blacklisted[_account] = false;
         emit UnBlacklisted(_account);
     }

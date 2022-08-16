@@ -111,6 +111,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @return A boolean that indicates if the operation was successful.
      */
     function mint(address _to, uint256 _amount)
+        virtual
         external
         whenNotPaused
         onlyMinters
@@ -190,6 +191,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @param account address The account
      */
     function balanceOf(address account)
+        virtual
         external
         override
         view
@@ -246,6 +248,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         address to,
         uint256 value
     )
+        virtual
         external
         override
         whenNotPaused
@@ -270,6 +273,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @return True if successful
      */
     function transfer(address to, uint256 value)
+        virtual
         external
         override
         whenNotPaused
@@ -291,7 +295,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         address from,
         address to,
         uint256 value
-    ) internal override {
+    ) virtual internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(
