@@ -22,7 +22,7 @@
     "clean": "truffle networks --clean",
     "deployContracts": "truffle migrate --interactive --to 2",
     "minters": "truffle migrate --interactive -f 3 --to 3",
-    "coldStorage": "truffle migrate --interactive -f 6",
+    "coldStorage": "truffle migrate --interactive -f 4",
     "verify": "truffle run verify FiatTokenProxy FiatTokenV2_1 MasterMinter"
   },
   "repository": {
