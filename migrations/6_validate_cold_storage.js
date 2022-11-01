@@ -26,7 +26,7 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
 }
 
 // Prints out current roles on important contracts, for validation
-module.exports = async function () {
+module.exports = async function (deployer, network, accounts) {
   proxyContractAddress =
     proxyContractAddress || (await FiatTokenProxy.deployed()).address;
   const proxyAsV2_1 = await FiatTokenV2_1.at(proxyContractAddress);

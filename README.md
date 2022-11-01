@@ -33,11 +33,12 @@ yarn deployContracts --network {development, testnet, mainnet}
 // ensure PROXY_CONTRACT_ADDRESS and MINT_ALLOWANCE_UNITS_PROD/STG 
 // are properly set in config.js 
 yarn minters --network {development, testnet, mainnet}
+// make sure you record address of FiatTokenProxy, FiatTokenV2_1, MasterMinter
+yarn verify --network {development, testnet, mainnet}
 
 // only needed for mainnet
+// ensure you set the address for MASTER_MINTER_CONTRACT_ADDRESS and PROXY_CONTRACT_ADDRESS
 yarn coldStorage --network {development, testnet, mainnet}
-
-yarn verify --network {see here https://www.npmjs.com/package/truffle-plugin-verify}
 ```
 
 **Remember to save the config.js file in 1PW Wallets Org** 
