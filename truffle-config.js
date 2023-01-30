@@ -44,15 +44,19 @@ module.exports = {
       provider: infuraProvider("ropsten"),
       network_id: 3,
     },
+    goerli: {
+      provider: infuraProvider("goerli"),
+      network_id: 5,
+    },
   },
   mocha: {
     timeout: 60000, // prevents tests from failing when pc is under heavy load
     reporter: "Spec",
   },
-  plugins: ["solidity-coverage"],
+  plugins: ["solidity-coverage", "truffle-plugin-verify"],
 };
 
-function infuraProvider(network) {
+function infuraProvider (network) {
   return () => {
     if (!config.MNEMONIC) {
       console.error("A valid MNEMONIC must be provided in config.js");

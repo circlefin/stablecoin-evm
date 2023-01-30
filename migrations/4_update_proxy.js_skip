@@ -1,0 +1,44 @@
+const fs = require("fs");
+const path = require("path");
+const some = require("lodash/some");
+
+const FiatTokenV1b = artifacts.require("FiatTokenV1b");
+const FiatTokenProxy = artifacts.require("FiatTokenProxy");
+
+let proxyContractAddress = "";
+let proxyAdminAddress = "";
+
+/** ---------------------------
+ * Setup
+ --------------------------- */
+
+// Read config file if it exists
+if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+  ({
+    PROXY_CONTRACT_ADDRESS: proxyContractAddress,
+    PROXY_ADMIN_ADDRESS: proxyAdminAddress,
+  } = require("../config.js"));
+}
+
+module.exports = async (deployer, network) => {
+  if (some(["development", "coverage"], (v) => network.includes(v))) {
+    proxyAdminAddress = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598";
+    const fiatTokenProxy = await FiatTokenProxy.deployed();
+    console.log("Deployed proxy contract at", fiatTokenProxy.address);
+    proxyContractAddress = fiatTokenProxy.address;
+  }
+
+  /** ---------------------------
+  * Updating proxy
+  --------------------------- */
+
+  const proxy = await FiatTokenProxy.at(proxyContractAddress);
+  const v1b = await FiatTokenV1b.deployed();
+  console.log("Deployed v1b contract at", v1b.address);
+  const res = await proxy.upgradeTo(v1b.address, {
+    from: proxyAdminAddress,
+  });
+
+  console.log(`FiatTokenProxy: ${proxy.address}`);
+  console.log({ res });
+};
