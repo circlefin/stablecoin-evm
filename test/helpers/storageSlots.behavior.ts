@@ -4,6 +4,8 @@ import { FiatTokenProxyInstance } from "../../@types/generated";
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
+const FiatTokenV2 = artifacts.require("FiatTokenV2");
+const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 
 export function usesOriginalStorageSlotPositions<
   T extends Truffle.ContractInstance
@@ -35,10 +37,12 @@ export function usesOriginalStorageSlotPositions<
       alice,
       bob,
       charlie,
+      lostAndFound,
     ] = accounts;
 
     let fiatToken: T;
     let proxy: FiatTokenProxyInstance;
+    let domainSeparator : String;
 
     beforeEach(async () => {
       fiatToken = await Contract.new();
@@ -71,6 +75,15 @@ export function usesOriginalStorageSlotPositions<
         await proxyAsFiatTokenV1_1.updateRescuer(rescuer, {
           from: owner,
         });
+      }
+      if (version >= 2) {
+        const proxyAsFiatTokenV2 = await FiatTokenV2.at(proxy.address);
+        await proxyAsFiatTokenV2.initializeV2(name);
+        domainSeparator = await proxyAsFiatTokenV2.DOMAIN_SEPARATOR();
+      }
+      if (version >= 2.1) {
+        const proxyAsFiatTokenV2_1 = await FiatTokenV2_1.at(proxy.address);
+        await proxyAsFiatTokenV2_1.initializeV2_1(lostAndFound);
       }
     });
 
@@ -130,6 +143,12 @@ export function usesOriginalStorageSlotPositions<
       it("retains slot 14 for rescuer", async () => {
         const slot = await readSlot(proxy.address, 14);
         expect(parseAddress(slot)).to.equal(rescuer);
+      });
+    }
+    if (version >= 2) {
+      it("retains slot 15 for DOMAIN_SEPARATOR", async()=> {
+        const slot = await readSlot(proxy.address, 15);
+        expect("0x" + slot).to.equal(domainSeparator);
       });
     }
 

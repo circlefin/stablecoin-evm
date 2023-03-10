@@ -46,7 +46,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         // solhint-disable-next-line reason-string
         require(initialized && _initializedVersion == 0);
         name = newName;
-        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
+        _CACHED_DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
         _initializedVersion = 1;
     }
 
