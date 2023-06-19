@@ -1,3 +1,0 @@
-"scripts": {
-  "abi-encode": "node abi-encode.js"
-}
