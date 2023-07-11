@@ -14,6 +14,12 @@ validate/apikey.infura
 ganache-blockchain-log.txt
 .coverage_artifacts
 .coverage_contracts
-yarn-error.log
 @types/generated/
 config.js
+
+# Yarn & Node Modules
+yarn-error.log
+node_modules/
+
+logs/
+pids/

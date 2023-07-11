@@ -1,8 +1,4 @@
 {
-  "files.exclude": {
-    "**/.DS_Store": true,
-    "**/node_modules/": true
-  },
   "solidity.packageDefaultDependenciesContractsDirectory": "",
   "solidity.packageDefaultDependenciesDirectory": "node_modules",
   "solidity.formatter": "none",

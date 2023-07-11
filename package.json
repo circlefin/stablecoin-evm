@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "setup": "git config core.hooksPath .githooks",
+    "prepare": "husky install",
     "compile": "truffle compile",
     "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
     "typecheck": "tsc -p . --noEmit",
@@ -58,6 +58,7 @@
     "ethereumjs-util": "^7.0.3",
     "ganache-cli": "^6.12.2",
     "googleapis": "^55.0.0",
+    "husky": "^8.0.3",
     "lodash": "^4.17.19",
     "prettier": "2.0.5",
     "prettier-plugin-solidity": "1.0.0-alpha.54",
@@ -72,7 +73,7 @@
     "web3": "^1.2.11"
   },
   "engines": {
-    "node": ">= 12.0.0",
-    "yarn": ">= 1.21.1"
+    "node": "16.14.0",
+    "yarn": "1.22.19"
   }
 }
