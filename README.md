@@ -13,9 +13,8 @@ Requirements:
 $ git clone git@github.com:centrehq/centre-tokens.git
 $ cd centre-tokens
 $ nvm use
-$ npm i -g yarn       # Install yarn if you don't already have it
-$ yarn install        # Install dependencies
-$ yarn setup          # Setup Git hooks
+$ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
+$ yarn install          # Install dependencies
 ```
 
 ## TypeScript type definition files for the contracts
