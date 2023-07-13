@@ -25,7 +25,6 @@
 pragma solidity 0.6.12;
 
 import { FiatTokenV1 } from "../../v1/FiatTokenV1.sol";
-import { FiatTokenV2_1 } from "../../v2/FiatTokenV2_1.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 
 /**
@@ -125,14 +124,6 @@ contract V2UpgraderHelper is Ownable {
      */
     function balanceOf(address account) external view returns (uint256) {
         return FiatTokenV1(_proxy).balanceOf(account);
-    }
-
-    /**
-     * @notice Call version()
-     * @return version
-     */
-    function version() external view returns (string memory) {
-        return FiatTokenV2_1(_proxy).version();
     }
 
     /**
