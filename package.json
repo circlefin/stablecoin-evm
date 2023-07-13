@@ -73,7 +73,7 @@
     "web3": "^1.2.11"
   },
   "engines": {
-    "node": ">=16.14.0"
+    "node": "16.14.0"
   },
   "packageManager": "yarn@1.22.19"
 }
