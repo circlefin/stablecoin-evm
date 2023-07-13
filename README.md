@@ -4,10 +4,12 @@ Fiat tokens on the [CENTRE](https://centre.io) network.
 
 ## Setup
 
+### Development Environment
+
 Requirements:
 
-- Node >= v12
-- Yarn
+- Node 16.14.0
+- Yarn 1.22.19
 
 ```
 $ git clone git@github.com:centrehq/centre-tokens.git
@@ -17,17 +19,28 @@ $ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
 $ yarn install          # Install dependencies
 ```
 
+### IDE
+
+We recommend using VSCode for the project here with these
+[extensions](./.vscode/extensions.json) installed.
+
 ## TypeScript type definition files for the contracts
 
 To generate type definitions:
 
 ```
-$ yarn compile && yarn typechain
+$ yarn typechain
 ```
 
 ## Linting and Formatting
 
 To check code for problems:
+
+```
+$ yarn static-check   # Runs a static check on the repo.
+```
+
+or run the checks individually:
 
 ```
 $ yarn typecheck      # Type-check TypeScript code
@@ -67,6 +80,13 @@ To run tests and generate test coverage, run:
 
 ```
 $ yarn coverage
+```
+
+To check the size of contracts in the repo, run the following command. Add the
+flag if you want it to return an error code if a contract is larger than 24KiB:
+
+```
+$ yarn contract-size [--checkMaxSize]
 ```
 
 ## Deployment

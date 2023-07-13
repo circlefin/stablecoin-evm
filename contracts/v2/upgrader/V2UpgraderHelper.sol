@@ -34,7 +34,7 @@ import { Ownable } from "../../v1/Ownable.sol";
  * used to test approve/transferFrom.
  */
 contract V2UpgraderHelper is Ownable {
-    address private _proxy;
+    address internal _proxy;
 
     /**
      * @notice Constructor

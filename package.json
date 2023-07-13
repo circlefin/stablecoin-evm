@@ -7,20 +7,24 @@
     "test": "test"
   },
   "scripts": {
-    "prepare": "husky install",
     "compile": "truffle compile",
-    "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
-    "typecheck": "tsc -p . --noEmit",
-    "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
+    "contract-size": "truffle run contract-size",
+    "coverage": "truffle run coverage",
     "fmt": "prettier --write './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
     "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
-    "test": "truffle test",
-    "coverage": "truffle run coverage",
-    "contract-size": "truffle run contract-size",
-    "solhint": "solhint 'contracts/**/*.sol'",
-    "precommit": "yarn typechain && yarn fmt && yarn typecheck && yarn lint && yarn solhint",
+    "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
+    "migrate": "truffle migrate --interactive",
+    "migrate:v2": "yarn migrate --f 3 --to 4",
+    "migrate:v2_1": "yarn migrate --f 5 --to 6",
+    "migrate:v2_2": "yarn migrate --f 7 --to 8",
+    "prepare": "husky install",
+    "precommit": "yarn fmt && yarn static-check",
     "slither": "slither --solc-disable-warnings --disable-color --exclude-dependencies .",
-    "migrate": "truffle migrate --interactive"
+    "solhint": "solhint 'contracts/**/*.sol'",
+    "static-check": "yarn typechain && yarn typecheck && yarn lint && yarn solhint",
+    "test": "truffle test",
+    "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
+    "typecheck": "tsc -p . --noEmit"
   },
   "repository": {
     "type": "git",
@@ -71,7 +75,7 @@
     "truffle-contract-size": "^2.0.1",
     "ts-node": "^8.10.2",
     "typechain": "^2.0.0",
-    "typescript": "^3.9.7",
+    "typescript": "5.1.6",
     "web3": "^1.2.11"
   },
   "engines": {

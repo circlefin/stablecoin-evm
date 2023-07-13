@@ -1,14 +1,24 @@
-# Copyright (c) 2023, Circle Internet Financial Trading Company Limited.
-# All rights reserved.
+#!/usr/bin/env bash
 #
-# Circle Internet Financial Trading Company Limited CONFIDENTIAL
+# Copyright (c) 2018-2023 CENTRE SECZ
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# This file includes unpublished proprietary source code of Circle Internet
-# Financial Trading Company Limited, Inc. The copyright notice above does not
-# evidence any actual or intended publication of such source code. Disclosure
-# of this source code or any related proprietary information is strictly
-# prohibited without the express written permission of Circle Internet Financial
-# Trading Company Limited.
+# The above copyright notice and this permission notice shall be included in
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 DOCROOT="$( cd "$( dirname "$0" )" && pwd )"
 PIDS_DIRECTORY="${DOCROOT}/pids"
