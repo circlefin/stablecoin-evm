@@ -1,0 +1,25 @@
+name: Continuous Integration
+on:
+  pull_request:
+
+jobs:
+  run_ci_tests:
+    if: ${{ github.repository_owner == 'circlefin' || github.repository_owner == 'centrehq' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.14.0"
+
+      - name: Install packages
+        run: yarn install
+
+      - name: Setup local environment
+        run: cp config.js.example config.js && ./start-all.sh
+
+      - name: Run tests
+        run: yarn test
