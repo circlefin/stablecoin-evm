@@ -89,7 +89,7 @@ fi
 
 if [[ "${RESTART}" = true ]] ; then
     echo 'Stopping ganache.'
-    bash ${DOCROOT}/stop-all.sh
+    bash ${DOCROOT}/stop-ganache.sh
 fi
 
 if [[ -e "${GANACHE_PID_FILE}" ]];

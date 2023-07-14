@@ -4,7 +4,6 @@ on:
 
 jobs:
   run_ci_tests:
-    if: ${{ github.repository_owner == 'circlefin' || github.repository_owner == 'centrehq' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -19,10 +18,10 @@ jobs:
         run: npm install -g yarn@1.22.19
 
       - name: Install packages
-        run: yarn install
+        run: yarn install --frozen-lockfile
 
       - name: Setup local environment
-        run: cp config.js.example config.js && ./start-all.sh
+        run: cp config.js.example config.js && ./start-ganache.sh
 
       - name: Run tests
         run: yarn test
