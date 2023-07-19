@@ -109,7 +109,7 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
             nonce
         );
         require(
-            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == from,
+            EIP712.recover(_domainSeparator(), v, r, s, data) == from,
             "FiatTokenV2: invalid signature"
         );
 
@@ -155,7 +155,7 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
             nonce
         );
         require(
-            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == from,
+            EIP712.recover(_domainSeparator(), v, r, s, data) == from,
             "FiatTokenV2: invalid signature"
         );
 
@@ -186,7 +186,7 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
             nonce
         );
         require(
-            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == authorizer,
+            EIP712.recover(_domainSeparator(), v, r, s, data) == authorizer,
             "FiatTokenV2: invalid signature"
         );
 

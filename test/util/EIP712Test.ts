@@ -3,7 +3,7 @@ import { Eip712TestInstance } from "../../@types/generated";
 import { wordlist } from "ethereum-cryptography/bip39/wordlists/english";
 import sampleSize from "lodash/sampleSize";
 import { ACCOUNTS_AND_KEYS } from "../helpers/constants";
-import { prepend0x, strip0x, ecSign } from "../helpers";
+import { prepend0x, strip0x, ecSign, makeDomainSeparator } from "../helpers";
 
 const EIP712Test = artifacts.require("EIP712Test");
 
@@ -62,25 +62,3 @@ contract("EIP712", (_accounts) => {
     });
   });
 });
-
-function makeDomainSeparator(
-  name: string,
-  version: string,
-  chainId: number,
-  address: string
-): string {
-  return web3.utils.keccak256(
-    web3.eth.abi.encodeParameters(
-      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
-      [
-        web3.utils.keccak256(
-          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-        ),
-        web3.utils.keccak256(name),
-        web3.utils.keccak256(version),
-        chainId,
-        address,
-      ]
-    )
-  );
-}

@@ -1,5 +1,7 @@
 /**
- * Copyright CENTRE SECZ 2018 - 2021
+ * SPDX-License-Identifier: MIT
+ *
+ * Copyright CENTRE SECZ 2018 - 2023
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,23 +28,24 @@ import "./Controller.sol";
 import "./MinterManagementInterface.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
+// solhint-disable func-name-mixedcase
+
 /**
  * @title MintController
- * @notice The MintController contract manages minters for a contract that
+ * @dev The MintController contract manages minters for a contract that
  * implements the MinterManagerInterface. It lets the owner designate certain
  * addresses as controllers, and these controllers then manage the
  * minters by adding and removing minters, as well as modifying their minting
  * allowance. A controller may manage exactly one minter, but the same minter
  * address may be managed by multiple controllers.
- * @dev MintController inherits from the Controller contract. It treats the
+ * MintController inherits from the Controller contract. It treats the
  * Controller workers as minters.
  */
 contract MintController is Controller {
     using SafeMath for uint256;
 
     /**
-     * @title MinterManagementInterface
-     * @notice MintController calls the minterManager to execute/record minter
+     * @dev MintController calls the minterManager to execute/record minter
      * management tasks, as well as to query the status of a minter address.
      */
     MinterManagementInterface internal minterManager;

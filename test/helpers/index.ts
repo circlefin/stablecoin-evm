@@ -63,3 +63,25 @@ export function ecSign(digest: string, privateKey: string): Signature {
 export function bytes32FromAddress(address: string): string {
   return prepend0x(strip0x(address).toLowerCase().padStart(64, "0"));
 }
+
+export function makeDomainSeparator(
+  name: string,
+  version: string,
+  chainId: number,
+  address: string
+): string {
+  return web3.utils.keccak256(
+    web3.eth.abi.encodeParameters(
+      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
+      [
+        web3.utils.keccak256(
+          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        ),
+        web3.utils.keccak256(name),
+        web3.utils.keccak256(version),
+        chainId,
+        address,
+      ]
+    )
+  );
+}
