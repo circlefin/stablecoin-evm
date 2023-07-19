@@ -78,7 +78,7 @@ abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
             deadline
         );
         require(
-            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == owner,
+            EIP712.recover(_domainSeparator(), v, r, s, data) == owner,
             "EIP2612: invalid signature"
         );
 

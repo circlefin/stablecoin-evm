@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2023 CENTRE SECZ
+ * Copyright (c) 2018 zOS Global Limited.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,37 +24,34 @@
 
 pragma solidity 0.6.12;
 
-import { FiatTokenV2 } from "./FiatTokenV2.sol";
-
-// solhint-disable func-name-mixedcase
+import { FiatTokenV2_2 } from "../v2/FiatTokenV2_2.sol";
 
 /**
- * @title FiatToken V2.1
- * @notice ERC20 Token backed by fiat reserves, version 2.1
+ * @title MockFiatTokenWithEditableChainId
+ * @dev A mock class to simulate chain ID change as a result of blockchain forks
  */
-contract FiatTokenV2_1 is FiatTokenV2 {
+contract MockFiatTokenWithEditableChainId is FiatTokenV2_2 {
+    uint256 private _internalChainId = 1;
+
     /**
-     * @notice Initialize v2.1
-     * @param lostAndFound  The address to which the locked funds are sent
+     * @dev Allow chain ID to be set to any arbitrary values.
      */
-    function initializeV2_1(address lostAndFound) external {
-        // solhint-disable-next-line reason-string
-        require(_initializedVersion == 1);
-
-        uint256 lockedAmount = balances[address(this)];
-        if (lockedAmount > 0) {
-            _transfer(address(this), lostAndFound, lockedAmount);
-        }
-        blacklisted[address(this)] = true;
-
-        _initializedVersion = 2;
+    function setChainId(uint256 newChainId) external {
+        _internalChainId = newChainId;
     }
 
     /**
-     * @notice Version string for the EIP712 domain separator
-     * @return Version string
+     * @return uint256 the interal chain ID previous set with user input
      */
-    function version() external pure returns (string memory) {
-        return "2";
+    function _chainId() internal override view returns (uint256) {
+        return _internalChainId;
+    }
+
+    /**
+     * @dev Helper to allow reading current chain ID from test cases.
+     * @return uint256 the interal chain ID previous set with user input
+     */
+    function chainId() external view returns (uint256) {
+        return _chainId();
     }
 }

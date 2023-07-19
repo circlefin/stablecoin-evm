@@ -35,17 +35,14 @@ library EIP712 {
      * @notice Make EIP712 domain separator
      * @param name      Contract name
      * @param version   Contract version
+     * @param chainId   Blockchain ID
      * @return Domain separator
      */
-    function makeDomainSeparator(string memory name, string memory version)
-        internal
-        view
-        returns (bytes32)
-    {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
+    function makeDomainSeparator(
+        string memory name,
+        string memory version,
+        uint256 chainId
+    ) internal view returns (bytes32) {
         return
             keccak256(
                 abi.encode(
@@ -57,6 +54,24 @@ library EIP712 {
                     address(this)
                 )
             );
+    }
+
+    /**
+     * @notice Make EIP712 domain separator
+     * @param name      Contract name
+     * @param version   Contract version
+     * @return Domain separator
+     */
+    function makeDomainSeparator(string memory name, string memory version)
+        internal
+        view
+        returns (bytes32)
+    {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return makeDomainSeparator(name, version, chainId);
     }
 
     /**

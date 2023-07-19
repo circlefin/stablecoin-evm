@@ -16,6 +16,8 @@ ganache-blockchain-log.txt
 .coverage_contracts
 @types/generated/
 config.js
+out/
+cache/
 
 # Yarn & Node Modules
 yarn-error.log

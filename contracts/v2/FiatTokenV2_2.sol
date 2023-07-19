@@ -24,37 +24,37 @@
 
 pragma solidity 0.6.12;
 
-import { FiatTokenV2 } from "./FiatTokenV2.sol";
+import { FiatTokenV2_1 } from "./FiatTokenV2_1.sol";
+import { EIP712 } from "../util/EIP712.sol";
 
 // solhint-disable func-name-mixedcase
 
 /**
- * @title FiatToken V2.1
- * @notice ERC20 Token backed by fiat reserves, version 2.1
+ * @title FiatToken V2.2
+ * @notice ERC20 Token backed by fiat reserves, version 2.2
  */
-contract FiatTokenV2_1 is FiatTokenV2 {
+contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
-     * @notice Initialize v2.1
-     * @param lostAndFound  The address to which the locked funds are sent
+     * @notice Initialize v2.2
      */
-    function initializeV2_1(address lostAndFound) external {
+    function initializeV2_2() external {
         // solhint-disable-next-line reason-string
-        require(_initializedVersion == 1);
+        require(_initializedVersion == 2);
 
-        uint256 lockedAmount = balances[address(this)];
-        if (lockedAmount > 0) {
-            _transfer(address(this), lostAndFound, lockedAmount);
-        }
-        blacklisted[address(this)] = true;
+        _CACHED_CHAIN_ID = _chainId();
 
-        _initializedVersion = 2;
+        _initializedVersion = 3;
     }
 
-    /**
-     * @notice Version string for the EIP712 domain separator
-     * @return Version string
-     */
-    function version() external pure returns (string memory) {
-        return "2";
+    function _chainId() internal virtual view returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return chainId;
+    }
+
+    function _domainSeparator() internal override view returns (bytes32) {
+        return EIP712.makeDomainSeparator(name, "2", _chainId());
     }
 }

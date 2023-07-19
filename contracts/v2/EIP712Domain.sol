@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2018-2023 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,24 @@
 
 pragma solidity 0.6.12;
 
+// solhint-disable func-name-mixedcase
+
 /**
  * @title EIP712 Domain
  */
 contract EIP712Domain {
+    // was originally DOMAIN_SEPARATOR
+    // but that has been moved to a method so we can override it in V2_2+
+    bytes32 internal _DEPRECATED_CACHED_DOMAIN_SEPARATOR;
+
     /**
      * @dev EIP712 Domain Separator
      */
-    bytes32 public DOMAIN_SEPARATOR;
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
+        return _domainSeparator();
+    }
+
+    function _domainSeparator() internal virtual view returns (bytes32) {
+        return _DEPRECATED_CACHED_DOMAIN_SEPARATOR;
+    }
 }
