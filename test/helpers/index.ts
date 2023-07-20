@@ -1,5 +1,12 @@
 import { ecsign } from "ethereumjs-util";
 import { assert } from "chai";
+import {
+  FiatTokenV11Instance,
+  FiatTokenV1Instance,
+  FiatTokenV21Instance,
+  FiatTokenV22Instance,
+  FiatTokenV2Instance,
+} from "../../@types/generated";
 
 export async function expectRevert(
   promise: Promise<unknown>,
@@ -84,4 +91,41 @@ export function makeDomainSeparator(
       ]
     )
   );
+}
+
+export async function initializeToVersion(
+  implementation:
+    | FiatTokenV1Instance
+    | FiatTokenV11Instance
+    | FiatTokenV2Instance
+    | FiatTokenV21Instance
+    | FiatTokenV22Instance,
+  version: "1" | "1.1" | "2" | "2.1" | "2.2",
+  fiatTokenOwner: string,
+  lostAndFound: string
+): Promise<void> {
+  await implementation.initialize(
+    "USD Coin",
+    "USDC",
+    "USD",
+    6,
+    fiatTokenOwner,
+    fiatTokenOwner,
+    fiatTokenOwner,
+    fiatTokenOwner
+  );
+
+  if (version >= "2") {
+    await (implementation as FiatTokenV2Instance).initializeV2("USD Coin", {
+      from: fiatTokenOwner,
+    });
+  }
+
+  if (version >= "2.1") {
+    await (implementation as FiatTokenV21Instance).initializeV2_1(lostAndFound);
+  }
+
+  if (version >= "2.2") {
+    await (implementation as FiatTokenV22Instance).initializeV2_2();
+  }
 }
