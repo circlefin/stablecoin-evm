@@ -7,7 +7,6 @@
     "test": "test"
   },
   "scripts": {
-    "check": "yarn typechain && yarn typecheck && yarn lint && yarn solhint",
     "compile": "truffle compile",
     "contract-size": "truffle run contract-size",
     "coverage": "truffle run coverage",
@@ -18,6 +17,7 @@
     "prepare": "husky install",
     "slither": "slither --solc-disable-warnings --disable-color --exclude-dependencies .",
     "solhint": "solhint 'contracts/**/*.sol'",
+    "static-check": "yarn typechain && yarn typecheck && yarn lint && yarn solhint",
     "test": "truffle test",
     "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
     "typecheck": "tsc -p . --noEmit"

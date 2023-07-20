@@ -24,7 +24,7 @@ jobs:
         run: cp config.js.example config.js && ./start-ganache.sh
 
       - name: Run static checks
-        run: yarn check
+        run: yarn static-check
 
       - name: Run size check
         run: yarn contract-size --checkMaxSize
