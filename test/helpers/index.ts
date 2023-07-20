@@ -22,7 +22,7 @@ export async function expectRevert(
   try {
     await promise;
   } catch (e) {
-    err = e;
+    err = e as Error;
   }
 
   if (!err) {
