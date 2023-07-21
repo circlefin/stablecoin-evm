@@ -126,7 +126,7 @@ contract V2_2Upgrader is Ownable {
 
         // Check that this contract sufficient funds to run the tests
         uint256 contractBal = _helper.balanceOf(address(this));
-        require(contractBal >= 2e5, "V2_2Upgrader: 0.2 USDC needed");
+        require(contractBal >= 2e5, "V2_2Upgrader: 0.2 FiatToken needed");
 
         uint256 callerBal = _helper.balanceOf(msg.sender);
 
@@ -204,8 +204,8 @@ contract V2_2Upgrader is Ownable {
             "V2_2Upgrader: approve/transferFrom test failed"
         );
 
-        // Transfer any remaining USDC to the caller
-        withdrawUSDC();
+        // Transfer any remaining FiatToken to the caller
+        withdrawFiatToken();
 
         // Tear down
         _helper.tearDown();
@@ -213,15 +213,15 @@ contract V2_2Upgrader is Ownable {
     }
 
     /**
-     * @notice Withdraw any USDC in the contract
+     * @notice Withdraw any FiatToken in the contract
      */
-    function withdrawUSDC() public onlyOwner {
-        IERC20 usdc = IERC20(address(_proxy));
-        uint256 balance = usdc.balanceOf(address(this));
+    function withdrawFiatToken() public onlyOwner {
+        IERC20 fiatToken = IERC20(address(_proxy));
+        uint256 balance = fiatToken.balanceOf(address(this));
         if (balance > 0) {
             require(
-                usdc.transfer(msg.sender, balance),
-                "V2_2Upgrader: failed to withdraw USDC"
+                fiatToken.transfer(msg.sender, balance),
+                "V2_2Upgrader: failed to withdraw FiatToken"
             );
         }
     }

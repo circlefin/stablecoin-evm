@@ -52,7 +52,7 @@ contract("V2Upgrader", (accounts) => {
       expect(await upgrader.newProxyAdmin()).to.equal(originalProxyAdmin);
       expect(await upgrader.newName()).to.equal("USD Coin");
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
@@ -162,7 +162,7 @@ contract("V2Upgrader", (accounts) => {
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
@@ -197,7 +197,7 @@ contract("V2Upgrader", (accounts) => {
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
