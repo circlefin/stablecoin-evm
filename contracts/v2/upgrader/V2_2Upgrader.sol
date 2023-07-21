@@ -29,7 +29,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
-import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
+import { V2_2UpgraderHelper } from "./V2_2UpgraderHelper.sol";
 
 /**
  * @title V2.2 Upgrader
@@ -41,7 +41,7 @@ contract V2_2Upgrader is Ownable {
     FiatTokenProxy private _proxy;
     FiatTokenV2_2 private _implementation;
     address private _newProxyAdmin;
-    V2UpgraderHelper private _helper;
+    V2_2UpgraderHelper private _helper;
 
     /**
      * @notice Constructor
@@ -57,7 +57,7 @@ contract V2_2Upgrader is Ownable {
         _proxy = proxy;
         _implementation = implementation;
         _newProxyAdmin = newProxyAdmin;
-        _helper = new V2UpgraderHelper(address(proxy));
+        _helper = new V2_2UpgraderHelper(address(proxy));
     }
 
     /**
@@ -119,6 +119,7 @@ contract V2_2Upgrader is Ownable {
         address pauser = _helper.pauser();
         address blacklister = _helper.blacklister();
         string memory version = _helper.version();
+        bytes32 domainSeparator = _helper.DOMAIN_SEPARATOR();
 
         // Change implementation contract address
         _proxy.upgradeTo(address(_implementation));
@@ -142,7 +143,8 @@ contract V2_2Upgrader is Ownable {
                 owner == v2_2.owner() &&
                 pauser == v2_2.pauser() &&
                 blacklister == v2_2.blacklister() &&
-                keccak256(bytes(version)) == keccak256(bytes(v2_2.version())),
+                keccak256(bytes(version)) == keccak256(bytes(v2_2.version())) &&
+                domainSeparator == v2_2.DOMAIN_SEPARATOR(),
             "V2_2Upgrader: metadata test failed"
         );
 
