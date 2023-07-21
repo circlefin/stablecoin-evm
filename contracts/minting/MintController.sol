@@ -24,8 +24,8 @@
 
 pragma solidity 0.6.12;
 
-import "./Controller.sol";
-import "./MinterManagementInterface.sol";
+import { Controller } from "./Controller.sol";
+import { MinterManagementInterface } from "./MinterManagementInterface.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 // solhint-disable func-name-mixedcase

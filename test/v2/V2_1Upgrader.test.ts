@@ -59,10 +59,10 @@ contract("V2_1Upgrader", (accounts) => {
       expect(await upgrader.newProxyAdmin()).to.equal(originalProxyAdmin);
       expect(await upgrader.lostAndFound()).to.equal(lostAndFound);
 
-      // Transfer 0.2 USDC to the upgrader contract
+      // Transfer 0.2 FiatToken to the upgrader contract
       await proxyAsV2.transfer(upgrader.address, 2e5, { from: minter });
 
-      // Transfer 100 USDC to the FiatTokenProxy contract
+      // Transfer 100 FiatToken to the FiatTokenProxy contract
       await proxyAsV2.transfer(proxyAsV2_1.address, 100e6, { from: minter });
 
       // Transfer admin role to the contract
@@ -81,7 +81,7 @@ contract("V2_1Upgrader", (accounts) => {
         v2_1Implementation.address
       );
 
-      // 0.2 USDC is transferred back to the upgraderOwner
+      // 0.2 FiatToken is transferred back to the upgraderOwner
       expect(
         (await proxyAsV2_1.balanceOf(upgrader.address)).toNumber()
       ).to.equal(0);
@@ -89,7 +89,7 @@ contract("V2_1Upgrader", (accounts) => {
         2e5
       );
 
-      // the USDC tokens held by the proxy contract are transferred to the lost
+      // the FiatToken tokens held by the proxy contract are transferred to the lost
       // and found address
       expect(
         (await proxyAsV2_1.balanceOf(proxyAsV2_1.address)).toNumber()
@@ -168,7 +168,7 @@ contract("V2_1Upgrader", (accounts) => {
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV2.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
@@ -203,7 +203,7 @@ contract("V2_1Upgrader", (accounts) => {
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV2.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
