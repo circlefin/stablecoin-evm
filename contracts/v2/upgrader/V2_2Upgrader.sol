@@ -38,6 +38,22 @@ import { V2_2UpgraderHelper } from "./V2_2UpgraderHelper.sol";
 contract V2_2Upgrader is Ownable {
     using SafeMath for uint256;
 
+    struct FiatTokenMetadata {
+        string name;
+        string symbol;
+        uint8 decimals;
+        string currency;
+        string version;
+        bytes32 domainSeparator;
+        address masterMinter;
+        address owner;
+        address pauser;
+        address blacklister;
+        address rescuer;
+        bool paused;
+        uint256 totalSupply;
+    }
+
     FiatTokenProxy private _proxy;
     FiatTokenV2_2 private _implementation;
     address private _newProxyAdmin;
@@ -110,16 +126,21 @@ contract V2_2Upgrader is Ownable {
         uint256 callerBal = _helper.balanceOf(msg.sender);
 
         // Keep original contract metadata
-        string memory name = _helper.name();
-        string memory symbol = _helper.symbol();
-        uint8 decimals = _helper.decimals();
-        string memory currency = _helper.currency();
-        address masterMinter = _helper.masterMinter();
-        address owner = _helper.fiatTokenOwner();
-        address pauser = _helper.pauser();
-        address blacklister = _helper.blacklister();
-        string memory version = _helper.version();
-        bytes32 domainSeparator = _helper.DOMAIN_SEPARATOR();
+        FiatTokenMetadata memory originalMetadata = FiatTokenMetadata(
+            _helper.name(),
+            _helper.symbol(),
+            _helper.decimals(),
+            _helper.currency(),
+            _helper.version(),
+            _helper.DOMAIN_SEPARATOR(),
+            _helper.masterMinter(),
+            _helper.fiatTokenOwner(),
+            _helper.pauser(),
+            _helper.blacklister(),
+            _helper.rescuer(),
+            _helper.paused(),
+            _helper.totalSupply()
+        );
 
         // Change implementation contract address
         _proxy.upgradeTo(address(_implementation));
@@ -133,18 +154,23 @@ contract V2_2Upgrader is Ownable {
 
         // Sanity test
         // Check metadata
+        FiatTokenMetadata memory upgradedMetadata = FiatTokenMetadata(
+            v2_2.name(),
+            v2_2.symbol(),
+            v2_2.decimals(),
+            v2_2.currency(),
+            v2_2.version(),
+            v2_2.DOMAIN_SEPARATOR(),
+            v2_2.masterMinter(),
+            v2_2.owner(),
+            v2_2.pauser(),
+            v2_2.blacklister(),
+            v2_2.rescuer(),
+            v2_2.paused(),
+            v2_2.totalSupply()
+        );
         require(
-            keccak256(bytes(name)) == keccak256(bytes(v2_2.name())) &&
-                keccak256(bytes(symbol)) == keccak256(bytes(v2_2.symbol())) &&
-                decimals == v2_2.decimals() &&
-                keccak256(bytes(currency)) ==
-                keccak256(bytes(v2_2.currency())) &&
-                masterMinter == v2_2.masterMinter() &&
-                owner == v2_2.owner() &&
-                pauser == v2_2.pauser() &&
-                blacklister == v2_2.blacklister() &&
-                keccak256(bytes(version)) == keccak256(bytes(v2_2.version())) &&
-                domainSeparator == v2_2.DOMAIN_SEPARATOR(),
+            areFiatTokenMetadataEqual(originalMetadata, upgradedMetadata),
             "V2_2Upgrader: metadata test failed"
         );
 
@@ -208,5 +234,29 @@ contract V2_2Upgrader is Ownable {
         // Tear down
         _helper.tearDown();
         selfdestruct(msg.sender);
+    }
+
+    /**
+     * @dev Checks whether two FiatTokenMetadata are equal.
+     * @return true if the two metadata are equal, false otherwise.
+     */
+    function areFiatTokenMetadataEqual(
+        FiatTokenMetadata memory a,
+        FiatTokenMetadata memory b
+    ) private pure returns (bool) {
+        return
+            keccak256(bytes(a.name)) == keccak256(bytes(b.name)) &&
+            keccak256(bytes(a.symbol)) == keccak256(bytes(b.symbol)) &&
+            a.decimals == b.decimals &&
+            keccak256(bytes(a.currency)) == keccak256(bytes(b.currency)) &&
+            keccak256(bytes(a.version)) == keccak256(bytes(b.version)) &&
+            a.domainSeparator == b.domainSeparator &&
+            a.masterMinter == b.masterMinter &&
+            a.owner == b.owner &&
+            a.pauser == b.pauser &&
+            a.blacklister == b.blacklister &&
+            a.rescuer == b.rescuer &&
+            a.paused == b.paused &&
+            a.totalSupply == b.totalSupply;
     }
 }

@@ -1,7 +1,6 @@
 {
   "solidity.packageDefaultDependenciesContractsDirectory": "",
   "solidity.packageDefaultDependenciesDirectory": "node_modules",
-  "solidity.formatter": "none",
   "files.trimTrailingWhitespace": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.insertSpaces": true,

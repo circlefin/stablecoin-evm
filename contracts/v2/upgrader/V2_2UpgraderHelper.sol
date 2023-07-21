@@ -59,4 +59,28 @@ contract V2_2UpgraderHelper is V2UpgraderHelper {
     function DOMAIN_SEPARATOR() external view returns (bytes32) {
         return FiatTokenV2_1(_proxy).DOMAIN_SEPARATOR();
     }
+
+    /**
+     * @notice Call rescuer()
+     * @return rescuer
+     */
+    function rescuer() external view returns (address) {
+        return FiatTokenV2_1(_proxy).rescuer();
+    }
+
+    /**
+     * @notice Call paused()
+     * @return paused
+     */
+    function paused() external view returns (bool) {
+        return FiatTokenV2_1(_proxy).paused();
+    }
+
+    /**
+     * @notice Call totalSupply()
+     * @return totalSupply
+     */
+    function totalSupply() external view returns (uint256) {
+        return FiatTokenV2_1(_proxy).totalSupply();
+    }
 }
