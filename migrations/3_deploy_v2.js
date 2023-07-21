@@ -30,6 +30,11 @@ module.exports = async (deployer, network) => {
 
   const fiatTokenV2 = await FiatTokenV2.deployed();
   console.log("Deployed FiatTokenV2 at", fiatTokenV2.address);
+
+  // Initializing the implementation contract with dummy values here prevents
+  // the contract from being reinitialized later on with different values.
+  // Dummy values can be used here as the proxy contract will store the actual values
+  // for the deployed token.
   console.log(
     "Initializing FiatTokenV2 implementation contract with dummy values..."
   );
