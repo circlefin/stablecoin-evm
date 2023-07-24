@@ -233,9 +233,6 @@ contract V2_2Upgrader is Ownable {
         // Transfer proxy admin role
         _proxy.changeAdmin(_newProxyAdmin);
 
-        // Transfer any remaining USDC to the caller
-        withdrawUSDC();
-
         // Tear down
         _helper.tearDown();
         selfdestruct(msg.sender);

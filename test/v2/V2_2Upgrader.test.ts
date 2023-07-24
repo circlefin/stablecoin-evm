@@ -5,11 +5,6 @@ import {
   V22UpgraderInstance,
 } from "../../@types/generated";
 import { expectRevert, initializeToVersion } from "../helpers";
-import chai from "chai";
-import chaiAsPromised from "chai-as-promised";
-
-chai.should();
-chai.use(chaiAsPromised);
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
@@ -253,13 +248,12 @@ contract("V2_2Upgrader", (accounts) => {
   });
 
   describe("abortUpgrade", () => {
-    it("transfers proxy admin role to newProxyAdmin, withdraws the tokens, and self-destructs", async () => {
+    it("transfers proxy admin role to newProxyAdmin, and self-destructs", async () => {
       const _fiatTokenProxy = await FiatTokenProxy.new(
         v2_1Implementation.address,
         { from: originalProxyAdmin }
       );
       await initializeToVersion(_fiatTokenProxy, "2.1", minter, lostAndFound);
-      const _proxyAsV2_1 = await FiatTokenV2_1.at(_fiatTokenProxy.address);
 
       const upgraderOwner = accounts[0];
       const _v2_2Upgrader = await V2_2Upgrader.new(
@@ -268,16 +262,7 @@ contract("V2_2Upgrader", (accounts) => {
         originalProxyAdmin,
         { from: upgraderOwner }
       );
-
-      // Transfer 0.2 USDC to the contract
-      await _proxyAsV2_1.configureMinter(minter, 2e5, {
-        from: await _proxyAsV2_1.masterMinter(),
-      });
-      await _proxyAsV2_1.mint(minter, 2e5, { from: minter });
-      await _proxyAsV2_1.transfer(_v2_2Upgrader.address, 2e5, { from: minter });
-      expect(
-        (await _proxyAsV2_1.balanceOf(_v2_2Upgrader.address)).toNumber()
-      ).to.equal(2e5);
+      const _v2_2UpgraderHelperAddress = await _v2_2Upgrader.helper();
 
       // Transfer admin role to the contract
       await _fiatTokenProxy.changeAdmin(_v2_2Upgrader.address, {
@@ -295,19 +280,11 @@ contract("V2_2Upgrader", (accounts) => {
         v2_1Implementation.address
       );
 
-      // The USDC is withdrawn from the contract.
-      expect((await _proxyAsV2_1.balanceOf(upgraderOwner)).toNumber()).to.equal(
-        2e5
-      );
-      expect(
-        (await _proxyAsV2_1.balanceOf(_v2_2Upgrader.address)).toNumber()
-      ).to.equal(0);
-
       // The upgrader contract is self-destructed.
-      await V2_2Upgrader.at(_v2_2Upgrader.address).should.be.rejectedWith(
-        Error,
-        /.*no code at address.*/
-      );
+      expect(await web3.eth.getCode(_v2_2Upgrader.address)).to.equal("0x");
+
+      // The upgrader helper contract is self-destructed.
+      expect(await web3.eth.getCode(_v2_2UpgraderHelperAddress)).to.equal("0x");
     });
   });
 });
