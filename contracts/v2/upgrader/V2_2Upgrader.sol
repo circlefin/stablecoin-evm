@@ -170,7 +170,7 @@ contract V2_2Upgrader is Ownable {
             v2_2.totalSupply()
         );
         require(
-            areFiatTokenMetadataEqual(originalMetadata, upgradedMetadata),
+            checkFiatTokenMetadataEqual(originalMetadata, upgradedMetadata),
             "V2_2Upgrader: metadata test failed"
         );
 
@@ -240,7 +240,7 @@ contract V2_2Upgrader is Ownable {
      * @dev Checks whether two FiatTokenMetadata are equal.
      * @return true if the two metadata are equal, false otherwise.
      */
-    function areFiatTokenMetadataEqual(
+    function checkFiatTokenMetadataEqual(
         FiatTokenMetadata memory a,
         FiatTokenMetadata memory b
     ) private pure returns (bool) {
