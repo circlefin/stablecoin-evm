@@ -38,7 +38,7 @@ import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
  * overkill, but the peace of mind is worth the gas spent. By performing the
  * upgrade atomically, it ensures that there is no disruption of service if the
  * upgrade is not successful for some unforeseen circumstances.
- * @dev Read docs/v2_upgrade.md
+ * @dev Read doc/v2_upgrade.md
  */
 contract V2Upgrader is Ownable {
     using SafeMath for uint256;
