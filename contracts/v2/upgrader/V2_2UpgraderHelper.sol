@@ -55,7 +55,7 @@ contract V2_2UpgraderHelper is V2UpgraderHelper {
      * @notice Call DOMAIN_SEPARATOR()
      * @return domainSeparator
      */
-    // solhint-disable func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32) {
         return FiatTokenV2_1(_proxy).DOMAIN_SEPARATOR();
     }
