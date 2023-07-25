@@ -33,7 +33,7 @@ import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
 
 /**
  * @title V2.1 Upgrader
- * @dev Read docs/v2.1_upgrade.md
+ * @dev Read doc/v2.1_upgrade.md
  */
 contract V2_1Upgrader is Ownable {
     using SafeMath for uint256;

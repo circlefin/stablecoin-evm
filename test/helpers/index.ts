@@ -1,5 +1,18 @@
 import { ecsign } from "ethereumjs-util";
 import { assert } from "chai";
+import {
+  FiatTokenProxyInstance,
+  FiatTokenV11Instance,
+  FiatTokenV1Instance,
+  FiatTokenV21Instance,
+  FiatTokenV22Instance,
+  FiatTokenV2Instance,
+} from "../../@types/generated";
+
+const FiatTokenV1 = artifacts.require("FiatTokenV1");
+const FiatTokenV2 = artifacts.require("FiatTokenV2");
+const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
+const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 
 export async function expectRevert(
   promise: Promise<unknown>,
@@ -9,7 +22,7 @@ export async function expectRevert(
   try {
     await promise;
   } catch (e) {
-    err = e;
+    err = e as Error;
   }
 
   if (!err) {
@@ -84,4 +97,46 @@ export function makeDomainSeparator(
       ]
     )
   );
+}
+
+export async function initializeToVersion(
+  proxyOrImplementation:
+    | FiatTokenProxyInstance
+    | FiatTokenV1Instance
+    | FiatTokenV11Instance
+    | FiatTokenV2Instance
+    | FiatTokenV21Instance
+    | FiatTokenV22Instance,
+  version: "1" | "1.1" | "2" | "2.1" | "2.2",
+  fiatTokenOwner: string,
+  lostAndFound: string
+): Promise<void> {
+  const proxyAsV1 = await FiatTokenV1.at(proxyOrImplementation.address);
+  await proxyAsV1.initialize(
+    "USD Coin",
+    "USDC",
+    "USD",
+    6,
+    fiatTokenOwner,
+    fiatTokenOwner,
+    fiatTokenOwner,
+    fiatTokenOwner
+  );
+
+  if (version >= "2") {
+    const proxyAsV2 = await FiatTokenV2.at(proxyOrImplementation.address);
+    await proxyAsV2.initializeV2("USD Coin", {
+      from: fiatTokenOwner,
+    });
+  }
+
+  if (version >= "2.1") {
+    const proxyAsV2_1 = await FiatTokenV2_1.at(proxyOrImplementation.address);
+    await proxyAsV2_1.initializeV2_1(lostAndFound);
+  }
+
+  if (version >= "2.2") {
+    const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
+    await proxyAsV2_2.initializeV2_2();
+  }
 }

@@ -162,7 +162,7 @@ contract("V2_1Upgrader", (accounts) => {
 
       const upgrader = await V2_1Upgrader.new(
         fiatTokenProxy.address,
-        fiatTokenV1_1.address, // provide V1.1 implementation instead of V2
+        fiatTokenV1_1.address, // provide V1.1 implementation instead of V2.1
         originalProxyAdmin,
         lostAndFound,
         { from: upgraderOwner }
@@ -176,7 +176,7 @@ contract("V2_1Upgrader", (accounts) => {
         from: originalProxyAdmin,
       });
 
-      // Upgrade should fail because initializeV2 function doesn't exist on V1.1
+      // Upgrade should fail because initializeV2_1 function doesn't exist on V1.1
       await expectRevert(upgrader.upgrade({ from: upgraderOwner }), "revert");
 
       // The proxy admin role is not transferred
