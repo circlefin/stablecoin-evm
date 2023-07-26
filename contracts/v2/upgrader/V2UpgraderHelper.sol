@@ -24,7 +24,7 @@
 
 pragma solidity 0.6.12;
 
-import { FiatTokenV1 } from "../../v1/FiatTokenV1.sol";
+import { FiatTokenV2_1 } from "../../v2/FiatTokenV2_1.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 
 /**
@@ -34,7 +34,7 @@ import { Ownable } from "../../v1/Ownable.sol";
  * used to test approve/transferFrom.
  */
 contract V2UpgraderHelper is Ownable {
-    address internal _proxy;
+    address private _proxy;
 
     /**
      * @notice Constructor
@@ -57,7 +57,7 @@ contract V2UpgraderHelper is Ownable {
      * @return name
      */
     function name() external view returns (string memory) {
-        return FiatTokenV1(_proxy).name();
+        return FiatTokenV2_1(_proxy).name();
     }
 
     /**
@@ -65,7 +65,7 @@ contract V2UpgraderHelper is Ownable {
      * @return symbol
      */
     function symbol() external view returns (string memory) {
-        return FiatTokenV1(_proxy).symbol();
+        return FiatTokenV2_1(_proxy).symbol();
     }
 
     /**
@@ -73,7 +73,7 @@ contract V2UpgraderHelper is Ownable {
      * @return decimals
      */
     function decimals() external view returns (uint8) {
-        return FiatTokenV1(_proxy).decimals();
+        return FiatTokenV2_1(_proxy).decimals();
     }
 
     /**
@@ -81,7 +81,7 @@ contract V2UpgraderHelper is Ownable {
      * @return currency
      */
     function currency() external view returns (string memory) {
-        return FiatTokenV1(_proxy).currency();
+        return FiatTokenV2_1(_proxy).currency();
     }
 
     /**
@@ -89,7 +89,7 @@ contract V2UpgraderHelper is Ownable {
      * @return masterMinter
      */
     function masterMinter() external view returns (address) {
-        return FiatTokenV1(_proxy).masterMinter();
+        return FiatTokenV2_1(_proxy).masterMinter();
     }
 
     /**
@@ -98,7 +98,7 @@ contract V2UpgraderHelper is Ownable {
      * @return owner
      */
     function fiatTokenOwner() external view returns (address) {
-        return FiatTokenV1(_proxy).owner();
+        return FiatTokenV2_1(_proxy).owner();
     }
 
     /**
@@ -106,7 +106,7 @@ contract V2UpgraderHelper is Ownable {
      * @return pauser
      */
     function pauser() external view returns (address) {
-        return FiatTokenV1(_proxy).pauser();
+        return FiatTokenV2_1(_proxy).pauser();
     }
 
     /**
@@ -114,7 +114,7 @@ contract V2UpgraderHelper is Ownable {
      * @return blacklister
      */
     function blacklister() external view returns (address) {
-        return FiatTokenV1(_proxy).blacklister();
+        return FiatTokenV2_1(_proxy).blacklister();
     }
 
     /**
@@ -123,7 +123,7 @@ contract V2UpgraderHelper is Ownable {
      * @return balance
      */
     function balanceOf(address account) external view returns (uint256) {
-        return FiatTokenV1(_proxy).balanceOf(account);
+        return FiatTokenV2_1(_proxy).balanceOf(account);
     }
 
     /**
@@ -138,7 +138,48 @@ contract V2UpgraderHelper is Ownable {
         address to,
         uint256 value
     ) external returns (bool) {
-        return FiatTokenV1(_proxy).transferFrom(from, to, value);
+        return FiatTokenV2_1(_proxy).transferFrom(from, to, value);
+    }
+
+    /**
+     * @notice Call version()
+     * @return version
+     */
+    function version() external view returns (string memory) {
+        return FiatTokenV2_1(_proxy).version();
+    }
+
+    /**
+     * @notice Call DOMAIN_SEPARATOR()
+     * @return domainSeparator
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
+        return FiatTokenV2_1(_proxy).DOMAIN_SEPARATOR();
+    }
+
+    /**
+     * @notice Call rescuer()
+     * @return rescuer
+     */
+    function rescuer() external view returns (address) {
+        return FiatTokenV2_1(_proxy).rescuer();
+    }
+
+    /**
+     * @notice Call paused()
+     * @return paused
+     */
+    function paused() external view returns (bool) {
+        return FiatTokenV2_1(_proxy).paused();
+    }
+
+    /**
+     * @notice Call totalSupply()
+     * @return totalSupply
+     */
+    function totalSupply() external view returns (uint256) {
+        return FiatTokenV2_1(_proxy).totalSupply();
     }
 
     /**

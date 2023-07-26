@@ -30,6 +30,7 @@ import { Ownable } from "../../v1/Ownable.sol";
 import { FiatTokenV2 } from "../FiatTokenV2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
 import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
+import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
 
 /**
  * @title V2 Upgrader
@@ -40,14 +41,10 @@ import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
  * upgrade is not successful for some unforeseen circumstances.
  * @dev Read doc/v2_upgrade.md
  */
-contract V2Upgrader is Ownable {
+contract V2Upgrader is AbstractV2Upgrader {
     using SafeMath for uint256;
 
-    FiatTokenProxy private _proxy;
-    FiatTokenV2 private _implementation;
-    address private _newProxyAdmin;
     string private _newName;
-    V2UpgraderHelper private _helper;
 
     /**
      * @notice Constructor
@@ -61,45 +58,8 @@ contract V2Upgrader is Ownable {
         FiatTokenV2 implementation,
         address newProxyAdmin,
         string memory newName
-    ) public Ownable() {
-        _proxy = proxy;
-        _implementation = implementation;
-        _newProxyAdmin = newProxyAdmin;
+    ) public AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin) {
         _newName = newName;
-        _helper = new V2UpgraderHelper(address(proxy));
-    }
-
-    /**
-     * @notice The address of the FiatTokenProxy contract
-     * @return Contract address
-     */
-    function proxy() external view returns (address) {
-        return address(_proxy);
-    }
-
-    /**
-     * @notice The address of the FiatTokenV2 implementation contract
-     * @return Contract address
-     */
-    function implementation() external view returns (address) {
-        return address(_implementation);
-    }
-
-    /**
-     * @notice The address of the V2UpgraderHelper contract
-     * @return Contract address
-     */
-    function helper() external view returns (address) {
-        return address(_helper);
-    }
-
-    /**
-     * @notice The address to which the proxy admin role will be transferred
-     * after the upgrade is completed
-     * @return Address
-     */
-    function newProxyAdmin() external view returns (address) {
-        return _newProxyAdmin;
     }
 
     /**
@@ -186,32 +146,6 @@ contract V2Upgrader is Ownable {
 
         // Transfer any remaining FiatToken to the caller
         withdrawFiatToken();
-
-        // Tear down
-        _helper.tearDown();
-        selfdestruct(msg.sender);
-    }
-
-    /**
-     * @notice Withdraw any FiatToken in the contract
-     */
-    function withdrawFiatToken() public onlyOwner {
-        IERC20 fiatToken = IERC20(address(_proxy));
-        uint256 balance = fiatToken.balanceOf(address(this));
-        if (balance > 0) {
-            require(
-                fiatToken.transfer(msg.sender, balance),
-                "V2Upgrader: failed to withdraw FiatToken"
-            );
-        }
-    }
-
-    /**
-     * @notice Transfer proxy admin role to newProxyAdmin, and self-destruct
-     */
-    function abortUpgrade() external onlyOwner {
-        // Transfer proxy admin role
-        _proxy.changeAdmin(_newProxyAdmin);
 
         // Tear down
         _helper.tearDown();

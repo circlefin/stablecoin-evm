@@ -29,7 +29,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
-import { V2_2UpgraderHelper } from "./V2_2UpgraderHelper.sol";
+import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
 
 /**
  * @title V2.2 Upgrader
@@ -40,7 +40,7 @@ import { V2_2UpgraderHelper } from "./V2_2UpgraderHelper.sol";
  * upgrade is not successful for some unforeseen circumstances.
  * @dev Read doc/v2.2_upgrade.md
  */
-contract V2_2Upgrader is Ownable {
+contract V2_2Upgrader is AbstractV2Upgrader {
     using SafeMath for uint256;
 
     struct FiatTokenMetadata {
@@ -59,11 +59,6 @@ contract V2_2Upgrader is Ownable {
         uint256 totalSupply;
     }
 
-    FiatTokenProxy private _proxy;
-    FiatTokenV2_2 private _implementation;
-    address private _newProxyAdmin;
-    V2_2UpgraderHelper private _helper;
-
     /**
      * @notice Constructor
      * @param proxy             FiatTokenProxy contract
@@ -74,45 +69,10 @@ contract V2_2Upgrader is Ownable {
         FiatTokenProxy proxy,
         FiatTokenV2_2 implementation,
         address newProxyAdmin
-    ) public Ownable() {
-        _proxy = proxy;
-        _implementation = implementation;
-        _newProxyAdmin = newProxyAdmin;
-        _helper = new V2_2UpgraderHelper(address(proxy));
-    }
-
-    /**
-     * @notice The address of the FiatTokenProxy contract
-     * @return Contract address
-     */
-    function proxy() external view returns (address) {
-        return address(_proxy);
-    }
-
-    /**
-     * @notice The address of the FiatTokenV2 implementation contract
-     * @return Contract address
-     */
-    function implementation() external view returns (address) {
-        return address(_implementation);
-    }
-
-    /**
-     * @notice The address of the V2UpgraderHelper contract
-     * @return Contract address
-     */
-    function helper() external view returns (address) {
-        return address(_helper);
-    }
-
-    /**
-     * @notice The address to which the proxy admin role will be transferred
-     * after the upgrade is completed
-     * @return Address
-     */
-    function newProxyAdmin() external view returns (address) {
-        return _newProxyAdmin;
-    }
+    )
+        public
+        AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin)
+    {}
 
     /**
      * @notice Upgrade, transfer proxy admin role to a given address, run a
@@ -206,32 +166,6 @@ contract V2_2Upgrader is Ownable {
 
         // Transfer any remaining FiatToken to the caller
         withdrawFiatToken();
-
-        // Tear down
-        _helper.tearDown();
-        selfdestruct(msg.sender);
-    }
-
-    /**
-     * @notice Withdraw any FiatToken in the contract
-     */
-    function withdrawFiatToken() public onlyOwner {
-        IERC20 fiatToken = IERC20(address(_proxy));
-        uint256 balance = fiatToken.balanceOf(address(this));
-        if (balance > 0) {
-            require(
-                fiatToken.transfer(msg.sender, balance),
-                "V2_2Upgrader: failed to withdraw FiatToken"
-            );
-        }
-    }
-
-    /**
-     * @notice Transfer proxy admin role to newProxyAdmin, and self-destruct
-     */
-    function abortUpgrade() external onlyOwner {
-        // Transfer proxy admin role
-        _proxy.changeAdmin(_newProxyAdmin);
 
         // Tear down
         _helper.tearDown();
