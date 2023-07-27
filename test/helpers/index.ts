@@ -1,5 +1,6 @@
 import { ecsign } from "ethereumjs-util";
 import { assert } from "chai";
+import { solidityPack } from "ethereumjs-abi";
 import {
   FiatTokenProxyInstance,
   FiatTokenV11Instance,
@@ -62,6 +63,11 @@ export interface Signature {
   v: number;
   r: string;
   s: string;
+}
+
+export function packSignature(signature: Signature): Buffer {
+  const { v, r, s } = signature;
+  return solidityPack(["bytes32", "bytes32", "uint8"], [r, s, v]);
 }
 
 export function ecSign(digest: string, privateKey: string): Signature {

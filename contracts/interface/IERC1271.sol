@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018 - 2023 CENTRE SECZ
+ * Copyright (c) 2018-2023 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,14 +24,19 @@
 
 pragma solidity 0.6.12;
 
-import { ECRecover } from "../util/ECRecover.sol";
-
-contract ECRecoverTest {
-    function recover(bytes32 digest, bytes memory signature)
+/**
+ * @dev Interface of the ERC1271 standard signature validation method for
+ * contracts as defined in https://eips.ethereum.org/EIPS/eip-1271[ERC-1271].
+ */
+interface IERC1271 {
+    /**
+     * @dev Should return whether the signature provided is valid for the provided data
+     * @param hash          Hash of the data to be signed
+     * @param signature     Signature byte array associated with the provided data hash
+     * @return magicValue   bytes4 magic value 0x1626ba7e when function passes
+     */
+    function isValidSignature(bytes32 hash, bytes memory signature)
         external
-        pure
-        returns (address)
-    {
-        return ECRecover.recover(digest, signature);
-    }
+        view
+        returns (bytes4 magicValue);
 }
