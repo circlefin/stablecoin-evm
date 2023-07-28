@@ -39,6 +39,10 @@ library MessageHashUtils {
      * The digest is calculated from a `domainSeparator` and a `structHash`, by prefixing them with
      * `\x19\x01` and hashing the result. It corresponds to the hash signed by the
      * https://eips.ethereum.org/EIPS/eip-712[`eth_signTypedData`] JSON-RPC method as part of EIP-712.
+     *
+     * @param domainSeparator    Domain separator
+     * @param structHash         Hashed EIP-712 data struct
+     * @return digest the keccak256 digest of an EIP-712 typed data
      */
     function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
         internal

@@ -26,12 +26,11 @@ pragma solidity 0.6.12;
 
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ECRecover } from "./ECRecover.sol";
-import { IERC1271 } from "./IERC1271.sol";
+import { IERC1271 } from "../interface/IERC1271.sol";
 
 /**
  * @dev Signature verification helper that can be used instead of `ECRecover.recover` to seamlessly support both ECDSA
- * signatures from externally owned accounts (EOAs) as well as ERC1271 signatures from smart contract wallets like
- * Argent and Safe Wallet (previously Gnosis Safe).
+ * signatures from externally owned accounts (EOAs) as well as ERC1271 signatures from smart contract wallets.
  *
  * Adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/21bb89ef5bfc789b9333eb05e3ba2b7b284ac77c/contracts/utils/cryptography/SignatureChecker.sol
  */

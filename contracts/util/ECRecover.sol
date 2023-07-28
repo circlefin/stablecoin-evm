@@ -72,14 +72,19 @@ library ECRecover {
         return signer;
     }
 
-    function recover(bytes32 hash, bytes memory signature)
+    /**
+     * @notice Recover signer's address from a signed message
+     * @dev Adapted from: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/0053ee040a7ff1dbc39691c9e67a69f564930a88/contracts/utils/cryptography/ECDSA.sol
+     * @param digest    Keccak-256 hash digest of the signed message
+     * @param signature Signature byte array associated with hash
+     * @return Signer address
+     */
+    function recover(bytes32 digest, bytes memory signature)
         internal
         pure
         returns (address)
     {
-        if (signature.length != 65) {
-            revert("ECRecover: invalid signature length");
-        }
+        require(signature.length == 65, "ECRecover: invalid signature length");
 
         bytes32 r;
         bytes32 s;
@@ -93,6 +98,6 @@ library ECRecover {
             s := mload(add(signature, 0x40))
             v := byte(0, mload(add(signature, 0x60)))
         }
-        return recover(hash, v, r, s);
+        return recover(digest, v, r, s);
     }
 }
