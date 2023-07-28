@@ -14,6 +14,7 @@ import {
   MockErc1271WalletInstance,
   MockMaliciousErc1271WalletInstance,
   MockErc1271WalletWithCustomValidationInstance,
+  MockStateModifyingErc1271WalletInstance,
 } from "../../@types/generated";
 
 const SignatureChecker = artifacts.require("SignatureChecker");
@@ -23,6 +24,9 @@ const MockMaliciousERC1271Wallet = artifacts.require(
 );
 const MockERC1271WalletWithCustomValidation = artifacts.require(
   "MockERC1271WalletWithCustomValidation"
+);
+const MockStateModifyingERC1271Wallet = artifacts.require(
+  "MockStateModifyingERC1271Wallet"
 );
 
 describe("SignatureChecker", () => {
@@ -36,6 +40,7 @@ describe("SignatureChecker", () => {
   let standardWallet: MockErc1271WalletInstance;
   let maliciousWallet: MockMaliciousErc1271WalletInstance;
   let customWallet: MockErc1271WalletWithCustomValidationInstance;
+  let stateModifyingWallet: MockStateModifyingErc1271WalletInstance;
 
   beforeEach(async () => {
     signatureChecker = await SignatureChecker.new();
@@ -44,6 +49,7 @@ describe("SignatureChecker", () => {
     customWallet = await MockERC1271WalletWithCustomValidation.new(
       account1.address
     );
+    stateModifyingWallet = await MockStateModifyingERC1271Wallet.new();
   });
 
   context("EOA Wallet", () => {
@@ -151,6 +157,22 @@ describe("SignatureChecker", () => {
           "0x0"
         )
       ).to.equal(false);
+    });
+  });
+
+  context("AA Wallet - state modifying", () => {
+    it("returns true when wallet considers signature to be valid", async () => {
+      expect(await stateModifyingWallet.evoked()).to.equal(false);
+      expect(
+        await signatureChecker.isValidSignatureNow(
+          stateModifyingWallet.address,
+          ZERO_BYTES32,
+          "0x0"
+        )
+      ).to.equal(false);
+
+      // isValidSignatrue inside mock wallet is never evoked
+      expect(await stateModifyingWallet.evoked()).to.equal(false);
     });
   });
 });

@@ -98,3 +98,23 @@ contract MockERC1271WalletWithCustomValidation is IERC1271 {
         return _signatureValid ? IERC1271.isValidSignature.selector : bytes4(0);
     }
 }
+
+/**
+ * @title MockStateModifyingERC1271Wallet
+ * @dev An ERC-1271 compatible wallet that attempts to modify contract state.
+ */
+contract MockStateModifyingERC1271Wallet {
+    bool private _evoked;
+
+    function evoked() external view returns (bool) {
+        return _evoked;
+    }
+
+    function isValidSignature(bytes32, bytes memory)
+        external
+        returns (bytes4 magicValue)
+    {
+        _evoked = true;
+        return IERC1271.isValidSignature.selector;
+    }
+}
