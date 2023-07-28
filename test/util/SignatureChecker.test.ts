@@ -161,7 +161,7 @@ describe("SignatureChecker", () => {
   });
 
   context("AA Wallet - state modifying", () => {
-    it("returns true when wallet considers signature to be valid", async () => {
+    it("returns false for wallet contracts that omit the `view` modifier", async () => {
       expect(await stateModifyingWallet.evoked()).to.equal(false);
       expect(
         await signatureChecker.isValidSignatureNow(
