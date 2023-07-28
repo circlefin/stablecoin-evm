@@ -53,10 +53,11 @@ contract MockERC1271Wallet is IERC1271 {
 }
 
 /**
- * @title MockMaliciousERC1271Wallet
- * @dev Adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/874c2d3c02ec1bce6af9a30bc828d3fe2079136b/contracts/mocks/ERC1271WalletMock.sol
+ * @title MockERC1271WalletReturningBytes32
+ * @dev Used to check against unexpected reverts from abi.decode when raw bytes data overflow the target type.
+ * Adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/874c2d3c02ec1bce6af9a30bc828d3fe2079136b/contracts/mocks/ERC1271WalletMock.sol
  */
-contract MockMaliciousERC1271Wallet is IERC1271 {
+contract MockERC1271WalletReturningBytes32 is IERC1271 {
     function isValidSignature(bytes32, bytes memory)
         external
         override

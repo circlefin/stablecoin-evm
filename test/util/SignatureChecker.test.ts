@@ -12,7 +12,7 @@ import {
 import { SignatureCheckerInstance } from "../../@types/generated/SignatureChecker";
 import {
   MockErc1271WalletInstance,
-  MockMaliciousErc1271WalletInstance,
+  MockErc1271WalletReturningBytes32Instance,
   MockErc1271WalletWithCustomValidationInstance,
   MockStateModifyingErc1271WalletInstance,
 } from "../../@types/generated";
@@ -38,7 +38,7 @@ describe("SignatureChecker", () => {
 
   let signatureChecker: SignatureCheckerInstance;
   let standardWallet: MockErc1271WalletInstance;
-  let maliciousWallet: MockMaliciousErc1271WalletInstance;
+  let maliciousWallet: MockErc1271WalletReturningBytes32Instance;
   let customWallet: MockErc1271WalletWithCustomValidationInstance;
   let stateModifyingWallet: MockStateModifyingErc1271WalletInstance;
 

@@ -44,7 +44,7 @@ library SignatureChecker {
         bytes32 digest,
         bytes memory signature
     ) external view returns (bool) {
-        if (!Address.isContract(signer)) {
+        if (!isContract(signer)) {
             return ECRecover.recover(digest, signature) == signer;
         }
         return isValidERC1271SignatureNow(signer, digest, signature);
@@ -73,5 +73,16 @@ library SignatureChecker {
             result.length >= 32 &&
             abi.decode(result, (bytes32)) ==
             bytes32(IERC1271.isValidSignature.selector));
+    }
+
+    /**
+     * @dev Checks if the input address is a smart contract.
+     */
+    function isContract(address addr) internal view returns (bool) {
+        uint256 size;
+        assembly {
+            size := extcodesize(addr)
+        }
+        return size > 0;
     }
 }
