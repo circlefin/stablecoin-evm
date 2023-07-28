@@ -123,7 +123,7 @@ export function usesOriginalStorageSlotPositions<
       expect(slots[8].slice(0, 2)).to.equal("01"); // initialized
       expect(parseAddress(slots[8].slice(2))).to.equal(masterMinter); // masterMinter
 
-      // slot 9 - balances (mapping, slot is unused)
+      // slot 9 - balanceAndBlacklistStates (mapping, slot is unused)
       expect(slots[9]).to.equal("0");
 
       // slot 10 - allowed (mapping, slot is unused)
@@ -176,7 +176,7 @@ export function usesOriginalStorageSlotPositions<
       );
       expect(v).to.equal(minted - transferred);
 
-      // balances[bob]
+      // balanceAndBlacklistStates[bob]
       v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(bob, 9)),
         16
