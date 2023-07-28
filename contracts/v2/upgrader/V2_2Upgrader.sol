@@ -108,7 +108,7 @@ contract V2_2Upgrader is AbstractV2Upgrader {
         );
 
         // Change implementation contract address
-        _proxy.upgradeTo(address(_implementation));
+        _proxy.upgradeTo(_implementation);
 
         // Transfer proxy admin role
         _proxy.changeAdmin(_newProxyAdmin);
@@ -168,8 +168,7 @@ contract V2_2Upgrader is AbstractV2Upgrader {
         withdrawFiatToken();
 
         // Tear down
-        _helper.tearDown();
-        selfdestruct(msg.sender);
+        tearDown();
     }
 
     /**

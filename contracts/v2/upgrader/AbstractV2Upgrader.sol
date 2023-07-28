@@ -110,6 +110,13 @@ abstract contract AbstractV2Upgrader is Ownable {
         _proxy.changeAdmin(_newProxyAdmin);
 
         // Tear down
+        tearDown();
+    }
+
+    /**
+     * @dev Tears down the helper contract followed by this contract.
+     */
+    function tearDown() internal {
         _helper.tearDown();
         selfdestruct(msg.sender);
     }
