@@ -104,7 +104,7 @@ export function usesOriginalStorageSlotPositions<
       // slot 2 - blacklister
       expect(parseAddress(slots[2])).to.equal(blacklister); // blacklister
 
-      // slot 3 - blacklisted (mapping, slot is unused)
+      // slot 3 - _deprecatedBlacklisted (mapping, slot is unused)
       expect(slots[3]).to.equal("0");
 
       // slot 4 - name
@@ -123,7 +123,7 @@ export function usesOriginalStorageSlotPositions<
       expect(slots[8].slice(0, 2)).to.equal("01"); // initialized
       expect(parseAddress(slots[8].slice(2))).to.equal(masterMinter); // masterMinter
 
-      // slot 9 - balances (mapping, slot is unused)
+      // slot 9 - balanceAndBlacklistStates (mapping, slot is unused)
       expect(slots[9]).to.equal("0");
 
       // slot 10 - allowed (mapping, slot is unused)
@@ -154,15 +154,15 @@ export function usesOriginalStorageSlotPositions<
       });
     }
 
-    it("retains original storage slots for blacklisted mapping", async () => {
-      // blacklisted[alice]
+    it("retains original storage slots for _deprecatedBlacklisted mapping", async () => {
+      // _deprecatedBlacklisted[alice]
       let v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(alice, 3)),
         16
       );
       expect(v).to.equal(0);
 
-      // blacklisted[charlie]
+      // _deprecatedBlacklisted[charlie]
       v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(charlie, 3)),
         16
@@ -170,15 +170,15 @@ export function usesOriginalStorageSlotPositions<
       expect(v).to.equal(1);
     });
 
-    it("retains original storage slots for balances mapping", async () => {
-      // balance[alice]
+    it("retains original storage slots for balanceAndBlacklistStates mapping", async () => {
+      // balanceAndBlacklistStates[alice]
       let v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(alice, 9)),
         16
       );
       expect(v).to.equal(minted - transferred);
 
-      // balances[bob]
+      // balanceAndBlacklistStates[bob]
       v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(bob, 9)),
         16

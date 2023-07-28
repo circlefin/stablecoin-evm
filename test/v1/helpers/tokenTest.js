@@ -227,7 +227,7 @@ function buildExpectedState(token, customVars) {
     proxiedTokenAddress: token.proxiedTokenAddress,
     initializedV1: trueInStorageFormat,
     upgrader: proxyOwnerAccount,
-    balances: {
+    balanceAndBlacklistStates: {
       arbitraryAccount: bigZero,
       masterMinterAccount: bigZero,
       minterAccount: bigZero,
@@ -626,7 +626,7 @@ async function getActualState(token) {
         proxiedTokenAddress: hexToAddress(proxiedTokenAddress),
         upgrader: hexToAddress(upgrader),
         initializedV1,
-        balances: {
+        balanceAndBlacklistStates: {
           arbitraryAccount: balancesA,
           masterMinterAccount: balancesMM,
           minterAccount: balancesM,

@@ -41,11 +41,11 @@ contract FiatTokenV2_1 is FiatTokenV2 {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 1);
 
-        uint256 lockedAmount = balances[address(this)];
+        uint256 lockedAmount = balanceAndBlacklistStates[address(this)];
         if (lockedAmount > 0) {
             _transfer(address(this), lostAndFound, lockedAmount);
         }
-        blacklisted[address(this)] = true;
+        _deprecatedBlacklisted[address(this)] = true;
 
         _initializedVersion = 2;
     }

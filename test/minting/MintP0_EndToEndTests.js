@@ -557,7 +557,10 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
         variable: "minterAllowance.minterAccount",
         expectedValue: newBigNumber(5),
       },
-      { variable: "balances.arbitraryAccount", expectedValue: newBigNumber(5) },
+      {
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: newBigNumber(5),
+      },
       { variable: "totalSupply", expectedValue: newBigNumber(5) }
     );
     await checkMINTp0(
@@ -643,7 +646,10 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     expectedMintControllerState.controllers.arbitraryAccount =
       Accounts.minterAccount;
     expectedTokenState.push(
-      { variable: "balances.minterAccount", expectedValue: newBigNumber(5) },
+      {
+        variable: "balanceAndBlacklistStates.minterAccount",
+        expectedValue: newBigNumber(5),
+      },
       { variable: "totalSupply", expectedValue: newBigNumber(5) }
     );
     await checkMINTp0(

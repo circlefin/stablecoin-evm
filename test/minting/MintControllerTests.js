@@ -56,7 +56,7 @@ async function run_tests(newToken) {
     expectedTokenState.push(
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: newBigNumber(amount),
       },
       { variable: "totalSupply", expectedValue: newBigNumber(amount) }

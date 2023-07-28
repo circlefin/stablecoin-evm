@@ -65,7 +65,7 @@ function runTests(newToken, _accounts) {
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -92,7 +92,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -121,7 +121,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -152,7 +152,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       {
-        variable: "balances.minterAccount",
+        variable: "balanceAndBlacklistStates.minterAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -184,7 +184,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -258,7 +258,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount2),
       },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount1 + mintAmount2),
       },
       {
@@ -289,7 +289,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount1),
       },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount1 + mintAmount2),
       },
       {
@@ -362,7 +362,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -431,7 +431,7 @@ function runTests(newToken, _accounts) {
       { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount),
       },
     ];
@@ -459,7 +459,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(mintAmount + mintAmount),
       },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount + mintAmount),
       },
     ];
@@ -491,11 +491,11 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount2),
       },
       {
-        variable: "balances.minterAccount",
+        variable: "balanceAndBlacklistStates.minterAccount",
         expectedValue: new BN(mintAmount1),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount2),
       },
       {
@@ -519,11 +519,11 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount2),
       },
       {
-        variable: "balances.minterAccount",
+        variable: "balanceAndBlacklistStates.minterAccount",
         expectedValue: new BN(mintAmount1 - burnAmount),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount2 - burnAmount),
       },
       {
@@ -635,7 +635,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -678,7 +678,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -757,7 +757,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(0),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },
@@ -773,7 +773,7 @@ function runTests(newToken, _accounts) {
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.minterAccount",
+        variable: "balanceAndBlacklistStates.minterAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },
@@ -795,7 +795,7 @@ function runTests(newToken, _accounts) {
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },
@@ -806,7 +806,7 @@ function runTests(newToken, _accounts) {
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },
@@ -826,7 +826,7 @@ function runTests(newToken, _accounts) {
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },
@@ -837,7 +837,7 @@ function runTests(newToken, _accounts) {
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },
@@ -854,7 +854,7 @@ function runTests(newToken, _accounts) {
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },
@@ -871,7 +871,7 @@ function runTests(newToken, _accounts) {
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: maxAmountBN,
       },
       { variable: "totalSupply", expectedValue: maxAmountBN },

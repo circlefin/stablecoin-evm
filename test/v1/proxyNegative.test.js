@@ -206,9 +206,12 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
