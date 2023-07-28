@@ -19,8 +19,8 @@ import {
 
 const SignatureChecker = artifacts.require("SignatureChecker");
 const MockERC1271Wallet = artifacts.require("MockERC1271Wallet");
-const MockMaliciousERC1271Wallet = artifacts.require(
-  "MockMaliciousERC1271Wallet"
+const MockERC1271WalletReturningBytes32 = artifacts.require(
+  "MockERC1271WalletReturningBytes32"
 );
 const MockERC1271WalletWithCustomValidation = artifacts.require(
   "MockERC1271WalletWithCustomValidation"
@@ -38,14 +38,14 @@ describe("SignatureChecker", () => {
 
   let signatureChecker: SignatureCheckerInstance;
   let standardWallet: MockErc1271WalletInstance;
-  let maliciousWallet: MockErc1271WalletReturningBytes32Instance;
+  let walletReturningBytes32: MockErc1271WalletReturningBytes32Instance;
   let customWallet: MockErc1271WalletWithCustomValidationInstance;
   let stateModifyingWallet: MockStateModifyingErc1271WalletInstance;
 
   beforeEach(async () => {
     signatureChecker = await SignatureChecker.new();
     standardWallet = await MockERC1271Wallet.new(account1.address);
-    maliciousWallet = await MockMaliciousERC1271Wallet.new();
+    walletReturningBytes32 = await MockERC1271WalletReturningBytes32.new();
     customWallet = await MockERC1271WalletWithCustomValidation.new(
       account1.address
     );
@@ -128,7 +128,7 @@ describe("SignatureChecker", () => {
     it("returns false when given a signature", async () => {
       expect(
         await signatureChecker.isValidSignatureNow(
-          maliciousWallet.address,
+          walletReturningBytes32.address,
           digest,
           packSig(sig1)
         )
