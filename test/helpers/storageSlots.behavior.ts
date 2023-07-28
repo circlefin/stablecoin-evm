@@ -153,14 +153,14 @@ export function usesOriginalStorageSlotPositions<
     }
 
     it("retains original storage slots for blacklisted mapping", async () => {
-      // blacklisted[alice]
+      // _deprecatedBlacklisted[alice]
       let v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(alice, 3)),
         16
       );
       expect(v).to.equal(0);
 
-      // blacklisted[charlie]
+      // _deprecatedBlacklisted[charlie]
       v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(charlie, 3)),
         16

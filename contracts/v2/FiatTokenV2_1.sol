@@ -45,7 +45,7 @@ contract FiatTokenV2_1 is FiatTokenV2 {
         if (lockedAmount > 0) {
             _transfer(address(this), lostAndFound, lockedAmount);
         }
-        blacklisted[address(this)] = true;
+        _deprecatedBlacklisted[address(this)] = true;
 
         _initializedVersion = 2;
     }

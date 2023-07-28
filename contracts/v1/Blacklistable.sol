@@ -32,7 +32,7 @@ import { Ownable } from "./Ownable.sol";
  */
 contract Blacklistable is Ownable {
     address public blacklister;
-    mapping(address => bool) internal blacklisted;
+    mapping(address => bool) internal _deprecatedBlacklisted;
 
     event Blacklisted(address indexed _account);
     event UnBlacklisted(address indexed _account);
@@ -55,7 +55,7 @@ contract Blacklistable is Ownable {
      */
     modifier notBlacklisted(address _account) {
         require(
-            !blacklisted[_account],
+            !_deprecatedBlacklisted[_account],
             "Blacklistable: account is blacklisted"
         );
         _;
@@ -66,7 +66,7 @@ contract Blacklistable is Ownable {
      * @param _account The address to check
      */
     function isBlacklisted(address _account) external view returns (bool) {
-        return blacklisted[_account];
+        return _deprecatedBlacklisted[_account];
     }
 
     /**
@@ -74,7 +74,7 @@ contract Blacklistable is Ownable {
      * @param _account The address to blacklist
      */
     function blacklist(address _account) external onlyBlacklister {
-        blacklisted[_account] = true;
+        _deprecatedBlacklisted[_account] = true;
         emit Blacklisted(_account);
     }
 
@@ -83,7 +83,7 @@ contract Blacklistable is Ownable {
      * @param _account The address to remove from the blacklist
      */
     function unBlacklist(address _account) external onlyBlacklister {
-        blacklisted[_account] = false;
+        _deprecatedBlacklisted[_account] = false;
         emit UnBlacklisted(_account);
     }
 
