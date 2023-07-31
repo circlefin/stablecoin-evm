@@ -58,27 +58,9 @@ describe("SignatureChecker", () => {
       expect(sig1).not.to.deep.equal(sig3);
       expect(sig2).not.to.deep.equal(sig3);
 
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          account1.address,
-          digest,
-          packSig(sig1)
-        )
-      ).to.equal(true);
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          account2.address,
-          digest,
-          packSig(sig2)
-        )
-      ).to.equal(true);
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          account3.address,
-          digest,
-          packSig(sig3)
-        )
-      ).to.equal(true);
+      await expectValidSignature(account1.address, digest, packSig(sig1));
+      await expectValidSignature(account2.address, digest, packSig(sig2));
+      await expectValidSignature(account3.address, digest, packSig(sig3));
     });
 
     it("returns false when given a invalid signature", async () => {
@@ -104,77 +86,95 @@ describe("SignatureChecker", () => {
 
   context("AA Wallet - standard", () => {
     it("returns true when given a valid signature", async () => {
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          standardWallet.address,
-          digest,
-          packSig(sig1)
-        )
-      ).to.equal(true);
+      await expectValidSignature(standardWallet.address, digest, packSig(sig1));
     });
 
     it("returns false when given a invalid signature", async () => {
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          standardWallet.address,
-          digest,
-          packSig(sig2)
-        )
-      ).to.equal(false);
+      await expectInvalidSignature(
+        standardWallet.address,
+        digest,
+        packSig(sig2)
+      );
     });
   });
 
-  context("AA Wallet - malicious", () => {
+  context("AA Wallet - walletReturningBytes32", () => {
     it("returns false when given a signature", async () => {
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          walletReturningBytes32.address,
-          digest,
-          packSig(sig1)
-        )
-      ).to.equal(false);
+      await expectInvalidSignature(
+        walletReturningBytes32.address,
+        digest,
+        packSig(sig1)
+      );
     });
   });
 
   context("AA Wallet - custom validation", () => {
     it("returns true when wallet considers signature to be valid", async () => {
       await customWallet.setSignatureValid(true);
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          customWallet.address,
-          ZERO_BYTES32,
-          "0x0"
-        )
-      ).to.equal(true);
+      await expectValidSignature(customWallet.address, ZERO_BYTES32, "0x0");
     });
 
     it("returns false when wallet considers signature to be invalid", async () => {
       await customWallet.setSignatureValid(false);
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          customWallet.address,
-          ZERO_BYTES32,
-          "0x0"
-        )
-      ).to.equal(false);
+      await expectInvalidSignature(customWallet.address, ZERO_BYTES32, "0x0");
     });
   });
 
   context("AA Wallet - state modifying", () => {
     it("returns false for wallet contracts that omit the `view` modifier", async () => {
       expect(await stateModifyingWallet.evoked()).to.equal(false);
-      expect(
-        await signatureChecker.isValidSignatureNow(
-          stateModifyingWallet.address,
-          ZERO_BYTES32,
-          "0x0"
-        )
-      ).to.equal(false);
 
-      // isValidSignatrue inside mock wallet is never evoked
+      await expectInvalidSignature(
+        stateModifyingWallet.address,
+        ZERO_BYTES32,
+        "0x0"
+      );
+
+      // isValidSignature inside mock wallet is never evoked
       expect(await stateModifyingWallet.evoked()).to.equal(false);
     });
   });
+
+  async function expectSignatureValidationResult(
+    accountAddress: string,
+    digest: string,
+    signature: string,
+    expectValidSignature: boolean
+  ) {
+    expect(
+      await signatureChecker.isValidSignatureNow(
+        accountAddress,
+        digest,
+        signature
+      )
+    ).to.equal(expectValidSignature);
+  }
+
+  async function expectValidSignature(
+    accountAddress: string,
+    digest: string,
+    signature: string
+  ) {
+    await expectSignatureValidationResult(
+      accountAddress,
+      digest,
+      signature,
+      true
+    );
+  }
+
+  async function expectInvalidSignature(
+    accountAddress: string,
+    digest: string,
+    signature: string
+  ) {
+    await expectSignatureValidationResult(
+      accountAddress,
+      digest,
+      signature,
+      false
+    );
+  }
 });
 
 export function packSig(sig: Signature): string {

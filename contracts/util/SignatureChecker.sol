@@ -38,6 +38,9 @@ library SignatureChecker {
     /**
      * @dev Checks if a signature is valid for a given signer and data hash. If the signer is a smart contract, the
      * signature is validated against that smart contract using ERC1271, otherwise it's validated using `ECRecover.recover`.
+     * @param signer        Address of the claimed signer
+     * @param digest        Keccak-256 hash digest of the signed message
+     * @param signature     Signature byte array associated with hash
      */
     function isValidSignatureNow(
         address signer,
@@ -53,6 +56,9 @@ library SignatureChecker {
     /**
      * @dev Checks if a signature is valid for a given signer and data hash. The signature is validated
      * against the signer smart contract using ERC1271.
+     * @param signer        Address of the claimed signer
+     * @param digest        Keccak-256 hash digest of the signed message
+     * @param signature     Signature byte array associated with hash
      *
      * NOTE: Unlike ECDSA signatures, contract signatures are revocable, and the outcome of this function can thus
      * change through time. It could return true at block N and false at block N+1 (or the opposite).

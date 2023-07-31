@@ -42,7 +42,7 @@ library MessageHashUtils {
      *
      * @param domainSeparator    Domain separator
      * @param structHash         Hashed EIP-712 data struct
-     * @return digest the keccak256 digest of an EIP-712 typed data
+     * @return digest            The keccak256 digest of an EIP-712 typed data
      */
     function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
         internal

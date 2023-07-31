@@ -28,7 +28,7 @@ import { ECRecover } from "../util/ECRecover.sol";
 import { IERC1271 } from "../interface/IERC1271.sol";
 
 /**
- * @title ERC1271Wallet
+ * @title MockERC1271Wallet
  * @dev An ERC-1271 compatible wallet using standard ECDSA validation.
  */
 contract MockERC1271Wallet is IERC1271 {
