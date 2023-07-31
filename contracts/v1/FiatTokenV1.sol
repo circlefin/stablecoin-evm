@@ -110,10 +110,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * to the minterAllowance of the caller.
      * @return A boolean that indicates if the operation was successful.
      */
-    function mint(
-        address _to,
-        uint256 _amount
-    )
+    function mint(address _to, uint256 _amount)
         external
         whenNotPaused
         onlyMinters
@@ -174,17 +171,19 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @param spender   Spender's address
      * @return Allowance amount
      */
-    function allowance(
-        address owner,
-        address spender
-    ) external view override returns (uint256) {
+    function allowance(address owner, address spender)
+        external
+        override
+        view
+        returns (uint256)
+    {
         return allowed[owner][spender];
     }
 
     /**
      * @dev Get totalSupply of token
      */
-    function totalSupply() external view override returns (uint256) {
+    function totalSupply() external override view returns (uint256) {
         return totalSupply_;
     }
 
@@ -192,9 +191,12 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @dev Get token balance of an account
      * @param account address The account
      */
-    function balanceOf(
-        address account
-    ) external view override returns (uint256) {
+    function balanceOf(address account)
+        external
+        override
+        view
+        returns (uint256)
+    {
         return balanceAndBlacklistStates[account];
     }
 
@@ -205,10 +207,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @param value     Allowance amount
      * @return True if successful
      */
-    function approve(
-        address spender,
-        uint256 value
-    )
+    function approve(address spender, uint256 value)
         external
         override
         whenNotPaused
@@ -272,10 +271,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @param value Transfer amount
      * @return True if successful
      */
-    function transfer(
-        address to,
-        uint256 value
-    )
+    function transfer(address to, uint256 value)
         external
         override
         whenNotPaused
@@ -320,10 +316,12 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @param minterAllowedAmount The minting amount allowed for the minter
      * @return True if the operation was successful.
      */
-    function configureMinter(
-        address minter,
-        uint256 minterAllowedAmount
-    ) external whenNotPaused onlyMasterMinter returns (bool) {
+    function configureMinter(address minter, uint256 minterAllowedAmount)
+        external
+        whenNotPaused
+        onlyMasterMinter
+        returns (bool)
+    {
         minters[minter] = true;
         minterAllowed[minter] = minterAllowedAmount;
         emit MinterConfigured(minter, minterAllowedAmount);
@@ -335,9 +333,11 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @param minter The address of the minter to remove
      * @return True if the operation was successful.
      */
-    function removeMinter(
-        address minter
-    ) external onlyMasterMinter returns (bool) {
+    function removeMinter(address minter)
+        external
+        onlyMasterMinter
+        returns (bool)
+    {
         minters[minter] = false;
         minterAllowed[minter] = 0;
         emit MinterRemoved(minter);
@@ -350,9 +350,12 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * amount is less than or equal to the minter's account balance
      * @param _amount uint256 the amount of tokens to be burned
      */
-    function burn(
-        uint256 _amount
-    ) external whenNotPaused onlyMinters notBlacklisted(msg.sender) {
+    function burn(uint256 _amount)
+        external
+        whenNotPaused
+        onlyMinters
+        notBlacklisted(msg.sender)
+    {
         uint256 balance = balanceAndBlacklistStates[msg.sender];
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");

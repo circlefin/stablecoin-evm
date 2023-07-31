@@ -168,8 +168,8 @@ export function usesOriginalStorageSlotPositions<
       expect(v).to.equal(1);
     });
 
-    it("retains original storage slots for balances mapping", async () => {
-      // balance[alice]
+    it("retains original storage slots for balanceAndBlacklistStates mapping", async () => {
+      // balanceAndBlacklistStates[alice]
       let v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(alice, 9)),
         16
