@@ -21,17 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 pragma solidity 0.6.12;
 
-import { ECRecover } from "../util/ECRecover.sol";
+import { MessageHashUtils } from "../util/MessageHashUtils.sol";
 
-contract ECRecoverTest {
-    function recover(bytes32 digest, bytes memory signature)
+contract MessageHashUtilsTest {
+    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
         external
         pure
-        returns (address)
+        returns (bytes32 digest)
     {
-        return ECRecover.recover(digest, signature);
+        return MessageHashUtils.toTypedDataHash(domainSeparator, structHash);
     }
 }
