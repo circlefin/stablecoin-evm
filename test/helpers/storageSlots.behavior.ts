@@ -104,7 +104,7 @@ export function usesOriginalStorageSlotPositions<
       // slot 2 - blacklister
       expect(parseAddress(slots[2])).to.equal(blacklister); // blacklister
 
-      // slot 3 - blacklisted (mapping, slot is unused)
+      // slot 3 - _deprecatedBlacklisted (mapping, slot is unused)
       expect(slots[3]).to.equal("0");
 
       // slot 4 - name
@@ -152,7 +152,7 @@ export function usesOriginalStorageSlotPositions<
       });
     }
 
-    it("retains original storage slots for blacklisted mapping", async () => {
+    it("retains original storage slots for _deprecatedBlacklisted mapping", async () => {
       // _deprecatedBlacklisted[alice]
       let v = parseInt(
         await readSlot(proxy.address, addressMappingSlot(alice, 3)),
