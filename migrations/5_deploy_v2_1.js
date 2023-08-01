@@ -4,6 +4,7 @@ const some = require("lodash/some");
 
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
+const SignatureChecker = artifacts.require("SignatureChecker");
 
 const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 
@@ -23,6 +24,10 @@ module.exports = async (deployer, network) => {
   }
 
   console.log(`FiatTokenProxy: ${proxyContractAddress}`);
+
+  console.log("Deploying and linking SignatureChecker library contract...");
+  await deployer.deploy(SignatureChecker);
+  await deployer.link(SignatureChecker, FiatTokenV2_1);
 
   console.log("Deploying FiatTokenV2_1 implementation contract...");
   await deployer.deploy(FiatTokenV2_1);

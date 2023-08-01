@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2018-2023 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,8 @@ pragma solidity 0.6.12;
 
 import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
-import { EIP712 } from "../util/EIP712.sol";
+import { MessageHashUtils } from "../util/MessageHashUtils.sol";
+import { SignatureChecker } from "../util/SignatureChecker.sol";
 
 /**
  * @title EIP-2612
@@ -67,18 +68,46 @@ abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
         bytes32 r,
         bytes32 s
     ) internal {
+        _permit(owner, spender, value, deadline, abi.encodePacked(r, s, v));
+    }
+
+    /**
+     * @notice Verify a signed approval permit and execute if valid
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
+     * @param owner      Token owner's address (Authorizer)
+     * @param spender    Spender's address
+     * @param value      Amount of allowance
+     * @param deadline   The time at which this expires (unix time)
+     * @param signature  Signature byte array signed by an EOA wallet or a contract wallet
+     */
+    function _permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        bytes memory signature
+    ) internal {
         require(deadline >= now, "FiatTokenV2: permit is expired");
 
-        bytes memory data = abi.encode(
-            PERMIT_TYPEHASH,
-            owner,
-            spender,
-            value,
-            _permitNonces[owner]++,
-            deadline
+        bytes32 typedDataHash = MessageHashUtils.toTypedDataHash(
+            _domainSeparator(),
+            keccak256(
+                abi.encode(
+                    PERMIT_TYPEHASH,
+                    owner,
+                    spender,
+                    value,
+                    _permitNonces[owner]++,
+                    deadline
+                )
+            )
         );
         require(
-            EIP712.recover(_domainSeparator(), v, r, s, data) == owner,
+            SignatureChecker.isValidSignatureNow(
+                owner,
+                typedDataHash,
+                signature
+            ),
             "EIP2612: invalid signature"
         );
 
