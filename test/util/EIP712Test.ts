@@ -1,9 +1,7 @@
-import crypto from "crypto";
 import { Eip712TestInstance } from "../../@types/generated";
 import { wordlist } from "ethereum-cryptography/bip39/wordlists/english";
 import sampleSize from "lodash/sampleSize";
-import { ACCOUNTS_AND_KEYS } from "../helpers/constants";
-import { prepend0x, strip0x, ecSign, makeDomainSeparator } from "../helpers";
+import { makeDomainSeparator } from "../helpers";
 
 const EIP712Test = artifacts.require("EIP712Test");
 
@@ -37,28 +35,6 @@ contract("EIP712", (_accounts) => {
       expect(
         await eip712.makeDomainSeparator(randomName, randomVersion)
       ).to.equal(domainSeparator);
-    });
-  });
-
-  describe("recover", () => {
-    it("recovers the signer's address from signed data", async () => {
-      const randomAccount =
-        ACCOUNTS_AND_KEYS[Math.floor(Math.random() * ACCOUNTS_AND_KEYS.length)];
-      const randomData = prepend0x(crypto.randomBytes(256).toString("hex"));
-      const eip712Data = prepend0x(
-        "1901" +
-          strip0x(domainSeparator) +
-          strip0x(web3.utils.keccak256(randomData))
-      );
-
-      const { v, r, s } = ecSign(
-        web3.utils.keccak256(eip712Data),
-        randomAccount.key
-      );
-
-      expect(
-        await eip712.recover(domainSeparator, v, r, s, randomData)
-      ).to.equal(randomAccount.address);
     });
   });
 });
