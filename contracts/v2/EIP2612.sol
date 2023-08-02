@@ -73,6 +73,7 @@ abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
 
     /**
      * @notice Verify a signed approval permit and execute if valid
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
      * @param owner      Token owner's address (Authorizer)
      * @param spender    Spender's address
      * @param value      Amount of allowance

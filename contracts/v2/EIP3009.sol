@@ -111,6 +111,7 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
 
     /**
      * @notice Execute a transfer with a signed authorization
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
      * @param from          Payer's address (Authorizer)
      * @param to            Payee's address
      * @param value         Amount to be transferred
@@ -189,6 +190,7 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
      * @notice Receive a transfer with a signed authorization from the payer
      * @dev This has an additional check to ensure that the payee's address
      * matches the caller of this function to prevent front-running attacks.
+     * EOA wallet signatures should be packed in the order of r, s, v.
      * @param from          Payer's address (Authorizer)
      * @param to            Payee's address
      * @param value         Amount to be transferred
@@ -248,6 +250,7 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
 
     /**
      * @notice Attempt to cancel an authorization
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
      * @param authorizer    Authorizer's address
      * @param nonce         Nonce of the authorization
      * @param signature     Signature byte array produced by an EOA wallet or a contract wallet
