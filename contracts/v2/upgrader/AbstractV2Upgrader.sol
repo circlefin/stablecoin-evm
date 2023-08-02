@@ -28,15 +28,19 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
-import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
+import { AbstractUpgraderHelper } from "./helpers/AbstractUpgraderHelper.sol";
 
+/**
+ * @dev An abstract contract to encapsulate any common logic
+ * for any V2+ Upgrader contracts.
+ */
 abstract contract AbstractV2Upgrader is Ownable {
     using SafeMath for uint256;
 
     FiatTokenProxy internal _proxy;
     address internal _implementation;
     address internal _newProxyAdmin;
-    V2UpgraderHelper internal _helper;
+    AbstractUpgraderHelper internal _helper;
 
     /**
      * @notice Constructor
@@ -52,7 +56,6 @@ abstract contract AbstractV2Upgrader is Ownable {
         _proxy = proxy;
         _implementation = implementation;
         _newProxyAdmin = newProxyAdmin;
-        _helper = new V2UpgraderHelper(address(proxy));
     }
 
     /**

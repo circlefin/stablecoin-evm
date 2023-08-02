@@ -29,6 +29,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
+import { V2_2UpgraderHelper } from "./helpers/V2_2UpgraderHelper.sol";
 import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
 
 /**
@@ -68,10 +69,9 @@ contract V2_2Upgrader is AbstractV2Upgrader {
         FiatTokenProxy proxy,
         FiatTokenV2_2 implementation,
         address newProxyAdmin
-    )
-        public
-        AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin)
-    {}
+    ) public AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin) {
+        _helper = new V2_2UpgraderHelper(address(proxy));
+    }
 
     /**
      * @notice Upgrade, transfer proxy admin role to a given address, run a
@@ -82,28 +82,29 @@ contract V2_2Upgrader is AbstractV2Upgrader {
         // The helper needs to be used to read contract state because
         // AdminUpgradeabilityProxy does not allow the proxy admin to make
         // proxy calls.
+        V2_2UpgraderHelper v2_2Helper = V2_2UpgraderHelper(address(_helper));
 
         // Check that this contract sufficient funds to run the tests
-        uint256 contractBal = _helper.balanceOf(address(this));
+        uint256 contractBal = v2_2Helper.balanceOf(address(this));
         require(contractBal >= 2e5, "V2_2Upgrader: 0.2 FiatToken needed");
 
-        uint256 callerBal = _helper.balanceOf(msg.sender);
+        uint256 callerBal = v2_2Helper.balanceOf(msg.sender);
 
         // Keep original contract metadata
         FiatTokenMetadata memory originalMetadata = FiatTokenMetadata(
-            _helper.name(),
-            _helper.symbol(),
-            _helper.decimals(),
-            _helper.currency(),
-            _helper.version(),
-            _helper.DOMAIN_SEPARATOR(),
-            _helper.masterMinter(),
-            _helper.fiatTokenOwner(),
-            _helper.pauser(),
-            _helper.blacklister(),
-            _helper.rescuer(),
-            _helper.paused(),
-            _helper.totalSupply()
+            v2_2Helper.name(),
+            v2_2Helper.symbol(),
+            v2_2Helper.decimals(),
+            v2_2Helper.currency(),
+            v2_2Helper.version(),
+            v2_2Helper.DOMAIN_SEPARATOR(),
+            v2_2Helper.masterMinter(),
+            v2_2Helper.fiatTokenOwner(),
+            v2_2Helper.pauser(),
+            v2_2Helper.blacklister(),
+            v2_2Helper.rescuer(),
+            v2_2Helper.paused(),
+            v2_2Helper.totalSupply()
         );
 
         // Change implementation contract address
@@ -154,9 +155,9 @@ contract V2_2Upgrader is AbstractV2Upgrader {
 
         // Test approve/transferFrom
         require(
-            v2_2.approve(address(_helper), 1e5) &&
-                v2_2.allowance(address(this), address(_helper)) == 1e5 &&
-                _helper.transferFrom(address(this), msg.sender, 1e5) &&
+            v2_2.approve(address(v2_2Helper), 1e5) &&
+                v2_2.allowance(address(this), address(v2_2Helper)) == 1e5 &&
+                v2_2Helper.transferFrom(address(this), msg.sender, 1e5) &&
                 v2_2.allowance(address(this), msg.sender) == 0 &&
                 v2_2.balanceOf(msg.sender) == callerBal.add(2e5) &&
                 v2_2.balanceOf(address(this)) == contractBal.sub(2e5),
