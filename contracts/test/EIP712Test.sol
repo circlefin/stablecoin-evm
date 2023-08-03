@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018 zOS Global Limited.
+ * Copyright (c) 2018 - 2023 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,15 +33,5 @@ contract EIP712Test {
         returns (bytes32)
     {
         return EIP712.makeDomainSeparator(name, version);
-    }
-
-    function recover(
-        bytes32 domainSeparator,
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        bytes calldata typeHashAndData
-    ) external pure returns (address) {
-        return EIP712.recover(domainSeparator, v, r, s, typeHashAndData);
     }
 }

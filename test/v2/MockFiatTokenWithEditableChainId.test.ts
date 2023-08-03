@@ -1,6 +1,7 @@
 import { MockFiatTokenWithEditableChainIdInstance } from "../../@types/generated";
 import { makeDomainSeparator } from "../helpers";
 
+const SignatureChecker = artifacts.require("SignatureChecker");
 const MockFiatTokenWithEditableChainId = artifacts.require(
   "MockFiatTokenWithEditableChainId"
 );
@@ -13,6 +14,8 @@ contract("MockFiatTokenWithEditableChainId", (accounts) => {
   const version = "2";
 
   beforeEach(async () => {
+    await SignatureChecker.new();
+    MockFiatTokenWithEditableChainId.link(SignatureChecker);
     fiatToken = await MockFiatTokenWithEditableChainId.new();
 
     await fiatToken.initialize(
