@@ -44,7 +44,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
     address public masterMinter;
     bool internal initialized;
 
-    mapping(address => uint256) internal balances;
+    mapping(address => uint256) internal balanceAndBlacklistStates;
     mapping(address => mapping(address => uint256)) internal allowed;
     uint256 internal totalSupply_ = 0;
     mapping(address => bool) internal minters;
@@ -128,7 +128,9 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         );
 
         totalSupply_ = totalSupply_.add(_amount);
-        balances[_to] = balances[_to].add(_amount);
+        balanceAndBlacklistStates[_to] = balanceAndBlacklistStates[_to].add(
+            _amount
+        );
         minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
@@ -195,7 +197,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         view
         returns (uint256)
     {
-        return balances[account];
+        return balanceAndBlacklistStates[account];
     }
 
     /**
@@ -295,12 +297,16 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(
-            value <= balances[from],
+            value <= balanceAndBlacklistStates[from],
             "ERC20: transfer amount exceeds balance"
         );
 
-        balances[from] = balances[from].sub(value);
-        balances[to] = balances[to].add(value);
+        balanceAndBlacklistStates[from] = balanceAndBlacklistStates[from].sub(
+            value
+        );
+        balanceAndBlacklistStates[to] = balanceAndBlacklistStates[to].add(
+            value
+        );
         emit Transfer(from, to, value);
     }
 
@@ -350,12 +356,12 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         onlyMinters
         notBlacklisted(msg.sender)
     {
-        uint256 balance = balances[msg.sender];
+        uint256 balance = balanceAndBlacklistStates[msg.sender];
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
 
         totalSupply_ = totalSupply_.sub(_amount);
-        balances[msg.sender] = balance.sub(_amount);
+        balanceAndBlacklistStates[msg.sender] = balance.sub(_amount);
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
     }

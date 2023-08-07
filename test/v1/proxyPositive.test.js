@@ -63,8 +63,14 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
-      { variable: "balances.pauserAccount", expectedValue: new BN(mintAmount) },
+      {
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
+        expectedValue: new BN(mintAmount),
+      },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
@@ -103,8 +109,14 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
-      { variable: "balances.pauserAccount", expectedValue: new BN(mintAmount) },
+      {
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
+        expectedValue: new BN(mintAmount),
+      },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
@@ -148,9 +160,12 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -308,9 +323,12 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount - 1),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount + 1),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount + 1) },
@@ -362,9 +380,12 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
