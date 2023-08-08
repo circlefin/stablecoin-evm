@@ -57,4 +57,103 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
     function _domainSeparator() internal override view returns (bytes32) {
         return EIP712.makeDomainSeparator(name, "2", _chainId());
     }
+
+    /**
+     * @notice Update allowance with a signed permit
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
+     * @param owner       Token owner's address (Authorizer)
+     * @param spender     Spender's address
+     * @param value       Amount of allowance
+     * @param deadline    Expiration time, seconds since the epoch
+     * @param signature   Signature bytes signed by an EOA wallet or a contract wallet
+     */
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        bytes memory signature
+    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+        _permit(owner, spender, value, deadline, signature);
+    }
+
+    /**
+     * @notice Execute a transfer with a signed authorization
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param signature     Signature bytes signed by an EOA wallet or a contract wallet
+     */
+    function transferWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        bytes memory signature
+    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+        _transferWithAuthorization(
+            from,
+            to,
+            value,
+            validAfter,
+            validBefore,
+            nonce,
+            signature
+        );
+    }
+
+    /**
+     * @notice Receive a transfer with a signed authorization from the payer
+     * @dev This has an additional check to ensure that the payee's address
+     * matches the caller of this function to prevent front-running attacks.
+     * EOA wallet signatures should be packed in the order of r, s, v.
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param signature     Signature bytes signed by an EOA wallet or a contract wallet
+     */
+    function receiveWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        bytes memory signature
+    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+        _receiveWithAuthorization(
+            from,
+            to,
+            value,
+            validAfter,
+            validBefore,
+            nonce,
+            signature
+        );
+    }
+
+    /**
+     * @notice Attempt to cancel an authorization
+     * @dev Works only if the authorization is not yet used.
+     * EOA wallet signatures should be packed in the order of r, s, v.
+     * @param authorizer    Authorizer's address
+     * @param nonce         Nonce of the authorization
+     * @param signature     Signature bytes signed by an EOA wallet or a contract wallet
+     */
+    function cancelAuthorization(
+        address authorizer,
+        bytes32 nonce,
+        bytes memory signature
+    ) external whenNotPaused {
+        _cancelAuthorization(authorizer, nonce, signature);
+    }
 }

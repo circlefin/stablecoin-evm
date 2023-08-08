@@ -1,15 +1,15 @@
-import { FiatTokenV2Instance } from "../../@types/generated";
+import { AnyFiatTokenV2Instance } from "../../@types/AnyFiatTokenV2Instance";
 import { Approval } from "../../@types/generated/FiatTokenV2";
 import { expectRevert } from "../helpers";
 import { MAX_UINT256 } from "../helpers/constants";
 
 export function hasSafeAllowance(
-  getFiatToken: () => FiatTokenV2Instance,
+  getFiatToken: () => AnyFiatTokenV2Instance,
   fiatTokenOwner: string,
   accounts: Truffle.Accounts
 ): void {
   describe("safe allowance", () => {
-    let fiatToken: FiatTokenV2Instance;
+    let fiatToken: AnyFiatTokenV2Instance;
     const [alice, bob] = accounts;
 
     beforeEach(() => {

@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { FiatTokenV2Instance } from "../../../@types/generated";
+import { MockErc1271WalletInstance } from "../../../@types/generated";
 import {
   AuthorizationUsed,
   Transfer,
@@ -7,37 +7,53 @@ import {
 import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
+  prepareSignature,
   receiveWithAuthorizationTypeHash,
   signReceiveAuthorization,
   TestParams,
+  WalletType,
 } from "./helpers";
+import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
 
 export function testReceiveWithAuthorization({
   getFiatToken,
+  getERC1271Wallet,
   getDomainSeparator,
   fiatTokenOwner,
   accounts,
+  signerWalletType,
+  signatureBytesType,
 }: TestParams): void {
-  describe("receiveWithAuthorization", () => {
-    let fiatToken: FiatTokenV2Instance;
-    let domainSeparator: string;
+  describe(`receiveWithAuthorization with ${signerWalletType} wallet, ${signatureBytesType} signature interface`, async () => {
     const [alice, charlie] = ACCOUNTS_AND_KEYS;
     const [, bob, david] = accounts;
-    let nonce: string;
-
+    const nonce: string = hexStringFromBuffer(crypto.randomBytes(32));
     const initialBalance = 10e6;
     const receiveParams = {
-      from: alice.address,
+      from: "",
       to: bob,
       value: 7e6,
       validAfter: 0,
       validBefore: MAX_UINT256,
+      nonce,
     };
+
+    let fiatToken: AnyFiatTokenV2Instance;
+    let aliceWallet: MockErc1271WalletInstance;
+    let domainSeparator: string;
 
     beforeEach(async () => {
       fiatToken = getFiatToken();
+      aliceWallet = await getERC1271Wallet(alice.address);
       domainSeparator = getDomainSeparator();
-      nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+      // Initialize `from` address either as Alice's EOA address or Alice's wallet address
+      if (signerWalletType == WalletType.AA) {
+        receiveParams.from = aliceWallet.address;
+      } else {
+        receiveParams.from = alice.address;
+      }
+
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
@@ -56,7 +72,7 @@ export function testReceiveWithAuthorization({
       const { from, to, value, validAfter, validBefore } = receiveParams;
       // create an authorization to transfer money from Alice to Bob and sign
       // with Alice's key
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -82,9 +98,7 @@ export function testReceiveWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        v,
-        r,
-        s,
+        ...prepareSignature(signature, signatureBytesType),
         { from: bob }
       );
 
@@ -114,7 +128,7 @@ export function testReceiveWithAuthorization({
     it("reverts if the caller is not the payee", async () => {
       const { from, to, value, validAfter, validBefore } = receiveParams;
       // create a signed authorization
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -134,9 +148,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: david }
         ),
         "caller must be the payee"
@@ -146,7 +158,7 @@ export function testReceiveWithAuthorization({
     it("reverts if the signature does not match given parameters", async () => {
       const { from, to, value, validAfter, validBefore } = receiveParams;
       // create a signed authorization
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -166,9 +178,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         ),
         "invalid signature"
@@ -179,7 +189,7 @@ export function testReceiveWithAuthorization({
       const { from, to, value, validAfter, validBefore } = receiveParams;
       // create an authorization to transfer money from Alice to Bob, but
       // sign with Bob's key instead of Alice's
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -200,9 +210,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         ),
         "invalid signature"
@@ -214,7 +222,7 @@ export function testReceiveWithAuthorization({
       // create a signed authorization that won't be valid until 10 seconds
       // later
       const validAfter = Math.floor(Date.now() / 1000) + 10;
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -234,9 +242,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         ),
         "authorization is not yet valid"
@@ -247,7 +253,7 @@ export function testReceiveWithAuthorization({
       // create a signed authorization that expires immediately
       const { from, to, value, validAfter } = receiveParams;
       const validBefore = Math.floor(Date.now() / 1000);
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -267,9 +273,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         ),
         "authorization is expired"
@@ -280,7 +284,7 @@ export function testReceiveWithAuthorization({
       const { from, to, validAfter, validBefore } = receiveParams;
       // create a signed authorization
       const value = 1e6;
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -299,9 +303,7 @@ export function testReceiveWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        v,
-        r,
-        s,
+        ...prepareSignature(signature, signatureBytesType),
         { from: bob }
       );
 
@@ -314,9 +316,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         ),
         "authorization is used or canceled"
@@ -345,9 +345,7 @@ export function testReceiveWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
+        ...prepareSignature(authorization, signatureBytesType),
         { from: bob }
       );
 
@@ -373,9 +371,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          authorization2.v,
-          authorization2.r,
-          authorization2.s,
+          ...prepareSignature(authorization2, signatureBytesType),
           { from: bob }
         ),
         "authorization is used or canceled"
@@ -387,7 +383,7 @@ export function testReceiveWithAuthorization({
       // create a signed authorization that attempts to transfer an amount
       // that exceeds the sender's balance
       const value = initialBalance + 1;
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -407,9 +403,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         ),
         "transfer amount exceeds balance"
@@ -419,7 +413,7 @@ export function testReceiveWithAuthorization({
     it("reverts if the contract is paused", async () => {
       const { from, to, value, validAfter, validBefore } = receiveParams;
       // create a signed authorization
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -442,9 +436,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         ),
         "paused"
@@ -454,7 +446,7 @@ export function testReceiveWithAuthorization({
     it("reverts if the payer or the payee is blacklisted", async () => {
       const { from, to, value, validAfter, validBefore } = receiveParams;
       // create a signed authorization
-      const { v, r, s } = signReceiveAuthorization(
+      const signature = signReceiveAuthorization(
         from,
         to,
         value,
@@ -476,9 +468,7 @@ export function testReceiveWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: bob }
         );
 
