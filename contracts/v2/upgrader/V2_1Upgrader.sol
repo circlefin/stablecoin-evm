@@ -29,7 +29,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 import { FiatTokenV2_1 } from "../FiatTokenV2_1.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
-import { V2_1UpgraderHelper } from "./helpers/V2_1UpgraderHelper.sol";
+import { V2UpgraderHelper } from "./helpers/V2UpgraderHelper.sol";
 import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
 
 /**
@@ -59,7 +59,7 @@ contract V2_1Upgrader is AbstractV2Upgrader {
         address lostAndFound
     ) public AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin) {
         _lostAndFound = lostAndFound;
-        _helper = new V2_1UpgraderHelper(address(proxy));
+        _helper = new V2UpgraderHelper(address(proxy));
     }
 
     /**
@@ -80,7 +80,7 @@ contract V2_1Upgrader is AbstractV2Upgrader {
         // The helper needs to be used to read contract state because
         // AdminUpgradeabilityProxy does not allow the proxy admin to make
         // proxy calls.
-        V2_1UpgraderHelper v2_1Helper = V2_1UpgraderHelper(address(_helper));
+        V2UpgraderHelper v2_1Helper = V2UpgraderHelper(address(_helper));
 
         // Check that this contract sufficient funds to run the tests
         uint256 contractBal = v2_1Helper.balanceOf(address(this));

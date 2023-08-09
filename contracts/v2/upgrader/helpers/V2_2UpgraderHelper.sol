@@ -25,7 +25,7 @@
 pragma solidity 0.6.12;
 
 import { FiatTokenV2_1 } from "../../../v2/FiatTokenV2_1.sol";
-import { V2_1UpgraderHelper } from "./V2_1UpgraderHelper.sol";
+import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
 
 /**
  * @title V2.2 Upgrader Helper
@@ -33,14 +33,14 @@ import { V2_1UpgraderHelper } from "./V2_1UpgraderHelper.sol";
  * proxy admin role. (Proxy admins cannot call delegated methods). It is also
  * used to test approve/transferFrom.
  */
-contract V2_2UpgraderHelper is V2_1UpgraderHelper {
+contract V2_2UpgraderHelper is V2UpgraderHelper {
     /**
      * @notice Constructor
      * @param fiatTokenProxy    Address of the FiatTokenProxy contract
      */
     constructor(address fiatTokenProxy)
         public
-        V2_1UpgraderHelper(fiatTokenProxy)
+        V2UpgraderHelper(fiatTokenProxy)
     {}
 
     /**
