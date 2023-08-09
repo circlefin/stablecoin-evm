@@ -74,9 +74,9 @@ contract("V2_2Upgrader", (accounts) => {
     });
   });
 
-  describe("withdrawUSDC", () => {
-    it("should return the USDC to the transaction sender", async () => {
-      // Mint 0.2 USDC.
+  describe("withdrawFiatToken", () => {
+    it("should return the FiatToken to the transaction sender", async () => {
+      // Mint 0.2 FiatToken.
       await proxyAsV2_1.configureMinter(minter, 2e5, {
         from: v2_1MasterMinter,
       });
@@ -86,15 +86,15 @@ contract("V2_2Upgrader", (accounts) => {
         (await proxyAsV2_1.balanceOf(v2_2Upgrader.address)).toNumber()
       ).to.equal(0);
 
-      // Transfer 0.2 USDC to the upgrader contract.
+      // Transfer 0.2 FiatToken to the upgrader contract.
       await proxyAsV2_1.transfer(v2_2Upgrader.address, 2e5, { from: minter });
       expect((await proxyAsV2_1.balanceOf(minter)).toNumber()).to.equal(0);
       expect(
         (await proxyAsV2_1.balanceOf(v2_2Upgrader.address)).toNumber()
       ).to.equal(2e5);
 
-      // Withdraw the USDC from the upgrader contract.
-      await v2_2Upgrader.withdrawUSDC({ from: upgraderOwner });
+      // Withdraw the FiatToken from the upgrader contract.
+      await v2_2Upgrader.withdrawFiatToken({ from: upgraderOwner });
       expect((await proxyAsV2_1.balanceOf(upgraderOwner)).toNumber()).to.equal(
         2e5
       );
@@ -102,7 +102,7 @@ contract("V2_2Upgrader", (accounts) => {
         (await proxyAsV2_1.balanceOf(v2_2Upgrader.address)).toNumber()
       ).to.equal(0);
 
-      // Cleanup - Burn 0.2 USDC.
+      // Cleanup - Burn 0.2 FiatToken.
       await proxyAsV2_1.transfer(minter, 2e5, { from: upgraderOwner });
       await proxyAsV2_1.burn(2e5, { from: minter });
     });
@@ -110,7 +110,7 @@ contract("V2_2Upgrader", (accounts) => {
 
   describe("upgrade", () => {
     it("upgrades, transfers proxy admin role to newProxyAdmin, runs tests, and self-destructs", async () => {
-      // Transfer 0.2 USDC to the upgrader contract
+      // Transfer 0.2 FiatToken to the upgrader contract
       await proxyAsV2_1.configureMinter(minter, 2e5, {
         from: v2_1MasterMinter,
       });
@@ -133,7 +133,7 @@ contract("V2_2Upgrader", (accounts) => {
         v2_2Implementation.address
       );
 
-      // 0.2 USDC is transferred back to the upgraderOwner
+      // 0.2 FiatToken is transferred back to the upgraderOwner
       expect(
         (await proxyAsV2_2.balanceOf(v2_2Upgrader.address)).toNumber()
       ).to.equal(0);
@@ -219,7 +219,7 @@ contract("V2_2Upgrader", (accounts) => {
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await _proxyAsV2_1.configureMinter(minter, 2e5, {
         from: await _proxyAsV2_1.masterMinter(),
       });

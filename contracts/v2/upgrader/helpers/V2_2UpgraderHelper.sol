@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2018-2023 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,13 @@
 
 pragma solidity 0.6.12;
 
-import { FiatTokenV2_1 } from "../../v2/FiatTokenV2_1.sol";
+import { FiatTokenV2_1 } from "../../../v2/FiatTokenV2_1.sol";
 import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
 
 /**
- * @title V2_2 Upgrader Helper
+ * @title V2.2 Upgrader Helper
  * @dev Enables V2_2Upgrader to read some contract state before it renounces the
- * proxy admin role. (Proxy admins cannot call delegated methods.) It is also
+ * proxy admin role. (Proxy admins cannot call delegated methods). It is also
  * used to test approve/transferFrom.
  */
 contract V2_2UpgraderHelper is V2UpgraderHelper {
@@ -55,7 +55,7 @@ contract V2_2UpgraderHelper is V2UpgraderHelper {
      * @notice Call DOMAIN_SEPARATOR()
      * @return domainSeparator
      */
-    // solhint-disable func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32) {
         return FiatTokenV2_1(_proxy).DOMAIN_SEPARATOR();
     }

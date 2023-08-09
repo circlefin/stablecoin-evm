@@ -27,7 +27,7 @@ pragma solidity 0.6.12;
 /**
  * @dev A contract that implements the MinterManagementInterface has external
  * functions for adding and removing minters and modifying their allowances.
- * An example is the FiatTokenV1 contract that implements USDC.
+ * An example is the FiatTokenV1 contract.
  */
 interface MinterManagementInterface {
     function isMinter(address _account) external view returns (bool);
