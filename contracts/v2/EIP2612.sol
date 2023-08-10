@@ -54,7 +54,7 @@ abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
      * @param owner     Token owner's address (Authorizer)
      * @param spender   Spender's address
      * @param value     Amount of allowance
-     * @param deadline  The time at which this expires (unix time)
+     * @param deadline  The time at which the signature expires (unix time), or max uint256 value to signal no expiration
      * @param v         v of the signature
      * @param r         r of the signature
      * @param s         s of the signature
@@ -77,7 +77,7 @@ abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
      * @param owner      Token owner's address (Authorizer)
      * @param spender    Spender's address
      * @param value      Amount of allowance
-     * @param deadline   The time at which this expires (unix time)
+     * @param deadline   The time at which the signature expires (unix time), or max uint256 value to signal no expiration
      * @param signature  Signature byte array signed by an EOA wallet or a contract wallet
      */
     function _permit(
@@ -87,7 +87,10 @@ abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
         uint256 deadline,
         bytes memory signature
     ) internal {
-        require(deadline >= now, "FiatTokenV2: permit is expired");
+        require(
+            deadline == type(uint256).max || deadline >= now,
+            "FiatTokenV2: permit is expired"
+        );
 
         bytes32 typedDataHash = MessageHashUtils.toTypedDataHash(
             _domainSeparator(),
