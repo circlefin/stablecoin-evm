@@ -185,7 +185,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      * @param owner       Token owner's address (Authorizer)
      * @param spender     Spender's address
      * @param value       Amount of allowance
-     * @param deadline    Expiration time, seconds since the epoch
+     * @param deadline    The time at which the signature expires (unix time), or max uint256 value to signal no expiration
      * @param v           v of the signature
      * @param r           r of the signature
      * @param s           s of the signature

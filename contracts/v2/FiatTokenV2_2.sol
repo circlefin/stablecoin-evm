@@ -76,7 +76,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      * @param owner       Token owner's address (Authorizer)
      * @param spender     Spender's address
      * @param value       Amount of allowance
-     * @param deadline    Expiration time, seconds since the epoch
+     * @param deadline    The time at which the signature expires (unix time), or max uint256 value to signal no expiration
      * @param signature   Signature bytes signed by an EOA wallet or a contract wallet
      */
     function permit(
