@@ -27,7 +27,7 @@ jobs:
         run: yarn static-check
 
       - name: Run size check
-        run: yarn contract-size --checkMaxSize
+        run: yarn contract-size
 
       - name: Run tests
         run: yarn test

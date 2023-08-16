@@ -40,6 +40,11 @@ contract("FiatTokenV2", (accounts) => {
   });
 
   behavesLikeFiatTokenV2(accounts, () => fiatToken, fiatTokenOwner);
+  usesOriginalStorageSlotPositions({
+    Contract: FiatTokenV2,
+    version: 2,
+    accounts,
+  });
 });
 
 export function behavesLikeFiatTokenV2(
@@ -59,12 +64,6 @@ export function behavesLikeFiatTokenV2(
   });
 
   behavesLikeRescuable(getFiatToken as () => RescuableInstance, accounts);
-
-  usesOriginalStorageSlotPositions({
-    Contract: FiatTokenV2,
-    version: 2,
-    accounts,
-  });
 
   it("has the expected domain separator", async () => {
     expect(await getFiatToken().DOMAIN_SEPARATOR()).to.equal(domainSeparator);

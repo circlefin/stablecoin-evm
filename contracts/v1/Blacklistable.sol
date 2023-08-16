@@ -30,7 +30,7 @@ import { Ownable } from "./Ownable.sol";
  * @title Blacklistable Token
  * @dev Allows accounts to be blacklisted by a "blacklister" role
  */
-contract Blacklistable is Ownable {
+abstract contract Blacklistable is Ownable {
     address public blacklister;
     mapping(address => bool) internal _deprecatedBlacklisted;
 
@@ -55,7 +55,7 @@ contract Blacklistable is Ownable {
      */
     modifier notBlacklisted(address _account) {
         require(
-            !_deprecatedBlacklisted[_account],
+            !_isBlacklisted(_account),
             "Blacklistable: account is blacklisted"
         );
         _;
@@ -66,7 +66,7 @@ contract Blacklistable is Ownable {
      * @param _account The address to check
      */
     function isBlacklisted(address _account) external view returns (bool) {
-        return _deprecatedBlacklisted[_account];
+        return _isBlacklisted(_account);
     }
 
     /**
@@ -74,7 +74,7 @@ contract Blacklistable is Ownable {
      * @param _account The address to blacklist
      */
     function blacklist(address _account) external onlyBlacklister {
-        _deprecatedBlacklisted[_account] = true;
+        _blacklist(_account);
         emit Blacklisted(_account);
     }
 
@@ -83,7 +83,7 @@ contract Blacklistable is Ownable {
      * @param _account The address to remove from the blacklist
      */
     function unBlacklist(address _account) external onlyBlacklister {
-        _deprecatedBlacklisted[_account] = false;
+        _unBlacklist(_account);
         emit UnBlacklisted(_account);
     }
 
@@ -95,4 +95,27 @@ contract Blacklistable is Ownable {
         blacklister = _newBlacklister;
         emit BlacklisterChanged(blacklister);
     }
+
+    /**
+     * @dev Checks if account is blacklisted.
+     * @param _account The address to check.
+     * @return true if the account is blacklisted, false otherwise.
+     */
+    function _isBlacklisted(address _account)
+        internal
+        virtual
+        view
+        returns (bool);
+
+    /**
+     * @dev Helper method that blacklists an account.
+     * @param _account The address to blacklist.
+     */
+    function _blacklist(address _account) internal virtual;
+
+    /**
+     * @dev Helper method that unblacklists an account.
+     * @param _account The address to unblacklist.
+     */
+    function _unBlacklist(address _account) internal virtual;
 }

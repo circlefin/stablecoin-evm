@@ -31,7 +31,7 @@ contract("MockFiatTokenWithEditableChainId", (accounts) => {
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
     const [, , lostAndFound] = accounts;
     await fiatToken.initializeV2_1(lostAndFound);
-    await fiatToken.initializeV2_2();
+    await fiatToken.initializeV2_2([]);
   });
 
   describe("DOMAIN_SEPARATOR", () => {

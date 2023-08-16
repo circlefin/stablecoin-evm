@@ -1,4 +1,5 @@
 const BN = require("bn.js");
+const { POW_2_255_HEX, POW_2_255_BN } = require("../helpers/constants");
 const wrapTests = require("./helpers/wrapTests");
 const {
   checkVariables,
@@ -15,12 +16,18 @@ const {
   FiatTokenProxy,
 } = require("./helpers/tokenTest");
 
+// TODO: Change these to UPPERCASE
 const maxAmount =
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 const maxAmountBN = new BN(maxAmount.slice(2), 16);
+
+const pow2_255Minus1Hex =
+  "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+const pow2_255Minus1BN = new BN(pow2_255Minus1Hex.slice(2), 16);
+
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -736,20 +743,27 @@ function runTests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms048 mint works on amount=2^256-1", async () => {
-    await token.configureMinter(minterAccount, maxAmount, {
+  it(`ms048 mint works on amount=${
+    version < 2.2 ? "2^256-1" : "2^255-1"
+  }`, async () => {
+    const [amount, amountBN] =
+      version < 2.2
+        ? [maxAmount, maxAmountBN]
+        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+
+    await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
     ];
     await checkVariables([token], [customVars]);
 
-    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
+    await token.mint(arbitraryAccount, amount, { from: minterAccount });
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
@@ -758,29 +772,69 @@ function runTests(newToken, _accounts) {
       },
       {
         variable: "balanceAndBlacklistStates.arbitraryAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      { variable: "totalSupply", expectedValue: amountBN },
     ];
     await checkVariables([token], [customVars]);
   });
 
-  it("ms049 burn on works on amount=2^256-1", async () => {
-    await token.configureMinter(minterAccount, maxAmount, {
+  if (version >= 2.2) {
+    it("ms048(b) mint does not work on amount=2^255", async () => {
+      await token.configureMinter(minterAccount, POW_2_255_HEX, {
+        from: masterMinterAccount,
+      });
+      let customVars = [
+        { variable: "isAccountMinter.minterAccount", expectedValue: true },
+        {
+          variable: "minterAllowance.minterAccount",
+          expectedValue: POW_2_255_BN,
+        },
+      ];
+      await checkVariables([token], [customVars]);
+
+      await expectRevert(
+        token.mint(arbitraryAccount, POW_2_255_HEX, { from: minterAccount })
+      );
+      customVars = [
+        { variable: "isAccountMinter.minterAccount", expectedValue: true },
+        {
+          variable: "minterAllowance.minterAccount",
+          expectedValue: POW_2_255_BN,
+        },
+        {
+          variable: "balanceAndBlacklistStates.arbitraryAccount",
+          expectedValue: new BN(0),
+        },
+        { variable: "totalSupply", expectedValue: new BN(0) },
+      ];
+      await checkVariables([token], [customVars]);
+    });
+  }
+
+  it(`ms049 burn on works on amount=${
+    version < 2.2 ? "2^256-1" : "2^255-1"
+  }`, async () => {
+    const [amount, amountBN] =
+      version < 2.2
+        ? [maxAmount, maxAmountBN]
+        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+
+    await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    await token.mint(minterAccount, maxAmount, { from: minterAccount });
+    await token.mint(minterAccount, amount, { from: minterAccount });
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balanceAndBlacklistStates.minterAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      { variable: "totalSupply", expectedValue: amountBN },
     ];
     await checkVariables([token], [customVars]);
 
-    await token.burn(maxAmount, { from: minterAccount });
+    await token.burn(amount, { from: minterAccount });
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
     ];
@@ -788,17 +842,29 @@ function runTests(newToken, _accounts) {
   });
 
   it("ms050 approve works on amount=2^256-1", async () => {
-    await token.configureMinter(minterAccount, maxAmount, {
+    const [mintAmount, mintAmountBN] =
+      version < 2.2
+        ? [maxAmount, maxAmountBN]
+        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+
+    await token.configureMinter(minterAccount, mintAmount, {
       from: masterMinterAccount,
     });
-    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
+    await token.mint(arbitraryAccount, mintAmount, {
+      from: minterAccount,
+    });
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balanceAndBlacklistStates.arbitraryAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: mintAmountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
+        // TODO: Abstract all new BN(0) static var.
+        expectedValue: new BN(0),
+      },
+      { variable: "totalSupply", expectedValue: mintAmountBN },
     ];
     await checkVariables([token], [customVars]);
 
@@ -807,9 +873,13 @@ function runTests(newToken, _accounts) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balanceAndBlacklistStates.arbitraryAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: mintAmountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
+        expectedValue: new BN(0),
+      },
+      { variable: "totalSupply", expectedValue: mintAmountBN },
       {
         variable: "allowance.arbitraryAccount.pauserAccount",
         expectedValue: maxAmountBN,
@@ -818,63 +888,83 @@ function runTests(newToken, _accounts) {
     await checkVariables([token], [customVars]);
   });
 
-  it("ms051 transfer works on amount=2^256-1", async () => {
-    await token.configureMinter(minterAccount, maxAmount, {
+  it(`ms051 transfer works on amount=${
+    version < 2.2 ? "2^256-1" : "2^255-1"
+  }`, async () => {
+    const [amount, amountBN] =
+      version < 2.2
+        ? [maxAmount, maxAmountBN]
+        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+
+    await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
+    await token.mint(arbitraryAccount, amount, { from: minterAccount });
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balanceAndBlacklistStates.arbitraryAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      { variable: "totalSupply", expectedValue: amountBN },
     ];
     await checkVariables([token], [customVars]);
 
-    await token.transfer(pauserAccount, maxAmount, { from: arbitraryAccount });
+    await token.transfer(pauserAccount, amount, {
+      from: arbitraryAccount,
+    });
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balanceAndBlacklistStates.pauserAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      { variable: "totalSupply", expectedValue: amountBN },
     ];
     await checkVariables([token], [customVars]);
   });
 
-  it("ms052 transferFrom works on amount=2^256-1", async () => {
-    await token.configureMinter(minterAccount, maxAmount, {
+  it(`ms052 transferFrom works on amount=${
+    version < 2.2 ? "2^256-1" : "2^255-1"
+  }`, async () => {
+    const [amount, amountBN] =
+      version < 2.2
+        ? [maxAmount, maxAmountBN]
+        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+
+    await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
     });
-    await token.mint(arbitraryAccount, maxAmount, { from: minterAccount });
-    await token.approve(pauserAccount, maxAmount, { from: arbitraryAccount });
+    await token.mint(arbitraryAccount, amount, {
+      from: minterAccount,
+    });
+    await token.approve(pauserAccount, amount, {
+      from: arbitraryAccount,
+    });
     let customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balanceAndBlacklistStates.arbitraryAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      { variable: "totalSupply", expectedValue: amountBN },
       {
         variable: "allowance.arbitraryAccount.pauserAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
     ];
     await checkVariables([token], [customVars]);
 
-    await token.transferFrom(arbitraryAccount, pauserAccount, maxAmount, {
+    await token.transferFrom(arbitraryAccount, pauserAccount, amount, {
       from: pauserAccount,
     });
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "balanceAndBlacklistStates.pauserAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: amountBN,
       },
-      { variable: "totalSupply", expectedValue: maxAmountBN },
+      { variable: "totalSupply", expectedValue: amountBN },
     ];
     await checkVariables([token], [customVars]);
   });

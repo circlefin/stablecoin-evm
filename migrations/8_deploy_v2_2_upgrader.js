@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const some = require("lodash/some");
+const { readBlacklistFile } = require("../utils");
 
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -18,7 +19,20 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
 }
 
 module.exports = async (deployer, network) => {
-  if (some(["development", "coverage"], (v) => network.includes(v))) {
+  const isTestEnvironment = some(["development", "coverage"], (v) =>
+    network.includes(v)
+  );
+
+  // Proceed if and only if the blacklist file exists.
+  const accountsToBlacklist = readBlacklistFile(
+    path.join(
+      __dirname,
+      "..",
+      isTestEnvironment ? "blacklist.test.js" : "blacklist.remote.js"
+    )
+  );
+
+  if (isTestEnvironment) {
     // DO NOT USE THESE ADDRESSES IN PRODUCTION
     proxyAdminAddress = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598";
     proxyContractAddress = (await FiatTokenProxy.deployed()).address;
@@ -42,7 +56,8 @@ module.exports = async (deployer, network) => {
     V2_2Upgrader,
     proxyContractAddress,
     fiatTokenV2_2.address,
-    proxyAdminAddress
+    proxyAdminAddress,
+    accountsToBlacklist
   );
 
   console.log(

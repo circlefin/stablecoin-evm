@@ -4,13 +4,24 @@ import {
   FiatTokenV22Instance,
   V22UpgraderInstance,
 } from "../../@types/generated";
-import { expectRevert, initializeToVersion } from "../helpers";
+import {
+  expectRevert,
+  generateAccounts,
+  initializeToVersion,
+} from "../helpers";
+import { readBlacklistFile } from "../../utils";
+import path from "path";
+import { toLower } from "lodash";
+import { BLOCK_GAS_LIMIT } from "../helpers/constants";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const V2_2Upgrader = artifacts.require("V2_2Upgrader");
+const accountsToBlacklist = readBlacklistFile(
+  path.join(__dirname, "..", "..", "blacklist.test.js")
+);
 
 contract("V2_2Upgrader", (accounts) => {
   let fiatTokenProxy: FiatTokenProxyInstance;
@@ -23,6 +34,7 @@ contract("V2_2Upgrader", (accounts) => {
   let v2_1MasterMinter: string;
   let originalProxyAdmin: string;
 
+  const blacklisterAccount = accounts[4];
   const [minter, lostAndFound, alice, bob] = accounts.slice(9);
 
   before(async () => {
@@ -46,6 +58,13 @@ contract("V2_2Upgrader", (accounts) => {
     });
     await proxyAsV2_1.initializeV2("USD Coin");
     await proxyAsV2_1.initializeV2_1(lostAndFound);
+
+    // Initially blacklist all these accounts.
+    await Promise.all(
+      accountsToBlacklist.map((account) =>
+        proxyAsV2_2.blacklist(account, { from: blacklisterAccount })
+      )
+    );
   });
 
   describe("proxy", () => {
@@ -71,6 +90,15 @@ contract("V2_2Upgrader", (accounts) => {
   describe("newProxyAdmin", () => {
     it("should return the correct address", async () => {
       expect(await v2_2Upgrader.newProxyAdmin()).to.equal(originalProxyAdmin);
+    });
+  });
+
+  describe("accountsToBlacklist", () => {
+    it("should return the correct list of addresses read in blacklist.test.js", async () => {
+      const actualAccountsToBlacklist = await v2_2Upgrader.accountsToBlacklist();
+      expect(actualAccountsToBlacklist.map(toLower)).to.deep.equal(
+        accountsToBlacklist.map(toLower)
+      );
     });
   });
 
@@ -146,6 +174,12 @@ contract("V2_2Upgrader", (accounts) => {
         true
       );
 
+      // All accountsToBlacklist are still blacklisted
+      const areAccountsBlacklisted = await Promise.all(
+        accountsToBlacklist.map((account) => proxyAsV2_2.isBlacklisted(account))
+      );
+      expect(areAccountsBlacklisted.every((b) => b)).to.be.true;
+
       // mint works as expected
       await proxyAsV2_2.configureMinter(minter, 1000e6, {
         from: await proxyAsV2_2.masterMinter(),
@@ -216,6 +250,7 @@ contract("V2_2Upgrader", (accounts) => {
         _fiatTokenProxy.address,
         _v1_1Implementation.address, // provide V1.1 implementation instead of V2.2
         originalProxyAdmin,
+        [],
         { from: upgraderOwner }
       );
 
@@ -245,6 +280,124 @@ contract("V2_2Upgrader", (accounts) => {
         v2_1Implementation.address
       );
     });
+
+    it("reverts if blacklisting an account that was not blacklisted", async () => {
+      const _fiatTokenProxy = await FiatTokenProxy.new(
+        v2_1Implementation.address,
+        { from: originalProxyAdmin }
+      );
+      await initializeToVersion(_fiatTokenProxy, "2.1", minter, lostAndFound);
+      const _proxyAsV2_1 = await FiatTokenV2_1.at(_fiatTokenProxy.address);
+
+      const _v2_2Implementation = await FiatTokenV2_2.new();
+      const upgraderOwner = accounts[0];
+
+      // Try blacklisting an account that was not originally blacklisted.
+      const accountsToBlacklist = generateAccounts(1);
+      const _v2_2Upgrader = await V2_2Upgrader.new(
+        _fiatTokenProxy.address,
+        _v2_2Implementation.address,
+        originalProxyAdmin,
+        accountsToBlacklist,
+        { from: upgraderOwner }
+      );
+
+      // Transfer 0.2 FiatToken to the contract
+      await _proxyAsV2_1.configureMinter(minter, 2e5, {
+        from: await _proxyAsV2_1.masterMinter(),
+      });
+      await _proxyAsV2_1.mint(minter, 2e5, { from: minter });
+      await _proxyAsV2_1.transfer(_v2_2Upgrader.address, 2e5, { from: minter });
+
+      // Transfer admin role to the contract
+      await _fiatTokenProxy.changeAdmin(_v2_2Upgrader.address, {
+        from: originalProxyAdmin,
+      });
+
+      // Upgrade should fail because the account to blacklist was not previously blacklisted.
+      await expectRevert(
+        _v2_2Upgrader.upgrade({ from: upgraderOwner }),
+        "FiatTokenV2_2: Blacklisting previously unblacklisted account!"
+      );
+
+      // The proxy admin role is not transferred
+      expect(await _fiatTokenProxy.admin()).to.equal(_v2_2Upgrader.address);
+
+      // The implementation is left unchanged
+      expect(await _fiatTokenProxy.implementation()).to.equal(
+        v2_1Implementation.address
+      );
+    });
+
+    describe("gas tests", () => {
+      const gasTests: [number, number][] = [
+        [100, BLOCK_GAS_LIMIT * 0.1],
+        [500, BLOCK_GAS_LIMIT * 0.5],
+      ];
+      gasTests.forEach(([numAccounts, gasTarget]) => {
+        it(`should not exceed ${gasTarget} gas when blacklisting ${numAccounts} accounts`, async () => {
+          const accountsToBlacklist = generateAccounts(numAccounts);
+
+          const _fiatTokenProxy = await FiatTokenProxy.new(
+            v2_1Implementation.address,
+            { from: originalProxyAdmin }
+          );
+          await initializeToVersion(
+            _fiatTokenProxy,
+            "2.1",
+            minter,
+            lostAndFound
+          );
+          const _proxyAsV2_1 = await FiatTokenV2_1.at(_fiatTokenProxy.address);
+
+          // Blacklist the accounts in _deprecatedBlacklist first
+          await Promise.all(
+            accountsToBlacklist.map((a) =>
+              _proxyAsV2_1.blacklist(a, { from: minter })
+            )
+          );
+
+          // Set up the V2_2Upgrader
+          const _v2_2Implementation = await FiatTokenV2_2.new();
+          const upgraderOwner = accounts[0];
+          const _v2_2Upgrader = await V2_2Upgrader.new(
+            _fiatTokenProxy.address,
+            _v2_2Implementation.address,
+            originalProxyAdmin,
+            accountsToBlacklist,
+            { from: upgraderOwner, gas: BLOCK_GAS_LIMIT }
+          );
+
+          // Transfer 0.2 FiatToken to the contract
+          await _proxyAsV2_1.configureMinter(minter, 2e5, {
+            from: await _proxyAsV2_1.masterMinter(),
+          });
+          await _proxyAsV2_1.mint(minter, 2e5, { from: minter });
+          await _proxyAsV2_1.transfer(_v2_2Upgrader.address, 2e5, {
+            from: minter,
+          });
+
+          // Transfer admin role to the contract
+          await _fiatTokenProxy.changeAdmin(_v2_2Upgrader.address, {
+            from: originalProxyAdmin,
+          });
+
+          // Perform the upgrade.
+          const txReceipt = await _v2_2Upgrader.upgrade({
+            from: upgraderOwner,
+            gas: BLOCK_GAS_LIMIT,
+          });
+          const gasUsed = txReceipt.receipt.gasUsed;
+          console.log({ numAccounts, gasUsed });
+          expect(gasUsed).to.be.lessThan(gasTarget);
+
+          // Sanity check that upgrade worked.
+          expect(await _fiatTokenProxy.implementation()).to.equal(
+            _v2_2Implementation.address
+          );
+        });
+      });
+    });
   });
 
   describe("abortUpgrade", () => {
@@ -260,6 +413,7 @@ contract("V2_2Upgrader", (accounts) => {
         _fiatTokenProxy.address,
         v2_1Implementation.address,
         originalProxyAdmin,
+        [],
         { from: upgraderOwner }
       );
       const _v2_2UpgraderHelperAddress = await _v2_2Upgrader.helper();

@@ -20,12 +20,12 @@ const {
   encodeCall,
   FiatTokenV1,
   UpgradedFiatToken,
-  UpgradedFiatTokenNewFields,
+  deployUpgradedFiatTokenNewFields,
 } = require("./helpers/tokenTest");
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, version) {
   let rawToken, proxy, token;
 
   beforeEach(async () => {
@@ -134,7 +134,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("nut010 should fail to call updateToAndCall with non-adminAccount", async () => {
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initialize",
       ["bool", "address", "uint256"],
@@ -164,7 +164,7 @@ function runTests(newToken, _accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const data = encodeCall(
       "initialize",
       [

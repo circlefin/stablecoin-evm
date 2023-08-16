@@ -25,12 +25,13 @@ const {
   UpgradedFiatTokenNewFields,
   UpgradedFiatTokenNewFieldsNewLogic,
   getAdmin,
+  deployUpgradedFiatTokenNewFields,
 } = require("./helpers/tokenTest");
 const { makeRawTransaction, sendRawTransaction } = require("./helpers/abi");
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, version) {
   let rawToken, proxy, token;
 
   beforeEach(async () => {
@@ -86,7 +87,7 @@ function runTests(newToken, _accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -175,7 +176,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("upt008 should deploy upgraded version of contract with new data fields and without previous deployment and ensure new fields correct", async () => {
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const newProxy = await FiatTokenProxy.new(upgradedToken.address, {
       from: proxyOwnerAccount,
     });
@@ -403,7 +404,7 @@ function runTests(newToken, _accounts) {
   it("upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result", async () => {
     await token.pause({ from: pauserAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -426,7 +427,7 @@ function runTests(newToken, _accounts) {
   it("upt012 should upgradeToAndCall while upgrader is blacklisted", async () => {
     await token.blacklist(proxyOwnerAccount, { from: blacklisterAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -445,7 +446,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("upt013 should upgradeToAndCall while new logic is blacklisted", async () => {
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     await token.blacklist(upgradedToken.address, { from: blacklisterAccount });
 
     const initializeData = encodeCall(

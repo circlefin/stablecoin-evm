@@ -2,7 +2,6 @@
  * SPDX-License-Identifier: MIT
  *
  * Copyright (c) 2018-2023 CENTRE SECZ
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -20,41 +19,19 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-
-pragma solidity 0.6.12;
-
-import { FiatTokenV2 } from "./FiatTokenV2.sol";
-
-// solhint-disable func-name-mixedcase
 
 /**
- * @title FiatToken V2.1
- * @notice ERC20 Token backed by fiat reserves, version 2.1
+ * These are addresses used purely for tests. Deployers should
+ * create a `blacklist.remote.js` file and fill those in with
+ * correct addresses to blacklist before proceeding with the deploy.
  */
-contract FiatTokenV2_1 is FiatTokenV2 {
-    /**
-     * @notice Initialize v2.1
-     * @param lostAndFound  The address to which the locked funds are sent
-     */
-    function initializeV2_1(address lostAndFound) external {
-        // solhint-disable-next-line reason-string
-        require(_initializedVersion == 1);
-
-        uint256 lockedAmount = _balanceOf(address(this));
-        if (lockedAmount > 0) {
-            _transfer(address(this), lostAndFound, lockedAmount);
-        }
-        _blacklist(address(this));
-
-        _initializedVersion = 2;
-    }
-
-    /**
-     * @notice Version string for the EIP712 domain separator
-     * @return Version string
-     */
-    function version() external pure returns (string memory) {
-        return "2";
-    }
-}
+module.exports = [
+  "0x04dba1194ee10112fe6c3207c0687def0e78bacf",
+  "0x08a8a2436fc920e6c73c3a9e9a00b8d937812ee0",
+  "0xb6f5ec1a0a9cd1526536d3f0426c429529471f40",
+  "0xbf4f36efa3ac655a1d86f6c32b648a90271443f4",
+  "0xf8a9ab377ce63592583767b34602e130e38ebdca",
+  "0xfc672c73ca5c7234edc82552e4a0c8fc247d32ac",
+];

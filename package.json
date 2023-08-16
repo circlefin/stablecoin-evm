@@ -8,10 +8,11 @@
   },
   "scripts": {
     "compile": "truffle compile",
-    "contract-size": "truffle run contract-size",
+    "contract-size": "yarn contract-size:all --contracts $(find ./contracts -name \"*.sol\" -not -path \"./contracts/test/*\" | xargs -I {} /bin/bash -c 'basename {} .sol')",
+    "contract-size:all": "yarn compile && truffle run contract-size --checkMaxSize",
     "coverage": "truffle run coverage",
     "fmt": "prettier --write './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
-    "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
+    "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --allowUnlimitedContractSize --gasLimit=0x1C9C380 --quiet",
     "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
     "migrate": "truffle migrate --interactive",
     "prepare": "husky install",
