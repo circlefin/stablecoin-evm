@@ -1,11 +1,17 @@
 import BN from "bn.js";
 import { FiatTokenProxyInstance } from "../../@types/generated";
+import { POW_2_255_BN } from "./constants";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
+
+export const STORAGE_SLOT_NUMBERS = {
+  _deprecatedBlacklisted: 3,
+  balanceAndBlacklistStates: 9,
+};
 
 export function usesOriginalStorageSlotPositions<
   T extends Truffle.ContractInstance
@@ -15,7 +21,7 @@ export function usesOriginalStorageSlotPositions<
   accounts,
 }: {
   Contract: Truffle.Contract<T>;
-  version: 1 | 1.1 | 2 | 2.1;
+  version: 1 | 1.1 | 2 | 2.1 | 2.2;
   accounts: Truffle.Accounts;
 }): void {
   describe("uses original storage slot positions", () => {
@@ -26,6 +32,10 @@ export function usesOriginalStorageSlotPositions<
       30e6,
       10e6,
     ];
+    const [mintedBN, transferredBN] = [minted, transferred].map(
+      (v) => new BN(v, 10)
+    );
+
     const [
       owner,
       proxyAdmin,
@@ -67,6 +77,7 @@ export function usesOriginalStorageSlotPositions<
       await proxyAsFiatTokenV1.mint(alice, minted, { from: minter });
       await proxyAsFiatTokenV1.transfer(bob, transferred, { from: alice });
       await proxyAsFiatTokenV1.approve(charlie, allowance, { from: alice });
+      await proxyAsFiatTokenV1.blacklist(bob, { from: blacklister });
       await proxyAsFiatTokenV1.blacklist(charlie, { from: blacklister });
       await proxyAsFiatTokenV1.pause({ from: pauser });
 
@@ -145,6 +156,7 @@ export function usesOriginalStorageSlotPositions<
         expect(parseAddress(slot)).to.equal(rescuer);
       });
     }
+
     if (version >= 2) {
       it("retains slot 15 for DOMAIN_SEPARATOR", async () => {
         const slot = await readSlot(proxy.address, 15);
@@ -157,33 +169,88 @@ export function usesOriginalStorageSlotPositions<
     it("retains original storage slots for _deprecatedBlacklisted mapping", async () => {
       // _deprecatedBlacklisted[alice]
       let v = parseInt(
-        await readSlot(proxy.address, addressMappingSlot(alice, 3)),
+        await readSlot(
+          proxy.address,
+          addressMappingSlot(alice, STORAGE_SLOT_NUMBERS._deprecatedBlacklisted)
+        ),
         16
       );
       expect(v).to.equal(0);
 
-      // _deprecatedBlacklisted[charlie]
+      // _deprecatedBlacklisted[bob] - this should be set to true in pre-v2.2 versions,
+      // and left untouched in v2.2+ versions.
       v = parseInt(
-        await readSlot(proxy.address, addressMappingSlot(charlie, 3)),
+        await readSlot(
+          proxy.address,
+          addressMappingSlot(bob, STORAGE_SLOT_NUMBERS._deprecatedBlacklisted)
+        ),
         16
       );
-      expect(v).to.equal(1);
+      if (version >= 2.2) {
+        expect(v).to.equal(0);
+      } else {
+        expect(v).to.equal(1);
+      }
+
+      // _deprecatedBlacklisted[charlie] - this should be set to true in pre-v2.2 versions,
+      // and left untouched in v2.2+ versions.
+      v = parseInt(
+        await readSlot(
+          proxy.address,
+          addressMappingSlot(
+            charlie,
+            STORAGE_SLOT_NUMBERS._deprecatedBlacklisted
+          )
+        ),
+        16
+      );
+      if (version >= 2.2) {
+        expect(v).to.equal(0);
+      } else {
+        expect(v).to.equal(1);
+      }
     });
 
     it("retains original storage slots for balanceAndBlacklistStates mapping", async () => {
-      // balanceAndBlacklistStates[alice]
-      let v = parseInt(
-        await readSlot(proxy.address, addressMappingSlot(alice, 9)),
-        16
+      // balanceAndBlacklistStates[alice] - not blacklisted, has balance
+      let v = parseUint(
+        await readSlot(
+          proxy.address,
+          addressMappingSlot(
+            alice,
+            STORAGE_SLOT_NUMBERS.balanceAndBlacklistStates
+          )
+        )
       );
-      expect(v).to.equal(minted - transferred);
+      let expectedValue = mintedBN.sub(transferredBN);
+      expect(v.eq(expectedValue)).to.be.true;
 
-      // balanceAndBlacklistStates[bob]
-      v = parseInt(
-        await readSlot(proxy.address, addressMappingSlot(bob, 9)),
-        16
+      // balanceAndBlacklistStates[bob] - blacklisted, has balance
+      v = parseUint(
+        await readSlot(
+          proxy.address,
+          addressMappingSlot(
+            bob,
+            STORAGE_SLOT_NUMBERS.balanceAndBlacklistStates
+          )
+        )
       );
-      expect(v).to.equal(transferred);
+      expectedValue =
+        version >= 2.2 ? POW_2_255_BN.add(transferredBN) : transferredBN;
+      expect(v.eq(expectedValue)).to.be.true;
+
+      // balanceAndBlacklistStates[charlie] - blacklisted, no balance
+      v = parseUint(
+        await readSlot(
+          proxy.address,
+          addressMappingSlot(
+            charlie,
+            STORAGE_SLOT_NUMBERS.balanceAndBlacklistStates
+          )
+        )
+      );
+      expectedValue = version >= 2.2 ? POW_2_255_BN : new BN(0);
+      expect(v.eq(expectedValue)).to.be.true;
     });
 
     it("retains original storage slots for allowed mapping", async () => {
@@ -235,7 +302,8 @@ export function usesOriginalStorageSlotPositions<
   });
 }
 
-async function readSlot(
+// TODO: Organize these storage reading logic into a test helper.
+export async function readSlot(
   address: string,
   slot: number | string
 ): Promise<string> {
@@ -255,7 +323,7 @@ function parseString(hex: string): string {
   return Buffer.from(hex.slice(0, len), "hex").toString("utf8");
 }
 
-function parseUint(hex: string): BN {
+export function parseUint(hex: string): BN {
   return new BN(hex, 16);
 }
 
@@ -267,7 +335,7 @@ function encodeAddress(addr: string): string {
   return addr.replace(/^0x/, "").toLowerCase().padStart(64, "0");
 }
 
-function addressMappingSlot(addr: string, pos: number): string {
+export function addressMappingSlot(addr: string, pos: number): string {
   return web3.utils.keccak256("0x" + encodeAddress(addr) + encodeUint(pos));
 }
 

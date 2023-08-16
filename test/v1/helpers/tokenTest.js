@@ -6,8 +6,13 @@ const Q = require("q");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
+const SignatureChecker = artifacts.require("SignatureChecker");
+const UpgradedFiatTokenV2_2 = artifacts.require("UpgradedFiatTokenV2_2");
 const UpgradedFiatTokenNewFields = artifacts.require(
   "UpgradedFiatTokenNewFieldsTest"
+);
+const UpgradedFiatTokenV2_2NewFields = artifacts.require(
+  "UpgradedFiatTokenV2_2NewFieldsTest"
 );
 const UpgradedFiatTokenNewFieldsNewLogic = artifacts.require(
   "UpgradedFiatTokenNewFieldsNewLogicTest"
@@ -959,10 +964,31 @@ async function getInitializedV1(token) {
   return initialized;
 }
 
+async function deployUpgradedFiatToken(version) {
+  if (version < 2.2) {
+    return UpgradedFiatToken.new();
+  } else {
+    await SignatureChecker.new();
+    UpgradedFiatTokenV2_2.link(SignatureChecker);
+    return UpgradedFiatTokenV2_2.new();
+  }
+}
+
+async function deployUpgradedFiatTokenNewFields(version) {
+  if (version < 2.2) {
+    return UpgradedFiatTokenNewFields.new();
+  } else {
+    await SignatureChecker.new();
+    UpgradedFiatTokenV2_2NewFields.link(SignatureChecker);
+    return UpgradedFiatTokenV2_2NewFields.new();
+  }
+}
+
 module.exports = {
   FiatTokenV1,
   FiatTokenProxy,
   UpgradedFiatToken,
+  UpgradedFiatTokenV2_2,
   UpgradedFiatTokenNewFields,
   UpgradedFiatTokenNewFieldsNewLogic,
   name,
@@ -993,6 +1019,8 @@ module.exports = {
   buildExpectedState,
   checkVariables,
   setMinter,
+  deployUpgradedFiatToken,
+  deployUpgradedFiatTokenNewFields,
   mint,
   burn,
   mintRaw,

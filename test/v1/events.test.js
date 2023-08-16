@@ -25,14 +25,14 @@ const {
   checkBlacklisterChangedEvent,
   checkUpgradeEvent,
   checkAdminChangedEvent,
-  UpgradedFiatTokenNewFields,
+  deployUpgradedFiatTokenNewFields,
   checkPauseEvent,
   checkTransferEvents,
 } = require("./helpers/tokenTest");
 
 const amount = 100;
 
-function runTests(_newToken, _accounts) {
+function runTests(_newToken, _accounts, version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -110,7 +110,7 @@ function runTests(_newToken, _accounts) {
   });
 
   it("et008 should check Upgraded event", async () => {
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],

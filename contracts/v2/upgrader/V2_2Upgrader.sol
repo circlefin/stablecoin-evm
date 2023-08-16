@@ -59,18 +59,31 @@ contract V2_2Upgrader is AbstractV2Upgrader {
         uint256 totalSupply;
     }
 
+    address[] private _accountsToBlacklist;
+
     /**
      * @notice Constructor
-     * @param proxy             FiatTokenProxy contract
-     * @param implementation    FiatTokenV2_2 implementation contract
-     * @param newProxyAdmin     Grantee of proxy admin role after upgrade
+     * @param proxy               FiatTokenProxy contract
+     * @param implementation      FiatTokenV2_2 implementation contract
+     * @param newProxyAdmin       Grantee of proxy admin role after upgrade
+     * @param accountsToBlacklist Accounts to add to the new blacklist data structure
      */
     constructor(
         FiatTokenProxy proxy,
         FiatTokenV2_2 implementation,
-        address newProxyAdmin
+        address newProxyAdmin,
+        address[] memory accountsToBlacklist
     ) public AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin) {
         _helper = new V2_2UpgraderHelper(address(proxy));
+        _accountsToBlacklist = accountsToBlacklist;
+    }
+
+    /**
+     * @notice The list of blacklisted accounts to migrate to the blacklist data structure.
+     * @return Address[] the list of accounts to blacklist.
+     */
+    function accountsToBlacklist() external view returns (address[] memory) {
+        return _accountsToBlacklist;
     }
 
     /**
@@ -115,7 +128,7 @@ contract V2_2Upgrader is AbstractV2Upgrader {
 
         // Initialize V2 contract
         FiatTokenV2_2 v2_2 = FiatTokenV2_2(address(_proxy));
-        v2_2.initializeV2_2();
+        v2_2.initializeV2_2(_accountsToBlacklist);
 
         // Sanity test
         // Check metadata

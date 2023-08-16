@@ -9,6 +9,7 @@ import {
   FiatTokenV22Instance,
   FiatTokenV2Instance,
 } from "../../@types/generated";
+import _ from "lodash";
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
@@ -105,6 +106,15 @@ export function makeDomainSeparator(
   );
 }
 
+/**
+ * Helper function to generate a number of fake accounts.
+ * @param n the number of accounts to generate.
+ * @returns a list of accounts.
+ */
+export function generateAccounts(n: number): string[] {
+  return _.range(0, n).map(() => web3.eth.accounts.create().address);
+}
+
 export async function initializeToVersion(
   proxyOrImplementation:
     | FiatTokenProxyInstance
@@ -115,7 +125,8 @@ export async function initializeToVersion(
     | FiatTokenV22Instance,
   version: "1" | "1.1" | "2" | "2.1" | "2.2",
   fiatTokenOwner: string,
-  lostAndFound: string
+  lostAndFound: string,
+  accountsToBlacklist: string[] = []
 ): Promise<void> {
   const proxyAsV1 = await FiatTokenV1.at(proxyOrImplementation.address);
   await proxyAsV1.initialize(
@@ -143,6 +154,6 @@ export async function initializeToVersion(
 
   if (version >= "2.2") {
     const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
-    await proxyAsV2_2.initializeV2_2();
+    await proxyAsV2_2.initializeV2_2(accountsToBlacklist);
   }
 }

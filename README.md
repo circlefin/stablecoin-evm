@@ -82,11 +82,11 @@ To run tests and generate test coverage, run:
 $ yarn coverage
 ```
 
-To check the size of contracts in the repo, run the following command. Add the
-flag if you want it to return an error code if a contract is larger than 24KiB:
+To check the size of contracts in the repo, run the following command.
 
-```
-$ yarn contract-size [--checkMaxSize]
+```sh
+$ yarn contract-size # Ignores tests
+$ yarn contract-size:all # Includes all contracts
 ```
 
 ## Deployment
@@ -96,6 +96,11 @@ the BIP39 mnemonic phrase, the INFURA API key to use for deployment, and the
 addresses of proxy admin, owner, master minter, blacklister, and pauser in
 `config.js`. This file must not be checked into the repository. To prevent
 accidental check-ins, `config.js` is in `.gitignore`.
+
+Create a copy of the file `blacklist.test.js`, and name it
+`blacklist.remote.js`. Fill in `blacklist.remote.js` with the list addresses to
+blacklist. This file must not be checked into the repository. To prevent
+accidental check-ins, `blacklist.remote.js` is in `.gitignore`.
 
 Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 `ropsten`.

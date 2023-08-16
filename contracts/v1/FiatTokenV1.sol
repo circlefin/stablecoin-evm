@@ -44,6 +44,9 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
     address public masterMinter;
     bool internal initialized;
 
+    /// @dev A mapping that stores the balance and blacklist states for a given address.
+    /// The first bit defines whether the address is blacklisted (1 if blacklisted, 0 otherwise).
+    /// The last 255 bits define the balance for the address.
     mapping(address => uint256) internal balanceAndBlacklistStates;
     mapping(address => mapping(address => uint256)) internal allowed;
     uint256 internal totalSupply_ = 0;
@@ -128,9 +131,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         );
 
         totalSupply_ = totalSupply_.add(_amount);
-        balanceAndBlacklistStates[_to] = balanceAndBlacklistStates[_to].add(
-            _amount
-        );
+        _setBalance(_to, _balanceOf(_to).add(_amount));
         minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
@@ -190,6 +191,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
     /**
      * @dev Get token balance of an account
      * @param account address The account
+     * @return balance The fiat token balance of the account
      */
     function balanceOf(address account)
         external
@@ -197,7 +199,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         view
         returns (uint256)
     {
-        return balanceAndBlacklistStates[account];
+        return _balanceOf(account);
     }
 
     /**
@@ -297,16 +299,12 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(
-            value <= balanceAndBlacklistStates[from],
+            value <= _balanceOf(from),
             "ERC20: transfer amount exceeds balance"
         );
 
-        balanceAndBlacklistStates[from] = balanceAndBlacklistStates[from].sub(
-            value
-        );
-        balanceAndBlacklistStates[to] = balanceAndBlacklistStates[to].add(
-            value
-        );
+        _setBalance(from, _balanceOf(from).sub(value));
+        _setBalance(to, _balanceOf(to).add(value));
         emit Transfer(from, to, value);
     }
 
@@ -356,12 +354,12 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         onlyMinters
         notBlacklisted(msg.sender)
     {
-        uint256 balance = balanceAndBlacklistStates[msg.sender];
+        uint256 balance = _balanceOf(msg.sender);
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
 
         totalSupply_ = totalSupply_.sub(_amount);
-        balanceAndBlacklistStates[msg.sender] = balance.sub(_amount);
+        _setBalance(msg.sender, balance.sub(_amount));
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
     }
@@ -373,5 +371,67 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         );
         masterMinter = _newMasterMinter;
         emit MasterMinterChanged(masterMinter);
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     */
+    function _blacklist(address _account) internal override {
+        _setBlacklistState(_account, true);
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     */
+    function _unBlacklist(address _account) internal override {
+        _setBlacklistState(_account, false);
+    }
+
+    /**
+     * @dev Helper method that sets the blacklist state of an account.
+     * @param _account         The address of the account.
+     * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
+     */
+    function _setBlacklistState(address _account, bool _shouldBlacklist)
+        internal
+        virtual
+    {
+        _deprecatedBlacklisted[_account] = _shouldBlacklist;
+    }
+
+    /**
+     * @dev Helper method that sets the balance of an account.
+     * @param _account The address of the account.
+     * @param _balance The new fiat token balance of the account.
+     */
+    function _setBalance(address _account, uint256 _balance) internal virtual {
+        balanceAndBlacklistStates[_account] = _balance;
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     */
+    function _isBlacklisted(address _account)
+        internal
+        virtual
+        override
+        view
+        returns (bool)
+    {
+        return _deprecatedBlacklisted[_account];
+    }
+
+    /**
+     * @dev Helper method to obtain the balance of an account.
+     * @param _account  The address of the account.
+     * @return          The fiat token balance of the account.
+     */
+    function _balanceOf(address _account)
+        internal
+        virtual
+        view
+        returns (uint256)
+    {
+        return balanceAndBlacklistStates[_account];
     }
 }

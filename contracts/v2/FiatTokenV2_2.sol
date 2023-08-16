@@ -24,6 +24,7 @@
 
 pragma solidity 0.6.12;
 
+import { Blacklistable } from "../v1/Blacklistable.sol";
 import { FiatTokenV2_1 } from "./FiatTokenV2_1.sol";
 import { EIP712 } from "../util/EIP712.sol";
 
@@ -37,11 +38,22 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
      * @notice Initialize v2.2
      */
-    function initializeV2_2() external {
+    function initializeV2_2(address[] calldata accountsToBlacklist) external {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 2);
 
-        _CACHED_CHAIN_ID = _chainId();
+        // Add previously blacklisted accounts to the new blacklist data structure
+        // and remove them from the old blacklist data structure.
+        for (uint256 i = 0; i < accountsToBlacklist.length; i++) {
+            require(
+                _deprecatedBlacklisted[accountsToBlacklist[i]],
+                "FiatTokenV2_2: Blacklisting previously unblacklisted account!"
+            );
+            _blacklist(accountsToBlacklist[i]);
+            delete _deprecatedBlacklisted[accountsToBlacklist[i]];
+        }
+        _blacklist(address(this));
+        delete _deprecatedBlacklisted[address(this)];
 
         _initializedVersion = 3;
     }
@@ -155,5 +167,76 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         bytes memory signature
     ) external whenNotPaused {
         _cancelAuthorization(authorizer, nonce, signature);
+    }
+
+    /**
+     * @dev Helper method that sets the blacklist state of an account on balanceAndBlacklistStates.
+     * If _shouldBlacklist is true, we apply a (1 << 255) bitmask with an OR operation on the
+     * account's balanceAndBlacklistState. This flips the high bit for the account to 1,
+     * indicating that the account is blacklisted.
+     *
+     * If _shouldBlacklist if false, we reset the account's balanceAndBlacklistStates to their
+     * balances. This clears the high bit for the account, indicating that the account is unblacklisted.
+     * @param _account         The address of the account.
+     * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
+     */
+    function _setBlacklistState(address _account, bool _shouldBlacklist)
+        internal
+        override
+    {
+        balanceAndBlacklistStates[_account] = _shouldBlacklist
+            ? balanceAndBlacklistStates[_account] | (1 << 255)
+            : _balanceOf(_account);
+    }
+
+    /**
+     * @dev Helper method that sets the balance of an account on balanceAndBlacklistStates.
+     * Since balances are stored in the last 255 bits of the balanceAndBlacklistStates value,
+     * we need to ensure that the updated balance does not exceed (2^255 - 1).
+     * Since blacklisted accounts' balances cannot be updated, the method will also
+     * revert if the account is blacklisted
+     * @param _account The address of the account.
+     * @param _balance The new fiat token balance of the account (max: (2^255 - 1)).
+     */
+    function _setBalance(address _account, uint256 _balance) internal override {
+        require(
+            _balance <= ((1 << 255) - 1),
+            "FiatTokenV2_2: Balance exceeds (2^255 - 1)"
+        );
+        require(
+            !_isBlacklisted(_account),
+            "FiatTokenV2_2: Account is blacklisted"
+        );
+
+        balanceAndBlacklistStates[_account] = _balance;
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     */
+    function _isBlacklisted(address _account)
+        internal
+        override
+        view
+        returns (bool)
+    {
+        return balanceAndBlacklistStates[_account] >> 255 == 1;
+    }
+
+    /**
+     * @dev Helper method to obtain the balance of an account. Since balances
+     * are stored in the last 255 bits of the balanceAndBlacklistStates value,
+     * we apply a ((1 << 255) - 1) bit bitmask with an AND operation on the
+     * balanceAndBlacklistState to obtain the balance.
+     * @param _account  The address of the account.
+     * @return          The fiat token balance of the account.
+     */
+    function _balanceOf(address _account)
+        internal
+        override
+        view
+        returns (uint256)
+    {
+        return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
     }
 }
