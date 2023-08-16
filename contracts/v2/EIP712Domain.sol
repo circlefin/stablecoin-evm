@@ -32,7 +32,7 @@ pragma solidity 0.6.12;
 contract EIP712Domain {
     // was originally DOMAIN_SEPARATOR
     // but that has been moved to a method so we can override it in V2_2+
-    bytes32 internal _CACHED_DOMAIN_SEPARATOR;
+    bytes32 internal _DEPRECATED_CACHED_DOMAIN_SEPARATOR;
 
     /**
      * @dev EIP712 Domain Separator
@@ -42,6 +42,6 @@ contract EIP712Domain {
     }
 
     function _domainSeparator() internal virtual view returns (bytes32) {
-        return _CACHED_DOMAIN_SEPARATOR;
+        return _DEPRECATED_CACHED_DOMAIN_SEPARATOR;
     }
 }

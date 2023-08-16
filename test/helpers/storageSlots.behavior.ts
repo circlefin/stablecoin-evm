@@ -148,6 +148,8 @@ export function usesOriginalStorageSlotPositions<
     if (version >= 2) {
       it("retains slot 15 for DOMAIN_SEPARATOR", async () => {
         const slot = await readSlot(proxy.address, 15);
+
+        // Cached domain separator is deprecated in v2.2. But we still need to ensure the storage slot is retained.
         expect("0x" + slot).to.equal(domainSeparator);
       });
     }

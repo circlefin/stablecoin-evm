@@ -34,16 +34,12 @@ import { EIP712 } from "../util/EIP712.sol";
  * @notice ERC20 Token backed by fiat reserves, version 2.2
  */
 contract FiatTokenV2_2 is FiatTokenV2_1 {
-    uint256 private _CACHED_CHAIN_ID;
-
     /**
      * @notice Initialize v2.2
      */
     function initializeV2_2() external {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 2);
-
-        _CACHED_CHAIN_ID = _chainId();
 
         _initializedVersion = 3;
     }
@@ -57,12 +53,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
     }
 
     function _domainSeparator() internal override view returns (bytes32) {
-        uint256 chainId = _chainId();
-        if (_CACHED_CHAIN_ID == chainId) {
-            return _CACHED_DOMAIN_SEPARATOR;
-        } else {
-            return EIP712.makeDomainSeparator(name, "2", chainId);
-        }
+        return EIP712.makeDomainSeparator(name, "2", _chainId());
     }
 
     /**
