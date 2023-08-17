@@ -24,7 +24,6 @@
 
 pragma solidity 0.6.12;
 
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ECRecover } from "./ECRecover.sol";
 import { IERC1271 } from "../interface/IERC1271.sol";
 

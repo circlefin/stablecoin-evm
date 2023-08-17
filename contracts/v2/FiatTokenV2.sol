@@ -25,9 +25,7 @@
 pragma solidity 0.6.12;
 
 import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
-import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712 } from "../util/EIP712.sol";
-import { EIP712Domain } from "./EIP712Domain.sol";
 import { EIP3009 } from "./EIP3009.sol";
 import { EIP2612 } from "./EIP2612.sol";
 
