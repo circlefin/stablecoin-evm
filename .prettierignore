@@ -6,3 +6,4 @@ coverage.json
 build/
 .coverage_contracts/
 .coverage_artifacts/
+LICENSE
