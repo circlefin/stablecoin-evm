@@ -24,7 +24,7 @@
 
 pragma solidity 0.6.12;
 
-import { Blacklistable } from "../v1/Blacklistable.sol";
+import { Blacklistable } from "../v1/Blacklistable.sol"; // solhint-disable-line no-unused-import
 import { FiatTokenV2_1 } from "./FiatTokenV2_1.sol";
 import { EIP712 } from "../util/EIP712.sol";
 

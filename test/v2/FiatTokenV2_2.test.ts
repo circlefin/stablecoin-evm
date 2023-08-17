@@ -404,8 +404,8 @@ export function behavesLikeFiatTokenV22(
     });
 
     async function expectV2_2MethodGasUsedToBeLower(
-      v2_1Method: Promise<Truffle.TransactionResponse<any>>,
-      v2_2Method: Promise<Truffle.TransactionResponse<any>>
+      v2_1Method: Promise<Truffle.TransactionResponse<any>>, // eslint-disable-line @typescript-eslint/no-explicit-any
+      v2_2Method: Promise<Truffle.TransactionResponse<any>> // eslint-disable-line @typescript-eslint/no-explicit-any
     ) {
       const v2_1Receipt = await v2_1Method;
       const v2_2Receipt = await v2_2Method;
