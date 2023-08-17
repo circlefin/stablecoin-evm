@@ -18,6 +18,7 @@ import {
 import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
 
 export function testPermit({
+  version,
   getFiatToken,
   getERC1271Wallet,
   getDomainSeparator,
@@ -504,43 +505,94 @@ export function testPermit({
       );
     });
 
-    it("reverts if the owner or the spender is blacklisted", async () => {
-      const { owner, spender, value, nonce, deadline } = permitParams;
-      // create a signed permit
-      const signature = signPermit(
-        owner,
-        spender,
-        value,
-        nonce,
-        deadline,
-        domainSeparator,
-        alice.key
-      );
-
-      // owner is blacklisted
-      await fiatToken.blacklist(owner, { from: fiatTokenOwner });
-
-      const submitTx = () =>
-        fiatToken.permit(
+    if (version < 2.2) {
+      it("reverts if the owner or the spender is blacklisted", async () => {
+        const { owner, spender, value, nonce, deadline } = permitParams;
+        // create a signed permit
+        const signature = signPermit(
           owner,
           spender,
           value,
+          nonce,
           deadline,
-          ...prepareSignature(signature, signatureBytesType),
-          {
-            from: charlie,
-          }
+          domainSeparator,
+          alice.key
         );
 
-      // try to submit the permit
-      await expectRevert(submitTx(), "account is blacklisted");
+        // owner is blacklisted
+        await fiatToken.blacklist(owner, { from: fiatTokenOwner });
 
-      // spender is blacklisted
-      await fiatToken.unBlacklist(owner, { from: fiatTokenOwner });
-      await fiatToken.blacklist(spender, { from: fiatTokenOwner });
+        const submitTx = () =>
+          fiatToken.permit(
+            owner,
+            spender,
+            value,
+            deadline,
+            ...prepareSignature(signature, signatureBytesType),
+            {
+              from: charlie,
+            }
+          );
 
-      // try to submit the permit
-      await expectRevert(submitTx(), "account is blacklisted");
-    });
+        // try to submit the permit
+        await expectRevert(submitTx(), "account is blacklisted");
+
+        // spender is blacklisted
+        await fiatToken.unBlacklist(owner, { from: fiatTokenOwner });
+        await fiatToken.blacklist(spender, { from: fiatTokenOwner });
+
+        // try to submit the permit
+        await expectRevert(submitTx(), "account is blacklisted");
+      });
+    } else {
+      // version >= 2.2
+
+      it("grants allowance normally when the owner or the spender is blacklisted", async () => {
+        const { owner, spender, value, deadline } = permitParams;
+
+        const submitTxWithNonce = (nonce: number, value: number) => {
+          const signature = signPermit(
+            owner,
+            spender,
+            value,
+            nonce,
+            deadline,
+            domainSeparator,
+            alice.key
+          );
+          return fiatToken.permit(
+            owner,
+            spender,
+            value,
+            deadline,
+            ...prepareSignature(signature, signatureBytesType),
+            {
+              from: charlie,
+            }
+          );
+        };
+
+        // owner is blacklisted
+        await fiatToken.blacklist(owner, { from: fiatTokenOwner });
+
+        // try to submit the permit
+        await submitTxWithNonce(0, value);
+        // check that allowance is updated
+        expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+          value
+        );
+
+        // spender is blacklisted
+        await fiatToken.unBlacklist(owner, { from: fiatTokenOwner });
+        await fiatToken.blacklist(spender, { from: fiatTokenOwner });
+
+        // try to submit the permit
+        await submitTxWithNonce(1, value * 2);
+        // check that allowance is updated
+        expect((await fiatToken.allowance(owner, spender)).toNumber()).to.equal(
+          value * 2
+        );
+      });
+    }
   });
 }
