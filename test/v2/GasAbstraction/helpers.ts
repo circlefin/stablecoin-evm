@@ -14,6 +14,7 @@ export enum SignatureBytesType {
 }
 
 export interface TestParams {
+  version: number;
   getFiatToken: () => AnyFiatTokenV2Instance;
   getDomainSeparator: () => string;
   fiatTokenOwner: string;

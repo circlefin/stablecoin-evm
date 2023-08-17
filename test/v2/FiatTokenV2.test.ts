@@ -39,7 +39,7 @@ contract("FiatTokenV2", (accounts) => {
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
   });
 
-  behavesLikeFiatTokenV2(accounts, () => fiatToken, fiatTokenOwner);
+  behavesLikeFiatTokenV2(accounts, 2, () => fiatToken, fiatTokenOwner);
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV2,
     version: 2,
@@ -49,6 +49,7 @@ contract("FiatTokenV2", (accounts) => {
 
 export function behavesLikeFiatTokenV2(
   accounts: Truffle.Accounts,
+  version: number,
   getFiatToken: () => AnyFiatTokenV2Instance,
   fiatTokenOwner: string
 ): void {
@@ -69,9 +70,10 @@ export function behavesLikeFiatTokenV2(
     expect(await getFiatToken().DOMAIN_SEPARATOR()).to.equal(domainSeparator);
   });
 
-  hasSafeAllowance(getFiatToken, fiatTokenOwner, accounts);
+  hasSafeAllowance(version, getFiatToken, fiatTokenOwner, accounts);
 
   const testParams: TestParams = {
+    version,
     getFiatToken,
     getDomainSeparator: () => domainSeparator,
     getERC1271Wallet,

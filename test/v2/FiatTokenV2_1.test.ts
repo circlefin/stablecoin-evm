@@ -24,7 +24,7 @@ contract("FiatTokenV2_1", (accounts) => {
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
   });
 
-  behavesLikeFiatTokenV2(accounts, () => fiatToken, fiatTokenOwner);
+  behavesLikeFiatTokenV2(accounts, 2.1, () => fiatToken, fiatTokenOwner);
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV2_1,
     version: 2.1,

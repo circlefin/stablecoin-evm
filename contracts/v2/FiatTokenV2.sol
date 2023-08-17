@@ -59,6 +59,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      */
     function increaseAllowance(address spender, uint256 increment)
         external
+        virtual
         whenNotPaused
         notBlacklisted(msg.sender)
         notBlacklisted(spender)
@@ -76,6 +77,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      */
     function decreaseAllowance(address spender, uint256 decrement)
         external
+        virtual
         whenNotPaused
         notBlacklisted(msg.sender)
         notBlacklisted(spender)
@@ -196,7 +198,13 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+    )
+        external
+        virtual
+        whenNotPaused
+        notBlacklisted(owner)
+        notBlacklisted(spender)
+    {
         _permit(owner, spender, value, deadline, v, r, s);
     }
 

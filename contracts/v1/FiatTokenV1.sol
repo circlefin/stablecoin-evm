@@ -211,6 +211,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      */
     function approve(address spender, uint256 value)
         external
+        virtual
         override
         whenNotPaused
         notBlacklisted(msg.sender)

@@ -194,6 +194,7 @@ contract("FiatTokenV2_2", (accounts) => {
 
     behavesLikeFiatTokenV2(
       accounts,
+      2.2,
       getFiatToken(SignatureBytesType.Unpacked),
       fiatTokenOwner
     );
@@ -231,6 +232,7 @@ export function behavesLikeFiatTokenV22(
   });
 
   const v22TestParams = {
+    version: 2.2,
     getFiatToken,
     getDomainSeparator: () => domainSeparator,
     getERC1271Wallet,

@@ -25,6 +25,8 @@
 pragma solidity 0.6.12;
 
 import { Blacklistable } from "../v1/Blacklistable.sol"; // solhint-disable-line no-unused-import
+import { FiatTokenV1 } from "../v1/FiatTokenV1.sol"; // solhint-disable-line no-unused-import
+import { FiatTokenV2 } from "./FiatTokenV2.sol"; // solhint-disable-line no-unused-import
 import { FiatTokenV2_1 } from "./FiatTokenV2_1.sol";
 import { EIP712 } from "../util/EIP712.sol";
 
@@ -85,7 +87,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         uint256 value,
         uint256 deadline,
         bytes memory signature
-    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+    ) external whenNotPaused {
         _permit(owner, spender, value, deadline, signature);
     }
 
@@ -238,5 +240,59 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         returns (uint256)
     {
         return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
+    }
+
+    /**
+     * @inheritdoc FiatTokenV1
+     */
+    function approve(address spender, uint256 value)
+        external
+        override
+        whenNotPaused
+        returns (bool)
+    {
+        _approve(msg.sender, spender, value);
+        return true;
+    }
+
+    /**
+     * @inheritdoc FiatTokenV2
+     */
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external override whenNotPaused {
+        _permit(owner, spender, value, deadline, v, r, s);
+    }
+
+    /**
+     * @inheritdoc FiatTokenV2
+     */
+    function increaseAllowance(address spender, uint256 increment)
+        external
+        override
+        whenNotPaused
+        returns (bool)
+    {
+        _increaseAllowance(msg.sender, spender, increment);
+        return true;
+    }
+
+    /**
+     * @inheritdoc FiatTokenV2
+     */
+    function decreaseAllowance(address spender, uint256 decrement)
+        external
+        override
+        whenNotPaused
+        returns (bool)
+    {
+        _decreaseAllowance(msg.sender, spender, decrement);
+        return true;
     }
 }

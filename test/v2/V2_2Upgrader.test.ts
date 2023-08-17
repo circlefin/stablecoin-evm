@@ -218,11 +218,6 @@ contract("V2_2Upgrader", (accounts) => {
       expect((await proxyAsV2_2.balanceOf(alice)).toNumber()).to.equal(550e6);
       expect((await proxyAsV2_2.balanceOf(bob)).toNumber()).to.equal(450e6);
 
-      await expectRevert(
-        proxyAsV2_2.approve(proxyAsV2_2.address, 1, { from: alice }),
-        "account is blacklisted"
-      );
-
       // burn works as expected
       await proxyAsV2_2.transfer(minter, 100e6, { from: alice });
       expect((await proxyAsV2_2.balanceOf(minter)).toNumber()).to.equal(100e6);
