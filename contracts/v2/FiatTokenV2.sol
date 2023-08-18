@@ -209,7 +209,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
     }
 
     /**
-     * @notice Internal function to increase the allowance by a given increment
+     * @dev Internal function to increase the allowance by a given increment
      * @param owner     Token owner's address
      * @param spender   Spender's address
      * @param increment Amount of increase
@@ -223,7 +223,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
     }
 
     /**
-     * @notice Internal function to decrease the allowance by a given decrement
+     * @dev Internal function to decrease the allowance by a given decrement
      * @param owner     Token owner's address
      * @param spender   Spender's address
      * @param decrement Amount of decrease

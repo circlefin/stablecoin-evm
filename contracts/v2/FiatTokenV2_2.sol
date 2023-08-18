@@ -24,6 +24,7 @@
 
 pragma solidity 0.6.12;
 
+import { EIP712Domain } from "./EIP712Domain.sol"; // solhint-disable-line no-unused-import
 import { Blacklistable } from "../v1/Blacklistable.sol"; // solhint-disable-line no-unused-import
 import { FiatTokenV1 } from "../v1/FiatTokenV1.sol"; // solhint-disable-line no-unused-import
 import { FiatTokenV2 } from "./FiatTokenV2.sol"; // solhint-disable-line no-unused-import
@@ -39,6 +40,8 @@ import { EIP712 } from "../util/EIP712.sol";
 contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
      * @notice Initialize v2.2
+     * @param accountsToBlacklist A list of accounts to migrate from the old blacklist
+     * data structure to the new blacklist data structure.
      */
     function initializeV2_2(address[] calldata accountsToBlacklist) external {
         // solhint-disable-next-line reason-string
@@ -60,6 +63,10 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         _initializedVersion = 3;
     }
 
+    /**
+     * @dev Internal function to get the current chain id.
+     * @return The current chain id.
+     */
     function _chainId() internal virtual view returns (uint256) {
         uint256 chainId;
         assembly {
@@ -68,6 +75,9 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         return chainId;
     }
 
+    /**
+     * @inheritdoc EIP712Domain
+     */
     function _domainSeparator() internal override view returns (bytes32) {
         return EIP712.makeDomainSeparator(name, "2", _chainId());
     }
