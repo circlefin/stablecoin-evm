@@ -32,7 +32,7 @@ import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
 
 /**
  * @title V2.2 Upgrader
- * @notice Performs USDC v2.2 upgrade, and runs a basic sanity test in a single
+ * @notice Performs FiatToken v2.2 upgrade, and runs a basic sanity test in a single
  * atomic transaction, rolling back if any issues are found. By performing the
  * upgrade atomically, it ensures that there is no disruption of service if the
  * upgrade is not successful for some unforeseen circumstances.

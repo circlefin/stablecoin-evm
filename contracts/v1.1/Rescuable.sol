@@ -66,8 +66,8 @@ contract Rescuable is Ownable {
     }
 
     /**
-     * @notice Assign the rescuer role to a given address.
-     * @param newRescuer New rescuer's address
+     * @notice Updates the rescuer address.
+     * @param newRescuer The address of the new rescuer.
      */
     function updateRescuer(address newRescuer) external onlyOwner {
         require(

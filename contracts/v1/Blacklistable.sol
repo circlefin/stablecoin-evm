@@ -39,7 +39,7 @@ abstract contract Blacklistable is Ownable {
     event BlacklisterChanged(address indexed newBlacklister);
 
     /**
-     * @dev Throws if called by any account other than the blacklister
+     * @dev Throws if called by any account other than the blacklister.
      */
     modifier onlyBlacklister() {
         require(
@@ -50,8 +50,8 @@ abstract contract Blacklistable is Ownable {
     }
 
     /**
-     * @dev Throws if argument account is blacklisted
-     * @param _account The address to check
+     * @dev Throws if argument account is blacklisted.
+     * @param _account The address to check.
      */
     modifier notBlacklisted(address _account) {
         require(
@@ -62,16 +62,17 @@ abstract contract Blacklistable is Ownable {
     }
 
     /**
-     * @dev Checks if account is blacklisted
-     * @param _account The address to check
+     * @notice Checks if account is blacklisted.
+     * @param _account The address to check.
+     * @return True if the account is blacklisted, false if the account is not blacklisted.
      */
     function isBlacklisted(address _account) external view returns (bool) {
         return _isBlacklisted(_account);
     }
 
     /**
-     * @dev Adds account to blacklist
-     * @param _account The address to blacklist
+     * @notice Adds account to blacklist.
+     * @param _account The address to blacklist.
      */
     function blacklist(address _account) external onlyBlacklister {
         _blacklist(_account);
@@ -79,14 +80,18 @@ abstract contract Blacklistable is Ownable {
     }
 
     /**
-     * @dev Removes account from blacklist
-     * @param _account The address to remove from the blacklist
+     * @notice Removes account from blacklist.
+     * @param _account The address to remove from the blacklist.
      */
     function unBlacklist(address _account) external onlyBlacklister {
         _unBlacklist(_account);
         emit UnBlacklisted(_account);
     }
 
+    /**
+     * @notice Updates the blacklister address.
+     * @param _newBlacklister The address of the new blacklister.
+     */
     function updateBlacklister(address _newBlacklister) external onlyOwner {
         require(
             _newBlacklister != address(0),
