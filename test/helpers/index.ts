@@ -154,6 +154,6 @@ export async function initializeToVersion(
 
   if (version >= "2.2") {
     const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
-    await proxyAsV2_2.initializeV2_2(accountsToBlacklist);
+    await proxyAsV2_2.initializeV2_2(accountsToBlacklist, "USDCUSDC");
   }
 }

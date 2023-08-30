@@ -9,7 +9,6 @@ import {
   generateAccounts,
   hexStringFromBuffer,
   initializeToVersion,
-  strip0x,
 } from "../helpers";
 import {
   ACCOUNTS_AND_KEYS,
@@ -41,6 +40,7 @@ import {
   signTransferAuthorization,
   signReceiveAuthorization,
 } from "./GasAbstraction/helpers";
+import { encodeCall } from "../v1/helpers/tokenTest";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
@@ -50,6 +50,7 @@ contract("FiatTokenV2_2", (accounts) => {
   const fiatTokenOwner = accounts[9];
   const lostAndFound = accounts[2];
   const proxyOwnerAccount = accounts[14];
+  const newSymbol = "USDCUSDC";
 
   let fiatToken: FiatTokenV22InstanceExtended;
 
@@ -69,8 +70,13 @@ contract("FiatTokenV2_2", (accounts) => {
 
   describe("initializeV2_2", () => {
     it("disallows calling initializeV2_2 twice", async () => {
-      await fiatToken.initializeV2_2([]);
-      await expectRevert(fiatToken.initializeV2_2([]));
+      await fiatToken.initializeV2_2([], newSymbol);
+      await expectRevert(fiatToken.initializeV2_2([], newSymbol));
+    });
+
+    it("should update symbol", async () => {
+      await fiatToken.initializeV2_2([], newSymbol);
+      expect(await fiatToken.symbol()).to.eql(newSymbol);
     });
 
     it("should blacklist all accountsToBlacklist", async () => {
@@ -125,14 +131,14 @@ contract("FiatTokenV2_2", (accounts) => {
       ).to.be.true;
 
       // Call the initializeV2_2 function through an upgrade call.
-      await _proxy.upgradeToAndCall(
-        fiatToken.address,
-        web3.eth.abi.encodeFunctionSignature("initializeV2_2(address[])") +
-          strip0x(
-            web3.eth.abi.encodeParameter("address[]", accountsToBlacklist)
-          ),
-        { from: proxyOwnerAccount }
+      const initializeData = encodeCall(
+        "initializeV2_2",
+        ["address[]", "string"],
+        [accountsToBlacklist, newSymbol]
       );
+      await _proxy.upgradeToAndCall(fiatToken.address, initializeData, {
+        from: proxyOwnerAccount,
+      });
 
       // Validate that isBlacklisted returns true for every accountsToBlacklist.
       const _proxyAsV2_2 = await FiatTokenV2_2.at(_proxy.address);
@@ -178,7 +184,7 @@ contract("FiatTokenV2_2", (accounts) => {
     it("should revert if an accountToBlacklist was not blacklisted", async () => {
       const accountsToBlacklist = generateAccounts(1);
       await expectRevert(
-        fiatToken.initializeV2_2(accountsToBlacklist),
+        fiatToken.initializeV2_2(accountsToBlacklist, newSymbol),
         "FiatTokenV2_2: Blacklisting previously unblacklisted account!"
       );
 
@@ -189,7 +195,7 @@ contract("FiatTokenV2_2", (accounts) => {
 
   describe("initialized contract", () => {
     beforeEach(async () => {
-      await fiatToken.initializeV2_2([]);
+      await fiatToken.initializeV2_2([], newSymbol);
     });
 
     behavesLikeFiatTokenV2(

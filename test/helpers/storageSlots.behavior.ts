@@ -7,6 +7,7 @@ const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
+const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 
 export const STORAGE_SLOT_NUMBERS = {
   _deprecatedBlacklisted: 3,
@@ -95,6 +96,10 @@ export function usesOriginalStorageSlotPositions<
       if (version >= 2.1) {
         const proxyAsFiatTokenV2_1 = await FiatTokenV2_1.at(proxy.address);
         await proxyAsFiatTokenV2_1.initializeV2_1(lostAndFound);
+      }
+      if (version >= 2.2) {
+        const proxyAsFiatTokenV2_2 = await FiatTokenV2_2.at(proxy.address);
+        await proxyAsFiatTokenV2_2.initializeV2_2([], symbol);
       }
     });
 

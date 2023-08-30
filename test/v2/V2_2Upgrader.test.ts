@@ -34,6 +34,7 @@ contract("V2_2Upgrader", (accounts) => {
   let v2_1MasterMinter: string;
   let originalProxyAdmin: string;
 
+  const newSymbol = "USDCUSDC"; // Use a symbol different from original symbol
   const blacklisterAccount = accounts[4];
   const [minter, lostAndFound, alice, bob] = accounts.slice(9);
 
@@ -43,7 +44,13 @@ contract("V2_2Upgrader", (accounts) => {
     fiatTokenProxy = await FiatTokenProxy.deployed();
     v2_1Implementation = await FiatTokenV2_1.deployed();
     v2_2Implementation = await FiatTokenV2_2.deployed();
-    v2_2Upgrader = await V2_2Upgrader.deployed();
+    v2_2Upgrader = await V2_2Upgrader.new(
+      fiatTokenProxy.address,
+      v2_2Implementation.address,
+      await fiatTokenProxy.admin(),
+      accountsToBlacklist,
+      newSymbol
+    );
 
     proxyAsV2_1 = await FiatTokenV2_1.at(fiatTokenProxy.address);
     proxyAsV2_2 = await FiatTokenV2_2.at(fiatTokenProxy.address);
@@ -246,6 +253,7 @@ contract("V2_2Upgrader", (accounts) => {
         _v1_1Implementation.address, // provide V1.1 implementation instead of V2.2
         originalProxyAdmin,
         [],
+        newSymbol,
         { from: upgraderOwner }
       );
 
@@ -294,6 +302,7 @@ contract("V2_2Upgrader", (accounts) => {
         _v2_2Implementation.address,
         originalProxyAdmin,
         accountsToBlacklist,
+        newSymbol,
         { from: upgraderOwner }
       );
 
@@ -360,6 +369,7 @@ contract("V2_2Upgrader", (accounts) => {
             _v2_2Implementation.address,
             originalProxyAdmin,
             accountsToBlacklist,
+            newSymbol,
             { from: upgraderOwner, gas: BLOCK_GAS_LIMIT }
           );
 
@@ -409,6 +419,7 @@ contract("V2_2Upgrader", (accounts) => {
         v2_1Implementation.address,
         originalProxyAdmin,
         [],
+        newSymbol,
         { from: upgraderOwner }
       );
       const _v2_2UpgraderHelperAddress = await _v2_2Upgrader.helper();
