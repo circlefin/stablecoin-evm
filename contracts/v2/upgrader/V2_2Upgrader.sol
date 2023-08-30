@@ -43,7 +43,6 @@ contract V2_2Upgrader is AbstractV2Upgrader {
 
     struct FiatTokenMetadata {
         string name;
-        string symbol;
         uint8 decimals;
         string currency;
         string version;
@@ -58,6 +57,7 @@ contract V2_2Upgrader is AbstractV2Upgrader {
     }
 
     address[] private _accountsToBlacklist;
+    string private _newSymbol;
 
     /**
      * @notice Constructor
@@ -65,15 +65,18 @@ contract V2_2Upgrader is AbstractV2Upgrader {
      * @param implementation      FiatTokenV2_2 implementation contract
      * @param newProxyAdmin       Grantee of proxy admin role after upgrade
      * @param accountsToBlacklist Accounts to add to the new blacklist data structure
+     * @param newSymbol           New token symbol
      */
     constructor(
         FiatTokenProxy proxy,
         FiatTokenV2_2 implementation,
         address newProxyAdmin,
-        address[] memory accountsToBlacklist
+        address[] memory accountsToBlacklist,
+        string memory newSymbol
     ) public AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin) {
         _helper = new V2_2UpgraderHelper(address(proxy));
         _accountsToBlacklist = accountsToBlacklist;
+        _newSymbol = newSymbol;
     }
 
     /**
@@ -104,7 +107,6 @@ contract V2_2Upgrader is AbstractV2Upgrader {
         // Keep original contract metadata
         FiatTokenMetadata memory originalMetadata = FiatTokenMetadata(
             v2_2Helper.name(),
-            v2_2Helper.symbol(),
             v2_2Helper.decimals(),
             v2_2Helper.currency(),
             v2_2Helper.version(),
@@ -126,13 +128,12 @@ contract V2_2Upgrader is AbstractV2Upgrader {
 
         // Initialize V2 contract
         FiatTokenV2_2 v2_2 = FiatTokenV2_2(address(_proxy));
-        v2_2.initializeV2_2(_accountsToBlacklist);
+        v2_2.initializeV2_2(_accountsToBlacklist, _newSymbol);
 
         // Sanity test
         // Check metadata
         FiatTokenMetadata memory upgradedMetadata = FiatTokenMetadata(
             v2_2.name(),
-            v2_2.symbol(),
             v2_2.decimals(),
             v2_2.currency(),
             v2_2.version(),
@@ -148,6 +149,12 @@ contract V2_2Upgrader is AbstractV2Upgrader {
         require(
             checkFiatTokenMetadataEqual(originalMetadata, upgradedMetadata),
             "V2_2Upgrader: metadata test failed"
+        );
+
+        // Check symbol is updated
+        require(
+            keccak256(bytes(v2_2.symbol())) == keccak256(bytes(_newSymbol)),
+            "V2_2Upgrader: symbol not updated"
         );
 
         // Test balanceOf
@@ -192,7 +199,6 @@ contract V2_2Upgrader is AbstractV2Upgrader {
     ) private pure returns (bool) {
         return
             keccak256(bytes(a.name)) == keccak256(bytes(b.name)) &&
-            keccak256(bytes(a.symbol)) == keccak256(bytes(b.symbol)) &&
             a.decimals == b.decimals &&
             keccak256(bytes(a.currency)) == keccak256(bytes(b.currency)) &&
             keccak256(bytes(a.version)) == keccak256(bytes(b.version)) &&
