@@ -4,36 +4,17 @@ const BN = require("bn.js");
 const Q = require("q");
 const BigNumber = require("bignumber.js");
 const {
-  deployerAccount,
   arbitraryAccount,
   tokenOwnerAccount,
-  arbitraryAccount2,
   masterMinterAccount,
   minterAccount,
   pauserAccount,
   blacklisterAccount,
   proxyOwnerAccount,
-  proxyOwnerAccountPrivateKey,
   upgraderAccount,
-  arbitraryAccountPrivateKey,
-  upgraderAccountPrivateKey,
-  tokenOwnerPrivateKey,
-  blacklisterAccountPrivateKey,
-  arbitraryAccount2PrivateKey,
-  masterMinterAccountPrivateKey,
-  minterAccountPrivateKey,
-  pauserAccountPrivateKey,
-  deployerAccountPrivateKey,
 } = require("./helpers/tokenTest");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
-const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
-const UpgradedFiatTokenNewFields = artifacts.require(
-  "UpgradedFiatTokenNewFieldsTest"
-);
-const UpgradedFiatTokenNewFieldsNewLogic = artifacts.require(
-  "UpgradedFiatTokenNewFieldsNewLogicTest"
-);
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
 const name = "Sample Fiat Token";
@@ -42,11 +23,8 @@ const currency = "USD";
 const decimals = 2;
 const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
-const bigHundred = new BN(100);
 const maxAmount =
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-
-const nullAccount = "0x0000000000000000000000000000000000000000";
 
 const adminSlot =
   "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
@@ -73,43 +51,6 @@ async function expectError(contractPromise, errorMsg) {
       `Expected ${errorMsg}, got ${error.message} instead`
     );
   }
-}
-
-function checkBlacklistEvent(blacklistEvent, account) {
-  assert.strictEqual(blacklistEvent.logs[0].event, "Blacklisted");
-  assert.strictEqual(blacklistEvent.logs[0].args._account, account);
-}
-
-function checkUnblacklistEvent(unblacklistEvent, account) {
-  assert.strictEqual(unblacklistEvent.logs[0].event, "UnBlacklisted");
-  assert.strictEqual(unblacklistEvent.logs[0].args._account, account);
-}
-
-function checkMintEvent(minting, to, amount, minter) {
-  // Mint Event
-  assert.strictEqual(minting.logs[0].event, "Mint");
-  assert.strictEqual(minting.logs[0].args.minter, minter);
-  assert.strictEqual(minting.logs[0].args.to, to);
-  assert.isTrue(minting.logs[0].args.amount.eq(new BN(amount)));
-
-  // Transfer from 0 Event
-  assert.strictEqual(minting.logs[1].event, "Transfer");
-  assert.strictEqual(minting.logs[1].args.from, nullAccount);
-  assert.strictEqual(minting.logs[1].args.to, to);
-  assert.isTrue(minting.logs[1].args.value.eq(new BN(amount)));
-}
-
-function checkBurnEvents(burning, amount, burner) {
-  // Burn Event
-  assert.strictEqual(burning.logs[0].event, "Burn");
-  assert.strictEqual(burning.logs[0].args.burner, burner);
-  assert.isTrue(burning.logs[0].args.amount.eq(new BN(amount)));
-
-  // Transfer to 0 Event
-  assert.strictEqual(burning.logs[1].event, "Transfer");
-  assert.strictEqual(burning.logs[1].args.from, burner);
-  assert.strictEqual(burning.logs[1].args.to, nullAccount);
-  assert.isTrue(burning.logs[1].args.value.eq(new BN(amount)));
 }
 
 // Creates a state object, with default values replaced by
@@ -637,65 +578,6 @@ async function getActualState(token) {
   );
 }
 
-async function setMinter(token, minter, amount) {
-  const update = await token.configureMinter(minter, amount, {
-    from: masterMinterAccount,
-  });
-  assert.strictEqual(update.logs[0].event, "MinterConfigured");
-  assert.strictEqual(update.logs[0].args.minter, minter);
-  assert.isTrue(update.logs[0].args.minterAllowedAmount.eq(new BN(amount)));
-  const minterAllowance = await token.minterAllowance(minter);
-
-  assert.isTrue(minterAllowance.eq(new BN(amount)));
-}
-
-async function burn(token, amount, burner) {
-  const burning = await token.burn(amount, { from: burner });
-  checkBurnEvents(burning, amount, burner);
-}
-
-async function mint(token, to, amount, minter) {
-  await setMinter(token, minter, amount);
-  await mintRaw(token, to, amount, minter);
-}
-
-async function mintRaw(token, to, amount, minter) {
-  const initialTotalSupply = await token.totalSupply();
-  const initialMinterAllowance = await token.minterAllowance(minter);
-  const minting = await token.mint(to, amount, { from: minter });
-  checkMintEvent(minting, to, amount, minter);
-
-  const totalSupply = await token.totalSupply();
-  assert.isTrue(totalSupply.eq(initialTotalSupply.add(new BN(amount))));
-  const minterAllowance = await token.minterAllowance(minter);
-  assert.isTrue(initialMinterAllowance.sub(new BN(amount)).eq(minterAllowance));
-}
-
-async function blacklist(token, account) {
-  const blacklist = await token.blacklist(account, {
-    from: blacklisterAccount,
-  });
-  checkBlacklistEvent(blacklist, account);
-}
-
-async function unBlacklist(token, account) {
-  const unblacklist = await token.unBlacklist(account, {
-    from: blacklisterAccount,
-  });
-  checkUnblacklistEvent(unblacklist, account);
-}
-
-async function approve(token, to, amount, from) {
-  await token.approve(to, amount, { from });
-}
-
-async function redeem(token, account, amount) {
-  const redeemResult = await token.redeem(amount, { from: account });
-  assert.strictEqual(redeemResult.logs[0].event, "Redeem");
-  assert.strictEqual(redeemResult.logs[0].args.redeemedAddress, account);
-  assert.isTrue(redeemResult.logs[0].args.amount.eq(new BN(amount)));
-}
-
 async function initializeTokenWithProxy(rawToken) {
   return customInitializeTokenWithProxy(
     rawToken,
@@ -735,19 +617,6 @@ async function customInitializeTokenWithProxy(
     token: proxiedToken,
   };
   return tokenConfig;
-}
-
-async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
-  if (proxyUpgraderAccount == null) {
-    proxyUpgraderAccount = proxyOwnerAccount;
-  }
-  await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
-  const proxiedToken = await FiatTokenV1.at(proxy.address);
-  assert.strictEqual(proxiedToken.address, proxy.address);
-  return {
-    proxy,
-    token: proxiedToken,
-  };
 }
 
 async function expectRevert(contractPromise) {
@@ -813,50 +682,11 @@ async function checkMINTp0(_contracts, _customVars) {
 }
 
 module.exports = {
-  FiatTokenV1,
-  FiatTokenProxy,
-  UpgradedFiatToken,
-  UpgradedFiatTokenNewFields,
-  UpgradedFiatTokenNewFieldsNewLogic,
-  name,
-  symbol,
-  currency,
-  decimals,
   bigZero,
-  bigHundred,
-  debugLogging,
-  maxAmount,
   checkMINTp0,
-  mint,
-  burn,
-  blacklist,
-  unBlacklist,
-  approve,
-  redeem,
-  initializeTokenWithProxy,
-  upgradeTo,
   expectRevert,
   expectError,
-  nullAccount,
-  deployerAccount,
-  arbitraryAccount,
-  tokenOwnerAccount,
-  arbitraryAccount2,
-  masterMinterAccount,
-  minterAccount,
-  pauserAccount,
-  blacklisterAccount,
-  proxyOwnerAccount,
-  proxyOwnerAccountPrivateKey,
-  upgraderAccount,
-  arbitraryAccountPrivateKey,
-  upgraderAccountPrivateKey,
-  tokenOwnerPrivateKey,
-  blacklisterAccountPrivateKey,
-  arbitraryAccount2PrivateKey,
-  masterMinterAccountPrivateKey,
-  minterAccountPrivateKey,
-  pauserAccountPrivateKey,
-  deployerAccountPrivateKey,
+  initializeTokenWithProxy,
+  maxAmount,
   newBigNumber,
 };
