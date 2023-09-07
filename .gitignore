@@ -14,8 +14,10 @@ coverage/
 credentials.json
 echidna/
 ganache-blockchain-log.txt
+logs/
 node_modules/
 package-lock.json
+pids/
 token.json
 validate/apikey.infura
 yarn-error.log

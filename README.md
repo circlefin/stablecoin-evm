@@ -12,9 +12,9 @@ Requirements:
 ```
 $ git clone git@github.com:centrehq/centre-tokens.git
 $ cd centre-tokens
-$ nvm use 16.14.0
-$ npm i -g yarn       # Install yarn if you don't already have it
-$ yarn install        # Install dependencies
+$ nvm use
+$ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
+$ yarn install          # Install dependencies
 ```
 
 ## Deployment
@@ -26,12 +26,13 @@ You will need 5 different hot keys (blacklister, deployer, master minter, owner,
 and proxy admin), and they should be funded (with 0.5-1 ETH) to pay for
 transactions. You can use ./scripts/create-account.js to create the keys.
 
-Create a copy of the file `config.js.example`, and name it `config.js`. Create a copy
-of `config.{env}.js.example` for stg and prod by replacing env with the name of the 
-environment e.g. `config.stg.js`. The `config.js` file holds values that are common
-whereas `config.{env}.js` holds environment specific values. Fill in the empty values. 
-These file must not be checked into the repository. To prevent accidental check-ins, 
-`config.js`, `config.{env}.js` and `blacklist.txt` are in `.gitignore`.
+Create a copy of the file `config.js.example`, and name it `config.js`. Create a
+copy of `config.{env}.js.example` for stg and prod by replacing env with the
+name of the environment e.g. `config.stg.js`. The `config.js` file holds values
+that are common whereas `config.{env}.js` holds environment specific values.
+Fill in the empty values. These file must not be checked into the repository. To
+prevent accidental check-ins, `config.js`, `config.{env}.js` and `blacklist.txt`
+are in `.gitignore`.
 
 For mainnet, be sure to have a specified `blacklist.txt` file with a sanctions
 list from Compliance. As seen in `blacklist.txt.example`, addresses are split by
@@ -39,7 +40,7 @@ new lines. You must blacklist the sanctions list at deployment time using the
 hot blacklister key (in `config.js`).
 
 ```
-// Ensure that the ENV variable in config.js is set to stg or prod, which will 
+// Ensure that the ENV variable in config.js is set to stg or prod, which will
 // dictate which config.{env}.js file gets read during execution
 yarn deployContracts --network {development, testnet, mainnet}
 yarn blacklistSeed --network development
@@ -57,8 +58,10 @@ yarn coldStorage --network {development, testnet, mainnet}
 yarn verify --network {see here https://www.npmjs.com/package/truffle-plugin-verify}
 ```
 
-> Note that you may need to update truffle-config.js to have a verify attribute for the network you're testing.
-> See [Confluence](https://circlepay.atlassian.net/wiki/spaces/ENGINEERIN/pages/721256540/Deploying+FiatToken+ERC-20+contracts) for details.
+> Note that you may need to update truffle-config.js to have a verify attribute
+> for the network you're testing. See
+> [Confluence](https://circlepay.atlassian.net/wiki/spaces/ENGINEERIN/pages/721256540/Deploying+FiatToken+ERC-20+contracts)
+> for details.
 
 **Remember to save the config.js file in 1PW Wallets Org**
 
