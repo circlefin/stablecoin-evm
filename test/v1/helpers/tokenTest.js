@@ -43,19 +43,20 @@ const {
   rescuerAccount,
   lostAndFoundAccount,
 } = accounts;
+const {
+  deployerAccount: deployerAccountPrivateKey,
+  arbitraryAccount: arbitraryAccountPrivateKey,
+  tokenOwnerAccount: tokenOwnerPrivateKey,
+  blacklisterAccount: blacklisterAccountPrivateKey,
+  arbitraryAccount2: arbitraryAccount2PrivateKey,
+  masterMinterAccount: masterMinterAccountPrivateKey,
+  minterAccount: minterAccountPrivateKey,
+  pauserAccount: pauserAccountPrivateKey,
+  proxyOwnerAccount: proxyOwnerAccountPrivateKey,
+  rescuerAccount: rescuerAccountPrivateKey,
+  lostAndFoundAccount: lostAndFoundAccountPrivateKey,
+} = accountPrivateKeys;
 const upgraderAccount = proxyOwnerAccount;
-const deployerAccountPrivateKey = accountPrivateKeys.deployerAccount;
-const arbitraryAccountPrivateKey = accountPrivateKeys.arbitraryAccount;
-const tokenOwnerPrivateKey = accountPrivateKeys.tokenOwnerAccount;
-const blacklisterAccountPrivateKey = accountPrivateKeys.blacklisterAccount;
-const arbitraryAccount2PrivateKey = accountPrivateKeys.arbitraryAccount2;
-const masterMinterAccountPrivateKey = accountPrivateKeys.masterMinterAccount;
-const minterAccountPrivateKey = accountPrivateKeys.minterAccount;
-const pauserAccountPrivateKey = accountPrivateKeys.pauserAccount;
-const proxyOwnerAccountPrivateKey = accountPrivateKeys.proxyOwnerAccount;
-const rescuerAccountPrivateKey = accountPrivateKeys.rescuerAccount;
-const lostAndFoundAccountPrivateKey =
-  accountPrivateKeys.lostAndFoundAccountPrivateKey;
 const upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
 
 const adminSlot =
