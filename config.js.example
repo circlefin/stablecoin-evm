@@ -1,5 +1,4 @@
 module.exports = {
-
   // ***** CONFIGURATION *********
   // Environment: Either stg or prod
   ENV: "",
@@ -10,7 +9,7 @@ module.exports = {
   OPTIMISTIC_ETHERSCAN_API_KEY: "",
   POLYGONSCAN_API_KEY: "",
 
-  LOCAL_RPC_URL: "",
+  LOCAL_RPC_URL: "http://127.0.0.1:8545",
   TESTNET_RPC_URL: "",
   MAINNET_RPC_URL: "",
 
@@ -49,7 +48,6 @@ module.exports = {
 
   PROXY_ADMIN_ADDRESS: "",
   PROXY_ADMIN_PRIVATE_KEY: "",
-
 
   // ***** COLD STORAGE *********
 

@@ -44,7 +44,7 @@ module.exports = {
   networks: {
     development: {
       network_id: "*",
-      provider: rpcProvider(config.LOCAL_RPC_URL),
+      url: config.LOCAL_RPC_URL,
     },
     mainnet: {
       provider: rpcProvider(config.MAINNET_RPC_URL),
@@ -75,9 +75,10 @@ module.exports = {
     optimistic_etherscan: config.OPTIMISTIC_ETHERSCAN_API_KEY,
   },
   // Use default directory if false
-  migrations_directory: config.USE_USDC_MIGRATIONS
-    ? "./migrations/usdc"
-    : undefined,
+  migrations_directory:
+    config.USE_USDC_MIGRATIONS || process.env.USE_USDC_MIGRATIONS === "true"
+      ? "./migrations/usdc"
+      : undefined,
 };
 
 function rpcProvider(network) {
