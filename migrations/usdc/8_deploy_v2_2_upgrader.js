@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const some = require("lodash/some");
-const { readBlacklistFile } = require("../utils");
+const { readBlacklistFile } = require("../../utils");
 
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -11,11 +11,11 @@ let proxyAdminAddress = "";
 let proxyContractAddress = "";
 
 // Read config file if it exists
-if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
-  } = require("../config.js"));
+  } = require("../../config.js"));
 }
 
 module.exports = async (deployer, network) => {
@@ -27,6 +27,7 @@ module.exports = async (deployer, network) => {
   const accountsToBlacklist = readBlacklistFile(
     path.join(
       __dirname,
+      "..",
       "..",
       isTestEnvironment ? "blacklist.test.js" : "blacklist.remote.js"
     )

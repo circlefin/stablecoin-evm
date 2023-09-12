@@ -11,7 +11,7 @@ const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 let proxyContractAddress = "";
 
 // Read config file if it exists
-if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
   } = require("../../config.js"));
