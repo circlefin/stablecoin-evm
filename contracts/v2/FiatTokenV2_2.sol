@@ -40,12 +40,19 @@ import { EIP712 } from "../util/EIP712.sol";
 contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
      * @notice Initialize v2.2
-     * @param accountsToBlacklist A list of accounts to migrate from the old blacklist
+     * @param accountsToBlacklist   A list of accounts to migrate from the old blacklist
+     * @param newSymbol             New token symbol
      * data structure to the new blacklist data structure.
      */
-    function initializeV2_2(address[] calldata accountsToBlacklist) external {
+    function initializeV2_2(
+        address[] calldata accountsToBlacklist,
+        string calldata newSymbol
+    ) external {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 2);
+
+        // Update fiat token symbol
+        symbol = newSymbol;
 
         // Add previously blacklisted accounts to the new blacklist data structure
         // and remove them from the old blacklist data structure.

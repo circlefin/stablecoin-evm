@@ -54,5 +54,5 @@ module.exports = async (deployer, network) => {
   );
   await fiatTokenV2_2.initializeV2("");
   await fiatTokenV2_2.initializeV2_1(THROWAWAY_ADDRESS);
-  await fiatTokenV2_2.initializeV2_2([]);
+  await fiatTokenV2_2.initializeV2_2([], "");
 };

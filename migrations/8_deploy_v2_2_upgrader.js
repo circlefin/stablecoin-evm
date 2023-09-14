@@ -57,7 +57,8 @@ module.exports = async (deployer, network) => {
     proxyContractAddress,
     fiatTokenV2_2.address,
     proxyAdminAddress,
-    accountsToBlacklist
+    accountsToBlacklist,
+    "USDC"
   );
 
   console.log(
