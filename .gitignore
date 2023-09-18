@@ -16,8 +16,8 @@ ganache-blockchain-log.txt
 .coverage_contracts
 @types/generated/
 config.js
-blacklist.*.js
-!blacklist.test.js
+blacklist.*.json
+!blacklist.test.json
 out/
 cache/
 
