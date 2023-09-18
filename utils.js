@@ -35,7 +35,7 @@ function readBlacklistFile(blacklistFilePath) {
   if (!fs.existsSync(blacklistFilePath)) {
     throw new Error(`'${blacklistFilePath}' does not exist!`);
   }
-  let addresses = require(blacklistFilePath);
+  let addresses = JSON.parse(fs.readFileSync(blacklistFilePath));
   addresses = _.uniqBy(addresses, (a) => a.toLowerCase()); // Deduplicate any addresses in the file
 
   // Validate that addresses' integrity

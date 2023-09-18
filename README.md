@@ -97,10 +97,10 @@ addresses of proxy admin, owner, master minter, blacklister, and pauser in
 `config.js`. This file must not be checked into the repository. To prevent
 accidental check-ins, `config.js` is in `.gitignore`.
 
-Create a copy of the file `blacklist.test.js`, and name it
-`blacklist.remote.js`. Fill in `blacklist.remote.js` with the list addresses to
-blacklist. This file must not be checked into the repository. To prevent
-accidental check-ins, `blacklist.remote.js` is in `.gitignore`.
+Create a copy of the file `blacklist.test.json`, and name it
+`blacklist.remote.json`. Fill in `blacklist.remote.json` with the list addresses
+to blacklist. This file must not be checked into the repository. To prevent
+accidental check-ins, `blacklist.remote.json` is in `.gitignore`.
 
 Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 `ropsten`.

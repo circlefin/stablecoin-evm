@@ -32,15 +32,15 @@ const V2_2Upgrader = artifacts.require("V2_2Upgrader");
 
 /**
  * A utility script to validate that
- * 1. V2_2Upgrader.accountsToBlacklist() values match with the list of addresses in blacklist.remote.js
- * 2. The list of addresses in blacklist.remote.js are currently blacklisted.
+ * 1. V2_2Upgrader.accountsToBlacklist() values match with the list of addresses in blacklist.remote.json
+ * 2. The list of addresses in blacklist.remote.json are currently blacklisted.
  * @param {string} proxyAddress the contract address of FiatTokenProxy
  * @param {string} v2_2UpgraderAddress the contract address of V2_2Upgrader
  */
 async function main(proxyAddress, v2_2UpgraderAddress) {
   console.log("Comparing local state with deployed V2_2Upgrader...");
   const expectedAccountsToBlacklist = readBlacklistFile(
-    path.join(__dirname, "..", "blacklist.remote.js")
+    path.join(__dirname, "..", "blacklist.remote.json")
   ).map(toLower);
   console.log(
     `>> Expecting ${expectedAccountsToBlacklist.length} accounts to blacklist`
@@ -66,7 +66,7 @@ async function main(proxyAddress, v2_2UpgraderAddress) {
   for (const actualAccount of actualAccountsToBlacklist) {
     if (!expectedAccountsToBlacklist.includes(actualAccount)) {
       throw new Error(
-        `Actual account '${actualAccount}' not found in blacklist.remote.js`
+        `Actual account '${actualAccount}' not found in blacklist.remote.json`
       );
     }
   }

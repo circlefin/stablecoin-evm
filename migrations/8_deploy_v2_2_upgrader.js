@@ -28,7 +28,7 @@ module.exports = async (deployer, network) => {
     path.join(
       __dirname,
       "..",
-      isTestEnvironment ? "blacklist.test.js" : "blacklist.remote.js"
+      isTestEnvironment ? "blacklist.test.json" : "blacklist.remote.json"
     )
   );
 
