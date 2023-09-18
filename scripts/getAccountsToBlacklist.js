@@ -32,7 +32,7 @@ const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const MAX_RETRIES = 5;
 const CHUNK_SIZE = 30000;
 const SLEEP_MS = 1000;
-const OUTPUT_FILE = path.join(__dirname, "..", "blacklist.json");
+const OUTPUT_FILE = path.join(__dirname, "..", "blacklist.remote.json");
 
 async function main(proxyAddress, startBlockNumber) {
   const fiatTokenV2_1 = await FiatTokenV2_1.at(proxyAddress);
