@@ -40,7 +40,7 @@ module.exports = async (deployer, network) => {
   console.log(`Proxy Admin:     ${proxyAdminAddress}`);
   console.log(`FiatTokenProxy:  ${proxyContractAddress}`);
   console.log(`FiatTokenV2_1:   ${fiatTokenV2_1.address}`);
-  console.log(`Lost & Found:    ${lostAndFoundAddress.address}`);
+  console.log(`Lost & Found:    ${lostAndFoundAddress}`);
 
   if (!proxyAdminAddress) {
     throw new Error("PROXY_ADMIN_ADDRESS must be provided in config.js");
