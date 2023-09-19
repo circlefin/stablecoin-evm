@@ -29,7 +29,9 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
 // Configure some minters with hot keys before converting to cold storage
 // to avoid needing a run to even get our products started.
 module.exports = async function (deployer, network, accounts) {
-  console.log(`>>>>>>> Configuring Known Minters and Burners on ${env} <<<<<<<`);
+  console.log(
+    `>>>>>>> Configuring Known Minters and Burners on ${env} <<<<<<<`
+  );
   proxyContractAddress =
     proxyContractAddress || (await FiatTokenProxy.deployed()).address;
 

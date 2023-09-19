@@ -51,7 +51,9 @@ module.exports = async function (_) {
   console.log(`Blacklister Role:   ${blacklisterRole}`);
   console.log(`Pauser Role:        ${pauserRole}`);
 
-  console.log(`>>>>>>> Configuring Minter and Burner allowance on ${env} <<<<<<<`);
+  console.log(
+    `>>>>>>> Configuring Minter and Burner allowance on ${env} <<<<<<<`
+  );
   const minterAllowance = new BigNumber(
     await proxyAsV2_1.minterAllowance(minter)
   ).shiftedBy(-6);
