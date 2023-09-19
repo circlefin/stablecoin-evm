@@ -27,19 +27,34 @@ const fs = require("fs");
 const path = require("path");
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
+let FiatTokenV2_1;
+try {
+  FiatTokenV2_1 = require("../build/contracts/FiatTokenV2_1.json");
+} catch (e) {
+  console.error("Run `yarn compile` to generate the abi first!");
+  console.error(e);
+  process.exit(1);
+}
 
 const MAX_RETRIES = 5;
-const CHUNK_SIZE = 30000;
+const CHUNK_SIZE = 200000;
 const SLEEP_MS = 1000;
 const OUTPUT_FILE = path.join(__dirname, "..", "blacklist.remote.json");
 
 async function main(proxyAddress, startBlockNumber) {
-  const fiatTokenV2_1 = await FiatTokenV2_1.at(proxyAddress);
+  if (fs.existsSync(OUTPUT_FILE)) {
+    console.log(`'${OUTPUT_FILE}' exists. Will append results to the file.`);
+  }
+  // A web3 Contract instance is used here as Truffle < v5.4.29 can trigger an
+  // insufficient funds error on view functions. @see https://github.com/trufflesuite/truffle/issues/4457
+  const fiatTokenV2_1 = new web3.eth.Contract(FiatTokenV2_1.abi, proxyAddress);
 
   const latestBlockNumber = await web3.eth.getBlockNumber();
   let fromBlockNumber = startBlockNumber;
-  let toBlockNumber = startBlockNumber + CHUNK_SIZE;
+  let toBlockNumber = Math.min(
+    latestBlockNumber,
+    startBlockNumber + CHUNK_SIZE
+  );
 
   do {
     await saveBlacklistedAccounts(
@@ -52,7 +67,10 @@ async function main(proxyAddress, startBlockNumber) {
 
     // Sleep for a bit to avoid blasting the RPC.
     await sleep(SLEEP_MS);
-  } while (toBlockNumber < latestBlockNumber);
+  } while (
+    toBlockNumber <= latestBlockNumber &&
+    fromBlockNumber < toBlockNumber
+  );
 }
 
 /**
@@ -87,7 +105,9 @@ async function saveBlacklistedAccounts(
   );
   const blacklistedAccounts = [];
   for (const account of maybeBlacklistedAccounts) {
-    const isCurrentlyBlacklisted = await fiatTokenV2_1.isBlacklisted(account);
+    const isCurrentlyBlacklisted = fiatTokenV2_1.methods
+      .isBlacklisted(account)
+      .call();
     if (isCurrentlyBlacklisted) {
       blacklistedAccounts.push(account);
     }
