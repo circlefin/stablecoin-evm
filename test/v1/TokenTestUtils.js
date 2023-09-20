@@ -3,15 +3,18 @@ const _ = require("lodash");
 const BN = require("bn.js");
 const Q = require("q");
 const BigNumber = require("bignumber.js");
+const {
+  arbitraryAccount,
+  tokenOwnerAccount,
+  masterMinterAccount,
+  minterAccount,
+  pauserAccount,
+  blacklisterAccount,
+  proxyOwnerAccount,
+  upgraderAccount,
+} = require("./helpers/tokenTest");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
-const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
-const UpgradedFiatTokenNewFields = artifacts.require(
-  "UpgradedFiatTokenNewFieldsTest"
-);
-const UpgradedFiatTokenNewFieldsNewLogic = artifacts.require(
-  "UpgradedFiatTokenNewFieldsNewLogicTest"
-);
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
 const name = "Sample Fiat Token";
@@ -20,42 +23,8 @@ const currency = "USD";
 const decimals = 2;
 const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
-const bigHundred = new BN(100);
 const maxAmount =
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-const nullAccount = "0x0000000000000000000000000000000000000000";
-const deployerAccount = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"; // accounts[0]
-const arbitraryAccount = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // accounts[1]
-const tokenOwnerAccount = "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d"; // accounts[3]
-const blacklisterAccount = "0xd03ea8624C8C5987235048901fB614fDcA89b117"; // accounts[4]
-const arbitraryAccount2 = "0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC"; // accounts[5]
-const masterMinterAccount = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // accounts[6]
-const minterAccount = "0x28a8746e75304c0780E011BEd21C72cD78cd535E"; // accounts[7]
-const pauserAccount = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"; // accounts[8]
-
-const proxyOwnerAccount = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598"; // accounts[14]
-const upgraderAccount = proxyOwnerAccount; // accounts[14]
-
-const deployerAccountPrivateKey =
-  "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
-const arbitraryAccountPrivateKey =
-  "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-const tokenOwnerPrivateKey =
-  "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
-const blacklisterAccountPrivateKey =
-  "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
-const arbitraryAccount2PrivateKey =
-  "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd"; // accounts[5]
-const masterMinterAccountPrivateKey =
-  "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"; // accounts[6]
-const minterAccountPrivateKey =
-  "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"; // accounts[7]
-const pauserAccountPrivateKey =
-  "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9]
-const proxyOwnerAccountPrivateKey =
-  "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46"; // accounts[14]
-const upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
-// var blacklisterAccountPrivateKey = "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
 
 const adminSlot =
   "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
@@ -82,43 +51,6 @@ async function expectError(contractPromise, errorMsg) {
       `Expected ${errorMsg}, got ${error.message} instead`
     );
   }
-}
-
-function checkBlacklistEvent(blacklistEvent, account) {
-  assert.strictEqual(blacklistEvent.logs[0].event, "Blacklisted");
-  assert.strictEqual(blacklistEvent.logs[0].args._account, account);
-}
-
-function checkUnblacklistEvent(unblacklistEvent, account) {
-  assert.strictEqual(unblacklistEvent.logs[0].event, "UnBlacklisted");
-  assert.strictEqual(unblacklistEvent.logs[0].args._account, account);
-}
-
-function checkMintEvent(minting, to, amount, minter) {
-  // Mint Event
-  assert.strictEqual(minting.logs[0].event, "Mint");
-  assert.strictEqual(minting.logs[0].args.minter, minter);
-  assert.strictEqual(minting.logs[0].args.to, to);
-  assert.isTrue(minting.logs[0].args.amount.eq(new BN(amount)));
-
-  // Transfer from 0 Event
-  assert.strictEqual(minting.logs[1].event, "Transfer");
-  assert.strictEqual(minting.logs[1].args.from, nullAccount);
-  assert.strictEqual(minting.logs[1].args.to, to);
-  assert.isTrue(minting.logs[1].args.value.eq(new BN(amount)));
-}
-
-function checkBurnEvents(burning, amount, burner) {
-  // Burn Event
-  assert.strictEqual(burning.logs[0].event, "Burn");
-  assert.strictEqual(burning.logs[0].args.burner, burner);
-  assert.isTrue(burning.logs[0].args.amount.eq(new BN(amount)));
-
-  // Transfer to 0 Event
-  assert.strictEqual(burning.logs[1].event, "Transfer");
-  assert.strictEqual(burning.logs[1].args.from, burner);
-  assert.strictEqual(burning.logs[1].args.to, nullAccount);
-  assert.isTrue(burning.logs[1].args.value.eq(new BN(amount)));
 }
 
 // Creates a state object, with default values replaced by
@@ -646,65 +578,6 @@ async function getActualState(token) {
   );
 }
 
-async function setMinter(token, minter, amount) {
-  const update = await token.configureMinter(minter, amount, {
-    from: masterMinterAccount,
-  });
-  assert.strictEqual(update.logs[0].event, "MinterConfigured");
-  assert.strictEqual(update.logs[0].args.minter, minter);
-  assert.isTrue(update.logs[0].args.minterAllowedAmount.eq(new BN(amount)));
-  const minterAllowance = await token.minterAllowance(minter);
-
-  assert.isTrue(minterAllowance.eq(new BN(amount)));
-}
-
-async function burn(token, amount, burner) {
-  const burning = await token.burn(amount, { from: burner });
-  checkBurnEvents(burning, amount, burner);
-}
-
-async function mint(token, to, amount, minter) {
-  await setMinter(token, minter, amount);
-  await mintRaw(token, to, amount, minter);
-}
-
-async function mintRaw(token, to, amount, minter) {
-  const initialTotalSupply = await token.totalSupply();
-  const initialMinterAllowance = await token.minterAllowance(minter);
-  const minting = await token.mint(to, amount, { from: minter });
-  checkMintEvent(minting, to, amount, minter);
-
-  const totalSupply = await token.totalSupply();
-  assert.isTrue(totalSupply.eq(initialTotalSupply.add(new BN(amount))));
-  const minterAllowance = await token.minterAllowance(minter);
-  assert.isTrue(initialMinterAllowance.sub(new BN(amount)).eq(minterAllowance));
-}
-
-async function blacklist(token, account) {
-  const blacklist = await token.blacklist(account, {
-    from: blacklisterAccount,
-  });
-  checkBlacklistEvent(blacklist, account);
-}
-
-async function unBlacklist(token, account) {
-  const unblacklist = await token.unBlacklist(account, {
-    from: blacklisterAccount,
-  });
-  checkUnblacklistEvent(unblacklist, account);
-}
-
-async function approve(token, to, amount, from) {
-  await token.approve(to, amount, { from });
-}
-
-async function redeem(token, account, amount) {
-  const redeemResult = await token.redeem(amount, { from: account });
-  assert.strictEqual(redeemResult.logs[0].event, "Redeem");
-  assert.strictEqual(redeemResult.logs[0].args.redeemedAddress, account);
-  assert.isTrue(redeemResult.logs[0].args.amount.eq(new BN(amount)));
-}
-
 async function initializeTokenWithProxy(rawToken) {
   return customInitializeTokenWithProxy(
     rawToken,
@@ -744,19 +617,6 @@ async function customInitializeTokenWithProxy(
     token: proxiedToken,
   };
   return tokenConfig;
-}
-
-async function upgradeTo(proxy, upgradedToken, proxyUpgraderAccount) {
-  if (proxyUpgraderAccount == null) {
-    proxyUpgraderAccount = proxyOwnerAccount;
-  }
-  await proxy.upgradeTo(upgradedToken.address, { from: proxyUpgraderAccount });
-  const proxiedToken = await FiatTokenV1.at(proxy.address);
-  assert.strictEqual(proxiedToken.address, proxy.address);
-  return {
-    proxy,
-    token: proxiedToken,
-  };
 }
 
 async function expectRevert(contractPromise) {
@@ -822,50 +682,11 @@ async function checkMINTp0(_contracts, _customVars) {
 }
 
 module.exports = {
-  FiatTokenV1,
-  FiatTokenProxy,
-  UpgradedFiatToken,
-  UpgradedFiatTokenNewFields,
-  UpgradedFiatTokenNewFieldsNewLogic,
-  name,
-  symbol,
-  currency,
-  decimals,
   bigZero,
-  bigHundred,
-  debugLogging,
-  maxAmount,
   checkMINTp0,
-  mint,
-  burn,
-  blacklist,
-  unBlacklist,
-  approve,
-  redeem,
-  initializeTokenWithProxy,
-  upgradeTo,
   expectRevert,
   expectError,
-  nullAccount,
-  deployerAccount,
-  arbitraryAccount,
-  tokenOwnerAccount,
-  arbitraryAccount2,
-  masterMinterAccount,
-  minterAccount,
-  pauserAccount,
-  blacklisterAccount,
-  proxyOwnerAccount,
-  proxyOwnerAccountPrivateKey,
-  upgraderAccount,
-  arbitraryAccountPrivateKey,
-  upgraderAccountPrivateKey,
-  tokenOwnerPrivateKey,
-  blacklisterAccountPrivateKey,
-  arbitraryAccount2PrivateKey,
-  masterMinterAccountPrivateKey,
-  minterAccountPrivateKey,
-  pauserAccountPrivateKey,
-  deployerAccountPrivateKey,
+  initializeTokenWithProxy,
+  maxAmount,
   newBigNumber,
 };

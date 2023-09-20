@@ -4,6 +4,8 @@ const _ = require("lodash");
 const BN = require("bn.js");
 const Q = require("q");
 
+const { accounts, accountPrivateKeys } = require("../../helpers/constants");
+
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
 const SignatureChecker = artifacts.require("SignatureChecker");
@@ -28,42 +30,33 @@ const bigZero = new BN(0);
 const bigHundred = new BN(100);
 
 const nullAccount = "0x0000000000000000000000000000000000000000";
-const deployerAccount = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"; // accounts[0]
-const arbitraryAccount = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // accounts[1]
-const tokenOwnerAccount = "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d"; // accounts[3]
-const blacklisterAccount = "0xd03ea8624C8C5987235048901fB614fDcA89b117"; // accounts[4]
-const arbitraryAccount2 = "0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC"; // accounts[5]
-const masterMinterAccount = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // accounts[6]
-const minterAccount = "0x28a8746e75304c0780E011BEd21C72cD78cd535E"; // accounts[7]
-const pauserAccount = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"; // accounts[8]
-const rescuerAccount = "0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e"; // accounts[9]
-const lostAndFoundAccount = "0x610Bb1573d1046FCb8A70Bbbd395754cD57C2b60"; // accounts[10]
-
-const proxyOwnerAccount = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598"; // accounts[14]
+const {
+  deployerAccount,
+  arbitraryAccount,
+  tokenOwnerAccount,
+  blacklisterAccount,
+  arbitraryAccount2,
+  masterMinterAccount,
+  minterAccount,
+  pauserAccount,
+  proxyOwnerAccount,
+  rescuerAccount,
+  lostAndFoundAccount,
+} = accounts;
+const {
+  deployerAccount: deployerAccountPrivateKey,
+  arbitraryAccount: arbitraryAccountPrivateKey,
+  tokenOwnerAccount: tokenOwnerPrivateKey,
+  blacklisterAccount: blacklisterAccountPrivateKey,
+  arbitraryAccount2: arbitraryAccount2PrivateKey,
+  masterMinterAccount: masterMinterAccountPrivateKey,
+  minterAccount: minterAccountPrivateKey,
+  pauserAccount: pauserAccountPrivateKey,
+  proxyOwnerAccount: proxyOwnerAccountPrivateKey,
+  rescuerAccount: rescuerAccountPrivateKey,
+  lostAndFoundAccount: lostAndFoundAccountPrivateKey,
+} = accountPrivateKeys;
 const upgraderAccount = proxyOwnerAccount;
-
-const deployerAccountPrivateKey =
-  "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
-const arbitraryAccountPrivateKey =
-  "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-const tokenOwnerPrivateKey =
-  "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
-const blacklisterAccountPrivateKey =
-  "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
-const arbitraryAccount2PrivateKey =
-  "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd"; // accounts[5]
-const masterMinterAccountPrivateKey =
-  "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"; // accounts[6]
-const minterAccountPrivateKey =
-  "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"; // accounts[7]
-const pauserAccountPrivateKey =
-  "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[8]
-const rescuerAccountPrivateKey =
-  "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773"; // accounts[9]
-const lostAndFoundAccountPrivateKey =
-  "77c5495fbb039eed474fc940f29955ed0531693cc9212911efd35dff0373153f"; // accounts[10]
-const proxyOwnerAccountPrivateKey =
-  "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46"; // accounts[14]
 const upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
 
 const adminSlot =
