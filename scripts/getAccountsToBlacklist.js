@@ -43,7 +43,9 @@ const OUTPUT_FILE = path.join(__dirname, "..", "blacklist.remote.json");
 
 async function main(proxyAddress, startBlockNumber) {
   if (fs.existsSync(OUTPUT_FILE)) {
-    console.log(`'${OUTPUT_FILE}' exists. Will append results to the file.`);
+    console.log(
+      `NOTE: '${OUTPUT_FILE}' exists. Will append results to the file.`
+    );
   }
   // A web3 Contract instance is used here as Truffle < v5.4.29 can trigger an
   // insufficient funds error on view functions. @see https://github.com/trufflesuite/truffle/issues/4457
@@ -105,7 +107,7 @@ async function saveBlacklistedAccounts(
   );
   const blacklistedAccounts = [];
   for (const account of maybeBlacklistedAccounts) {
-    const isCurrentlyBlacklisted = fiatTokenV2_1.methods
+    const isCurrentlyBlacklisted = await fiatTokenV2_1.methods
       .isBlacklisted(account)
       .call();
     if (isCurrentlyBlacklisted) {
@@ -116,6 +118,10 @@ async function saveBlacklistedAccounts(
   console.log(
     `>> Found ${blacklistedAccounts.length} unique & currently blacklisted accounts`
   );
+  if (blacklistedAccounts.length <= 0) {
+    return;
+  }
+
   appendBlacklistedAccounts(blacklistedAccounts);
 }
 
@@ -126,7 +132,7 @@ async function saveBlacklistedAccounts(
 function appendBlacklistedAccounts(blacklistedAccounts) {
   let previousBlacklistedAccounts = [];
   try {
-    previousBlacklistedAccounts = require(OUTPUT_FILE);
+    previousBlacklistedAccounts = JSON.parse(fs.readFileSync(OUTPUT_FILE));
   } catch (e) {
     // no-op
   }
