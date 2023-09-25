@@ -10,13 +10,13 @@ const {
   minterAccount,
   pauserAccount,
   initializeTokenWithProxy,
-  UpgradedFiatToken,
+  deployUpgradedFiatToken,
   upgradeTo,
 } = require("./helpers/tokenTest");
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -112,7 +112,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("ept008 should upgrade while paused", async () => {
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await deployUpgradedFiatToken(version);
     await token.pause({ from: pauserAccount });
     const tokenConfig = await upgradeTo(proxy, newRawToken);
     const newProxiedToken = tokenConfig.token;
@@ -248,7 +248,7 @@ function runTests(newToken, _accounts) {
 
   it("ept022 should upgrade when msg.sender blacklisted", async () => {
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await deployUpgradedFiatToken(version);
     const tokenConfig = await upgradeTo(proxy, newRawToken);
     const newProxiedToken = tokenConfig.token;
 
@@ -260,7 +260,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("ept023 should upgrade to blacklisted address", async () => {
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await deployUpgradedFiatToken(version);
 
     await token.blacklist(newRawToken.address, { from: blacklisterAccount });
     const tokenConfig = await upgradeTo(proxy, newRawToken);

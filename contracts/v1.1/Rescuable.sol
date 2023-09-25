@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2018-2023 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,8 +66,8 @@ contract Rescuable is Ownable {
     }
 
     /**
-     * @notice Assign the rescuer role to a given address.
-     * @param newRescuer New rescuer's address
+     * @notice Updates the rescuer address.
+     * @param newRescuer The address of the new rescuer.
      */
     function updateRescuer(address newRescuer) external onlyOwner {
         require(

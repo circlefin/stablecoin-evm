@@ -5,6 +5,7 @@ const some = require("lodash/some");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenUtil = artifacts.require("FiatTokenUtil");
+const SignatureChecker = artifacts.require("SignatureChecker");
 
 const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 
@@ -27,11 +28,20 @@ module.exports = async (deployer, network) => {
 
   console.log(`FiatTokenProxy: ${proxyContractAddress}`);
 
+  console.log("Deploying and linking SignatureChecker library contract...");
+  await deployer.deploy(SignatureChecker);
+  await deployer.link(SignatureChecker, FiatTokenV2);
+
   console.log("Deploying FiatTokenV2 implementation contract...");
   await deployer.deploy(FiatTokenV2);
 
   const fiatTokenV2 = await FiatTokenV2.deployed();
   console.log("Deployed FiatTokenV2 at", fiatTokenV2.address);
+
+  // Initializing the implementation contract with dummy values here prevents
+  // the contract from being reinitialized later on with different values.
+  // Dummy values can be used here as the proxy contract will store the actual values
+  // for the deployed token.
   console.log(
     "Initializing FiatTokenV2 implementation contract with dummy values..."
   );

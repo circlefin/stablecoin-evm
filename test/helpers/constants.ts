@@ -1,9 +1,16 @@
+import BN from "bn.js";
+
+export const BLOCK_GAS_LIMIT = 30e6;
+
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const ZERO_BYTES32 =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const MAX_UINT256 =
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+export const POW_2_255_HEX =
+  "0x8000000000000000000000000000000000000000000000000000000000000000";
+export const POW_2_255_BN = new BN(POW_2_255_HEX.slice(2), 16);
 
 // derived from mnemonic: clarify final village pulse require old seek excite mushroom forest satoshi video
 export const ACCOUNTS_AND_KEYS: { address: string; key: string }[] = [

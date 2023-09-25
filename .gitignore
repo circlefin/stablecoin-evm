@@ -5,6 +5,8 @@
 @types/generated/
 artifacts/
 blacklist.txt
+blacklist.*.js
+!blacklist.test.js
 build/
 config.js
 config.*.js
@@ -14,6 +16,9 @@ coverage/
 credentials.json
 echidna/
 ganache-blockchain-log.txt
+out/
+cache/
+
 logs/
 node_modules/
 package-lock.json

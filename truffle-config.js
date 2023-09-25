@@ -67,7 +67,11 @@ module.exports = {
     timeout: 60000, // prevents tests from failing when pc is under heavy load
     reporter: "Spec",
   },
-  plugins: ["solidity-coverage", "truffle-plugin-verify"],
+  plugins: [
+    "solidity-coverage",
+    "truffle-contract-size",
+    "truffle-plugin-verify",
+  ],
   // https://www.npmjs.com/package/truffle-plugin-verify
   api_keys: {
     etherscan: config.ETHERSCAN_API_KEY,

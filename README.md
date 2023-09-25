@@ -4,10 +4,12 @@ Fiat tokens on the [CENTRE](https://centre.io) network.
 
 ## Setup
 
+### Development Environment
+
 Requirements:
 
 - Node 16.14.0
-- Yarn
+- Yarn 1.22.19
 
 ```
 $ git clone git@github.com:centrehq/centre-tokens.git
@@ -39,6 +41,11 @@ list from Compliance. As seen in `blacklist.txt.example`, addresses are split by
 new lines. You must blacklist the sanctions list at deployment time using the
 hot blacklister key (in `config.js`).
 
+Create a copy of the file `blacklist.test.js`, and name it
+`blacklist.remote.js`. Fill in `blacklist.remote.js` with the list addresses to
+blacklist. This file must not be checked into the repository. To prevent
+accidental check-ins, `blacklist.remote.js` is in `.gitignore`.
+
 ```
 // Ensure that the ENV variable in config.js is set to stg or prod, which will
 // dictate which config.{env}.js file gets read during execution
@@ -67,17 +74,28 @@ yarn verify --network {see here https://www.npmjs.com/package/truffle-plugin-ver
 
 - include the deployed contract addresses in the config file.
 
+### IDE
+
+We recommend using VSCode for the project here with these
+[extensions](./.vscode/extensions.json) installed.
+
 ## TypeScript type definition files for the contracts
 
 To generate type definitions:
 
 ```
-$ yarn compile && yarn typechain
+$ yarn typechain
 ```
 
 ## Linting and Formatting
 
 To check code for problems:
+
+```
+$ yarn static-check   # Runs a static check on the repo.
+```
+
+or run the checks individually:
 
 ```
 $ yarn typecheck      # Type-check TypeScript code
@@ -117,6 +135,13 @@ To run tests and generate test coverage, run:
 
 ```
 $ yarn coverage
+```
+
+To check the size of contracts in the repo, run the following command.
+
+```sh
+$ yarn contract-size # Ignores tests
+$ yarn contract-size:all # Includes all contracts
 ```
 
 ## Contracts
