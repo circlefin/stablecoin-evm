@@ -192,7 +192,7 @@ module.exports = async (callback) => {
   const argv = config._;
   /* eslint-enable no-undef */
   const usageError = new Error(
-    "Usage: yarn truffle exec scripts/getAccountsToBlacklist.js [<0x-stripped Proxy address>] [startBlockNumber] [--network=<NETWORK>]"
+    "Usage: yarn truffle exec scripts/getBlacklistedAccounts.js [<0x-stripped Proxy address>] [startBlockNumber] [--network=<NETWORK>]"
   );
 
   // Truffle exec seems to auto parse a hex string passed in arguments into decimals.
