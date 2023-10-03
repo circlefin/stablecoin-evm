@@ -27,9 +27,9 @@ const fs = require("fs");
 const path = require("path");
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-let FiatTokenV2_1;
+let Blacklistable;
 try {
-  FiatTokenV2_1 = require("../build/contracts/FiatTokenV2_1.json");
+  Blacklistable = require("../build/contracts/Blacklistable.json");
 } catch (e) {
   console.error("Run `yarn compile` to generate the abi first!");
   console.error(e);
@@ -49,7 +49,10 @@ async function main(proxyAddress, startBlockNumber) {
   }
   // A web3 Contract instance is used here as Truffle < v5.4.29 can trigger an
   // insufficient funds error on view functions. @see https://github.com/trufflesuite/truffle/issues/4457
-  const fiatTokenV2_1 = new web3.eth.Contract(FiatTokenV2_1.abi, proxyAddress);
+  const proxyAsBlacklistable = new web3.eth.Contract(
+    Blacklistable.abi,
+    proxyAddress
+  );
 
   const latestBlockNumber = await web3.eth.getBlockNumber();
   let fromBlockNumber = startBlockNumber;
@@ -60,7 +63,7 @@ async function main(proxyAddress, startBlockNumber) {
 
   do {
     await saveBlacklistedAccounts(
-      fiatTokenV2_1,
+      proxyAsBlacklistable,
       fromBlockNumber,
       toBlockNumber
     );
@@ -78,12 +81,12 @@ async function main(proxyAddress, startBlockNumber) {
 /**
  * Saves all accounts that were blacklisted in [fromBlockNumber, toBlockNumber]
  * AND are still blacklisted, in storage.
- * @param {FiatTokenV2_1} fiatTokenV2_1 the FiatTokenProxy contract as v2.1
+ * @param {Blacklistable} proxyAsBlacklistable the FiatTokenProxy contract as Blacklistable
  * @param {number} fromBlockNumber the start block number
  * @param {number} toBlockNumber the end block number
  */
 async function saveBlacklistedAccounts(
-  fiatTokenV2_1,
+  proxyAsBlacklistable,
   fromBlockNumber,
   toBlockNumber
 ) {
@@ -91,7 +94,7 @@ async function saveBlacklistedAccounts(
     `Querying events in range [${fromBlockNumber}, ${toBlockNumber}]`
   );
   const rawBlacklistedEvents = await getBlacklistedEventsRetryWithBackoff(
-    fiatTokenV2_1,
+    proxyAsBlacklistable,
     fromBlockNumber,
     toBlockNumber
   );
@@ -107,7 +110,7 @@ async function saveBlacklistedAccounts(
   );
   const blacklistedAccounts = [];
   for (const account of maybeBlacklistedAccounts) {
-    const isCurrentlyBlacklisted = await fiatTokenV2_1.methods
+    const isCurrentlyBlacklisted = await proxyAsBlacklistable.methods
       .isBlacklisted(account)
       .call();
     if (isCurrentlyBlacklisted) {
@@ -149,13 +152,13 @@ function appendBlacklistedAccounts(blacklistedAccounts) {
 
 /**
  * Get all blacklisted events that were emitted in [fromBlockNumber, toBlockNumber]
- * @param {FiatTokenV2_1} fiatTokenV2_1 the FiatTokenProxy contract as v2.1
+ * @param {Blacklistable} proxyAsBlacklistable the FiatTokenProxy contract as Blacklistable
  * @param {number} fromBlockNumber the start block number
  * @param {number} toBlockNumber the end block number
  * @throws error if RPC fails after MAX_RETRIES counts
  */
 async function getBlacklistedEventsRetryWithBackoff(
-  fiatTokenV2_1,
+  proxyAsBlacklistable,
   fromBlockNumber,
   toBlockNumber
 ) {
@@ -165,7 +168,7 @@ async function getBlacklistedEventsRetryWithBackoff(
   while (tries < MAX_RETRIES) {
     await sleep(tries * SLEEP_MS);
     try {
-      return await fiatTokenV2_1.getPastEvents("Blacklisted", {
+      return await proxyAsBlacklistable.getPastEvents("Blacklisted", {
         fromBlock: fromBlockNumber,
         toBlock: toBlockNumber,
       });
