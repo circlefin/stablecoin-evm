@@ -98,6 +98,8 @@ module.exports = async (deployer, network) => {
       THROWAWAY_ADDRESS,
       THROWAWAY_ADDRESS
     );
+    await fiatTokenV2_1.initializeV2("");
+    await fiatTokenV2_1.initializeV2_1(THROWAWAY_ADDRESS);
 
     fiatTokenImplementationAddress = FiatTokenV2_1.address;
   }
