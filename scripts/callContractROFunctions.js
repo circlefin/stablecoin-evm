@@ -59,6 +59,16 @@ async function main(contractName, contractAddress, functionNames) {
 }
 
 /**
+ * Memory addresses for the return data of certain read-only functions
+ * on the FiatTokenProxy contract.
+ */
+const FiatTokenProxy_SLOT_ADDRESSES = {
+  admin: "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b",
+  implementation:
+    "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3",
+};
+
+/**
  * Conditionally calls a read-only function from a contract, depending on the contractName.
  * If the contract is FiatTokenProxy, and either `name()` or `implementation()` is requested,
  * then first try to get the result by calling the function, reading from storage slots as a fallback.
@@ -79,32 +89,18 @@ async function conditionalCallROFunction(Contract, contractAddress, funcName) {
     Contract.contractName === "FiatTokenProxy" &&
     ["admin", "implementation"].includes(funcName)
   ) {
-    const slots = {
-      admin:
-        "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b",
-      implementation:
-        "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3",
-    };
-
     try {
       return await contract.methods[funcName]().call();
     } catch {
-      return await readAddressFromStorage(slots[funcName], contractAddress);
+      const storageResult = await web3.eth.getStorageAt(
+        contractAddress,
+        FiatTokenProxy_SLOT_ADDRESSES[funcName]
+      );
+      return web3.utils.toChecksumAddress("0x" + storageResult.slice(26));
     }
   }
 
   return await contract.methods[funcName]().call();
-}
-
-/**
- * Reads data from a storage slot in a contract, and parses it into a valid EVM address.
- * @param {string} slot The address of the slot to read.
- * @param {string} contractAddress The address of the contract.
- * @returns The parsed address
- */
-async function readAddressFromStorage(slot, contractAddress) {
-  const storageResult = await web3.eth.getStorageAt(contractAddress, slot);
-  return web3.utils.toChecksumAddress("0x" + storageResult.slice(26));
 }
 
 module.exports = async (callback) => {
