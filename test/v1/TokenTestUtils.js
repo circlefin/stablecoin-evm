@@ -193,7 +193,6 @@ function buildExpectedState(token, customVars) {
         );
       }
     } else {
-      // TODO: test the error
       throw new Error(
         "variable " + customVars[i].variable + " not found in expectedState"
       );

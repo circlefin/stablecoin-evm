@@ -859,7 +859,6 @@ function runTests(newToken, _accounts, version) {
       },
       {
         variable: "balanceAndBlacklistStates.pauserAccount",
-        // TODO: Abstract all new BN(0) static var.
         expectedValue: new BN(0),
       },
       { variable: "totalSupply", expectedValue: mintAmountBN },

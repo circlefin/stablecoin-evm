@@ -380,9 +380,6 @@ export function behavesLikeFiatTokenV22(
   });
 
   // TODO: Fix ganache's gas reporting.
-  // Ganache seems to return incorrect gas usage for these transactions.
-  // V2_2 methods are costing more than what it will cost on testnet, causing these to fail.
-  // Skipping them for now.
   describe.skip("gas tests", () => {
     let fiatTokenV2_1: FiatTokenV21Instance;
     let fiatTokenV2_1DomainSeparator: string;
