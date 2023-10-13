@@ -26,7 +26,9 @@ const { assert } = require("chai");
 const { rlp } = require("ethereumjs-util");
 const { defaultAbiCoder, Interface } = require("@ethersproject/abi");
 
-const { abi } = require("../build/contracts/FiatTokenProxy.json");
+const {
+  abi: FiatTokenProxyAbi,
+} = require("../build/contracts/FiatTokenProxy.json");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const V2_2Upgrader = artifacts.require("V2_2Upgrader");
 
@@ -70,6 +72,15 @@ async function validateChangeAdminTx(
     `Upgrader contract does not match input upgrader contract address: Expected '${v2_2UpgraderAddress}' but was '${newAdmin}'`
   );
 
+  console.log(">> Decoded parameters: \n", {
+    nonce,
+    to,
+    value,
+    data: {
+      newAdmin,
+    },
+  });
+
   console.log(">> Signed tx verified!");
 }
 
@@ -100,8 +111,8 @@ function decodeTx(signedTx) {
 }
 
 function decodeTxData(fnName, data) {
-  const iface = new Interface(abi);
-  const params = "0x" + data.substring(10);
+  const iface = new Interface(FiatTokenProxyAbi);
+  const params = "0x" + data.substring(10); // Remove function selector from data hex
   const fnInfo = iface.functions[fnName];
   return defaultAbiCoder.decode(fnInfo.inputs, params);
 }
@@ -120,7 +131,7 @@ async function main(callback) {
     [--network=<NETWORK>] \
     [--proxy-address=<0x-stripped Proxy contract address>] \
     [--upgrader-address=<0x-stripped V2.2 Upgrader contract address>] \
-    [--signed-tx=<0x-stripped Signed changeAdmin transaction>]"
+    --signed-tx=<0x-stripped Signed changeAdmin transaction>"
   );
 
   const proxyAddress =
