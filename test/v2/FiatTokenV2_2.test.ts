@@ -40,7 +40,6 @@ import {
   signTransferAuthorization,
   signReceiveAuthorization,
 } from "./GasAbstraction/helpers";
-import { FiatTokenV21Instance } from "../../@types/generated";
 import { encodeCall } from "../v1/helpers/tokenTest";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -209,8 +208,7 @@ contract("FiatTokenV2_2", (accounts) => {
     behavesLikeFiatTokenV22(
       accounts,
       getFiatToken(SignatureBytesType.Packed),
-      fiatTokenOwner,
-      lostAndFound
+      fiatTokenOwner
     );
     usesOriginalStorageSlotPositions({
       Contract: FiatTokenV2_2,
@@ -223,8 +221,7 @@ contract("FiatTokenV2_2", (accounts) => {
 export function behavesLikeFiatTokenV22(
   accounts: Truffle.Accounts,
   getFiatToken: () => AnyFiatTokenV2Instance,
-  fiatTokenOwner: string,
-  lostAndFound: string
+  fiatTokenOwner: string
 ): void {
   const [minter, arbitraryAccount] = accounts.slice(3);
   let domainSeparator: string;
@@ -374,199 +371,6 @@ export function behavesLikeFiatTokenV22(
             { from: to }
           ),
           errorMessage
-        );
-      });
-    });
-  });
-
-  // TODO: Fix ganache's gas reporting.
-  describe.skip("gas tests", () => {
-    let fiatTokenV2_1: FiatTokenV21Instance;
-    let fiatTokenV2_1DomainSeparator: string;
-    const mintAmount = 1000;
-
-    beforeEach(async () => {
-      fiatTokenV2_1 = await FiatTokenV2_1.new();
-      await initializeToVersion(
-        fiatTokenV2_1,
-        "2.1",
-        fiatTokenOwner,
-        lostAndFound
-      );
-      fiatTokenV2_1DomainSeparator = makeDomainSeparator(
-        "USD Coin",
-        "2",
-        1, // hardcoded to 1 because of ganache bug: https://github.com/trufflesuite/ganache/issues/1643
-        fiatTokenV2_1.address
-      );
-
-      await fiatTokenV2_1.configureMinter(minter, mintAmount, {
-        from: fiatTokenOwner,
-      });
-      await fiatToken.configureMinter(minter, mintAmount, {
-        from: fiatTokenOwner,
-      });
-    });
-
-    async function expectV2_2MethodGasUsedToBeLower(
-      v2_1Method: Promise<Truffle.TransactionResponse<any>>, // eslint-disable-line @typescript-eslint/no-explicit-any
-      v2_2Method: Promise<Truffle.TransactionResponse<any>> // eslint-disable-line @typescript-eslint/no-explicit-any
-    ) {
-      const v2_1Receipt = await v2_1Method;
-      const v2_2Receipt = await v2_2Method;
-
-      const v2_1GasUsed = v2_1Receipt.receipt.gasUsed;
-      const v2_2GasUsed = v2_2Receipt.receipt.gasUsed;
-      expect(v2_1GasUsed).to.be.greaterThan(0);
-      expect(v2_2GasUsed).to.be.greaterThan(0);
-      expect(v2_2GasUsed).to.be.lessThan(v2_1GasUsed);
-    }
-
-    it("should be cheaper to call mint", async () => {
-      await expectV2_2MethodGasUsedToBeLower(
-        fiatTokenV2_1.mint(minter, mintAmount, { from: minter }),
-        fiatToken.mint(minter, mintAmount, { from: minter })
-      );
-    });
-
-    it("should be cheaper to call transfer", async () => {
-      await fiatTokenV2_1.mint(minter, mintAmount, { from: minter });
-      await fiatToken.mint(minter, mintAmount, { from: minter });
-
-      await expectV2_2MethodGasUsedToBeLower(
-        fiatTokenV2_1.transfer(arbitraryAccount, mintAmount, { from: minter }),
-        fiatToken.transfer(arbitraryAccount, mintAmount, { from: minter })
-      );
-    });
-
-    it("should be cheaper to call transferFrom", async () => {
-      await fiatTokenV2_1.mint(minter, mintAmount, { from: minter });
-      await fiatToken.mint(minter, mintAmount, { from: minter });
-
-      await fiatTokenV2_1.approve(arbitraryAccount, mintAmount, {
-        from: minter,
-      });
-      await fiatToken.approve(arbitraryAccount, mintAmount, {
-        from: minter,
-      });
-
-      await expectV2_2MethodGasUsedToBeLower(
-        fiatTokenV2_1.transferFrom(minter, arbitraryAccount, mintAmount, {
-          from: arbitraryAccount,
-        }),
-        fiatToken.transferFrom(minter, arbitraryAccount, mintAmount, {
-          from: arbitraryAccount,
-        })
-      );
-    });
-
-    it("should be cheaper to call burn", async () => {
-      await fiatTokenV2_1.mint(minter, mintAmount, { from: minter });
-      await fiatToken.mint(minter, mintAmount, { from: minter });
-
-      await expectV2_2MethodGasUsedToBeLower(
-        fiatTokenV2_1.burn(mintAmount, { from: minter }),
-        fiatToken.burn(mintAmount, { from: minter })
-      );
-    });
-
-    context("EIP3009", () => {
-      const signer = ACCOUNTS_AND_KEYS[0];
-      const from = signer.address;
-      const to = arbitraryAccount;
-      const value = 1000;
-      const validAfter = 0;
-      const validBefore = MAX_UINT256_HEX;
-      const nonce = hexStringFromBuffer(crypto.randomBytes(32));
-
-      beforeEach(async () => {
-        await fiatTokenV2_1.mint(signer.address, mintAmount, { from: minter });
-        await fiatToken.mint(signer.address, mintAmount, { from: minter });
-      });
-
-      it("should be cheaper to call transferWithAuthorization", async () => {
-        const [v2_1Signature, v2_2Signature] = [
-          fiatTokenV2_1DomainSeparator,
-          domainSeparator,
-        ].map((ds) =>
-          signTransferAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            ds,
-            signer.key
-          )
-        );
-
-        await expectV2_2MethodGasUsedToBeLower(
-          fiatTokenV2_1.transferWithAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            v2_1Signature.v,
-            v2_1Signature.r,
-            v2_1Signature.s,
-            { from: to }
-          ),
-          fiatToken.transferWithAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            ...prepareSignature(v2_2Signature, SignatureBytesType.Packed),
-            { from: to }
-          )
-        );
-      });
-
-      it("should be cheaper to call receiveWithAuthorization", async () => {
-        const [v2_1Signature, v2_2Signature] = [
-          fiatTokenV2_1DomainSeparator,
-          domainSeparator,
-        ].map((ds) =>
-          signReceiveAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            ds,
-            signer.key
-          )
-        );
-
-        await expectV2_2MethodGasUsedToBeLower(
-          fiatTokenV2_1.receiveWithAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            v2_1Signature.v,
-            v2_1Signature.r,
-            v2_1Signature.s,
-            { from: to }
-          ),
-          fiatToken.receiveWithAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            ...prepareSignature(v2_2Signature, SignatureBytesType.Packed),
-            { from: to }
-          )
         );
       });
     });
