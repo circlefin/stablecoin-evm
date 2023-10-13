@@ -70,8 +70,11 @@ const FiatTokenProxy_SLOT_ADDRESSES = {
 
 /**
  * Conditionally calls a read-only function from a contract, depending on the contractName.
+ *
  * If the contract is FiatTokenProxy, and either `name()` or `implementation()` is requested,
- * then first try to get the result by calling the function, reading from storage slots as a fallback.
+ * then first try to get the result by calling the function, reading from storage slots as a fallback
+ * since these functions return data from static memory addresses.
+ *
  * Otherwise, get the result by calling the function.
  * @param {object} Contract The JSON abi for the contract
  * @param {string} contractAddress The address of the contract.
