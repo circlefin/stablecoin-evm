@@ -1,7 +1,7 @@
 {
-  "name": "centre-tokens",
+  "name": "stablecoin-evm",
   "version": "1.0.0",
-  "description": "Fiat and non-fiat tokens part of the CENTRE network.",
+  "description": "Circle's Stablecoin Smart Contracts on EVM-compatible blockchains",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -26,15 +26,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/centrehq/centre-tokens.git"
+    "url": "git+https://github.com/circlefin/stablecoin-evm.git"
   },
   "keywords": [],
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/centrehq/centre-tokens/issues"
+    "url": "https://github.com/circlefin/stablecoin-evm/issues"
   },
-  "homepage": "https://github.com/centrehq/centre-tokens#readme",
+  "homepage": "https://github.com/circlefin/stablecoin-evm#readme",
   "dependencies": {},
   "devDependencies": {
     "@openzeppelin/contracts": "^3.1.0",
