@@ -13,7 +13,6 @@ const {
   proxyOwnerAccount,
   upgraderAccount,
 } = require("./helpers/tokenTest");
-const { MAX_UINT256_HEX } = require("../helpers/constants");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -685,6 +684,5 @@ module.exports = {
   expectRevert,
   expectError,
   initializeTokenWithProxy,
-  maxAmount: MAX_UINT256_HEX,
   newBigNumber,
 };
