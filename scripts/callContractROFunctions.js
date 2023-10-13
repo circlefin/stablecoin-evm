@@ -118,8 +118,8 @@ module.exports = async (callback) => {
 
   const usageError = new Error(
     "Usage: yarn truffle exec scripts/callContractROFunctions.js [--network=<NETWORK>] \n" +
-      "--contractName=<contract name eg. FiatTokenV2_1>\n" +
-      "--contractAddress=<0x-stripped address>\n" +
+      "--contract-name=<contract name eg. FiatTokenV2_1>\n" +
+      "--contract-address=<0x-stripped address>\n" +
       "[functionNames...]"
   );
 
