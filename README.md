@@ -12,7 +12,7 @@ Requirements:
 - Yarn 1.22.19
 
 ```
-$ git clone git@github.com:centrehq/centre-tokens.git
+$ git clone git@github.com:circlefin/fiat-tokens.git
 $ cd centre-tokens
 $ nvm use
 $ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
