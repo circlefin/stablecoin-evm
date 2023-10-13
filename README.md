@@ -36,7 +36,7 @@ $ yarn typechain
 
 To check code for problems:
 
-```fiat
+```
 $ yarn static-check   # Runs a static check on the repo.
 ```
 
