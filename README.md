@@ -1,6 +1,6 @@
-# centre-tokens
+# fiat-tokens
 
-Fiat tokens on the [CENTRE](https://centre.io) network.
+[Circle's](https://www.circle.com/) fiat tokens.
 
 ## Setup
 
@@ -13,7 +13,7 @@ Requirements:
 
 ```
 $ git clone git@github.com:circlefin/fiat-tokens.git
-$ cd centre-tokens
+$ cd fiat-tokens
 $ nvm use
 $ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
 $ yarn install          # Install dependencies
@@ -36,7 +36,7 @@ $ yarn typechain
 
 To check code for problems:
 
-```
+```fiat
 $ yarn static-check   # Runs a static check on the repo.
 ```
 
