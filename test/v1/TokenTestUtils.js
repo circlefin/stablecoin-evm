@@ -23,8 +23,6 @@ const currency = "USD";
 const decimals = 2;
 const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
-const maxAmount =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 const adminSlot =
   "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
@@ -194,7 +192,6 @@ function buildExpectedState(token, customVars) {
         );
       }
     } else {
-      // TODO: test the error
       throw new Error(
         "variable " + customVars[i].variable + " not found in expectedState"
       );
@@ -687,6 +684,5 @@ module.exports = {
   expectRevert,
   expectError,
   initializeTokenWithProxy,
-  maxAmount,
   newBigNumber,
 };

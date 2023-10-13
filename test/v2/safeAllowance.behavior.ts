@@ -1,7 +1,7 @@
 import { AnyFiatTokenV2Instance } from "../../@types/AnyFiatTokenV2Instance";
 import { Approval } from "../../@types/generated/FiatTokenV2";
 import { expectRevert } from "../helpers";
-import { MAX_UINT256 } from "../helpers/constants";
+import { MAX_UINT256_HEX } from "../helpers/constants";
 
 export function hasSafeAllowance(
   version: number,
@@ -56,7 +56,7 @@ export function hasSafeAllowance(
         });
 
         await expectRevert(
-          fiatToken.increaseAllowance(bob, MAX_UINT256, {
+          fiatToken.increaseAllowance(bob, MAX_UINT256_HEX, {
             from: alice,
           }),
           "addition overflow"
@@ -178,7 +178,7 @@ export function hasSafeAllowance(
         // it catches that the given decrement is greater than the current
         // allowance
         await expectRevert(
-          fiatToken.decreaseAllowance(bob, MAX_UINT256, {
+          fiatToken.decreaseAllowance(bob, MAX_UINT256_HEX, {
             from: alice,
           }),
           "decreased allowance below zero"

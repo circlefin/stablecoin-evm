@@ -4,7 +4,11 @@ const _ = require("lodash");
 const BN = require("bn.js");
 const Q = require("q");
 
-const { accounts, accountPrivateKeys } = require("../../helpers/constants");
+const {
+  accounts,
+  accountPrivateKeys,
+  ZERO_ADDRESS,
+} = require("../../helpers/constants");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
@@ -29,7 +33,6 @@ const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
 const bigHundred = new BN(100);
 
-const nullAccount = "0x0000000000000000000000000000000000000000";
 const {
   deployerAccount,
   arbitraryAccount,
@@ -191,7 +194,7 @@ function checkMintEvent(minting, to, amount, minter) {
 
   // Transfer from 0 Event
   assert.strictEqual(minting.logs[1].event, "Transfer");
-  assert.strictEqual(minting.logs[1].args.from, nullAccount);
+  assert.strictEqual(minting.logs[1].args.from, ZERO_ADDRESS);
   assert.strictEqual(minting.logs[1].args.to, to);
   assert.isTrue(minting.logs[1].args.value.eq(new BN(amount)));
 }
@@ -205,7 +208,7 @@ function checkBurnEvents(burning, amount, burner) {
   // Transfer to 0 Event
   assert.strictEqual(burning.logs[1].event, "Transfer");
   assert.strictEqual(burning.logs[1].args.from, burner);
-  assert.strictEqual(burning.logs[1].args.to, nullAccount);
+  assert.strictEqual(burning.logs[1].args.to, ZERO_ADDRESS);
   assert.isTrue(burning.logs[1].args.value.eq(new BN(amount)));
 }
 
@@ -1030,7 +1033,7 @@ module.exports = {
   expectRevert,
   encodeCall,
   getInitializedV1,
-  nullAccount,
+  nullAccount: ZERO_ADDRESS,
   deployerAccount,
   arbitraryAccount,
   tokenOwnerAccount,

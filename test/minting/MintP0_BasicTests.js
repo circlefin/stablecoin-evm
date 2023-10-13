@@ -1,3 +1,4 @@
+const { ZERO_ADDRESS, MAX_UINT256_HEX } = require("../helpers/constants");
 const MintController = artifacts.require("minting/MintController");
 const MasterMinter = artifacts.require("minting/MasterMinter");
 const FiatToken = artifacts.require("FiatTokenV1");
@@ -8,7 +9,6 @@ const checkMINTp0 = tokenUtils.checkMINTp0;
 const expectRevert = tokenUtils.expectRevert;
 const expectError = tokenUtils.expectError;
 const bigZero = tokenUtils.bigZero;
-const maxAmount = tokenUtils.maxAmount;
 
 const clone = require("clone");
 
@@ -19,8 +19,6 @@ const getAccountState = AccountUtils.getAccountState;
 const addressEquals = AccountUtils.addressEquals;
 const initializeTokenWithProxyAndMintController =
   mintUtils.initializeTokenWithProxyAndMintController;
-
-const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 async function run_tests_MintController(newToken, accounts) {
   run_MINT_tests(newToken, MintController, accounts);
@@ -148,7 +146,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     await mintController.removeController(Accounts.controller1Account, {
       from: Accounts.mintOwnerAccount,
     });
-    expectedMintControllerState.controllers.controller1Account = zeroAddress;
+    expectedMintControllerState.controllers.controller1Account = ZERO_ADDRESS;
     await checkMINTp0(
       [token, mintController],
       [expectedTokenState, expectedMintControllerState]
@@ -337,7 +335,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     await mintController.removeController(Accounts.controller1Account, {
       from: Accounts.mintOwnerAccount,
     });
-    expectedMintControllerState.controllers.controller1Account = zeroAddress;
+    expectedMintControllerState.controllers.controller1Account = ZERO_ADDRESS;
     await checkMINTp0(
       [token, mintController],
       [expectedTokenState, expectedMintControllerState]
@@ -936,7 +934,8 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
 
   it("bt049 incrementMinterAllowance(M,amt) reverts when minterAllowance[M] + amt > 2^256", async function () {
     const initialAmount =
-      "0x" + newBigNumber(maxAmount).sub(newBigNumber(45)).toString(16, 64);
+      "0x" +
+      newBigNumber(MAX_UINT256_HEX).sub(newBigNumber(45)).toString(16, 64);
     const incrementAmount = 64;
     await mintController.configureController(
       Accounts.controller1Account,
@@ -1049,7 +1048,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    await mintController.configureMinter(maxAmount, {
+    await mintController.configureMinter(MAX_UINT256_HEX, {
       from: Accounts.controller1Account,
     });
 
@@ -1132,7 +1131,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    await mintController.configureMinter(maxAmount, {
+    await mintController.configureMinter(MAX_UINT256_HEX, {
       from: Accounts.controller1Account,
     });
 
@@ -1186,10 +1185,10 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
 
   it("bt058 decrementMinterAllowance reverts when minterManager is 0", async function () {
     // set minterManager to zero
-    await mintController.setMinterManager(zeroAddress, {
+    await mintController.setMinterManager(ZERO_ADDRESS, {
       from: Accounts.mintOwnerAccount,
     });
-    expectedMintControllerState.minterManager = zeroAddress;
+    expectedMintControllerState.minterManager = ZERO_ADDRESS;
     await checkMINTp0(
       [token, mintController],
       [expectedTokenState, expectedMintControllerState]
@@ -1311,7 +1310,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
   });
 
   it("bt063 decrementMinterAllowance(M,amt) works when minterAllowance is MAX", async function () {
-    const amount = maxAmount;
+    const amount = MAX_UINT256_HEX;
     await mintController.configureController(
       Accounts.controller1Account,
       Accounts.minterAccount,
@@ -1327,7 +1326,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     const minterAllowance = await minterManager.minterAllowance(
       Accounts.minterAccount
     );
-    assert(minterAllowance.cmp(newBigNumber(maxAmount)) === 0);
+    assert(minterAllowance.cmp(newBigNumber(MAX_UINT256_HEX)) === 0);
     await mintController.decrementMinterAllowance(amount, {
       from: Accounts.controller1Account,
     });
