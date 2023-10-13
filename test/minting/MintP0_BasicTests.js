@@ -1,3 +1,4 @@
+const { ZERO_ADDRESS } = require("../helpers/constants");
 const MintController = artifacts.require("minting/MintController");
 const MasterMinter = artifacts.require("minting/MasterMinter");
 const FiatToken = artifacts.require("FiatTokenV1");
@@ -19,8 +20,6 @@ const getAccountState = AccountUtils.getAccountState;
 const addressEquals = AccountUtils.addressEquals;
 const initializeTokenWithProxyAndMintController =
   mintUtils.initializeTokenWithProxyAndMintController;
-
-const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 async function run_tests_MintController(newToken, accounts) {
   run_MINT_tests(newToken, MintController, accounts);
@@ -148,7 +147,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     await mintController.removeController(Accounts.controller1Account, {
       from: Accounts.mintOwnerAccount,
     });
-    expectedMintControllerState.controllers.controller1Account = zeroAddress;
+    expectedMintControllerState.controllers.controller1Account = ZERO_ADDRESS;
     await checkMINTp0(
       [token, mintController],
       [expectedTokenState, expectedMintControllerState]
@@ -337,7 +336,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     await mintController.removeController(Accounts.controller1Account, {
       from: Accounts.mintOwnerAccount,
     });
-    expectedMintControllerState.controllers.controller1Account = zeroAddress;
+    expectedMintControllerState.controllers.controller1Account = ZERO_ADDRESS;
     await checkMINTp0(
       [token, mintController],
       [expectedTokenState, expectedMintControllerState]
@@ -1186,10 +1185,10 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
 
   it("bt058 decrementMinterAllowance reverts when minterManager is 0", async function () {
     // set minterManager to zero
-    await mintController.setMinterManager(zeroAddress, {
+    await mintController.setMinterManager(ZERO_ADDRESS, {
       from: Accounts.mintOwnerAccount,
     });
-    expectedMintControllerState.minterManager = zeroAddress;
+    expectedMintControllerState.minterManager = ZERO_ADDRESS;
     await checkMINTp0(
       [token, mintController],
       [expectedTokenState, expectedMintControllerState]

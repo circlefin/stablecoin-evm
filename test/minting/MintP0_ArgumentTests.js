@@ -2,6 +2,7 @@ const MintController = artifacts.require("minting/MintController");
 const MasterMinter = artifacts.require("minting/MasterMinter");
 const FiatToken = artifacts.require("FiatTokenV1");
 
+const { MAX_UINT256_HEX, ZERO_ADDRESS } = require("../helpers/constants");
 const tokenUtils = require("../v1/TokenTestUtils");
 const newBigNumber = tokenUtils.newBigNumber;
 const checkMINTp0 = tokenUtils.checkMINTp0;
@@ -17,10 +18,6 @@ const Accounts = AccountUtils.Accounts;
 const addressEquals = AccountUtils.addressEquals;
 const initializeTokenWithProxyAndMintController =
   mintUtils.initializeTokenWithProxyAndMintController;
-
-const zeroAddress = "0x0000000000000000000000000000000000000000";
-const maxAmount =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 async function run_tests_MintController(newToken, accounts) {
   run_MINT_tests(newToken, MintController, accounts);
@@ -64,7 +61,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
 
   it("arg001 transferOwnership(0) reverts", async function () {
     await expectRevert(
-      mintController.transferOwnership(zeroAddress, {
+      mintController.transferOwnership(ZERO_ADDRESS, {
         from: Accounts.mintOwnerAccount,
       })
     );
@@ -82,7 +79,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
 
   it("arg003 configureController(0, M) throws", async function () {
     await expectError(
-      mintController.configureController(zeroAddress, Accounts.minterAccount, {
+      mintController.configureController(ZERO_ADDRESS, Accounts.minterAccount, {
         from: Accounts.mintOwnerAccount,
       }),
       "Controller must be a non-zero address"
@@ -121,7 +118,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     await expectError(
       mintController.configureController(
         Accounts.controller1Account,
-        zeroAddress,
+        ZERO_ADDRESS,
         { from: Accounts.mintOwnerAccount }
       ),
       "Worker must be a non-zero address"
@@ -131,7 +128,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
   it("arg007 removeController(0) throws", async function () {
     // expect no changes
     await expectError(
-      mintController.removeController(zeroAddress, {
+      mintController.removeController(ZERO_ADDRESS, {
         from: Accounts.mintOwnerAccount,
       }),
       "Controller must be a non-zero address"
@@ -143,10 +140,10 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
   });
 
   it("arg008 setMinterManager(0) works", async function () {
-    await mintController.setMinterManager(zeroAddress, {
+    await mintController.setMinterManager(ZERO_ADDRESS, {
       from: Accounts.mintOwnerAccount,
     });
-    expectedMintControllerState.minterManager = zeroAddress;
+    expectedMintControllerState.minterManager = ZERO_ADDRESS;
     await checkMINTp0(
       [token, mintController],
       [expectedTokenState, expectedMintControllerState]
@@ -247,7 +244,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    await mintController.configureMinter(maxAmount, {
+    await mintController.configureMinter(MAX_UINT256_HEX, {
       from: Accounts.controller1Account,
     });
 
@@ -257,7 +254,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: newBigNumber(maxAmount),
+        expectedValue: newBigNumber(MAX_UINT256_HEX),
       }
     );
     await checkMINTp0(
@@ -320,7 +317,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       from: Accounts.controller1Account,
     });
     await expectRevert(
-      mintController.incrementMinterAllowance(maxAmount, {
+      mintController.incrementMinterAllowance(MAX_UINT256_HEX, {
         from: Accounts.controller1Account,
       })
     );
@@ -332,7 +329,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       Accounts.minterAccount,
       { from: Accounts.mintOwnerAccount }
     );
-    await mintController.configureMinter(maxAmount, {
+    await mintController.configureMinter(MAX_UINT256_HEX, {
       from: Accounts.controller1Account,
     });
     await expectRevert(
@@ -344,7 +341,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
 
   it("arg019 configureController(0, 0) throws", async function () {
     await expectError(
-      mintController.configureController(zeroAddress, zeroAddress, {
+      mintController.configureController(ZERO_ADDRESS, ZERO_ADDRESS, {
         from: Accounts.mintOwnerAccount,
       }),
       "Controller must be a non-zero address"
@@ -372,7 +369,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       [expectedTokenState, expectedMintControllerState]
     );
     actualMinter = await mintController.getWorker(Accounts.controller1Account);
-    addressEquals(actualMinter, zeroAddress);
+    addressEquals(actualMinter, ZERO_ADDRESS);
   });
 
   it("arg021 removeController throws if worker is already address(0)", async function () {
@@ -396,7 +393,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
       [expectedTokenState, expectedMintControllerState]
     );
     actualMinter = await mintController.getWorker(Accounts.controller1Account);
-    addressEquals(actualMinter, zeroAddress);
+    addressEquals(actualMinter, ZERO_ADDRESS);
 
     // attempting to remove the controller1Account again should throw because the worker is already set to address(0).
     await expectError(

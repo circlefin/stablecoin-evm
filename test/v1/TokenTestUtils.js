@@ -13,6 +13,7 @@ const {
   proxyOwnerAccount,
   upgraderAccount,
 } = require("./helpers/tokenTest");
+const { MAX_UINT256_HEX } = require("../helpers/constants");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -23,8 +24,6 @@ const currency = "USD";
 const decimals = 2;
 const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
-const maxAmount =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 const adminSlot =
   "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
@@ -687,6 +686,6 @@ module.exports = {
   expectRevert,
   expectError,
   initializeTokenWithProxy,
-  maxAmount,
+  maxAmount: MAX_UINT256_HEX,
   newBigNumber,
 };

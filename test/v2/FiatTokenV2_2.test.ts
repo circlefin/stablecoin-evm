@@ -12,7 +12,7 @@ import {
 } from "../helpers";
 import {
   ACCOUNTS_AND_KEYS,
-  MAX_UINT256,
+  MAX_UINT256_HEX,
   POW_2_255_BN,
 } from "../helpers/constants";
 import {
@@ -314,7 +314,7 @@ export function behavesLikeFiatTokenV22(
       const to = recipient;
       const value = incrementAmount;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
       const nonce = hexStringFromBuffer(crypto.randomBytes(32));
 
       beforeEach(async () => {
@@ -479,7 +479,7 @@ export function behavesLikeFiatTokenV22(
       const to = arbitraryAccount;
       const value = 1000;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
       const nonce = hexStringFromBuffer(crypto.randomBytes(32));
 
       beforeEach(async () => {
