@@ -12,6 +12,10 @@ let ownerAddress = "";
 let masterMinterAddress = "";
 let pauserAddress = "";
 let blacklisterAddress = "";
+let tokenName = "";
+let tokenSymbol = "";
+let tokenCurrency = "";
+let tokenDecimals = 0;
 
 // Read config file if it exists
 if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
@@ -21,6 +25,10 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
     MASTERMINTER_ADDRESS: masterMinterAddress,
     PAUSER_ADDRESS: pauserAddress,
     BLACKLISTER_ADDRESS: blacklisterAddress,
+    TOKEN_NAME: tokenName,
+    TOKEN_SYMBOL: tokenSymbol,
+    TOKEN_CURRENCY: tokenCurrency,
+    TOKEN_DECIMALS: tokenDecimals,
   } = require("../config.js"));
 }
 
@@ -34,23 +42,35 @@ module.exports = async (deployer, network) => {
     masterMinterAddress = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9";
     pauserAddress = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E";
     blacklisterAddress = "0xd03ea8624C8C5987235048901fB614fDcA89b117";
+    tokenName = "USD//C";
+    tokenSymbol = "USDC";
+    tokenCurrency = "USD";
+    tokenDecimals = 6;
   }
 
-  console.log(`Proxy Admin:   ${proxyAdminAddress}`);
-  console.log(`Owner:         ${ownerAddress}`);
-  console.log(`Master Minter: ${masterMinterAddress}`);
-  console.log(`Pauser:        ${pauserAddress}`);
-  console.log(`Blacklister:   ${blacklisterAddress}`);
+  console.log(`Proxy Admin:     ${proxyAdminAddress}`);
+  console.log(`Owner:           ${ownerAddress}`);
+  console.log(`Master Minter:   ${masterMinterAddress}`);
+  console.log(`Pauser:          ${pauserAddress}`);
+  console.log(`Blacklister:     ${blacklisterAddress}`);
+  console.log(`Token Name:      ${tokenName}`);
+  console.log(`Token Symbol:    ${tokenSymbol}`);
+  console.log(`Token Currency:  ${tokenCurrency}`);
+  console.log(`Token Decimals:  ${tokenDecimals}`);
 
   if (
     !proxyAdminAddress ||
     !ownerAddress ||
     !masterMinterAddress ||
     !pauserAddress ||
-    !blacklisterAddress
+    !blacklisterAddress ||
+    !tokenName ||
+    !tokenSymbol ||
+    !tokenCurrency ||
+    !tokenDecimals
   ) {
     throw new Error(
-      "PROXY_ADMIN_ADDRESS, OWNER_ADDRESS, MASTERMINTER_ADDRESS, PAUSER_ADDRESS, and BLACKLISTER_ADDRESS must be provided in config.js"
+      "PROXY_ADMIN_ADDRESS, OWNER_ADDRESS, MASTERMINTER_ADDRESS, PAUSER_ADDRESS, BLACKLISTER_ADDRESS, TOKEN_NAME, TOKEN_SYMBOL, TOKEN_CURRENCY, and TOKEN_DECIMALS must be provided in config.js"
     );
   }
 
@@ -86,10 +106,10 @@ module.exports = async (deployer, network) => {
   // proxy will forward all the calls to the FiatTokenV1 impl
   const proxyAsV1 = await FiatTokenV1.at(FiatTokenProxy.address);
   await proxyAsV1.initialize(
-    "USD//C",
-    "USDC",
-    "USD",
-    6,
+    tokenName,
+    tokenSymbol,
+    tokenCurrency,
+    tokenDecimals,
     masterMinterAddress,
     pauserAddress,
     blacklisterAddress,

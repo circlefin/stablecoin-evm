@@ -17,4 +17,15 @@ module.exports = {
   PROXY_CONTRACT_ADDRESS: "",
   // LostAndFound - tokens that were locked in the contract are sent to this
   LOST_AND_FOUND_ADDRESS: "",
+  // MockERC1271WalletOwner - can deploy and send transactions from a sample ERC1271 wallet
+  MOCK_ERC1271_WALLET_OWNER_ADDRESS: "",
+
+  // TokenName - ERC20 name of the token e.g. "USD Coin"
+  TOKEN_NAME: "USD Coin",
+  // TokenSymbol - Symbol of the token e.g. "USDC"
+  TOKEN_SYMBOL: "USDC",
+  // TokenCurrency - Currency of the token e.g. "USD"
+  TOKEN_CURRENCY: "USD",
+  // TokenDecimals - Number of decimals for the token e.g. 6
+  TOKEN_DECIMALS: 6,
 };

@@ -9,12 +9,14 @@ const V2_2Upgrader = artifacts.require("V2_2Upgrader");
 
 let proxyAdminAddress = "";
 let proxyContractAddress = "";
+let newTokenSymbol = "";
 
 // Read config file if it exists
 if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
+    TOKEN_SYMBOL: newTokenSymbol,
   } = require("../config.js"));
 }
 
@@ -46,9 +48,10 @@ module.exports = async (deployer, network) => {
 
   const fiatTokenV2_2 = await FiatTokenV2_2.deployed();
 
-  console.log(`Proxy Admin:     ${proxyAdminAddress}`);
-  console.log(`FiatTokenProxy:  ${proxyContractAddress}`);
-  console.log(`FiatTokenV2_2:   ${fiatTokenV2_2.address}`);
+  console.log(`Proxy Admin:       ${proxyAdminAddress}`);
+  console.log(`FiatTokenProxy:    ${proxyContractAddress}`);
+  console.log(`FiatTokenV2_2:     ${fiatTokenV2_2.address}`);
+  console.log(`New Token Symbol:  ${newTokenSymbol}`);
 
   console.log("Deploying V2_2Upgrader contract...");
 
@@ -58,7 +61,7 @@ module.exports = async (deployer, network) => {
     fiatTokenV2_2.address,
     proxyAdminAddress,
     accountsToBlacklist,
-    "USDC"
+    newTokenSymbol
   );
 
   console.log(
