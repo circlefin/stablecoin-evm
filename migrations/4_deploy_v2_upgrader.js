@@ -8,12 +8,14 @@ const V2Upgrader = artifacts.require("V2Upgrader");
 
 let proxyAdminAddress = "";
 let proxyContractAddress = "";
+let tokenName = "";
 
 // Read config file if it exists
 if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
+    TOKEN_NAME: tokenName,
   } = require("../config.js"));
 }
 
@@ -31,9 +33,12 @@ module.exports = async (deployer, network) => {
   console.log(`Proxy Admin:     ${proxyAdminAddress}`);
   console.log(`FiatTokenProxy:  ${proxyContractAddress}`);
   console.log(`FiatTokenV2:     ${fiatTokenV2.address}`);
+  console.log(`Token Name:      ${tokenName}`);
 
-  if (!proxyAdminAddress) {
-    throw new Error("PROXY_ADMIN_ADDRESS must be provided in config.js");
+  if (!proxyContractAddress || !proxyAdminAddress || !tokenName) {
+    throw new Error(
+      "PROXY_CONTRACT_ADDRESS, PROXY_ADMIN_ADDRESS, and TOKEN_NAME must be provided in config.js"
+    );
   }
 
   console.log("Deploying V2Upgrader contract...");
@@ -43,7 +48,7 @@ module.exports = async (deployer, network) => {
     proxyContractAddress,
     fiatTokenV2.address,
     proxyAdminAddress,
-    "USD Coin"
+    tokenName
   );
 
   console.log(`>>>>>>> Deployed V2Upgrader at ${v2Upgrader.address} <<<<<<<`);

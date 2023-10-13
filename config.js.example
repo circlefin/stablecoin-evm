@@ -17,4 +17,13 @@ module.exports = {
   PROXY_CONTRACT_ADDRESS: "",
   // LostAndFound - tokens that were locked in the contract are sent to this
   LOST_AND_FOUND_ADDRESS: "",
+
+  TOKEN_NAME: "USD Coin",
+  // TokenSymbol - Symbol of the token e.g. "USDC"
+  TOKEN_SYMBOL: "USDC",
+  // TokenCurrency - Currency of the token e.g. "USD"
+  TOKEN_CURRENCY: "USD",
+  // TokenDecimals - Number of decimals for the token e.g. 6
+  TOKEN_DECIMALS: 6,
+  // USE_USDC_MIGRATIONS - whether or not to use legacy migrations in migrations/usdc directory.
 };
