@@ -3,7 +3,7 @@ import { MockErc1271WalletInstance } from "../../../@types/generated";
 import { Approval } from "../../../@types/generated/FiatTokenV2";
 import {
   ACCOUNTS_AND_KEYS,
-  MAX_UINT256,
+  MAX_UINT256_HEX,
   ZERO_ADDRESS,
 } from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
@@ -154,7 +154,7 @@ export function testPermit({
 
     it("grants allowance when a valid permit is given with (2^256 - 1) as deadline", async () => {
       const { owner, spender, value, nonce } = permitParams;
-      const deadline = MAX_UINT256;
+      const deadline = MAX_UINT256_HEX;
 
       const signature = signPermit(
         owner,
