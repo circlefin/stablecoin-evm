@@ -58,11 +58,13 @@ yarn blacklistSeed --network development
 // are properly set in config.js and config.{env}.js respectively
 yarn minters --network {development, testnet, mainnet}
 
+// Make sure that you record the address of FiatTokenProxy, FiatTokenV2_1, MasterMinter
+yarn verify --network {development, testnet, mainnet}
+
 // Only needed for mainnet, but feel free to simulate a local run on the dev network.
 // This will move all five hot keys to cold.
+// Ensure that you set the address for MASTER_MINTER_CONTRACT_ADDRESS and PROXY_CONTRACT_ADDRESS
 yarn coldStorage --network {development, testnet, mainnet}
-
-yarn verify --network {see here https://www.npmjs.com/package/truffle-plugin-verify}
 ```
 
 > Note that you may need to update truffle-config.js to have a verify attribute
