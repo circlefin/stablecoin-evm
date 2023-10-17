@@ -16,6 +16,7 @@ module.exports = {
   MAINNET_ID: "",
   TESTNET_ID: "",
 
+  // TokenName - ERC20 name of the token e.g. "USD Coin"
   TOKEN_NAME: "USD Coin",
   // TokenSymbol - Symbol of the token e.g. "USDC"
   TOKEN_SYMBOL: "USDC",
@@ -48,6 +49,8 @@ module.exports = {
 
   PROXY_ADMIN_ADDRESS: "",
   PROXY_ADMIN_PRIVATE_KEY: "",
+
+  MOCK_ERC1271_WALLET_OWNER_ADDRESS: "",
 
   // ***** COLD STORAGE *********
 

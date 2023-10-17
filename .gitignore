@@ -5,8 +5,8 @@
 @types/generated/
 artifacts/
 blacklist.txt
-blacklist.*.js
-!blacklist.test.js
+blacklist.*.json
+!blacklist.test.json
 build/
 config.js
 config.*.js

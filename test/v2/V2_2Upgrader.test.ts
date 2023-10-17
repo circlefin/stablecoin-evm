@@ -20,7 +20,7 @@ const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const V2_2Upgrader = artifacts.require("V2_2Upgrader");
 const accountsToBlacklist = readBlacklistFile(
-  path.join(__dirname, "..", "..", "blacklist.test.js")
+  path.join(__dirname, "..", "..", "blacklist.test.json")
 );
 
 contract("V2_2Upgrader", (accounts) => {
@@ -101,7 +101,7 @@ contract("V2_2Upgrader", (accounts) => {
   });
 
   describe("accountsToBlacklist", () => {
-    it("should return the correct list of addresses read in blacklist.test.js", async () => {
+    it("should return the correct list of addresses read in blacklist.test.json", async () => {
       const actualAccountsToBlacklist = await v2_2Upgrader.accountsToBlacklist();
       expect(actualAccountsToBlacklist.map(toLower)).to.deep.equal(
         accountsToBlacklist.map(toLower)

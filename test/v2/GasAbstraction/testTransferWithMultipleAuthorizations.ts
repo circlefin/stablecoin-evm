@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { FiatTokenUtilInstance } from "../../../@types/generated";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+import { ACCOUNTS_AND_KEYS, MAX_UINT256_HEX } from "../../helpers/constants";
 import {
   expectRevert,
   hexStringFromBuffer,
@@ -32,7 +32,7 @@ export function testTransferWithMultipleAuthorizations({
       to: bob.address,
       value: 7e6,
       validAfter: 0,
-      validBefore: MAX_UINT256,
+      validBefore: MAX_UINT256_HEX,
       nonce,
     };
 

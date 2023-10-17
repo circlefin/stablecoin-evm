@@ -1,5 +1,12 @@
 const BN = require("bn.js");
-const { POW_2_255_HEX, POW_2_255_BN } = require("../helpers/constants");
+const {
+  POW_2_255_HEX,
+  POW_2_255_BN,
+  POW_2_255_MINUS1_BN,
+  POW_2_255_MINUS1_HEX,
+  MAX_UINT256_HEX,
+  MAX_UINT256_BN,
+} = require("../helpers/constants");
 const wrapTests = require("./helpers/wrapTests");
 const {
   checkVariables,
@@ -15,15 +22,6 @@ const {
   FiatTokenV1,
   FiatTokenProxy,
 } = require("./helpers/tokenTest");
-
-// TODO: Change these to UPPERCASE
-const maxAmount =
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-const maxAmountBN = new BN(maxAmount.slice(2), 16);
-
-const pow2_255Minus1Hex =
-  "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-const pow2_255Minus1BN = new BN(pow2_255Minus1Hex.slice(2), 16);
 
 const amount = 100;
 
@@ -730,14 +728,14 @@ function runTests(newToken, _accounts, version) {
   });
 
   it("ms047 configureMinter works on amount=2^256-1", async () => {
-    await token.configureMinter(minterAccount, maxAmount, {
+    await token.configureMinter(minterAccount, MAX_UINT256_HEX, {
       from: masterMinterAccount,
     });
     const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
         variable: "minterAllowance.minterAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: MAX_UINT256_BN,
       },
     ];
     await checkVariables([token], [customVars]);
@@ -748,8 +746,8 @@ function runTests(newToken, _accounts, version) {
   }`, async () => {
     const [amount, amountBN] =
       version < 2.2
-        ? [maxAmount, maxAmountBN]
-        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+        ? [MAX_UINT256_HEX, MAX_UINT256_BN]
+        : [POW_2_255_MINUS1_HEX, POW_2_255_MINUS1_BN];
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -817,8 +815,8 @@ function runTests(newToken, _accounts, version) {
   }`, async () => {
     const [amount, amountBN] =
       version < 2.2
-        ? [maxAmount, maxAmountBN]
-        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+        ? [MAX_UINT256_HEX, MAX_UINT256_BN]
+        : [POW_2_255_MINUS1_HEX, POW_2_255_MINUS1_BN];
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -844,8 +842,8 @@ function runTests(newToken, _accounts, version) {
   it("ms050 approve works on amount=2^256-1", async () => {
     const [mintAmount, mintAmountBN] =
       version < 2.2
-        ? [maxAmount, maxAmountBN]
-        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+        ? [MAX_UINT256_HEX, MAX_UINT256_BN]
+        : [POW_2_255_MINUS1_HEX, POW_2_255_MINUS1_BN];
 
     await token.configureMinter(minterAccount, mintAmount, {
       from: masterMinterAccount,
@@ -861,14 +859,15 @@ function runTests(newToken, _accounts, version) {
       },
       {
         variable: "balanceAndBlacklistStates.pauserAccount",
-        // TODO: Abstract all new BN(0) static var.
         expectedValue: new BN(0),
       },
       { variable: "totalSupply", expectedValue: mintAmountBN },
     ];
     await checkVariables([token], [customVars]);
 
-    await token.approve(pauserAccount, maxAmount, { from: arbitraryAccount });
+    await token.approve(pauserAccount, MAX_UINT256_HEX, {
+      from: arbitraryAccount,
+    });
     customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
@@ -882,7 +881,7 @@ function runTests(newToken, _accounts, version) {
       { variable: "totalSupply", expectedValue: mintAmountBN },
       {
         variable: "allowance.arbitraryAccount.pauserAccount",
-        expectedValue: maxAmountBN,
+        expectedValue: MAX_UINT256_BN,
       },
     ];
     await checkVariables([token], [customVars]);
@@ -893,8 +892,8 @@ function runTests(newToken, _accounts, version) {
   }`, async () => {
     const [amount, amountBN] =
       version < 2.2
-        ? [maxAmount, maxAmountBN]
-        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+        ? [MAX_UINT256_HEX, MAX_UINT256_BN]
+        : [POW_2_255_MINUS1_HEX, POW_2_255_MINUS1_BN];
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
@@ -929,8 +928,8 @@ function runTests(newToken, _accounts, version) {
   }`, async () => {
     const [amount, amountBN] =
       version < 2.2
-        ? [maxAmount, maxAmountBN]
-        : [pow2_255Minus1Hex, pow2_255Minus1BN];
+        ? [MAX_UINT256_HEX, MAX_UINT256_BN]
+        : [POW_2_255_MINUS1_HEX, POW_2_255_MINUS1_BN];
 
     await token.configureMinter(minterAccount, amount, {
       from: masterMinterAccount,
