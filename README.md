@@ -138,12 +138,16 @@ Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 
 ## Contracts
 
-The implementation uses 2 separate contracts - a proxy contract
-([`FiatTokenProxy.sol`](./contracts/v1/FiatTokenProxy.sol)) and an
-implementation contract
-([`FiatTokenV2_2.sol`](./contracts/v2/FiatTokenV2_2.sol)). This allows upgrading
-the contract, as a new implementation contact can be deployed and the Proxy can
-be updated to point to it.
+The FiatToken contracts adheres to OpenZeppelin's
+[Proxy Upgrade Pattern](https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies)
+([permalink](https://github.com/OpenZeppelin/openzeppelin-upgrades/blob/65cf285bd36af24570186ca6409341540c67238a/docs/modules/ROOT/pages/proxies.adoc#L1)).
+There are 2 main contracts - an implementation contract
+([`FiatTokenV2_2.sol`](./contracts/v2/FiatTokenV2_2.sol)) that contains the main
+logic for FiatToken's functionalities, and a proxy contract
+([`FiatTokenProxy.sol`](./contracts/v1/FiatTokenProxy.sol)) that redirects
+function calls to the implementation contract. This allows upgrading FiatToken's
+functionalities, as a new implementation contact can be deployed and the Proxy
+can be updated to point to it.
 
 ## FiatToken features
 
