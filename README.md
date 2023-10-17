@@ -1,9 +1,35 @@
+<!-- prettier-ignore-start -->
+<!-- omit in toc -->
 # Circle FiatToken Contracts
+<!-- prettier-ignore-end -->
 
 This repository contains all the smart contracts used by
 [Circle's](https://www.circle.com/) fiat tokens. All contracts are written in
 [Solidity](https://soliditylang.org/) and managed by the
 [Truffle](https://trufflesuite.com/) framework.
+
+<!-- prettier-ignore-start -->
+<!-- omit in toc -->
+## Table of contents
+<!-- prettier-ignore-end -->
+
+- [Setup](#setup)
+  - [Development Environment](#development-environment)
+  - [IDE](#ide)
+- [Development](#development)
+  - [TypeScript type definition files for the contracts](#typescript-type-definition-files-for-the-contracts)
+  - [Linting and Formatting](#linting-and-formatting)
+  - [Testing](#testing)
+- [Deployment](#deployment)
+- [Contracts](#contracts)
+- [FiatToken features](#fiattoken-features)
+  - [ERC20 compatible](#erc20-compatible)
+  - [Pausable](#pausable)
+  - [Upgradable](#upgradable)
+  - [Blacklist](#blacklist)
+  - [Minting/Burning](#mintingburning)
+  - [Ownable](#ownable)
+- [Additional Documentations](#additional-documentations)
 
 ## Setup
 
@@ -27,7 +53,9 @@ $ yarn install          # Install dependencies
 We recommend using VSCode for the project here with these
 [extensions](./.vscode/extensions.json) installed.
 
-## TypeScript type definition files for the contracts
+## Development
+
+### TypeScript type definition files for the contracts
 
 To generate type definitions:
 
@@ -35,7 +63,7 @@ To generate type definitions:
 $ yarn typechain
 ```
 
-## Linting and Formatting
+### Linting and Formatting
 
 To check code for problems:
 
@@ -59,7 +87,7 @@ To auto-format code:
 $ yarn fmt
 ```
 
-## Testing
+### Testing
 
 First, make sure Ganache is running.
 
@@ -117,7 +145,7 @@ implementation contract
 the contract, as a new implementation contact can be deployed and the Proxy can
 be updated to point to it.
 
-### FiatToken
+## FiatToken features
 
 The FiatToken offers a number of capabilities, which briefly are described
 below. There are more [detailed design docs](./doc/tokendesign.md) in the `doc`
@@ -160,3 +188,13 @@ the `masterMinter`.
 The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`,
 or `masterMinter` addresses. The `owner` can not change the `proxyOwner`
 address.
+
+## Additional Documentations
+
+- [FiatToken design](./doc/tokendesign.md)
+- [MasterMinter design](./doc/masterminter.md)
+- [Deployment process](./doc/deployment.md)
+- [Preparing an upgrade](./doc/upgrade.md)
+- [Upgrading from v1 to v2](./doc/v2_upgrade.md)
+- [Upgrading from v2 to v2.1](./doc/v2.1_upgrade.md)
+- [Upgrading from v2.1 to v2.2](./doc/v2.2_upgrade.md)

@@ -108,11 +108,10 @@ We recommend assigning at least <b>two</b> `controllers` to each `minter`.
 - <b>SecurityController.</b> Use this `controller` to sign a single
   `removeMinter` transaction and store it for emergencies.
 
-This configuration allows the `removeMinter` transaction to be
-presigned as nonces for the `SecurityController` are deterministic, which
-reduces the time to respond when there's an issue. Broadcasting the
-`removeMinter` transaction will cause all future interactions from the
-`AllowanceController` to `throw`.
+This configuration allows the `removeMinter` transaction to be presigned as
+nonces for the `SecurityController` are deterministic, which reduces the time to
+respond when there's an issue. Broadcasting the `removeMinter` transaction will
+cause all future interactions from the `AllowanceController` to `throw`.
 
 # MasterMinter vs. MintController
 
