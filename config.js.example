@@ -50,6 +50,8 @@ module.exports = {
   // FIAT_TOKEN_IMPLEMENTATION_ADDRESS: "",
   // FiatTokenProxy contract - override the contract address used in migrations
   // PROXY_CONTRACT_ADDRESS: "",
+  // MasterMinter contract - (optional) only required if transferring addresses to cold storage
+  // MASTER_MINTER_CONTRACT_ADDRESS: "",
 
   // ***** DEPLOYER HOT KEYS *********
 
