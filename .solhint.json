@@ -3,7 +3,6 @@
   "rules": {
     "compiler-version": ["error", "^0.6.0"],
     "contract-name-camelcase": "off",
-    "custom-errors": "off",
     "no-empty-blocks": "off",
     "no-inline-assembly": "off",
     "not-rely-on-time": "off",
