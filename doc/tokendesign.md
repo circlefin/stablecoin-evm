@@ -169,6 +169,32 @@ is unpaused.
 
 - Unpausing emits an `Unpause()` event
 
+## Meta transactions compatibility
+
+### ERC-2612
+
+The contract is compatible with
+[ERC-2612](https://eips.ethereum.org/EIPS/eip-2612). Users may update their
+ERC-20 allowances by signing a `permit` message and passing the signed message
+to a relayer who will execute the on-chain transaction, instead of submitting a
+transaction themselves.
+
+### ERC-3009
+
+The contract is compatible with
+[ERC-3009](https://eips.ethereum.org/EIPS/eip-3009). Users may transfer assets
+to another user by signing an EIP-3009 authorization and passing the
+authorization to a relayer who will execute the authorization on chain, instead
+of submitting a transaction themselves.
+
+### Signature Validation schemes
+
+The contract supports signature validation via:
+
+1. ECDSA signatures for Externally Owned Accounts (EOAs)
+2. [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) for ERC-1271 compatible
+   Smart Contract Wallets
+
 ## Upgrading
 
 The FiatTokenProxy contract uses the zeppelinos Unstructured-Storage Proxy
