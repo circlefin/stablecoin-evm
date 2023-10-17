@@ -25,7 +25,7 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     OWNER_ADDRESS: ownerAddress,
     COLD_PAUSER_ADDRESS: pauserAddress,
-    COLD_BLACKLISTER_ADDRESS: blacklisterAddress,
+    BLACKLISTER_ADDRESS: blacklisterAddress,
     COLD_LOST_AND_FOUND_ADDRESS: lostAndFoundAddress,
     MASTERMINTER_OWNER_ADDRESS: masterMinterOwnerAddress,
     FIAT_TOKEN_IMPLEMENTATION_ADDRESS: fiatTokenImplementationAddress,
@@ -38,7 +38,7 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
 
 /**
  * This file combines the work of USDC on ETH migrations 2 through 7. This was created with slight modifications from
- * 2_deploy_all.js from the tron branch of this repo. There's no point in deploying the older implementations for
+ * 2_deploy_all.js from the TRON branch of this repo. There's no point in deploying the older implementations for
  * FiatToken since we don't need them (we only want V2_1).
  *
  * The ordering of this is a little complex - we need the proxy's address in order to deploy
@@ -46,50 +46,48 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
  */
 
 module.exports = async (deployer, network) => {
-  if (
-      !proxyAdminAddress ||
-      !ownerAddress ||
-      !masterMinterOwnerAddress
-  ) {
+  if (!proxyAdminAddress || !ownerAddress || !masterMinterOwnerAddress) {
     throw new Error(
-        "PROXY_ADMIN_ADDRESS, OWNER_ADDRESS, and MASTERMINTER_OWNER_ADDRESS must be provided in config.js"
+      "PROXY_ADMIN_ADDRESS, OWNER_ADDRESS, and MASTERMINTER_OWNER_ADDRESS must be provided in config.js"
     );
   }
 
-  if (
-      !pauserAddress ||
-      !blacklisterAddress ||
-      !lostAndFoundAddress
-  ) {
+  if (!pauserAddress || !blacklisterAddress || !lostAndFoundAddress) {
     if (network === "mainnet") {
       throw new Error(
-          "PAUSER_ADDRESS, BLACKLISTER_ADDRESS and LOST_AND_FOUND_ADDRESS must be provided in config.js"
+        "PAUSER_ADDRESS, BLACKLISTER_ADDRESS and LOST_AND_FOUND_ADDRESS must be provided in config.js"
       );
     } else {
-      pauserAddress = proxyAdminAddress;
-      blacklisterAddress = proxyAdminAddress;
-      lostAndFoundAddress = proxyAdminAddress;
+      // If we're not on mainnet, let the user values dictate this.
+      pauserAddress = pauserAddress || proxyAdminAddress;
+      blacklisterAddress = blacklisterAddress || proxyAdminAddress;
+      lostAndFoundAddress = lostAndFoundAddress || proxyAdminAddress;
     }
   }
 
-  console.log(`Proxy Admin:         ${proxyAdminAddress}`);
-  console.log(`Owner:               ${ownerAddress}`);
-  console.log(`Pauser:              ${pauserAddress}`);
-  console.log(`Blacklister:         ${blacklisterAddress}`);
-  console.log(`Lost and Found:      ${lostAndFoundAddress}`);
-  console.log(`Master Minter Owner: ${masterMinterOwnerAddress}`);
-  console.log(`FiatTokenV2_1ImplementationAddress: ${fiatTokenImplementationAddress}`);
+  console.log(`Proxy Admin:                        ${proxyAdminAddress}`);
+  console.log(`Owner:                              ${ownerAddress}`);
+  console.log(`Pauser:                             ${pauserAddress}`);
+  console.log(`Blacklister:                        ${blacklisterAddress}`);
+  console.log(`Lost and Found:                     ${lostAndFoundAddress}`);
+  console.log(
+    `Master Minter Owner:                ${masterMinterOwnerAddress}`
+  );
+  console.log(
+    `FiatTokenV2_1ImplementationAddress: ${fiatTokenImplementationAddress}`
+  );
 
   // If there is an existing USDC implementation contract,
   // we can simply point the newly deployed proxy contract to it.
   if (!fiatTokenImplementationAddress) {
-
     console.log("Deploying implementation contract...");
     await deployer.deploy(FiatTokenV2_1, { gas: 20000000 });
     const fiatTokenV2_1 = await FiatTokenV2_1.deployed();
     console.log("Deployed implementation contract at", FiatTokenV2_1.address);
 
     console.log("Initializing implementation contract with dummy values...");
+    // These values are dummy values because we only rely on the implementation
+    // deployment for delegatecall logic, not for actual state storage.
     await fiatTokenV2_1.initialize(
       "",
       "",
@@ -100,6 +98,8 @@ module.exports = async (deployer, network) => {
       THROWAWAY_ADDRESS,
       THROWAWAY_ADDRESS
     );
+    await fiatTokenV2_1.initializeV2("");
+    await fiatTokenV2_1.initializeV2_1(THROWAWAY_ADDRESS);
 
     fiatTokenImplementationAddress = FiatTokenV2_1.address;
   }
@@ -131,6 +131,7 @@ module.exports = async (deployer, network) => {
 
   // Do the initial (V1) initialization.
   // Note that this takes in the master minter contract's address as the master minter.
+  // The master minter contract's owner is a separate address.
   const proxyAsV2_1 = await FiatTokenV2_1.at(FiatTokenProxy.address);
   await proxyAsV2_1.initialize(
     tokenName,

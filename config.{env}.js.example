@@ -1,0 +1,15 @@
+module.exports = {
+  // ***** MINTER SETUP *********
+  MINTER: "",
+  BURNER: "",
+
+  // 115792089237316195423570985008687907853269984665640564039457584007 for testnet minter
+  // 25000 for mainnet stg
+  // 25000000 for mainnet prod
+  MINT_ALLOWANCE_UNITS: ,
+
+  // ***** COLD STORAGE *********
+  MINTER_CONTROLLER_INCREMENTER: "",
+  MINTER_CONTROLLER_REMOVER: "",
+  BURNER_CONTROLLER: "",
+}

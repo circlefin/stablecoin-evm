@@ -9,6 +9,7 @@ const path = require("path");
 
 // Read config file if it exists
 let config = {
+  BLACKLISTER_PRIVATE_KEY: "",
   DEPLOYER_PRIVATE_KEY: "",
   MASTERMINTER_OWNER_PRIVATE_KEY: "",
   OWNER_PRIVATE_KEY: "",
@@ -43,7 +44,7 @@ module.exports = {
   networks: {
     development: {
       network_id: "*",
-      provider: rpcProvider(config.LOCAL_RPC_URL),
+      url: config.LOCAL_RPC_URL,
     },
     mainnet: {
       provider: rpcProvider(config.MAINNET_RPC_URL),
@@ -66,7 +67,11 @@ module.exports = {
     timeout: 60000, // prevents tests from failing when pc is under heavy load
     reporter: "Spec",
   },
-  plugins: ["solidity-coverage", "truffle-plugin-verify"],
+  plugins: [
+    "solidity-coverage",
+    "truffle-contract-size",
+    "truffle-plugin-verify",
+  ],
   // https://www.npmjs.com/package/truffle-plugin-verify
   api_keys: {
     etherscan: config.ETHERSCAN_API_KEY,
@@ -74,9 +79,10 @@ module.exports = {
     optimistic_etherscan: config.OPTIMISTIC_ETHERSCAN_API_KEY,
   },
   // Use default directory if false
-  migrations_directory: config.USE_USDC_MIGRATIONS
-    ? "./migrations/usdc"
-    : undefined,
+  migrations_directory:
+    config.USE_USDC_MIGRATIONS || process.env.USE_USDC_MIGRATIONS === "true"
+      ? "./migrations/usdc"
+      : undefined,
 };
 
 function rpcProvider(network) {
@@ -87,6 +93,7 @@ function rpcProvider(network) {
         config.MASTERMINTER_OWNER_PRIVATE_KEY,
         config.PROXY_ADMIN_PRIVATE_KEY,
         config.OWNER_PRIVATE_KEY,
+        config.BLACKLISTER_PRIVATE_KEY,
       ],
       providerOrUrl: network,
     });

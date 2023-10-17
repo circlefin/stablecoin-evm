@@ -4,57 +4,100 @@ Fiat tokens on the [CENTRE](https://centre.io) network.
 
 ## Setup
 
+### Development Environment
+
 Requirements:
 
 - Node 16.14.0
-- Yarn
+- Yarn 1.22.19
 
 ```
 $ git clone git@github.com:centrehq/centre-tokens.git
 $ cd centre-tokens
-$ nvm use 16.14.0
-$ npm i -g yarn       # Install yarn if you don't already have it
-$ yarn install        # Install dependencies
+$ nvm use
+$ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
+$ yarn install          # Install dependencies
 ```
 
 ## Deployment
 
-You will need 4 different hot keys (deployer, proxy admin, master minter, owner), and they should be funded (with 0.5-1 ETH) to pay for tx's.
-You can use ./scripts/create-account.js to create the keys
+The deployment process is detailed on
+[Confluence](https://circlepay.atlassian.net/wiki/spaces/ENGINEERIN/pages/721256540/Deploying+FiatToken+ERC-20+contracts).
 
-Create a copy of the file `config.js.example`, and name it `config.js`. 
-Fill in the empty values.  
-This file must not be checked into the repository. To prevent
-accidental check-ins, `config.js` is in `.gitignore`.
+You will need 5 different hot keys (blacklister, deployer, master minter, owner,
+and proxy admin), and they should be funded (with 0.5-1 ETH) to pay for
+transactions. You can use ./scripts/create-account.js to create the keys.
+
+Create a copy of the file `config.js.example`, and name it `config.js`. Create a
+copy of `config.{env}.js.example` for stg and prod by replacing env with the
+name of the environment e.g. `config.stg.js`. The `config.js` file holds values
+that are common whereas `config.{env}.js` holds environment specific values.
+Fill in the empty values. These file must not be checked into the repository. To
+prevent accidental check-ins, `config.js`, `config.{env}.js` and `blacklist.txt`
+are in `.gitignore`.
+
+For mainnet, be sure to have a specified `blacklist.txt` file with a sanctions
+list from Compliance. As seen in `blacklist.txt.example`, addresses are split by
+new lines. You must blacklist the sanctions list at deployment time using the
+hot blacklister key (in `config.js`).
+
+Create a copy of the file `blacklist.test.js`, and name it
+`blacklist.remote.js`. Fill in `blacklist.remote.js` with the list addresses to
+blacklist. This file must not be checked into the repository. To prevent
+accidental check-ins, `blacklist.remote.js` is in `.gitignore`.
 
 ```
+// Ensure that the ENV variable in config.js is set to stg or prod, which will
+// dictate which config.{env}.js file gets read during execution
 yarn deployContracts --network {development, testnet, mainnet}
+yarn blacklistSeed --network development
 
-// ensure PROXY_CONTRACT_ADDRESS and MINT_ALLOWANCE_UNITS_PROD/STG 
-// are properly set in config.js 
+// When you deploy the contract for the first time, it will give you address for the FiatToken Proxy
+// which you can use as the PROXY_CONTRACT_ADDRESS
+// Ensure that PROXY_CONTRACT_ADDRESS and MINT_ALLOWANCE_UNITS
+// are properly set in config.js and config.{env}.js respectively
 yarn minters --network {development, testnet, mainnet}
-// make sure you record address of FiatTokenProxy, FiatTokenV2_1, MasterMinter
+
+// Make sure that you record the address of FiatTokenProxy, FiatTokenV2_1, MasterMinter
 yarn verify --network {development, testnet, mainnet}
 
-// only needed for mainnet
-// ensure you set the address for MASTER_MINTER_CONTRACT_ADDRESS and PROXY_CONTRACT_ADDRESS
+// Only needed for mainnet, but feel free to simulate a local run on the dev network.
+// This will move all five hot keys to cold.
+// Ensure that you set the address for MASTER_MINTER_CONTRACT_ADDRESS and PROXY_CONTRACT_ADDRESS
 yarn coldStorage --network {development, testnet, mainnet}
 ```
 
-**Remember to save the config.js file in 1PW Wallets Org** 
+> Note that you may need to update truffle-config.js to have a verify attribute
+> for the network you're testing. See
+> [Confluence](https://circlepay.atlassian.net/wiki/spaces/ENGINEERIN/pages/721256540/Deploying+FiatToken+ERC-20+contracts)
+> for details.
+
+**Remember to save the config.js file in 1PW Wallets Org**
+
 - include the deployed contract addresses in the config file.
+
+### IDE
+
+We recommend using VSCode for the project here with these
+[extensions](./.vscode/extensions.json) installed.
 
 ## TypeScript type definition files for the contracts
 
 To generate type definitions:
 
 ```
-$ yarn compile && yarn typechain
+$ yarn typechain
 ```
 
 ## Linting and Formatting
 
 To check code for problems:
+
+```
+$ yarn static-check   # Runs a static check on the repo.
+```
+
+or run the checks individually:
 
 ```
 $ yarn typecheck      # Type-check TypeScript code
@@ -94,6 +137,13 @@ To run tests and generate test coverage, run:
 
 ```
 $ yarn coverage
+```
+
+To check the size of contracts in the repo, run the following command.
+
+```sh
+$ yarn contract-size # Ignores tests
+$ yarn contract-size:all # Includes all contracts
 ```
 
 ## Contracts

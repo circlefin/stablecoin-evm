@@ -1,5 +1,6 @@
 import { FiatTokenV21Instance } from "../../@types/generated";
 import { expectRevert } from "../helpers";
+import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
 import { behavesLikeFiatTokenV2 } from "./FiatTokenV2.test";
 
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
@@ -23,7 +24,12 @@ contract("FiatTokenV2_1", (accounts) => {
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
   });
 
-  behavesLikeFiatTokenV2(accounts, () => fiatToken, fiatTokenOwner);
+  behavesLikeFiatTokenV2(accounts, 2.1, () => fiatToken, fiatTokenOwner);
+  usesOriginalStorageSlotPositions({
+    Contract: FiatTokenV2_1,
+    version: 2.1,
+    accounts,
+  });
 
   describe("initializeV2_1", () => {
     const [, user, lostAndFound] = accounts;

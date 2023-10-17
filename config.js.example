@@ -1,14 +1,15 @@
 module.exports = {
-
   // ***** CONFIGURATION *********
-
+  // Environment: Either stg or prod
+  ENV: "",
   // these API keys are used to verify contracts
   // see truffle-config.js for more context
   ETHERSCAN_API_KEY: "",
   ARBISCAN_API_KEY: "",
   OPTIMISTIC_ETHERSCAN_API_KEY: "",
+  POLYGONSCAN_API_KEY: "",
 
-  LOCAL_RPC_URL: "",
+  LOCAL_RPC_URL: "http://127.0.0.1:8545",
   TESTNET_RPC_URL: "",
   MAINNET_RPC_URL: "",
 
@@ -30,9 +31,13 @@ module.exports = {
   // FIAT_TOKEN_IMPLEMENTATION_ADDRESS: "",
   // FiatTokenProxy contract - override the contract address used in migrations
   // PROXY_CONTRACT_ADDRESS: "",
+  // MasterMinter contract - (optional) only required if transferring addresses to cold storage
   // MASTER_MINTER_CONTRACT_ADDRESS: "",
 
   // ***** DEPLOYER HOT KEYS *********
+
+  BLACKLISTER_ADDRESS: "",
+  BLACKLISTER_PRIVATE_KEY: "",
 
   DEPLOYER_ADDRESS: "",
   DEPLOYER_PRIVATE_KEY: "",
@@ -40,32 +45,13 @@ module.exports = {
   MASTERMINTER_OWNER_ADDRESS: "",
   MASTERMINTER_OWNER_PRIVATE_KEY: "",
 
-  PROXY_ADMIN_ADDRESS: "",
-  PROXY_ADMIN_PRIVATE_KEY: "",
-
   OWNER_ADDRESS: "",
   OWNER_PRIVATE_KEY: "",
 
-  // ***** MINTER SETUP *********
-
-  MINTER_PROD: "",
-  MINTER_STG: "",
-  BURNER_PROD: "",
-  BURNER_STG: "",
-
-  // 115792089237316195423570985008687907853269984665640564039457584007 for testnet minter
-  MINT_ALLOWANCE_UNITS_PROD: 25000000,
-  MINT_ALLOWANCE_UNITS_STG: 25000,
+  PROXY_ADMIN_ADDRESS: "",
+  PROXY_ADMIN_PRIVATE_KEY: "",
 
   // ***** COLD STORAGE *********
-
-  MINTER_STG_CONTROLLER_INCREMENTER: "",
-  MINTER_STG_CONTROLLER_REMOVER: "",
-  BURNER_STG_CONTROLLER: "",
-
-  MINTER_PROD_CONTROLLER_INCREMENTER: "",
-  MINTER_PROD_CONTROLLER_REMOVER: "",
-  BURNER_PROD_CONTROLLER: "",
 
   // Pauser - can pause the contract
   COLD_PAUSER_ADDRESS: "",

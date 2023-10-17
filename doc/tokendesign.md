@@ -28,8 +28,11 @@ controlled by the entities that CENTRE elects to make minters
 The `FiatToken` implements the standard methods of the ERC-20 interface with
 some changes:
 
-- A blacklisted address will be unable to call `transfer`, `transferFrom`, or
-  `approve`, and will be unable to receive tokens.
+- A blacklisted address will be unable to call `transfer` or `transferFrom`, and
+  will be unable to receive tokens.
+  - `approve` was not allowed for blacklisted addresses in FiatToken versions
+    <2.2 but available in versions 2.2+. See "Blacklisting" section for more
+    details.
 - `transfer`, `transferFrom`, and `approve` will fail if the contract has been
   paused.
 
@@ -111,7 +114,15 @@ burning.
 ## Blacklisting
 
 Addresses can be blacklisted. A blacklisted address will be unable to transfer
-tokens, approve, mint, or burn tokens.
+tokens, mint, or burn tokens.
+
+In FiatToken versions <2.2, A blacklisted address is unable to call `approve`,
+`increaseAllowance`, `decreaseAllowance`, or authorize future pull payments
+using `permit`. Nor can it be authorized to pull payments from other addresses.
+This has been changed in v2.2 where a blacklisted address can perform the above
+functions. But they are still blocked from transferring the assets in any way.
+and therefore any operations on modifying the allowance of blacklisted addresses
+are considered meaningless.
 
 ### Adding a blacklisted address
 

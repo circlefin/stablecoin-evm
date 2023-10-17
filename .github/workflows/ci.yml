@@ -1,0 +1,33 @@
+name: Continuous Integration
+on:
+  pull_request:
+
+jobs:
+  run_ci_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.14.0"
+
+      - name: Install Yarn
+        run: npm install -g yarn@1.22.19
+
+      - name: Install packages
+        run: yarn install --frozen-lockfile
+
+      - name: Setup local environment
+        run: cp config.js.example config.js && ./start-ganache.sh
+
+      - name: Run static checks
+        run: yarn static-check
+
+      - name: Run size check
+        run: yarn contract-size
+
+      - name: Run tests
+        run: yarn test

@@ -1,7 +1,7 @@
 /**
  * SPDX-License-Identifier: MIT
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2018-2023 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,11 +41,11 @@ contract FiatTokenV2_1 is FiatTokenV2 {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 1);
 
-        uint256 lockedAmount = balances[address(this)];
+        uint256 lockedAmount = _balanceOf(address(this));
         if (lockedAmount > 0) {
             _transfer(address(this), lostAndFound, lockedAmount);
         }
-        blacklisted[address(this)] = true;
+        _blacklist(address(this));
 
         _initializedVersion = 2;
     }
@@ -54,7 +54,7 @@ contract FiatTokenV2_1 is FiatTokenV2 {
      * @notice Version string for the EIP712 domain separator
      * @return Version string
      */
-    function version() external view returns (string memory) {
+    function version() external pure returns (string memory) {
         return "2";
     }
 }
