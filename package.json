@@ -1,7 +1,7 @@
 {
-  "name": "centre-tokens",
+  "name": "fiat-tokens",
   "version": "1.0.0",
-  "description": "Fiat and non-fiat tokens part of the CENTRE network.",
+  "description": "Circle's fiat tokens",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
