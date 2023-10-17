@@ -153,7 +153,7 @@ can be updated to point to it.
 
 The FiatToken offers a number of capabilities, which briefly are described
 below. There are more [detailed design docs](./doc/tokendesign.md) in the `doc`
-folder.
+directory.
 
 ### ERC20 compatible
 
