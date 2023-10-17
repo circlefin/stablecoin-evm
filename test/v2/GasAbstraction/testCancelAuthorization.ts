@@ -17,7 +17,7 @@
  */
 
 import crypto from "crypto";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+import { ACCOUNTS_AND_KEYS, MAX_UINT256_HEX } from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
   cancelAuthorizationTypeHash,
@@ -80,7 +80,7 @@ export function testCancelAuthorization({
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -136,7 +136,7 @@ export function testCancelAuthorization({
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -192,7 +192,7 @@ export function testCancelAuthorization({
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(

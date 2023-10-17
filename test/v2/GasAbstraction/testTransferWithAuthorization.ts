@@ -22,7 +22,7 @@ import {
   AuthorizationUsed,
   Transfer,
 } from "../../../@types/generated/FiatTokenV2";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+import { ACCOUNTS_AND_KEYS, MAX_UINT256_HEX } from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
   transferWithAuthorizationTypeHash,
@@ -52,7 +52,7 @@ export function testTransferWithAuthorization({
       to: bob.address,
       value: 7e6,
       validAfter: 0,
-      validBefore: MAX_UINT256,
+      validBefore: MAX_UINT256_HEX,
       nonce,
     };
 

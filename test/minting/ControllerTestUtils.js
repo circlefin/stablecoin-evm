@@ -18,6 +18,7 @@
 
 const Q = require("q");
 
+const { ZERO_ADDRESS } = require("../helpers/constants");
 const AccountUtils = require("./AccountUtils.js");
 const Accounts = AccountUtils.Accounts;
 const setAccountDefault = AccountUtils.setAccountDefault;
@@ -35,7 +36,7 @@ function ControllerState(owner, controllers) {
 // Default state of Controller when it is deployed
 const controllerEmptyState = new ControllerState(
   Accounts.mintOwnerAccount,
-  setAccountDefault(Accounts, "0x0000000000000000000000000000000000000000")
+  setAccountDefault(Accounts, ZERO_ADDRESS)
 );
 
 // Checks the state of an array of controller contracts

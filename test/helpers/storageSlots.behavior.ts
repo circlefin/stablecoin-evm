@@ -325,7 +325,6 @@ export function usesOriginalStorageSlotPositions<
   });
 }
 
-// TODO: Organize these storage reading logic into a test helper.
 export async function readSlot(
   address: string,
   slot: number | string
