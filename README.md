@@ -96,7 +96,7 @@ The deployment process is detailed on
 
 You will need 5 different hot keys (blacklister, deployer, master minter, owner,
 and proxy admin), and they should be funded (with 0.5-1 ETH) to pay for
-transactions. You can use ./scripts/create-account.js to create the keys.
+transactions. You can use ./scripts/createAccount.js to create the keys.
 
 Create a copy of the file `config.js.example`, and name it `config.js`. Create a
 copy of `config.{env}.js.example` for stg and prod by replacing env with the
