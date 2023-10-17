@@ -1,6 +1,9 @@
-# fiat-tokens
+# Circle FiatToken Contracts
 
-[Circle's](https://www.circle.com/) fiat tokens.
+This repository contains all the smart contracts used by
+[Circle's](https://www.circle.com/) fiat tokens. All contracts are written in
+[Solidity](https://soliditylang.org/) and managed by the
+[Truffle](https://trufflesuite.com/) framework.
 
 ## Setup
 
@@ -11,7 +14,7 @@ Requirements:
 - Node 16.14.0
 - Yarn 1.22.19
 
-```
+```sh
 $ git clone git@github.com:circlefin/fiat-tokens.git
 $ cd fiat-tokens
 $ nvm use
@@ -28,7 +31,7 @@ We recommend using VSCode for the project here with these
 
 To generate type definitions:
 
-```
+```sh
 $ yarn typechain
 ```
 
@@ -36,13 +39,13 @@ $ yarn typechain
 
 To check code for problems:
 
-```
+```sh
 $ yarn static-check   # Runs a static check on the repo.
 ```
 
 or run the checks individually:
 
-```
+```sh
 $ yarn typecheck      # Type-check TypeScript code
 $ yarn lint           # Check JavaScript and TypeScript code
 $ yarn lint --fix     # Fix problems where possible
@@ -52,7 +55,7 @@ $ yarn slither        # Run Slither
 
 To auto-format code:
 
-```
+```sh
 $ yarn fmt
 ```
 
@@ -60,25 +63,25 @@ $ yarn fmt
 
 First, make sure Ganache is running.
 
-```
+```sh
 $ yarn ganache
 ```
 
 Run all tests:
 
-```
+```sh
 $ yarn test
 ```
 
 To run tests in a specific file, run:
 
-```
+```sh
 $ yarn test [path/to/file]
 ```
 
 To run tests and generate test coverage, run:
 
-```
+```sh
 $ yarn coverage
 ```
 
@@ -108,9 +111,11 @@ Run `yarn migrate --network NETWORK`, where NETWORK is either `mainnet` or
 ## Contracts
 
 The implementation uses 2 separate contracts - a proxy contract
-(`FiatTokenProxy.sol`) and an implementation contract (`FiatToken.sol`). This
-allows upgrading the contract, as a new implementation contact can be deployed
-and the Proxy updated to point to it.
+([`FiatTokenProxy.sol`](./contracts/v1/FiatTokenProxy.sol)) and an
+implementation contract
+([`FiatTokenV2_2.sol`](./contracts/v2/FiatTokenV2_2.sol)). This allows upgrading
+the contract, as a new implementation contact can be deployed and the Proxy can
+be updated to point to it.
 
 ### FiatToken
 
