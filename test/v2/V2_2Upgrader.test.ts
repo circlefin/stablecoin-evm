@@ -1,3 +1,21 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {
   FiatTokenProxyInstance,
   FiatTokenV21Instance,
@@ -20,7 +38,7 @@ const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const V2_2Upgrader = artifacts.require("V2_2Upgrader");
 const accountsToBlacklist = readBlacklistFile(
-  path.join(__dirname, "..", "..", "blacklist.test.js")
+  path.join(__dirname, "..", "..", "blacklist.test.json")
 );
 
 contract("V2_2Upgrader", (accounts) => {
@@ -101,7 +119,7 @@ contract("V2_2Upgrader", (accounts) => {
   });
 
   describe("accountsToBlacklist", () => {
-    it("should return the correct list of addresses read in blacklist.test.js", async () => {
+    it("should return the correct list of addresses read in blacklist.test.json", async () => {
       const actualAccountsToBlacklist = await v2_2Upgrader.accountsToBlacklist();
       expect(actualAccountsToBlacklist.map(toLower)).to.deep.equal(
         accountsToBlacklist.map(toLower)
