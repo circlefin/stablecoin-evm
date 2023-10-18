@@ -22,8 +22,7 @@ functionality:
   implementation contract
 - `rescuer` - transfer any ERC-20 tokens that are locked up in the contract
 
-Circle will control the address of all roles except for minters, which will be
-controlled by the entities that Circle elects to make minters
+Circle will control the address of all roles.
 
 ## ERC-20
 
