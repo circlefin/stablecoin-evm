@@ -36,7 +36,7 @@ let tokenCurrency = "";
 let tokenDecimals = 0;
 
 // Read config file if it exists
-if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     OWNER_ADDRESS: ownerAddress,
@@ -47,7 +47,7 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
     TOKEN_SYMBOL: tokenSymbol,
     TOKEN_CURRENCY: tokenCurrency,
     TOKEN_DECIMALS: tokenDecimals,
-  } = require("../config.js"));
+  } = require("../../config.js"));
 }
 
 module.exports = async (deployer, network) => {

@@ -25,10 +25,10 @@ const MockERC1271Wallet = artifacts.require("MockERC1271Wallet");
 let mockERC1271WalletOwnerAddress = "";
 
 // Read config file if it exists
-if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     MOCK_ERC1271_WALLET_OWNER_ADDRESS: mockERC1271WalletOwnerAddress,
-  } = require("../config.js"));
+  } = require("../../config.js"));
 }
 
 module.exports = async (deployer, network, accounts) => {

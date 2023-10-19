@@ -68,6 +68,11 @@ module.exports = {
     reporter: "Spec",
   },
   plugins: ["solidity-coverage", "truffle-contract-size"],
+  migrations_directory:
+    config.USE_VERSIONED_MIGRATIONS ||
+    process.env.USE_VERSIONED_MIGRATIONS === "true"
+      ? "./migrations/versioned"
+      : "./migrations/direct",
 };
 
 function infuraProvider(network) {
