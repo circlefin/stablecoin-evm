@@ -20,7 +20,7 @@
     "slither": "slither --solc-disable-warnings --disable-color --exclude-dependencies .",
     "solhint": "solhint 'contracts/**/*.sol'",
     "static-check": "yarn typechain && yarn typecheck && yarn lint && yarn solhint",
-    "test": "truffle test",
+    "test": "USE_VERSIONED_MIGRATIONS=true truffle test",
     "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
     "typecheck": "tsc -p . --noEmit"
   },
