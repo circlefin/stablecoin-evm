@@ -1,7 +1,7 @@
 {
-  "name": "centre-tokens",
+  "name": "fiat-tokens",
   "version": "1.0.0",
-  "description": "Fiat and non-fiat tokens part of the CENTRE network.",
+  "description": "Circle's fiat tokens",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -26,15 +26,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/centrehq/centre-tokens.git"
+    "url": "git+https://github.com/circlefin/fiat-tokens.git"
   },
   "keywords": [],
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/centrehq/centre-tokens/issues"
+    "url": "https://github.com/circlefin/fiat-tokens/issues"
   },
-  "homepage": "https://github.com/centrehq/centre-tokens#readme",
+  "homepage": "https://github.com/circlefin/fiat-tokens#readme",
   "dependencies": {},
   "devDependencies": {
     "@openzeppelin/contracts": "^3.1.0",
