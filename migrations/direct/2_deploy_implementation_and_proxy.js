@@ -1,9 +1,28 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const fs = require("fs");
 const path = require("path");
 
-const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
+const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const MasterMinter = artifacts.require("MasterMinter");
+const SignatureChecker = artifacts.require("SignatureChecker");
 
 const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
 
@@ -20,7 +39,7 @@ let tokenCurrency = "";
 let tokenDecimals = "";
 
 // Read config file if it exists
-if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     OWNER_ADDRESS: ownerAddress,
@@ -33,18 +52,15 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
     TOKEN_SYMBOL: tokenSymbol,
     TOKEN_CURRENCY: tokenCurrency,
     TOKEN_DECIMALS: tokenDecimals,
-  } = require("../config.js"));
+  } = require("../../config.js"));
 }
 
 /**
- * This file combines the work of USDC on ETH migrations 2 through 7. This was created with slight modifications from
- * 2_deploy_all.js from the TRON branch of this repo. There's no point in deploying the older implementations for
- * FiatToken since we don't need them (we only want V2_1).
+ * A utility script to directly deploy Fiat Token contract with the latest implementation
  *
- * The ordering of this is a little complex - we need the proxy's address in order to deploy
- * the master minter, but we can't initialize the proxy until we have the master minter deployed.
+ * Note: The proxy needs to be deployed before the master minter; the proxy cannot
+ * be initialized until the master minter is deployed.
  */
-
 module.exports = async (deployer, network) => {
   if (!proxyAdminAddress || !ownerAddress || !masterMinterOwnerAddress) {
     throw new Error(
@@ -59,36 +75,39 @@ module.exports = async (deployer, network) => {
       );
     } else {
       // If we're not on mainnet, let the user values dictate this.
-      pauserAddress = pauserAddress || proxyAdminAddress;
-      blacklisterAddress = blacklisterAddress || proxyAdminAddress;
-      lostAndFoundAddress = lostAndFoundAddress || proxyAdminAddress;
+      pauserAddress = pauserAddress || ownerAddress;
+      blacklisterAddress = blacklisterAddress || ownerAddress;
+      lostAndFoundAddress = lostAndFoundAddress || ownerAddress;
     }
   }
 
-  console.log(`Proxy Admin:                        ${proxyAdminAddress}`);
-  console.log(`Owner:                              ${ownerAddress}`);
-  console.log(`Pauser:                             ${pauserAddress}`);
-  console.log(`Blacklister:                        ${blacklisterAddress}`);
-  console.log(`Lost and Found:                     ${lostAndFoundAddress}`);
+  console.log(`Proxy Admin:                ${proxyAdminAddress}`);
+  console.log(`Owner:                      ${ownerAddress}`);
+  console.log(`Pauser:                     ${pauserAddress}`);
+  console.log(`Blacklister:                ${blacklisterAddress}`);
+  console.log(`Lost and Found:             ${lostAndFoundAddress}`);
+  console.log(`Master Minter Owner:        ${masterMinterOwnerAddress}`);
   console.log(
-    `Master Minter Owner:                ${masterMinterOwnerAddress}`
-  );
-  console.log(
-    `FiatTokenV2_1ImplementationAddress: ${fiatTokenImplementationAddress}`
+    `FiatTokenImplementationAddress: ${fiatTokenImplementationAddress}`
   );
 
-  // If there is an existing USDC implementation contract,
+  // If there is an existing implementation contract,
   // we can simply point the newly deployed proxy contract to it.
+  // Otherwise, deploy the latest implementation contract code to the network.
   if (!fiatTokenImplementationAddress) {
+    console.log("Deploying and linking SignatureChecker library contract...");
+    await deployer.deploy(SignatureChecker);
+    await deployer.link(SignatureChecker, FiatTokenV2_2);
+
     console.log("Deploying implementation contract...");
-    await deployer.deploy(FiatTokenV2_1, { gas: 20000000 });
-    const fiatTokenV2_1 = await FiatTokenV2_1.deployed();
-    console.log("Deployed implementation contract at", FiatTokenV2_1.address);
+    await deployer.deploy(FiatTokenV2_2);
+    const fiatTokenV2_2 = await FiatTokenV2_2.deployed();
+    console.log("Deployed implementation contract at", FiatTokenV2_2.address);
 
     console.log("Initializing implementation contract with dummy values...");
     // These values are dummy values because we only rely on the implementation
     // deployment for delegatecall logic, not for actual state storage.
-    await fiatTokenV2_1.initialize(
+    await fiatTokenV2_2.initialize(
       "",
       "",
       "",
@@ -98,10 +117,12 @@ module.exports = async (deployer, network) => {
       THROWAWAY_ADDRESS,
       THROWAWAY_ADDRESS
     );
-    await fiatTokenV2_1.initializeV2("");
-    await fiatTokenV2_1.initializeV2_1(THROWAWAY_ADDRESS);
 
-    fiatTokenImplementationAddress = FiatTokenV2_1.address;
+    await fiatTokenV2_2.initializeV2("");
+    await fiatTokenV2_2.initializeV2_1(THROWAWAY_ADDRESS);
+    await fiatTokenV2_2.initializeV2_2([], "");
+
+    fiatTokenImplementationAddress = FiatTokenV2_2.address;
   }
 
   console.log("Deploying proxy contract...");
@@ -115,7 +136,7 @@ module.exports = async (deployer, network) => {
   const masterMinter = await MasterMinter.deployed();
   console.log("Deployed master minter at", MasterMinter.address);
 
-  // Change the master minter to be owned by the permanent owner
+  // Change the master minter to be owned by the master minter owner
   console.log("Reassigning master minter owner...");
   await masterMinter.transferOwnership(masterMinterOwnerAddress);
 
@@ -123,22 +144,20 @@ module.exports = async (deployer, network) => {
   // implementation contracts.
 
   console.log("Reassigning proxy contract admin...");
-  // need to change admin first, or the call to initialize won't work
+  // Need to change admin first, or the call to initialize won't work
   // since admin can only call methods in the proxy, and not forwarded methods
   await fiatTokenProxy.changeAdmin(proxyAdminAddress);
 
   console.log("Initializing proxy contract...");
 
   // Do the initial (V1) initialization.
-  // Note that this takes in the master minter contract's address as the master minter.
-  // The master minter contract's owner is a separate address.
-  const proxyAsV2_1 = await FiatTokenV2_1.at(FiatTokenProxy.address);
-  await proxyAsV2_1.initialize(
+  const proxyAsV2_2 = await FiatTokenV2_2.at(FiatTokenProxy.address);
+  await proxyAsV2_2.initialize(
     tokenName,
     tokenSymbol,
     tokenCurrency,
     tokenDecimals,
-    masterMinterOwnerAddress,
+    masterMinterOwnerAddress, // Use master minter owner address initially to allow easy configuation of mint controllers and minter allowance.
     pauserAddress,
     blacklisterAddress,
     ownerAddress
@@ -146,11 +165,15 @@ module.exports = async (deployer, network) => {
 
   // Do the V2 initialization
   console.log("Initializing V2...");
-  await proxyAsV2_1.initializeV2(tokenName);
+  await proxyAsV2_2.initializeV2(tokenName);
 
   // Do the V2_1 initialization
   console.log("Initializing V2.1...");
-  await proxyAsV2_1.initializeV2_1(lostAndFoundAddress);
+  await proxyAsV2_2.initializeV2_1(lostAndFoundAddress);
+
+  // Do the V2_2 initialization
+  console.log("Initializing V2.2...");
+  await proxyAsV2_2.initializeV2_2([], tokenSymbol);
 
   console.log("Deployment step 2 finished");
 };

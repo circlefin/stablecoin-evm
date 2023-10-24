@@ -1,12 +1,30 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const fs = require("fs");
 const path = require("path");
 
-const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
+const Blacklistable = artifacts.require("Blacklistable");
 
 const configFile = "config.js";
-const configFileResolved = path.join(__dirname, "..", configFile);
+const configFileResolved = path.join(__dirname, "..", "..", configFile);
 const blacklistFile = "blacklist.txt";
-const blacklistFileResolved = path.join(__dirname, "..", blacklistFile);
+const blacklistFileResolved = path.join(__dirname, "..", "..", blacklistFile);
 
 let blacklisterPrivateKey = "";
 let proxyContractAddress = "";
@@ -16,7 +34,7 @@ if (fs.existsSync(configFileResolved)) {
   ({
     BLACKLISTER_PRIVATE_KEY: blacklisterPrivateKey, // This is used in HDWallet setup in truffle-config.js
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
-  } = require(`../${configFile}`));
+  } = require(`../../${configFile}`));
 }
 if (!blacklisterPrivateKey || !proxyContractAddress) {
   throw new Error(
@@ -42,13 +60,13 @@ if (!fs.existsSync(blacklistFileResolved)) {
  * @param {*} network  Current network used by Truffle.
  * @param {*} accounts A list of private keys provided through Truffle config (truffle-config.js).
  */
-module.exports = async function (deployer, network, accounts) {
-  const proxyAsV2_1 = await FiatTokenV2_1.at(proxyContractAddress);
-  const blacklisterAddress = accounts[4]; // truffle-config.js, HDWalletProvider
+module.exports = async function (_) {
+  const proxyAsBlacklistable = await Blacklistable.at(proxyContractAddress);
+  const blacklisterAddress = await proxyAsBlacklistable.blacklister();
 
   console.log(
     "Blacklisting the following addresses using blacklister address",
-    await proxyAsV2_1.blacklister()
+    await proxyAsBlacklistable.blacklister()
   );
 
   const addressesToBlacklist = fs
@@ -56,11 +74,11 @@ module.exports = async function (deployer, network, accounts) {
     .split(/\r?\n/); // Split by newlines (\n).
   for (const addr of addressesToBlacklist) {
     if (addr) {
-      await proxyAsV2_1.blacklist(addr, {
+      await proxyAsBlacklistable.blacklist(addr, {
         from: blacklisterAddress,
       });
       // Log confirmation of this address being blacklisted.
-      console.log(addr, await proxyAsV2_1.isBlacklisted(addr));
+      console.log(addr, await proxyAsBlacklistable.isBlacklisted(addr));
     }
   }
   console.log(

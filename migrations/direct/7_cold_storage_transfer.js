@@ -1,8 +1,26 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const fs = require("fs");
 const path = require("path");
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
+const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const MasterMinter = artifacts.require("MasterMinter.sol");
 
 let coldBlacklisterAddress = "";
@@ -14,7 +32,7 @@ let masterMinterContractAddress = "";
 let proxyContractAddress = "";
 
 // Read config file if it exists
-if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
+if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     COLD_BLACKLISTER_ADDRESS: coldBlacklisterAddress,
     COLD_MASTERMINTER_OWNER_ADDRESS: coldMasterMinterAddress,
@@ -22,11 +40,11 @@ if (fs.existsSync(path.join(__dirname, "..", "config.js"))) {
     COLD_PROXY_ADMIN_ADDRESS: coldProxyAdminAddress,
     MASTER_MINTER_CONTRACT_ADDRESS: masterMinterContractAddress,
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
-  } = require("../config.js"));
+  } = require("../../config.js"));
 }
 
 // reassign ownership/control of contract to cold storage keys
-module.exports = async function (deployer, network, accounts) {
+module.exports = async function (_) {
   if (
     !coldBlacklisterAddress ||
     !coldMasterMinterAddress ||
@@ -39,10 +57,6 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   // Hot private keys used for reassignment.
-  const masterMinterOwnerAddress = accounts[1];
-  const proxyAdminAddress = accounts[2];
-  const ownerAddress = accounts[3];
-
   console.log(`>>>>>>> Reassigning ownership to cold storage <<<<<<<`);
 
   masterMinterContractAddress =
@@ -50,9 +64,16 @@ module.exports = async function (deployer, network, accounts) {
   proxyContractAddress =
     proxyContractAddress || (await FiatTokenProxy.deployed()).address;
 
+  const proxy = await FiatTokenProxy.at(proxyContractAddress);
+  const proxyAsV2_2 = await FiatTokenV2_2.at(proxyContractAddress);
+  const masterMinter = await MasterMinter.at(masterMinterContractAddress);
+
+  const proxyAdminAddress = await proxy.admin();
+  const masterMinterOwnerAddress = await masterMinter.owner();
+  const ownerAddress = await proxyAsV2_2.owner();
+
   // Migrate master minter on token to master minter contract.
-  const proxyAsV2_1 = await FiatTokenV2_1.at(proxyContractAddress);
-  await proxyAsV2_1.updateMasterMinter(masterMinterContractAddress, {
+  await proxyAsV2_2.updateMasterMinter(masterMinterContractAddress, {
     from: ownerAddress,
   });
   console.log(
@@ -60,7 +81,6 @@ module.exports = async function (deployer, network, accounts) {
   );
 
   // Reassign master minter contract's owner to cold owner.
-  const masterMinter = await MasterMinter.at(masterMinterContractAddress);
   await masterMinter.transferOwnership(coldMasterMinterAddress, {
     from: masterMinterOwnerAddress,
   });
@@ -80,7 +100,7 @@ module.exports = async function (deployer, network, accounts) {
   // Reassign the blacklister, assuming blacklist seeding is complete.
   // Blacklistable.sol#updateBlacklister onlyOwner
   // We must do this while we have the hot owner key before we reassign the token owner below.
-  await proxyAsV2_1.updateBlacklister(coldBlacklisterAddress, {
+  await proxyAsV2_2.updateBlacklister(coldBlacklisterAddress, {
     from: ownerAddress,
   });
   console.log(
@@ -88,7 +108,7 @@ module.exports = async function (deployer, network, accounts) {
   );
 
   // Reassign the token owner.
-  await proxyAsV2_1.transferOwnership(coldOwnerAddress, {
+  await proxyAsV2_2.transferOwnership(coldOwnerAddress, {
     from: ownerAddress,
   });
   console.log(

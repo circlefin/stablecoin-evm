@@ -1,3 +1,21 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /*
  * Use this script to verify that the proxy contract has all items it should blacklist
  *  Make sure your config.js file has the PROXY_CONTRACT_ADDRESS set and the
@@ -9,21 +27,21 @@
 const fs = require("fs");
 const path = require("path");
 
+const Blacklistable = artifacts.require("Blacklistable");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 
 let proxyContractAddress = "";
 
 const configFile = "config.js";
-const configFileResolved = path.join(__dirname, "..", configFile);
+const configFileResolved = path.join(__dirname, "..", "..", configFile);
 const blacklistFile = "blacklist.txt";
-const blacklistFileResolved = path.join(__dirname, "..", blacklistFile);
+const blacklistFileResolved = path.join(__dirname, "..", "..", blacklistFile);
 
 // Attempt to fetch the values needed for blacklisting.
 if (fs.existsSync(configFileResolved)) {
   ({
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
-  } = require(`../${configFile}`));
+  } = require(`../../${configFile}`));
 }
 
 if (!proxyContractAddress) {
@@ -47,8 +65,8 @@ const addressesToBlacklist = fs
 module.exports = async function (_) {
   proxyContractAddress =
     proxyContractAddress || (await FiatTokenProxy.deployed()).address;
-  const proxyAsV2_1 = await FiatTokenV2_1.at(proxyContractAddress);
-  const blacklisterRole = await proxyAsV2_1.blacklister();
+  const proxyAsBlacklistable = await Blacklistable.at(proxyContractAddress);
+  const blacklisterRole = await proxyAsBlacklistable.blacklister();
 
   console.log(`>>>>>>> Starting Validation <<<<<<<`);
   console.log(`Proxy Contract Addr:   ${proxyContractAddress}`);
@@ -57,7 +75,7 @@ module.exports = async function (_) {
     `# of items in blacklist.txt:   ${addressesToBlacklist.length}\n\n`
   );
 
-  if (!(await proxyAsV2_1.isBlacklisted(proxyContractAddress))) {
+  if (!(await proxyAsBlacklistable.isBlacklisted(proxyContractAddress))) {
     throw new Error(
       `Proxy Contract @ ${proxyContractAddress} should be blacklisted but is not.`
     );
@@ -65,7 +83,7 @@ module.exports = async function (_) {
 
   let success = 0;
   for (const addr of addressesToBlacklist) {
-    if (!(await proxyAsV2_1.isBlacklisted(addr))) {
+    if (!(await proxyAsBlacklistable.isBlacklisted(addr))) {
       throw new Error(`Address: ${addr} is missing from the blacklist.`);
     } else {
       success += 1;

@@ -42,9 +42,9 @@ module.exports = {
   TOKEN_CURRENCY: "USD",
   // TokenDecimals - Number of decimals for the token e.g. 6
   TOKEN_DECIMALS: 6,
-  // USE_USDC_MIGRATIONS - whether or not to use legacy migrations in migrations/usdc directory.
+  // USE_VERSIONED_MIGRATIONS - whether or not to use legacy migrations in migrations/versioned directory.
   // These migrations deploy each version of FiatToken separately.
-  USE_USDC_MIGRATIONS: false,
+  USE_VERSIONED_MIGRATIONS: false,
 
   // FiatTokenImplementationAddress - (optional) if given for non-usdc migrations we don't deploy FiatToken, just the proxy
   // FIAT_TOKEN_IMPLEMENTATION_ADDRESS: "",

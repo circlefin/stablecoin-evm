@@ -32,7 +32,7 @@ let config = {
   MASTERMINTER_OWNER_PRIVATE_KEY: "",
   OWNER_PRIVATE_KEY: "",
   PROXY_ADMIN_PRIVATE_KEY: "",
-  USE_USDC_MIGRATIONS: "",
+  USE_VERSIONED_MIGRATIONS: "",
   TESTNET_RPC_URL: "",
   LOCAL_RPC_URL: "",
   MAINNET_RPC_URL: "",
@@ -98,9 +98,10 @@ module.exports = {
   },
   // Use default directory if false
   migrations_directory:
-    config.USE_USDC_MIGRATIONS || process.env.USE_USDC_MIGRATIONS === "true"
-      ? "./migrations/usdc"
-      : undefined,
+    config.USE_VERSIONED_MIGRATIONS ||
+    process.env.USE_VERSIONED_MIGRATIONS === "true"
+      ? "./migrations/versioned"
+      : "./migrations/direct",
 };
 
 function rpcProvider(network) {
