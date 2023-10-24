@@ -22,7 +22,7 @@ const web3 = require("web3");
 
 /**
  * Helper function to read the blacklist file.
- * @param blacklistFilePath {string} the filepath to the blacklist file.
+ * @param {string} blacklistFilePath the filepath to the blacklist file.
  * @returns {string[]} the list of addresses in the file.
  */
 function readBlacklistFile(blacklistFilePath) {
