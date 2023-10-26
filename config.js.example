@@ -72,6 +72,10 @@ module.exports = {
 
   MOCK_ERC1271_WALLET_OWNER_ADDRESS: "",
 
+  // Used for running test scripts.
+  TEST_ACCOUNT: "",
+  TEST_ACCOUNT_PRIVATE_KEY: "",
+
   // ***** COLD STORAGE *********
 
   // Pauser - can pause the contract

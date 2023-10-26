@@ -113,6 +113,7 @@ function rpcProvider(network) {
         config.PROXY_ADMIN_PRIVATE_KEY,
         config.OWNER_PRIVATE_KEY,
         config.BLACKLISTER_PRIVATE_KEY,
+        config.TEST_ACCOUNT_PRIVATE_KEY,
       ],
       providerOrUrl: network,
     });
