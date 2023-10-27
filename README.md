@@ -1,12 +1,12 @@
 <!-- prettier-ignore-start -->
 <!-- omit in toc -->
-# Circle FiatToken Contracts
+# Circle's Stablecoin Smart Contracts on EVM-compatible blockchains
 <!-- prettier-ignore-end -->
 
-This repository contains all the smart contracts used by
-[Circle's](https://www.circle.com/) fiat tokens. All contracts are written in
-[Solidity](https://soliditylang.org/) and managed by the
-[Truffle](https://trufflesuite.com/) framework.
+This repository contains the smart contracts used by
+[Circle's](https://www.circle.com/) stablecoins on EVM-compatible blockchains.
+All contracts are written in [Solidity](https://soliditylang.org/) and managed
+by the [Truffle](https://trufflesuite.com/) framework.
 
 <!-- prettier-ignore-start -->
 <!-- omit in toc -->
@@ -41,8 +41,8 @@ Requirements:
 - Yarn 1.22.19
 
 ```sh
-$ git clone git@github.com:circlefin/fiat-tokens.git
-$ cd fiat-tokens
+$ git clone git@github.com:circlefin/stablecoin-evm.git
+$ cd stablecoin-evm
 $ nvm use
 $ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
 $ yarn install          # Install dependencies
