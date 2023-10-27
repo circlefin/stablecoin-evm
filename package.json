@@ -25,7 +25,7 @@
     "test": "USE_VERSIONED_MIGRATIONS=true truffle test",
     "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
     "typecheck": "tsc -p . --noEmit",
-    "verify": "truffle run verify FiatTokenProxy FiatTokenV2_1 MasterMinter",
+    "verify": "truffle run verify",
     "deployContracts": "truffle migrate --interactive --to 2",
     "blacklistSeed": "truffle migrate --interactive -f 3 --to 4",
     "minters": "truffle migrate --interactive -f 5 --to 6",

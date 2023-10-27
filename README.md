@@ -132,7 +132,9 @@ yarn minters --network {development, testnet, mainnet}
 // This will move all five hot keys to cold.
 yarn coldStorage --network {development, testnet, mainnet}
 
-yarn verify --network {see here https://www.npmjs.com/package/truffle-plugin-verify}
+// Verify contract bytecode against the block explorer, and upload contract source code.
+// See here https://www.npmjs.com/package/truffle-plugin-verify} for more details.
+yarn verify [DEPLOYED_CONTRACT_NAME] --network=$NETWORK [--verifiers=<etherscan, snowtrace, etc>]
 ```
 
 > Note that you may need to update truffle-config.js to have a verify attribute

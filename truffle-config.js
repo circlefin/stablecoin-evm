@@ -32,15 +32,24 @@ let config = {
   MASTERMINTER_OWNER_PRIVATE_KEY: "",
   OWNER_PRIVATE_KEY: "",
   PROXY_ADMIN_PRIVATE_KEY: "",
+
   USE_VERSIONED_MIGRATIONS: "",
-  TESTNET_RPC_URL: "",
+
   LOCAL_RPC_URL: "",
-  MAINNET_RPC_URL: "",
   MAINNET_ID: "",
+  MAINNET_RPC_URL: "",
+  MAINNET_GAS_PRICE: "",
+  MAINNET_GAS: "",
   TESTNET_ID: "",
+  TESTNET_RPC_URL: "",
+  TESTNET_GAS_PRICE: "",
+  TESTNET_GAS: "",
+
   ETHERSCAN_API_KEY: "",
   ARBISCAN_API_KEY: "",
   OPTIMISTIC_ETHERSCAN_API_KEY: "",
+  POLYGONSCAN_API_KEY: "",
+  SNOWTRACE_API_KEY: "",
 };
 
 if (fs.existsSync(path.join(__dirname, "config.js"))) {
@@ -71,6 +80,8 @@ module.exports = {
       confirmations: 1,
       networkCheckTimeout: 100000,
       timeoutBlocks: 20,
+      gasPrice: config.MAINNET_GAS_PRICE,
+      gas: config.MAINNET_GAS,
     },
     testnet: {
       provider: rpcProvider(config.TESTNET_RPC_URL),
@@ -79,6 +90,8 @@ module.exports = {
       confirmations: 1,
       networkCheckTimeout: 100000,
       timeoutBlocks: 20,
+      gasPrice: config.TESTNET_GAS_PRICE,
+      gas: config.TESTNET_GAS,
     },
   },
   mocha: {
@@ -95,6 +108,8 @@ module.exports = {
     etherscan: config.ETHERSCAN_API_KEY,
     arbiscan: config.ARBISCAN_API_KEY,
     optimistic_etherscan: config.OPTIMISTIC_ETHERSCAN_API_KEY,
+    polygonscan: config.POLYGONSCAN_API_KEY,
+    snowtrace: config.SNOWTRACE_API_KEY,
   },
   // Use default directory if false
   migrations_directory:

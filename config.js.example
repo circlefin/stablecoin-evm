@@ -22,17 +22,23 @@ module.exports = {
   ENV: "",
   // these API keys are used to verify contracts
   // see truffle-config.js for more context
-  ETHERSCAN_API_KEY: "",
   ARBISCAN_API_KEY: "",
+  ETHERSCAN_API_KEY: "",
   OPTIMISTIC_ETHERSCAN_API_KEY: "",
   POLYGONSCAN_API_KEY: "",
+  SNOWTRACE_API_KEY: "",
 
   LOCAL_RPC_URL: "http://127.0.0.1:8545",
-  TESTNET_RPC_URL: "",
-  MAINNET_RPC_URL: "",
 
   MAINNET_ID: "",
+  MAINNET_RPC_URL: "",
+  MAINNET_GAS_PRICE: "",
+  MAINNET_GAS: "",
+
   TESTNET_ID: "",
+  TESTNET_RPC_URL: "",
+  TESTNET_GAS_PRICE: "",
+  TESTNET_GAS: "",
 
   // TokenName - ERC20 name of the token e.g. "USD Coin"
   TOKEN_NAME: "USD Coin",
