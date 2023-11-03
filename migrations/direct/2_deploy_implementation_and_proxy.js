@@ -117,7 +117,6 @@ module.exports = async (deployer, network) => {
       THROWAWAY_ADDRESS,
       THROWAWAY_ADDRESS
     );
-
     await fiatTokenV2_2.initializeV2("");
     await fiatTokenV2_2.initializeV2_1(THROWAWAY_ADDRESS);
     await fiatTokenV2_2.initializeV2_2([], "");
@@ -142,7 +141,6 @@ module.exports = async (deployer, network) => {
 
   // Now that the master minter is set up, we can go back to setting up the proxy and
   // implementation contracts.
-
   console.log("Reassigning proxy contract admin...");
   // Need to change admin first, or the call to initialize won't work
   // since admin can only call methods in the proxy, and not forwarded methods
