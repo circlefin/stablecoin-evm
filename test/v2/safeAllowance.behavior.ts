@@ -1,15 +1,34 @@
-import { FiatTokenV2Instance } from "../../@types/generated";
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { AnyFiatTokenV2Instance } from "../../@types/AnyFiatTokenV2Instance";
 import { Approval } from "../../@types/generated/FiatTokenV2";
 import { expectRevert } from "../helpers";
-import { MAX_UINT256 } from "../helpers/constants";
+import { MAX_UINT256_HEX } from "../helpers/constants";
 
 export function hasSafeAllowance(
-  getFiatToken: () => FiatTokenV2Instance,
+  version: number,
+  getFiatToken: () => AnyFiatTokenV2Instance,
   fiatTokenOwner: string,
   accounts: Truffle.Accounts
 ): void {
   describe("safe allowance", () => {
-    let fiatToken: FiatTokenV2Instance;
+    let fiatToken: AnyFiatTokenV2Instance;
     const [alice, bob] = accounts;
 
     beforeEach(() => {
@@ -55,7 +74,7 @@ export function hasSafeAllowance(
         });
 
         await expectRevert(
-          fiatToken.increaseAllowance(bob, MAX_UINT256, {
+          fiatToken.increaseAllowance(bob, MAX_UINT256_HEX, {
             from: alice,
           }),
           "addition overflow"
@@ -73,26 +92,57 @@ export function hasSafeAllowance(
         );
       });
 
-      it("reverts if either the owner or the spender is blacklisted", async () => {
-        // owner is blacklisted
-        await fiatToken.blacklist(alice, { from: fiatTokenOwner });
+      if (version < 2.2) {
+        it("reverts if either the owner or the spender is blacklisted", async () => {
+          // owner is blacklisted
+          await fiatToken.blacklist(alice, { from: fiatTokenOwner });
 
-        // try to increase allowance
-        await expectRevert(
-          fiatToken.increaseAllowance(bob, 1, { from: alice }),
-          "account is blacklisted"
-        );
+          // try to increase allowance
+          await expectRevert(
+            fiatToken.increaseAllowance(bob, 1, { from: alice }),
+            "account is blacklisted"
+          );
 
-        // spender is blacklisted
-        await fiatToken.unBlacklist(alice, { from: fiatTokenOwner });
-        await fiatToken.blacklist(bob, { from: fiatTokenOwner });
+          // spender is blacklisted
+          await fiatToken.unBlacklist(alice, { from: fiatTokenOwner });
+          await fiatToken.blacklist(bob, { from: fiatTokenOwner });
 
-        // try to increase allowance
-        await expectRevert(
-          fiatToken.increaseAllowance(bob, 1, { from: alice }),
-          "account is blacklisted"
-        );
-      });
+          // try to increase allowance
+          await expectRevert(
+            fiatToken.increaseAllowance(bob, 1, { from: alice }),
+            "account is blacklisted"
+          );
+        });
+      } else {
+        // version >= 2.2
+
+        it("increases allowance normally when the owner or the spender is blacklisted", async () => {
+          // owner is blacklisted
+          await fiatToken.blacklist(alice, { from: fiatTokenOwner });
+
+          // try to increase allowance
+          await fiatToken.increaseAllowance(bob, 10e6, {
+            from: alice,
+          });
+          // check that allowance has increased
+          expect((await fiatToken.allowance(alice, bob)).toNumber()).to.equal(
+            10e6
+          );
+
+          // spender is blacklisted
+          await fiatToken.unBlacklist(alice, { from: fiatTokenOwner });
+          await fiatToken.blacklist(bob, { from: fiatTokenOwner });
+
+          // try to increase allowance
+          await fiatToken.increaseAllowance(bob, 5e6, {
+            from: alice,
+          });
+          // check that allowance has increased
+          expect((await fiatToken.allowance(alice, bob)).toNumber()).to.equal(
+            15e6
+          );
+        });
+      }
     });
 
     describe("decreaseAllowance", () => {
@@ -146,7 +196,7 @@ export function hasSafeAllowance(
         // it catches that the given decrement is greater than the current
         // allowance
         await expectRevert(
-          fiatToken.decreaseAllowance(bob, MAX_UINT256, {
+          fiatToken.decreaseAllowance(bob, MAX_UINT256_HEX, {
             from: alice,
           }),
           "decreased allowance below zero"
@@ -164,26 +214,53 @@ export function hasSafeAllowance(
         );
       });
 
-      it("reverts if either the owner or the spender is blacklisted", async () => {
-        // owner is blacklisted
-        await fiatToken.blacklist(alice, { from: fiatTokenOwner });
+      if (version < 2.2) {
+        it("reverts if either the owner or the spender is blacklisted", async () => {
+          // owner is blacklisted
+          await fiatToken.blacklist(alice, { from: fiatTokenOwner });
 
-        // try to decrease allowance
-        await expectRevert(
-          fiatToken.decreaseAllowance(bob, 1, { from: alice }),
-          "account is blacklisted"
-        );
+          // try to decrease allowance
+          await expectRevert(
+            fiatToken.decreaseAllowance(bob, 1, { from: alice }),
+            "account is blacklisted"
+          );
 
-        // spender is blacklisted
-        await fiatToken.unBlacklist(alice, { from: fiatTokenOwner });
-        await fiatToken.blacklist(bob, { from: fiatTokenOwner });
+          // spender is blacklisted
+          await fiatToken.unBlacklist(alice, { from: fiatTokenOwner });
+          await fiatToken.blacklist(bob, { from: fiatTokenOwner });
 
-        // try to decrease allowance
-        await expectRevert(
-          fiatToken.decreaseAllowance(bob, 1, { from: alice }),
-          "account is blacklisted"
-        );
-      });
+          // try to decrease allowance
+          await expectRevert(
+            fiatToken.decreaseAllowance(bob, 1, { from: alice }),
+            "account is blacklisted"
+          );
+        });
+      } else {
+        // version >= 2.2
+
+        it("decreases allowance normally when the owner or the spender is blacklisted", async () => {
+          // owner is blacklisted
+          await fiatToken.blacklist(alice, { from: fiatTokenOwner });
+
+          // try to decrease allowance
+          await fiatToken.decreaseAllowance(bob, 2e6, { from: alice });
+          // check that allowance has decreased
+          expect((await fiatToken.allowance(alice, bob)).toNumber()).to.equal(
+            8e6
+          );
+
+          // spender is blacklisted
+          await fiatToken.unBlacklist(alice, { from: fiatTokenOwner });
+          await fiatToken.blacklist(bob, { from: fiatTokenOwner });
+
+          // try to decrease allowance
+          await fiatToken.decreaseAllowance(bob, 2e6, { from: alice });
+          // check that allowance has decreased
+          expect((await fiatToken.allowance(alice, bob)).toNumber()).to.equal(
+            6e6
+          );
+        });
+      }
     });
   });
 }

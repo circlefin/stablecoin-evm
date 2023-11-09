@@ -1,3 +1,21 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const BN = require("bn.js");
 const wrapTests = require("./helpers/wrapTests");
 const {
@@ -27,16 +45,15 @@ const {
   initializeTokenWithProxy,
   upgradeTo,
   UpgradedFiatToken,
-  FiatTokenV1,
   getAdmin,
 } = require("./helpers/tokenTest");
 
 // these tests are for reference and do not track side effects on all variables
-function runTests(_newToken, accounts) {
+function runTests(newToken, accounts, version) {
   let proxy, token;
 
   beforeEach(async () => {
-    const rawToken = await FiatTokenV1.new();
+    const rawToken = await newToken();
     const tokenConfig = await initializeTokenWithProxy(rawToken);
     ({ proxy, token } = tokenConfig);
     assert.strictEqual(proxy.address, token.address);
@@ -428,24 +445,50 @@ function runTests(_newToken, accounts) {
     assert.isTrue(new BN(balance).eqn(1900));
   });
 
-  it("should blacklist and make approve impossible", async () => {
-    await mint(token, accounts[1], 1900, minterAccount);
-    await blacklist(token, accounts[1]);
+  if (version < 2.2) {
+    it("should blacklist and make approve impossible", async () => {
+      await mint(token, accounts[1], 1900, minterAccount);
+      await blacklist(token, accounts[1]);
 
-    await expectRevert(token.approve(accounts[2], 600, { from: accounts[1] }));
-    const approval = await token.allowance(accounts[1], accounts[2]);
-    assert.isTrue(new BN(approval).eqn(0));
-  });
+      await expectRevert(
+        token.approve(accounts[2], 600, { from: accounts[1] })
+      );
+      const approval = await token.allowance(accounts[1], accounts[2]);
+      assert.isTrue(new BN(approval).eqn(0));
+    });
 
-  it("should make giving approval to blacklisted account impossible", async () => {
-    await mint(token, accounts[2], 1900, minterAccount);
-    await blacklist(token, accounts[1]);
+    it("should make giving approval to blacklisted account impossible", async () => {
+      await mint(token, accounts[2], 1900, minterAccount);
+      await blacklist(token, accounts[1]);
 
-    await expectRevert(token.approve(accounts[1], 600, { from: accounts[2] }));
+      await expectRevert(
+        token.approve(accounts[1], 600, { from: accounts[2] })
+      );
 
-    const approval = await token.allowance(accounts[2], accounts[1]);
-    assert.isTrue(new BN(approval).eqn(0));
-  });
+      const approval = await token.allowance(accounts[2], accounts[1]);
+      assert.isTrue(new BN(approval).eqn(0));
+    });
+  } else {
+    // version >= 2.2
+
+    it("should approve when owner is blacklisted", async () => {
+      await mint(token, accounts[1], 1900, minterAccount);
+      await blacklist(token, accounts[1]);
+
+      await approve(token, accounts[1], 100, accounts[2]);
+      const allowance = await token.allowance(accounts[2], accounts[1]);
+      assert.isTrue(new BN(allowance).eqn(100));
+    });
+
+    it("should approve when spender is blacklisted", async () => {
+      await mint(token, accounts[2], 1900, minterAccount);
+      await blacklist(token, accounts[2]);
+
+      await approve(token, accounts[1], 100, accounts[2]);
+      const allowance = await token.allowance(accounts[2], accounts[1]);
+      assert.isTrue(new BN(allowance).eqn(100));
+    });
+  }
 
   it("should blacklist then unblacklist to make a transfer possible", async () => {
     await mint(token, accounts[2], 1900, minterAccount);

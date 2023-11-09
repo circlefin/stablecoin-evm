@@ -1,35 +1,73 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import crypto from "crypto";
-import { FiatTokenV2Instance } from "../../../@types/generated";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+import { ACCOUNTS_AND_KEYS, MAX_UINT256_HEX } from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
   cancelAuthorizationTypeHash,
   signTransferAuthorization,
   signCancelAuthorization,
   TestParams,
+  WalletType,
+  prepareSignature,
 } from "./helpers";
+import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
+import { MockErc1271WalletInstance } from "../../../@types/generated";
 
 export function testCancelAuthorization({
   getFiatToken,
+  getERC1271Wallet,
   getDomainSeparator,
   fiatTokenOwner,
   accounts,
+  signerWalletType,
+  signatureBytesType,
 }: TestParams): void {
-  describe("cancelAuthorization", () => {
-    let fiatToken: FiatTokenV2Instance;
-    let domainSeparator: string;
+  describe(`cancelAuthorization with ${signerWalletType} wallet, ${signatureBytesType} signature interface`, async () => {
     const [alice, bob] = ACCOUNTS_AND_KEYS;
     const charlie = accounts[1];
-    let nonce: string;
+    const nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+    let fiatToken: AnyFiatTokenV2Instance;
+    let aliceWallet: MockErc1271WalletInstance;
+    let domainSeparator: string;
+
+    let from: string;
 
     beforeEach(async () => {
       fiatToken = getFiatToken();
+      aliceWallet = await getERC1271Wallet(alice.address);
       domainSeparator = getDomainSeparator();
-      nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+      // Initialize `from` address either as Alice's EOA address or Alice's wallet address
+      if (signerWalletType == WalletType.AA) {
+        from = aliceWallet.address;
+      } else {
+        from = alice.address;
+      }
+
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
-      await fiatToken.mint(alice.address, 10e6, { from: fiatTokenOwner });
+      await fiatToken.mint(from, 10e6, {
+        from: fiatTokenOwner,
+      });
     });
 
     it("has the expected type hash", async () => {
@@ -39,11 +77,10 @@ export function testCancelAuthorization({
     });
 
     it("cancels unused transfer authorization if signature is valid", async () => {
-      const from = alice.address;
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -72,9 +109,7 @@ export function testCancelAuthorization({
       await fiatToken.cancelAuthorization(
         from,
         nonce,
-        cancellation.v,
-        cancellation.r,
-        cancellation.s,
+        ...prepareSignature(cancellation, signatureBytesType),
         { from: charlie }
       );
 
@@ -90,9 +125,7 @@ export function testCancelAuthorization({
           validAfter,
           validBefore,
           nonce,
-          authorization.v,
-          authorization.r,
-          authorization.s,
+          ...prepareSignature(authorization, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -100,11 +133,10 @@ export function testCancelAuthorization({
     });
 
     it("cannot be used to cancel someone else's authorization", async () => {
-      const from = alice.address;
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -134,9 +166,7 @@ export function testCancelAuthorization({
         fiatToken.cancelAuthorization(
           from,
           nonce,
-          cancellation.v,
-          cancellation.r,
-          cancellation.s,
+          ...prepareSignature(cancellation, signatureBytesType),
           { from: charlie }
         ),
         "invalid signature"
@@ -153,19 +183,16 @@ export function testCancelAuthorization({
         validAfter,
         validBefore,
         nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
+        ...prepareSignature(authorization, signatureBytesType),
         { from: charlie }
       );
     });
 
     it("reverts if the authorization has already been used", async () => {
-      const from = alice.address;
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -187,9 +214,7 @@ export function testCancelAuthorization({
         validAfter,
         validBefore,
         nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
+        ...prepareSignature(authorization, signatureBytesType),
         { from: charlie }
       );
 
@@ -206,9 +231,7 @@ export function testCancelAuthorization({
         fiatToken.cancelAuthorization(
           from,
           nonce,
-          cancellation.v,
-          cancellation.r,
-          cancellation.s,
+          ...prepareSignature(cancellation, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -218,7 +241,7 @@ export function testCancelAuthorization({
     it("reverts if the authorization has already been canceled", async () => {
       // create cancellation
       const cancellation = signCancelAuthorization(
-        alice.address,
+        from,
         nonce,
         domainSeparator,
         alice.key
@@ -226,22 +249,18 @@ export function testCancelAuthorization({
 
       // submit the cancellation
       await fiatToken.cancelAuthorization(
-        alice.address,
+        from,
         nonce,
-        cancellation.v,
-        cancellation.r,
-        cancellation.s,
+        ...prepareSignature(cancellation, signatureBytesType),
         { from: charlie }
       );
 
       // try to submit the same cancellation again
       await expectRevert(
         fiatToken.cancelAuthorization(
-          alice.address,
+          from,
           nonce,
-          cancellation.v,
-          cancellation.r,
-          cancellation.s,
+          ...prepareSignature(cancellation, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -250,8 +269,8 @@ export function testCancelAuthorization({
 
     it("reverts if the contract is paused", async () => {
       // create a cancellation
-      const { v, r, s } = signCancelAuthorization(
-        alice.address,
+      const cancellation = signCancelAuthorization(
+        from,
         nonce,
         domainSeparator,
         alice.key
@@ -262,9 +281,15 @@ export function testCancelAuthorization({
 
       // try to submit the cancellation
       await expectRevert(
-        fiatToken.cancelAuthorization(alice.address, nonce, v, r, s, {
-          from: charlie,
-        }),
+        fiatToken.cancelAuthorization(
+          from,
+          nonce,
+          ...prepareSignature(cancellation, signatureBytesType),
+
+          {
+            from: charlie,
+          }
+        ),
         "paused"
       );
     });

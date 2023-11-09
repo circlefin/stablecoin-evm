@@ -1,33 +1,25 @@
 /**
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * The above copyright notice and this permission notice shall be included in
- * copies or substantial portions of the Software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 pragma solidity 0.6.12;
 
 import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
-import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712 } from "../util/EIP712.sol";
-import { EIP712Domain } from "./EIP712Domain.sol";
 import { EIP3009 } from "./EIP3009.sol";
 import { EIP2612 } from "./EIP2612.sol";
 
@@ -46,7 +38,10 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         // solhint-disable-next-line reason-string
         require(initialized && _initializedVersion == 0);
         name = newName;
-        DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(newName, "2");
+        _DEPRECATED_CACHED_DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(
+            newName,
+            "2"
+        );
         _initializedVersion = 1;
     }
 
@@ -58,6 +53,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      */
     function increaseAllowance(address spender, uint256 increment)
         external
+        virtual
         whenNotPaused
         notBlacklisted(msg.sender)
         notBlacklisted(spender)
@@ -75,6 +71,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      */
     function decreaseAllowance(address spender, uint256 decrement)
         external
+        virtual
         whenNotPaused
         notBlacklisted(msg.sender)
         notBlacklisted(spender)
@@ -182,7 +179,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      * @param owner       Token owner's address (Authorizer)
      * @param spender     Spender's address
      * @param value       Amount of allowance
-     * @param deadline    Expiration time, seconds since the epoch
+     * @param deadline    The time at which the signature expires (unix time), or max uint256 value to signal no expiration
      * @param v           v of the signature
      * @param r           r of the signature
      * @param s           s of the signature
@@ -195,12 +192,18 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external whenNotPaused notBlacklisted(owner) notBlacklisted(spender) {
+    )
+        external
+        virtual
+        whenNotPaused
+        notBlacklisted(owner)
+        notBlacklisted(spender)
+    {
         _permit(owner, spender, value, deadline, v, r, s);
     }
 
     /**
-     * @notice Internal function to increase the allowance by a given increment
+     * @dev Internal function to increase the allowance by a given increment
      * @param owner     Token owner's address
      * @param spender   Spender's address
      * @param increment Amount of increase
@@ -214,7 +217,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
     }
 
     /**
-     * @notice Internal function to decrease the allowance by a given decrement
+     * @dev Internal function to decrease the allowance by a given decrement
      * @param owner     Token owner's address
      * @param spender   Spender's address
      * @param decrement Amount of decrease

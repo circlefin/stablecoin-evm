@@ -1,32 +1,27 @@
 /**
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * The above copyright notice and this permission notice shall be included in
- * copies or substantial portions of the Software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 pragma solidity 0.6.12;
 
 import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
-import { EIP712 } from "../util/EIP712.sol";
+import { SignatureChecker } from "../util/SignatureChecker.sol";
+import { MessageHashUtils } from "../util/MessageHashUtils.sol";
 
 /**
  * @title EIP-3009
@@ -97,20 +92,52 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
         bytes32 r,
         bytes32 s
     ) internal {
-        _requireValidAuthorization(from, nonce, validAfter, validBefore);
-
-        bytes memory data = abi.encode(
-            TRANSFER_WITH_AUTHORIZATION_TYPEHASH,
+        _transferWithAuthorization(
             from,
             to,
             value,
             validAfter,
             validBefore,
-            nonce
+            nonce,
+            abi.encodePacked(r, s, v)
         );
-        require(
-            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == from,
-            "FiatTokenV2: invalid signature"
+    }
+
+    /**
+     * @notice Execute a transfer with a signed authorization
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param signature     Signature byte array produced by an EOA wallet or a contract wallet
+     */
+    function _transferWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        bytes memory signature
+    ) internal {
+        _requireValidAuthorization(from, nonce, validAfter, validBefore);
+        _requireValidSignature(
+            from,
+            keccak256(
+                abi.encode(
+                    TRANSFER_WITH_AUTHORIZATION_TYPEHASH,
+                    from,
+                    to,
+                    value,
+                    validAfter,
+                    validBefore,
+                    nonce
+                )
+            ),
+            signature
         );
 
         _markAuthorizationAsUsed(from, nonce);
@@ -142,21 +169,55 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
         bytes32 r,
         bytes32 s
     ) internal {
-        require(to == msg.sender, "FiatTokenV2: caller must be the payee");
-        _requireValidAuthorization(from, nonce, validAfter, validBefore);
-
-        bytes memory data = abi.encode(
-            RECEIVE_WITH_AUTHORIZATION_TYPEHASH,
+        _receiveWithAuthorization(
             from,
             to,
             value,
             validAfter,
             validBefore,
-            nonce
+            nonce,
+            abi.encodePacked(r, s, v)
         );
-        require(
-            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == from,
-            "FiatTokenV2: invalid signature"
+    }
+
+    /**
+     * @notice Receive a transfer with a signed authorization from the payer
+     * @dev This has an additional check to ensure that the payee's address
+     * matches the caller of this function to prevent front-running attacks.
+     * EOA wallet signatures should be packed in the order of r, s, v.
+     * @param from          Payer's address (Authorizer)
+     * @param to            Payee's address
+     * @param value         Amount to be transferred
+     * @param validAfter    The time after which this is valid (unix time)
+     * @param validBefore   The time before which this is valid (unix time)
+     * @param nonce         Unique nonce
+     * @param signature     Signature byte array produced by an EOA wallet or a contract wallet
+     */
+    function _receiveWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        bytes memory signature
+    ) internal {
+        require(to == msg.sender, "FiatTokenV2: caller must be the payee");
+        _requireValidAuthorization(from, nonce, validAfter, validBefore);
+        _requireValidSignature(
+            from,
+            keccak256(
+                abi.encode(
+                    RECEIVE_WITH_AUTHORIZATION_TYPEHASH,
+                    from,
+                    to,
+                    value,
+                    validAfter,
+                    validBefore,
+                    nonce
+                )
+            ),
+            signature
         );
 
         _markAuthorizationAsUsed(from, nonce);
@@ -178,20 +239,53 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
         bytes32 r,
         bytes32 s
     ) internal {
-        _requireUnusedAuthorization(authorizer, nonce);
+        _cancelAuthorization(authorizer, nonce, abi.encodePacked(r, s, v));
+    }
 
-        bytes memory data = abi.encode(
-            CANCEL_AUTHORIZATION_TYPEHASH,
+    /**
+     * @notice Attempt to cancel an authorization
+     * @dev EOA wallet signatures should be packed in the order of r, s, v.
+     * @param authorizer    Authorizer's address
+     * @param nonce         Nonce of the authorization
+     * @param signature     Signature byte array produced by an EOA wallet or a contract wallet
+     */
+    function _cancelAuthorization(
+        address authorizer,
+        bytes32 nonce,
+        bytes memory signature
+    ) internal {
+        _requireUnusedAuthorization(authorizer, nonce);
+        _requireValidSignature(
             authorizer,
-            nonce
-        );
-        require(
-            EIP712.recover(DOMAIN_SEPARATOR, v, r, s, data) == authorizer,
-            "FiatTokenV2: invalid signature"
+            keccak256(
+                abi.encode(CANCEL_AUTHORIZATION_TYPEHASH, authorizer, nonce)
+            ),
+            signature
         );
 
         _authorizationStates[authorizer][nonce] = true;
         emit AuthorizationCanceled(authorizer, nonce);
+    }
+
+    /**
+     * @notice Validates that signature against input data struct
+     * @param signer        Signer's address
+     * @param dataHash      Hash of encoded data struct
+     * @param signature     Signature byte array produced by an EOA wallet or a contract wallet
+     */
+    function _requireValidSignature(
+        address signer,
+        bytes32 dataHash,
+        bytes memory signature
+    ) private view {
+        require(
+            SignatureChecker.isValidSignatureNow(
+                signer,
+                MessageHashUtils.toTypedDataHash(_domainSeparator(), dataHash),
+                signature
+            ),
+            "FiatTokenV2: invalid signature"
+        );
     }
 
     /**

@@ -1,26 +1,19 @@
 /**
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright (c) 2016-2019 zOS Global Limited
- * Copyright (c) 2018-2020 CENTRE SECZ
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * The above copyright notice and this permission notice shall be included in
- * copies or substantial portions of the Software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 pragma solidity 0.6.12;
@@ -71,5 +64,34 @@ library ECRecover {
         require(signer != address(0), "ECRecover: invalid signature");
 
         return signer;
+    }
+
+    /**
+     * @notice Recover signer's address from a signed message
+     * @dev Adapted from: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/0053ee040a7ff1dbc39691c9e67a69f564930a88/contracts/utils/cryptography/ECDSA.sol
+     * @param digest    Keccak-256 hash digest of the signed message
+     * @param signature Signature byte array associated with hash
+     * @return Signer address
+     */
+    function recover(bytes32 digest, bytes memory signature)
+        internal
+        pure
+        returns (address)
+    {
+        require(signature.length == 65, "ECRecover: invalid signature length");
+
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
+        // ecrecover takes the signature parameters, and the only way to get them
+        // currently is to use assembly.
+        /// @solidity memory-safe-assembly
+        assembly {
+            r := mload(add(signature, 0x20))
+            s := mload(add(signature, 0x40))
+            v := byte(0, mload(add(signature, 0x60)))
+        }
+        return recover(digest, v, r, s);
     }
 }

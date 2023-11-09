@@ -1,3 +1,21 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import crypto from "crypto";
 import {
   FiatTokenV1Instance,
@@ -5,7 +23,7 @@ import {
   FiatTokenProxyInstance,
 } from "../../@types/generated";
 import { signTransferAuthorization } from "./GasAbstraction/helpers";
-import { MAX_UINT256, ACCOUNTS_AND_KEYS } from "../helpers/constants";
+import { MAX_UINT256_HEX, ACCOUNTS_AND_KEYS } from "../helpers/constants";
 import { hexStringFromBuffer, expectRevert } from "../helpers";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -52,7 +70,7 @@ contract("V2Upgrader", (accounts) => {
       expect(await upgrader.newProxyAdmin()).to.equal(originalProxyAdmin);
       expect(await upgrader.newName()).to.equal("USD Coin");
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
@@ -94,7 +112,7 @@ contract("V2Upgrader", (accounts) => {
         minter,
         1e5,
         0,
-        MAX_UINT256,
+        MAX_UINT256_HEX,
         nonce,
         await proxyAsV2.DOMAIN_SEPARATOR(),
         user2.key // Signed with someone else's key
@@ -106,7 +124,7 @@ contract("V2Upgrader", (accounts) => {
           minter,
           1e5,
           0,
-          MAX_UINT256,
+          MAX_UINT256_HEX,
           nonce,
           invalidAuthorization.v,
           invalidAuthorization.r,
@@ -121,7 +139,7 @@ contract("V2Upgrader", (accounts) => {
         minter,
         1e5,
         0,
-        MAX_UINT256,
+        MAX_UINT256_HEX,
         nonce,
         await proxyAsV2.DOMAIN_SEPARATOR(),
         user.key
@@ -133,7 +151,7 @@ contract("V2Upgrader", (accounts) => {
         minter,
         1e5,
         0,
-        MAX_UINT256,
+        MAX_UINT256_HEX,
         nonce,
         validAuthorization.v,
         validAuthorization.r,
@@ -162,7 +180,7 @@ contract("V2Upgrader", (accounts) => {
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
@@ -197,7 +215,7 @@ contract("V2Upgrader", (accounts) => {
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract

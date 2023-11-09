@@ -1,3 +1,21 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const wrapTests = require("./helpers/wrapTests");
 const BN = require("bn.js");
 const {
@@ -19,7 +37,7 @@ const {
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -135,30 +153,32 @@ function runTests(newToken, _accounts) {
 
   // Approve
 
-  it("nt008 should fail to approve when spender is blacklisted", async () => {
-    await token.blacklist(minterAccount, { from: blacklisterAccount });
-    const customVars = [
-      { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
-    ];
-    await expectRevert(
-      token.approve(minterAccount, 100, { from: arbitraryAccount })
-    );
-    await checkVariables([token], [customVars]);
-  });
+  if (version < 2.2) {
+    it("nt008 should fail to approve when spender is blacklisted", async () => {
+      await token.blacklist(minterAccount, { from: blacklisterAccount });
+      const customVars = [
+        { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
+      ];
+      await expectRevert(
+        token.approve(minterAccount, 100, { from: arbitraryAccount })
+      );
+      await checkVariables([token], [customVars]);
+    });
 
-  it("nt009 should fail to approve when msg.sender is blacklisted", async () => {
-    await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
-    const customVars = [
-      {
-        variable: "isAccountBlacklisted.arbitraryAccount",
-        expectedValue: true,
-      },
-    ];
-    await expectRevert(
-      token.approve(minterAccount, 100, { from: arbitraryAccount })
-    );
-    await checkVariables([token], [customVars]);
-  });
+    it("nt009 should fail to approve when msg.sender is blacklisted", async () => {
+      await token.blacklist(arbitraryAccount, { from: blacklisterAccount });
+      const customVars = [
+        {
+          variable: "isAccountBlacklisted.arbitraryAccount",
+          expectedValue: true,
+        },
+      ];
+      await expectRevert(
+        token.approve(minterAccount, 100, { from: arbitraryAccount })
+      );
+      await checkVariables([token], [customVars]);
+    });
+  }
 
   it("nt010 should fail to approve when contract is paused", async () => {
     await token.pause({ from: pauserAccount });
@@ -193,7 +213,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -232,7 +252,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -272,7 +292,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.blacklisterAccount",
+        variable: "balanceAndBlacklistStates.blacklisterAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -316,7 +336,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.tokenOwnerAccount",
+        variable: "balanceAndBlacklistStates.tokenOwnerAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -360,7 +380,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -403,7 +423,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -443,7 +463,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -484,7 +504,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -516,7 +536,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -549,7 +569,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.tokenOwnerAccount",
+        variable: "balanceAndBlacklistStates.tokenOwnerAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -586,7 +606,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -623,7 +643,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - 50),
       },
       {
-        variable: "balances.arbitraryAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
         expectedValue: new BN(50),
       },
       { variable: "totalSupply", expectedValue: new BN(50) },
@@ -704,7 +724,7 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(0),
       },
       {
-        variable: "balances.minterAccount",
+        variable: "balanceAndBlacklistStates.minterAccount",
         expectedValue: new BN(amount),
       },
       { variable: "totalSupply", expectedValue: new BN(amount) },
@@ -734,7 +754,10 @@ function runTests(newToken, _accounts) {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - 50),
       },
-      { variable: "balances.minterAccount", expectedValue: new BN(50) },
+      {
+        variable: "balanceAndBlacklistStates.minterAccount",
+        expectedValue: new BN(50),
+      },
       { variable: "totalSupply", expectedValue: new BN(50) },
       { variable: "isAccountBlacklisted.minterAccount", expectedValue: true },
     ];
@@ -763,7 +786,10 @@ function runTests(newToken, _accounts) {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - 50),
       },
-      { variable: "balances.minterAccount", expectedValue: new BN(50) },
+      {
+        variable: "balanceAndBlacklistStates.minterAccount",
+        expectedValue: new BN(50),
+      },
       { variable: "totalSupply", expectedValue: new BN(50) },
       { variable: "paused", expectedValue: true },
     ];
@@ -791,7 +817,10 @@ function runTests(newToken, _accounts) {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - 50),
       },
-      { variable: "balances.minterAccount", expectedValue: new BN(50) },
+      {
+        variable: "balanceAndBlacklistStates.minterAccount",
+        expectedValue: new BN(50),
+      },
       { variable: "totalSupply", expectedValue: new BN(50) },
     ];
     await expectRevert(token.burn(50, { from: arbitraryAccount }));
@@ -818,7 +847,10 @@ function runTests(newToken, _accounts) {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(amount - 50),
       },
-      { variable: "balances.minterAccount", expectedValue: new BN(50) },
+      {
+        variable: "balanceAndBlacklistStates.minterAccount",
+        expectedValue: new BN(50),
+      },
       { variable: "totalSupply", expectedValue: new BN(50) },
     ];
     await checkVariables([token], [customVars]);
@@ -830,7 +862,10 @@ function runTests(newToken, _accounts) {
         variable: "minterAllowance.minterAccount",
         expectedValue: new BN(0),
       },
-      { variable: "balances.minterAccount", expectedValue: new BN(50) },
+      {
+        variable: "balanceAndBlacklistStates.minterAccount",
+        expectedValue: new BN(50),
+      },
       { variable: "totalSupply", expectedValue: new BN(50) },
     ];
     await expectRevert(token.burn(50, { from: minterAccount }));
@@ -942,7 +977,7 @@ function runTests(newToken, _accounts) {
     const customVars = [
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
       {
-        variable: "balances.minterAccount",
+        variable: "balanceAndBlacklistStates.minterAccount",
         expectedValue: new BN(amount),
       },
       { variable: "totalSupply", expectedValue: new BN(amount) },

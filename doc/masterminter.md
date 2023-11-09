@@ -1,12 +1,12 @@
 # MasterMinter contract
 
 The MasterMinter is a governance contract. It delegates the functionality of the
-`masterMinter` role in the CENTRE USDC contract to multiple addresses. (The
+`masterMinter` role in the Circle FiatToken contract to multiple addresses. (The
 `masterMinter` role can add and remove minters from a FiatToken and set their
 allowances.) The MasterMinter contract delegates the minter management
 capability to `controllers`. Each `controller` manages exactly one `minter`, and
 a single `minter` may be managed by multiple `controllers`. This allows
-separation of duties (off-line key management) and simplifies nonce management
+separation of duties (offline key management) and simplifies nonce management
 for warm transactions.
 
 Minters and FiatToken holders are not affected by replacing a `masterMinter`
@@ -45,8 +45,8 @@ contract to call minter management functions on the FiatToken contract:
 
 Together, these four functions are defined as the `MinterManagementInterface`.
 The `MasterMinter` contains the address of a `minterManager` that implements the
-`MinterManagementInterface`. The `MasterMinter` interacts with the USDC token
-via the `minterManager`.
+`MinterManagementInterface`. The `MasterMinter` interacts with the FiatToken
+contract via the `minterManager`.
 
 When a `controller` calls a function on `MasterMinter`, the `MasterMinter` will
 call the appropriate function on the `FiatToken` contract on its behalf. Both
@@ -108,13 +108,10 @@ We recommend assigning at least <b>two</b> `controllers` to each `minter`.
 - <b>SecurityController.</b> Use this `controller` to sign a single
   `removeMinter` transaction and store it for emergencies.
 
-The private keys to the `AllowanceController` and `SecurityController` should
-stay in cold storage. This configuration lets the Controller keep multiple warm
-`incrementMinterAllowance` transactions on hand, as well as the `removeMinter`
-transaction in case of a problem. Broadcasting the `removeMinter` transaction
-will cause all future `incrementMinterAllowance` transactions to `throw`. Since
-the two types of transactions are managed by different addresses, there is no
-need to worry about nonce management.
+This configuration allows the `removeMinter` transaction to be presigned as
+nonces for the `SecurityController` are deterministic, which reduces the time to
+respond when there's an issue. Broadcasting the `removeMinter` transaction will
+cause all future interactions from the `AllowanceController` to `throw`.
 
 # MasterMinter vs. MintController
 

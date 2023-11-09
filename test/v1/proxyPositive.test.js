@@ -1,3 +1,21 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const wrapTests = require("./helpers/wrapTests");
 const BN = require("bn.js");
 const {
@@ -25,12 +43,13 @@ const {
   UpgradedFiatTokenNewFields,
   UpgradedFiatTokenNewFieldsNewLogic,
   getAdmin,
+  deployUpgradedFiatTokenNewFields,
 } = require("./helpers/tokenTest");
 const { makeRawTransaction, sendRawTransaction } = require("./helpers/abi");
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, _accounts, version) {
   let rawToken, proxy, token;
 
   beforeEach(async () => {
@@ -63,8 +82,14 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
-      { variable: "balances.pauserAccount", expectedValue: new BN(mintAmount) },
+      {
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
+        expectedValue: new BN(mintAmount),
+      },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
@@ -80,7 +105,7 @@ function runTests(newToken, _accounts) {
     await token.mint(arbitraryAccount, mintAmount, { from: minterAccount });
     await token.transfer(pauserAccount, mintAmount, { from: arbitraryAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -103,8 +128,14 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
-      { variable: "balances.pauserAccount", expectedValue: new BN(mintAmount) },
+      {
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
+        expectedValue: new BN(mintAmount),
+      },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
       { variable: "proxiedTokenAddress", expectedValue: upgradedToken.address },
     ];
@@ -148,9 +179,12 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -160,7 +194,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("upt008 should deploy upgraded version of contract with new data fields and without previous deployment and ensure new fields correct", async () => {
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const newProxy = await FiatTokenProxy.new(upgradedToken.address, {
       from: proxyOwnerAccount,
     });
@@ -308,9 +342,12 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount - 1),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount + 1),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount + 1) },
@@ -362,9 +399,12 @@ function runTests(newToken, _accounts) {
         expectedValue: new BN(amount - mintAmount),
       },
       { variable: "isAccountMinter.minterAccount", expectedValue: true },
-      { variable: "balances.arbitraryAccount", expectedValue: bigZero },
       {
-        variable: "balances.pauserAccount",
+        variable: "balanceAndBlacklistStates.arbitraryAccount",
+        expectedValue: bigZero,
+      },
+      {
+        variable: "balanceAndBlacklistStates.pauserAccount",
         expectedValue: new BN(mintAmount),
       },
       { variable: "totalSupply", expectedValue: new BN(mintAmount) },
@@ -382,7 +422,7 @@ function runTests(newToken, _accounts) {
   it("upt011 should upgradeToAndCall while paused and upgraded contract should be paused as a result", async () => {
     await token.pause({ from: pauserAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -405,7 +445,7 @@ function runTests(newToken, _accounts) {
   it("upt012 should upgradeToAndCall while upgrader is blacklisted", async () => {
     await token.blacklist(proxyOwnerAccount, { from: blacklisterAccount });
 
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],
@@ -424,7 +464,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("upt013 should upgradeToAndCall while new logic is blacklisted", async () => {
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     await token.blacklist(upgradedToken.address, { from: blacklisterAccount });
 
     const initializeData = encodeCall(

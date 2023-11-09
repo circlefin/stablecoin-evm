@@ -1,43 +1,77 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import crypto from "crypto";
-import { FiatTokenV2Instance } from "../../../@types/generated";
+import { MockErc1271WalletInstance } from "../../../@types/generated";
 import {
   AuthorizationUsed,
   Transfer,
 } from "../../../@types/generated/FiatTokenV2";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+import { ACCOUNTS_AND_KEYS, MAX_UINT256_HEX } from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
   transferWithAuthorizationTypeHash,
   signTransferAuthorization,
   TestParams,
+  WalletType,
+  prepareSignature,
 } from "./helpers";
+import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
 
 export function testTransferWithAuthorization({
   getFiatToken,
+  getERC1271Wallet,
   getDomainSeparator,
   fiatTokenOwner,
   accounts,
+  signerWalletType,
+  signatureBytesType,
 }: TestParams): void {
-  describe("transferWithAuthorization", () => {
-    let fiatToken: FiatTokenV2Instance;
-    let domainSeparator: string;
+  describe(`transferWithAuthorization with ${signerWalletType} wallet, ${signatureBytesType} signature interface`, async () => {
     const [alice, bob] = ACCOUNTS_AND_KEYS;
     const charlie = accounts[1];
-    let nonce: string;
-
+    const nonce: string = hexStringFromBuffer(crypto.randomBytes(32));
     const initialBalance = 10e6;
     const transferParams = {
-      from: alice.address,
+      from: "",
       to: bob.address,
       value: 7e6,
       validAfter: 0,
-      validBefore: MAX_UINT256,
+      validBefore: MAX_UINT256_HEX,
+      nonce,
     };
+
+    let fiatToken: AnyFiatTokenV2Instance;
+    let aliceWallet: MockErc1271WalletInstance;
+    let domainSeparator: string;
 
     beforeEach(async () => {
       fiatToken = getFiatToken();
+      aliceWallet = await getERC1271Wallet(alice.address);
       domainSeparator = getDomainSeparator();
-      nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+      // Initialize `from` address either as Alice's EOA address or Alice's wallet address
+      if (signerWalletType == WalletType.AA) {
+        transferParams.from = aliceWallet.address;
+      } else {
+        transferParams.from = alice.address;
+      }
+
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
@@ -56,7 +90,7 @@ export function testTransferWithAuthorization({
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create an authorization to transfer money from Alice to Bob and sign
       // with Alice's key
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -82,9 +116,7 @@ export function testTransferWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        v,
-        r,
-        s,
+        ...prepareSignature(signature, signatureBytesType),
         { from: charlie }
       );
 
@@ -114,7 +146,7 @@ export function testTransferWithAuthorization({
     it("reverts if the signature does not match given parameters", async () => {
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create a signed authorization
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -134,9 +166,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "invalid signature"
@@ -147,7 +177,7 @@ export function testTransferWithAuthorization({
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create an authorization to transfer money from Alice to Bob, but
       // sign with Bob's key instead of Alice's
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -168,9 +198,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "invalid signature"
@@ -182,7 +210,7 @@ export function testTransferWithAuthorization({
       // create a signed authorization that won't be valid until 10 seconds
       // later
       const validAfter = Math.floor(Date.now() / 1000) + 10;
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -202,9 +230,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "authorization is not yet valid"
@@ -215,7 +241,7 @@ export function testTransferWithAuthorization({
       // create a signed authorization that expires immediately
       const { from, to, value, validAfter } = transferParams;
       const validBefore = Math.floor(Date.now() / 1000);
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -235,9 +261,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "authorization is expired"
@@ -248,7 +272,7 @@ export function testTransferWithAuthorization({
       const { from, to, validAfter, validBefore } = transferParams;
       // create a signed authorization
       const value = 1e6;
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -267,9 +291,7 @@ export function testTransferWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        v,
-        r,
-        s,
+        ...prepareSignature(signature, signatureBytesType),
         { from: charlie }
       );
 
@@ -282,9 +304,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -313,9 +333,7 @@ export function testTransferWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
+        ...prepareSignature(authorization, signatureBytesType),
         { from: charlie }
       );
 
@@ -341,9 +359,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          authorization2.v,
-          authorization2.r,
-          authorization2.s,
+          ...prepareSignature(authorization2, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -355,7 +371,7 @@ export function testTransferWithAuthorization({
       // create a signed authorization that attempts to transfer an amount
       // that exceeds the sender's balance
       const value = initialBalance + 1;
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -375,9 +391,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "transfer amount exceeds balance"
@@ -387,7 +401,7 @@ export function testTransferWithAuthorization({
     it("reverts if the contract is paused", async () => {
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create a signed authorization
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -410,9 +424,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "paused"
@@ -422,7 +434,7 @@ export function testTransferWithAuthorization({
     it("reverts if the payer or the payee is blacklisted", async () => {
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create a signed authorization
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -444,9 +456,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         );
 

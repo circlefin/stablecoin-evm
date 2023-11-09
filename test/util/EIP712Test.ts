@@ -1,9 +1,25 @@
-import crypto from "crypto";
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { Eip712TestInstance } from "../../@types/generated";
 import { wordlist } from "ethereum-cryptography/bip39/wordlists/english";
 import sampleSize from "lodash/sampleSize";
-import { ACCOUNTS_AND_KEYS } from "../helpers/constants";
-import { prepend0x, strip0x, ecSign } from "../helpers";
+import { makeDomainSeparator } from "../helpers";
 
 const EIP712Test = artifacts.require("EIP712Test");
 
@@ -39,48 +55,4 @@ contract("EIP712", (_accounts) => {
       ).to.equal(domainSeparator);
     });
   });
-
-  describe("recover", () => {
-    it("recovers the signer's address from signed data", async () => {
-      const randomAccount =
-        ACCOUNTS_AND_KEYS[Math.floor(Math.random() * ACCOUNTS_AND_KEYS.length)];
-      const randomData = prepend0x(crypto.randomBytes(256).toString("hex"));
-      const eip712Data = prepend0x(
-        "1901" +
-          strip0x(domainSeparator) +
-          strip0x(web3.utils.keccak256(randomData))
-      );
-
-      const { v, r, s } = ecSign(
-        web3.utils.keccak256(eip712Data),
-        randomAccount.key
-      );
-
-      expect(
-        await eip712.recover(domainSeparator, v, r, s, randomData)
-      ).to.equal(randomAccount.address);
-    });
-  });
 });
-
-function makeDomainSeparator(
-  name: string,
-  version: string,
-  chainId: number,
-  address: string
-): string {
-  return web3.utils.keccak256(
-    web3.eth.abi.encodeParameters(
-      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
-      [
-        web3.utils.keccak256(
-          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-        ),
-        web3.utils.keccak256(name),
-        web3.utils.keccak256(version),
-        chainId,
-        address,
-      ]
-    )
-  );
-}

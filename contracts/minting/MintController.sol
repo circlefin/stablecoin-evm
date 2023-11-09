@@ -1,48 +1,45 @@
 /**
- * Copyright CENTRE SECZ 2018 - 2021
+ * SPDX-License-Identifier: Apache-2.0
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 pragma solidity 0.6.12;
 
-import "./Controller.sol";
-import "./MinterManagementInterface.sol";
+import { Controller } from "./Controller.sol";
+import { MinterManagementInterface } from "./MinterManagementInterface.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+
+// solhint-disable func-name-mixedcase
 
 /**
  * @title MintController
- * @notice The MintController contract manages minters for a contract that
+ * @dev The MintController contract manages minters for a contract that
  * implements the MinterManagerInterface. It lets the owner designate certain
  * addresses as controllers, and these controllers then manage the
  * minters by adding and removing minters, as well as modifying their minting
  * allowance. A controller may manage exactly one minter, but the same minter
  * address may be managed by multiple controllers.
- * @dev MintController inherits from the Controller contract. It treats the
+ * MintController inherits from the Controller contract. It treats the
  * Controller workers as minters.
  */
 contract MintController is Controller {
     using SafeMath for uint256;
 
     /**
-     * @title MinterManagementInterface
-     * @notice MintController calls the minterManager to execute/record minter
+     * @dev MintController calls the minterManager to execute/record minter
      * management tasks, as well as to query the status of a minter address.
      */
     MinterManagementInterface internal minterManager;

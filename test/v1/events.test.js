@@ -1,3 +1,21 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const wrapTests = require("./helpers/wrapTests");
 const {
   FiatTokenV1,
@@ -25,14 +43,14 @@ const {
   checkBlacklisterChangedEvent,
   checkUpgradeEvent,
   checkAdminChangedEvent,
-  UpgradedFiatTokenNewFields,
+  deployUpgradedFiatTokenNewFields,
   checkPauseEvent,
   checkTransferEvents,
 } = require("./helpers/tokenTest");
 
 const amount = 100;
 
-function runTests(_newToken, _accounts) {
+function runTests(_newToken, _accounts, version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -110,7 +128,7 @@ function runTests(_newToken, _accounts) {
   });
 
   it("et008 should check Upgraded event", async () => {
-    const upgradedToken = await UpgradedFiatTokenNewFields.new();
+    const upgradedToken = await deployUpgradedFiatTokenNewFields(version);
     const initializeData = encodeCall(
       "initV2",
       ["bool", "address", "uint256"],

@@ -1,12 +1,42 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2023, Circle Internet Financial, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { behavesLikeRescuable } from "../v1.1/Rescuable.behavior";
-import { FiatTokenV2Instance, RescuableInstance } from "../../@types/generated";
+import {
+  MockErc1271WalletInstance,
+  FiatTokenV2Instance,
+  RescuableInstance,
+} from "../../@types/generated";
+import { AnyFiatTokenV2Instance } from "../../@types/AnyFiatTokenV2Instance";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
 import { hasSafeAllowance } from "./safeAllowance.behavior";
 import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
-import { makeDomainSeparator } from "./GasAbstraction/helpers";
+import {
+  SignatureBytesType,
+  TestParams,
+  WalletType,
+  makeDomainSeparator,
+} from "./GasAbstraction/helpers";
 import { expectRevert } from "../helpers";
+import { testTransferWithMultipleAuthorizations } from "./GasAbstraction/testTransferWithMultipleAuthorizations";
 
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
+const MockERC1271Wallet = artifacts.require("MockERC1271Wallet");
 
 contract("FiatTokenV2", (accounts) => {
   const fiatTokenOwner = accounts[9];
@@ -27,12 +57,18 @@ contract("FiatTokenV2", (accounts) => {
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
   });
 
-  behavesLikeFiatTokenV2(accounts, () => fiatToken, fiatTokenOwner);
+  behavesLikeFiatTokenV2(accounts, 2, () => fiatToken, fiatTokenOwner);
+  usesOriginalStorageSlotPositions({
+    Contract: FiatTokenV2,
+    version: 2,
+    accounts,
+  });
 });
 
 export function behavesLikeFiatTokenV2(
   accounts: Truffle.Accounts,
-  getFiatToken: () => FiatTokenV2Instance,
+  version: number,
+  getFiatToken: () => AnyFiatTokenV2Instance,
   fiatTokenOwner: string
 ): void {
   let domainSeparator: string;
@@ -48,24 +84,26 @@ export function behavesLikeFiatTokenV2(
 
   behavesLikeRescuable(getFiatToken as () => RescuableInstance, accounts);
 
-  usesOriginalStorageSlotPositions({
-    Contract: FiatTokenV2,
-    version: 2,
-    accounts,
-  });
-
   it("has the expected domain separator", async () => {
     expect(await getFiatToken().DOMAIN_SEPARATOR()).to.equal(domainSeparator);
   });
 
-  hasSafeAllowance(getFiatToken, fiatTokenOwner, accounts);
+  hasSafeAllowance(version, getFiatToken, fiatTokenOwner, accounts);
 
-  hasGasAbstraction(
+  const testParams: TestParams = {
+    version,
     getFiatToken,
-    () => domainSeparator,
+    getDomainSeparator: () => domainSeparator,
+    getERC1271Wallet,
     fiatTokenOwner,
-    accounts
-  );
+    accounts,
+    signerWalletType: WalletType.EOA,
+    signatureBytesType: SignatureBytesType.Unpacked,
+  };
+
+  hasGasAbstraction(testParams);
+
+  testTransferWithMultipleAuthorizations(testParams);
 
   it("disallows calling initializeV2 twice", async () => {
     // It was called once in beforeEach. Try to call again.
@@ -73,4 +111,10 @@ export function behavesLikeFiatTokenV2(
       getFiatToken().initializeV2("Not USD Coin", { from: fiatTokenOwner })
     );
   });
+}
+
+export async function getERC1271Wallet(
+  owner: string
+): Promise<MockErc1271WalletInstance> {
+  return await MockERC1271Wallet.new(owner);
 }

@@ -1,43 +1,47 @@
 {
-  "name": "centre-tokens",
+  "name": "stablecoin-evm",
   "version": "1.0.0",
-  "description": "Fiat and non-fiat tokens part of the CENTRE network.",
+  "description": "Circle's Stablecoin Smart Contracts on EVM-compatible blockchains",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "setup": "git config core.hooksPath .githooks",
     "compile": "truffle compile",
-    "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
-    "typecheck": "tsc -p . --noEmit",
-    "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
-    "fmt": "prettier --write './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
-    "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --quiet",
-    "test": "truffle test",
+    "contract-size": "yarn contract-size:all --contracts $(find ./contracts -name \"*.sol\" -not -path \"./contracts/test/*\" | xargs -I {} /bin/bash -c 'basename {} .sol')",
+    "contract-size:all": "yarn compile && truffle run contract-size --checkMaxSize",
     "coverage": "truffle run coverage",
-    "solhint": "solhint 'contracts/**/*.sol'",
-    "precommit": "yarn typechain && yarn fmt && yarn typecheck && yarn lint && yarn solhint",
+    "fmt": "prettier --write './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
+    "ganache": "ganache-cli --accounts=15 --deterministic --defaultBalanceEther=1000000 --allowUnlimitedContractSize --gasLimit=0x1C9C380 --quiet",
+    "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
+    "migrate": "truffle migrate --interactive",
+    "prepare": "husky install",
+    "precommit": "yarn fmt && yarn static-check",
     "slither": "slither --solc-disable-warnings --disable-color --exclude-dependencies .",
-    "migrate": "truffle migrate --interactive"
+    "solhint": "solhint 'contracts/**/*.sol'",
+    "static-check": "yarn typechain && yarn typecheck && yarn lint && yarn solhint",
+    "test": "USE_VERSIONED_MIGRATIONS=true truffle test",
+    "typechain": "yarn compile && rm -rf './@types/generated' && typechain --target=truffle-v5 --outDir './@types/generated' 'build/contracts/**/*.json'",
+    "typecheck": "tsc -p . --noEmit"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/centrehq/centre-tokens.git"
+    "url": "git+https://github.com/circlefin/stablecoin-evm.git"
   },
   "keywords": [],
   "author": "",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/centrehq/centre-tokens/issues"
+    "url": "https://github.com/circlefin/stablecoin-evm/issues"
   },
-  "homepage": "https://github.com/centrehq/centre-tokens#readme",
+  "homepage": "https://github.com/circlefin/stablecoin-evm#readme",
   "dependencies": {},
   "devDependencies": {
     "@openzeppelin/contracts": "^3.1.0",
     "@truffle/hdwallet-provider": "^1.0.39",
     "@typechain/truffle-v5": "^2.0.2",
     "@types/chai": "^4.2.11",
+    "@types/ethereumjs-abi": "^0.6.3",
     "@types/lodash": "^4.14.158",
     "@types/mocha": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
@@ -58,21 +62,23 @@
     "ethereumjs-util": "^7.0.3",
     "ganache-cli": "^6.12.2",
     "googleapis": "^55.0.0",
+    "husky": "^8.0.3",
     "lodash": "^4.17.19",
     "prettier": "2.0.5",
     "prettier-plugin-solidity": "1.0.0-alpha.54",
     "q": "^1.5.1",
     "solc": "0.6.12",
     "solhint": "^3.1.0",
-    "solidity-coverage": "^0.7.9",
-    "truffle": "^5.1.35",
+    "solidity-coverage": "0.7.22",
+    "truffle": "5.1.49",
+    "truffle-contract-size": "^2.0.1",
     "ts-node": "^8.10.2",
     "typechain": "^2.0.0",
-    "typescript": "^3.9.7",
+    "typescript": "5.1.6",
     "web3": "^1.2.11"
   },
   "engines": {
-    "node": ">= 12.0.0",
-    "yarn": ">= 1.21.1"
+    "node": "16.14.0",
+    "yarn": "1.22.19"
   }
 }
