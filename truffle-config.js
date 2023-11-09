@@ -65,6 +65,12 @@ module.exports = {
           enabled: true,
           runs: 10000000,
         },
+        metadata: {
+          // bytecodeHash value defaults to 'ipfs': https://docs.soliditylang.org/en/develop/metadata.html#contract-metadata
+          // Set to 'none' when performing partial verification, to omit appending metadata file hash at the end of compiled bytecode
+          bytecodeHash:
+            process.env.VERIFICATION_TYPE === "partial" ? "none" : "ipfs",
+        },
       },
     },
   },
