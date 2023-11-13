@@ -79,6 +79,7 @@ async function postUpgradeCheck(
   }
 
   // Check initial balance
+  console.log("Starting balance check...");
   const aliceBalance = await proxyAsV22.balanceOf(alice);
   assert(
     aliceBalance.toNumber() >= value * 4,
@@ -95,16 +96,18 @@ async function postUpgradeCheck(
 
   // Deploy Mock ERC1271 wallet for Alice
   if (!aliceWallet) {
+    console.log(
+      "Wallet not specified, starting to deploy new ERC1271 wallet..."
+    );
     aliceWallet = (await MockERC1271Wallet.new(alice)).address;
     console.log(`\n>>> Generated wallet for Alice: '${aliceWallet}'`);
   }
 
   const step0_transfer = async () => {
     // Alice transfer 2e5 to Alice's wallet.
-    const transferTx = await proxyAsV22.transfer(aliceWallet, value * 2, {
+    return proxyAsV22.transfer.request(aliceWallet, value * 2, {
       from: alice,
     });
-    logTx("transferTx", transferTx);
     // Alice fiat token balance = 2 * value
   };
 
@@ -122,7 +125,9 @@ async function postUpgradeCheck(
       domainSeparator,
       alicePrivateKey.slice(2)
     );
-    const transferEOATx = await proxyAsV22.transferWithAuthorization(
+    console.log("transferEOASignature: ", transferEOASignature);
+
+    return proxyAsV22.transferWithAuthorization.request(
       alice,
       bob,
       value,
@@ -132,8 +137,6 @@ async function postUpgradeCheck(
       packSignature(transferEOASignature),
       { from: charlie }
     );
-    logTx("transferEOATx", transferEOATx);
-    // Bob balance = value
   };
 
   const step2_transferWithAuthAA = async () => {
@@ -150,7 +153,7 @@ async function postUpgradeCheck(
       domainSeparator,
       alicePrivateKey.slice(2)
     );
-    const transferAATx = await proxyAsV22.transferWithAuthorization(
+    return proxyAsV22.transferWithAuthorization.request(
       aliceWallet,
       bob,
       value,
@@ -160,7 +163,6 @@ async function postUpgradeCheck(
       packSignature(transferAASignature),
       { from: charlie }
     );
-    logTx("transferAATx", transferAATx);
     // Bob balance = value * 2
   };
 
@@ -178,7 +180,7 @@ async function postUpgradeCheck(
       domainSeparator,
       alicePrivateKey.slice(2)
     );
-    const receiveEOATx = await proxyAsV22.receiveWithAuthorization(
+    return proxyAsV22.receiveWithAuthorization.request(
       alice,
       charlie,
       value,
@@ -188,7 +190,6 @@ async function postUpgradeCheck(
       packSignature(receiveEOASignature),
       { from: charlie }
     );
-    logTx("receiveEOATx", receiveEOATx);
     // Charlie balance = value
   };
 
@@ -206,7 +207,8 @@ async function postUpgradeCheck(
       domainSeparator,
       alicePrivateKey.slice(2)
     );
-    const receiveAATx = await proxyAsV22.receiveWithAuthorization(
+    console.log("receiveAASignature: ", receiveAASignature);
+    return proxyAsV22.receiveWithAuthorization.request(
       aliceWallet,
       charlie,
       value,
@@ -216,7 +218,6 @@ async function postUpgradeCheck(
       packSignature(receiveAASignature),
       { from: charlie }
     );
-    logTx("receiveAATx", receiveAATx);
     // Charlie balance = value * 2
   };
 
@@ -230,12 +231,12 @@ async function postUpgradeCheck(
       domainSeparator,
       alicePrivateKey.slice(2)
     );
-    const cancelEOATx = await proxyAsV22.methods[
+    console.log("cancelEOASignature: ", cancelEOASignature);
+    return proxyAsV22.methods[
       "cancelAuthorization(address,bytes32,bytes)"
-    ](alice, cancelEOANonce, packSignature(cancelEOASignature), {
+    ].request(alice, cancelEOANonce, packSignature(cancelEOASignature), {
       from: charlie,
     });
-    logTx("cancelEOATx", cancelEOATx);
   };
 
   const step6_cancelAuthAA = async () => {
@@ -248,12 +249,12 @@ async function postUpgradeCheck(
       domainSeparator,
       alicePrivateKey.slice(2)
     );
-    const cancelAATx = await proxyAsV22.methods[
+    console.log("cancelAASignature: ", cancelAASignature);
+    return proxyAsV22.methods[
       "cancelAuthorization(address,bytes32,bytes)"
-    ](aliceWallet, cancelAANonce, packSignature(cancelAASignature), {
+    ].request(aliceWallet, cancelAANonce, packSignature(cancelAASignature), {
       from: charlie,
     });
-    logTx("cancelAATx", cancelAATx);
   };
 
   const step7_permitAA = async () => {
@@ -267,7 +268,8 @@ async function postUpgradeCheck(
       domainSeparator,
       alicePrivateKey.slice(2)
     );
-    const permitAATx = await proxyAsV22.permit(
+    console.log("permitAASignature: ", permitAASignature);
+    return proxyAsV22.permit.request(
       aliceWallet,
       bob,
       value,
@@ -275,7 +277,6 @@ async function postUpgradeCheck(
       packSignature(permitAASignature),
       { from: charlie }
     );
-    logTx("permitAATx", permitAATx);
   };
 
   const step8_permitEOA = async () => {
@@ -289,7 +290,8 @@ async function postUpgradeCheck(
       domainSeparator,
       bobPrivateKey.slice(2)
     );
-    const permitEOATx = await proxyAsV22.permit(
+    console.log("permitEOASignature: ", permitEOASignature);
+    return proxyAsV22.permit.request(
       bob,
       alice,
       value * 2,
@@ -297,72 +299,56 @@ async function postUpgradeCheck(
       packSignature(permitEOASignature),
       { from: charlie }
     );
-    logTx("permitEOATx", permitEOATx);
   };
 
   const step9_transferFromBob = async () => {
     // Alice transfer (value * 2) from Bob (using allowance set in permit EOA tx above)
-    const transferFromBobTx = await proxyAsV22.transferFrom(
-      bob,
-      alice,
-      value * 2,
-      {
-        from: alice,
-      }
-    );
-    logTx("transferFromBobTx", transferFromBobTx);
+    return proxyAsV22.transferFrom.request(bob, alice, value * 2, {
+      from: alice,
+    });
   };
 
   const step10_approve = async () => {
-    const approveTx = await proxyAsV22.approve(alice, value * 2, {
+    return proxyAsV22.approve.request(alice, value * 2, {
       from: charlie,
     });
-    logTx("approveTx", approveTx);
   };
 
   const step11_transferFromCharlie = async () => {
     // Alice transfer (value * 2) from Charlie
-    const transferFromCharlieTx = await proxyAsV22.transferFrom(
-      charlie,
-      alice,
-      value * 2,
-      {
-        from: alice,
-      }
-    );
-    logTx("transferFromCharlieTx", transferFromCharlieTx);
+    return proxyAsV22.transferFrom.request(charlie, alice, value * 2, {
+      from: alice,
+    });
   };
   const step12_blacklist = async () => {
-    const blacklistTx = await proxyAsV22.blacklist(bob, {
+    return proxyAsV22.blacklist.request(bob, {
       from: blacklister,
     });
-    logTx("blacklistTx", blacklistTx);
   };
 
   const step13_unBlacklist = async () => {
-    const unblacklistTx = await proxyAsV22.unBlacklist(bob, {
+    return proxyAsV22.unBlacklist.request(bob, {
       from: blacklister,
     });
-    logTx("unblacklistTx", unblacklistTx);
   };
 
   const allPostUpgradeChecks = [
-    step0_transfer,
-    step1_transferWithAuthEOA,
-    step2_transferWithAuthAA,
-    step3_receiveWithAuthEOA,
-    step4_receiveWithAuthAA,
-    step5_cancelAuthEOA,
-    step6_cancelAuthAA,
-    step7_permitAA,
-    step8_permitEOA,
-    step9_transferFromBob,
-    step10_approve,
-    step11_transferFromCharlie,
+    ["step0_transfer", step0_transfer],
+    ["step1_transferWithAuthEOA", step1_transferWithAuthEOA],
+    ["step2_transferWithAuthAA", step2_transferWithAuthAA],
+    ["step3_receiveWithAuthEOA", step3_receiveWithAuthEOA],
+    ["step4_receiveWithAuthAA", step4_receiveWithAuthAA],
+    ["step5_cancelAuthEOA", step5_cancelAuthEOA],
+    ["step6_cancelAuthAA", step6_cancelAuthAA],
+    ["step7_permitAA", step7_permitAA],
+    ["step8_permitEOA", step8_permitEOA],
+    ["step9_transferFromBob", step9_transferFromBob],
+    ["step10_approve", step10_approve],
+    ["step11_transferFromCharlie", step11_transferFromCharlie],
   ];
   if (shouldTestBlacklist) {
-    allPostUpgradeChecks.push(step12_blacklist);
-    allPostUpgradeChecks.push(step13_unBlacklist);
+    allPostUpgradeChecks.push(["step12_blacklist", step12_blacklist]);
+    allPostUpgradeChecks.push(["step13_unBlacklist", step13_unBlacklist]);
   }
 
   const fromStep = Math.max(0, from);
@@ -375,17 +361,17 @@ async function postUpgradeCheck(
   );
 
   for (let i = fromStep; i <= toStep; i++) {
-    await allPostUpgradeChecks[i]();
+    const [txName, createTx] = allPostUpgradeChecks[i];
+    console.log(`\n>>> ${txName}: `);
+    const rawTx = await createTx();
+    console.log(rawTx);
+    const tx = await web3.eth.sendTransaction(rawTx);
+    console.log({
+      txHash: tx.transactionHash,
+      status: tx.status,
+      gasUsed: tx.gasUsed,
+    });
   }
-}
-
-function logTx(txName, tx) {
-  console.log(`\n>>> ${txName}: `);
-  console.log({
-    txHash: tx.receipt.transactionHash,
-    status: tx.receipt.status,
-    gasUsed: tx.receipt.gasUsed,
-  });
 }
 
 module.exports = async (callback) => {
