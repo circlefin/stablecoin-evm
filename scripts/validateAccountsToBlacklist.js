@@ -148,7 +148,7 @@ function verifyUnique(accountsArray) {
 
 module.exports = async (callback) => {
   const usageError = new Error(
-    "Usage: yarn truffle exec scripts/validateAccountsToBlacklist.js [--datasource-filepath=<path to JSON file>] \n" +
+    "Usage: yarn truffle exec scripts/validateAccountsToBlacklist.js [--datasource-file-path=<path to JSON file>] \n" +
       "[--skip-datasource-validation] \n" +
       "[--skip-upgrader-validation] \n" +
       "[--proxy-address=<0x-stripped Proxy address>] \n" +
@@ -186,7 +186,7 @@ module.exports = async (callback) => {
 
   if (
     !web3.utils.isAddress(proxyAddress) ||
-    !web3.utils.isAddress(v2_2UpgraderAddress)
+    (!skipUpgraderValidation && !web3.utils.isAddress(v2_2UpgraderAddress))
   ) {
     callback(usageError);
   } else {
