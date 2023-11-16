@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.2.0 (2023-11-07)
+## 2.2.0 (2023-11-09)
 
 - Add ERC-1271 signature validation support to EIP-2612 and EIP-3009 functions
 - Combine the balance state and the blacklist state for an address in a
