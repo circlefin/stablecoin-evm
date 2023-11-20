@@ -147,7 +147,7 @@ async function main(callback) {
   console.log(`network: ${network}`);
   console.log(`proxyAddress: ${proxyAddress}`);
   console.log(`v2_2UpgraderAddress: ${v2_2UpgraderAddress}`);
-  console.log(`signedTx: ${signedTx}`);
+  console.log(`signedTx: ${"*".repeat(signedTx.length)}`);
 
   if (
     !web3.utils.isAddress(proxyAddress) ||
