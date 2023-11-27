@@ -197,6 +197,7 @@ address.
 
 - [FiatToken design](./doc/tokendesign.md)
 - [MasterMinter design](./doc/masterminter.md)
+- [Bridged USDC Standard](./doc/bridged_USDC_standard.md)
 - [Deployment process](./doc/deployment.md)
 - [Preparing an upgrade](./doc/upgrade.md)
 - [Upgrading from v1 to v2](./doc/v2_upgrade.md)
