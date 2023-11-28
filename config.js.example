@@ -40,8 +40,8 @@ module.exports = {
   TESTNET_GAS_PRICE: "",
   TESTNET_GAS: "",
 
-  // TokenName - ERC20 name of the token e.g. "USD Coin"
-  TOKEN_NAME: "USD Coin",
+  // TokenName - ERC20 name of the token e.g. "USDC"
+  TOKEN_NAME: "USDC",
   // TokenSymbol - Symbol of the token e.g. "USDC"
   TOKEN_SYMBOL: "USDC",
   // TokenCurrency - Currency of the token e.g. "USD"
