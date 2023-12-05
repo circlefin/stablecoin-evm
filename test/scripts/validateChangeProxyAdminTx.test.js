@@ -37,6 +37,8 @@ contract("Test script to validate change proxy admin transaction", () => {
     upgraderContractAddress,
     arbitraryAccount;
 
+  const LOCAL_RPC_URL = "http://localhost:8545";
+
   before(async () => {
     const proxy = await FiatTokenProxy.deployed();
     proxyAddress = proxy.address;
@@ -54,6 +56,7 @@ contract("Test script to validate change proxy admin transaction", () => {
       upgraderContractAddress
     );
     await validateChangeAdminTx(
+      LOCAL_RPC_URL,
       proxyAddress,
       upgraderContractAddress,
       signedTx
@@ -70,6 +73,7 @@ contract("Test script to validate change proxy admin transaction", () => {
 
     try {
       await validateChangeAdminTx(
+        LOCAL_RPC_URL,
         proxyAddress,
         upgraderContractAddress,
         signedTx
