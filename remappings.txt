@@ -1,0 +1,5 @@
+@eth-optimism/=node_modules/@eth-optimism/
+@openzeppelin/=node_modules/@openzeppelin/
+@solidity-parser/=node_modules/prettier-plugin-solidity/node_modules/@solidity-parser/
+forge-std/=lib/forge-std/src/
+truffle/=node_modules/truffle/

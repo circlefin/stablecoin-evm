@@ -15,15 +15,17 @@ ganache-blockchain-log.txt
 .coverage_artifacts
 .coverage_contracts
 @types/generated/
-config.js
 blacklist.*.json
 !blacklist.test.json
 out/
 cache/
 
+lib/
 # Yarn & Node Modules
 yarn-error.log
 node_modules/
 
 logs/
 pids/
+
+broadcast/**

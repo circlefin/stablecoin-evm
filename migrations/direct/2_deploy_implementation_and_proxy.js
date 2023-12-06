@@ -19,9 +19,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
+const FiatTokenV2_2 = artifacts.require("FiatTokenV2_Circle");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-const MasterMinter = artifacts.require("MasterMinter");
 const SignatureChecker = artifacts.require("SignatureChecker");
 
 const THROWAWAY_ADDRESS = "0x0000000000000000000000000000000000000001";
@@ -37,6 +36,8 @@ let tokenName = "";
 let tokenSymbol = "";
 let tokenCurrency = "";
 let tokenDecimals = "";
+let l1TokenAddress = "";
+let l2BridgeAddress = "";
 
 // Read config file if it exists
 if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
@@ -52,6 +53,8 @@ if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
     TOKEN_SYMBOL: tokenSymbol,
     TOKEN_CURRENCY: tokenCurrency,
     TOKEN_DECIMALS: tokenDecimals,
+    L1_TOKEN_ADDRESS: l1TokenAddress,
+    L2_BRIDGE_ADDRESS: l2BridgeAddress,
   } = require("../../config.js"));
 }
 
@@ -120,7 +123,10 @@ module.exports = async (deployer, network) => {
     await fiatTokenV2_2.initializeV2("");
     await fiatTokenV2_2.initializeV2_1(THROWAWAY_ADDRESS);
     await fiatTokenV2_2.initializeV2_2([], "");
-
+    await fiatTokenV2_2.initializeV2_Circle(
+      THROWAWAY_ADDRESS,
+      THROWAWAY_ADDRESS
+    );
     fiatTokenImplementationAddress = FiatTokenV2_2.address;
   }
 
@@ -128,16 +134,6 @@ module.exports = async (deployer, network) => {
   await deployer.deploy(FiatTokenProxy, fiatTokenImplementationAddress);
   const fiatTokenProxy = await FiatTokenProxy.deployed();
   console.log("Deployed proxy contract at", FiatTokenProxy.address);
-
-  // Now that the proxy contract has been deployed, we can deploy the master minter.
-  console.log("Deploying master minter...");
-  await deployer.deploy(MasterMinter, FiatTokenProxy.address);
-  const masterMinter = await MasterMinter.deployed();
-  console.log("Deployed master minter at", MasterMinter.address);
-
-  // Change the master minter to be owned by the master minter owner
-  console.log("Reassigning master minter owner...");
-  await masterMinter.transferOwnership(masterMinterOwnerAddress);
 
   // Now that the master minter is set up, we can go back to setting up the proxy and
   // implementation contracts.
@@ -157,7 +153,7 @@ module.exports = async (deployer, network) => {
     tokenSymbol,
     tokenCurrency,
     tokenDecimals,
-    masterMinter.address,
+    masterMinterOwnerAddress,
     pauserAddress,
     blacklisterAddress,
     ownerAddress
@@ -174,6 +170,9 @@ module.exports = async (deployer, network) => {
   // Do the V2_2 initialization
   console.log("Initializing V2.2...");
   await proxyAsV2_2.initializeV2_2([], tokenSymbol);
+
+  console.log("Initializing V2.Circle...");
+  await proxyAsV2_2.initializeV2_Circle(l1TokenAddress, l2BridgeAddress);
 
   console.log("Deployment step 2 finished");
 };
