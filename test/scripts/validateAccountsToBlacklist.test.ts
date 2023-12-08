@@ -36,6 +36,7 @@ contract("Test script to validate accounts to blacklist", () => {
   const DATASOURCE_FILE_PATH = "blacklist.datasource.json";
 
   let validateAccountsToBlacklist: typeof validateAccountsToBlacklistFnType;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   let readBlacklistFileStub: sinon.SinonStub<any[], any>;
 
   let blacklistedAccounts: string[];

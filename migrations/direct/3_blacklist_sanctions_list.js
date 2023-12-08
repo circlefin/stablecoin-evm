@@ -18,13 +18,13 @@
 
 const fs = require("fs");
 const path = require("path");
+const some = require("lodash/some");
+const { readBlacklistFile } = require("../../utils");
 
 const Blacklistable = artifacts.require("Blacklistable");
 
 const configFile = "config.js";
 const configFileResolved = path.join(__dirname, "..", "..", configFile);
-const blacklistFile = "blacklist.txt";
-const blacklistFileResolved = path.join(__dirname, "..", "..", blacklistFile);
 
 let blacklisterPrivateKey = "";
 let proxyContractAddress = "";
@@ -42,25 +42,17 @@ if (!blacklisterPrivateKey || !proxyContractAddress) {
   );
 }
 
-// Proceed to blacklist if and only if the file exists.
-if (!fs.existsSync(blacklistFileResolved)) {
-  throw new Error(
-    `${blacklistFile} file does not exist with addresses! See ${blacklistFile}.example!`
-  );
-}
-
 /**
  * This is a task for blacklisting a given text file of addresses
  * split by newlines (0x123\n0x456\n...) in accordance with Compliance
- * requirements at Circle Internet Financial, LLC. It reads blacklist.txt
+ * requirements at Circle Internet Financial, LLC. It reads blacklist.remote.json
  * and, one by one, blacklists each with a hot private key for the blacklister.
  * This task assumes that the shift to a cold blacklister address has not yet happened.
  *
  * @param {*} deployer Deployer object from Truffle.
  * @param {*} network  Current network used by Truffle.
- * @param {*} accounts A list of private keys provided through Truffle config (truffle-config.js).
  */
-module.exports = async function (_) {
+module.exports = async function (_, network) {
   const proxyAsBlacklistable = await Blacklistable.at(proxyContractAddress);
   const blacklisterAddress = await proxyAsBlacklistable.blacklister();
 
@@ -69,9 +61,16 @@ module.exports = async function (_) {
     await proxyAsBlacklistable.blacklister()
   );
 
-  const addressesToBlacklist = fs
-    .readFileSync(blacklistFileResolved, "utf-8")
-    .split(/\r?\n/); // Split by newlines (\n).
+  const isTestEnvironment = some(["development", "coverage"], (v) =>
+    network.includes(v)
+  );
+  const blacklistFile = isTestEnvironment
+    ? "blacklist.test.json"
+    : "blacklist.remote.json";
+  const addressesToBlacklist = readBlacklistFile(
+    path.join(__dirname, "..", "..", blacklistFile)
+  );
+
   for (const addr of addressesToBlacklist) {
     if (addr) {
       await proxyAsBlacklistable.blacklist(addr, {
