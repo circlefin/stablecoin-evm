@@ -16,32 +16,41 @@
  * limitations under the License.
  */
 
+const Web3 = require("web3");
+const minimist = require("minimist");
 const path = require("path");
 const { readBlacklistFile } = require("../utils");
 const _ = require("lodash");
 
-const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
-const V2_2Upgrader = artifacts.require("V2_2Upgrader");
+const {
+  abi: FiatTokenV2_1Abi,
+} = require("../build/contracts/FiatTokenV2_1.json");
+const {
+  abi: V2_2UpgraderAbi,
+} = require("../build/contracts/V2_2Upgrader.json");
 
 /**
  * A utility script to validate that
  * 1. Addresses retrieved from a datasource match with the list of addresses in blacklist.remote.json
  * 2. V2_2Upgrader.accountsToBlacklist() values match with the list of addresses in blacklist.remote.json
  * 3. The list of addresses in blacklist.remote.json are currently blacklisted.
+ * @param {string} rpcUrl url to a valid JSON RPC node
  * @param {string} proxyAddress the contract address of FiatTokenProxy
  * @param {string} v2_2UpgraderAddress the contract address of V2_2Upgrader
  * @param {string} datasourceFilePath the JSON file containing an array of addresses retrieved from a datasource (eg. Dune)
  * @param {boolean} skipDatasourceValidation true if datasource validation should be skipped, false otherwise
  * @param {boolean} skipUpgraderValidation true if upgrader validation should be skipped, false otherwise
  */
-async function main(
+async function validateAccountsToBlacklist(
+  rpcUrl,
   proxyAddress,
   v2_2UpgraderAddress,
   datasourceFilePath,
   skipDatasourceValidation,
   skipUpgraderValidation
 ) {
+  const web3 = new Web3(rpcUrl);
+
   const expectedAccountsToBlacklist = readBlacklistFile(
     path.join(__dirname, "..", "blacklist.remote.json")
   );
@@ -65,8 +74,13 @@ async function main(
   // ==== Local state == Upgrader state
   if (!skipUpgraderValidation) {
     console.log("\nComparing local state with deployed V2_2Upgrader...");
-    const v2_2Upgrader = await V2_2Upgrader.at(v2_2UpgraderAddress);
-    const accountsFromUpgrader = await v2_2Upgrader.accountsToBlacklist();
+    const v2_2Upgrader = new web3.eth.Contract(
+      V2_2UpgraderAbi,
+      v2_2UpgraderAddress
+    );
+    const accountsFromUpgrader = await v2_2Upgrader.methods
+      .accountsToBlacklist()
+      .call();
     console.log(
       `>> Retrieved ${accountsFromUpgrader.length} accounts from v2_2Upgrader`
     );
@@ -79,7 +93,7 @@ async function main(
   // ==== Every account blacklisted
   console.log("\nComparing local state with deployed FiatTokenProxy...");
   console.log(">> Validating that all accountsToBlacklist are blacklisted");
-  const proxyAsV2_1 = await FiatTokenV2_1.at(proxyAddress);
+  const proxyAsV2_1 = new web3.eth.Contract(FiatTokenV2_1Abi, proxyAddress);
 
   for (let i = 0; i < expectedAccountsToBlacklist.length; i++) {
     if (i % 5 === 0) {
@@ -89,7 +103,7 @@ async function main(
     }
 
     const account = expectedAccountsToBlacklist[i];
-    if (!(await proxyAsV2_1.isBlacklisted(account))) {
+    if (!(await proxyAsV2_1.methods.isBlacklisted(account).call())) {
       throw new Error(`Account '${account}' is not currently blacklisted!`);
     }
   }
@@ -103,8 +117,8 @@ async function main(
  */
 function verifyAccountsArrays(accountsArray, otherAccountsArray) {
   console.log(`>> Converting to checksum addresses`);
-  accountsArray = accountsArray.map(web3.utils.toChecksumAddress);
-  otherAccountsArray = otherAccountsArray.map(web3.utils.toChecksumAddress);
+  accountsArray = accountsArray.map(Web3.utils.toChecksumAddress);
+  otherAccountsArray = otherAccountsArray.map(Web3.utils.toChecksumAddress);
 
   // Check for duplicates.
   console.log(`>> Checking for duplicates in accountsArray`);
@@ -146,61 +160,51 @@ function verifyUnique(accountsArray) {
   }
 }
 
-module.exports = async (callback) => {
-  const usageError = new Error(
-    "Usage: yarn truffle exec scripts/validateAccountsToBlacklist.js [--datasource-file-path=<path to JSON file>] \n" +
-      "[--skip-datasource-validation] \n" +
-      "[--skip-upgrader-validation] \n" +
-      "[--proxy-address=<0x-stripped Proxy address>] \n" +
-      "[--upgrader-address=<0x-stripped V2_2Upgrader address>] \n" +
-      "[--network=<NETWORK>]"
-  );
+async function main() {
+  const argv = minimist(process.argv.slice(2), {
+    string: ["proxy-address", "upgrader-address"],
+  });
 
-  /* eslint-disable no-undef -- Config is a global variable in a truffle exec script https://github.com/trufflesuite/truffle/pull/3233 */
-  const network = config.network;
+  const rpcUrl = argv["rpc-url"];
+  const proxyAddress = argv["proxy-address"];
+  const v2_2UpgraderAddress = argv["upgrader-address"];
+  const datasourceFilePath = argv["datasource-file-path"];
+  const skipDatasourceValidation = !!argv["skip-datasource-validation"];
+  const skipUpgraderValidation = !!argv["skip-upgrader-validation"];
 
-  // Truffle exec seems to auto parse a hex string passed in arguments into decimals.
-  // We need to strip the 0x in arguments to prevent this from happening.
-  const rawProxyAddress = config.proxyAddress;
-  const rawV2_2UpgraderAddress = config.upgraderAddress;
-  const datasourceFilePath = config.datasourceFilePath;
-  const skipDatasourceValidation = !!config.skipDatasourceValidation;
-  const skipUpgraderValidation = !!config.skipUpgraderValidation;
-  /* eslint-enable no-undef */
+  if (
+    !proxyAddress ||
+    !rpcUrl ||
+    !Web3.utils.isAddress(proxyAddress) ||
+    (!skipUpgraderValidation &&
+      (!v2_2UpgraderAddress || !Web3.utils.isAddress(v2_2UpgraderAddress)))
+  ) {
+    throw new Error(
+      "Usage: yarn execScript scripts/validateAccountsToBlacklist.js [--datasource-file-path=<path to JSON file>] \n" +
+        "[--skip-datasource-validation] \n" +
+        "[--skip-upgrader-validation] \n" +
+        "--proxy-address=<Proxy address> \n" +
+        "--upgrader-address=<V2_2Upgrader address> \n" +
+        "--rpc-url=<URL to a valid RPC>"
+    );
+  }
 
-  const proxyAddress =
-    network === "development" && !rawProxyAddress
-      ? (await FiatTokenProxy.deployed()).address
-      : `0x${rawProxyAddress}`;
-  const v2_2UpgraderAddress =
-    network === "development" && !rawV2_2UpgraderAddress
-      ? (await V2_2Upgrader.deployed()).address
-      : `0x${rawV2_2UpgraderAddress}`;
-
-  console.log(`network: ${network}`);
+  console.log(`rpcUrl: ${rpcUrl}`);
   console.log(`proxyAddress: ${proxyAddress}`);
   console.log(`v2_2UpgraderAddress: ${v2_2UpgraderAddress}`);
   console.log(`datasourceFilePath: ${datasourceFilePath}`);
   console.log(`skipDatasourceValidation: ${skipDatasourceValidation}`);
   console.log(`skipUpgraderValidation: ${skipUpgraderValidation}`);
 
-  if (
-    !web3.utils.isAddress(proxyAddress) ||
-    (!skipUpgraderValidation && !web3.utils.isAddress(v2_2UpgraderAddress))
-  ) {
-    callback(usageError);
-  } else {
-    try {
-      await main(
-        proxyAddress,
-        v2_2UpgraderAddress,
-        datasourceFilePath,
-        skipDatasourceValidation,
-        skipUpgraderValidation
-      );
-      callback();
-    } catch (e) {
-      callback(e);
-    }
-  }
-};
+  await validateAccountsToBlacklist(
+    rpcUrl,
+    proxyAddress,
+    v2_2UpgraderAddress,
+    datasourceFilePath,
+    skipDatasourceValidation,
+    skipUpgraderValidation
+  );
+}
+
+module.exports = main;
+module.exports.validateAccountsToBlacklist = validateAccountsToBlacklist;

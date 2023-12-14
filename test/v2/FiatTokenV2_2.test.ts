@@ -248,7 +248,7 @@ export function behavesLikeFiatTokenV22(
   beforeEach(async () => {
     fiatToken = getFiatToken() as FiatTokenV22InstanceExtended;
     domainSeparator = makeDomainSeparator(
-      "USD Coin",
+      "USDC",
       "2",
       1, // hardcoded to 1 because of ganache bug: https://github.com/trufflesuite/ganache/issues/1643
       fiatToken.address

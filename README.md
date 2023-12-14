@@ -134,18 +134,18 @@ copy of `config.{env}.js.example` for stg and prod by replacing env with the
 name of the environment e.g. `config.stg.js`. The `config.js` file holds values
 that are common whereas `config.{env}.js` holds environment specific values.
 Fill in the empty values. These file must not be checked into the repository. To
-prevent accidental check-ins, `config.js`, `config.{env}.js` and `blacklist.txt`
-are in `.gitignore`.
+prevent accidental check-ins, `config.js` and `config.{env}.js` are in
+`.gitignore`.
 
-For mainnet, be sure to have a specified `blacklist.txt` file with a sanctions
-list from Compliance. As seen in `blacklist.txt.example`, addresses are split by
-new lines. You must blacklist the sanctions list at deployment time using the
-hot blacklister key (in `config.js`).
+For mainnet, be sure to have a specified `blacklist.remote.json` file with a
+sanctions list from Compliance. As seen in `blacklist.test.json`, addresses are
+defined as a json array. You must blacklist the sanctions list at deployment
+time using the hot blacklister key (in `config.js`).
 
 Create a copy of the file `blacklist.test.json`, and name it
 `blacklist.remote.json`. Fill in `blacklist.remote.json` with the list addresses
 to blacklist. This file must not be checked into the repository. To prevent
-accidental check-ins, `blacklist.remote.json` is in `.gitignore`.
+accidental check-ins, `blacklist.*.json` is in `.gitignore`.
 
 ```
 // Ensure that the ENV variable in config.js is set to stg or prod, which will

@@ -21,6 +21,8 @@
  * SOFTWARE.
  */
 
+const Web3 = require("web3");
+const minimist = require("minimist");
 const BN = require("bn.js");
 const { assert } = require("chai");
 const { rlp } = require("ethereumjs-util");
@@ -29,22 +31,23 @@ const { defaultAbiCoder, Interface } = require("@ethersproject/abi");
 const {
   abi: FiatTokenProxyAbi,
 } = require("../build/contracts/FiatTokenProxy.json");
-const FiatTokenProxy = artifacts.require("FiatTokenProxy");
-const V2_2Upgrader = artifacts.require("V2_2Upgrader");
 
 /**
  * A utility script to validate that the signed `changeAdmin` transaction assigns proxy admin to the v2_2UpgraderAddress.
+ * @param {string} rpcUrl url to a valid JSON RPC node
  * @param {string} proxyAddress the contract address of FiatTokenProxy
  * @param {string} v2_2UpgraderAddress the contract address of V2_2Upgrader
  * @param {string} signedTx the signed transaction to be validated
  */
 async function validateChangeAdminTx(
+  rpcUrl,
   proxyAddress,
   v2_2UpgraderAddress,
   signedTx
 ) {
-  const proxy = await FiatTokenProxy.at(proxyAddress);
-  const proxyAdmin = await proxy.admin();
+  const web3 = new Web3(rpcUrl);
+  const proxy = new web3.eth.Contract(FiatTokenProxyAbi, proxyAddress);
+  const proxyAdmin = await proxy.methods.admin().call();
 
   console.log(">> Validating signed tx sender matches proxyAdmin address...");
 
@@ -117,51 +120,45 @@ function decodeTxData(fnName, data) {
   return defaultAbiCoder.decode(fnInfo.inputs, params);
 }
 
-async function main(callback) {
-  /* eslint-disable no-undef -- Config is a global variable in a truffle exec script https://github.com/trufflesuite/truffle/pull/3233 */
-  const network = config.network;
-  const rawProxyAddress = config.proxyAddress;
-  const rawUpgraderAddress = config.upgraderAddress;
-  const rawSignedTx = config.signedTx;
+async function main() {
+  const argv = minimist(process.argv.slice(2), {
+    string: ["proxy-address", "upgrader-address", "signed-tx"],
+  });
 
-  /* eslint-enable no-undef */
-  const usageError = new Error(
-    /* eslint-disable no-multi-str */
-    "Usage: yarn truffle exec scripts/validateChangeProxyAdminTx.js \
-    [--network=<NETWORK>] \
-    [--proxy-address=<0x-stripped Proxy contract address>] \
-    [--upgrader-address=<0x-stripped V2.2 Upgrader contract address>] \
-    --signed-tx=<0x-stripped Signed changeAdmin transaction>"
-  );
-
-  const proxyAddress =
-    network === "development" && !rawProxyAddress
-      ? (await FiatTokenProxy.deployed()).address
-      : `0x${rawProxyAddress}`;
-  const v2_2UpgraderAddress =
-    network === "development" && !rawUpgraderAddress
-      ? (await V2_2Upgrader.deployed()).address
-      : `0x${rawUpgraderAddress}`;
-  const signedTx = `0x${rawSignedTx}`;
-
-  console.log(`network: ${network}`);
-  console.log(`proxyAddress: ${proxyAddress}`);
-  console.log(`v2_2UpgraderAddress: ${v2_2UpgraderAddress}`);
-  console.log(`signedTx: ${signedTx}`);
+  const proxyAddress = argv["proxy-address"];
+  const v2_2UpgraderAddress = argv["upgrader-address"];
+  const rpcUrl = argv["rpc-url"];
+  const signedTx = argv["signed-tx"];
 
   if (
-    !web3.utils.isAddress(proxyAddress) ||
-    !web3.utils.isAddress(v2_2UpgraderAddress)
+    !proxyAddress ||
+    !v2_2UpgraderAddress ||
+    !rpcUrl ||
+    !signedTx ||
+    !Web3.utils.isAddress(proxyAddress) ||
+    !Web3.utils.isAddress(v2_2UpgraderAddress)
   ) {
-    callback(usageError);
-  } else {
-    try {
-      await validateChangeAdminTx(proxyAddress, v2_2UpgraderAddress, signedTx);
-      callback();
-    } catch (e) {
-      callback(e);
-    }
+    throw new Error(
+      /* eslint-disable no-multi-str */
+      "Usage: yarn execScript scripts/validateChangeProxyAdminTx.js \n\
+      --proxy-address=<Proxy contract address> \n\
+      --upgrader-address=<V2.2 Upgrader contract address> \n\
+      --rpc-url=<URL to a valid RPC> \n\
+      --signed-tx=<Signed changeAdmin transaction bytes>"
+    );
   }
+
+  console.log(`proxyAddress: ${proxyAddress}`);
+  console.log(`v2_2UpgraderAddress: ${v2_2UpgraderAddress}`);
+  console.log(`rpcUrl: ${rpcUrl}`);
+  console.log(`signedTx: ${"*".repeat(signedTx.length)}`);
+
+  await validateChangeAdminTx(
+    rpcUrl,
+    proxyAddress,
+    v2_2UpgraderAddress,
+    signedTx
+  );
 }
 
 module.exports = main;

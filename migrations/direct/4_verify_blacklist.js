@@ -19,13 +19,15 @@
 /*
  * Use this script to verify that the proxy contract has all items it should blacklist
  *  Make sure your config.js file has the PROXY_CONTRACT_ADDRESS set and the
- *  blacklist.txt file filled.
+ *  blacklist.remote.json file filled.
  *
  * The script is read-only
  */
 
 const fs = require("fs");
 const path = require("path");
+const some = require("lodash/some");
+const { readBlacklistFile } = require("../../utils");
 
 const Blacklistable = artifacts.require("Blacklistable");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -34,8 +36,6 @@ let proxyContractAddress = "";
 
 const configFile = "config.js";
 const configFileResolved = path.join(__dirname, "..", "..", configFile);
-const blacklistFile = "blacklist.txt";
-const blacklistFileResolved = path.join(__dirname, "..", "..", blacklistFile);
 
 // Attempt to fetch the values needed for blacklisting.
 if (fs.existsSync(configFileResolved)) {
@@ -50,29 +50,28 @@ if (!proxyContractAddress) {
   );
 }
 
-// Proceed to blacklist if and only if the file exists.
-if (!fs.existsSync(blacklistFileResolved)) {
-  throw new Error(
-    `${blacklistFile} file does not exist with addresses! See ${blacklistFile}.example!`
-  );
-}
-
-const addressesToBlacklist = fs
-  .readFileSync(blacklistFileResolved, "utf-8")
-  .split(/\r?\n/); // Split by newlines (\n)
-
 // Prints out current roles on important contracts, for validation
-module.exports = async function (_) {
+module.exports = async function (_, network) {
   proxyContractAddress =
     proxyContractAddress || (await FiatTokenProxy.deployed()).address;
   const proxyAsBlacklistable = await Blacklistable.at(proxyContractAddress);
   const blacklisterRole = await proxyAsBlacklistable.blacklister();
 
+  const isTestEnvironment = some(["development", "coverage"], (v) =>
+    network.includes(v)
+  );
+  const blacklistFile = isTestEnvironment
+    ? "blacklist.test.json"
+    : "blacklist.remote.json";
+  const addressesToBlacklist = readBlacklistFile(
+    path.join(__dirname, "..", "..", blacklistFile)
+  );
+
   console.log(`>>>>>>> Starting Validation <<<<<<<`);
   console.log(`Proxy Contract Addr:   ${proxyContractAddress}`);
   console.log(`Blacklister Role:   ${blacklisterRole}`);
   console.log(
-    `# of items in blacklist.txt:   ${addressesToBlacklist.length}\n\n`
+    `# of items in ${blacklistFile}:   ${addressesToBlacklist.length}\n\n`
   );
 
   if (!(await proxyAsBlacklistable.isBlacklisted(proxyContractAddress))) {

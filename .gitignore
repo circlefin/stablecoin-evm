@@ -4,7 +4,6 @@
 .idea/
 @types/generated/
 artifacts/
-blacklist.txt
 blacklist.*.json
 !blacklist.test.json
 build/
