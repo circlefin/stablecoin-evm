@@ -1,0 +1,164 @@
+name: Master Branch Sync
+on:
+  schedule:
+    # At 5PM UTC every day
+    - cron: "0 17 * * *"
+
+env:
+  PR_HEAD_OWNER: circle-github-action-bot
+  PR_HEAD_PREFIX: update-master-to
+  PR_BASE: master
+
+jobs:
+  auto_sync:
+    runs-on: circle-small
+    steps:
+      - name: Check out repository code
+        if: ${{ github.repository_owner == 'circlefin' }}
+        uses: actions/checkout@v3
+
+      - name: Read secrets from AWS Secrets Manager into environment variables
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          parse-json-secrets: true
+          secret-ids: |
+            /ops/utilities/github-actions-bot/api-token
+            /ops/utilities/github-actions-bot/ssh-priv-key
+
+      - name: Import SSH key
+        uses: shimataro/ssh-key-action@v2.6.1
+        with:
+          key: "${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_SSH_PRIV_KEY }}"
+          name: id_rsa
+          known_hosts: "github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk="
+          if_key_exists: replace
+
+      - name: Add & Fetch Remotes
+        run: |
+          git remote add stablecoin-evm https://github.com/circlefin/stablecoin-evm.git;
+          git remote add stablecoin-evm-private-fork git@github.com:$PR_HEAD_OWNER/stablecoin-evm-private.git;
+
+          git fetch origin;
+          git fetch stablecoin-evm;
+          git fetch stablecoin-evm-private-fork;
+
+          PR_HEAD_BRANCH=$PR_HEAD_PREFIX-$(git rev-parse stablecoin-evm/master)
+          echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> "$GITHUB_ENV";
+          echo "PR_HEAD=$PR_HEAD_OWNER:$PR_HEAD_BRANCH" >> "$GITHUB_ENV";
+
+      - name: Check for differences between the master branches
+        id: check-for-branch-differences
+        run: |
+          if [ ! -z "$(git diff origin/master stablecoin-evm/master)" ]; then
+            echo "has-diff=true" >> "$GITHUB_OUTPUT";
+          fi
+
+      - name: Check if pull request already exists
+        id: check-if-pr-exists
+        uses: actions/github-script@v7
+        if: ${{ steps.check-for-branch-differences.outputs.has-diff == 'true' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              const response = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: process.env.PR_HEAD,
+                base: process.env.PR_BASE,
+                state: "open"
+              });
+              core.setOutput('has-open-pr', (response.data.length > 0).toString())
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
+
+      - name: Close outdated PRs
+        uses: actions/github-script@v7
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr != 'true' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              // GitHub's API doesn't support finding PRs with head branches that match
+              // some pattern. So we do this by listing out 50 PRs (should be sufficient)
+              // given a base, then do an in-memory filtering.
+              const response = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: process.env.PR_BASE,
+                per_page: 50,
+                state: "open",
+              });
+              const regex = new RegExp(`^${process.env.PR_HEAD_OWNER}:${process.env.PR_HEAD_PREFIX}-\\w{40}$`)
+              const outdatedPRs = response.data.filter((pr) => !!pr.head.label.match(regex));
+
+              await Promise.all(
+                outdatedPRs.map(async (pr) => {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    body: "Closing this in favor of a newer PR",
+                  });
+
+                  await github.rest.pulls.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    state: "closed",
+                  });
+                })
+              );
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
+
+      - name: Create branch on stablecoin-evm-private fork
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr != 'true' }}
+        run: |
+          echo "Checking out stablecoin-evm/master to $PR_HEAD_BRANCH...";
+          git checkout -b $PR_HEAD_BRANCH stablecoin-evm/master;
+
+          echo "Pushing updates to fork at $PR_HEAD_OWNER:$PR_HEAD_BRANCH...";
+          git push --force --set-upstream stablecoin-evm-private-fork $PR_HEAD_BRANCH;
+
+      - name: Create pull request
+        uses: actions/github-script@v7
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr != 'true' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              const response = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: "[SYNC] Update master branch with stablecoin-evm/master",
+                head: process.env.PR_HEAD,
+                base: process.env.PR_BASE
+              });
+              core.exportVariable("PR_NUMBER", response.data.number);
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
+
+      - name: Request for reviews
+        uses: actions/github-script@v7
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr != 'true' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: process.env.PR_NUMBER,
+                team_reviewers: ['engineering-centre-tokens-approvers']
+              });
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
