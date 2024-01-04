@@ -19,9 +19,10 @@
 const fs = require("fs");
 
 /**
- * A utility script to merge abis of proxy and implementation contracts
- * @param {string} contractA name of the first contract
- * @param {string} contractB name of the second contract
+ * A utility script to merge abis of proxy and implementation contracts. Events
+ * and functions of contract B will be appended to contract A.
+ * @param {string} contractA name of the first contract (eg. FiatTokenV2_2)
+ * @param {string} contractB name of the second contract (eg. FiatTokenProxy)
  */
 async function mergeAbi(contractA, contractB) {
   const { abi: abiA } = require(`../build/contracts/${contractA}.json`);
