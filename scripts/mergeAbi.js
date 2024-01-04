@@ -54,7 +54,7 @@ async function main() {
 
   if (!contractA || !contractB) {
     throw new Error(
-      "Usage: node scripts/mergeAbi.js <CONTRACT_A> <CONTRACT_B> "
+      "Usage: yarn execScript scripts/mergeAbi.js <CONTRACT_A> <CONTRACT_B> "
     );
   }
 
