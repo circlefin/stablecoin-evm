@@ -1,0 +1,25 @@
+name: Branch Sync
+on:
+  schedule:
+    # At 5PM UTC every day
+    - cron: "0 17 * * *"
+
+jobs:
+  master_branch:
+    uses: ./.github/workflows/pull-based-branch-sync.yml
+    if: ${{ github.repository_owner == 'circlefin' }}
+    with:
+      source_repository_owner: circlefin
+      source_repository: stablecoin-evm
+      source_branch: master
+      destination_branch: master
+      team_reviewer: engineering-centre-tokens-approvers
+  deploy_branch:
+    uses: ./.github/workflows/pull-based-branch-sync.yml
+    if: ${{ github.repository_owner == 'circlefin' }}
+    with:
+      source_repository_owner: circlefin
+      source_repository: stablecoin-evm-private
+      source_branch: master
+      destination_branch: deploy
+      team_reviewer: engineering-centre-tokens-approvers
