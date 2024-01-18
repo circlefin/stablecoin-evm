@@ -28,6 +28,7 @@ const V2_2Upgrader = artifacts.require("V2_2Upgrader");
 let proxyAdminAddress = "";
 let proxyContractAddress = "";
 let newTokenSymbol = "";
+let fiatTokenImplementationAddress = "";
 
 // Read config file if it exists
 if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
@@ -35,6 +36,7 @@ if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
     TOKEN_SYMBOL: newTokenSymbol,
+    FIAT_TOKEN_IMPLEMENTATION_ADDRESS: fiatTokenImplementationAddress,
   } = require("../../config.js"));
 }
 
@@ -65,7 +67,12 @@ module.exports = async (deployer, network) => {
     throw new Error("PROXY_ADMIN_ADDRESS must be provided in config.js");
   }
 
-  const fiatTokenV2_2 = await FiatTokenV2_2.deployed();
+  let fiatTokenV2_2;
+  if (!fiatTokenImplementationAddress) {
+    fiatTokenV2_2 = await FiatTokenV2_2.deployed(); // throws if no implementation contract has been deployed
+  } else {
+    fiatTokenV2_2 = await FiatTokenV2_2.at(fiatTokenImplementationAddress);
+  }
 
   console.log(`Proxy Admin:       ${proxyAdminAddress}`);
   console.log(`FiatTokenProxy:    ${proxyContractAddress}`);
