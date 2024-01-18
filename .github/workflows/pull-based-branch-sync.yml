@@ -26,7 +26,7 @@ env:
 
 jobs:
   auto_sync:
-    runs-on: circle-small
+    runs-on: small-spot
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
