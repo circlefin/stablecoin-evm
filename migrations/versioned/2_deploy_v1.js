@@ -40,9 +40,9 @@ if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     OWNER_ADDRESS: ownerAddress,
-    MASTERMINTER_ADDRESS: masterMinterAddress,
-    PAUSER_ADDRESS: pauserAddress,
-    BLACKLISTER_ADDRESS: blacklisterAddress,
+    MASTER_MINTER_CONTRACT_ADDRESS: masterMinterAddress,
+    COLD_PAUSER_ADDRESS: pauserAddress,
+    COLD_BLACKLISTER_ADDRESS: blacklisterAddress,
     TOKEN_NAME: tokenName,
     TOKEN_SYMBOL: tokenSymbol,
     TOKEN_CURRENCY: tokenCurrency,
@@ -88,7 +88,7 @@ module.exports = async (deployer, network) => {
     !tokenDecimals
   ) {
     throw new Error(
-      "PROXY_ADMIN_ADDRESS, OWNER_ADDRESS, MASTERMINTER_ADDRESS, PAUSER_ADDRESS, BLACKLISTER_ADDRESS, TOKEN_NAME, TOKEN_SYMBOL, TOKEN_CURRENCY, and TOKEN_DECIMALS must be provided in config.js"
+      "PROXY_ADMIN_ADDRESS, OWNER_ADDRESS, MASTER_MINTER_CONTRACT_ADDRESS, COLD_PAUSER_ADDRESS, COLD_BLACKLISTER_ADDRESS, TOKEN_NAME, TOKEN_SYMBOL, TOKEN_CURRENCY, and TOKEN_DECIMALS must be provided in config.js"
     );
   }
 

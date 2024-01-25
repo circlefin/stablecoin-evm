@@ -33,7 +33,7 @@ if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     PROXY_CONTRACT_ADDRESS: proxyContractAddress,
-    LOST_AND_FOUND_ADDRESS: lostAndFoundAddress,
+    COLD_LOST_AND_FOUND_ADDRESS: lostAndFoundAddress,
   } = require("../../config.js"));
 }
 
@@ -48,7 +48,9 @@ module.exports = async (deployer, network) => {
     proxyContractAddress || (await FiatTokenProxy.deployed()).address;
 
   if (!lostAndFoundAddress) {
-    throw new Error("LOST_AND_FOUND_ADDRESS must be provided in config.js");
+    throw new Error(
+      "COLD_LOST_AND_FOUND_ADDRESS must be provided in config.js"
+    );
   }
 
   const fiatTokenV2_1 = await FiatTokenV2_1.deployed();

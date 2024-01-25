@@ -28,7 +28,7 @@ contract("MockFiatTokenWithEditableChainId", (accounts) => {
   const fiatTokenOwner = accounts[9];
   let fiatToken: MockFiatTokenWithEditableChainIdInstance;
 
-  const name = "USD Coin";
+  const name = "USDC";
   const version = "2";
 
   beforeEach(async () => {
@@ -46,7 +46,7 @@ contract("MockFiatTokenWithEditableChainId", (accounts) => {
       fiatTokenOwner,
       fiatTokenOwner
     );
-    await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
+    await fiatToken.initializeV2("USDC", { from: fiatTokenOwner });
     const [, , lostAndFound] = accounts;
     await fiatToken.initializeV2_1(lostAndFound);
     await fiatToken.initializeV2_2([], "USDCUSDC");

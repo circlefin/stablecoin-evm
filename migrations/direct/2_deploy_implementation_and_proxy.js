@@ -43,9 +43,9 @@ if (fs.existsSync(path.join(__dirname, "..", "..", "config.js"))) {
   ({
     PROXY_ADMIN_ADDRESS: proxyAdminAddress,
     OWNER_ADDRESS: ownerAddress,
-    PAUSER_ADDRESS: pauserAddress,
+    COLD_PAUSER_ADDRESS: pauserAddress,
     BLACKLISTER_ADDRESS: blacklisterAddress,
-    LOST_AND_FOUND_ADDRESS: lostAndFoundAddress,
+    COLD_LOST_AND_FOUND_ADDRESS: lostAndFoundAddress,
     MASTERMINTER_OWNER_ADDRESS: masterMinterOwnerAddress,
     FIAT_TOKEN_IMPLEMENTATION_ADDRESS: fiatTokenImplementationAddress,
     TOKEN_NAME: tokenName,
@@ -149,15 +149,13 @@ module.exports = async (deployer, network) => {
   console.log("Initializing proxy contract...");
 
   // Do the initial (V1) initialization.
-  // Note that this takes in the master minter contract's address as the master minter.
-  // The master minter contract's owner is a separate address.
   const proxyAsV2_2 = await FiatTokenV2_2.at(FiatTokenProxy.address);
   await proxyAsV2_2.initialize(
     tokenName,
     tokenSymbol,
     tokenCurrency,
     tokenDecimals,
-    masterMinter.address,
+    masterMinterOwnerAddress, // Use master minter owner address initially to allow easy configuation of mint controllers and minter allowance.
     pauserAddress,
     blacklisterAddress,
     ownerAddress

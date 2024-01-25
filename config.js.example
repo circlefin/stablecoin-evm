@@ -17,41 +17,81 @@
  */
 
 module.exports = {
-  // BIP39 mnemonic phrase
-  MNEMONIC: "",
-  // INFURA API key
-  INFURA_KEY: "",
-  // FiatTokenProxy admin - can upgrade implementation contract
-  PROXY_ADMIN_ADDRESS: "",
-  // Owner - can configure master minter, pauser, and blacklister
-  OWNER_ADDRESS: "",
-  // Master Minter - can configure minters and minter allowance
-  MASTERMINTER_ADDRESS: "",
-  // Master Minter Owner - owner of master minter contract
-  MASTERMINTER_OWNER_ADDRESS: "",
-  // Pauser - can pause the contract
-  PAUSER_ADDRESS: "",
-  // Blacklister - can blacklist addresses
-  BLACKLISTER_ADDRESS: "",
-  // FiatTokenProxy contract - override the contract address used in migrations
-  PROXY_CONTRACT_ADDRESS: "",
-  // FiatToken Implementation contract - deploy new proxy with an existing implementation contract
-  FIAT_TOKEN_IMPLEMENTATION_ADDRESS: "",
-  // LostAndFound - tokens that were locked in the contract are sent to this
-  LOST_AND_FOUND_ADDRESS: "",
-  // MockERC1271WalletOwner - can deploy and send transactions from a sample ERC1271 wallet
-  MOCK_ERC1271_WALLET_OWNER_ADDRESS: "",
+  // ***** CONFIGURATION *********
+  // Environment: Either stg or prod
+  ENV: "",
+  // these API keys are used to verify contracts
+  // see truffle-config.js for more context
+  ARBISCAN_API_KEY: "",
+  ETHERSCAN_API_KEY: "",
+  OPTIMISTIC_ETHERSCAN_API_KEY: "",
+  POLYGONSCAN_API_KEY: "",
+  SNOWTRACE_API_KEY: "",
 
-  // TokenName - ERC20 name of the token e.g. "USD Coin"
-  TOKEN_NAME: "USD Coin",
+  LOCAL_RPC_URL: "http://127.0.0.1:8545",
+
+  MAINNET_ID: "",
+  MAINNET_RPC_URL: "",
+  MAINNET_GAS_PRICE: "",
+  MAINNET_GAS: "",
+
+  TESTNET_ID: "",
+  TESTNET_RPC_URL: "",
+  TESTNET_GAS_PRICE: "",
+  TESTNET_GAS: "",
+
+  // TokenName - ERC20 name of the token e.g. "USDC"
+  TOKEN_NAME: "USDC",
   // TokenSymbol - Symbol of the token e.g. "USDC"
   TOKEN_SYMBOL: "USDC",
   // TokenCurrency - Currency of the token e.g. "USD"
   TOKEN_CURRENCY: "USD",
   // TokenDecimals - Number of decimals for the token e.g. 6
   TOKEN_DECIMALS: 6,
-
-  // USE_VERSIONED_MIGRATIONS - whether or not to use migrations in migrations/versioned directory.
+  // USE_VERSIONED_MIGRATIONS - whether or not to use legacy migrations in migrations/versioned directory.
   // These migrations deploy each version of FiatToken separately.
-  USE_VERSIONED_MIGRATIONS: true,
+  USE_VERSIONED_MIGRATIONS: false,
+
+  // FiatTokenImplementationAddress - (optional) if given for non-usdc migrations we don't deploy FiatToken, just the proxy
+  // FIAT_TOKEN_IMPLEMENTATION_ADDRESS: "",
+  // FiatTokenProxy contract - override the contract address used in migrations
+  // PROXY_CONTRACT_ADDRESS: "",
+  // MasterMinter contract - (optional) only required if transferring addresses to cold storage
+  // MASTER_MINTER_CONTRACT_ADDRESS: "",
+
+  // ***** DEPLOYER HOT KEYS *********
+
+  BLACKLISTER_ADDRESS: "",
+  BLACKLISTER_PRIVATE_KEY: "",
+
+  DEPLOYER_ADDRESS: "",
+  DEPLOYER_PRIVATE_KEY: "",
+
+  MASTERMINTER_OWNER_ADDRESS: "",
+  MASTERMINTER_OWNER_PRIVATE_KEY: "",
+
+  OWNER_ADDRESS: "",
+  OWNER_PRIVATE_KEY: "",
+
+  PROXY_ADMIN_ADDRESS: "",
+  PROXY_ADMIN_PRIVATE_KEY: "",
+
+  MOCK_ERC1271_WALLET_OWNER_ADDRESS: "",
+
+  // Used for running test scripts.
+  TEST_ACCOUNT: "",
+  TEST_ACCOUNT_PRIVATE_KEY: "",
+
+  // ***** COLD STORAGE *********
+
+  // Pauser - can pause the contract
+  COLD_PAUSER_ADDRESS: "",
+  // Blacklister - can blacklist addresses
+  COLD_BLACKLISTER_ADDRESS: "",
+  // LostAndFound - tokens that were locked in the contract are sent to this
+  COLD_LOST_AND_FOUND_ADDRESS: "",
+  COLD_MASTERMINTER_OWNER_ADDRESS: "",
+  COLD_PROXY_ADMIN_ADDRESS: "",
+  // Owner - can configure master minter, pauser, and blacklister
+  COLD_OWNER_ADDRESS: "",
 };
