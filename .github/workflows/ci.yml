@@ -1,5 +1,7 @@
 name: Continuous Integration
 on:
+  push:
+    branches: [master]
   pull_request:
 
 jobs:
@@ -31,3 +33,13 @@ jobs:
 
       - name: Run tests
         run: yarn test
+
+  scan:
+    needs: run_ci_tests
+    if: github.event_name == 'pull_request'
+    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1
+
+  release-sbom:
+    needs: run_ci_tests
+    if: github.event_name == 'push'
+    uses: circlefin/circle-public-github-workflows/.github/workflows/attach-release-assets.yaml@v1
