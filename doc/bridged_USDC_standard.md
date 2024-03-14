@@ -4,7 +4,7 @@
 
 The result is a secure and standardized way for any EVM blockchain and rollup team to transfer ownership of a bridged USDC token contract to Circle to facilitate an upgrade to native USDC, if and when both parties deem appropriate.<sup>2</sup>
 
-This document provides a high-level overview of the process. Note that this also applies to to implementations of bridged EURC (Circle’s euro-backed stablecoin), as they follow the same implementation.
+This document provides a high-level overview of the process. Note that this also applies to implementations of bridged EURC (Circle’s euro-backed stablecoin), as they follow the same implementation.
 
 ## How it works
 
