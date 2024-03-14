@@ -16,22 +16,46 @@ This document provides a high-level overview of the process. Note that this also
    - Circle and the third-party team will jointly coordinate to burn the supply of native USDC locked in the bridge contract on the origin chain and upgrade the bridged USDC token contract on the destination chain to native USDC.
 4. The native USDC token contract seamlessly retains the existing supply, holders, and app integrations of the original bridged USDC token contract.
 
-### Bridge Contracts
+## Bridge Contracts
 
-The third-party team’s bridge contracts must be upgradeable to add required, specific functionality at a later point in time to support the upgrade steps above, once Circle and the third-party team jointly decide to perform the upgrade.
+The third-party team’s bridge contracts play an integral role and require small additions to support the upgrade process. 
 
-### Token Deployment
+1. (*Source and destination blockchains*) Ability to pause USDC bridging to create a lock on the supply.
+2. (*Source blockchain*) Ability to burn locked USDC.
+
+Circle recommends deferring adding this functionality to a later time through a contract upgrade after Circle and the third-party team have jointly agreed to proceed with an upgrade. 
+
+### 1) Ability to pause USDC bridging
+
+The bridges must be able to support a USDC supply lock, whereby the USDC locked on the source blockchain will (at some point soon after) precisely match the circulating bridged USDC supply on the destination blockchain. How this is implemented is up to the third-party team, but this functionality must be present before an upgrade can take place. 
+
+### 2) Ability to burn locked USDC
+
+A final step during the upgrade is to burn locked USDC in the source blockchain bridge contract. To support this, Circle will temporarily assign the bridge contract holding the USDC balance the role of a zero-allowance USDC minter. This means that the bridge may burn its own held balance but not mint new supply. 
+
+To execute the burn, the bridge contract must expose a single function, only callable by a Circle-controlled account. The signature of this function will be: 
+
+```
+function burnLockedUSDC() external;
+```
+
+The specific implementation details are left up to the third-party team, but at a minimum, the function must:
+1. Be only callable by an address that Circle specifies closer to the time of the upgrade. 
+2. Burn the amount of USDC held by the bridge that corresponds precisely to the circulating total supply of bridged USDC established by the supply lock. 
+
+
+## Token Deployment
 
 The third-party team’s bridged USDC token contract is expected to be identical to native USDC token contracts on other EVM blockchains. USDC uses a proxy pattern, so the standard applies to both the implementation contract code and the token proxy.
 
-**Token Contract Code**
+### Token Contract Code
 
 Using identical code facilitates trustless contract verification by Circle and supports a seamless integration with existing USDC services. To facilitate this, the third-party team may choose one of the following:
 - Copy previously deployed bytecode from a recent, native USDC token contract deployment (both proxy and implementation) on an EVM blockchain, for example [Arbitrum](https://arbiscan.io/token/0xaf88d065e77c8cc2239327c5edb3a432268e5831), [Base](https://basescan.org/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913), [OP Mainnet](https://optimistic.etherscan.io/token/0x0b2c639c533813f4aa9d7837caf62653d097ff85), or [Polygon PoS](https://polygonscan.com/token/0x3c499c542cef5e3811e1192ce70d8cc03d5c3359). Note that you must supply different constructor and initializer parameters where needed.
    - For EURC, please reference the bytecode from the [Ethereum](https://etherscan.io/token/0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c) implementation
 - Build the [FiatToken contracts](https://github.com/circlefin/stablecoin-evm#contracts) from source. In this case, the compiler [metadata](https://docs.soliditylang.org/en/latest/metadata.html) must be published or made available to support full contract verification. Various suggested compiler settings that Circle uses can be found [here](https://github.com/circlefin/stablecoin-evm/blob/35d66ae39f7038e30f04f87635f8bca6f8e38b04/truffle-config.js#L34-L45), which will allow the third-party team to reach the same bytecode if followed consistently.
 
-**Token Naming**
+### Token Naming
 
 Circle has recommended [naming guidelines](https://brand.circle.com/d/M9z54TaEwsWL/stablecoins#/usdc-brand-guide/usdc-naming-guidelines) for the Token Name and Token Symbol attributes of a bridged USDC or EURC token contract that third-party teams are encouraged to follow. It is often the case that USDC and EURC are bridged from Ethereum to a new destination blockchain, and as such, the following is commonly used:
 
@@ -46,7 +70,7 @@ EURC
 
 Note that the text shown in parentheses above would be the third-party team’s company name.
 
-**IMPORTANT NOTE:**
+### IMPORTANT NOTE:
 
 - Once deployed, the bridged token contract must not be upgraded to a new or different implementation at any time, outside of subsequent FiatToken versions authored by Circle.
 - FiatToken has a number of one-time use initialization functions (listed below) that are not permissioned, and therefore should be called during contract deployment.
@@ -59,13 +83,36 @@ Note that the text shown in parentheses above would be the third-party team’s 
 
 There are a number of reference [deployment scripts](https://github.com/circlefin/stablecoin-evm/tree/35d66ae39f7038e30f04f87635f8bca6f8e38b04/migrations/direct) in the repository that demonstrate patterns for deploying USDC/EURC and configuring the implementation. For instance, there’s an [upgrader pattern](https://github.com/circlefin/stablecoin-evm/blob/35d66ae39f7038e30f04f87635f8bca6f8e38b04/migrations/versioned/8_deploy_v2_2_upgrader.js), where a smart contract sets the FiatToken implementation contract and calls the initialize functions within a single transaction.
 
-**Token Roles**
+### Token Roles
 
-FiatToken uses a minter pattern, where minters can be configured via a master minter role to mint up to an allowed amount. One way to adapt the minter pattern to a bridged USDC or EURC token contract is to configure the destination bridge as a solo minter.
+FiatToken uses a minter pattern, where minters can be configured via a master minter role to mint up to an allowed amount. One way to adapt the minter pattern to a bridged USDC token contract is to configure the destination bridge as a solo minter.
 
 The individual FiatToken roles (Owner, Pauser, Blacklister, MasterMinter) could also be assigned to the bridge, or some other upgradeable contract, as long as there's the ability to add a hook in the future to enable transferring the roles to Circle.
 
-If you would like more flexibility with permissioned minter configurations, you may want to explore the `Controller` and `MinterController` [contracts](https://github.com/circlefin/stablecoin-evm/tree/35d66ae39f7038e30f04f87635f8bca6f8e38b04/contracts/minting), which come together to form the `MasterMinter` pattern.
+If you would like more flexibility with permissioned minter configurations, you may want to explore the Controller and `MinterController` [contracts](https://github.com/circlefin/stablecoin-evm/tree/35d66ae39f7038e30f04f87635f8bca6f8e38b04/contracts/minting), which come together to form the `MasterMinter` pattern.
+
+**Transferring the roles to Circle**
+
+There are several USDC roles that will be transferred to a Circle-owned address at the time of the upgrade. Specifically these are:
+
+* Implementation Owner: [defined](https://github.com/circlefin/stablecoin-evm/blob/657375471bff72afa5f625083bbab8003eb5f8c9/contracts/v1/Ownable.sol#L37) in the implementation contract, the Owner can re-assign all other roles (Owner, MasterMinter, Pauser, Rescuer, Blacklister). 
+* ProxyAdmin: [defined](https://github.com/circlefin/stablecoin-evm/blob/657375471bff72afa5f625083bbab8003eb5f8c9/contracts/upgradeability/AdminUpgradeabilityProxy.sol#L31) in the proxy contract, the ProxyAdmin can re-assign the ProxyAdmin and perform upgrades. By default, the proxy admin is not allowed to call any functions defined by the implementation contract.
+
+It is up to the third-party team as to how they will secure and manage these roles as part of their original bridged USDC deployment and its ongoing use before a potential upgrade. For instance, the roles could be assigned to a secure multi-sig, or assigned to a smart contract (like the bridge), which can simplify the role transfer process. 
+
+Some teams have opted to assign the ProxyAdmin role to a secure EOA / multi-sig wallet and assign the USDC roles to the bridge contract itself.
+
+If they are assigned to a smart contract, the contract must expose a function that Circle can call through a smart contract interaction to perform the role transfer at upgrade time. Automating this interaction can reduce manual errors and can enable atomic before and after checks that facilitate a smooth transfer. 
+
+This function must have the following signature: 
+
+```
+function transferUSDCRoles(address owner) external;
+```
+
+The function implementation details are left up to the partner, but it must: 1) only be callable by a Circle-owned address and 2) transfer the Implementation Owner role and the ProxyAdmin role to the function caller (if both are assigned to the bridge). 
+
+Additionally, the partner is expected to remove all configured minters prior to (or concurrently with) transferring the roles to Circle.
 
 ## For more information
 
