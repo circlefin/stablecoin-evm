@@ -85,7 +85,7 @@ There are a number of reference [deployment scripts](https://github.com/circlefi
 
 ### Token Roles
 
-FiatToken uses a minter pattern, where minters can be configured via a master minter role to mint up to an allowed amount. One way to adapt the minter pattern to a bridged USDC token contract is to configure the destination bridge as a solo minter.
+FiatToken uses a minter pattern, where minters can be configured via a master minter role to mint up to an allowed amount. One way to adapt the minter pattern to a bridged USDC or EURC token contract is to configure the destination bridge as a solo minter.
 
 The individual FiatToken roles (Owner, Pauser, Blacklister, MasterMinter) could also be assigned to the bridge, or some other upgradeable contract, as long as there's the ability to add a hook in the future to enable transferring the roles to Circle.
 
