@@ -18,7 +18,7 @@ This document provides a high-level overview of the process. Note that this also
 
 ## Bridge Contracts
 
-The third-party team’s bridge contracts play an integral role and require small additions to support the upgrade process. 
+The third-party team’s bridge contracts play an integral role in the process, and must be upgradable in order to add the following functionality, which is required to support the upgrade process.
 
 1. (*Source and destination blockchains*) Ability to pause USDC bridging to create a lock on the supply.
 2. (*Source blockchain*) Ability to burn locked USDC.
