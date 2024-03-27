@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,12 +44,14 @@ const {
   proxyOwnerAccount,
   initializeTokenWithProxy,
   upgradeTo,
-  UpgradedFiatToken,
   getAdmin,
 } = require("./helpers/tokenTest");
+const { HARDHAT_ACCOUNTS } = require("../helpers/constants");
 
 // these tests are for reference and do not track side effects on all variables
-function runTests(newToken, accounts, version) {
+function runTests(newToken, version) {
+  const accounts = HARDHAT_ACCOUNTS;
+
   let proxy, token;
 
   beforeEach(async () => {
@@ -672,18 +674,17 @@ function runTests(newToken, accounts, version) {
     const initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BN(initialBalance).eqn(200));
 
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await newToken();
     const tokenConfig = await upgradeTo(proxy, newRawToken);
     const newProxiedToken = tokenConfig.token;
-    const newToken = newProxiedToken;
 
-    const upgradedBalance = await newToken.balanceOf(accounts[2]);
+    const upgradedBalance = await newProxiedToken.balanceOf(accounts[2]);
     assert.isTrue(new BN(upgradedBalance).eqn(200));
-    await newToken.configureMinter(minterAccount, 500, {
+    await newProxiedToken.configureMinter(minterAccount, 500, {
       from: masterMinterAccount,
     });
-    await newToken.mint(accounts[2], 200, { from: minterAccount });
-    const balance = await newToken.balanceOf(accounts[2]);
+    await newProxiedToken.mint(accounts[2], 200, { from: minterAccount });
+    const balance = await newProxiedToken.balanceOf(accounts[2]);
     assert.isTrue(new BN(balance).eqn(400));
   });
 
@@ -742,18 +743,17 @@ function runTests(newToken, accounts, version) {
     const initialBalance = await token.balanceOf(accounts[2]);
     assert.isTrue(new BN(initialBalance).eqn(200));
 
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await newToken();
     const tokenConfig = await upgradeTo(proxy, newRawToken, address1);
     const newProxiedToken = tokenConfig.token;
-    const newToken = newProxiedToken;
 
-    const upgradedBalance = await newToken.balanceOf(accounts[2]);
+    const upgradedBalance = await newProxiedToken.balanceOf(accounts[2]);
     assert.isTrue(new BN(upgradedBalance).eqn(200));
-    await newToken.configureMinter(minterAccount, 500, {
+    await newProxiedToken.configureMinter(minterAccount, 500, {
       from: masterMinterAccount,
     });
-    await newToken.mint(accounts[2], 200, { from: minterAccount });
-    const balance = await newToken.balanceOf(accounts[2]);
+    await newProxiedToken.mint(accounts[2], 200, { from: minterAccount });
+    const balance = await newProxiedToken.balanceOf(accounts[2]);
     assert.isTrue(new BN(balance).eqn(400));
   });
 

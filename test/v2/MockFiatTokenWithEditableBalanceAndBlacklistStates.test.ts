@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,28 +18,39 @@
 
 import BN from "bn.js";
 import { MockFiatTokenWithEditableBalanceAndBlacklistStatesInstance } from "../../@types/generated";
-import { expectRevert, initializeToVersion } from "../helpers";
-import { ACCOUNTS_AND_KEYS, POW_2_255_BN } from "../helpers/constants";
+import {
+  expectRevert,
+  initializeToVersion,
+  linkLibraryToTokenContract,
+} from "../helpers";
+import {
+  ACCOUNTS_AND_KEYS,
+  HARDHAT_ACCOUNTS,
+  POW_2_255_BN,
+} from "../helpers/constants";
 
-const SignatureChecker = artifacts.require("SignatureChecker");
 const MockFiatTokenWithEditableBalanceAndBlacklistStates = artifacts.require(
   "MockFiatTokenWithEditableBalanceAndBlacklistStates"
 );
 
-contract("MockFiatTokenWithEditableBalanceAndBlacklistStates", (accounts) => {
-  const fiatTokenOwner = accounts[9];
+describe("MockFiatTokenWithEditableBalanceAndBlacklistStates", () => {
   const userOne = ACCOUNTS_AND_KEYS[0].address;
+  const [, , lostAndFound] = HARDHAT_ACCOUNTS;
+  const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
 
   let fiatToken: MockFiatTokenWithEditableBalanceAndBlacklistStatesInstance;
 
   const ZERO = new BN(0);
   const SEVEN = new BN(7, 10);
 
+  before(async () => {
+    await linkLibraryToTokenContract(
+      MockFiatTokenWithEditableBalanceAndBlacklistStates
+    );
+  });
+
   beforeEach(async () => {
-    await SignatureChecker.new();
-    MockFiatTokenWithEditableBalanceAndBlacklistStates.link(SignatureChecker);
     fiatToken = await MockFiatTokenWithEditableBalanceAndBlacklistStates.new();
-    const [, , lostAndFound] = accounts;
     await initializeToVersion(fiatToken, "2.2", fiatTokenOwner, lostAndFound);
   });
 

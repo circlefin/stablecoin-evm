@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ const expectRevert = tokenUtils.expectRevert;
 const expectError = tokenUtils.expectError;
 const bigZero = tokenUtils.bigZero;
 
-const clone = require("clone");
+const { cloneDeep } = require("lodash");
 
 const mintUtils = require("./MintControllerUtils.js");
 const AccountUtils = require("./AccountUtils.js");
@@ -49,7 +49,7 @@ async function run_tests(newToken) {
     );
     token = tokenConfig.token;
     mintController = tokenConfig.mintController;
-    expectedMintControllerState = clone(tokenConfig.customState);
+    expectedMintControllerState = cloneDeep(tokenConfig.customState);
     expectedTokenState = [
       { variable: "masterMinter", expectedValue: mintController.address },
     ];

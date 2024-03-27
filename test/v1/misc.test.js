@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ const {
   POW_2_255_MINUS1_HEX,
   MAX_UINT256_HEX,
   MAX_UINT256_BN,
+  ZERO_BYTES32,
 } = require("../helpers/constants");
 const wrapTests = require("./helpers/wrapTests");
 const {
@@ -43,7 +44,7 @@ const {
 
 const amount = 100;
 
-function runTests(newToken, _accounts, version) {
+function runTests(newToken, version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -742,7 +743,7 @@ function runTests(newToken, _accounts, version) {
     });
     const token = await FiatTokenV1.at(newProxy.address);
     const initialized = await getInitializedV1(token);
-    assert.strictEqual("0x00", initialized);
+    assert.strictEqual(ZERO_BYTES32, initialized);
   });
 
   it("ms047 configureMinter works on amount=2^256-1", async () => {

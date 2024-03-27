@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,11 @@
 
 import {
   FiatTokenV2Instance,
-  FiatTokenV21Instance,
+  FiatTokenV2_1Instance,
   FiatTokenProxyInstance,
 } from "../../@types/generated";
-import { strip0x, expectRevert } from "../helpers";
+import { strip0x, expectRevert, linkLibraryToTokenContract } from "../helpers";
+import { accounts } from "../helpers/constants";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
@@ -29,22 +30,47 @@ const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const V2_1Upgrader = artifacts.require("V2_1Upgrader");
 
-contract("V2_1Upgrader", (accounts) => {
+describe("V2_1Upgrader", () => {
   let fiatTokenProxy: FiatTokenProxyInstance;
   let proxyAsV2: FiatTokenV2Instance;
-  let proxyAsV2_1: FiatTokenV21Instance;
+  let proxyAsV2_1: FiatTokenV2_1Instance;
   let v2Implementation: FiatTokenV2Instance;
-  let v2_1Implementation: FiatTokenV21Instance;
-  let originalProxyAdmin: string;
-  const [minter, lostAndFound, alice, bob] = accounts.slice(9);
+  let v2_1Implementation: FiatTokenV2_1Instance;
+
+  const {
+    minterAccount: minter,
+    proxyOwnerAccount: originalProxyAdmin,
+    lostAndFoundAccount: lostAndFound,
+    arbitraryAccount: alice,
+    arbitraryAccount2: bob,
+    masterMinterAccount,
+    pauserAccount,
+    blacklisterAccount,
+    tokenOwnerAccount,
+  } = accounts;
 
   before(async () => {
-    fiatTokenProxy = await FiatTokenProxy.deployed();
+    await linkLibraryToTokenContract(FiatTokenV2);
+    await linkLibraryToTokenContract(FiatTokenV2_1);
+
+    v2Implementation = await FiatTokenV2.new();
+    v2_1Implementation = await FiatTokenV2_1.new();
+    fiatTokenProxy = await FiatTokenProxy.new(v2Implementation.address, {
+      from: originalProxyAdmin,
+    });
+
     proxyAsV2 = await FiatTokenV2.at(fiatTokenProxy.address);
     proxyAsV2_1 = await FiatTokenV2_1.at(fiatTokenProxy.address);
-    v2Implementation = await FiatTokenV2.deployed();
-    v2_1Implementation = await FiatTokenV2_1.deployed();
-    originalProxyAdmin = await fiatTokenProxy.admin();
+    await proxyAsV2.initialize(
+      "USD//C",
+      "USDC",
+      "USD",
+      6,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      tokenOwnerAccount
+    );
 
     // Upgrade from v1 to v2
     await fiatTokenProxy.upgradeToAndCall(
@@ -64,9 +90,12 @@ contract("V2_1Upgrader", (accounts) => {
 
   describe("upgrade", () => {
     it("upgrades, transfers proxy admin role to newProxyAdmin, runs tests, and self-destructs", async () => {
-      // Run the test on the contracts deployed by Truffle to ensure the Truffle
-      // migration is written correctly
-      const upgrader = await V2_1Upgrader.deployed();
+      const upgrader = await V2_1Upgrader.new(
+        fiatTokenProxy.address,
+        v2_1Implementation.address,
+        originalProxyAdmin,
+        lostAndFound
+      );
       const upgraderOwner = await upgrader.owner();
 
       expect(await upgrader.proxy()).to.equal(fiatTokenProxy.address);
@@ -176,7 +205,7 @@ contract("V2_1Upgrader", (accounts) => {
         from: originalProxyAdmin,
       });
       const fiatTokenV1_1 = await FiatTokenV1_1.new();
-      const upgraderOwner = accounts[0];
+      const upgraderOwner = accounts.deployerAccount;
 
       const upgrader = await V2_1Upgrader.new(
         fiatTokenProxy.address,
@@ -212,7 +241,7 @@ contract("V2_1Upgrader", (accounts) => {
       fiatTokenProxy = await FiatTokenProxy.new(v2Implementation.address, {
         from: originalProxyAdmin,
       });
-      const upgraderOwner = accounts[0];
+      const upgraderOwner = accounts.deployerAccount;
       const upgrader = await V2_1Upgrader.new(
         fiatTokenProxy.address,
         v2_1Implementation.address,

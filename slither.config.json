@@ -1,3 +1,0 @@
-{
-  "detectors_to_exclude": "naming-convention,pragma,solc-version,timestamp"
-}

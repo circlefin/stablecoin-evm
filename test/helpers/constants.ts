@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -100,70 +100,80 @@ export const ACCOUNTS_AND_KEYS: { address: string; key: string }[] = [
   },
 ];
 
-const GANACHE_ACCOUNTS: Array<string> = [
-  "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
-  "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
-  "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b",
-  "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d",
-  "0xd03ea8624C8C5987235048901fB614fDcA89b117",
-  "0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC",
-  "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9",
-  "0x28a8746e75304c0780E011BEd21C72cD78cd535E",
-  "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E",
-  "0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e",
-  "0x610Bb1573d1046FCb8A70Bbbd395754cD57C2b60",
-  "0x855FA758c77D68a04990E992aA4dcdeF899F654A",
-  "0xfA2435Eacf10Ca62ae6787ba2fB044f8733Ee843",
-  "0x64E078A8Aa15A41B85890265648e965De686bAE6",
-  "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598",
+export const HARDHAT_ACCOUNTS: string[] = [
+  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+  "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+  "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+  "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+  "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+  "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+  "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+  "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+  "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+  "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
+  "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+  "0xFABB0ac9d68B0B445fB7357272Ff202C5651694a",
+  "0x1CBd3b2770909D4e10f157cABC84C7264073C9Ec",
+  "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097",
+  "0xcd3B766CCDd6AE721141F452C550Ca635964ce71",
+  "0x2546BcD3c84621e976D8185a91A922aE77ECEc30",
+  "0xbDA5747bFD65F08deb54cb465eB87D40e51B197E",
+  "0xdD2FD4581271e230360230F9337D5c0430Bf44C0",
+  "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
 ];
 
-const GANACHE_PRIVATE_KEYS: Array<string> = [
-  "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d",
-  "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1",
-  "6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c",
-  "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913",
-  "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743",
-  "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd",
-  "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52",
-  "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3",
-  "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4",
-  "b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773",
-  "77c5495fbb039eed474fc940f29955ed0531693cc9212911efd35dff0373153f",
-  "d99b5b29e6da2528bf458b26237a6cf8655a3e3276c1cdc0de1f98cefee81c01",
-  "9b9c613a36396172eab2d34d72331c8ca83a358781883a535d2941f66db07b24",
-  "0874049f95d55fb76916262dc70571701b5c4cc5900c0691af75f1a8a52c8268",
-  "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46",
+export const HARDHAT_PRIVATE_KEYS: string[] = [
+  "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+  "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+  "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+  "7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+  "47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+  "8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba",
+  "92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
+  "4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
+  "dbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97",
+  "2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6",
+  "f214f2b2cd398c806f84e317254e0f0b801d0643303237d97a22a48e01628897",
+  "701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
+  "a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
+  "47c99abed3324a2707c28affff1267e45918ec8c3f20b8aa892e8b065d2942dd",
+  "c526ee95bf44d8fc405a158bb884d9d1238d99f0612e9f33d006bb0789009aaa",
+  "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61",
+  "ea6c44ac03bff858b476bba40716402b03e41b8e97e276d1baec7c37d42484a0",
+  "689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd",
+  "de9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0",
+  "df57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
 ];
 
 export const accounts = {
-  deployerAccount: GANACHE_ACCOUNTS[0],
-  arbitraryAccount: GANACHE_ACCOUNTS[1],
-  tokenOwnerAccount: GANACHE_ACCOUNTS[3],
-  blacklisterAccount: GANACHE_ACCOUNTS[4],
-  arbitraryAccount2: GANACHE_ACCOUNTS[5],
-  masterMinterAccount: GANACHE_ACCOUNTS[6],
-  minterAccount: GANACHE_ACCOUNTS[7],
-  pauserAccount: GANACHE_ACCOUNTS[8],
-  mintOwnerAccount: GANACHE_ACCOUNTS[9],
-  controller1Account: GANACHE_ACCOUNTS[11],
-  rescuerAccount: GANACHE_ACCOUNTS[12],
-  lostAndFoundAccount: GANACHE_ACCOUNTS[13],
-  proxyOwnerAccount: GANACHE_ACCOUNTS[14],
+  deployerAccount: HARDHAT_ACCOUNTS[0],
+  arbitraryAccount: HARDHAT_ACCOUNTS[1],
+  tokenOwnerAccount: HARDHAT_ACCOUNTS[3],
+  blacklisterAccount: HARDHAT_ACCOUNTS[4],
+  arbitraryAccount2: HARDHAT_ACCOUNTS[5],
+  masterMinterAccount: HARDHAT_ACCOUNTS[6],
+  minterAccount: HARDHAT_ACCOUNTS[7],
+  pauserAccount: HARDHAT_ACCOUNTS[8],
+  mintOwnerAccount: HARDHAT_ACCOUNTS[9],
+  controller1Account: HARDHAT_ACCOUNTS[11],
+  rescuerAccount: HARDHAT_ACCOUNTS[12],
+  lostAndFoundAccount: HARDHAT_ACCOUNTS[13],
+  proxyOwnerAccount: HARDHAT_ACCOUNTS[14],
 };
 
 export const accountPrivateKeys = {
-  deployerAccount: GANACHE_PRIVATE_KEYS[0],
-  arbitraryAccount: GANACHE_PRIVATE_KEYS[1],
-  tokenOwnerAccount: GANACHE_PRIVATE_KEYS[3],
-  blacklisterAccount: GANACHE_PRIVATE_KEYS[4],
-  arbitraryAccount2: GANACHE_PRIVATE_KEYS[5],
-  masterMinterAccount: GANACHE_PRIVATE_KEYS[6],
-  minterAccount: GANACHE_PRIVATE_KEYS[7],
-  pauserAccount: GANACHE_PRIVATE_KEYS[8],
-  mintOwnerAccount: GANACHE_PRIVATE_KEYS[9],
-  controller1Account: GANACHE_PRIVATE_KEYS[11],
-  rescuerAccount: GANACHE_PRIVATE_KEYS[12],
-  lostAndFoundAccount: GANACHE_PRIVATE_KEYS[13],
-  proxyOwnerAccount: GANACHE_PRIVATE_KEYS[14],
+  deployerAccount: HARDHAT_PRIVATE_KEYS[0],
+  arbitraryAccount: HARDHAT_PRIVATE_KEYS[1],
+  tokenOwnerAccount: HARDHAT_PRIVATE_KEYS[3],
+  blacklisterAccount: HARDHAT_PRIVATE_KEYS[4],
+  arbitraryAccount2: HARDHAT_PRIVATE_KEYS[5],
+  masterMinterAccount: HARDHAT_PRIVATE_KEYS[6],
+  minterAccount: HARDHAT_PRIVATE_KEYS[7],
+  pauserAccount: HARDHAT_PRIVATE_KEYS[8],
+  mintOwnerAccount: HARDHAT_PRIVATE_KEYS[9],
+  controller1Account: HARDHAT_PRIVATE_KEYS[11],
+  rescuerAccount: HARDHAT_PRIVATE_KEYS[12],
+  lostAndFoundAccount: HARDHAT_PRIVATE_KEYS[13],
+  proxyOwnerAccount: HARDHAT_PRIVATE_KEYS[14],
 };
