@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,11 @@
 
 import crypto from "crypto";
 import { FiatTokenUtilInstance } from "../../../@types/generated";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256_HEX } from "../../helpers/constants";
+import {
+  ACCOUNTS_AND_KEYS,
+  HARDHAT_ACCOUNTS,
+  MAX_UINT256_HEX,
+} from "../../helpers/constants";
 import {
   expectRevert,
   hexStringFromBuffer,
@@ -36,13 +40,11 @@ const ContractThatReverts = artifacts.require("ContractThatReverts");
 export function testTransferWithMultipleAuthorizations({
   getFiatToken,
   getDomainSeparator,
-  fiatTokenOwner,
-  accounts,
   signerWalletType,
 }: TestParams): void {
   describe(`transferWithMultipleAuthorization with ${signerWalletType} wallet`, async () => {
     const [alice, bob] = ACCOUNTS_AND_KEYS;
-    const charlie = accounts[1];
+    const charlie = HARDHAT_ACCOUNTS[1];
     const nonce: string = hexStringFromBuffer(crypto.randomBytes(32));
     const initialBalance = 10e6;
     const transferParams = {
@@ -57,6 +59,11 @@ export function testTransferWithMultipleAuthorizations({
     let fiatToken: AnyFiatTokenV2Instance;
     let fiatTokenUtil: FiatTokenUtilInstance;
     let domainSeparator: string;
+    let fiatTokenOwner: string;
+
+    before(async () => {
+      fiatTokenOwner = await getFiatToken().owner();
+    });
 
     beforeEach(async () => {
       fiatToken = getFiatToken();

@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,23 +17,23 @@
  */
 
 import { MockFiatTokenWithEditableChainIdInstance } from "../../@types/generated";
-import { makeDomainSeparator } from "../helpers";
+import { makeDomainSeparator, linkLibraryToTokenContract } from "../helpers";
+import { HARDHAT_ACCOUNTS } from "../helpers/constants";
 
-const SignatureChecker = artifacts.require("SignatureChecker");
 const MockFiatTokenWithEditableChainId = artifacts.require(
   "MockFiatTokenWithEditableChainId"
 );
 
-contract("MockFiatTokenWithEditableChainId", (accounts) => {
-  const fiatTokenOwner = accounts[9];
-  let fiatToken: MockFiatTokenWithEditableChainIdInstance;
-
+describe("MockFiatTokenWithEditableChainId", () => {
   const name = "USD Coin";
   const version = "2";
+  const [, , lostAndFound] = HARDHAT_ACCOUNTS;
+  const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
+
+  let fiatToken: MockFiatTokenWithEditableChainIdInstance;
 
   beforeEach(async () => {
-    await SignatureChecker.new();
-    MockFiatTokenWithEditableChainId.link(SignatureChecker);
+    await linkLibraryToTokenContract(MockFiatTokenWithEditableChainId);
     fiatToken = await MockFiatTokenWithEditableChainId.new();
 
     await fiatToken.initialize(
@@ -47,7 +47,6 @@ contract("MockFiatTokenWithEditableChainId", (accounts) => {
       fiatTokenOwner
     );
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
-    const [, , lostAndFound] = accounts;
     await fiatToken.initializeV2_1(lostAndFound);
     await fiatToken.initializeV2_2([], "USDCUSDC");
   });

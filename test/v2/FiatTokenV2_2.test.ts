@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,60 +17,49 @@
  */
 
 import BN from "bn.js";
-import crypto from "crypto";
 import {
   AnyFiatTokenV2Instance,
-  FiatTokenV22InstanceExtended,
+  FiatTokenV2_2InstanceExtended,
 } from "../../@types/AnyFiatTokenV2Instance";
 import {
   expectRevert,
   generateAccounts,
-  hexStringFromBuffer,
   initializeToVersion,
+  linkLibraryToTokenContract,
 } from "../helpers";
-import {
-  ACCOUNTS_AND_KEYS,
-  MAX_UINT256_HEX,
-  POW_2_255_BN,
-} from "../helpers/constants";
+import { HARDHAT_ACCOUNTS, POW_2_255_BN } from "../helpers/constants";
 import {
   STORAGE_SLOT_NUMBERS,
   addressMappingSlot,
-  parseUint,
   readSlot,
   usesOriginalStorageSlotPositions,
 } from "../helpers/storageSlots.behavior";
-import { behavesLikeFiatTokenV2, getERC1271Wallet } from "./FiatTokenV2.test";
-import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
+import { behavesLikeFiatTokenV2 } from "./v2.behavior";
 import {
   SignatureBytesType,
-  WalletType,
-  makeDomainSeparator,
   permitSignature,
   permitSignatureV22,
-  prepareSignature,
   transferWithAuthorizationSignature,
   transferWithAuthorizationSignatureV22,
   cancelAuthorizationSignature,
   cancelAuthorizationSignatureV22,
   receiveWithAuthorizationSignature,
   receiveWithAuthorizationSignatureV22,
-  signTransferAuthorization,
-  signReceiveAuthorization,
 } from "./GasAbstraction/helpers";
 import { encodeCall } from "../v1/helpers/tokenTest";
+import { behavesLikeFiatTokenV22 } from "./v2_2.behavior";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 
-contract("FiatTokenV2_2", (accounts) => {
-  const fiatTokenOwner = accounts[9];
-  const lostAndFound = accounts[2];
-  const proxyOwnerAccount = accounts[14];
+describe("FiatTokenV2_2", () => {
   const newSymbol = "USDCUSDC";
+  const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
+  const lostAndFound = HARDHAT_ACCOUNTS[2];
+  const proxyOwnerAccount = HARDHAT_ACCOUNTS[14];
 
-  let fiatToken: FiatTokenV22InstanceExtended;
+  let fiatToken: FiatTokenV2_2InstanceExtended;
 
   const getFiatToken = (
     signatureBytesType: SignatureBytesType
@@ -80,6 +69,11 @@ contract("FiatTokenV2_2", (accounts) => {
       return fiatToken;
     };
   };
+
+  before(async () => {
+    await linkLibraryToTokenContract(FiatTokenV2_1);
+    await linkLibraryToTokenContract(FiatTokenV2_2);
+  });
 
   beforeEach(async () => {
     fiatToken = await FiatTokenV2_2.new();
@@ -165,7 +159,7 @@ contract("FiatTokenV2_2", (accounts) => {
           _proxyAsV2_2.isBlacklisted(account)
         )
       );
-      expect(areAccountsBlacklisted.every((b) => b)).to.be.true;
+      expect(areAccountsBlacklisted.every((b: boolean) => b)).to.be.true;
 
       // Validate that _deprecatedBlacklisted is unset, and balanceAndBlacklistStates is set for every
       // accountsToBlacklist.
@@ -216,184 +210,15 @@ contract("FiatTokenV2_2", (accounts) => {
       await fiatToken.initializeV2_2([], newSymbol);
     });
 
-    behavesLikeFiatTokenV2(
-      accounts,
-      2.2,
-      getFiatToken(SignatureBytesType.Unpacked),
-      fiatTokenOwner
-    );
+    behavesLikeFiatTokenV2(2.2, getFiatToken(SignatureBytesType.Unpacked));
 
-    behavesLikeFiatTokenV22(
-      accounts,
-      getFiatToken(SignatureBytesType.Packed),
-      fiatTokenOwner
-    );
+    behavesLikeFiatTokenV22(getFiatToken(SignatureBytesType.Packed));
     usesOriginalStorageSlotPositions({
       Contract: FiatTokenV2_2,
       version: 2.2,
-      accounts,
     });
   });
 });
-
-export function behavesLikeFiatTokenV22(
-  accounts: Truffle.Accounts,
-  getFiatToken: () => AnyFiatTokenV2Instance,
-  fiatTokenOwner: string
-): void {
-  const [minter, arbitraryAccount] = accounts.slice(3);
-  let domainSeparator: string;
-  let fiatToken: FiatTokenV22InstanceExtended;
-
-  beforeEach(async () => {
-    fiatToken = getFiatToken() as FiatTokenV22InstanceExtended;
-    domainSeparator = makeDomainSeparator(
-      "USD Coin",
-      "2",
-      1, // hardcoded to 1 because of ganache bug: https://github.com/trufflesuite/ganache/issues/1643
-      fiatToken.address
-    );
-  });
-
-  const v22TestParams = {
-    version: 2.2,
-    getFiatToken,
-    getDomainSeparator: () => domainSeparator,
-    getERC1271Wallet,
-    fiatTokenOwner,
-    accounts,
-  };
-
-  // Test gas abstraction functionalities with both EOA and AA wallets
-  hasGasAbstraction({
-    ...v22TestParams,
-    signerWalletType: WalletType.EOA,
-    signatureBytesType: SignatureBytesType.Packed,
-  });
-  hasGasAbstraction({
-    ...v22TestParams,
-    signerWalletType: WalletType.AA,
-    signatureBytesType: SignatureBytesType.Packed,
-  });
-
-  // Additional negative test cases.
-  describe("will trigger exceeded 2^255 balance error", () => {
-    const incrementAmount = 1000;
-    const recipient = arbitraryAccount;
-    const errorMessage = "FiatTokenV2_2: Balance exceeds (2^255 - 1)";
-
-    beforeEach(async () => {
-      const recipientInitialBalance = POW_2_255_BN.sub(new BN(incrementAmount));
-      await fiatToken.configureMinter(minter, POW_2_255_BN, {
-        from: fiatTokenOwner,
-      });
-      await fiatToken.mint(recipient, recipientInitialBalance, {
-        from: minter,
-      });
-      expect((await fiatToken.balanceOf(recipient)).eq(recipientInitialBalance))
-        .to.be.true;
-    });
-
-    it("should fail to mint to recipient if balance will exceed 2^255", async () => {
-      await expectRevert(
-        fiatToken.mint(recipient, incrementAmount, { from: minter }),
-        errorMessage
-      );
-    });
-
-    it("should fail to transfer to recipient if balance will exceed 2^255", async () => {
-      await fiatToken.mint(minter, incrementAmount, { from: minter });
-      await expectRevert(
-        fiatToken.transfer(recipient, incrementAmount, { from: minter }),
-        errorMessage
-      );
-    });
-
-    it("should fail call transferFrom to recipient if balance will exceed 2^255", async () => {
-      await fiatToken.mint(minter, incrementAmount, { from: minter });
-      await fiatToken.approve(arbitraryAccount, incrementAmount, {
-        from: minter,
-      });
-
-      await expectRevert(
-        fiatToken.transferFrom(minter, recipient, incrementAmount, {
-          from: arbitraryAccount,
-        }),
-        errorMessage
-      );
-    });
-
-    context("EIP3009", () => {
-      const signer = ACCOUNTS_AND_KEYS[0];
-      const from = signer.address;
-      const to = recipient;
-      const value = incrementAmount;
-      const validAfter = 0;
-      const validBefore = MAX_UINT256_HEX;
-      const nonce = hexStringFromBuffer(crypto.randomBytes(32));
-
-      beforeEach(async () => {
-        await fiatToken.mint(signer.address, incrementAmount, {
-          from: minter,
-        });
-      });
-
-      it("should fail to call transferWithAuthorization to recipient if balance will exceed 2^255", async () => {
-        const signature = signTransferAuthorization(
-          from,
-          to,
-          value,
-          validAfter,
-          validBefore,
-          nonce,
-          domainSeparator,
-          signer.key
-        );
-
-        await expectRevert(
-          fiatToken.transferWithAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            ...prepareSignature(signature, SignatureBytesType.Packed),
-            { from: to }
-          ),
-          errorMessage
-        );
-      });
-
-      it("should fail to call receiveWithAuthorization to recipient if balance will exceed 2^255", async () => {
-        const signature = signReceiveAuthorization(
-          from,
-          to,
-          value,
-          validAfter,
-          validBefore,
-          nonce,
-          domainSeparator,
-          signer.key
-        );
-
-        await expectRevert(
-          fiatToken.receiveWithAuthorization(
-            from,
-            to,
-            value,
-            validAfter,
-            validBefore,
-            nonce,
-            ...prepareSignature(signature, SignatureBytesType.Packed),
-            { from: to }
-          ),
-          errorMessage
-        );
-      });
-    });
-  });
-}
 
 /**
  * With v2.2 we introduce overloaded functions for `permit`,
@@ -411,7 +236,7 @@ export function behavesLikeFiatTokenV22(
  * here we re-assign the overloaded method definition to the method name shorthand.
  */
 export function initializeOverloadedMethods(
-  fiatToken: FiatTokenV22InstanceExtended,
+  fiatToken: FiatTokenV2_2InstanceExtended,
   signatureBytesType: SignatureBytesType
 ): void {
   if (signatureBytesType == SignatureBytesType.Unpacked) {
@@ -474,5 +299,5 @@ async function readBalanceAndBlacklistStates(
         )
       )
     )
-  ).map((result) => parseUint(result));
+  ).map((result) => new BN(result.slice(2), 16));
 }
