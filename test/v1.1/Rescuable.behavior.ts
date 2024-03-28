@@ -108,7 +108,7 @@ export function behavesLikeRescuable(
         );
       });
 
-      it("reverts when the the given contract address is not ERC20", async () => {
+      it("reverts when the given contract address is not ERC20", async () => {
         await expectRevert(
           rescuable.rescueERC20(accounts[3], tokenOwner, 1, {
             from: rescuer,

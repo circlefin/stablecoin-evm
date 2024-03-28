@@ -30,7 +30,7 @@ contract Test is FiatTokenV1 {
     constructor() public {
         /* config.yaml sets this contract's address to ownerAddr, so we
     need to initialize all the contract roles to this address so that calls
-    from the contract pass funtion modifiers.*/
+    from the contract pass function modifiers.*/
         initialize(
             "Test",
             "",

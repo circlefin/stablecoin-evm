@@ -179,7 +179,7 @@ function getTests(auth) {
 /**
  * Helper function that gets the test code and test description from a row in a
  * given speadsheet tab and adds them to the tests object returned by getTests().
- * @param {Array} row The row of the spreadsheet to processs.
+ * @param {Array} row The row of the spreadsheet to processes.
  * @param {String} tabName The name of the spreadsheet tab currently loading.
  * @param {Object} tests Contains all the spreadsheet test data to verify.
  * @param {Int} col The index of the test code column of the spreadsheet tab.

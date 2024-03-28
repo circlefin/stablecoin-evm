@@ -400,7 +400,7 @@ function runTests(newToken, accounts, version) {
     assert.isTrue(new BN(balance).eqn(1600));
   });
 
-  it("should blacklist and make transferFrom impossible with the approved transferer", async () => {
+  it("should blacklist and make transferFrom impossible with the approved transferred", async () => {
     const isBlacklistedBefore = await token.isBlacklisted(accounts[2]);
     assert.strictEqual(isBlacklistedBefore, false);
 
@@ -419,7 +419,7 @@ function runTests(newToken, accounts, version) {
     assert.strictEqual(isBlacklistedAfter, true);
   });
 
-  it("should make transferFrom impossible with the approved and blacklisted transferer", async () => {
+  it("should make transferFrom impossible with the approved and blacklisted transferred", async () => {
     await mint(token, accounts[2], 1900, minterAccount);
     await token.approve(accounts[1], 600, { from: accounts[2] });
     await blacklist(token, accounts[1]);
