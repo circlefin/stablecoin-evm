@@ -29,14 +29,17 @@ import { V2_2Upgrader } from "../../../contracts/v2/upgrader/V2_2Upgrader.sol";
 // solhint-disable func-name-mixedcase
 
 contract DeployImplAndUpgraderTest is TestUtils {
+    DeployImplAndUpgrader private deployScript;
+
     function setUp() public override {
         TestUtils.setUp();
+
+        vm.prank(deployer);
+        deployScript = new DeployImplAndUpgrader();
+        deployScript.setUp();
     }
 
     function test_DeployImplAndUpgraderWithAllEnvConfigured() public {
-        DeployImplAndUpgrader deployScript = new DeployImplAndUpgrader();
-        deployScript.setUp();
-
         (FiatTokenV2_2 v2_2, V2_2Upgrader upgrader) = deployScript.run();
 
         validateImpl(v2_2);
@@ -48,9 +51,8 @@ contract DeployImplAndUpgraderTest is TestUtils {
     }
 
     function test_DeployImplAndUpgraderWithPredeployedImpl() public {
+        vm.prank(deployer);
         FiatTokenV2_2 predeployedImpl = new FiatTokenV2_2();
-        DeployImplAndUpgrader deployScript = new DeployImplAndUpgrader();
-        deployScript.setUp();
 
         (, V2_2Upgrader upgrader) = deployScript.deploy(
             address(predeployedImpl)

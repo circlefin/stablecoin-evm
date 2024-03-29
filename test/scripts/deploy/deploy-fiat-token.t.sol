@@ -34,6 +34,8 @@ contract DeployFiatTokenTest is TestUtils {
 
     function setUp() public override {
         TestUtils.setUp();
+
+        vm.prank(deployer);
         deployScript = new DeployFiatToken();
         deployScript.setUp();
     }
@@ -51,6 +53,7 @@ contract DeployFiatTokenTest is TestUtils {
     }
 
     function test_deployFiatTokenWithPredeployedImpl() public {
+        vm.prank(deployer);
         FiatTokenV2_2 predeployedImpl = new FiatTokenV2_2();
 
         (, MasterMinter masterMinter, FiatTokenProxy proxy) = deployScript

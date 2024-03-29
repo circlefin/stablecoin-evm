@@ -40,7 +40,7 @@ jobs:
         run: yarn contract-size
 
       - name: Run forge tests
-        run: forge test
+        run: forge test -vvv
 
       - name: Generate gas report
         run: yarn gas-report
@@ -97,7 +97,9 @@ jobs:
 
   scan:
     if: github.event_name == 'pull_request'
-    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1
+    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1.2.0
+    with:
+      allow-reciprocal-licenses: false
 
   release-sbom:
     if: github.event_name == 'push'

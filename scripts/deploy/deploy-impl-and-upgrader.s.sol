@@ -20,6 +20,7 @@ pragma solidity 0.6.12;
 
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
+import { ScriptUtils } from "./ScriptUtils.sol";
 import { DeployImpl } from "./DeployImpl.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
@@ -29,8 +30,9 @@ import { V2_2Upgrader } from "../../contracts/v2/upgrader/V2_2Upgrader.sol";
  * A utility script to deploy the latest fiat token implementation and
  * an upgrader contract that updates fiat token use the latest implementation
  */
-contract DeployImplAndUpgrader is Script, DeployImpl {
+contract DeployImplAndUpgrader is Script, DeployImpl, ScriptUtils {
     string private newTokenSymbol;
+    string private blacklistFileName;
     address private impl;
     address payable private proxyContractAddress;
     address private proxyAdmin;
@@ -55,7 +57,8 @@ contract DeployImplAndUpgrader is Script, DeployImpl {
             vm.envAddress("OWNER_ADDRESS")
         );
 
-        accountsToBlacklist = loadAccountsToBlacklist();
+        blacklistFileName = vm.envString("BLACKLIST_FILE_NAME");
+        accountsToBlacklist = _loadAccountsToBlacklist(blacklistFileName);
 
         deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
@@ -64,19 +67,7 @@ contract DeployImplAndUpgrader is Script, DeployImpl {
         console.log("FIAT_TOKEN_PROXY_ADDRESS: '%s'", proxyContractAddress);
         console.log("PROXY_ADMIN_ADDRESS: '%s'", proxyAdmin);
         console.log("LOST_AND_FOUND_ADDRESS: '%s'", lostAndFound);
-    }
-
-    /**
-     * @notice helper function that loads local json
-     */
-    function loadAccountsToBlacklist()
-        internal
-        view
-        returns (address[] memory)
-    {
-        string memory path = "blacklist.remote.json";
-        string memory json = vm.readFile(path);
-        return vm.parseJsonAddressArray(json, "");
+        console.log("BLACKLIST_FILE_NAME: '%s'", blacklistFileName);
     }
 
     /**

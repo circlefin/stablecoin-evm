@@ -29,15 +29,31 @@ import {
 
 contract TestUtils is Test {
     uint256 internal deployerPrivateKey = 1;
+    uint256 internal proxyAdminPrivateKey = 2;
+    uint256 internal masterMinterOwnerPrivateKey = 3;
+    uint256 internal ownerPrivateKey = 4;
+    uint256 internal pauserPrivateKey = 5;
+    uint256 internal blacklisterPrivateKey = 6;
+    uint256 internal lostAndFoundPrivateKey = 7;
+
+    address internal deployer = vm.addr(deployerPrivateKey);
+    address internal proxyAdmin = vm.addr(proxyAdminPrivateKey);
+    address internal masterMinterOwner = vm.addr(masterMinterOwnerPrivateKey);
+    address internal owner = vm.addr(ownerPrivateKey);
+    address internal pauser = vm.addr(pauserPrivateKey);
+    address internal blacklister = vm.addr(blacklisterPrivateKey);
+    address internal lostAndFound = vm.addr(lostAndFoundPrivateKey);
+
+    uint8 internal decimals = 6;
     string internal tokenName = "USDC";
     string internal tokenSymbol = "USDC";
-    address internal proxyAdmin = vm.addr(2);
-    address internal masterMinterOwner = vm.addr(3);
-    address internal owner = vm.addr(4);
-    address internal pauser = vm.addr(5);
-    address internal blacklister = vm.addr(6);
-    address internal lostAndFound = vm.addr(7);
-    address[] internal accountsToBlacklist = new address[](0);
+
+    string internal blacklistFileName = "test.blacklist.remote.json";
+
+    address[] internal accountsToBlacklist = [
+        0x04DBA1194ee10112fE6C3207C0687DEf0e78baCf,
+        0xb6f5ec1A0a9cd1526536D3F0426c429529471F40
+    ];
 
     function setUp() public virtual {
         vm.setEnv("TOKEN_NAME", tokenName);
@@ -56,12 +72,13 @@ contract TestUtils is Test {
         vm.setEnv("LOST_AND_FOUND_ADDRESS", vm.toString(lostAndFound));
 
         // Deploy an instance of proxy contract to configure contract address in env
+        vm.startPrank(deployer);
         FiatTokenV1 v1 = new FiatTokenV1();
         FiatTokenProxy proxy = new FiatTokenProxy(address(v1));
+        vm.stopPrank();
         vm.setEnv("FIAT_TOKEN_PROXY_ADDRESS", vm.toString(address(proxy)));
 
-        // Write accountsToBlacklist to local blacklist.remote.json
-        vm.writeJson("[]", "blacklist.remote.json");
+        vm.setEnv("BLACKLIST_FILE_NAME", blacklistFileName);
     }
 
     function validateImpl(FiatTokenV1 impl) internal {

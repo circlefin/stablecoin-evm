@@ -19,31 +19,22 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
-import { TestUtils } from "./TestUtils.sol";
-import {
-    DeployMasterMinter
-} from "../../../scripts/deploy/deploy-master-minter.s.sol";
-import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
+import { Script } from "forge-std/Script.sol";
 
-// solhint-disable func-name-mixedcase
-
-contract DeployMasterMinterTest is TestUtils {
-    DeployMasterMinter internal deployScript;
-
-    function setUp() public override {
-        TestUtils.setUp();
-
-        vm.prank(deployer);
-        deployScript = new DeployMasterMinter();
-        deployScript.setUp();
-    }
-
-    function test_deployMasterMinter() public {
-        MasterMinter masterMinter = deployScript.run();
-
-        validateMasterMinter(
-            masterMinter,
-            vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS")
-        );
+/**
+ * Shared utilities for scripts. It inherits the Script contract in order
+ * to access vm cheatcodes.
+ */
+contract ScriptUtils is Script {
+    /**
+     * @notice helper function that loads local json
+     */
+    function _loadAccountsToBlacklist(string memory blacklistFileName)
+        internal
+        view
+        returns (address[] memory)
+    {
+        string memory json = vm.readFile(blacklistFileName);
+        return vm.parseJsonAddressArray(json, "");
     }
 }
