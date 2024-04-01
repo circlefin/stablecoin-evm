@@ -3,6 +3,7 @@ on:
   schedule:
     # At 5PM UTC every day
     - cron: "0 17 * * *"
+  workflow_dispatch:
 
 jobs:
   master_branch:
