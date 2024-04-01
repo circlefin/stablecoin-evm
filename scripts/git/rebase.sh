@@ -1,14 +1,14 @@
 #!/bin/bash
 #
-# SPDX-License-Identifier: Apache-2.0
+# Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
 #
-# Copyright (c) 2023, Circle Internet Financial, LLC.
+# SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,11 +21,11 @@
 # =============
 
 # Husky should be disabled so that pre-commit hook run per 'reword' rebase.
-HUSKY=0
+export HUSKY=0
 
 # (Optional) Choose the editor that you want to use for rebasing. For sufficiently
 # large rebases, it may be easier to use an editor with a GUI (eg. Sublime Text).
-GIT_EDITOR="subl -n -w" # Sublime Text
+export GIT_EDITOR="subl -n -w" # Sublime Text
 # GIT_EDITOR="vim"
 # GIT_EDITOR="nano"
 

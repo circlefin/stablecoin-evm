@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,16 @@
  */
 
 import crypto from "crypto";
-import { MockErc1271WalletInstance } from "../../../@types/generated";
+import { MockERC1271WalletInstance } from "../../../@types/generated";
 import {
   AuthorizationUsed,
   Transfer,
 } from "../../../@types/generated/FiatTokenV2";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256_HEX } from "../../helpers/constants";
+import {
+  ACCOUNTS_AND_KEYS,
+  HARDHAT_ACCOUNTS,
+  MAX_UINT256_HEX,
+} from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
   prepareSignature,
@@ -37,14 +41,12 @@ export function testReceiveWithAuthorization({
   getFiatToken,
   getERC1271Wallet,
   getDomainSeparator,
-  fiatTokenOwner,
-  accounts,
   signerWalletType,
   signatureBytesType,
 }: TestParams): void {
   describe(`receiveWithAuthorization with ${signerWalletType} wallet, ${signatureBytesType} signature interface`, async () => {
     const [alice, charlie] = ACCOUNTS_AND_KEYS;
-    const [, bob, david] = accounts;
+    const [, bob, david] = HARDHAT_ACCOUNTS;
     const nonce: string = hexStringFromBuffer(crypto.randomBytes(32));
     const initialBalance = 10e6;
     const receiveParams = {
@@ -56,9 +58,14 @@ export function testReceiveWithAuthorization({
       nonce,
     };
 
+    let fiatTokenOwner: string;
     let fiatToken: AnyFiatTokenV2Instance;
-    let aliceWallet: MockErc1271WalletInstance;
+    let aliceWallet: MockERC1271WalletInstance;
     let domainSeparator: string;
+
+    before(async () => {
+      fiatTokenOwner = await getFiatToken().owner();
+    });
 
     beforeEach(async () => {
       fiatToken = getFiatToken();
@@ -237,9 +244,8 @@ export function testReceiveWithAuthorization({
 
     it("reverts if the authorization is not yet valid", async () => {
       const { from, to, value, validBefore } = receiveParams;
-      // create a signed authorization that won't be valid until 10 seconds
-      // later
-      const validAfter = Math.floor(Date.now() / 1000) + 10;
+      // create a signed authorization that won't be valid until 1 day later
+      const validAfter = Math.floor(Date.now() / 1000) + 86400;
       const signature = signReceiveAuthorization(
         from,
         to,

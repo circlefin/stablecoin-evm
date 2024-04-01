@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@
  */
 
 import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
-import { MockErc1271WalletInstance } from "../../../@types/generated";
+import { MockERC1271WalletInstance } from "../../../@types/generated";
 import { Signature, ecSign, strip0x } from "../../helpers";
 import { packSignature } from "../../helpers";
 
@@ -35,11 +35,9 @@ export interface TestParams {
   version: number;
   getFiatToken: () => AnyFiatTokenV2Instance;
   getDomainSeparator: () => string;
-  fiatTokenOwner: string;
-  accounts: Truffle.Accounts;
   signerWalletType: WalletType;
   signatureBytesType: SignatureBytesType;
-  getERC1271Wallet: (owner: string) => Promise<MockErc1271WalletInstance>;
+  getERC1271Wallet: (owner: string) => Promise<MockERC1271WalletInstance>;
 }
 
 export function makeDomainSeparator(
