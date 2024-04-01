@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,10 @@ import { assert } from "chai";
 import { solidityPack } from "ethereumjs-abi";
 import {
   FiatTokenProxyInstance,
-  FiatTokenV11Instance,
+  FiatTokenV1_1Instance,
   FiatTokenV1Instance,
-  FiatTokenV21Instance,
-  FiatTokenV22Instance,
+  FiatTokenV2_1Instance,
+  FiatTokenV2_2Instance,
   FiatTokenV2Instance,
 } from "../../@types/generated";
 import _ from "lodash";
@@ -33,6 +33,7 @@ const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
+const SignatureChecker = artifacts.require("SignatureChecker");
 
 export async function expectRevert(
   promise: Promise<unknown>,
@@ -51,10 +52,9 @@ export async function expectRevert(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const errMsg: string = (err as any).hijackedMessage ?? err.message;
-  assert.match(errMsg, /revert/i);
 
   if (!reason) {
-    return;
+    assert.match(errMsg, /revert/i);
   } else if (reason instanceof RegExp) {
     assert.match(errMsg, reason);
   } else {
@@ -137,10 +137,10 @@ export async function initializeToVersion(
   proxyOrImplementation:
     | FiatTokenProxyInstance
     | FiatTokenV1Instance
-    | FiatTokenV11Instance
+    | FiatTokenV1_1Instance
     | FiatTokenV2Instance
-    | FiatTokenV21Instance
-    | FiatTokenV22Instance,
+    | FiatTokenV2_1Instance
+    | FiatTokenV2_2Instance,
   version: "1" | "1.1" | "2" | "2.1" | "2.2",
   fiatTokenOwner: string,
   lostAndFound: string,
@@ -173,5 +173,19 @@ export async function initializeToVersion(
   if (version >= "2.2") {
     const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
     await proxyAsV2_2.initializeV2_2(accountsToBlacklist, "USDCUSDC");
+  }
+}
+
+export async function linkLibraryToTokenContract<
+  T extends Truffle.ContractInstance
+>(tokenContract: Truffle.Contract<T>): Promise<void> {
+  try {
+    const signatureChecker = await SignatureChecker.new();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    tokenContract.link(signatureChecker);
+  } catch (e) {
+    console.error(e);
+    // do nothing
   }
 }

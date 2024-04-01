@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,17 +19,21 @@
 import { AnyFiatTokenV2Instance } from "../../@types/AnyFiatTokenV2Instance";
 import { Approval } from "../../@types/generated/FiatTokenV2";
 import { expectRevert } from "../helpers";
-import { MAX_UINT256_HEX } from "../helpers/constants";
+import { MAX_UINT256_HEX, HARDHAT_ACCOUNTS } from "../helpers/constants";
 
 export function hasSafeAllowance(
   version: number,
-  getFiatToken: () => AnyFiatTokenV2Instance,
-  fiatTokenOwner: string,
-  accounts: Truffle.Accounts
+  getFiatToken: () => AnyFiatTokenV2Instance
 ): void {
   describe("safe allowance", () => {
+    const [alice, bob] = HARDHAT_ACCOUNTS;
+
     let fiatToken: AnyFiatTokenV2Instance;
-    const [alice, bob] = accounts;
+    let fiatTokenOwner: string;
+
+    before(async () => {
+      fiatTokenOwner = await getFiatToken().owner();
+    });
 
     beforeEach(() => {
       fiatToken = getFiatToken();

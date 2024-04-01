@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,12 +27,12 @@ import {
   ZERO_ADDRESS,
   ZERO_BYTES32,
 } from "../helpers/constants";
-import { SignatureCheckerInstance } from "../../@types/generated/SignatureChecker";
 import {
-  MockErc1271WalletInstance,
-  MockErc1271WalletReturningBytes32Instance,
-  MockErc1271WalletWithCustomValidationInstance,
-  MockStateModifyingErc1271WalletInstance,
+  MockERC1271WalletInstance,
+  MockERC1271WalletReturningBytes32Instance,
+  MockERC1271WalletWithCustomValidationInstance,
+  MockStateModifyingERC1271WalletInstance,
+  SignatureCheckerInstance,
 } from "../../@types/generated";
 
 const SignatureChecker = artifacts.require("SignatureChecker");
@@ -55,10 +55,10 @@ describe("SignatureChecker", () => {
   const sig3 = ecSign(digest, account3.key);
 
   let signatureChecker: SignatureCheckerInstance;
-  let standardWallet: MockErc1271WalletInstance;
-  let walletReturningBytes32: MockErc1271WalletReturningBytes32Instance;
-  let customWallet: MockErc1271WalletWithCustomValidationInstance;
-  let stateModifyingWallet: MockStateModifyingErc1271WalletInstance;
+  let standardWallet: MockERC1271WalletInstance;
+  let walletReturningBytes32: MockERC1271WalletReturningBytes32Instance;
+  let customWallet: MockERC1271WalletWithCustomValidationInstance;
+  let stateModifyingWallet: MockStateModifyingERC1271WalletInstance;
 
   beforeEach(async () => {
     signatureChecker = await SignatureChecker.new();

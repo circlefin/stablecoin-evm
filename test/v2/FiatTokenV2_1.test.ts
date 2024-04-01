@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,22 @@
  * limitations under the License.
  */
 
-import { FiatTokenV21Instance } from "../../@types/generated";
-import { expectRevert } from "../helpers";
+import { FiatTokenV2_1Instance } from "../../@types/generated";
+import { expectRevert, linkLibraryToTokenContract } from "../helpers";
+import { HARDHAT_ACCOUNTS } from "../helpers/constants";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
-import { behavesLikeFiatTokenV2 } from "./FiatTokenV2.test";
+import { behavesLikeFiatTokenV2 } from "./v2.behavior";
 
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 
-contract("FiatTokenV2_1", (accounts) => {
-  const fiatTokenOwner = accounts[9];
-  let fiatToken: FiatTokenV21Instance;
+describe("FiatTokenV2_1", () => {
+  const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
+
+  let fiatToken: FiatTokenV2_1Instance;
+
+  before(async () => {
+    await linkLibraryToTokenContract(FiatTokenV2_1);
+  });
 
   beforeEach(async () => {
     fiatToken = await FiatTokenV2_1.new();
@@ -42,15 +48,14 @@ contract("FiatTokenV2_1", (accounts) => {
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
   });
 
-  behavesLikeFiatTokenV2(accounts, 2.1, () => fiatToken, fiatTokenOwner);
+  behavesLikeFiatTokenV2(2.1, () => fiatToken);
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV2_1,
     version: 2.1,
-    accounts,
   });
 
   describe("initializeV2_1", () => {
-    const [, user, lostAndFound] = accounts;
+    const [, user, lostAndFound] = HARDHAT_ACCOUNTS;
 
     beforeEach(async () => {
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {

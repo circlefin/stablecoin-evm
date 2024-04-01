@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,31 +16,21 @@
  * limitations under the License.
  */
 
-import { behavesLikeRescuable } from "../v1.1/Rescuable.behavior";
-import {
-  MockErc1271WalletInstance,
-  FiatTokenV2Instance,
-  RescuableInstance,
-} from "../../@types/generated";
-import { AnyFiatTokenV2Instance } from "../../@types/AnyFiatTokenV2Instance";
+import { FiatTokenV2Instance } from "../../@types/generated";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
-import { hasSafeAllowance } from "./safeAllowance.behavior";
-import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
-import {
-  SignatureBytesType,
-  TestParams,
-  WalletType,
-  makeDomainSeparator,
-} from "./GasAbstraction/helpers";
-import { expectRevert } from "../helpers";
-import { testTransferWithMultipleAuthorizations } from "./GasAbstraction/testTransferWithMultipleAuthorizations";
+import { linkLibraryToTokenContract } from "../helpers";
+import { HARDHAT_ACCOUNTS } from "../helpers/constants";
+import { behavesLikeFiatTokenV2 } from "./v2.behavior";
 
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
-const MockERC1271Wallet = artifacts.require("MockERC1271Wallet");
 
-contract("FiatTokenV2", (accounts) => {
-  const fiatTokenOwner = accounts[9];
+describe("FiatTokenV2", () => {
   let fiatToken: FiatTokenV2Instance;
+  const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
+
+  before(async () => {
+    await linkLibraryToTokenContract(FiatTokenV2);
+  });
 
   beforeEach(async () => {
     fiatToken = await FiatTokenV2.new();
@@ -57,64 +47,9 @@ contract("FiatTokenV2", (accounts) => {
     await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
   });
 
-  behavesLikeFiatTokenV2(accounts, 2, () => fiatToken, fiatTokenOwner);
+  behavesLikeFiatTokenV2(2, () => fiatToken);
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV2,
     version: 2,
-    accounts,
   });
 });
-
-export function behavesLikeFiatTokenV2(
-  accounts: Truffle.Accounts,
-  version: number,
-  getFiatToken: () => AnyFiatTokenV2Instance,
-  fiatTokenOwner: string
-): void {
-  let domainSeparator: string;
-
-  beforeEach(async () => {
-    domainSeparator = makeDomainSeparator(
-      "USD Coin",
-      "2",
-      1, // hardcoded to 1 because of ganache bug: https://github.com/trufflesuite/ganache/issues/1643
-      getFiatToken().address
-    );
-  });
-
-  behavesLikeRescuable(getFiatToken as () => RescuableInstance, accounts);
-
-  it("has the expected domain separator", async () => {
-    expect(await getFiatToken().DOMAIN_SEPARATOR()).to.equal(domainSeparator);
-  });
-
-  hasSafeAllowance(version, getFiatToken, fiatTokenOwner, accounts);
-
-  const testParams: TestParams = {
-    version,
-    getFiatToken,
-    getDomainSeparator: () => domainSeparator,
-    getERC1271Wallet,
-    fiatTokenOwner,
-    accounts,
-    signerWalletType: WalletType.EOA,
-    signatureBytesType: SignatureBytesType.Unpacked,
-  };
-
-  hasGasAbstraction(testParams);
-
-  testTransferWithMultipleAuthorizations(testParams);
-
-  it("disallows calling initializeV2 twice", async () => {
-    // It was called once in beforeEach. Try to call again.
-    await expectRevert(
-      getFiatToken().initializeV2("Not USD Coin", { from: fiatTokenOwner })
-    );
-  });
-}
-
-export async function getERC1271Wallet(
-  owner: string
-): Promise<MockErc1271WalletInstance> {
-  return await MockERC1271Wallet.new(owner);
-}

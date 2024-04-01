@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,19 +18,21 @@
 
 import { behavesLikeRescuable } from "./Rescuable.behavior";
 import {
-  FiatTokenV11Instance,
+  FiatTokenV1_1Instance,
   RescuableInstance,
 } from "../../@types/generated";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
+import { HARDHAT_ACCOUNTS } from "../helpers/constants";
 
 const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 
-contract("FiatTokenV1_1", (accounts) => {
-  let fiatToken: FiatTokenV11Instance;
+describe("FiatTokenV1_1", () => {
+  const owner = HARDHAT_ACCOUNTS[0];
+
+  let fiatToken: FiatTokenV1_1Instance;
 
   beforeEach(async () => {
     fiatToken = await FiatTokenV1_1.new();
-    const owner = accounts[0];
     await fiatToken.initialize(
       "USD Coin",
       "USDC",
@@ -43,10 +45,9 @@ contract("FiatTokenV1_1", (accounts) => {
     );
   });
 
-  behavesLikeRescuable(() => fiatToken as RescuableInstance, accounts);
+  behavesLikeRescuable(() => fiatToken as RescuableInstance);
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV1_1,
     version: 1.1,
-    accounts,
   });
 });

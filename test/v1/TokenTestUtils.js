@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ const {
   proxyOwnerAccount,
   upgraderAccount,
 } = require("./helpers/tokenTest");
+const { ZERO_BYTES32 } = require("../helpers/constants");
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
@@ -649,35 +650,42 @@ async function expectRevert(contractPromise) {
 
 async function getAdmin(proxy) {
   const adm = await web3.eth.getStorageAt(proxy.address, adminSlot);
-  return web3.utils.toChecksumAddress("0x" + adm.slice(2).padStart(40, "0"));
+  return web3.utils.toChecksumAddress("0x" + adm.slice(26));
 }
 
 async function getImplementation(proxy) {
   const impl = await web3.eth.getStorageAt(proxy.address, implSlot);
-  return web3.utils.toChecksumAddress("0x" + impl.slice(2).padStart(40, "0"));
+  return web3.utils.toChecksumAddress("0x" + impl.slice(26));
 }
 
 async function getInitializedV1(token) {
   const slot8Data = await web3.eth.getStorageAt(token.address, 8);
   let initialized;
 
-  if (slot8Data === "0x0") {
+  if (slot8Data === ZERO_BYTES32) {
     // validate proxy not yet initialized
     for (let i = 0; i <= 20; i++) {
-      assert.strictEqual("0x0", await web3.eth.getStorageAt(token.address, i));
+      assert.strictEqual(
+        ZERO_BYTES32,
+        await web3.eth.getStorageAt(token.address, i)
+      );
     }
-    initialized = "0x00";
+    initialized = ZERO_BYTES32;
   } else {
-    const slot8DataPadded = slot8Data.slice(2).padStart(42, "0");
-    if (slot8DataPadded.length !== 42) {
+    if (slot8Data.length !== 66) {
       assert.fail("slot8Data unexpected size");
     }
-    const masterMinterAddress = await token.masterMinter.call();
-    assert.isTrue(
-      slot8DataPadded.indexOf(masterMinterAddress.slice(2).toLowerCase()) === 2
+    // String layout
+    // 2 chars - 0x
+    // 22 zeroes chars
+    // 2 chars - initialized (bool)
+    // 40 chars - masterMinter (address)
+    initialized = "0x" + slot8Data.slice(24, 26);
+    const masterMinterAddress = web3.utils.toChecksumAddress(
+      "0x" + slot8Data.slice(26)
     );
-
-    initialized = "0x" + slot8DataPadded.slice(0, 2);
+    const expectedMasterMinterAddress = await token.masterMinter.call();
+    assert.strictEqual(masterMinterAddress, expectedMasterMinterAddress);
   }
   return initialized;
 }

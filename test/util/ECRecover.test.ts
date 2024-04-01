@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@
 
 import { bufferFromHexString, ecSign, expectRevert } from "../helpers";
 import { ACCOUNTS_AND_KEYS, ZERO_BYTES32 } from "../helpers/constants";
-import { EcRecoverTestInstance } from "../../@types/generated/EcRecoverTest";
+import { ECRecoverTestInstance } from "../../@types/generated";
 import { packSig } from "./SignatureChecker.test";
 import { toCompactSig } from "ethereumjs-util";
 
@@ -31,7 +31,7 @@ describe("ECRecover", () => {
   const sig2 = ecSign(digest, account2.key);
   const sig3 = ecSign(digest, account3.key);
 
-  let ecRecover: EcRecoverTestInstance;
+  let ecRecover: ECRecoverTestInstance;
 
   beforeEach(async () => {
     ecRecover = await ECRecoverTest.new();
