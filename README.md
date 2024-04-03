@@ -6,7 +6,7 @@
 This repository contains the smart contracts used by
 [Circle's](https://www.circle.com/) stablecoins on EVM-compatible blockchains.
 All contracts are written in [Solidity](https://soliditylang.org/) and managed
-by the [Truffle](https://trufflesuite.com/) framework.
+by the [Hardhat](https://hardhat.org/) framework.
 
 <!-- prettier-ignore-start -->
 <!-- omit in toc -->
@@ -39,13 +39,14 @@ Requirements:
 
 - Node 16.14.0
 - Yarn 1.22.19
+- [Foundry@2cf84d9](https://github.com/foundry-rs/foundry/releases/tag/nightly-2cf84d9f3ba7b6f4a9296299e7036ecc24cfa1da)
 
 ```sh
 $ git clone git@github.com:circlefin/stablecoin-evm.git
 $ cd stablecoin-evm
 $ nvm use
 $ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
-$ yarn install          # Install dependencies
+$ yarn install          # Install npm packages and other dependencies listed in setup.sh
 ```
 
 ### IDE
@@ -57,10 +58,16 @@ We recommend using VSCode for the project here with these
 
 ### TypeScript type definition files for the contracts
 
-To generate type definitions:
+Types are automatically generated as a part of contract compilation:
 
 ```sh
-$ yarn typechain
+$ yarn compile
+```
+
+To generate typing without re-compiling, run
+
+```sh
+$ yarn hardhat typechain
 ```
 
 ### Linting and Formatting
@@ -78,7 +85,6 @@ $ yarn typecheck      # Type-check TypeScript code
 $ yarn lint           # Check JavaScript and TypeScript code
 $ yarn lint --fix     # Fix problems where possible
 $ yarn solhint        # Check Solidity code
-$ yarn slither        # Run Slither
 ```
 
 To auto-format code:
@@ -88,12 +94,6 @@ $ yarn fmt
 ```
 
 ### Testing
-
-First, make sure Ganache is running.
-
-```sh
-$ yarn ganache
-```
 
 Run all tests:
 
@@ -117,65 +117,46 @@ To check the size of contracts in the repo, run the following command.
 
 ```sh
 $ yarn contract-size # Ignores tests
-$ yarn contract-size:all # Includes all contracts
 ```
 
 ## Deployment
 
-The deployment process is detailed on
-[Confluence](https://circlepay.atlassian.net/wiki/spaces/ENGINEERIN/pages/721256540/Deploying+FiatToken+ERC-20+contracts).
+1. Create a copy of the file `.env.example`, and name it `.env`. Fill in
+   appropriate values in the `.env` file. This file must not be checked into the
+   repository.
 
-You will need 5 different hot keys (blacklister, deployer, master minter, owner,
-and proxy admin), and they should be funded (with 0.5-1 ETH) to pay for
-transactions. You can use ./scripts/createAccount.js to create the keys.
-
-Create a copy of the file `config.js.example`, and name it `config.js`. Create a
-copy of `config.{env}.js.example` for stg and prod by replacing env with the
-name of the environment e.g. `config.stg.js`. The `config.js` file holds values
-that are common whereas `config.{env}.js` holds environment specific values.
-Fill in the empty values. These file must not be checked into the repository. To
-prevent accidental check-ins, `config.js` and `config.{env}.js` are in
-`.gitignore`.
-
-For mainnet, be sure to have a specified `blacklist.remote.json` file with a
-sanctions list from Compliance. As seen in `blacklist.test.json`, addresses are
-defined as a json array. You must blacklist the sanctions list at deployment
-time using the hot blacklister key (in `config.js`).
-
-Create a copy of the file `blacklist.test.json`, and name it
-`blacklist.remote.json`. Fill in `blacklist.remote.json` with the list addresses
-to blacklist. This file must not be checked into the repository. To prevent
-accidental check-ins, `blacklist.*.json` is in `.gitignore`.
-
-```
-// Ensure that the ENV variable in config.js is set to stg or prod, which will
-// dictate which config.{env}.js file gets read during execution
-yarn deployContracts --network {development, testnet, mainnet}
-yarn blacklistSeed --network development
-
-// When you deploy the contract for the first time, it will give you address for the FiatToken Proxy
-// which you can use as the PROXY_CONTRACT_ADDRESS
-// Ensure that PROXY_CONTRACT_ADDRESS and MINT_ALLOWANCE_UNITS
-// are properly set in config.js and config.{env}.js respectively
-yarn minters --network {development, testnet, mainnet}
-
-// Only needed for mainnet, but feel free to simulate a local run on the dev network.
-// This will move all five hot keys to cold.
-yarn coldStorage --network {development, testnet, mainnet}
-
-// Verify contract bytecode against the block explorer, and upload contract source code.
-// See here https://www.npmjs.com/package/truffle-plugin-verify} for more details.
-yarn verify [DEPLOYED_CONTRACT_NAME] --network=$NETWORK [--verifiers=<etherscan, snowtrace, etc>]
+```sh
+cp .env.example .env
 ```
 
-> Note that you may need to update truffle-config.js to have a verify attribute
-> for the network you're testing. See
-> [Confluence](https://circlepay.atlassian.net/wiki/spaces/ENGINEERIN/pages/721256540/Deploying+FiatToken+ERC-20+contracts)
-> for details.
+2. Create a `blacklist.remote.json` file and populate it with a list of
+   addresses to be blacklisted. This file must not be checked into the
+   repository.
 
-**Remember to save the config.js file in 1PW Wallets Org**
+```sh
+echo "[]" > blacklist.remote.json
+```
 
-- include the deployed contract addresses in the config file.
+3. Simulate a deployment by running the following command
+
+```sh
+yarn forge:simulate scripts/deploy/deploy-fiat-token.s.sol --rpc-url <testnet OR mainnet>
+```
+
+4. Validate that all transactions to be broadcasted are filled in with the
+   correct values
+5. Deploy the contracts by running the following command
+
+```sh
+yarn forge:broadcast scripts/deploy/deploy-fiat-token.s.sol --rpc-url <testnet OR mainnet>
+```
+
+6. Verify the contracts on an Etherscan flavored block explorer by running the
+   following command. Ensure that `ETHERSCAN_KEY` is set in the `.env` file.
+
+```sh
+yarn forge:verify scripts/deploy/deploy-fiat-token.s.sol --rpc-url <testnet OR mainnet>
+```
 
 ## Contracts
 
@@ -241,6 +222,4 @@ address.
 - [Bridged USDC Standard](./doc/bridged_USDC_standard.md)
 - [Deployment process](./doc/deployment.md)
 - [Preparing an upgrade](./doc/upgrade.md)
-- [Upgrading from v1 to v2](./doc/v2_upgrade.md)
-- [Upgrading from v2 to v2.1](./doc/v2.1_upgrade.md)
 - [Upgrading from v2.1 to v2.2](./doc/v2.2_upgrade.md)
