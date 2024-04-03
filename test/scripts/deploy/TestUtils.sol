@@ -22,7 +22,7 @@ pragma experimental ABIEncoderV2; // needed for compiling older solc versions: h
 import "forge-std/Test.sol"; // solhint-disable no-global-import
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
-import { FiatTokenV1 } from "../../../contracts/v1/FiatTokenV1.sol";
+import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 import {
     AbstractV2Upgrader
 } from "../../../contracts/v2/upgrader/AbstractV2Upgrader.sol";
@@ -69,19 +69,45 @@ contract TestUtils is Test {
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
         vm.setEnv("BLACKLISTER_ADDRESS", vm.toString(blacklister));
+        vm.setEnv(
+            "BLACKLISTER_PRIVATE_KEY",
+            vm.toString(blacklisterPrivateKey)
+        );
         vm.setEnv("LOST_AND_FOUND_ADDRESS", vm.toString(lostAndFound));
 
         // Deploy an instance of proxy contract to configure contract address in env
+        vm.prank(deployer);
+        FiatTokenV2_2 v2_2 = new FiatTokenV2_2();
+
+        vm.prank(proxyAdmin);
+        FiatTokenProxy proxy = new FiatTokenProxy(address(v2_2));
+
         vm.startPrank(deployer);
-        FiatTokenV1 v1 = new FiatTokenV1();
-        FiatTokenProxy proxy = new FiatTokenProxy(address(v1));
+        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
+
+        MasterMinter masterMinter = new MasterMinter(address(proxy));
+
+        proxyAsV2_2.initialize(
+            tokenName,
+            tokenSymbol,
+            "USD",
+            decimals,
+            address(masterMinter),
+            pauser,
+            blacklister,
+            vm.addr(ownerPrivateKey)
+        );
+        proxyAsV2_2.initializeV2(tokenName);
+        proxyAsV2_2.initializeV2_1(lostAndFound);
+        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
         vm.stopPrank();
+
         vm.setEnv("FIAT_TOKEN_PROXY_ADDRESS", vm.toString(address(proxy)));
 
         vm.setEnv("BLACKLIST_FILE_NAME", blacklistFileName);
     }
 
-    function validateImpl(FiatTokenV1 impl) internal {
+    function validateImpl(FiatTokenV2_2 impl) internal {
         assertEq(impl.name(), "");
         assertEq(impl.symbol(), "");
         assertEq(impl.currency(), "");
