@@ -205,14 +205,14 @@ controlled by the `blacklister` address.
 Tokens can be minted or burned on demand. The contract supports having multiple
 minters simultaneously. There is a `masterMinter` address which controls the
 list of minters and how much each is allowed to mint. The mint allowance is
-similar to the ERC20 allowance - as each minter mints new tokens their allowance
-decreases. When it gets too low they will need the allowance increased again by
+similar to the ERC20 allowance - as each minter mints new tokens, their allowance
+decreases. When it gets too low, they will need the allowance increased again by
 the `masterMinter`.
 
 ### Ownable
 
-The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`,
-or `masterMinter` addresses. The `owner` can not change the `proxyOwner`
+The contract has an Owner who can change the `owner`, `pauser`, `blacklister`
+and `masterMinter` addresses. The `owner` can not change the `proxyOwner`
 address.
 
 ## Additional Documentations
