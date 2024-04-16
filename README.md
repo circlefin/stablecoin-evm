@@ -160,7 +160,7 @@ yarn forge:verify scripts/deploy/deploy-fiat-token.s.sol --rpc-url <testnet OR m
 
 ## Contracts
 
-The FiatToken contracts adheres to OpenZeppelin's
+The FiatToken contracts adhere to OpenZeppelin's
 [Proxy Upgrade Pattern](https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies)
 ([permalink](https://github.com/OpenZeppelin/openzeppelin-upgrades/blob/65cf285bd36af24570186ca6409341540c67238a/docs/modules/ROOT/pages/proxies.adoc#L1)).
 There are 2 main contracts - an implementation contract
