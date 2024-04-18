@@ -19,7 +19,7 @@
 set -e
 
 # Refer to https://github.com/foundry-rs/foundry/tags for the list of Foundry versions.
-FOUNDRY_VERSION=nightly-2cf84d9f3ba7b6f4a9296299e7036ecc24cfa1da
+FOUNDRY_VERSION=nightly-bdc04c278f8ac716ed5fd3994bc0da841807b5cf
 
 if [[ "$CI" == "true" ]]
 then
@@ -38,7 +38,7 @@ then
   export PATH="$FOUNDRY_BIN_DIR:$PATH"
 fi
 
-if ! command -v forge &> /dev/null || [ ! "$(forge -V | grep -Eo '\b\w{7}\b')" = "2cf84d9" ]
+if ! command -v forge &> /dev/null || [ ! "$(forge -V | grep -Eo '\b\w{7}\b')" = $(echo $FOUNDRY_VERSION | cut -c '9-15') ]
 then
   echo "Installing foundry at $FOUNDRY_VERSION..."
   foundryup --version $FOUNDRY_VERSION
