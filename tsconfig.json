@@ -19,5 +19,5 @@
     "target": "ES2019"
   },
   "include": ["**/*.ts", "*.ts"],
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules"]
 }

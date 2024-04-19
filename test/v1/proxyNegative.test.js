@@ -1,13 +1,13 @@
 /**
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
  *
- * Copyright (c) 2023, Circle Internet Financial, LLC.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,13 +37,12 @@ const {
   initializeTokenWithProxy,
   encodeCall,
   FiatTokenV1,
-  UpgradedFiatToken,
   deployUpgradedFiatTokenNewFields,
 } = require("./helpers/tokenTest");
 
 const amount = 100;
 
-function runTests(newToken, _accounts, version) {
+function runTests(newToken, version) {
   let rawToken, proxy, token;
 
   beforeEach(async () => {
@@ -137,7 +136,7 @@ function runTests(newToken, _accounts, version) {
   });
 
   it("nut009 should fail to call upgradeTo with non-adminAccount", async () => {
-    const upgradedToken = await UpgradedFiatToken.new();
+    const upgradedToken = await newToken();
     await expectRevert(
       proxy.upgradeTo(upgradedToken.address, { from: masterMinterAccount })
     );
