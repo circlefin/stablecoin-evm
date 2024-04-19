@@ -59,7 +59,8 @@ contract VerifyColdStorageTest is TestUtils {
 
         setUpMinterAndBurnerScript = new SetUpHotMinterAndBurner();
         setUpMinterAndBurnerScript.setUp();
-        setUpMinterAndBurnerScript.run();
+        setUpMinterAndBurnerScript.setUpHotMinterAndBurner("STG");
+        setUpMinterAndBurnerScript.setUpHotMinterAndBurner("PROD");
 
         coldStorageScript = new ColdStorageTransfer();
         coldStorageScript.setUp();
@@ -135,31 +136,59 @@ contract VerifyColdStorageTest is TestUtils {
         verifyColdStorageScript.run();
     }
 
-    function test_VerifyColdStorageNegativeMinterAllowanceTest() public {
+    function test_VerifyColdStorageNegativeProdMinterAllowanceTest() public {
         vm.prank(coldOwner);
         proxyAsV2_2.updateMasterMinter(masterMinterOwner);
 
         vm.prank(masterMinterOwner);
-        proxyAsV2_2.configureMinter(minter, 0);
+        proxyAsV2_2.configureMinter(prodMinter, 0);
 
         vm.prank(coldOwner);
         proxyAsV2_2.updateMasterMinter(masterMinterContractAddress);
 
-        vm.expectRevert("Minter allowance does not match config");
+        vm.expectRevert("Prod minter allowance does not match config");
         verifyColdStorageScript.run();
     }
 
-    function test_VerifyColdStorageNegativeBurnerAllowanceTest() public {
+    function test_VerifyColdStorageNegativeProdBurnerAllowanceTest() public {
         vm.prank(coldOwner);
         proxyAsV2_2.updateMasterMinter(masterMinterOwner);
 
         vm.prank(masterMinterOwner);
-        proxyAsV2_2.configureMinter(burner, 1);
+        proxyAsV2_2.configureMinter(prodBurner, 1);
 
         vm.prank(coldOwner);
         proxyAsV2_2.updateMasterMinter(masterMinterContractAddress);
 
-        vm.expectRevert("Burner mint allowance should be 0");
+        vm.expectRevert("Prod burner mint allowance should be 0");
+        verifyColdStorageScript.run();
+    }
+
+    function test_VerifyColdStorageNegativeStgMinterAllowanceTest() public {
+        vm.prank(coldOwner);
+        proxyAsV2_2.updateMasterMinter(masterMinterOwner);
+
+        vm.prank(masterMinterOwner);
+        proxyAsV2_2.configureMinter(stgMinter, 0);
+
+        vm.prank(coldOwner);
+        proxyAsV2_2.updateMasterMinter(masterMinterContractAddress);
+
+        vm.expectRevert("Staging minter allowance does not match config");
+        verifyColdStorageScript.run();
+    }
+
+    function test_VerifyColdStorageNegativeStgBurnerAllowanceTest() public {
+        vm.prank(coldOwner);
+        proxyAsV2_2.updateMasterMinter(masterMinterOwner);
+
+        vm.prank(masterMinterOwner);
+        proxyAsV2_2.configureMinter(stgBurner, 1);
+
+        vm.prank(coldOwner);
+        proxyAsV2_2.updateMasterMinter(masterMinterContractAddress);
+
+        vm.expectRevert("Staging burner mint allowance should be 0");
         verifyColdStorageScript.run();
     }
 }

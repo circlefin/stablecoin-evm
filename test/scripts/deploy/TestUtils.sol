@@ -34,17 +34,21 @@ contract TestUtils is Test {
     uint256 internal ownerPrivateKey = 4;
     uint256 internal pauserPrivateKey = 5;
     uint256 internal blacklisterPrivateKey = 6;
-    uint256 internal lostAndFoundPrivateKey = 7;
-    uint256 internal minterPrivateKey = 8;
-    uint256 internal burnerPrivateKey = 9;
-    uint256 internal minterControllerIncrementerPrivateKey = 10;
-    uint256 internal minterControllerRemoverPrivateKey = 11;
-    uint256 internal burnerControllerPrivateKey = 12;
-    uint256 internal coldMasterMinterOwnerPrivateKey = 13;
-    uint256 internal coldProxyAdminPrivateKey = 14;
-    uint256 internal coldOwnerPrivateKey = 15;
-    uint256 internal coldBlacklisterPrivateKey = 16;
-    uint256 internal coldPauserPrivateKey = 16;
+    uint256 internal prodMinterPrivateKey = 7;
+    uint256 internal prodBurnerPrivateKey = 8;
+    uint256 internal stgMinterPrivateKey = 9;
+    uint256 internal stgBurnerPrivateKey = 10;
+    uint256 internal prodMinterControllerIncrementerPrivateKey = 11;
+    uint256 internal prodMinterControllerRemoverPrivateKey = 12;
+    uint256 internal prodBurnerControllerPrivateKey = 13;
+    uint256 internal stgMinterControllerIncrementerPrivateKey = 14;
+    uint256 internal stgMinterControllerRemoverPrivateKey = 15;
+    uint256 internal stgBurnerControllerPrivateKey = 16;
+    uint256 internal coldMasterMinterOwnerPrivateKey = 17;
+    uint256 internal coldProxyAdminPrivateKey = 18;
+    uint256 internal coldOwnerPrivateKey = 19;
+    uint256 internal coldBlacklisterPrivateKey = 20;
+    uint256 internal coldPauserPrivateKey = 21;
 
     address internal deployer = vm.addr(deployerPrivateKey);
     address internal proxyAdmin = vm.addr(proxyAdminPrivateKey);
@@ -52,16 +56,28 @@ contract TestUtils is Test {
     address internal owner = vm.addr(ownerPrivateKey);
     address internal pauser = vm.addr(pauserPrivateKey);
     address internal blacklister = vm.addr(blacklisterPrivateKey);
-    address internal lostAndFound = vm.addr(lostAndFoundPrivateKey);
-    address internal minter = vm.addr(minterPrivateKey);
-    address internal burner = vm.addr(burnerPrivateKey);
-    address internal minterControllerIncrementer = vm.addr(
-        minterControllerIncrementerPrivateKey
+    address internal prodMinter = vm.addr(prodMinterPrivateKey);
+    address internal prodBurner = vm.addr(prodBurnerPrivateKey);
+    address internal stgMinter = vm.addr(stgMinterPrivateKey);
+    address internal stgBurner = vm.addr(stgBurnerPrivateKey);
+    address internal prodMinterControllerIncrementer = vm.addr(
+        prodMinterControllerIncrementerPrivateKey
     );
-    address internal minterControllerRemover = vm.addr(
-        minterControllerRemoverPrivateKey
+    address internal prodMinterControllerRemover = vm.addr(
+        prodMinterControllerRemoverPrivateKey
     );
-    address internal burnerController = vm.addr(burnerControllerPrivateKey);
+    address internal prodBurnerController = vm.addr(
+        prodBurnerControllerPrivateKey
+    );
+    address internal stgMinterControllerIncrementer = vm.addr(
+        stgMinterControllerIncrementerPrivateKey
+    );
+    address internal stgMinterControllerRemover = vm.addr(
+        stgMinterControllerRemoverPrivateKey
+    );
+    address internal stgBurnerController = vm.addr(
+        stgBurnerControllerPrivateKey
+    );
     address internal coldMasterMinterOwner = vm.addr(
         coldMasterMinterOwnerPrivateKey
     );
@@ -74,8 +90,10 @@ contract TestUtils is Test {
     string internal tokenName = "USDC";
     string internal tokenSymbol = "USDC";
 
-    uint256 internal mintAllowanceUnits = 25;
-    uint256 internal mintAllowance = 25000000;
+    uint256 internal prodMintAllowanceUnits = 25000000;
+    uint256 internal prodMintAllowance = 25000000000000;
+    uint256 internal stgMintAllowanceUnits = 25000;
+    uint256 internal stgMintAllowance = 25000000000;
 
     string internal blacklistFileName = "test.blacklist.remote.json";
 
@@ -100,6 +118,7 @@ contract TestUtils is Test {
             "MASTER_MINTER_OWNER_PRIVATE_KEY",
             vm.toString(masterMinterOwnerPrivateKey)
         );
+        vm.setEnv("MINTER_ENV", "PROD");
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("OWNER_PRIVATE_KEY", vm.toString(ownerPrivateKey));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
@@ -108,19 +127,36 @@ contract TestUtils is Test {
             "BLACKLISTER_PRIVATE_KEY",
             vm.toString(blacklisterPrivateKey)
         );
-        vm.setEnv("LOST_AND_FOUND_ADDRESS", vm.toString(lostAndFound));
-        vm.setEnv("MINTER_ADDRESS", vm.toString(minter));
-        vm.setEnv("BURNER_ADDRESS", vm.toString(burner));
-        // controller addresses
+        // hot minter/burner
+        vm.setEnv("PROD_MINTER_ADDRESS", vm.toString(prodMinter));
+        vm.setEnv("PROD_BURNER_ADDRESS", vm.toString(prodBurner));
+        vm.setEnv("STG_MINTER_ADDRESS", vm.toString(stgMinter));
+        vm.setEnv("STG_BURNER_ADDRESS", vm.toString(stgBurner));
+        // minter/burner controller addresses
         vm.setEnv(
-            "MINTER_CONTROLLER_INCREMENTER_ADDRESS",
-            vm.toString(minterControllerIncrementer)
+            "PROD_MINTER_CONTROLLER_INCREMENTER_ADDRESS",
+            vm.toString(prodMinterControllerIncrementer)
         );
         vm.setEnv(
-            "MINTER_CONTROLLER_REMOVER_ADDRESS",
-            vm.toString(minterControllerRemover)
+            "PROD_MINTER_CONTROLLER_REMOVER_ADDRESS",
+            vm.toString(prodMinterControllerRemover)
         );
-        vm.setEnv("BURNER_CONTROLLER_ADDRESS", vm.toString(burnerController));
+        vm.setEnv(
+            "PROD_BURNER_CONTROLLER_ADDRESS",
+            vm.toString(prodBurnerController)
+        );
+        vm.setEnv(
+            "STG_MINTER_CONTROLLER_INCREMENTER_ADDRESS",
+            vm.toString(stgMinterControllerIncrementer)
+        );
+        vm.setEnv(
+            "STG_MINTER_CONTROLLER_REMOVER_ADDRESS",
+            vm.toString(stgMinterControllerRemover)
+        );
+        vm.setEnv(
+            "STG_BURNER_CONTROLLER_ADDRESS",
+            vm.toString(stgBurnerController)
+        );
         // cold storage addresses
         vm.setEnv(
             "COLD_MASTER_MINTER_OWNER_ADDRESS",
@@ -132,8 +168,12 @@ contract TestUtils is Test {
         vm.setEnv("COLD_PAUSER_ADDRESS", vm.toString(coldPauser));
 
         vm.setEnv(
-            "MINT_ALLOWANCE_IN_NORMAL_UNITS",
-            vm.toString(mintAllowanceUnits)
+            "PROD_MINT_ALLOWANCE_IN_NORMAL_UNITS",
+            vm.toString(prodMintAllowanceUnits)
+        );
+        vm.setEnv(
+            "STG_MINT_ALLOWANCE_IN_NORMAL_UNITS",
+            vm.toString(stgMintAllowanceUnits)
         );
 
         // Deploy an instance of proxy contract to configure contract address in env
@@ -157,7 +197,7 @@ contract TestUtils is Test {
             vm.addr(ownerPrivateKey)
         );
         proxyAsV2_2.initializeV2(tokenName);
-        proxyAsV2_2.initializeV2_1(lostAndFound);
+        proxyAsV2_2.initializeV2_1(owner);
         proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
 
         MasterMinter masterMinter = new MasterMinter(address(proxy));

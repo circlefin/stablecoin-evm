@@ -44,5 +44,7 @@ then
   foundryup --version $FOUNDRY_VERSION
 fi
 
+npm install -g dotenv-cli@7.3.0
+
 echo "Updating git submodules..."
 git submodule update --init --recursive

@@ -29,6 +29,7 @@ import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 
 contract SetUpColdStorageMinterControllersTest is TestUtils {
     address masterMinterContractAddress;
+    SetUpColdStorageMinterControllers minterControllersScript = new SetUpColdStorageMinterControllers();
 
     MasterMinter masterMinter;
 
@@ -43,22 +44,71 @@ contract SetUpColdStorageMinterControllersTest is TestUtils {
 
     function test_SetUpColdStorageMinterControllersNegativeTest() public {
         assertEq(
-            masterMinter.getWorker(minterControllerIncrementer),
+            masterMinter.getWorker(prodMinterControllerIncrementer),
             address(0)
         );
-        assertEq(masterMinter.getWorker(minterControllerRemover), address(0));
-        assertEq(masterMinter.getWorker(burnerController), address(0));
+        assertEq(
+            masterMinter.getWorker(prodMinterControllerRemover),
+            address(0)
+        );
+        assertEq(masterMinter.getWorker(prodBurnerController), address(0));
+        assertEq(
+            masterMinter.getWorker(stgMinterControllerIncrementer),
+            address(0)
+        );
+        assertEq(
+            masterMinter.getWorker(stgMinterControllerRemover),
+            address(0)
+        );
+        assertEq(masterMinter.getWorker(stgBurnerController), address(0));
     }
 
-    function test_SetUpColdStorageMinterControllersPositiveTest() public {
-
-            SetUpColdStorageMinterControllers minterControllersScript
-         = new SetUpColdStorageMinterControllers();
+    function test_SetUpColdStorageMinterControllersProdPositiveTest() public {
         minterControllersScript.setUp();
-        minterControllersScript.run();
+        minterControllersScript.setUpColdStorageMinterControllers("PROD");
 
-        assertEq(masterMinter.getWorker(minterControllerIncrementer), minter);
-        assertEq(masterMinter.getWorker(minterControllerRemover), minter);
-        assertEq(masterMinter.getWorker(burnerController), burner);
+        assertEq(
+            masterMinter.getWorker(prodMinterControllerIncrementer),
+            prodMinter
+        );
+        assertEq(
+            masterMinter.getWorker(prodMinterControllerRemover),
+            prodMinter
+        );
+        assertEq(masterMinter.getWorker(prodBurnerController), prodBurner);
+
+        // no staging side effects
+        assertEq(
+            masterMinter.getWorker(stgMinterControllerIncrementer),
+            address(0)
+        );
+        assertEq(
+            masterMinter.getWorker(stgMinterControllerRemover),
+            address(0)
+        );
+        assertEq(masterMinter.getWorker(stgBurnerController), address(0));
+    }
+
+    function test_SetUpColdStorageMinterControllersStgPositiveTest() public {
+        minterControllersScript.setUp();
+        minterControllersScript.setUpColdStorageMinterControllers("STG");
+
+        assertEq(
+            masterMinter.getWorker(stgMinterControllerIncrementer),
+            stgMinter
+        );
+        assertEq(masterMinter.getWorker(stgMinterControllerRemover), stgMinter);
+        assertEq(masterMinter.getWorker(stgBurnerController), stgBurner);
+
+        // no prod side effects
+        assertEq(
+            masterMinter.getWorker(prodMinterControllerIncrementer),
+            address(0)
+        );
+        assertEq(
+            masterMinter.getWorker(prodMinterControllerRemover),
+            address(0)
+        );
+        assertEq(masterMinter.getWorker(prodBurnerController), address(0));
     }
 }

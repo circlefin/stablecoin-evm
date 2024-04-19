@@ -41,20 +41,43 @@ contract SetUpHotMinterAndBurnerTest is TestUtils {
     }
 
     function test_SetUpHotMinterAndBurnerNegativeTest() public {
-        assertEq(proxyAsV2_2.isMinter(minter), false);
-        assertEq(proxyAsV2_2.isMinter(burner), false);
+        assertEq(proxyAsV2_2.isMinter(prodMinter), false);
+        assertEq(proxyAsV2_2.isMinter(prodBurner), false);
+        assertEq(proxyAsV2_2.isMinter(stgMinter), false);
+        assertEq(proxyAsV2_2.isMinter(stgBurner), false);
     }
 
-    function test_SetUpHotMinterAndBurnerPositiveTest() public {
+    function test_SetUpHotMinterAndBurnerProdPositiveTest() public {
 
             SetUpHotMinterAndBurner setUpHotMinterAndBurnerScript
          = new SetUpHotMinterAndBurner();
         setUpHotMinterAndBurnerScript.setUp();
-        setUpHotMinterAndBurnerScript.run();
+        setUpHotMinterAndBurnerScript.setUpHotMinterAndBurner("PROD");
 
-        assertEq(proxyAsV2_2.isMinter(minter), true);
-        assertEq(proxyAsV2_2.minterAllowance(minter), mintAllowance);
-        assertEq(proxyAsV2_2.isMinter(burner), true);
-        assertEq(proxyAsV2_2.minterAllowance(burner), 0);
+        assertEq(proxyAsV2_2.isMinter(prodMinter), true);
+        assertEq(proxyAsV2_2.minterAllowance(prodMinter), prodMintAllowance);
+        assertEq(proxyAsV2_2.isMinter(prodBurner), true);
+        assertEq(proxyAsV2_2.minterAllowance(prodBurner), 0);
+
+        // no staging side effects
+        assertEq(proxyAsV2_2.isMinter(stgMinter), false);
+        assertEq(proxyAsV2_2.isMinter(stgBurner), false);
+    }
+
+    function test_SetUpHotMinterAndBurnerStgPositiveTest() public {
+
+            SetUpHotMinterAndBurner setUpHotMinterAndBurnerScript
+         = new SetUpHotMinterAndBurner();
+        setUpHotMinterAndBurnerScript.setUp();
+        setUpHotMinterAndBurnerScript.setUpHotMinterAndBurner("STG");
+
+        assertEq(proxyAsV2_2.isMinter(stgMinter), true);
+        assertEq(proxyAsV2_2.minterAllowance(stgMinter), stgMintAllowance);
+        assertEq(proxyAsV2_2.isMinter(stgBurner), true);
+        assertEq(proxyAsV2_2.minterAllowance(stgBurner), 0);
+
+        // no prod side effects
+        assertEq(proxyAsV2_2.isMinter(prodMinter), false);
+        assertEq(proxyAsV2_2.isMinter(prodBurner), false);
     }
 }
