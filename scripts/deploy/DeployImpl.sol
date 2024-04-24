@@ -89,19 +89,22 @@ contract DeployImpl {
             // the contract from being reinitialized later on with different values.
             // Dummy values can be used here as the proxy contract will store the actual values
             // for the deployed token.
-            fiatTokenV2_2.initialize(
-                "",
-                "",
-                "",
-                0,
-                THROWAWAY_ADDRESS,
-                THROWAWAY_ADDRESS,
-                THROWAWAY_ADDRESS,
-                THROWAWAY_ADDRESS
-            );
-            fiatTokenV2_2.initializeV2("");
-            fiatTokenV2_2.initializeV2_1(THROWAWAY_ADDRESS);
-            fiatTokenV2_2.initializeV2_2(new address[](0), "");
+            fiatTokenV2_2.initialize({
+                tokenName: "",
+                tokenSymbol: "",
+                tokenCurrency: "",
+                tokenDecimals: 0,
+                newMasterMinter: THROWAWAY_ADDRESS,
+                newPauser: THROWAWAY_ADDRESS,
+                newBlacklister: THROWAWAY_ADDRESS,
+                newOwner: THROWAWAY_ADDRESS
+            });
+            fiatTokenV2_2.initializeV2({ newName: "" });
+            fiatTokenV2_2.initializeV2_1({ lostAndFound: THROWAWAY_ADDRESS });
+            fiatTokenV2_2.initializeV2_2({
+                accountsToBlacklist: new address[](0),
+                newSymbol: ""
+            });
         } else {
             fiatTokenV2_2 = OptimismFiatTokenV2_2(impl);
         }
