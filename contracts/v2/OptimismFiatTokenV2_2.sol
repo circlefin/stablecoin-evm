@@ -16,7 +16,7 @@ import { IERC165 } from "@openzeppelin/contracts/introspection/IERC165.sol";
 contract OptimismFiatTokenV2_2 is FiatTokenV2_2, IERC165 {
     address private immutable l1RemoteToken;
 
-    constructor(address _l1RemoteToken) public {
+    constructor(address _l1RemoteToken) public FiatTokenV2_2() {
         l1RemoteToken = _l1RemoteToken;
     }
 
