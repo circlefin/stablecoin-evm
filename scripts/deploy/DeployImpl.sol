@@ -73,7 +73,9 @@ contract DeployImpl {
      * 2) loads an instance of an existing contract when input is not the zero address.
      *
      * @param impl configured of the implementation contract, where address(0) represents a new instance should be deployed
-     * @return FiatTokenV2_2 newly deployed or loaded instance
+     * @param l1RemoteToken token on the L1 corresponding to this bridged version of the token
+     * @param l2StandardBridge Optimism L2StandardBridge contract address on the L2 of the bridged token
+     * @return OptimismFiatTokenV2_2 newly deployed or loaded instance
      */
     function getOrDeployImpl(
         address impl,
