@@ -120,8 +120,6 @@ contract DeployFiatToken is Script, DeployImpl {
         // Now that the proxy contract has been deployed, we can deploy the master minter.
         MasterMinter masterMinter = new MasterMinter(address(proxy));
 
-        // TODO: If l2StandardBridge and l1RemoteToken are set, set the l2StandardBridge as minter.
-
         // Change the master minter to be owned by the master minter owner
         masterMinter.transferOwnership(masterMinterOwner);
 
