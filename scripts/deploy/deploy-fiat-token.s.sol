@@ -53,7 +53,6 @@ contract DeployFiatToken is Script, DeployImpl {
     uint256 private deployerPrivateKey;
 
     address l1RemoteToken;
-    address l2StandardBridge;
 
     /**
      * @notice initialize variables from environment
