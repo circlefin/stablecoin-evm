@@ -15,19 +15,19 @@ import { IERC165 } from "@openzeppelin/contracts/introspection/IERC165.sol";
  */
 contract OptimismFiatTokenV2_2 is FiatTokenV2_2, IERC165 {
     address private immutable l1RemoteToken;
-    address private immutable l2StandardBridge;
 
-    constructor(address _l1RemoteToken, address _l2StandardBridge) public {
+    constructor(address _l1RemoteToken) public {
         l1RemoteToken = _l1RemoteToken;
-        l2StandardBridge = _l2StandardBridge;
     }
 
     function remoteToken() external view returns (address) {
         return l1RemoteToken;
     }
 
-    function bridge() external view returns (address) {
-        return l2StandardBridge;
+    function bridge() external pure returns (address) {
+        // OP Stack L2StandardBridge predeploy
+        // https://specs.optimism.io/protocol/predeploys.html
+        return address(0x4200000000000000000000000000000000000010);
     }
 
     function supportsInterface(bytes4 interfaceId)

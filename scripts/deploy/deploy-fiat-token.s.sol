@@ -77,7 +77,6 @@ contract DeployFiatToken is Script, DeployImpl {
         deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
         l1RemoteToken = vm.envAddress("L1_REMOTE_TOKEN");
-        l2StandardBridge = vm.envAddress("L2_STANDARD_BRIDGE");
 
         console.log("TOKEN_NAME: '%s'", tokenName);
         console.log("TOKEN_SYMBOL: '%s'", tokenSymbol);
@@ -91,7 +90,6 @@ contract DeployFiatToken is Script, DeployImpl {
         console.log("BLACKLISTER_ADDRESS: '%s'", blacklister);
         console.log("LOST_AND_FOUND_ADDRESS: '%s'", lostAndFound);
         console.log("L1_REMOTE_TOKEN: '%s'", l1RemoteToken);
-        console.log("L2_STANDARD_BRIDGE: '%s'", l2StandardBridge);
     }
 
     /**
@@ -110,14 +108,10 @@ contract DeployFiatToken is Script, DeployImpl {
         // If there is an existing implementation contract,
         // we can simply point the newly deployed proxy contract to it.
         // Otherwise, deploy the latest implementation contract code to the network.
-        // If l2StandardBridge and l1RemoteToken are set, deploy an OptimimsFiatToken.
+        // If l1RemoteToken is set, deploy an OptimimsFiatToken.
         FiatTokenV2_2 fiatTokenV2_2;
-        if (l1RemoteToken != address(0) && l2StandardBridge != address(0)) {
-            fiatTokenV2_2 = getOrDeployImpl({
-                impl: _impl,
-                l1RemoteToken: l1RemoteToken,
-                l2StandardBridge: l2StandardBridge
-            });
+        if (l1RemoteToken != address(0)) {
+            fiatTokenV2_2 = getOrDeployImpl(_impl, l1RemoteToken);
         } else {
             fiatTokenV2_2 = getOrDeployImpl(_impl);
         }
