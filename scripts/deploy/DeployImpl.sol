@@ -19,6 +19,9 @@
 pragma solidity 0.6.12;
 
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
+import {
+    OptimismFiatTokenV2_2
+} from "../../contracts/v2/OptimismFiatTokenV2_2.sol";
 
 /**
  * @notice A utility contract that exposes a re-useable getOrDeployImpl function.
@@ -59,6 +62,51 @@ contract DeployImpl {
             fiatTokenV2_2.initializeV2_2(new address[](0), "");
         } else {
             fiatTokenV2_2 = FiatTokenV2_2(impl);
+        }
+
+        return fiatTokenV2_2;
+    }
+
+    /**
+     * @notice helper function that either
+     * 1) deploys the implementation contract if the input is the zero address, or
+     * 2) loads an instance of an existing contract when input is not the zero address.
+     *
+     * @param impl configured of the implementation contract, where address(0) represents a new instance should be deployed
+     * @return FiatTokenV2_2 newly deployed or loaded instance
+     */
+    function getOrDeployImpl(
+        address impl,
+        address l1RemoteToken,
+        address l2StandardBridge
+    ) internal returns (FiatTokenV2_2) {
+        OptimismFiatTokenV2_2 fiatTokenV2_2;
+
+        if (impl == address(0)) {
+            fiatTokenV2_2 = new OptimismFiatTokenV2_2({
+                _l1RemoteToken: l1RemoteToken,
+                _l2StandardBridge: l2StandardBridge
+            });
+
+            // Initializing the implementation contract with dummy values here prevents
+            // the contract from being reinitialized later on with different values.
+            // Dummy values can be used here as the proxy contract will store the actual values
+            // for the deployed token.
+            fiatTokenV2_2.initialize(
+                "",
+                "",
+                "",
+                0,
+                THROWAWAY_ADDRESS,
+                THROWAWAY_ADDRESS,
+                THROWAWAY_ADDRESS,
+                THROWAWAY_ADDRESS
+            );
+            fiatTokenV2_2.initializeV2("");
+            fiatTokenV2_2.initializeV2_1(THROWAWAY_ADDRESS);
+            fiatTokenV2_2.initializeV2_2(new address[](0), "");
+        } else {
+            fiatTokenV2_2 = OptimismFiatTokenV2_2(impl);
         }
 
         return fiatTokenV2_2;
