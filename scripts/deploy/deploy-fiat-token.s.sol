@@ -75,7 +75,7 @@ contract DeployFiatToken is Script, DeployImpl {
 
         deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
-        l1RemoteToken = vm.envAddress("L1_REMOTE_TOKEN");
+        l1RemoteToken = vm.envOr("L1_REMOTE_TOKEN", address(0));
 
         console.log("TOKEN_NAME: '%s'", tokenName);
         console.log("TOKEN_SYMBOL: '%s'", tokenSymbol);
