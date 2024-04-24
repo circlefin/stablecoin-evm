@@ -15,10 +15,11 @@ contract SetL2StandardBridge is Script {
     /**
      * @notice main function that will be run by forge
      */
-    function run(address owner, OptimismFiatTokenV2_2 optimismFiatTokenV2_2)
-        external
-    {
-        vm.startBroadcast(owner);
+    function run(
+        address masterMinterOwner,
+        OptimismFiatTokenV2_2 optimismFiatTokenV2_2
+    ) external {
+        vm.startBroadcast(masterMinterOwner);
         address l2StandardBridge = optimismFiatTokenV2_2.bridge();
         if (l2StandardBridge == address(0)) {
             revert("Expected no-zero bridge address");
@@ -26,9 +27,9 @@ contract SetL2StandardBridge is Script {
         MasterMinter masterMinter = MasterMinter(
             optimismFiatTokenV2_2.masterMinter()
         );
-        masterMinter.configureController(owner, l2StandardBridge);
+        masterMinter.configureController(masterMinterOwner, l2StandardBridge);
         masterMinter.configureMinter(type(uint256).max);
-        masterMinter.removeController(owner);
+        masterMinter.removeController(masterMinterOwner);
 
         vm.stopBroadcast();
     }
