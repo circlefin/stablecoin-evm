@@ -23,11 +23,11 @@ contract SetL2StandardBridge is Script {
         if (l2StandardBridge == address(0)) {
             revert("Expected no-zero bridge address");
         }
-
-        vm.startBroadcast(masterMinterOwner);
         MasterMinter masterMinter = MasterMinter(
             optimismFiatTokenV2_2.masterMinter()
         );
+
+        vm.startBroadcast(masterMinterOwner);
         masterMinter.configureController(masterMinterOwner, l2StandardBridge);
         masterMinter.configureMinter(type(uint256).max);
         masterMinter.removeController(masterMinterOwner);
