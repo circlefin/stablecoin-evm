@@ -67,6 +67,9 @@ jobs:
       - name: Setup CI Environment
         uses: ./.github/composite-actions/setup-ci
 
+      - name: Compile contracts
+        run: yarn compile
+
       - name: Run hardhat tests
         run: HARDHAT_TEST_GREP='${{ matrix.test-groups.grep }}' HARDHAT_TEST_INVERT='${{ matrix.test-groups.invert }}' yarn test
 
