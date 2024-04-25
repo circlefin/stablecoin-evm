@@ -19,8 +19,17 @@
 import { FiatTokenV2Instance } from "./generated/FiatTokenV2";
 import { FiatTokenV2_1Instance } from "./generated/FiatTokenV2_1";
 import { FiatTokenV2_2Instance } from "./generated/FiatTokenV2_2";
+import { OptimismFiatTokenV2_2Instance } from "./generated/OptimismFiatTokenV2_2";
 
 export interface FiatTokenV2_2InstanceExtended extends FiatTokenV2_2Instance {
+  permit?: typeof FiatTokenV2Instance.permit;
+  transferWithAuthorization?: typeof FiatTokenV2Instance.transferWithAuthorization;
+  receiveWithAuthorization?: typeof FiatTokenV2Instance.receiveWithAuthorization;
+  cancelAuthorization?: typeof FiatTokenV2Instance.cancelAuthorization;
+}
+
+export interface OptimismFiatTokenV2_2InstanceExtended
+  extends OptimismFiatTokenV2_2Instance {
   permit?: typeof FiatTokenV2Instance.permit;
   transferWithAuthorization?: typeof FiatTokenV2Instance.transferWithAuthorization;
   receiveWithAuthorization?: typeof FiatTokenV2Instance.receiveWithAuthorization;
@@ -30,4 +39,5 @@ export interface FiatTokenV2_2InstanceExtended extends FiatTokenV2_2Instance {
 export type AnyFiatTokenV2Instance =
   | FiatTokenV2Instance
   | FiatTokenV2_1Instance
-  | FiatTokenV2_2InstanceExtended;
+  | FiatTokenV2_2InstanceExtended
+  | OptimismFiatTokenV2_2InstanceExtended;

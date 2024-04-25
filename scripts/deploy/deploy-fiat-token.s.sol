@@ -23,6 +23,9 @@ import { Script } from "forge-std/Script.sol";
 import { DeployImpl } from "./DeployImpl.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
+import {
+    OptimismFiatTokenV2_2
+} from "../../contracts/v2/OptimismFiatTokenV2_2.sol";
 import { MasterMinter } from "../../contracts/minting/MasterMinter.sol";
 
 /**
@@ -49,6 +52,8 @@ contract DeployFiatToken is Script, DeployImpl {
 
     uint256 private deployerPrivateKey;
 
+    address l1RemoteToken;
+
     /**
      * @notice initialize variables from environment
      */
@@ -70,6 +75,8 @@ contract DeployFiatToken is Script, DeployImpl {
 
         deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
+        l1RemoteToken = vm.envOr("L1_REMOTE_TOKEN", address(0));
+
         console.log("TOKEN_NAME: '%s'", tokenName);
         console.log("TOKEN_SYMBOL: '%s'", tokenSymbol);
         console.log("TOKEN_CURRENCY: '%s'", tokenCurrency);
@@ -81,6 +88,7 @@ contract DeployFiatToken is Script, DeployImpl {
         console.log("PAUSER_ADDRESS: '%s'", pauser);
         console.log("BLACKLISTER_ADDRESS: '%s'", blacklister);
         console.log("LOST_AND_FOUND_ADDRESS: '%s'", lostAndFound);
+        console.log("L1_REMOTE_TOKEN: '%s'", l1RemoteToken);
     }
 
     /**
@@ -99,7 +107,13 @@ contract DeployFiatToken is Script, DeployImpl {
         // If there is an existing implementation contract,
         // we can simply point the newly deployed proxy contract to it.
         // Otherwise, deploy the latest implementation contract code to the network.
-        FiatTokenV2_2 fiatTokenV2_2 = getOrDeployImpl(_impl);
+        // If l1RemoteToken is set, deploy an OptimimsFiatToken.
+        FiatTokenV2_2 fiatTokenV2_2;
+        if (l1RemoteToken != address(0)) {
+            fiatTokenV2_2 = getOrDeployImpl(_impl, l1RemoteToken);
+        } else {
+            fiatTokenV2_2 = getOrDeployImpl(_impl);
+        }
 
         FiatTokenProxy proxy = new FiatTokenProxy(address(fiatTokenV2_2));
 

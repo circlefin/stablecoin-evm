@@ -26,6 +26,7 @@ const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
 const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
+const OptimismFiatTokenV2_2 = artifacts.require("OptimismFiatTokenV2_2");
 
 export const STORAGE_SLOT_NUMBERS = {
   _deprecatedBlacklisted: 3,
@@ -37,9 +38,11 @@ export function usesOriginalStorageSlotPositions<
 >({
   Contract,
   version,
+  constructorArgs,
 }: {
   Contract: Truffle.Contract<T>;
   version: 1 | 1.1 | 2 | 2.1 | 2.2;
+  constructorArgs?: unknown[];
 }): void {
   describe("uses original storage slot positions", () => {
     const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
@@ -71,7 +74,7 @@ export function usesOriginalStorageSlotPositions<
     let domainSeparator: string;
 
     beforeEach(async () => {
-      fiatToken = await Contract.new();
+      fiatToken = await Contract.new(...(constructorArgs || []));
       proxy = await FiatTokenProxy.new(fiatToken.address);
       await proxy.changeAdmin(proxyAdmin);
 
@@ -113,7 +116,9 @@ export function usesOriginalStorageSlotPositions<
         await proxyAsFiatTokenV2_1.initializeV2_1(lostAndFound);
       }
       if (version >= 2.2) {
-        const proxyAsFiatTokenV2_2 = await FiatTokenV2_2.at(proxy.address);
+        const proxyAsFiatTokenV2_2 = constructorArgs
+          ? await OptimismFiatTokenV2_2.at(proxy.address)
+          : await FiatTokenV2_2.at(proxy.address);
         await proxyAsFiatTokenV2_2.initializeV2_2([], symbol);
       }
     });
