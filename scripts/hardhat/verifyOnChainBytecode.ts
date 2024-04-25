@@ -292,7 +292,7 @@ export async function verifyOnChainBytecode(
 
 function logBytecodeComparisonResults(results: BytecodeComparisionResult[]) {
   for (const { type, equal } of results) {
-    if (equal) {
+    if (!equal) {
       console.warn(
         "\x1b[31m",
         `\nWARNING: verification failed - ${type} mismatch.`
