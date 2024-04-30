@@ -223,3 +223,4 @@ address.
 - [Deployment process](./doc/deployment.md)
 - [Preparing an upgrade](./doc/upgrade.md)
 - [Upgrading from v2.1 to v2.2](./doc/v2.2_upgrade.md)
+- [Celo FiatToken extension](./doc/celo.md)

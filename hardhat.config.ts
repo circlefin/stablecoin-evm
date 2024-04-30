@@ -51,7 +51,7 @@ const hardhatConfig: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 10000000,
+        runs: parseInt(process.env.OPTIMIZER_RUNS || "10000000"),
       },
     },
   },

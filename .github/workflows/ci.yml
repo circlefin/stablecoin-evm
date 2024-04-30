@@ -20,6 +20,11 @@ on:
     branches: [master]
   pull_request:
 
+# Celo USDC contracts violate Spurious Dragon with existing configs, so
+# we need to lower the number of runs to decrease the contract size.
+env:
+  OPTIMIZER_RUNS: 81250
+
 jobs:
   run_ci_tests:
     runs-on: ubuntu-latest
