@@ -42,7 +42,7 @@ export function usesOriginalStorageSlotPositions<
   version: 1 | 1.1 | 2 | 2.1 | 2.2;
 }): void {
   describe("uses original storage slot positions", () => {
-    const [name, symbol, currency, decimals] = ["USD Coin", "USDC", "USD", 6];
+    const [name, symbol, currency, decimals] = ["USDC", "USDC", "USD", 6];
     const [mintAllowance, minted, transferred, allowance] = [
       1000e6,
       100e6,

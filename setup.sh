@@ -19,7 +19,7 @@
 set -e
 
 # Refer to https://github.com/foundry-rs/foundry/tags for the list of Foundry versions.
-FOUNDRY_VERSION=nightly-2cf84d9f3ba7b6f4a9296299e7036ecc24cfa1da
+FOUNDRY_VERSION=nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9
 
 if [[ "$CI" == "true" ]]
 then
@@ -38,11 +38,13 @@ then
   export PATH="$FOUNDRY_BIN_DIR:$PATH"
 fi
 
-if ! command -v forge &> /dev/null || [ ! "$(forge -V | grep -Eo '\b\w{7}\b')" = "2cf84d9" ]
+if ! command -v forge &> /dev/null || [ ! "$(forge -V | grep -Eo '\b\w{7}\b')" = $(echo $FOUNDRY_VERSION | cut -c '9-15') ]
 then
   echo "Installing foundry at $FOUNDRY_VERSION..."
   foundryup --version $FOUNDRY_VERSION
 fi
+
+npm install -g dotenv-cli@7.3.0
 
 echo "Updating git submodules..."
 git submodule update --init --recursive

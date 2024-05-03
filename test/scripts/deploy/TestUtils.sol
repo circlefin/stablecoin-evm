@@ -22,7 +22,7 @@ pragma experimental ABIEncoderV2; // needed for compiling older solc versions: h
 import "forge-std/Test.sol"; // solhint-disable no-global-import
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
-import { FiatTokenV1 } from "../../../contracts/v1/FiatTokenV1.sol";
+import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 import {
     AbstractV2Upgrader
 } from "../../../contracts/v2/upgrader/AbstractV2Upgrader.sol";
@@ -37,7 +37,6 @@ contract TestUtils is Test {
     uint256 internal ownerPrivateKey = 4;
     uint256 internal pauserPrivateKey = 5;
     uint256 internal blacklisterPrivateKey = 6;
-    uint256 internal lostAndFoundPrivateKey = 7;
 
     address internal deployer = vm.addr(deployerPrivateKey);
     address internal proxyAdmin = vm.addr(proxyAdminPrivateKey);
@@ -45,7 +44,6 @@ contract TestUtils is Test {
     address internal owner = vm.addr(ownerPrivateKey);
     address internal pauser = vm.addr(pauserPrivateKey);
     address internal blacklister = vm.addr(blacklisterPrivateKey);
-    address internal lostAndFound = vm.addr(lostAndFoundPrivateKey);
 
     uint8 internal decimals = 6;
     string internal tokenName = "USDC";
@@ -73,13 +71,33 @@ contract TestUtils is Test {
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
         vm.setEnv("BLACKLISTER_ADDRESS", vm.toString(blacklister));
-        vm.setEnv("LOST_AND_FOUND_ADDRESS", vm.toString(lostAndFound));
 
         // Deploy an instance of proxy contract to configure contract address in env
+        vm.prank(deployer);
+        FiatTokenV2_2 v2_2 = new FiatTokenV2_2();
+
+        vm.prank(proxyAdmin);
+        FiatTokenProxy proxy = new FiatTokenProxy(address(v2_2));
+
         vm.startPrank(deployer);
-        FiatTokenV1 v1 = new FiatTokenV1();
-        FiatTokenProxy proxy = new FiatTokenProxy(address(v1));
-        vm.stopPrank();
+        MasterMinter masterMinter = new MasterMinter(address(proxy));
+        masterMinter.transferOwnership(masterMinterOwner);
+
+        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
+
+        proxyAsV2_2.initialize(
+            tokenName,
+            tokenSymbol,
+            "USD",
+            decimals,
+            address(masterMinter),
+            pauser,
+            blacklister,
+            vm.addr(ownerPrivateKey)
+        );
+        proxyAsV2_2.initializeV2(tokenName);
+        proxyAsV2_2.initializeV2_1(owner);
+        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
         vm.setEnv("FIAT_TOKEN_PROXY_ADDRESS", vm.toString(address(proxy)));
 
         vm.setEnv("BLACKLIST_FILE_NAME", blacklistFileName);
@@ -108,7 +126,7 @@ contract TestUtils is Test {
             owner
         );
         proxyAsV2_2.initializeV2(tokenName);
-        proxyAsV2_2.initializeV2_1(lostAndFound);
+        proxyAsV2_2.initializeV2_1(owner);
         proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
         vm.stopPrank();
 
@@ -117,7 +135,7 @@ contract TestUtils is Test {
         vm.setEnv("FEE_ADAPTER_DECIMALS", "18");
     }
 
-    function validateImpl(FiatTokenV1 impl) internal {
+    function validateImpl(FiatTokenV2_2 impl) internal {
         assertEq(impl.name(), "");
         assertEq(impl.symbol(), "");
         assertEq(impl.currency(), "");

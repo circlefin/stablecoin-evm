@@ -49,7 +49,7 @@ export function behavesLikeFiatTokenV2(
     fiatTokenOwner = await getFiatToken().owner();
 
     domainSeparator = makeDomainSeparator(
-      "USD Coin",
+      "USDC",
       "2",
       await web3.eth.getChainId(),
       getFiatToken().address
@@ -80,7 +80,7 @@ export function behavesLikeFiatTokenV2(
   it("disallows calling initializeV2 twice", async () => {
     // It was called once in beforeEach. Try to call again.
     await expectRevert(
-      getFiatToken().initializeV2("Not USD Coin", { from: fiatTokenOwner })
+      getFiatToken().initializeV2("Not USDC", { from: fiatTokenOwner })
     );
   });
 }
