@@ -20,6 +20,7 @@ import BN from "bn.js";
 import {
   AnyFiatTokenV2Instance,
   FiatTokenV2_2InstanceExtended,
+  FiatTokenCeloV2_2InstanceExtended,
 } from "../../@types/AnyFiatTokenV2Instance";
 import {
   expectRevert,
@@ -236,7 +237,7 @@ describe("FiatTokenV2_2", () => {
  * here we re-assign the overloaded method definition to the method name shorthand.
  */
 export function initializeOverloadedMethods(
-  fiatToken: FiatTokenV2_2InstanceExtended,
+  fiatToken: FiatTokenV2_2InstanceExtended | FiatTokenCeloV2_2InstanceExtended,
   signatureBytesType: SignatureBytesType
 ): void {
   if (signatureBytesType == SignatureBytesType.Unpacked) {

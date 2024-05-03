@@ -19,6 +19,9 @@
 pragma solidity 0.6.12;
 
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
+import {
+    FiatTokenCeloV2_2
+} from "../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 
 /**
  * @notice A utility contract that exposes a re-useable getOrDeployImpl function.
@@ -62,5 +65,46 @@ contract DeployImpl {
         }
 
         return fiatTokenV2_2;
+    }
+
+    /**
+     * @notice helper function that either
+     * 1) deploys the implementation contract if the input is the zero address, or
+     * 2) loads an instance of an existing contract when input is not the zero address.
+     *
+     * @param impl configured of the implementation contract, where address(0) represents a new instance should be deployed
+     * @return FiatTokenCeloV2_2 newly deployed or loaded instance
+     */
+    function getOrDeployImplCelo(address impl)
+        internal
+        returns (FiatTokenCeloV2_2)
+    {
+        FiatTokenCeloV2_2 fiatTokenCeloV2_2;
+
+        if (impl == address(0)) {
+            fiatTokenCeloV2_2 = new FiatTokenCeloV2_2();
+
+            // Initializing the implementation contract with dummy values here prevents
+            // the contract from being reinitialized later on with different values.
+            // Dummy values can be used here as the proxy contract will store the actual values
+            // for the deployed token.
+            fiatTokenCeloV2_2.initialize(
+                "",
+                "",
+                "",
+                0,
+                THROWAWAY_ADDRESS,
+                THROWAWAY_ADDRESS,
+                THROWAWAY_ADDRESS,
+                THROWAWAY_ADDRESS
+            );
+            fiatTokenCeloV2_2.initializeV2("");
+            fiatTokenCeloV2_2.initializeV2_1(THROWAWAY_ADDRESS);
+            fiatTokenCeloV2_2.initializeV2_2(new address[](0), "");
+        } else {
+            fiatTokenCeloV2_2 = FiatTokenCeloV2_2(impl);
+        }
+
+        return fiatTokenCeloV2_2;
     }
 }

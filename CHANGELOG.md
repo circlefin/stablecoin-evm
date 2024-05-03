@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.0, Celo variant (2024-04-08)
+
+- Add `ICeloGasToken` and `IFiatTokenFeeAdapter` per Celo documentation
+- Add `FiatTokenFeeAdapterProxy` and `FiatTokenFeeAdapterV1` to support USDC as
+  gas on Celo
+- Implement `debitGasFees` and `creditGasFees` in `FiatTokenCeloV2_2`
+
 ## 2.2.0 (2023-11-09)
 
 - Add ERC-1271 signature validation support to EIP-2612 and EIP-3009 functions

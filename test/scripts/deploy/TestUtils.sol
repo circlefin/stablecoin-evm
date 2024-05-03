@@ -26,6 +26,9 @@ import { FiatTokenV1 } from "../../../contracts/v1/FiatTokenV1.sol";
 import {
     AbstractV2Upgrader
 } from "../../../contracts/v2/upgrader/AbstractV2Upgrader.sol";
+import {
+    FiatTokenCeloV2_2
+} from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 
 contract TestUtils is Test {
     uint256 internal deployerPrivateKey = 1;
@@ -47,6 +50,7 @@ contract TestUtils is Test {
     uint8 internal decimals = 6;
     string internal tokenName = "USDC";
     string internal tokenSymbol = "USDC";
+    string internal tokenCurrency = "USD";
 
     string internal blacklistFileName = "test.blacklist.remote.json";
 
@@ -58,7 +62,7 @@ contract TestUtils is Test {
     function setUp() public virtual {
         vm.setEnv("TOKEN_NAME", tokenName);
         vm.setEnv("TOKEN_SYMBOL", tokenSymbol);
-        vm.setEnv("TOKEN_CURRENCY", "USD");
+        vm.setEnv("TOKEN_CURRENCY", tokenCurrency);
         vm.setEnv("TOKEN_DECIMALS", "6");
         vm.setEnv("DEPLOYER_PRIVATE_KEY", vm.toString(deployerPrivateKey));
         vm.setEnv("PROXY_ADMIN_ADDRESS", vm.toString(proxyAdmin));
@@ -79,6 +83,38 @@ contract TestUtils is Test {
         vm.setEnv("FIAT_TOKEN_PROXY_ADDRESS", vm.toString(address(proxy)));
 
         vm.setEnv("BLACKLIST_FILE_NAME", blacklistFileName);
+
+        setUpCelo();
+    }
+
+    function setUpCelo() internal {
+        // Deploy and initialize FiatTokenCeloV2_2 and it's proxy.
+        vm.startPrank(deployer);
+        FiatTokenCeloV2_2 celoV2_2 = new FiatTokenCeloV2_2();
+        FiatTokenProxy proxy = new FiatTokenProxy(address(celoV2_2));
+        FiatTokenCeloV2_2 proxyAsV2_2 = FiatTokenCeloV2_2(address(proxy));
+        MasterMinter masterMinter = new MasterMinter(address(proxy));
+        masterMinter.transferOwnership(masterMinterOwner);
+        proxy.changeAdmin(proxyAdmin);
+        // This is required since the FiatTokenFeeAdapter needs the decimals field.
+        proxyAsV2_2.initialize(
+            tokenName,
+            tokenSymbol,
+            tokenCurrency,
+            decimals,
+            address(masterMinter),
+            pauser,
+            blacklister,
+            owner
+        );
+        proxyAsV2_2.initializeV2(tokenName);
+        proxyAsV2_2.initializeV2_1(lostAndFound);
+        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
+        vm.stopPrank();
+
+        vm.setEnv("FIAT_TOKEN_CELO_PROXY_ADDRESS", vm.toString(address(proxy)));
+        vm.setEnv("FEE_ADAPTER_PROXY_ADMIN_ADDRESS", vm.toString(proxyAdmin));
+        vm.setEnv("FEE_ADAPTER_DECIMALS", "18");
     }
 
     function validateImpl(FiatTokenV1 impl) internal {
