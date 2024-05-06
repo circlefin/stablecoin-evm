@@ -25,7 +25,7 @@ const MockFiatTokenWithEditableChainId = artifacts.require(
 );
 
 describe("MockFiatTokenWithEditableChainId", () => {
-  const name = "USD Coin";
+  const name = "USDC";
   const version = "2";
   const [, , lostAndFound] = HARDHAT_ACCOUNTS;
   const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
@@ -46,7 +46,7 @@ describe("MockFiatTokenWithEditableChainId", () => {
       fiatTokenOwner,
       fiatTokenOwner
     );
-    await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
+    await fiatToken.initializeV2("USDC", { from: fiatTokenOwner });
     await fiatToken.initializeV2_1(lostAndFound);
     await fiatToken.initializeV2_2([], "USDCUSDC");
   });

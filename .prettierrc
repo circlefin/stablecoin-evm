@@ -25,6 +25,12 @@
       "options": {
         "proseWrap": "always"
       }
+    },
+    {
+      "files": ".github/pull_request_template.md",
+      "options": {
+        "proseWrap": "never"
+      }
     }
   ]
 }
