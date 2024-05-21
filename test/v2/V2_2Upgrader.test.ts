@@ -96,7 +96,7 @@ describe("V2_2Upgrader", () => {
     await fiatTokenProxy.upgradeTo(v2_1Implementation.address, {
       from: originalProxyAdmin,
     });
-    await proxyAsV2_1.initializeV2("USD Coin");
+    await proxyAsV2_1.initializeV2("USDC");
     await proxyAsV2_1.initializeV2_1(lostAndFound);
 
     // Initially blacklist all these accounts.

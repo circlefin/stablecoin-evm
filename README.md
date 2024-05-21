@@ -39,7 +39,7 @@ Requirements:
 
 - Node 16.14.0
 - Yarn 1.22.19
-- [Foundry@2cf84d9](https://github.com/foundry-rs/foundry/releases/tag/nightly-2cf84d9f3ba7b6f4a9296299e7036ecc24cfa1da)
+- [Foundry@f625d0f](https://github.com/foundry-rs/foundry/releases/tag/nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9)
 
 ```sh
 $ git clone git@github.com:circlefin/stablecoin-evm.git

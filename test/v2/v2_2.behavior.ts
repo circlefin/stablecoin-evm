@@ -56,7 +56,7 @@ export function behavesLikeFiatTokenV22(
   beforeEach(async () => {
     fiatToken = getFiatToken() as FiatTokenV2_2InstanceExtended;
     domainSeparator = makeDomainSeparator(
-      "USD Coin",
+      "USDC",
       "2",
       await web3.eth.getChainId(),
       fiatToken.address

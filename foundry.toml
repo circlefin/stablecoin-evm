@@ -32,6 +32,10 @@ fs_permissions = [
     { access = "read-write", path = "blacklist.remote.json"},
     { access = "read-write", path = "test.blacklist.remote.json"}
 ] # https://book.getfoundry.sh/cheatcodes/fs
+extra-output-files = [
+    "bin",
+    "metadata"
+]
 
 [rpc_endpoints]
 testnet = "${TESTNET_RPC_URL}"

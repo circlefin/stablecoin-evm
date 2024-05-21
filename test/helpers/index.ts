@@ -150,7 +150,7 @@ export async function initializeToVersion(
 ): Promise<void> {
   const proxyAsV1 = await FiatTokenV1.at(proxyOrImplementation.address);
   await proxyAsV1.initialize(
-    "USD Coin",
+    "USDC",
     "USDC",
     "USD",
     6,
@@ -162,7 +162,7 @@ export async function initializeToVersion(
 
   if (version >= "2") {
     const proxyAsV2 = await FiatTokenV2.at(proxyOrImplementation.address);
-    await proxyAsV2.initializeV2("USD Coin", {
+    await proxyAsV2.initializeV2("USDC", {
       from: fiatTokenOwner,
     });
   }

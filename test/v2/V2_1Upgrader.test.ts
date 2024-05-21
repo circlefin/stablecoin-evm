@@ -76,7 +76,7 @@ describe("V2_1Upgrader", () => {
     await fiatTokenProxy.upgradeToAndCall(
       v2Implementation.address,
       web3.eth.abi.encodeFunctionSignature("initializeV2(string)") +
-        strip0x(web3.eth.abi.encodeParameters(["string"], ["USD Coin"])),
+        strip0x(web3.eth.abi.encodeParameters(["string"], ["USDC"])),
       { from: originalProxyAdmin }
     );
   });

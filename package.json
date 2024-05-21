@@ -11,7 +11,8 @@
     "coverage": "hardhat coverage",
     "forge:simulate": "forge script -vv --gas-estimate-multiplier $(dotenv -p GAS_MULTIPLIER)",
     "forge:broadcast": "yarn forge:simulate --broadcast",
-    "forge:verify": "yarn forge:simulate --verify --resume --etherscan-api-key $(dotenv -p ETHERSCAN_KEY)",
+    "forge:broadcastAndVerify": "yarn forge:broadcast --verify --etherscan-api-key $(dotenv -p ETHERSCAN_KEY)",
+    "forge:verify": "yarn forge:simulate --verify --resume --etherscan-api-key $(dotenv -p ETHERSCAN_KEY) --private-key $(dotenv -p DEPLOYER_PRIVATE_KEY)",
     "fmt:base": "prettier './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
     "fmt:check": "yarn fmt:base --check",
     "fmt": "yarn fmt:base --write",
@@ -35,7 +36,6 @@
     "url": "https://github.com/circlefin/stablecoin-evm/issues"
   },
   "homepage": "https://github.com/circlefin/stablecoin-evm#readme",
-  "dependencies": {},
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "2.0.2",
     "@nomicfoundation/hardhat-ethers": "3.0.4",

@@ -40,7 +40,6 @@ contract DeployFiatToken is Script, DeployImpl {
     address private owner;
     address private pauser;
     address private blacklister;
-    address private lostAndFound;
 
     string private tokenName;
     string private tokenSymbol;
@@ -63,10 +62,9 @@ contract DeployFiatToken is Script, DeployImpl {
         masterMinterOwner = vm.envAddress("MASTER_MINTER_OWNER_ADDRESS");
         owner = vm.envAddress("OWNER_ADDRESS");
 
-        // Pauser, blacklister, and lost and found addresses can default to owner address
+        // Pauser and blacklister addresses can default to owner address
         pauser = vm.envOr("PAUSER_ADDRESS", owner);
         blacklister = vm.envOr("BLACKLISTER_ADDRESS", owner);
-        lostAndFound = vm.envOr("LOST_AND_FOUND_ADDRESS", owner);
 
         deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
@@ -80,7 +78,6 @@ contract DeployFiatToken is Script, DeployImpl {
         console.log("OWNER_ADDRESS: '%s'", owner);
         console.log("PAUSER_ADDRESS: '%s'", pauser);
         console.log("BLACKLISTER_ADDRESS: '%s'", blacklister);
-        console.log("LOST_AND_FOUND_ADDRESS: '%s'", lostAndFound);
     }
 
     /**
@@ -134,7 +131,7 @@ contract DeployFiatToken is Script, DeployImpl {
         proxyAsV2_2.initializeV2(tokenName);
 
         // Do the V2_1 initialization
-        proxyAsV2_2.initializeV2_1(lostAndFound);
+        proxyAsV2_2.initializeV2_1(owner);
 
         // Do the V2_2 initialization
         proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);

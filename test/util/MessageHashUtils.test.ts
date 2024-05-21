@@ -31,7 +31,7 @@ describe("MessageHashUtils", function () {
       const messageHashUtils: MessageHashUtilsTestInstance = await MessageHashUtils.new();
       const structhash: string = web3.utils.randomHex(32);
       const domainSeparator: string = makeDomainSeparator(
-        "USD Coin",
+        "USDC",
         "2",
         1,
         messageHashUtils.address

@@ -34,7 +34,7 @@ describe("FiatTokenV1_1", () => {
   beforeEach(async () => {
     fiatToken = await FiatTokenV1_1.new();
     await fiatToken.initialize(
-      "USD Coin",
+      "USDC",
       "USDC",
       "USD",
       6,
