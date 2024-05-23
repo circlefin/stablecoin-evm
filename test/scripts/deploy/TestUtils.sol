@@ -198,7 +198,7 @@ contract TestUtils is Test {
             tokenSymbol,
             "USD",
             decimals,
-            address(masterMinter),
+            masterMinterOwner,
             pauser,
             blacklister,
             vm.addr(ownerPrivateKey)
