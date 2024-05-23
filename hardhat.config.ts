@@ -36,7 +36,7 @@ import "./scripts/hardhat/getContractCreationBlock";
 import "./scripts/hardhat/readValuesFromContract";
 import "./scripts/hardhat/validateAccountsToBlacklist";
 
-import "./scripts/hardhat/verifyBytecodeOnChain";
+import "./scripts/hardhat/verifyOnChainBytecode";
 
 dotenv.config();
 

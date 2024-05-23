@@ -87,7 +87,7 @@ contract DeployFiatToken is Script, DeployImpl {
         internal
         returns (
             FiatTokenV2_2,
-            MasterMinter,
+            address,
             FiatTokenProxy
         )
     {
@@ -100,14 +100,6 @@ contract DeployFiatToken is Script, DeployImpl {
 
         FiatTokenProxy proxy = new FiatTokenProxy(address(fiatTokenV2_2));
 
-        // Now that the proxy contract has been deployed, we can deploy the master minter.
-        MasterMinter masterMinter = new MasterMinter(address(proxy));
-
-        // Change the master minter to be owned by the master minter owner
-        masterMinter.transferOwnership(masterMinterOwner);
-
-        // Now that the master minter is set up, we can go back to setting up the proxy and
-        // implementation contracts.
         // Need to change admin first, or the call to initialize won't work
         // since admin can only call methods in the proxy, and not forwarded methods
         proxy.changeAdmin(proxyAdmin);
@@ -121,7 +113,10 @@ contract DeployFiatToken is Script, DeployImpl {
             tokenSymbol,
             tokenCurrency,
             tokenDecimals,
-            address(masterMinter),
+            // setting this to the master minter owner for now
+            // to allow hot key setup before migrating to cold
+            // storage
+            masterMinterOwner,
             pauser,
             blacklister,
             owner
@@ -138,7 +133,7 @@ contract DeployFiatToken is Script, DeployImpl {
 
         vm.stopBroadcast();
 
-        return (fiatTokenV2_2, masterMinter, proxy);
+        return (fiatTokenV2_2, masterMinterOwner, proxy);
     }
 
     /**
@@ -148,7 +143,7 @@ contract DeployFiatToken is Script, DeployImpl {
         external
         returns (
             FiatTokenV2_2,
-            MasterMinter,
+            address,
             FiatTokenProxy
         )
     {
@@ -162,7 +157,7 @@ contract DeployFiatToken is Script, DeployImpl {
         external
         returns (
             FiatTokenV2_2,
-            MasterMinter,
+            address,
             FiatTokenProxy
         )
     {
