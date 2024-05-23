@@ -1,6 +1,8 @@
 pkg:npm/pako
 pkg:npm/highlightjs-solidity
 pkg:npm/ethereum-ens
+pkg:npm/interface-ipld-format
+pkg:npm/multiformats
 pkg:npm/%40ethereumjs/rlp@4.0.1
 pkg:npm/%40ethereumjs/util@8.1.0
 pkg:npm/%40nomicfoundation/ethereumjs-block@5.0.2

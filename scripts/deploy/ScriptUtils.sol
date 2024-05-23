@@ -37,4 +37,17 @@ contract ScriptUtils is Script {
         string memory json = vm.readFile(blacklistFileName);
         return vm.parseJsonAddressArray(json, "");
     }
+
+    /**
+     * @dev Returns true if the two strings are equal.
+     */
+    function stringsEqual(string memory a, string memory b)
+        internal
+        pure
+        returns (bool)
+    {
+        return
+            bytes(a).length == bytes(b).length &&
+            keccak256(bytes(a)) == keccak256(bytes(b));
+    }
 }
