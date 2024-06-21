@@ -29,7 +29,7 @@ jobs:
     if: ${{ github.event.label.name == 'needs_coverage' }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup CI Environment
         uses: ./.github/composite-actions/setup-ci
