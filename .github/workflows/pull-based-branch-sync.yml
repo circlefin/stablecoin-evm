@@ -29,10 +29,10 @@ jobs:
     runs-on: small-spot
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Read secrets from AWS Secrets Manager into environment variables
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           parse-json-secrets: true
           secret-ids: |
@@ -40,7 +40,7 @@ jobs:
             /ops/utilities/github-actions-bot/ssh-priv-key
 
       - name: Import SSH key
-        uses: shimataro/ssh-key-action@v2.6.1
+        uses: shimataro/ssh-key-action@v2.7.0
         with:
           key: "${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_SSH_PRIV_KEY }}"
           name: id_rsa
