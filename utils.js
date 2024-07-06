@@ -19,6 +19,7 @@
 const _ = require("lodash");
 const fs = require("fs");
 const web3 = require("web3");
+const evm = require("getEvm");
 
 /**
  * Helper function to read the blacklist file.
