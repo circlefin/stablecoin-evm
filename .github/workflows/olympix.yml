@@ -1,0 +1,12 @@
+name: "Olympix Scan"
+on:
+  pull_request:
+    branches: [ "deploy" ]
+  workflow_dispatch:
+  schedule:
+    - cron: '31 14 * * 1' # Every Monday 2:31PM UTC
+
+jobs:
+  run_olympix:
+    if: ${{ github.repository_owner == 'circlefin' }}
+    uses: circlefin/security-seceng-templates/.github/workflows/olympix_scan.yml@v1.14.0
