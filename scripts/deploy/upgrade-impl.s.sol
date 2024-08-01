@@ -9,8 +9,6 @@ import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
 
 contract DeployImplAndUpgrader is Script, DeployImpl, ScriptUtils {
-    address private immutable THROWAWAY_ADDRESS = address(1);
-
     address private proxy;
     address private impl;
     address private proxyAdmin;
