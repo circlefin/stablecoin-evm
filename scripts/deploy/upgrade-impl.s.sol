@@ -150,10 +150,15 @@ contract UpgradeImpl is Script, DeployImpl, ScriptUtils {
         bridge.bridgeERC20(
             address(_proxy),
             l1RemoteToken,
-            100,
+            1000000,
             200000,
             _extraData
         );
+
+        balanceOf = FiatTokenV2_2(proxy).balanceOf(
+            0xf276E7A22F0059656f4781286A33Da62AB751E3A
+        );
+        console.log("new balanceOf: '%s'", balanceOf);
 
         vm.stopBroadcast();
 
