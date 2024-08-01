@@ -123,10 +123,8 @@ contract UpgradeImpl is Script, DeployImpl, ScriptUtils {
 
     function run() external returns (FiatTokenV2_2) {
         vm.startBroadcast(proxyAdmin);
-
         FiatTokenProxy _proxy = FiatTokenProxy(payable(proxy));
         FiatTokenV2_2 fiatTokenV2_2 = getOrDeployImpl(impl, l1RemoteToken);
-
         _proxy.upgradeTo(address(fiatTokenV2_2));
 
         vm.stopBroadcast();
