@@ -61,6 +61,7 @@ contract OptimismMintableFiatTokenV2_2 is
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
+        notBlacklisted(_from)
     {
         uint256 balance = _balanceOf(_from);
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
