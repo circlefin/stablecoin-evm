@@ -68,7 +68,7 @@ contract OptimismMintableFiatTokenV2_2 is
 
         totalSupply_ = totalSupply_.sub(_amount);
         _setBalance(_from, balance.sub(_amount));
-        emit Burn(_from, _amount);
+        emit Burn(msg.sender, _amount);
         emit Transfer(_from, address(0), _amount);
     }
 }
