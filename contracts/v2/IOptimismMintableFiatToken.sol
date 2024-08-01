@@ -19,3 +19,20 @@ interface IOptimismMintableERC20 is IERC165 {
 
     function burn(address _from, uint256 _amount) external;
 }
+
+/**
+ * @title IOptimismMintableFiatToken
+ * @author Lattice (https://lattice.xyz)
+ * @notice This interface adds the functions from IOptimismMintableERC20 missing from FiatTokenV2_2.
+ *         It doesn't include `mint(address _to, uint256 _amount)`, as this function already exists
+ *         on FiatTokenV2_2 (from FiatTokenV1), and can't be overridden. The only difference is a
+ *         (bool) return type for the FiatTokenV1 version, which doesn't matter for consumers of
+ *         IOptimismMintableERC20 that don't expect a return type.
+ */
+interface IOptimismMintableFiatToken is IERC165 {
+    function remoteToken() external view returns (address);
+
+    function bridge() external returns (address);
+
+    function burn(address _from, uint256 _amount) external;
+}

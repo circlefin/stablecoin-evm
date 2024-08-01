@@ -20,8 +20,8 @@ pragma solidity 0.6.12;
 
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
 import {
-    OptimismFiatTokenV2_2
-} from "../../contracts/v2/OptimismFiatTokenV2_2.sol";
+    OptimismMintableFiatTokenV2_2
+} from "../../contracts/v2/OptimismMintableFiatTokenV2_2.sol";
 
 /**
  * @notice A utility contract that exposes a re-useable getOrDeployImpl function.
@@ -74,16 +74,16 @@ contract DeployImpl {
      *
      * @param impl configured of the implementation contract, where address(0) represents a new instance should be deployed
      * @param l1RemoteToken token on the L1 corresponding to this bridged version of the token
-     * @return OptimismFiatTokenV2_2 newly deployed or loaded instance
+     * @return OptimismMintableFiatTokenV2_2 newly deployed or loaded instance
      */
     function getOrDeployImpl(address impl, address l1RemoteToken)
         internal
         returns (FiatTokenV2_2)
     {
-        OptimismFiatTokenV2_2 fiatTokenV2_2;
+        OptimismMintableFiatTokenV2_2 fiatTokenV2_2;
 
         if (impl == address(0)) {
-            fiatTokenV2_2 = new OptimismFiatTokenV2_2(l1RemoteToken);
+            fiatTokenV2_2 = new OptimismMintableFiatTokenV2_2(l1RemoteToken);
 
             // Initializing the implementation contract with dummy values here prevents
             // the contract from being reinitialized later on with different values.
@@ -106,7 +106,7 @@ contract DeployImpl {
                 newSymbol: ""
             });
         } else {
-            fiatTokenV2_2 = OptimismFiatTokenV2_2(impl);
+            fiatTokenV2_2 = OptimismMintableFiatTokenV2_2(impl);
         }
 
         return fiatTokenV2_2;

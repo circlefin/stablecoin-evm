@@ -19,7 +19,7 @@
 import BN from "bn.js";
 import {
   AnyFiatTokenV2Instance,
-  OptimismFiatTokenV2_2InstanceExtended,
+  OptimismMintableFiatTokenV2_2InstanceExtended,
 } from "../../@types/AnyFiatTokenV2Instance";
 import {
   expectRevert,
@@ -51,16 +51,18 @@ import { behavesLikeFiatTokenV22 } from "./v2_2.behavior";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV2_1 = artifacts.require("FiatTokenV2_1");
-const OptimismFiatTokenV2_2 = artifacts.require("OptimismFiatTokenV2_2");
+const OptimismMintableFiatTokenV2_2 = artifacts.require(
+  "OptimismMintableFiatTokenV2_2"
+);
 
-describe("OptimismFiatTokenV2_2", () => {
+describe("OptimismMintableFiatTokenV2_2", () => {
   const newSymbol = "USDCUSDC";
   const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
   const lostAndFound = HARDHAT_ACCOUNTS[2];
   const proxyOwnerAccount = HARDHAT_ACCOUNTS[14];
   const l1RemoteToken = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 
-  let fiatToken: OptimismFiatTokenV2_2InstanceExtended;
+  let fiatToken: OptimismMintableFiatTokenV2_2InstanceExtended;
 
   const getFiatToken = (
     signatureBytesType: SignatureBytesType
@@ -73,11 +75,11 @@ describe("OptimismFiatTokenV2_2", () => {
 
   before(async () => {
     await linkLibraryToTokenContract(FiatTokenV2_1);
-    await linkLibraryToTokenContract(OptimismFiatTokenV2_2);
+    await linkLibraryToTokenContract(OptimismMintableFiatTokenV2_2);
   });
 
   beforeEach(async () => {
-    fiatToken = await OptimismFiatTokenV2_2.new(l1RemoteToken);
+    fiatToken = await OptimismMintableFiatTokenV2_2.new(l1RemoteToken);
     await initializeToVersion(fiatToken, "2.1", fiatTokenOwner, lostAndFound);
   });
 
@@ -154,7 +156,9 @@ describe("OptimismFiatTokenV2_2", () => {
       });
 
       // Validate that isBlacklisted returns true for every accountsToBlacklist.
-      const _proxyAsV2_2 = await OptimismFiatTokenV2_2.at(_proxy.address);
+      const _proxyAsV2_2 = await OptimismMintableFiatTokenV2_2.at(
+        _proxy.address
+      );
       const areAccountsBlacklisted = await Promise.all(
         accountsToBlacklist.map((account) =>
           _proxyAsV2_2.isBlacklisted(account)
@@ -216,7 +220,7 @@ describe("OptimismFiatTokenV2_2", () => {
     behavesLikeFiatTokenV22(getFiatToken(SignatureBytesType.Packed));
     console.log("before");
     usesOriginalStorageSlotPositions({
-      Contract: OptimismFiatTokenV2_2,
+      Contract: OptimismMintableFiatTokenV2_2,
       version: 2.2,
       constructorArgs: [l1RemoteToken],
     });
@@ -240,7 +244,7 @@ describe("OptimismFiatTokenV2_2", () => {
  * here we re-assign the overloaded method definition to the method name shorthand.
  */
 export function initializeOverloadedMethods(
-  fiatToken: OptimismFiatTokenV2_2InstanceExtended,
+  fiatToken: OptimismMintableFiatTokenV2_2InstanceExtended,
   signatureBytesType: SignatureBytesType
 ): void {
   if (signatureBytesType == SignatureBytesType.Unpacked) {

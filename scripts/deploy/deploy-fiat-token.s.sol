@@ -24,8 +24,8 @@ import { DeployImpl } from "./DeployImpl.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
 import {
-    OptimismFiatTokenV2_2
-} from "../../contracts/v2/OptimismFiatTokenV2_2.sol";
+    OptimismMintableFiatTokenV2_2
+} from "../../contracts/v2/OptimismMintableFiatTokenV2_2.sol";
 import { MasterMinter } from "../../contracts/minting/MasterMinter.sol";
 
 /**

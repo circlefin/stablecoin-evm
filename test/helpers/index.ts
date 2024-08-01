@@ -26,6 +26,7 @@ import {
   FiatTokenV2_1Instance,
   FiatTokenV2_2Instance,
   FiatTokenV2Instance,
+  OptimismMintableFiatTokenV2_2Instance,
 } from "../../@types/generated";
 import _ from "lodash";
 
@@ -140,7 +141,8 @@ export async function initializeToVersion(
     | FiatTokenV1_1Instance
     | FiatTokenV2Instance
     | FiatTokenV2_1Instance
-    | FiatTokenV2_2Instance,
+    | FiatTokenV2_2Instance
+    | OptimismMintableFiatTokenV2_2Instance,
   version: "1" | "1.1" | "2" | "2.1" | "2.2",
   fiatTokenOwner: string,
   lostAndFound: string,

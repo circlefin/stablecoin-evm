@@ -119,13 +119,17 @@ describe(`gas costs for version ${TARGET_VERSION}`, () => {
   });
 
   it("burn() entire balance", async () => {
-    const tx = await fiatToken.burn(entireBalance, { from: fiatTokenOwner });
-    console.log(consoleMessage, tx.receipt.gasUsed);
+    if ("burn" in fiatToken) {
+      const tx = await fiatToken.burn(entireBalance, { from: fiatTokenOwner });
+      console.log(consoleMessage, tx.receipt.gasUsed);
+    }
   });
 
   it("burn() partial balance", async () => {
-    const tx = await fiatToken.burn(partialBalance, { from: fiatTokenOwner });
-    console.log(consoleMessage, tx.receipt.gasUsed);
+    if ("burn" in fiatToken) {
+      const tx = await fiatToken.burn(partialBalance, { from: fiatTokenOwner });
+      console.log(consoleMessage, tx.receipt.gasUsed);
+    }
   });
 
   it("transfer() where both parties have a balance before and after", async () => {
