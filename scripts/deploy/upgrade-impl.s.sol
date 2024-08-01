@@ -8,7 +8,7 @@ import { DeployImpl } from "./DeployImpl.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
 
-contract DeployImplAndUpgrader is Script, DeployImpl, ScriptUtils {
+contract UpgradeImpl is Script, DeployImpl, ScriptUtils {
     address private proxy;
     address private impl;
     address private proxyAdmin;
@@ -35,5 +35,7 @@ contract DeployImplAndUpgrader is Script, DeployImpl, ScriptUtils {
         FiatTokenV2_2 fiatTokenV2_2 = getOrDeployImpl(impl, l1RemoteToken);
         _proxy.upgradeTo(address(fiatTokenV2_2));
         vm.stopBroadcast();
+
+        return fiatTokenV2_2;
     }
 }
