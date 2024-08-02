@@ -26,7 +26,7 @@ import _ from "lodash";
 import path from "path";
 import { hardhatArgumentTypes } from "./hardhatArgumentTypes";
 
-type TaskArguments = {
+export type TaskArguments = {
   contractName: string;
   contractAddress: string;
   libraryName?: string;
@@ -45,7 +45,7 @@ export enum BytecodeInputType {
   MetadataHash = "metadata hash",
 }
 
-export type BytecodeComparisionResult = {
+type BytecodeComparisonResult = {
   type: BytecodeInputType;
   equal: boolean; // if the inputs are identical
 };
@@ -146,7 +146,7 @@ export async function verifyOnChainBytecode(
     contractCreationTxHash,
   }: TaskArguments,
   hre: HardhatRuntimeEnvironment
-): Promise<BytecodeComparisionResult[]> {
+): Promise<BytecodeComparisonResult[]> {
   const bytecodeComparisonResults = [];
 
   // Getting contract bytecode from blockchain or local file input
@@ -273,8 +273,7 @@ export async function verifyOnChainBytecode(
       path.join(__dirname, "..", "..", metadataFilePath),
       "utf-8"
     );
-    const minifiedMetadata = JSON.stringify(JSON.parse(rawMetadata));
-    const metadataHash = await Hash.of(minifiedMetadata); // the library output is bs58 encoded by default
+    const metadataHash = await Hash.of(rawMetadata); // the library output is bs58 encoded by default
     const expectedMetadataHash = Buffer.from(
       bs58.decode(metadataHash)
     ).toString("hex");
@@ -290,7 +289,9 @@ export async function verifyOnChainBytecode(
   return bytecodeComparisonResults;
 }
 
-function logBytecodeComparisonResults(results: BytecodeComparisionResult[]) {
+export function logBytecodeComparisonResults(
+  results: BytecodeComparisonResult[]
+): void {
   for (const { type, equal } of results) {
     if (!equal) {
       console.warn(
