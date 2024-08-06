@@ -13,19 +13,20 @@ directory, typically the `out` directory unless specified otherwise in the
 Foundry version. To retrieve the metadata, you can run the following command:
 
 ```sh
-$ cat out/example.sol/example.json | jq -r '.rawMetadata' > example.metadata.json
+cat out/example.sol/example.json | jq -jr '.rawMetadata' > example.metadata.json
 ```
 
 ## Hardhat
 
-Hardhat stores the compiled output in the `artifacts` directory, which includes
-two subdirectories we need to interact with: `build-info` and `contracts`. The
+Hardhat stores the compiled output in the `artifacts` directory (or to the
+artifacts path specified in `hardhat.config.ts`), which includes two
+subdirectories we need to interact with: `build-info` and `contracts`. The
 `build-info` directory contains files with hex IDs. You can retrieve the
 metadata of `example.sol` to `example.metadata.json` by running the following
 command from root directory:
 
 ```sh
-cat "$(jq -r '.buildInfo' artifacts/path/to/example.sol/example.dbg.json | sed 's|^\.\./\.\./\.\./|artifacts/|')" | jq -r '.output.contracts["contracts/path/to/example.sol"].example.metadata' > example.json
+cat "$(jq -r '.buildInfo' path/to/artifacts/contracts/path/to/example.sol/example.dbg.json | sed 's|^\.\./\.\./\.\./|path/to/artifacts/|')" | jq -jr '.output.contracts["contracts/path/to/example.sol"].example.metadata' > example.json
 ```
 
 ## Truffle
