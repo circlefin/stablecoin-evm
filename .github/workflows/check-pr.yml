@@ -1,4 +1,4 @@
-# Copyright 2024 Circle Internet Financial, LTD. All rights reserved.
+# Copyright 2024 Circle Internet Group, Inc. All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -15,7 +15,7 @@
 # limitations under the License.
 
 name: Check PR
-on: 
+on:
   workflow_run:
     workflows: [CI]
     types: [completed]
