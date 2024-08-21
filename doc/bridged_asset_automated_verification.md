@@ -25,21 +25,42 @@ library contract, all at once. Please
 1. Fill in the `input.json` file that you created. For each contract, required
    inputs fields are listed below
 
-   - contractAddress
-   - contractCreationTxHash
+   - `contractAddress`
+   - `contractCreationTxHash`
 
    And you also need to provide a standard EVM-compatible node URL in the field
 
-   - rpcUrl
+   - `rpcUrl`
 
-2. Follow the steps [here](./metadata_extraction.md) to extract the
-   FiatTokenV2_2 metadata to `verification_artifacts/FiatTokenV2_2.json`
+   There are additional optional parameters that should be ignored unless your
+   verification process requires them. Optional parameters include:
 
-3. Follow the steps [here](./metadata_extraction.md) to extract the
-   FiatTokenProxy metadata to `verification_artifacts/FiatTokenProxy.json`
+   - `verificationType`: by default, the verification type will be "partial".
+     This means that the metadata hash at the end of the runtime bytecode will
+     be verified separately via the metadata files generated below.
+     Alternatively, this field can be set to "full", but in that case, your
+     contract's metadata must match the metadata in this repo exactly.
+   - `useTracesForCreationBytecode`: a boolean value for whether or not to use
+     traces for pulling contract creation code. Setting this parameter to `true`
+     is only necessary if the contract was deployed _within_ a transaction, i.e.
+     it was deployed from another contract. Note that if this parameter is set
+     to `true`, the provided `rpcUrl` must support the `debug_traceTransaction`
+     JSON RPC method.
+   - `artifactType`: a string to indicate what artifact to use for verification
+     if the contract deployment does not match the current artifacts in the
+     repo. The options for this value can be found in
+     [alternativeArtficacts.ts](../scripts/hardhat/alternativeArtifacts.ts).
 
-4. Follow the steps [here](./metadata_extraction.md) to extract the
-   SignatureChecker metadata to `verification_artifacts/SignatureChecker.json`
+2. If `verificationType` is not set to "full", follow the steps
+   [here](./metadata_extraction.md) to extract metadata for each of the
+   following contracts:
+
+   1. extract FiatTokenV2_2 metadata to
+      `verification_artifacts/FiatTokenV2_2.json`
+   2. extract FiatTokenProxy metadata to
+      `verification_artifacts/FiatTokenProxy.json`
+   3. extract SignatureChecker metadata to
+      `verification_artifacts/SignatureChecker.json`
 
    After this step, your local directory should look like
 
@@ -75,5 +96,5 @@ optimizer runs, matches ours.
 
 ### Metadata mismatch
 
-Remember to not format the metadata file, leave them as extracted. Otherwise it
+Do not format the metadata files--leave them as extracted. Formatting the file
 will result in a mismatching hash.

@@ -22,15 +22,20 @@ import {
   logBytecodeComparisonResults,
   TaskArguments as VerifyOnChainBytecodeTaskArguments,
   verifyOnChainBytecode,
+  BytecodeVerificationType,
 } from "./hardhat/verifyOnChainBytecode";
 import hre from "hardhat";
 import { HttpNetworkConfig } from "hardhat/types";
 import { ethers } from "ethers";
+import { ArtifactType } from "./hardhat/alternativeArtifacts";
 
 type ContractInput = {
   contractAddress: string;
-  metadataFilePath: string;
   contractCreationTxHash: string;
+  metadataFilePath: string;
+  verificationType?: BytecodeVerificationType;
+  artifactType?: ArtifactType;
+  useTracesForCreationBytecode?: boolean;
 };
 
 type InputObject = {
@@ -115,16 +120,43 @@ function validateInput(filename: string): InputObject {
         `Invalid contractCreationTxHash for ${key}: ${value.contractCreationTxHash}`
       );
     }
-
-    // Validate metadataFilePath (file must exist)
-    const metadataFilePath = path.join(
-      VERIFICATION_ARTIFACTS_DIR,
-      `${key}.json`
-    );
-    if (!fs.existsSync(metadataFilePath)) {
+    // Validate verificationType if present
+    if (
+      value.verificationType !== undefined &&
+      !Object.values(BytecodeVerificationType).includes(value.verificationType)
+    ) {
       throw new Error(
-        `Invalid metadataFilePath for ${key}: File does not exist`
+        `Invalid verificationType for ${key}: ${value.verificationType}`
       );
+    }
+    // Validate artifactType if present
+    if (
+      value.artifactType !== undefined &&
+      !Object.values(ArtifactType).includes(value.artifactType)
+    ) {
+      throw new Error(`Invalid artifactType for ${key}: ${value.artifactType}`);
+    }
+    // Validate useTracesForCreationBytecode if present
+    if (
+      value.useTracesForCreationBytecode !== undefined &&
+      typeof value.useTracesForCreationBytecode !== "boolean"
+    ) {
+      throw new Error(
+        `Invalid useTracesForCreationBytecode for ${key}: ${value.useTracesForCreationBytecode}`
+      );
+    }
+
+    // If verification type isn't "full," validate metadataFilePath (file must exist)
+    if (value.verificationType !== BytecodeVerificationType.Full) {
+      const metadataFilePath = path.join(
+        VERIFICATION_ARTIFACTS_DIR,
+        `${key}.json`
+      );
+      if (!fs.existsSync(metadataFilePath)) {
+        throw new Error(
+          `Invalid metadataFilePath for ${key}: File does not exist`
+        );
+      }
     }
   }
 
@@ -134,8 +166,6 @@ function validateInput(filename: string): InputObject {
 function transformInputToVerifyOnChainBytecodeTaskArguments(
   input: InputObject
 ): VerifyOnChainBytecodeTaskArguments[] {
-  const verificationType = "partial";
-
   // Impl Contract
   const taskArgsImpl: VerifyOnChainBytecodeTaskArguments = {
     contractName: "FiatTokenV2_2",
@@ -143,9 +173,16 @@ function transformInputToVerifyOnChainBytecodeTaskArguments(
     libraryName: "SignatureChecker",
     libraryAddress: input.SignatureChecker.contractAddress,
     isLibrary: false,
-    verificationType,
-    metadataFilePath: "verification_artifacts/FiatTokenV2_2.json",
+    verificationType:
+      input.FiatTokenV2_2.verificationType || BytecodeVerificationType.Partial,
+    metadataFilePath:
+      input.FiatTokenV2_2.verificationType === BytecodeVerificationType.Full
+        ? undefined
+        : "verification_artifacts/FiatTokenV2_2.json",
     contractCreationTxHash: input.FiatTokenV2_2.contractCreationTxHash,
+    useTracesForCreationBytecode:
+      input.FiatTokenV2_2.useTracesForCreationBytecode,
+    artifactType: input.FiatTokenV2_2.artifactType,
   };
 
   // Proxy
@@ -153,9 +190,16 @@ function transformInputToVerifyOnChainBytecodeTaskArguments(
     contractName: "FiatTokenProxy",
     contractAddress: input.FiatTokenProxy.contractAddress,
     isLibrary: false,
-    verificationType,
-    metadataFilePath: "verification_artifacts/FiatTokenProxy.json",
+    verificationType:
+      input.FiatTokenProxy.verificationType || BytecodeVerificationType.Partial,
+    metadataFilePath:
+      input.FiatTokenProxy.verificationType === BytecodeVerificationType.Full
+        ? undefined
+        : "verification_artifacts/FiatTokenProxy.json",
     contractCreationTxHash: input.FiatTokenProxy.contractCreationTxHash,
+    useTracesForCreationBytecode:
+      input.FiatTokenProxy.useTracesForCreationBytecode,
+    artifactType: input.FiatTokenProxy.artifactType,
   };
 
   // Signature Checker
@@ -163,9 +207,17 @@ function transformInputToVerifyOnChainBytecodeTaskArguments(
     contractName: "SignatureChecker",
     contractAddress: input.SignatureChecker.contractAddress,
     isLibrary: true,
-    verificationType,
-    metadataFilePath: "verification_artifacts/SignatureChecker.json",
+    verificationType:
+      input.SignatureChecker.verificationType ||
+      BytecodeVerificationType.Partial,
+    metadataFilePath:
+      input.SignatureChecker.verificationType === BytecodeVerificationType.Full
+        ? undefined
+        : "verification_artifacts/SignatureChecker.json",
     contractCreationTxHash: input.SignatureChecker.contractCreationTxHash,
+    useTracesForCreationBytecode:
+      input.SignatureChecker.useTracesForCreationBytecode,
+    artifactType: input.SignatureChecker.artifactType,
   };
 
   return [taskArgsImpl, taskArgsProxy, taskArgsLib];

@@ -25,24 +25,51 @@ import Hash from "ipfs-only-hash";
 import _ from "lodash";
 import path from "path";
 import { hardhatArgumentTypes } from "./hardhatArgumentTypes";
+import { alternativeArtifacts, ArtifactType } from "./alternativeArtifacts";
 
 export type TaskArguments = {
   contractName: string;
   contractAddress: string;
   libraryName?: string;
   libraryAddress?: string;
-  verificationType: "full" | "partial";
+  verificationType: BytecodeVerificationType;
   onchainBytecodeFilePath?: string;
   isLibrary?: boolean;
   metadataFilePath?: string;
   contractCreationTxHash?: string;
+  useTracesForCreationBytecode?: boolean;
+  artifactType?: ArtifactType;
 };
+
+export enum BytecodeVerificationType {
+  Partial = "partial", // verifies the runtime bytecode without checking the metadata hash
+  Full = "full", // verifies the entire runtime bytecode including the metadata hash
+}
 
 export enum BytecodeInputType {
   ConstructorCode = "constructor code", // Constructor bytecode (the portion that preceeds the runtime bytecode within the full creation bytecode)
   RuntimeBytecodeFull = "full runtime bytecode", // Runtime bytecode including metadata hash
   RuntimeBytecodePartial = "partial runtime bytecode", // Runtime bytecode excluding metadata hash
   MetadataHash = "metadata hash",
+}
+
+export interface ContractArtifact {
+  creationBytecode: string;
+  runtimeBytecode: string;
+  creationLinkReferences: LinkReferences;
+  runtimeLinkReferences: LinkReferences;
+}
+
+interface GethTransactionTrace {
+  from: string;
+  to: string;
+  gas: string;
+  gasUsed: string;
+  input: string;
+  output?: string;
+  type: string;
+  value?: string;
+  calls?: GethTransactionTrace[];
 }
 
 type BytecodeComparisonResult = {
@@ -108,6 +135,18 @@ task(
     undefined,
     hardhatArgumentTypes.string
   )
+  .addOptionalParam(
+    "useTracesForCreationBytecode",
+    "Use transaction traces to pull the contract creation bytecode",
+    false,
+    hardhatArgumentTypes.boolean
+  )
+  .addOptionalParam(
+    "artifactType",
+    "The type of artifact to use for verification",
+    undefined,
+    hardhatArgumentTypes.string
+  )
   .setAction(taskAction);
 
 /**
@@ -144,6 +183,8 @@ export async function verifyOnChainBytecode(
     isLibrary,
     metadataFilePath,
     contractCreationTxHash,
+    useTracesForCreationBytecode,
+    artifactType,
   }: TaskArguments,
   hre: HardhatRuntimeEnvironment
 ): Promise<BytecodeComparisonResult[]> {
@@ -160,40 +201,20 @@ export async function verifyOnChainBytecode(
     actualRuntimeBytecode = await hre.ethers.provider.getCode(contractAddress);
   }
 
-  // Getting locally compiled bytecode, swap out library contract addresses
-  const foundryContractArtifact = JSON.parse(
-    readFileSync(
-      path.join(
-        __dirname,
-        "..",
-        "..",
-        "artifacts",
-        "foundry",
-        `${contractName}.sol`,
-        `${contractName}.json`
-      ),
-      "utf-8"
-    )
-  );
-
-  const expectedCreationBytecode: string =
-    foundryContractArtifact.bytecode.object;
-  let expectedRuntimeBytecode: string =
-    foundryContractArtifact.deployedBytecode.object;
-  const creationLinkReferences: LinkReferences =
-    foundryContractArtifact.bytecode.linkReferences;
-  const runtimeLinkReferences: LinkReferences =
-    foundryContractArtifact.deployedBytecode.linkReferences;
+  const contractArtifact = getContractArtifact(contractName, artifactType);
+  const expectedCreationBytecode = contractArtifact.creationBytecode;
+  let expectedRuntimeBytecode = contractArtifact.runtimeBytecode;
+  const creationLinkReferences = contractArtifact.creationLinkReferences;
+  const runtimeLinkReferences = contractArtifact.runtimeLinkReferences;
 
   // ==== Compare constructor code between contract on chain and locally compiled version
   if (contractCreationTxHash) {
-    const transaction = await hre.ethers.provider.getTransaction(
-      contractCreationTxHash
+    const actualCreationBytecode = await getContractCreationBytecode(
+      hre,
+      contractAddress,
+      contractCreationTxHash,
+      useTracesForCreationBytecode
     );
-    if (!transaction) {
-      throw new Error("Transaction not found");
-    }
-    const actualCreationBytecode = transaction?.data;
     const constructorCodeEndIndex = getConstructorCodeEndIndex(
       expectedCreationBytecode,
       expectedRuntimeBytecode,
@@ -253,7 +274,7 @@ export async function verifyOnChainBytecode(
   }
 
   // ==== Compare runtime bytecode
-  if (verificationType === "full") {
+  if (verificationType === BytecodeVerificationType.Full) {
     bytecodeComparisonResults.push({
       type: BytecodeInputType.RuntimeBytecodeFull,
       equal: expectedRuntimeBytecode === actualRuntimeBytecode,
@@ -305,6 +326,113 @@ export function logBytecodeComparisonResults(
       );
     }
   }
+}
+
+/**
+ * Returns contract creation bytecode
+ */
+async function getContractCreationBytecode(
+  hre: HardhatRuntimeEnvironment,
+  contractAddress: string,
+  contractCreationTxHash: string,
+  useTracesForCreationBytecode: boolean | undefined
+): Promise<string> {
+  if (useTracesForCreationBytecode) {
+    const transactionTraces: GethTransactionTrace = await hre.ethers.provider.send(
+      "debug_traceTransaction",
+      [contractCreationTxHash, { tracer: "callTracer" }]
+    );
+    return extractBytecodeFromGethTraces(transactionTraces, contractAddress);
+  }
+  const transaction = await hre.ethers.provider.getTransaction(
+    contractCreationTxHash
+  );
+  if (transaction == null) {
+    throw new Error("Transaction not found");
+  }
+  return transaction.data;
+}
+
+/**
+ * Returns contract creation bytecode given traces
+ */
+export function extractBytecodeFromGethTraces(
+  traces: GethTransactionTrace,
+  targetContract: string
+): string {
+  if (
+    traces.to.toLowerCase() === targetContract.toLowerCase() &&
+    (traces.type === "CREATE" || traces.type === "CREATE2")
+  ) {
+    return traces.input;
+  }
+  if (traces.calls) {
+    for (const call of traces.calls) {
+      return extractBytecodeFromGethTraces(call, targetContract);
+    }
+  }
+  throw new Error("Contract creation trace not found");
+}
+
+/**
+ * Returns contract artifact
+ */
+function getContractArtifact(
+  contractName: string,
+  artifactType: ArtifactType | undefined
+): ContractArtifact {
+  if (artifactType !== undefined) {
+    return getAlternativeArtifact(contractName, artifactType);
+  }
+  // Getting locally compiled bytecode
+  const foundryContractArtifact = JSON.parse(
+    readFileSync(
+      path.join(
+        __dirname,
+        "..",
+        "..",
+        "artifacts",
+        "foundry",
+        `${contractName}.sol`,
+        `${contractName}.json`
+      ),
+      "utf-8"
+    )
+  );
+
+  return {
+    creationBytecode: foundryContractArtifact.bytecode.object,
+    runtimeBytecode: foundryContractArtifact.deployedBytecode.object,
+    creationLinkReferences: foundryContractArtifact.bytecode.linkReferences,
+    runtimeLinkReferences:
+      foundryContractArtifact.deployedBytecode.linkReferences,
+  };
+}
+
+/**
+ * Returns contract artifact from the static alternative artifacts
+ */
+function getAlternativeArtifact(
+  contractName: string,
+  artifactType: ArtifactType
+): ContractArtifact {
+  if (!Object.values(ArtifactType).includes(artifactType)) {
+    throw new Error(`artifact type ${artifactType} not supported`);
+  }
+  const alternativeArtifactContracts = alternativeArtifacts.get(
+    artifactType as ArtifactType
+  );
+  if (alternativeArtifactContracts === undefined) {
+    throw new Error(`artifacts not found for artifact type ${artifactType}`);
+  }
+  const contractArtifact = alternativeArtifactContracts.get(contractName);
+  if (contractArtifact === undefined) {
+    throw new Error(
+      `artifact not found for contract ${contractName} for artifact type ${artifactType}`
+    );
+  }
+
+  return contractArtifact;
 }
 
 /**
