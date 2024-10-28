@@ -37,13 +37,11 @@ by the [Hardhat](https://hardhat.org/) framework.
 
 Requirements:
 
-- Node 16.14.0
+- Node 20.9.0
 - Yarn 1.22.19
 - [Foundry@f625d0f](https://github.com/foundry-rs/foundry/releases/tag/nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9)
 
 ```sh
-$ git clone git@github.com:circlefin/stablecoin-evm.git
-$ cd stablecoin-evm
 $ nvm use
 $ npm i -g yarn@1.22.19 # Install yarn if you don't already have it
 $ yarn install          # Install npm packages and other dependencies listed in setup.sh

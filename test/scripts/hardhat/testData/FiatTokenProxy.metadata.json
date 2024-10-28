@@ -1,0 +1,231 @@
+{
+  "compiler": {
+    "version": "0.6.12+commit.27d51765"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "implementationContract",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "previousAdmin",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "internalType": "address",
+            "name": "newAdmin",
+            "type": "address",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "AdminChanged",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "implementation",
+            "type": "address",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Upgraded",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "stateMutability": "payable",
+        "type": "fallback"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "admin",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newAdmin",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "changeAdmin"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "implementation",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newImplementation",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "upgradeTo"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newImplementation",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function",
+        "name": "upgradeToAndCall"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "admin()": {
+          "returns": {
+            "_0": "The address of the proxy admin."
+          }
+        },
+        "changeAdmin(address)": {
+          "details": "Changes the admin of the proxy. Only the current admin can call this function.",
+          "params": {
+            "newAdmin": "Address to transfer proxy administration to."
+          }
+        },
+        "implementation()": {
+          "returns": {
+            "_0": "The address of the implementation."
+          }
+        },
+        "upgradeTo(address)": {
+          "details": "Upgrade the backing implementation of the proxy. Only the admin can call this function.",
+          "params": {
+            "newImplementation": "Address of the new implementation."
+          }
+        },
+        "upgradeToAndCall(address,bytes)": {
+          "details": "Upgrade the backing implementation of the proxy and call a function on the new implementation. This is useful to initialize the proxied contract.",
+          "params": {
+            "data": "Data to send as msg.data in the low level call. It should include the signature and the parameters of the function to be called, as described in https://solidity.readthedocs.io/en/develop/abi-spec.html#function-selector-and-argument-encoding.",
+            "newImplementation": "Address of the new implementation."
+          }
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@ensdomains/=node_modules/@ensdomains/",
+      "@openzeppelin/=node_modules/@openzeppelin/",
+      "@solidity-parser/=node_modules/prettier-plugin-solidity/node_modules/@solidity-parser/",
+      "ds-test/=lib/forge-std/lib/ds-test/src/",
+      "eth-gas-reporter/=node_modules/eth-gas-reporter/",
+      "forge-std/=lib/forge-std/src/",
+      "hardhat/=node_modules/hardhat/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 10000000
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "contracts/v1/FiatTokenProxy.sol": "FiatTokenProxy"
+    },
+    "evmVersion": "istanbul",
+    "libraries": {}
+  },
+  "sources": {
+    "contracts/upgradeability/AdminUpgradeabilityProxy.sol": {
+      "keccak256": "0x709d23a3d4b34a43861d099ec8c3f964c933f45bf30ee08c98a569433114c599",
+      "urls": [
+        "bzz-raw://97ec753a4c2cf21c11daccde7727b3343bedfe985b7299ddb86b91b641c6bb8e",
+        "dweb:/ipfs/QmRerVbjv74Yx4Pa26am82cAMDyMXzka1oE9YnrQtGwkd7"
+      ],
+      "license": "Apache-2.0"
+    },
+    "contracts/upgradeability/Proxy.sol": {
+      "keccak256": "0x27eb2c0719a143aafc9f7f1fa39ef225baa0ad667bcd5f90cd1e4abcc89f4c20",
+      "urls": [
+        "bzz-raw://90cc41dbda5503142c6742a0b88fac18b9738dab7fb47365f9dd004921c31357",
+        "dweb:/ipfs/QmUfVsoFGj4nKvEy5fx7yszqNbC9VXWWkfWfMBHcwouLqr"
+      ],
+      "license": "Apache-2.0"
+    },
+    "contracts/upgradeability/UpgradeabilityProxy.sol": {
+      "keccak256": "0xa7a9d804acfb476666548a05cd94ce8a5ffa6bd76b038cbc3f1683d6ac708c49",
+      "urls": [
+        "bzz-raw://805cbc090ff93c9d6eb6348683c6d2cf5da46c2bca254fda8d87516d395f9299",
+        "dweb:/ipfs/Qmez8Q656MWiJwHw2t88X6bJwgbK2aUnnoqcj2FzyaWxdy"
+      ],
+      "license": "Apache-2.0"
+    },
+    "contracts/v1/FiatTokenProxy.sol": {
+      "keccak256": "0x30fc5a64a101f783b2c745624d4c77b03a8f6373315857dc637581a189963f74",
+      "urls": [
+        "bzz-raw://f5de3f5569c8ac27ca793653613ca320c0ce77617510c31e7451d9b32f83ddb0",
+        "dweb:/ipfs/QmYQq9xh4jNwCH9KUDbWqttj5MWMfY2iAZRzrQf4cHh2nA"
+      ],
+      "license": "Apache-2.0"
+    },
+    "node_modules/@openzeppelin/contracts/utils/Address.sol": {
+      "keccak256": "0x28911e614500ae7c607a432a709d35da25f3bc5ddc8bd12b278b66358070c0ea",
+      "urls": [
+        "bzz-raw://256c8c8af5eb072bc473226ab2b2187149b8fc04f5f4a4820db22527f5ce8e3c",
+        "dweb:/ipfs/QmRvi5BhnL7Rxf85KrJhwM6RRhukm4tzoctRdgQEheNyiN"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

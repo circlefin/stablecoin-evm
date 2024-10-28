@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2024 Circle Internet Financial, LTD. All rights reserved.
+# Copyright 2024 Circle Internet Group, Inc. All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
 #

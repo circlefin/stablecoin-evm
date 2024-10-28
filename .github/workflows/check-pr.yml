@@ -1,0 +1,50 @@
+# Copyright 2024 Circle Internet Group, Inc. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Check PR
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  checks: write
+  contents: write
+  actions: read
+
+jobs:
+  post_run_hardhat_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: junit-report-*
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish combined test report
+        uses: mikepenz/action-junit-report@v4
+        with:
+          check_name: upload_test_results
+          job_summary: true
+          detailed_summary: true
+          commit: ${{ github.event.workflow_run.head_sha }}
+          report_paths: "./junit-report-*/junit.xml"
+
+  release-sbom:
+    if: github.event.workflow_run.event == 'push'
+    uses: circlefin/circle-public-github-workflows/.github/workflows/attach-release-assets.yaml@v1
