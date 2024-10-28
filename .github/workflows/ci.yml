@@ -1,4 +1,4 @@
-# Copyright 2024 Circle Internet Financial, LTD. All rights reserved.
+# Copyright 2024 Circle Internet Group, Inc. All rights reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,6 +19,8 @@ on:
   push:
     branches: [master]
   pull_request:
+
+permissions: read-all
 
 # Celo USDC contracts violate Spurious Dragon with existing configs, so
 # we need to lower the number of runs to decrease the contract size.
@@ -72,6 +74,9 @@ jobs:
       - name: Setup CI Environment
         uses: ./.github/composite-actions/setup-ci
 
+      - name: Compile contracts
+        run: yarn compile
+
       - name: Run hardhat tests
         run: HARDHAT_TEST_GREP='${{ matrix.test-groups.grep }}' HARDHAT_TEST_INVERT='${{ matrix.test-groups.invert }}' yarn test
 
@@ -82,30 +87,12 @@ jobs:
           name: junit-report-${{ hashFiles('report/junit.xml') }}
           path: report/junit.xml
 
-  post_run_hardhat_tests:
-    runs-on: ubuntu-latest
-    needs: [run_hardhat_tests]
-    if: always()
-    steps:
-      - name: Download test results
-        uses: actions/download-artifact@v4
-        with:
-          pattern: junit-report-*
-
-      - name: Publish combined test report
-        uses: mikepenz/action-junit-report@v4
-        with:
-          check_name: upload_test_results
-          job_summary: true
-          detailed_summary: true
-          report_paths: "./junit-report-*/junit.xml"
-
   scan:
     if: github.event_name == 'pull_request'
-    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1.2.0
+    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1
+    permissions:
+      pull-requests: write
+      contents: read
     with:
       allow-reciprocal-licenses: false
 
-  release-sbom:
-    if: github.event_name == 'push'
-    uses: circlefin/circle-public-github-workflows/.github/workflows/attach-release-assets.yaml@v1

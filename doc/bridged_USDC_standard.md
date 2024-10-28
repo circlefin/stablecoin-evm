@@ -26,15 +26,14 @@ they follow the same implementation.
    securely transfer ownership of the bridged USDC token contract to Circle and
    perform an upgrade to native USDC, the following will take place:
    - Third-party team will pause bridging activity and reconcile in-flight
-     bridging activity to harmonize the total supply of native USDC locked on
-     the origin chain with the total supply of bridged USDC on the destination
-     chain.
+     bridging activity to finalize the total supply of bridged USDC on the
+     destination chain.
    - Third-party team will securely re-assign the contract roles of the bridged
      USDC token contract to Circle.
-   - Circle and the third-party team will jointly coordinate to burn the supply
-     of native USDC locked in the bridge contract on the origin chain and
-     upgrade the bridged USDC token contract on the destination chain to native
-     USDC.
+   - Circle and the third-party team will jointly coordinate to burn an amount
+     of native USDC locked in the bridge contract on the origin chain that
+     equals the supply of bridged USDC on the destination chain and upgrade the
+     bridged USDC token contract on the destination chain to native USDC.
 4. The native USDC token contract seamlessly retains the existing supply,
    holders, and app integrations of the original bridged USDC token contract.
 
@@ -54,11 +53,11 @@ proceed with an upgrade.
 
 ### 1) Ability to pause USDC bridging
 
-The bridges must be able to support a USDC supply lock, whereby the USDC locked
-on the source blockchain will (at some point soon after) precisely match the
-circulating bridged USDC supply on the destination blockchain. How this is
-implemented is up to the third-party team, but this functionality must be
-present before an upgrade can take place.
+The bridge contracts must be able to pause bridging, enabling a finalization of
+the supply of the bridged token with that supply being fully backed by an amount
+of native USDC on the source chain. How this is implemented is up to the
+third-party team, but this functionality must be present before an upgrade can
+take place.
 
 ### 2) Ability to burn locked USDC
 
@@ -78,9 +77,10 @@ The specific implementation details are left up to the third-party team, but at
 a minimum, the function must:
 
 1. Be only callable by an address that Circle specifies closer to the time of
-   the upgrade.
-2. Burn the amount of USDC held by the bridge that corresponds precisely to the
-   circulating total supply of bridged USDC established by the supply lock.
+   the upgrade. Note that this address will not necessarily be the same address
+   that is specified to call `transferUSDCRoles`.
+2. Burn an amount of USDC held by the bridge that equals the total supply of
+   bridged USDC finalized by the supply lock.
 
 ## Token Deployment
 
@@ -95,10 +95,18 @@ Using identical code facilitates trustless contract verification by Circle and
 supports a seamless integration with existing USDC services. To facilitate this,
 the third-party team should:
 
-1. Build the [FiatToken contracts](../README.md#contracts) from source. Various
-   suggested compiler settings that Circle uses can be found
-   [here](../foundry.toml), which will allow the third-party team to reach the
-   same bytecode if followed consistently.
+1. Build the [FiatToken contracts](../README.md#contracts) from source. To
+   ensure bytecode parity, the Solidity compiler configuration used should match
+   the following settings:
+
+   - Solidity version: 0.6.12
+   - Optimizer runs: 10000000 (Partners should attempt to use the same number of
+     optimizer runs, but may choose to reduce it if there are technical
+     limitations)
+
+   For suggested compiler settings that Circle uses, please refer to
+   [foundry.toml](../foundry.toml).
+
 2. Deploy the locally compiled FiatToken contracts. An overview of the
    deployment process can be found [here](./deployment.md).
 3. Extract the compiler metadata used to generate the deployed contract's
@@ -218,7 +226,8 @@ function transferUSDCRoles(address owner) external;
 The function implementation details are left up to the partner, but it must:
 
 1. Be only callable by an address that Circle specifies closer to the time of
-   the upgrade.
+   the upgrade. Note that this address will not necessarily be the same address
+   that is specified to call `burnLockedUSDC`.
 2. Transfer the Implementation Owner role to the address specified in the
    `owner` parameter.
 3. Transfer the ProxyAdmin role to the function caller (if it is assigned to the
