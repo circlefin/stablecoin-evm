@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-const tokenUtils = require("../v1/TokenTestUtils.js");
-const bigZero = tokenUtils.bigZero;
-const initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+const {
+  bigZero,
+  initializeTokenWithProxy,
+} = require("../v1/helpers/tokenTest.js");
 
 const AccountUtils = require("./AccountUtils.js");
 const Accounts = AccountUtils.Accounts;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Circle Internet Financial, LTD. All rights reserved.
+ * Copyright 2024 Circle Internet Group, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -16,10 +16,32 @@
  * limitations under the License.
  */
 
+import { execSync } from "child_process";
+
 /**
  * Utility function to trigger a sleep.
  * @param ms the period to sleep for
  */
 export async function sleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Utility function to validate a supplied optimizerRuns
+ * @param optimizerRuns the supplied value for optimizerRuns
+ */
+export function validateOptimizerRuns(optimizerRuns: number): void {
+  if (!Number.isInteger(optimizerRuns) || optimizerRuns < 0) {
+    throw new Error("invalid optimizerRuns");
+  }
+}
+
+/**
+ * Wrapper for execSync so that execSync can be mocked in tests.
+ * Mocking execSync directly with Sinon results in the error
+ *"TypeError: Descriptor for property execSync is non-configurable and non-writable"
+ * @param command the command to execute
+ */
+export function execSyncWrapper(command: string): void {
+  execSync(command);
 }

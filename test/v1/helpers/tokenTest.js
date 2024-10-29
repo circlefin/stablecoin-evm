@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,6 +20,7 @@ const util = require("util");
 const abi = require("ethereumjs-abi");
 const _ = require("lodash");
 const BN = require("bn.js");
+const BigNumber = require("bignumber.js");
 const Q = require("q");
 
 const {
@@ -230,8 +231,10 @@ function checkBurnEvents(burning, amount, burner) {
   assert.isTrue(burning.logs[1].args.value.eq(new BN(amount)));
 }
 
-// Creates a state object, with default values replaced by
-// customVars where appropriate.
+/**
+ * Creates a state object, with default values replaced
+ * by customVars where appropriate.
+ */
 function buildExpectedState(token, customVars) {
   // set each variable's default value
   const expectedState = {
@@ -379,7 +382,9 @@ function buildExpectedState(token, customVars) {
   return expectedState;
 }
 
-// BN-aware deep comparison
+/**
+ *  BN-aware deep comparison
+ */
 function checkState(actual, expected, prefix) {
   for (const k in actual) {
     if (Object.prototype.hasOwnProperty.call(actual, k)) {
@@ -400,10 +405,15 @@ function checkState(actual, expected, prefix) {
   }
 }
 
-// For testing variance of specific variables from their default values.
-// customVars is an array of objects of the form,
-// {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
-// to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
+/**
+ * For testing variance of specific variables from their default values
+ *
+ * @param _tokens is an array of tokens
+ * @param _customVars is an array of objects of the form,
+ * {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
+ *
+ * To reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
+ */
 async function checkVariables(_tokens, _customVars) {
   // Iterate over array of tokens.
   const numTokens = _tokens.length;
@@ -447,7 +457,9 @@ function hexToAddress(hex) {
   );
 }
 
-// build up actualState object to compare to expectedState object
+/**
+ * Build up actualState object to compare to expectedState object
+ */
 async function getActualState(token) {
   return Q.all([
     await token.name.call(),
@@ -1003,6 +1015,45 @@ async function deployUpgradedFiatTokenNewFields(version) {
   }
 }
 
+/**
+ * Returns a new BN object
+ */
+function newBigNumber(value) {
+  const hex = new BigNumber(value).toString(16);
+  return new BN(hex, 16);
+}
+
+async function expectError(contractPromise, errorMsg) {
+  try {
+    await contractPromise;
+    assert.fail("Expected error " + errorMsg + ", but no error received");
+  } catch (error) {
+    const correctErrorMsgReceived = error.message.includes(errorMsg);
+    assert(
+      correctErrorMsgReceived,
+      `Expected ${errorMsg}, got ${error.message} instead`
+    );
+  }
+}
+
+/**
+ * Check to ensure correct format of the two inputs
+ *
+ * @param _contracts is an array of exactly two values: a FiatTokenV1 and a MintController
+ * @param _customVars is an array of exactly two values: the expected state of the FiatTokenV1
+ * and the expected state of the MintController
+ */
+async function checkMINTp0(_contracts, _customVars) {
+  assert.equal(_contracts.length, 2);
+  assert.equal(_customVars.length, 2);
+
+  // the first is a FiatTokenV1
+  await checkVariables([_contracts[0]], [_customVars[0]]);
+
+  // the second is a MintController
+  await _customVars[1].checkState(_contracts[1]);
+}
+
 module.exports = {
   FiatTokenV1,
   FiatTokenProxy,
@@ -1015,6 +1066,8 @@ module.exports = {
   bigZero,
   bigHundred,
   debugLogging,
+  newBigNumber,
+  checkMINTp0,
   calculateFeeAmount,
   checkTransferEvents,
   checkMinterConfiguredEvent,
@@ -1052,6 +1105,7 @@ module.exports = {
   customInitializeTokenWithProxy,
   upgradeTo,
   expectRevert,
+  expectError,
   encodeCall,
   getInitializedV1,
   nullAccount: ZERO_ADDRESS,

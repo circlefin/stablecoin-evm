@@ -33,7 +33,7 @@ available, but can only be called once per proxy.
    ```
 
 3. Verify that all fields in the FiatToken have been initialized correctly and
-   have the expected values. See [README.validate.md](../validate/validate.js).
+   have the expected values.
 
 ## Deploying a Proxy:
 
@@ -51,9 +51,9 @@ available, but can only be called once per proxy.
    For details on what these roles can do, see the
    [Token Design Doc](tokendesign.md)
 
-2. Deploy [FiatTokenProxy](../contracts/FiatTokenProxy.sol), passing the address
-   of the deployed implementation contract to the constructor, which will
-   initialize the `_implementation` field.
+2. Deploy [FiatTokenProxy](../contracts/v1/FiatTokenProxy.sol), passing the
+   address of the deployed implementation contract to the constructor, which
+   will initialize the `_implementation` field.
 
 3. The `admin` of the proxy contract defaults to `msg.sender`. You must either
    change the `admin` now, or send the remaining transactions from a different

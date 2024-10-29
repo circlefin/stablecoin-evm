@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Circle Internet Financial, LTD. All rights reserved.
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -19,17 +19,18 @@
 const MintController = artifacts.require("minting/MintController");
 const MasterMinter = artifacts.require("minting/MasterMinter");
 
-const tokenUtils = require("../v1/TokenTestUtils.js");
-const newBigNumber = tokenUtils.newBigNumber;
-const checkMINTp0 = tokenUtils.checkMINTp0;
-const expectRevert = tokenUtils.expectRevert;
-const expectError = tokenUtils.expectError;
-const initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+const {
+  newBigNumber,
+  checkMINTp0,
+  expectRevert,
+  expectError,
+  initializeTokenWithProxy,
+} = require("../v1/helpers/tokenTest.js");
 
 const { cloneDeep } = require("lodash");
 
-const mintUtils = require("../minting/MintControllerUtils.js");
-const AccountUtils = require("../minting/AccountUtils.js");
+const mintUtils = require("./MintControllerUtils.js");
+const AccountUtils = require("./AccountUtils.js");
 const Accounts = AccountUtils.Accounts;
 const initializeTokenWithProxyAndMintController =
   mintUtils.initializeTokenWithProxyAndMintController;
