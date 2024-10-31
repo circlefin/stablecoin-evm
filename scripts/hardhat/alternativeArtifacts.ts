@@ -23,6 +23,7 @@ type AlternativeArtifact = Map<string, ContractArtifact>;
 
 export enum ArtifactType {
   OPMainnet = "OPMainnet",
+  ArbMainnet = "ArbMainnet",
 }
 
 const CACHED_ARTIFACTS_PATH = "./cached_artifacts/";
@@ -47,10 +48,33 @@ const opMainnetArtifacts: AlternativeArtifact = new Map([
   ],
 ]);
 
+// Read from https://arbiscan.io/token/0xaf88d065e77c8cC2239327C5EDb3A432268e5831#code
+export const arbMainnetFiatTokenProxyContractCreationBytecode = readCachedArtifact(
+  "arbMainnetFiatTokenProxyContractCreationBytecode.bin"
+);
+const arbMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
+  "arbMainnetFiatTokenProxyRuntimeBytecode.bin"
+);
+
+const arbMainnetArtifacts: AlternativeArtifact = new Map([
+  [
+    "FiatTokenProxy",
+    {
+      creationBytecode: arbMainnetFiatTokenProxyContractCreationBytecode,
+      runtimeBytecode: arbMainnetFiatTokenProxyRuntimeBytecode,
+      creationLinkReferences: {},
+      runtimeLinkReferences: {},
+    },
+  ],
+]);
+
 export const alternativeArtifacts: Map<
   ArtifactType,
   AlternativeArtifact
-> = new Map([[ArtifactType.OPMainnet, opMainnetArtifacts]]);
+> = new Map([
+  [ArtifactType.OPMainnet, opMainnetArtifacts],
+  [ArtifactType.ArbMainnet, arbMainnetArtifacts],
+]);
 
 function readCachedArtifact(filename: string): string {
   return (
