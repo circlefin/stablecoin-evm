@@ -21,22 +21,23 @@ const MintController = artifacts.require("minting/MintController");
 const MasterMinter = artifacts.require("minting/MasterMinter");
 const FiatToken = artifacts.require("FiatTokenV1");
 
-const tokenUtils = require("../v1/TokenTestUtils.js");
-const newBigNumber = tokenUtils.newBigNumber;
-const checkMINTp0 = tokenUtils.checkMINTp0;
-const expectRevert = tokenUtils.expectRevert;
-const expectError = tokenUtils.expectError;
-const bigZero = tokenUtils.bigZero;
+const {
+  newBigNumber,
+  checkMINTp0,
+  expectRevert,
+  expectError,
+  bigZero,
+} = require("../v1/helpers/tokenTest.js");
 
 const { cloneDeep } = require("lodash");
 
 const mintUtils = require("./MintControllerUtils.js");
 const AccountUtils = require("./AccountUtils.js");
 const Accounts = AccountUtils.Accounts;
-const getAccountState = AccountUtils.getAccountState;
-const addressEquals = AccountUtils.addressEquals;
 const initializeTokenWithProxyAndMintController =
   mintUtils.initializeTokenWithProxyAndMintController;
+
+const { getAccountState, addressEquals } = require("./AccountUtils.js");
 
 async function run_tests_MintController(newToken, accounts) {
   run_MINT_tests(newToken, MintController, accounts);

@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-const tokenUtils = require("../v1/TokenTestUtils.js");
-const bigZero = tokenUtils.bigZero;
-const initializeTokenWithProxy = tokenUtils.initializeTokenWithProxy;
+const {
+  bigZero,
+  initializeTokenWithProxy,
+} = require("../v1/helpers/tokenTest.js");
 
 const AccountUtils = require("./AccountUtils.js");
 const Accounts = AccountUtils.Accounts;

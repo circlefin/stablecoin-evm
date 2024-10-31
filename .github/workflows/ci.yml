@@ -86,3 +86,13 @@ jobs:
         with:
           name: junit-report-${{ hashFiles('report/junit.xml') }}
           path: report/junit.xml
+
+  scan:
+    if: github.event_name == 'pull_request'
+    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1
+    permissions:
+      pull-requests: write
+      contents: read
+    with:
+      allow-reciprocal-licenses: false
+

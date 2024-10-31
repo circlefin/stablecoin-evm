@@ -19,7 +19,7 @@ runs:
   using: composite
   steps:
     - name: Install Node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: "20.9.0"
 
@@ -40,7 +40,7 @@ runs:
       shell: bash
 
     - name: Retrieve cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}

@@ -26,6 +26,7 @@ import _ from "lodash";
 import path from "path";
 import { hardhatArgumentTypes } from "./hardhatArgumentTypes";
 import { alternativeArtifacts, ArtifactType } from "./alternativeArtifacts";
+import { execSyncWrapper, validateOptimizerRuns } from "./helpers";
 
 export type TaskArguments = {
   contractName: string;
@@ -39,6 +40,7 @@ export type TaskArguments = {
   contractCreationTxHash?: string;
   useTracesForCreationBytecode?: boolean;
   artifactType?: ArtifactType;
+  optimizerRuns?: number;
 };
 
 export enum BytecodeVerificationType {
@@ -147,6 +149,12 @@ task(
     undefined,
     hardhatArgumentTypes.string
   )
+  .addOptionalParam(
+    "optimizerRuns",
+    "The optimizer runs to use to compile the contract",
+    undefined,
+    hardhatArgumentTypes.int
+  )
   .setAction(taskAction);
 
 /**
@@ -185,9 +193,14 @@ export async function verifyOnChainBytecode(
     contractCreationTxHash,
     useTracesForCreationBytecode,
     artifactType,
+    optimizerRuns,
   }: TaskArguments,
   hre: HardhatRuntimeEnvironment
 ): Promise<BytecodeComparisonResult[]> {
+  if (optimizerRuns) {
+    validateOptimizerRuns(optimizerRuns);
+    execSyncWrapper(`forge build --optimizer-runs ${optimizerRuns}`);
+  }
   const bytecodeComparisonResults = [];
 
   // Getting contract bytecode from blockchain or local file input

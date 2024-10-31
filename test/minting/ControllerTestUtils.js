@@ -21,9 +21,11 @@ const Q = require("q");
 const { ZERO_ADDRESS } = require("../helpers/constants");
 const AccountUtils = require("./AccountUtils.js");
 const Accounts = AccountUtils.Accounts;
-const setAccountDefault = AccountUtils.setAccountDefault;
-const checkState = AccountUtils.checkState;
-const getAccountState = AccountUtils.getAccountState;
+const {
+  setAccountDefault,
+  checkState,
+  getAccountState,
+} = require("./AccountUtils.js");
 
 function ControllerState(owner, controllers) {
   this.owner = owner;

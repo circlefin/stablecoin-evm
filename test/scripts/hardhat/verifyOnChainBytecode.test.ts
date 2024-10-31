@@ -18,6 +18,7 @@
 
 import hre from "hardhat";
 import * as fs from "fs";
+import * as sinon from "sinon";
 import {
   verifyOnChainBytecode,
   BytecodeInputType,
@@ -31,7 +32,8 @@ import {
   ArtifactType,
   opMainnetFiatTokenProxyContractCreationBytecode,
 } from "../../../scripts/hardhat/alternativeArtifacts";
-import uniV3PoolCreationTrace from "./testData/uniV3PoolCreationTrace.json";
+import V2_2UpgraderDeploymentTrace from "./testData/V2_2UpgraderDeploymentTrace.json";
+import * as Helpers from "../../../scripts/hardhat/helpers";
 
 describe("Verify on chain bytecode", () => {
   let proxy: Contract;
@@ -40,6 +42,7 @@ describe("Verify on chain bytecode", () => {
   let opMainnetArtifactFiatTokenProxy: BaseContract & {
     deploymentTransaction(): ContractTransactionResponse;
   };
+  let execSyncWrapperStub: sinon.SinonStub<[string], void>;
 
   before("setup", async () => {
     signatureChecker = await hre.ethers.deployContract("SignatureChecker");
@@ -59,6 +62,57 @@ describe("Verify on chain bytecode", () => {
     );
     opMainnetArtifactFiatTokenProxy = await opMainnetFiatTokenProxyFactory.deploy();
     await opMainnetArtifactFiatTokenProxy.waitForDeployment();
+  });
+
+  beforeEach(() => {
+    execSyncWrapperStub = sinon.stub(Helpers, "execSyncWrapper");
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it("rejects for an improper optimizerRuns", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const improperOptimizerRuns: any[] = ["&& do something", 1.1, -1, "1000"];
+
+    for (const improperOptimizerRun in improperOptimizerRuns) {
+      await expect(
+        verifyOnChainBytecode(
+          {
+            contractName: "FiatTokenProxy",
+            contractAddress: proxy.target as string,
+            verificationType: BytecodeVerificationType.Partial,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            optimizerRuns: improperOptimizerRun as any,
+          },
+          hre
+        )
+      ).to.be.rejectedWith("invalid optimizerRuns");
+    }
+  });
+
+  it("will execute the expected forge command when optimizerRuns is present", async () => {
+    const results = await verifyOnChainBytecode(
+      {
+        contractName: "FiatTokenProxy",
+        contractAddress: proxy.target as string,
+        verificationType: BytecodeVerificationType.Partial,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        optimizerRuns: 1000,
+      },
+      hre
+    );
+
+    expect(results).to.deep.equal([
+      { type: BytecodeInputType.RuntimeBytecodePartial, equal: true },
+    ]);
+
+    expect(
+      execSyncWrapperStub.calledOnceWithExactly(
+        "forge build --optimizer-runs 1000"
+      )
+    ).to.be.true;
   });
 
   it("Can detect mismatched metadata input", async () => {
@@ -222,17 +276,20 @@ describe("Verify on chain bytecode", () => {
   });
 
   it("Can pull contract creation code from traces", async () => {
-    // example contract creation from factory taken from: https://sepolia-optimism.etherscan.io/tx/0x7c21a4f235349fd737797bcf9da907b404fd0fec4773013ea1f174665c876050
-    // it's a Uniswap V3 Pool creation
+    // example contract creation from internal transaction taken from: https://etherscan.io/tx/0x7f6268ff5bd05d1b61c19889a46eb9a38563accce441dcfcf0c7515b1733503e
+    // it's the deployment of the UpgraderHelper contract for V2_2Upgrader.sol
     const expectedCreationBytecode =
       "0x" +
       fs.readFileSync(
-        "test/scripts/hardhat/testData/uniV3PoolCreationBytecode.bin",
+        "test/scripts/hardhat/testData/V2_2UpgraderHelperCreationBytecode.bin",
         "utf-8"
       );
-    const contractAddress = "0x97634ccc7Ba7350f3578319E3D6eF19f5E3FD432";
+    const contractAddress = "0x4b2194B42EF7F4A41BA4cA3Df6D1E140dc9972b2";
     expect(
-      extractBytecodeFromGethTraces(uniV3PoolCreationTrace, contractAddress)
+      extractBytecodeFromGethTraces(
+        V2_2UpgraderDeploymentTrace,
+        contractAddress
+      )
     ).to.deep.equal(expectedCreationBytecode);
   });
 });

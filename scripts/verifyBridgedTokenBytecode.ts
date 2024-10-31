@@ -28,6 +28,7 @@ import hre from "hardhat";
 import { HttpNetworkConfig } from "hardhat/types";
 import { ethers } from "ethers";
 import { ArtifactType } from "./hardhat/alternativeArtifacts";
+import { validateOptimizerRuns } from "./hardhat/helpers";
 
 type ContractInput = {
   contractAddress: string;
@@ -36,6 +37,7 @@ type ContractInput = {
   verificationType?: BytecodeVerificationType;
   artifactType?: ArtifactType;
   useTracesForCreationBytecode?: boolean;
+  optimizerRuns?: number;
 };
 
 type InputObject = {
@@ -145,6 +147,16 @@ function validateInput(filename: string): InputObject {
         `Invalid useTracesForCreationBytecode for ${key}: ${value.useTracesForCreationBytecode}`
       );
     }
+    // Validate optimizerRuns if present
+    if (value.optimizerRuns !== undefined) {
+      try {
+        validateOptimizerRuns(value.optimizerRuns);
+      } catch (e) {
+        throw new Error(
+          `Invalid optimizerRuns for ${key}: ${value.optimizerRuns}`
+        );
+      }
+    }
 
     // If verification type isn't "full," validate metadataFilePath (file must exist)
     if (value.verificationType !== BytecodeVerificationType.Full) {
@@ -183,6 +195,7 @@ function transformInputToVerifyOnChainBytecodeTaskArguments(
     useTracesForCreationBytecode:
       input.FiatTokenV2_2.useTracesForCreationBytecode,
     artifactType: input.FiatTokenV2_2.artifactType,
+    optimizerRuns: input.FiatTokenV2_2.optimizerRuns,
   };
 
   // Proxy
@@ -200,6 +213,7 @@ function transformInputToVerifyOnChainBytecodeTaskArguments(
     useTracesForCreationBytecode:
       input.FiatTokenProxy.useTracesForCreationBytecode,
     artifactType: input.FiatTokenProxy.artifactType,
+    optimizerRuns: input.FiatTokenProxy.optimizerRuns,
   };
 
   // Signature Checker
@@ -218,6 +232,7 @@ function transformInputToVerifyOnChainBytecodeTaskArguments(
     useTracesForCreationBytecode:
       input.SignatureChecker.useTracesForCreationBytecode,
     artifactType: input.SignatureChecker.artifactType,
+    optimizerRuns: input.SignatureChecker.optimizerRuns,
   };
 
   return [taskArgsImpl, taskArgsProxy, taskArgsLib];

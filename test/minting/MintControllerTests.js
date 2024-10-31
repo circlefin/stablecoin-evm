@@ -18,12 +18,13 @@
 
 const MintController = artifacts.require("minting/MintController");
 
-const tokenUtils = require("../v1/TokenTestUtils.js");
-const newBigNumber = tokenUtils.newBigNumber;
-const checkMINTp0 = tokenUtils.checkMINTp0;
-const expectRevert = tokenUtils.expectRevert;
-const expectError = tokenUtils.expectError;
-const bigZero = tokenUtils.bigZero;
+const {
+  newBigNumber,
+  checkMINTp0,
+  expectRevert,
+  expectError,
+  bigZero,
+} = require("../v1/helpers/tokenTest.js");
 
 const { cloneDeep } = require("lodash");
 
