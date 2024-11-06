@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "null",
+    "contractCreationTxHash": "null"
+  },
+  "FiatTokenV2_1": {
+    "contractAddress": "0x35Ce106CC98cE93FA8082760d7a409016e8374Bc",
+    "contractCreationTxHash": "0xc7aa0e2550805386f8cf3bfe35394d00c571f0083913c4de21022070da13bd85"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x1199E23C0baE9710cCd9F645FA57794e5D469D06",
+    "contractCreationTxHash": "0x387285ff3b0dc2f1800f7163f95b1d201fa3536dd131b01ae88713e6c82af092"
+  },
+  "rpcUrl": "https://rpc.morphl2.io"
+}
