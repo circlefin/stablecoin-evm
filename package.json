@@ -19,7 +19,6 @@
     "fmt": "yarn fmt:base --write",
     "gas-report": "hardhat test test/misc/gas.ts",
     "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
-    "postinstall": "bash setup.sh && husky install",
     "precommit": "yarn fmt && yarn static-check",
     "solhint": "solhint 'contracts/**/*.sol'",
     "static-check": "yarn hardhat typechain && yarn typecheck && yarn lint && yarn fmt:check && yarn solhint",
