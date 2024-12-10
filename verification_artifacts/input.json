@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x23647c4C92c86A5d354D54e7478AdCD113d04986",
+    "contractCreationTxHash": "8b59f6e91a1dcfdde3c6783da9658bc0d39283ba187cbd081738bc59a3a0ac52"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x40A67415ae30c6aefF6bF695B08Aa87453142096",
+    "contractCreationTxHash": "537a85af704dfc65f0bd3f1c9eca12a2489cc3dbfdd6f5854e8459a7a47c8a28"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "ab7dc97055cd24bcf1249c61beb75354d1c04ee7",
+    "contractCreationTxHash": "d33580f283c6544b901ddb901539edebc99b7104661bc0ecd3bda2524fd34312"
+  },
+  "rpcUrl": "https://testnet.qnode.qtum.info/v1/7ot2Ig0j1O7ecwMBz4Y4rYsOM1sQh4Nnl7rMr"
+}
