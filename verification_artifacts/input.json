@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x40df78EF054B968477Bc09060FcB15A0f350c379",
+    "contractCreationTxHash": "0x995d5aba69773ba81b45b99e86157d7746c840a793941d491402fb7ff6bb0e6c"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x448811d70486296d4e2B60E4258328957C94EaA7",
+    "contractCreationTxHash": "0x12eda35930019c11ebc5178d79f54cfca808d3c038ccd3565f4704a1b63eb273"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x2777023E33B88CE622B15eCfA4ADa3cb5a9C545f",
+    "contractCreationTxHash": "0x1944af749456c7ad4a78df8a862863e4ce2a78b721e758700a1828a125c8c2f9"
+  },
+  "rpcUrl": "https://rpc-internal-1.piccadilly.autonity.org"
+}
