@@ -1,15 +1,15 @@
 {
   "SignatureChecker": {
-    "contractAddress": "0xe9aBA835f813ca05E50A6C0ce65D0D74390F7dE7",
-    "contractCreationTxHash": "0xe114fe51ef558177b6c26c1620c7ffc83e25f4510748a1f65031cdab9ff3ae3d"
+    "contractAddress": "0x2d93FbcE4CffC15DD385A80B3f4CC1D4E76C38b3",
+    "contractCreationTxHash": "0x2cd5f9be2f01426c730a77e416803111cf67a66138457841cfc1a499941c687d"
   },
   "FiatTokenV2_2": {
-    "contractAddress": "0xB1EeAD6959cb5bB9B20417d6689922523B2B86C3",
-    "contractCreationTxHash": "0x4f0eb72096170bfb0e55805c51630a6f1ee192af119863ee4cd9dd292ddb692b"
+    "contractAddress": "0x4F5F42799d1E01662B629Ede265baEa223e9f9C7",
+    "contractCreationTxHash": "0x8ee941b4cc9070dbd9765896a13cd89ffab62c6fb7d62764e9ee4b51c7e7d774"
   },
   "FiatTokenProxy": {
-    "contractAddress": "0xF1815bd50389c46847f0Bda824eC8da914045D14",
-    "contractCreationTxHash": "0x59020d3cdf2332b1b48405c95dec50e071ea5e4d1b4e96f7a165f7bd5b381789"
+    "contractAddress": "0xad11a8BEb98bbf61dbb1aa0F6d6F2ECD87b35afA",
+    "contractCreationTxHash": "0xc9ea93adb381487807827f96fafb1f47047317e5eb71d0a1934614d606dbd4f8"
   },
-  "rpcUrl": "https://rpc-qnd.inkonchain.com"
+  "rpcUrl": "https://7e57304f.rpc.hemi.network/rpc"
 }
