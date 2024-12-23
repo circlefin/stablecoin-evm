@@ -64,8 +64,7 @@ contract ColdStorageTransferTest is TestUtils {
         coldStorageScript.setUp();
         coldStorageScript.run();
 
-        // all roles assigned to cold key addrs after running the cold storage script
-        assertEq(proxyAsV2_2.blacklister(), coldBlacklister);
+        // all roles, except blacklister, are assigned to cold key addrs after running the cold storage script
         assertEq(proxyAsV2_2.owner(), coldOwner);
         assertEq(proxyAsProxy.admin(), coldProxyAdmin);
         assertEq(proxyAsV2_2.masterMinter(), address(masterMinter));

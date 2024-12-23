@@ -38,8 +38,8 @@ contract VerifyColdStorage is Script {
     address private stgMinter;
     address private stgBurner;
     address private masterMinterContractAddress;
+    address private blacklisterAddress;
     address private coldMasterMinterOwnerAddress;
-    address private coldBlacklisterAddress;
     address private coldOwnerAddress;
     address private coldProxyAdminAddress;
     address private coldPauserAddress;
@@ -61,10 +61,12 @@ contract VerifyColdStorage is Script {
         prodBurner = vm.envAddress("PROD_BURNER_ADDRESS");
         stgMinter = vm.envAddress("STG_MINTER_ADDRESS");
         stgBurner = vm.envAddress("STG_BURNER_ADDRESS");
+
+        blacklisterAddress = vm.envAddress("BLACKLISTER_ADDRESS");
+
         coldMasterMinterOwnerAddress = vm.envAddress(
             "COLD_MASTER_MINTER_OWNER_ADDRESS"
         );
-        coldBlacklisterAddress = vm.envAddress("COLD_BLACKLISTER_ADDRESS");
         coldOwnerAddress = vm.envAddress("COLD_OWNER_ADDRESS");
         coldProxyAdminAddress = vm.envAddress("COLD_PROXY_ADMIN_ADDRESS");
         coldPauserAddress = vm.envAddress("COLD_PAUSER_ADDRESS");
@@ -80,28 +82,30 @@ contract VerifyColdStorage is Script {
 
         console.log("Supplied params:");
         console.log("FIAT_TOKEN_PROXY_ADDRESS: '%s'", proxyAddress);
+        console.log("STG_MINTER_ADDRESS: '%s'", stgMinter);
+        console.log("STG_BURNER_ADDRESS: '%s'", stgBurner);
+        console.log(
+            "STG_MINT_ALLOWANCE_IN_NORMAL_UNITS: '%s'",
+            vm.toString(stgMintAllowanceInNormalUnits)
+        );
         console.log("PROD_MINTER_ADDRESS: '%s'", prodMinter);
         console.log("PROD_BURNER_ADDRESS: '%s'", prodBurner);
         console.log(
-            "COLD_MASTER_MINTER_OWNER_ADDRESS: '%s'",
-            coldMasterMinterOwnerAddress
+            "PROD_MINT_ALLOWANCE_IN_NORMAL_UNITS: '%s'",
+            vm.toString(prodMintAllowanceInNormalUnits)
         );
-        console.log("COLD_BLACKLISTER_ADDRESS: '%s'", coldBlacklisterAddress);
-        console.log("COLD_OWNER_ADDRESS: '%s'", coldOwnerAddress);
-        console.log("COLD_PROXY_ADMIN_ADDRESS: '%s'", coldProxyAdminAddress);
-        console.log("COLD_PAUSER_ADDRESS: '%s'", coldPauserAddress);
+        console.log("BLACKLISTER_ADDRESS: '%s'", blacklisterAddress);
         console.log(
             "MASTER_MINTER_CONTRACT_ADDRESS: '%s'",
             masterMinterContractAddress
         );
         console.log(
-            "PROD_MINT_ALLOWANCE_IN_NORMAL_UNITS: '%s'",
-            vm.toString(prodMintAllowanceInNormalUnits)
+            "COLD_MASTER_MINTER_OWNER_ADDRESS: '%s'",
+            coldMasterMinterOwnerAddress
         );
-        console.log(
-            "STG_MINT_ALLOWANCE_IN_NORMAL_UNITS: '%s'",
-            vm.toString(stgMintAllowanceInNormalUnits)
-        );
+        console.log("COLD_OWNER_ADDRESS: '%s'", coldOwnerAddress);
+        console.log("COLD_PROXY_ADMIN_ADDRESS: '%s'", coldProxyAdminAddress);
+        console.log("COLD_PAUSER_ADDRESS: '%s'", coldPauserAddress);
 
         proxy = FiatTokenProxy(proxyAddress);
         proxyAsV2_2 = FiatTokenV2_2(proxyAddress);
@@ -113,7 +117,7 @@ contract VerifyColdStorage is Script {
     /**
      * @notice main function that will be run by forge
      */
-    function run() external {
+    function run() external view {
         console.log(
             "\n>>>>>>> Validate the following roles are as expected: <<<<<<<"
         );
@@ -144,8 +148,8 @@ contract VerifyColdStorage is Script {
 
         console.log("Blacklister Role:   %s", proxyAsV2_2.blacklister());
         require(
-            proxyAsV2_2.blacklister() == coldBlacklisterAddress,
-            "Unexpected FiatToken blacklister, should be the cold storage blacklister"
+            proxyAsV2_2.blacklister() == blacklisterAddress,
+            "Unexpected FiatToken blacklister, should be the hot blacklister address"
         );
 
         console.log("Pauser Role:        %s", proxyAsV2_2.pauser());

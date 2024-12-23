@@ -40,7 +40,6 @@ contract ColdStorageTransfer is Script {
     address payable proxyAddress;
     address private masterMinterContractAddress;
     address private coldMasterMinterOwnerAddress;
-    address private coldBlacklisterAddress;
     address private coldOwnerAddress;
     address private coldProxyAdminAddress;
     address private coldPauserAddress;
@@ -66,7 +65,6 @@ contract ColdStorageTransfer is Script {
         coldMasterMinterOwnerAddress = vm.envAddress(
             "COLD_MASTER_MINTER_OWNER_ADDRESS"
         );
-        coldBlacklisterAddress = vm.envAddress("COLD_BLACKLISTER_ADDRESS");
         coldOwnerAddress = vm.envAddress("COLD_OWNER_ADDRESS");
         coldProxyAdminAddress = vm.envAddress("COLD_PROXY_ADMIN_ADDRESS");
         coldPauserAddress = vm.envAddress("COLD_PAUSER_ADDRESS");
@@ -84,7 +82,6 @@ contract ColdStorageTransfer is Script {
             "COLD_MASTER_MINTER_OWNER_ADDRESS: '%s'",
             coldMasterMinterOwnerAddress
         );
-        console.log("COLD_BLACKLISTER_ADDRESS: '%s'", coldBlacklisterAddress);
         console.log("COLD_OWNER_ADDRESS: '%s'", coldOwnerAddress);
         console.log("COLD_PROXY_ADMIN_ADDRESS: '%s'", coldProxyAdminAddress);
         console.log("COLD_PAUSER_ADDRESS: '%s'", coldPauserAddress);
@@ -132,15 +129,6 @@ contract ColdStorageTransfer is Script {
         console.log(
             "Reassigned proxy contract admin role to cold admin",
             coldProxyAdminAddress
-        );
-
-        // Reassign the blacklister, assuming blacklist seeding is complete
-        // by the hot blacklister key
-        vm.broadcast(ownerPrivateKey);
-        proxyAsV2_2.updateBlacklister(coldBlacklisterAddress);
-        console.log(
-            "Reassigned token blacklister role to cold blacklister",
-            coldBlacklisterAddress
         );
 
         // Reassign the token owner.
