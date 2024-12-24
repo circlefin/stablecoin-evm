@@ -116,13 +116,10 @@ contract VerifyColdStorageTest is TestUtils {
         verifyColdStorageScript.run();
     }
 
-    function test_VerifyColdStorageNegativeBlacklisterTest() public {
+    function test_VerifyHotBlacklisterTest() public {
         vm.prank(coldOwner);
         proxyAsV2_2.updateBlacklister(blacklister);
 
-        vm.expectRevert(
-            "Unexpected FiatToken blacklister, should be the cold storage blacklister"
-        );
         verifyColdStorageScript.run();
     }
 

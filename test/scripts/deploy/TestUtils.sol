@@ -50,8 +50,7 @@ contract TestUtils is Test {
     uint256 internal coldMasterMinterOwnerPrivateKey = 17;
     uint256 internal coldProxyAdminPrivateKey = 18;
     uint256 internal coldOwnerPrivateKey = 19;
-    uint256 internal coldBlacklisterPrivateKey = 20;
-    uint256 internal coldPauserPrivateKey = 21;
+    uint256 internal coldPauserPrivateKey = 20;
 
     address internal deployer = vm.addr(deployerPrivateKey);
     address internal proxyAdmin = vm.addr(proxyAdminPrivateKey);
@@ -86,7 +85,6 @@ contract TestUtils is Test {
     );
     address internal coldProxyAdmin = vm.addr(coldProxyAdminPrivateKey);
     address internal coldOwner = vm.addr(coldOwnerPrivateKey);
-    address internal coldBlacklister = vm.addr(coldBlacklisterPrivateKey);
     address internal coldPauser = vm.addr(coldPauserPrivateKey);
 
     uint8 internal decimals = 6;
@@ -168,7 +166,6 @@ contract TestUtils is Test {
         );
         vm.setEnv("COLD_PROXY_ADMIN_ADDRESS", vm.toString(coldProxyAdmin));
         vm.setEnv("COLD_OWNER_ADDRESS", vm.toString(coldOwner));
-        vm.setEnv("COLD_BLACKLISTER_ADDRESS", vm.toString(coldBlacklister));
         vm.setEnv("COLD_PAUSER_ADDRESS", vm.toString(coldPauser));
 
         vm.setEnv(
