@@ -19,7 +19,7 @@
 set -e
 
 # Refer to https://github.com/foundry-rs/foundry/tags for the list of Foundry versions.
-FOUNDRY_VERSION=nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9
+FOUNDRY_VERSION=nightly-5a8bd893eeeeb9489ea66dd52a02eeaa580e3af0
 
 if [[ "$CI" == "true" ]]
 then
@@ -41,7 +41,7 @@ fi
 if ! command -v forge &> /dev/null || [ ! "$(forge -V | grep -Eo '\b\w{7}\b')" = $(echo $FOUNDRY_VERSION | cut -c '9-15') ]
 then
   echo "Installing foundry at $FOUNDRY_VERSION..."
-  foundryup --version $FOUNDRY_VERSION
+  foundryup --install $FOUNDRY_VERSION
 fi
 
 npm install -g dotenv-cli@7.3.0
