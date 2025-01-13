@@ -1,0 +1,18 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x25C69114e2132f39411A58D5315442cC2801b647",
+    "contractCreationTxHash": "0x3d29bad0cf031661ba406150628b315f9abbf6efc21839718808bccf751681c7",
+    "verificationType": "full"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x647Fd7374B666CB6F7BfB2E1Adb9A7273354Bd89",
+    "contractCreationTxHash": "0xfe71a7fc532cd6317d1b50f7e5ca1e69ddad7a1fd4e1cf69fee88da721dfbc5c",
+    "verificationType": "full"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x43B89916A4C8f51Dc078AB6F92Bd97Dd0d17Ab3b",
+    "contractCreationTxHash": "0x50c584ba0fd88cb36347d57c5fc6a353002808c604f49ab0db847d584d409376",
+    "verificationType": "full"
+  },
+  "rpcUrl": "https://fullnode-mainnet.bouncebitapi.com"
+}
