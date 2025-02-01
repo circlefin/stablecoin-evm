@@ -23,28 +23,20 @@ import { TestUtils } from "./TestUtils.sol";
 import {
     BlacklistSanctionsList
 } from "../../../scripts/deploy/blacklist-sanctions-list.s.sol";
-import { Blacklistable } from "../../../contracts/v1/Blacklistable.sol";
 
 // solhint-disable func-name-mixedcase
 
 contract BlacklistSanctionsListTest is TestUtils {
-    Blacklistable private proxyAsBlacklistable;
+    address private proxyAddress;
 
     function setUp() public override {
         TestUtils.setUp();
 
-        proxyAsBlacklistable = Blacklistable(
-            vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS")
-        );
+        proxyAddress = vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS");
     }
 
     function test_BlacklistSanctionsListNegativeTest() public {
-        for (uint256 i = 0; i < accountsToBlacklist.length; i++) {
-            assertEq(
-                proxyAsBlacklistable.isBlacklisted(accountsToBlacklist[i]),
-                false
-            );
-        }
+        validateAddressesBlacklistedState(proxyAddress, false);
     }
 
     function test_BlacklistSanctionsListPositiveTest() public {
@@ -52,11 +44,6 @@ contract BlacklistSanctionsListTest is TestUtils {
         blacklistScript.setUp();
         blacklistScript.run();
 
-        for (uint256 i = 0; i < accountsToBlacklist.length; i++) {
-            assertEq(
-                proxyAsBlacklistable.isBlacklisted(accountsToBlacklist[i]),
-                true
-            );
-        }
+        validateAddressesBlacklistedState(proxyAddress, true);
     }
 }

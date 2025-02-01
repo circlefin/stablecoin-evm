@@ -21,14 +21,15 @@ pragma experimental ABIEncoderV2; // needed for compiling older solc versions: h
 
 import "forge-std/Test.sol"; // solhint-disable no-global-import
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
+import { Blacklistable } from "../../../contracts/v1/Blacklistable.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 import {
-    AbstractV2Upgrader
-} from "../../../contracts/v2/upgrader/AbstractV2Upgrader.sol";
-import {
     FiatTokenCeloV2_2
 } from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { Create2Factory } from "../../../contracts/test/Create2Factory.sol";
+
+// solhint-disable max-states-count
 
 contract TestUtils is Test {
     uint256 internal deployerPrivateKey = 1;
@@ -109,6 +110,7 @@ contract TestUtils is Test {
         vm.setEnv("TOKEN_SYMBOL", tokenSymbol);
         vm.setEnv("TOKEN_CURRENCY", tokenCurrency);
         vm.setEnv("TOKEN_DECIMALS", "6");
+        vm.setEnv("DEPLOYER_ADDRESS", vm.toString(deployer));
         vm.setEnv("DEPLOYER_PRIVATE_KEY", vm.toString(deployerPrivateKey));
         vm.setEnv("PROXY_ADMIN_ADDRESS", vm.toString(proxyAdmin));
         vm.setEnv("PROXY_ADMIN_PRIVATE_KEY", vm.toString(proxyAdminPrivateKey));
@@ -179,6 +181,8 @@ contract TestUtils is Test {
 
         // Deploy an instance of proxy contract to configure contract address in env
         vm.prank(deployer);
+        Create2Factory factory = new Create2Factory();
+
         FiatTokenV2_2 v2_2 = new FiatTokenV2_2();
 
         vm.prank(proxyAdmin);
@@ -203,6 +207,12 @@ contract TestUtils is Test {
         proxyAsV2_2.initializeV2(tokenName);
         proxyAsV2_2.initializeV2_1(owner);
         proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
+
+        vm.setEnv(
+            "CREATE2_FACTORY_CONTRACT_ADDRESS",
+            vm.toString(address(factory))
+        );
+
         vm.setEnv("FIAT_TOKEN_PROXY_ADDRESS", vm.toString(address(proxy)));
 
         vm.setEnv(
@@ -245,6 +255,25 @@ contract TestUtils is Test {
         vm.setEnv("FEE_ADAPTER_DECIMALS", "18");
     }
 
+    function validateProxy(
+        FiatTokenProxy proxy,
+        address _impl,
+        address _masterMinter
+    ) internal {
+        assertEq(proxy.admin(), proxyAdmin);
+        assertEq(proxy.implementation(), _impl);
+
+        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
+        assertEq(proxyAsV2_2.name(), "USDC");
+        assertEq(proxyAsV2_2.symbol(), "USDC");
+        assertEq(proxyAsV2_2.currency(), "USD");
+        assert(proxyAsV2_2.decimals() == 6);
+        assertEq(proxyAsV2_2.owner(), owner);
+        assertEq(proxyAsV2_2.pauser(), pauser);
+        assertEq(proxyAsV2_2.blacklister(), blacklister);
+        assertEq(proxyAsV2_2.masterMinter(), _masterMinter);
+    }
+
     function validateImpl(FiatTokenV2_2 impl) internal {
         assertEq(impl.name(), "");
         assertEq(impl.symbol(), "");
@@ -261,5 +290,16 @@ contract TestUtils is Test {
     {
         assertEq(masterMinter.owner(), masterMinterOwner);
         assertEq(address(masterMinter.getMinterManager()), _proxy);
+    }
+
+    function validateAddressesBlacklistedState(address proxy, bool blacklisted)
+        internal
+    {
+        for (uint256 i = 0; i < accountsToBlacklist.length; i++) {
+            assertEq(
+                Blacklistable(proxy).isBlacklisted(accountsToBlacklist[i]),
+                blacklisted
+            );
+        }
     }
 }

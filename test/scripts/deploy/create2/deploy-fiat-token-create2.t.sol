@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Circle Internet Group, Inc. All rights reserved.
+ * Copyright 2025 Circle Internet Group, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -19,49 +19,77 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
-import { TestUtils } from "./../TestUtils.sol";
+import { TestUtils } from "../TestUtils.sol";
 import {
-    DeployFiatTokenCelo
-} from "../../../../scripts/deploy/celo/deploy-fiat-token-celo.s.sol";
+    AddressUtils
+} from "../../../../scripts/deploy/create2/AddressUtils.sol";
+import {
+    DeployFiatTokenCreate2
+} from "../../../../scripts/deploy/create2/deploy-fiat-token-create2.s.sol";
 import { MasterMinter } from "../../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../../contracts/v1/FiatTokenProxy.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenV2_2 } from "../../../../contracts/v2/FiatTokenV2_2.sol";
 
 // solhint-disable func-name-mixedcase
 
-contract DeployFiatTokenCeloTest is TestUtils {
-    DeployFiatTokenCelo private deployScript;
+contract DeployFiatTokenCreate2Test is TestUtils {
+    DeployFiatTokenCreate2 private deployScript;
+    AddressUtils private addressUtils;
+    address private factoryAddress;
 
     function setUp() public override {
         TestUtils.setUp();
 
         vm.prank(deployer);
-        deployScript = new DeployFiatTokenCelo();
+        deployScript = new DeployFiatTokenCreate2();
         deployScript.setUp();
+
+        addressUtils = new AddressUtils();
+        factoryAddress = vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS");
     }
 
     function test_deployFiatTokenWithEnvConfigured() public {
         (
-            FiatTokenCeloV2_2 v2_2,
+            FiatTokenV2_2 v2_2,
             MasterMinter masterMinter,
             FiatTokenProxy proxy
         ) = deployScript.run();
 
         validateImpl(v2_2);
-        validateMasterMinter(masterMinter, address(proxy));
         validateProxy(proxy, address(v2_2), address(masterMinter));
+        validateAddressesBlacklistedState(address(proxy), true);
+
+        assertEq(
+            address(v2_2),
+            addressUtils.computeImplAddress(factoryAddress)
+        );
+        assertEq(
+            address(proxy),
+            addressUtils.computeProxyAddress(factoryAddress)
+        );
+        assertEq(
+            address(masterMinter),
+            addressUtils.computeMasterMinterAddress(factoryAddress)
+        );
     }
 
     function test_deployFiatTokenWithPredeployedImpl() public {
         vm.prank(deployer);
-        FiatTokenCeloV2_2 predeployedImpl = new FiatTokenCeloV2_2();
+        FiatTokenV2_2 predeployedImpl = new FiatTokenV2_2();
 
         (, MasterMinter masterMinter, FiatTokenProxy proxy) = deployScript
             .deploy(address(predeployedImpl));
 
-        validateMasterMinter(masterMinter, address(proxy));
         validateProxy(proxy, address(predeployedImpl), address(masterMinter));
+        validateAddressesBlacklistedState(address(proxy), true);
+
+        assertEq(
+            address(proxy),
+            addressUtils.computeProxyAddress(factoryAddress)
+        );
+        assertEq(
+            address(masterMinter),
+            addressUtils.computeMasterMinterAddress(factoryAddress)
+        );
     }
 }

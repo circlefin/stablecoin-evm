@@ -61,23 +61,4 @@ contract DeployFiatTokenTest is TestUtils {
 
         validateProxy(proxy, address(predeployedImpl), masterMinter);
     }
-
-    function validateProxy(
-        FiatTokenProxy proxy,
-        address _impl,
-        address _masterMinter
-    ) internal {
-        assertEq(proxy.admin(), proxyAdmin);
-        assertEq(proxy.implementation(), _impl);
-
-        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
-        assertEq(proxyAsV2_2.name(), "USDC");
-        assertEq(proxyAsV2_2.symbol(), "USDC");
-        assertEq(proxyAsV2_2.currency(), "USD");
-        assert(proxyAsV2_2.decimals() == 6);
-        assertEq(proxyAsV2_2.owner(), owner);
-        assertEq(proxyAsV2_2.pauser(), pauser);
-        assertEq(proxyAsV2_2.blacklister(), blacklister);
-        assertEq(proxyAsV2_2.masterMinter(), _masterMinter);
-    }
 }
