@@ -1,13 +1,43 @@
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const util = require("util");
 const abi = require("ethereumjs-abi");
 const _ = require("lodash");
 const BN = require("bn.js");
+const BigNumber = require("bignumber.js");
 const Q = require("q");
 
+const {
+  accounts,
+  accountPrivateKeys,
+  ZERO_ADDRESS,
+  ZERO_BYTES32,
+} = require("../../helpers/constants");
+const { linkLibraryToTokenContract } = require("../../helpers");
+
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
-const UpgradedFiatToken = artifacts.require("UpgradedFiatToken");
+const FiatTokenV2_2 = artifacts.require("FiatTokenV2_2");
 const UpgradedFiatTokenNewFields = artifacts.require(
   "UpgradedFiatTokenNewFieldsTest"
+);
+const UpgradedFiatTokenV2_2NewFields = artifacts.require(
+  "UpgradedFiatTokenV2_2NewFieldsTest"
 );
 const UpgradedFiatTokenNewFieldsNewLogic = artifacts.require(
   "UpgradedFiatTokenNewFieldsNewLogicTest"
@@ -22,37 +52,33 @@ const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
 const bigHundred = new BN(100);
 
-const nullAccount = "0x0000000000000000000000000000000000000000";
-const deployerAccount = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"; // accounts[0]
-const arbitraryAccount = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // accounts[1]
-const tokenOwnerAccount = "0xE11BA2b4D45Eaed5996Cd0823791E0C93114882d"; // accounts[3]
-const blacklisterAccount = "0xd03ea8624C8C5987235048901fB614fDcA89b117"; // accounts[4]
-const arbitraryAccount2 = "0x95cED938F7991cd0dFcb48F0a06a40FA1aF46EBC"; // accounts[5]
-const masterMinterAccount = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // accounts[6]
-const minterAccount = "0x28a8746e75304c0780E011BEd21C72cD78cd535E"; // accounts[7]
-const pauserAccount = "0xACa94ef8bD5ffEE41947b4585a84BdA5a3d3DA6E"; // accounts[8]
-
-const proxyOwnerAccount = "0x2F560290FEF1B3Ada194b6aA9c40aa71f8e95598"; // accounts[14]
+const {
+  deployerAccount,
+  arbitraryAccount,
+  tokenOwnerAccount,
+  blacklisterAccount,
+  arbitraryAccount2,
+  masterMinterAccount,
+  minterAccount,
+  pauserAccount,
+  proxyOwnerAccount,
+  rescuerAccount,
+  lostAndFoundAccount,
+} = accounts;
+const {
+  deployerAccount: deployerAccountPrivateKey,
+  arbitraryAccount: arbitraryAccountPrivateKey,
+  tokenOwnerAccount: tokenOwnerPrivateKey,
+  blacklisterAccount: blacklisterAccountPrivateKey,
+  arbitraryAccount2: arbitraryAccount2PrivateKey,
+  masterMinterAccount: masterMinterAccountPrivateKey,
+  minterAccount: minterAccountPrivateKey,
+  pauserAccount: pauserAccountPrivateKey,
+  proxyOwnerAccount: proxyOwnerAccountPrivateKey,
+  rescuerAccount: rescuerAccountPrivateKey,
+  lostAndFoundAccount: lostAndFoundAccountPrivateKey,
+} = accountPrivateKeys;
 const upgraderAccount = proxyOwnerAccount;
-
-const deployerAccountPrivateKey =
-  "4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"; // accounts[0]
-const arbitraryAccountPrivateKey =
-  "6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"; // accounts[1];
-const tokenOwnerPrivateKey =
-  "646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"; // accounts[3]
-const blacklisterAccountPrivateKey =
-  "add53f9a7e588d003326d1cbf9e4a43c061aadd9bc938c843a79e7b4fd2ad743"; // accounts[4]
-const arbitraryAccount2PrivateKey =
-  "395df67f0c2d2d9fe1ad08d1bc8b6627011959b79c53d7dd6a3536a33ab8a4fd"; // accounts[5]
-const masterMinterAccountPrivateKey =
-  "e485d098507f54e7733a205420dfddbe58db035fa577fc294ebd14db90767a52"; // accounts[6]
-const minterAccountPrivateKey =
-  "a453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3"; // accounts[7]
-const pauserAccountPrivateKey =
-  "829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4"; // accounts[9]
-const proxyOwnerAccountPrivateKey =
-  "21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46"; // accounts[14]
 const upgraderAccountPrivateKey = proxyOwnerAccountPrivateKey;
 
 const adminSlot =
@@ -187,7 +213,7 @@ function checkMintEvent(minting, to, amount, minter) {
 
   // Transfer from 0 Event
   assert.strictEqual(minting.logs[1].event, "Transfer");
-  assert.strictEqual(minting.logs[1].args.from, nullAccount);
+  assert.strictEqual(minting.logs[1].args.from, ZERO_ADDRESS);
   assert.strictEqual(minting.logs[1].args.to, to);
   assert.isTrue(minting.logs[1].args.value.eq(new BN(amount)));
 }
@@ -201,12 +227,14 @@ function checkBurnEvents(burning, amount, burner) {
   // Transfer to 0 Event
   assert.strictEqual(burning.logs[1].event, "Transfer");
   assert.strictEqual(burning.logs[1].args.from, burner);
-  assert.strictEqual(burning.logs[1].args.to, nullAccount);
+  assert.strictEqual(burning.logs[1].args.to, ZERO_ADDRESS);
   assert.isTrue(burning.logs[1].args.value.eq(new BN(amount)));
 }
 
-// Creates a state object, with default values replaced by
-// customVars where appropriate.
+/**
+ * Creates a state object, with default values replaced
+ * by customVars where appropriate.
+ */
 function buildExpectedState(token, customVars) {
   // set each variable's default value
   const expectedState = {
@@ -221,7 +249,7 @@ function buildExpectedState(token, customVars) {
     proxiedTokenAddress: token.proxiedTokenAddress,
     initializedV1: trueInStorageFormat,
     upgrader: proxyOwnerAccount,
-    balances: {
+    balanceAndBlacklistStates: {
       arbitraryAccount: bigZero,
       masterMinterAccount: bigZero,
       minterAccount: bigZero,
@@ -354,7 +382,9 @@ function buildExpectedState(token, customVars) {
   return expectedState;
 }
 
-// BN-aware deep comparison
+/**
+ *  BN-aware deep comparison
+ */
 function checkState(actual, expected, prefix) {
   for (const k in actual) {
     if (Object.prototype.hasOwnProperty.call(actual, k)) {
@@ -375,10 +405,15 @@ function checkState(actual, expected, prefix) {
   }
 }
 
-// For testing variance of specific variables from their default values.
-// customVars is an array of objects of the form,
-// {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
-// to reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
+/**
+ * For testing variance of specific variables from their default values
+ *
+ * @param _tokens is an array of tokens
+ * @param _customVars is an array of objects of the form,
+ * {'variable': <name of variable>, 'expectedValue': <expected value after modification>}
+ *
+ * To reference nested variables, name variable using dot syntax, e.g. 'allowance.arbitraryAccount.minterAccount'
+ */
 async function checkVariables(_tokens, _customVars) {
   // Iterate over array of tokens.
   const numTokens = _tokens.length;
@@ -422,7 +457,9 @@ function hexToAddress(hex) {
   );
 }
 
-// build up actualState object to compare to expectedState object
+/**
+ * Build up actualState object to compare to expectedState object
+ */
 async function getActualState(token) {
   return Q.all([
     await token.name.call(),
@@ -620,7 +657,7 @@ async function getActualState(token) {
         proxiedTokenAddress: hexToAddress(proxiedTokenAddress),
         upgrader: hexToAddress(upgrader),
         initializedV1,
-        balances: {
+        balanceAndBlacklistStates: {
           arbitraryAccount: balancesA,
           masterMinterAccount: balancesMM,
           minterAccount: balancesM,
@@ -912,18 +949,6 @@ async function expectRevert(contractPromise) {
   assert.fail("Expected error of type revert, but no error was received");
 }
 
-async function expectJump(contractPromise) {
-  try {
-    await contractPromise;
-    assert.fail("Expected invalid opcode not received");
-  } catch (error) {
-    assert.isTrue(
-      error.message.includes("invalid opcode"),
-      `Expected "invalid opcode", got ${error} instead`
-    );
-  }
-}
-
 function encodeCall(name, args, values) {
   const methodId = abi.methodID(name, args).toString("hex");
   const params = abi.rawEncode(args, values).toString("hex");
@@ -932,43 +957,106 @@ function encodeCall(name, args, values) {
 
 async function getAdmin(proxy) {
   const adm = await web3.eth.getStorageAt(proxy.address, adminSlot);
-  return web3.utils.toChecksumAddress("0x" + adm.slice(2).padStart(40, "0"));
+  return web3.utils.toChecksumAddress("0x" + adm.slice(26));
 }
 
 async function getImplementation(proxy) {
   const impl = await web3.eth.getStorageAt(proxy.address, implSlot);
-  return web3.utils.toChecksumAddress("0x" + impl.slice(2).padStart(40, "0"));
+  return web3.utils.toChecksumAddress("0x" + impl.slice(26));
 }
 
 async function getInitializedV1(token) {
   const slot8Data = await web3.eth.getStorageAt(token.address, 8);
   let initialized;
 
-  if (slot8Data === "0x0") {
+  if (slot8Data === ZERO_BYTES32) {
     // validate proxy not yet initialized
     for (let i = 0; i <= 20; i++) {
-      assert.strictEqual("0x0", await web3.eth.getStorageAt(token.address, i));
+      assert.strictEqual(
+        ZERO_BYTES32,
+        await web3.eth.getStorageAt(token.address, i)
+      );
     }
-    initialized = "0x00";
+    initialized = ZERO_BYTES32;
   } else {
-    const slot8DataPadded = slot8Data.slice(2).padStart(42, "0");
-    if (slot8DataPadded.length !== 42) {
+    if (slot8Data.length !== 66) {
       assert.fail("slot8Data unexpected size");
     }
-    const masterMinterAddress = await token.masterMinter.call();
-    assert.isTrue(
-      slot8DataPadded.indexOf(masterMinterAddress.slice(2).toLowerCase()) === 2
+    // String layout
+    // 2 chars - 0x
+    // 22 zeroes chars
+    // 2 chars - initialized (bool)
+    // 40 chars - masterMinter (address)
+    initialized = "0x" + slot8Data.slice(24, 26);
+    const masterMinterAddress = web3.utils.toChecksumAddress(
+      "0x" + slot8Data.slice(26)
     );
-
-    initialized = "0x" + slot8DataPadded.slice(0, 2);
+    const expectedMasterMinterAddress = await token.masterMinter.call();
+    assert.strictEqual(masterMinterAddress, expectedMasterMinterAddress);
   }
   return initialized;
+}
+
+async function deployUpgradedFiatToken(version) {
+  if (version < 2.2) {
+    return FiatTokenV1.new();
+  } else {
+    await linkLibraryToTokenContract(FiatTokenV2_2);
+    return FiatTokenV2_2.new();
+  }
+}
+
+async function deployUpgradedFiatTokenNewFields(version) {
+  if (version < 2.2) {
+    return UpgradedFiatTokenNewFields.new();
+  } else {
+    await linkLibraryToTokenContract(UpgradedFiatTokenV2_2NewFields);
+    return UpgradedFiatTokenV2_2NewFields.new();
+  }
+}
+
+/**
+ * Returns a new BN object
+ */
+function newBigNumber(value) {
+  const hex = new BigNumber(value).toString(16);
+  return new BN(hex, 16);
+}
+
+async function expectError(contractPromise, errorMsg) {
+  try {
+    await contractPromise;
+    assert.fail("Expected error " + errorMsg + ", but no error received");
+  } catch (error) {
+    const correctErrorMsgReceived = error.message.includes(errorMsg);
+    assert(
+      correctErrorMsgReceived,
+      `Expected ${errorMsg}, got ${error.message} instead`
+    );
+  }
+}
+
+/**
+ * Check to ensure correct format of the two inputs
+ *
+ * @param _contracts is an array of exactly two values: a FiatTokenV1 and a MintController
+ * @param _customVars is an array of exactly two values: the expected state of the FiatTokenV1
+ * and the expected state of the MintController
+ */
+async function checkMINTp0(_contracts, _customVars) {
+  assert.equal(_contracts.length, 2);
+  assert.equal(_customVars.length, 2);
+
+  // the first is a FiatTokenV1
+  await checkVariables([_contracts[0]], [_customVars[0]]);
+
+  // the second is a MintController
+  await _customVars[1].checkState(_contracts[1]);
 }
 
 module.exports = {
   FiatTokenV1,
   FiatTokenProxy,
-  UpgradedFiatToken,
   UpgradedFiatTokenNewFields,
   UpgradedFiatTokenNewFieldsNewLogic,
   name,
@@ -978,6 +1066,8 @@ module.exports = {
   bigZero,
   bigHundred,
   debugLogging,
+  newBigNumber,
+  checkMINTp0,
   calculateFeeAmount,
   checkTransferEvents,
   checkMinterConfiguredEvent,
@@ -999,6 +1089,8 @@ module.exports = {
   buildExpectedState,
   checkVariables,
   setMinter,
+  deployUpgradedFiatToken,
+  deployUpgradedFiatTokenNewFields,
   mint,
   burn,
   mintRaw,
@@ -1013,10 +1105,10 @@ module.exports = {
   customInitializeTokenWithProxy,
   upgradeTo,
   expectRevert,
-  expectJump,
+  expectError,
   encodeCall,
   getInitializedV1,
-  nullAccount,
+  nullAccount: ZERO_ADDRESS,
   deployerAccount,
   arbitraryAccount,
   tokenOwnerAccount,
@@ -1024,6 +1116,8 @@ module.exports = {
   masterMinterAccount,
   minterAccount,
   pauserAccount,
+  rescuerAccount,
+  lostAndFoundAccount,
   blacklisterAccount,
   proxyOwnerAccount,
   proxyOwnerAccountPrivateKey,
@@ -1038,4 +1132,6 @@ module.exports = {
   minterAccountPrivateKey,
   pauserAccountPrivateKey,
   deployerAccountPrivateKey,
+  rescuerAccountPrivateKey,
+  lostAndFoundAccountPrivateKey,
 };

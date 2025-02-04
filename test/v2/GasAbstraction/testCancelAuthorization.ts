@@ -1,38 +1,79 @@
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import crypto from "crypto";
-import { FiatTokenV2Instance } from "../../../@types/generated";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+import {
+  ACCOUNTS_AND_KEYS,
+  HARDHAT_ACCOUNTS,
+  MAX_UINT256_HEX,
+} from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
   cancelAuthorizationTypeHash,
   signTransferAuthorization,
-  signApproveAuthorization,
   signCancelAuthorization,
-  signIncreaseAllowanceAuthorization,
-  signDecreaseAllowanceAuthorization,
   TestParams,
+  WalletType,
+  prepareSignature,
 } from "./helpers";
+import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
+import { MockERC1271WalletInstance } from "../../../@types/generated";
 
 export function testCancelAuthorization({
   getFiatToken,
+  getERC1271Wallet,
   getDomainSeparator,
-  fiatTokenOwner,
-  accounts,
+  signerWalletType,
+  signatureBytesType,
 }: TestParams): void {
-  describe("cancelAuthorization", () => {
-    let fiatToken: FiatTokenV2Instance;
-    let domainSeparator: string;
+  describe(`cancelAuthorization with ${signerWalletType} wallet, ${signatureBytesType} signature interface`, async () => {
     const [alice, bob] = ACCOUNTS_AND_KEYS;
-    const charlie = accounts[1];
-    let nonce: string;
+    const charlie = HARDHAT_ACCOUNTS[1];
+    const nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+    let fiatTokenOwner: string;
+    let fiatToken: AnyFiatTokenV2Instance;
+    let aliceWallet: MockERC1271WalletInstance;
+    let domainSeparator: string;
+    let from: string;
+
+    before(async () => {
+      fiatTokenOwner = await getFiatToken().owner();
+    });
 
     beforeEach(async () => {
       fiatToken = getFiatToken();
+      aliceWallet = await getERC1271Wallet(alice.address);
       domainSeparator = getDomainSeparator();
-      nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+      // Initialize `from` address either as Alice's EOA address or Alice's wallet address
+      if (signerWalletType == WalletType.AA) {
+        from = aliceWallet.address;
+      } else {
+        from = alice.address;
+      }
+
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
-      await fiatToken.mint(alice.address, 10e6, { from: fiatTokenOwner });
+      await fiatToken.mint(from, 10e6, {
+        from: fiatTokenOwner,
+      });
     });
 
     it("has the expected type hash", async () => {
@@ -42,11 +83,10 @@ export function testCancelAuthorization({
     });
 
     it("cancels unused transfer authorization if signature is valid", async () => {
-      const from = alice.address;
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -68,25 +108,19 @@ export function testCancelAuthorization({
         alice.key
       );
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // cancel the authorization
       await fiatToken.cancelAuthorization(
         from,
         nonce,
-        cancellation.v,
-        cancellation.r,
-        cancellation.s,
+        ...prepareSignature(cancellation, signatureBytesType),
         { from: charlie }
       );
 
-      // check that the authorization state is now 2 = Canceled
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(2);
+      // check that the authorization state is now true
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(true);
 
       // attempt to use the canceled authorization
       await expectRevert(
@@ -97,204 +131,7 @@ export function testCancelAuthorization({
           validAfter,
           validBefore,
           nonce,
-          authorization.v,
-          authorization.r,
-          authorization.s,
-          { from: charlie }
-        ),
-        "authorization is used or canceled"
-      );
-    });
-
-    it("cancels unused approve authorization if signature is valid", async () => {
-      const owner = alice.address;
-      const spender = bob.address;
-      const value = 7e6;
-      const validAfter = 0;
-      const validBefore = MAX_UINT256;
-
-      // create a signed authorization
-      const authorization = signApproveAuthorization(
-        owner,
-        spender,
-        value,
-        validAfter,
-        validBefore,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // create cancellation
-      const cancellation = signCancelAuthorization(
-        owner,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(owner, nonce)).toNumber()
-      ).to.equal(0);
-
-      // cancel the authorization
-      await fiatToken.cancelAuthorization(
-        owner,
-        nonce,
-        cancellation.v,
-        cancellation.r,
-        cancellation.s,
-        { from: charlie }
-      );
-
-      // check that the authorization state is now 2 = Canceled
-      expect(
-        (await fiatToken.authorizationState(owner, nonce)).toNumber()
-      ).to.equal(2);
-
-      // attempt to use the canceled authorization
-      await expectRevert(
-        fiatToken.approveWithAuthorization(
-          owner,
-          spender,
-          value,
-          validAfter,
-          validBefore,
-          nonce,
-          authorization.v,
-          authorization.r,
-          authorization.s,
-          { from: charlie }
-        ),
-        "authorization is used or canceled"
-      );
-    });
-
-    it("cancels unused increaseAllowance authorization if signature is valid", async () => {
-      const owner = alice.address;
-      const spender = bob.address;
-      const value = 1e6;
-      const validAfter = 0;
-      const validBefore = MAX_UINT256;
-
-      // create a signed authorization
-      const authorization = signIncreaseAllowanceAuthorization(
-        owner,
-        spender,
-        value,
-        validAfter,
-        validBefore,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // create cancellation
-      const cancellation = signCancelAuthorization(
-        owner,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(owner, nonce)).toNumber()
-      ).to.equal(0);
-
-      // cancel the authorization
-      await fiatToken.cancelAuthorization(
-        owner,
-        nonce,
-        cancellation.v,
-        cancellation.r,
-        cancellation.s,
-        { from: charlie }
-      );
-
-      // check that the authorization state is now 2 = Canceled
-      expect(
-        (await fiatToken.authorizationState(owner, nonce)).toNumber()
-      ).to.equal(2);
-
-      // attempt to use the canceled authorization
-      await expectRevert(
-        fiatToken.increaseAllowanceWithAuthorization(
-          owner,
-          spender,
-          value,
-          validAfter,
-          validBefore,
-          nonce,
-          authorization.v,
-          authorization.r,
-          authorization.s,
-          { from: charlie }
-        ),
-        "authorization is used or canceled"
-      );
-    });
-
-    it("cancels unused decreaseAllowance authorization if signature is valid", async () => {
-      const owner = alice.address;
-      const spender = bob.address;
-      const value = 1e6;
-      const validAfter = 0;
-      const validBefore = MAX_UINT256;
-
-      // create a signed authorization
-      const authorization = signDecreaseAllowanceAuthorization(
-        owner,
-        spender,
-        value,
-        validAfter,
-        validBefore,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // create cancellation
-      const cancellation = signCancelAuthorization(
-        owner,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(owner, nonce)).toNumber()
-      ).to.equal(0);
-
-      // cancel the authorization
-      await fiatToken.cancelAuthorization(
-        owner,
-        nonce,
-        cancellation.v,
-        cancellation.r,
-        cancellation.s,
-        { from: charlie }
-      );
-
-      // check that the authorization state is now 2 = Canceled
-      expect(
-        (await fiatToken.authorizationState(owner, nonce)).toNumber()
-      ).to.equal(2);
-
-      // attempt to use the canceled authorization
-      await expectRevert(
-        fiatToken.decreaseAllowanceWithAuthorization(
-          owner,
-          spender,
-          value,
-          validAfter,
-          validBefore,
-          nonce,
-          authorization.v,
-          authorization.r,
-          authorization.s,
+          ...prepareSignature(authorization, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -302,11 +139,10 @@ export function testCancelAuthorization({
     });
 
     it("cannot be used to cancel someone else's authorization", async () => {
-      const from = alice.address;
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -320,10 +156,8 @@ export function testCancelAuthorization({
         alice.key
       );
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // create cancellation
       const cancellation = signCancelAuthorization(
@@ -338,18 +172,14 @@ export function testCancelAuthorization({
         fiatToken.cancelAuthorization(
           from,
           nonce,
-          cancellation.v,
-          cancellation.r,
-          cancellation.s,
+          ...prepareSignature(cancellation, signatureBytesType),
           { from: charlie }
         ),
         "invalid signature"
       );
 
-      // check that the authorization state is still 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is still false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // authorization should not have been canceled
       await fiatToken.transferWithAuthorization(
@@ -359,19 +189,16 @@ export function testCancelAuthorization({
         validAfter,
         validBefore,
         nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
+        ...prepareSignature(authorization, signatureBytesType),
         { from: charlie }
       );
     });
 
     it("reverts if the authorization has already been used", async () => {
-      const from = alice.address;
       const to = bob.address;
       const value = 7e6;
       const validAfter = 0;
-      const validBefore = MAX_UINT256;
+      const validBefore = MAX_UINT256_HEX;
 
       // create a signed authorization
       const authorization = signTransferAuthorization(
@@ -393,9 +220,7 @@ export function testCancelAuthorization({
         validAfter,
         validBefore,
         nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
+        ...prepareSignature(authorization, signatureBytesType),
         { from: charlie }
       );
 
@@ -412,9 +237,7 @@ export function testCancelAuthorization({
         fiatToken.cancelAuthorization(
           from,
           nonce,
-          cancellation.v,
-          cancellation.r,
-          cancellation.s,
+          ...prepareSignature(cancellation, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -424,7 +247,7 @@ export function testCancelAuthorization({
     it("reverts if the authorization has already been canceled", async () => {
       // create cancellation
       const cancellation = signCancelAuthorization(
-        alice.address,
+        from,
         nonce,
         domainSeparator,
         alice.key
@@ -432,22 +255,18 @@ export function testCancelAuthorization({
 
       // submit the cancellation
       await fiatToken.cancelAuthorization(
-        alice.address,
+        from,
         nonce,
-        cancellation.v,
-        cancellation.r,
-        cancellation.s,
+        ...prepareSignature(cancellation, signatureBytesType),
         { from: charlie }
       );
 
       // try to submit the same cancellation again
       await expectRevert(
         fiatToken.cancelAuthorization(
-          alice.address,
+          from,
           nonce,
-          cancellation.v,
-          cancellation.r,
-          cancellation.s,
+          ...prepareSignature(cancellation, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -456,8 +275,8 @@ export function testCancelAuthorization({
 
     it("reverts if the contract is paused", async () => {
       // create a cancellation
-      const { v, r, s } = signCancelAuthorization(
-        alice.address,
+      const cancellation = signCancelAuthorization(
+        from,
         nonce,
         domainSeparator,
         alice.key
@@ -468,9 +287,15 @@ export function testCancelAuthorization({
 
       // try to submit the cancellation
       await expectRevert(
-        fiatToken.cancelAuthorization(alice.address, nonce, v, r, s, {
-          from: charlie,
-        }),
+        fiatToken.cancelAuthorization(
+          from,
+          nonce,
+          ...prepareSignature(cancellation, signatureBytesType),
+
+          {
+            from: charlie,
+          }
+        ),
         "paused"
       );
     });

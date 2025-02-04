@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "",
+    "contractCreationTxHash": ""
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "",
+    "contractCreationTxHash": ""
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "",
+    "contractCreationTxHash": ""
+  },
+  "rpcUrl": ""
+}

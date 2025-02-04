@@ -1,9 +1,28 @@
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import crypto from "crypto";
+import { FiatTokenUtilInstance } from "../../../@types/generated";
 import {
-  FiatTokenV2Instance,
-  FiatTokenUtilInstance,
-} from "../../../@types/generated";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+  ACCOUNTS_AND_KEYS,
+  HARDHAT_ACCOUNTS,
+  MAX_UINT256_HEX,
+} from "../../helpers/constants";
 import {
   expectRevert,
   hexStringFromBuffer,
@@ -13,6 +32,7 @@ import {
 } from "../../helpers";
 import { signTransferAuthorization, TestParams } from "./helpers";
 import { TransactionRawLog } from "../../../@types/TransactionRawLog";
+import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
 
 const FiatTokenUtil = artifacts.require("FiatTokenUtil");
 const ContractThatReverts = artifacts.require("ContractThatReverts");
@@ -20,31 +40,36 @@ const ContractThatReverts = artifacts.require("ContractThatReverts");
 export function testTransferWithMultipleAuthorizations({
   getFiatToken,
   getDomainSeparator,
-  fiatTokenOwner,
-  accounts,
+  signerWalletType,
 }: TestParams): void {
-  describe("transferWithMultipleAuthorizations", () => {
-    let fiatToken: FiatTokenV2Instance;
-    let fiatTokenUtil: FiatTokenUtilInstance;
-    let domainSeparator: string;
+  describe(`transferWithMultipleAuthorization with ${signerWalletType} wallet`, async () => {
     const [alice, bob] = ACCOUNTS_AND_KEYS;
-    const charlie = accounts[1];
-    let nonce: string;
-
+    const charlie = HARDHAT_ACCOUNTS[1];
+    const nonce: string = hexStringFromBuffer(crypto.randomBytes(32));
     const initialBalance = 10e6;
     const transferParams = {
       from: alice.address,
       to: bob.address,
       value: 7e6,
       validAfter: 0,
-      validBefore: MAX_UINT256,
+      validBefore: MAX_UINT256_HEX,
+      nonce,
     };
+
+    let fiatToken: AnyFiatTokenV2Instance;
+    let fiatTokenUtil: FiatTokenUtilInstance;
+    let domainSeparator: string;
+    let fiatTokenOwner: string;
+
+    before(async () => {
+      fiatTokenOwner = await getFiatToken().owner();
+    });
 
     beforeEach(async () => {
       fiatToken = getFiatToken();
       fiatTokenUtil = await FiatTokenUtil.new(fiatToken.address);
       domainSeparator = getDomainSeparator();
-      nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
@@ -168,10 +193,8 @@ export function testTransferWithMultipleAuthorizations({
       expect((await fiatToken.balanceOf(from)).toNumber()).to.equal(10e6);
       expect((await fiatToken.balanceOf(to)).toNumber()).to.equal(0);
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // a third-party, Charlie (not Alice) submits the signed authorization
       const result = await fiatTokenUtil.transferWithMultipleAuthorizations(
@@ -207,10 +230,8 @@ export function testTransferWithMultipleAuthorizations({
         Number(web3.eth.abi.decodeParameters(["uint256"], log1.data)[0])
       ).to.equal(value);
 
-      // check that the authorization state is now 1 = Used
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(1);
+      // check that the authorization state is now true
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(true);
     });
 
     it("can execute multiple transfers", async () => {
@@ -250,13 +271,9 @@ export function testTransferWithMultipleAuthorizations({
       expect((await fiatToken.balanceOf(from)).toNumber()).to.equal(10e6);
       expect((await fiatToken.balanceOf(to)).toNumber()).to.equal(0);
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
-      expect(
-        (await fiatToken.authorizationState(from, nonce2)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
+      expect(await fiatToken.authorizationState(from, nonce2)).to.equal(false);
 
       // a third-party, Charlie (not Alice) submits the signed authorization
       const result = await fiatTokenUtil.transferWithMultipleAuthorizations(
@@ -319,13 +336,9 @@ export function testTransferWithMultipleAuthorizations({
         Number(web3.eth.abi.decodeParameters(["uint256"], log3.data)[0])
       ).to.equal(value2);
 
-      // check that the authorization state is now 1 = Used
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(1);
-      expect(
-        (await fiatToken.authorizationState(from, nonce2)).toNumber()
-      ).to.equal(1);
+      // check that the authorization state is now true
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(true);
+      expect(await fiatToken.authorizationState(from, nonce2)).to.equal(true);
     });
 
     it("does not revert if one of the transfers fail, but atomic is false", async () => {
@@ -365,13 +378,9 @@ export function testTransferWithMultipleAuthorizations({
       expect((await fiatToken.balanceOf(from)).toNumber()).to.equal(10e6);
       expect((await fiatToken.balanceOf(to)).toNumber()).to.equal(0);
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
-      expect(
-        (await fiatToken.authorizationState(from, nonce2)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
+      expect(await fiatToken.authorizationState(from, nonce2)).to.equal(false);
 
       // a third-party, Charlie (not Alice) submits the signed authorization
       const result = await fiatTokenUtil.transferWithMultipleAuthorizations(

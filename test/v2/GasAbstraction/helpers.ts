@@ -1,27 +1,84 @@
-import { FiatTokenV2Instance } from "../../../@types/generated";
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
+import { MockERC1271WalletInstance } from "../../../@types/generated";
 import { Signature, ecSign, strip0x } from "../../helpers";
+import { packSignature } from "../../helpers";
+
+export enum WalletType {
+  EOA = "EOA",
+  AA = "AA",
+}
+
+export enum SignatureBytesType {
+  Packed = "Packed", // Signature provided in the format of a single byte array, packed in the order of r, s, v for EOA wallets
+  Unpacked = "Unpacked", // Signature values provided as separate inputs (v, r, s)
+}
 
 export interface TestParams {
-  getFiatToken: () => FiatTokenV2Instance;
+  version: number;
+  getFiatToken: () => AnyFiatTokenV2Instance;
   getDomainSeparator: () => string;
-  fiatTokenOwner: string;
-  accounts: Truffle.Accounts;
+  signerWalletType: WalletType;
+  signatureBytesType: SignatureBytesType;
+  getERC1271Wallet: (owner: string) => Promise<MockERC1271WalletInstance>;
+}
+
+export function makeDomainSeparator(
+  name: string,
+  version: string,
+  chainId: number,
+  verifyingContract: string
+): string {
+  return web3.utils.keccak256(
+    web3.eth.abi.encodeParameters(
+      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
+      [
+        web3.utils.keccak256(
+          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        ),
+        web3.utils.keccak256(name),
+        web3.utils.keccak256(version),
+        chainId,
+        verifyingContract,
+      ]
+    )
+  );
+}
+
+export function prepareSignature(
+  signature: Signature,
+  signatureBytesType: SignatureBytesType
+): Array<string | number | Buffer> {
+  if (signatureBytesType == SignatureBytesType.Unpacked) {
+    return [signature.v, signature.r, signature.s];
+  } else {
+    return [packSignature(signature)];
+  }
 }
 
 export const transferWithAuthorizationTypeHash = web3.utils.keccak256(
   "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
 );
 
-export const approveWithAuthorizationTypeHash = web3.utils.keccak256(
-  "ApproveWithAuthorization(address owner,address spender,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
-);
-
-export const increaseAllowanceWithAuthorizationTypeHash = web3.utils.keccak256(
-  "IncreaseAllowanceWithAuthorization(address owner,address spender,uint256 increment,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
-);
-
-export const decreaseAllowanceWithAuthorizationTypeHash = web3.utils.keccak256(
-  "DecreaseAllowanceWithAuthorization(address owner,address spender,uint256 decrement,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+export const receiveWithAuthorizationTypeHash = web3.utils.keccak256(
+  "ReceiveWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
 );
 
 export const cancelAuthorizationTypeHash = web3.utils.keccak256(
@@ -32,6 +89,36 @@ export const permitTypeHash = web3.utils.keccak256(
   "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
 );
 
+/**
+ * Overloaded method signatures
+ */
+export const permitSignature =
+  "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)";
+
+export const permitSignatureV22 =
+  "permit(address,address,uint256,uint256,bytes)";
+
+export const transferWithAuthorizationSignature =
+  "transferWithAuthorization(address,address,uint256,uint256,uint256,bytes32,uint8,bytes32,bytes32)";
+
+export const transferWithAuthorizationSignatureV22 =
+  "transferWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes)";
+
+export const receiveWithAuthorizationSignature =
+  "receiveWithAuthorization(address,address,uint256,uint256,uint256,bytes32,uint8,bytes32,bytes32)";
+
+export const receiveWithAuthorizationSignatureV22 =
+  "receiveWithAuthorization(address,address,uint256,uint256,uint256,bytes32,bytes)";
+
+export const cancelAuthorizationSignature =
+  "cancelAuthorization(address,bytes32,uint8,bytes32,bytes32)";
+
+export const cancelAuthorizationSignatureV22 =
+  "cancelAuthorization(address,bytes32,bytes)";
+
+/**
+ * Signature generation helper functions
+ */
 export function signTransferAuthorization(
   from: string,
   to: string,
@@ -51,9 +138,9 @@ export function signTransferAuthorization(
   );
 }
 
-export function signApproveAuthorization(
-  owner: string,
-  spender: string,
+export function signReceiveAuthorization(
+  from: string,
+  to: string,
   value: number | string,
   validAfter: number | string,
   validBefore: number | string,
@@ -63,47 +150,9 @@ export function signApproveAuthorization(
 ): Signature {
   return signEIP712(
     domainSeparator,
-    approveWithAuthorizationTypeHash,
+    receiveWithAuthorizationTypeHash,
     ["address", "address", "uint256", "uint256", "uint256", "bytes32"],
-    [owner, spender, value, validAfter, validBefore, nonce],
-    privateKey
-  );
-}
-
-export function signIncreaseAllowanceAuthorization(
-  owner: string,
-  spender: string,
-  increment: number | string,
-  validAfter: number | string,
-  validBefore: number | string,
-  nonce: string,
-  domainSeparator: string,
-  privateKey: string
-): Signature {
-  return signEIP712(
-    domainSeparator,
-    increaseAllowanceWithAuthorizationTypeHash,
-    ["address", "address", "uint256", "uint256", "uint256", "bytes32"],
-    [owner, spender, increment, validAfter, validBefore, nonce],
-    privateKey
-  );
-}
-
-export function signDecreaseAllowanceAuthorization(
-  owner: string,
-  spender: string,
-  decrement: number | string,
-  validAfter: number | string,
-  validBefore: number | string,
-  nonce: string,
-  domainSeparator: string,
-  privateKey: string
-): Signature {
-  return signEIP712(
-    domainSeparator,
-    decreaseAllowanceWithAuthorizationTypeHash,
-    ["address", "address", "uint256", "uint256", "uint256", "bytes32"],
-    [owner, spender, decrement, validAfter, validBefore, nonce],
+    [from, to, value, validAfter, validBefore, nonce],
     privateKey
   );
 }

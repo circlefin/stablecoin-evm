@@ -1,8 +1,27 @@
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {
   ContractWithPublicFunctionsInstance,
   ContractWithExternalFunctionsInstance,
   ContractThatCallsPublicFunctionsInstance,
 } from "../../@types/generated";
+import { HARDHAT_ACCOUNTS } from "../helpers/constants";
 
 const ContractWithPublicFunctions = artifacts.require(
   "ContractWithPublicFunctions"
@@ -15,8 +34,10 @@ const ContractThatCallsPublicFunctions = artifacts.require(
 );
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 
-contract("public to external", (accounts) => {
+describe("public to external", () => {
   describe("changing access modifier from public to external", () => {
+    const from = HARDHAT_ACCOUNTS[0];
+
     let contractWithPublicFunctions: ContractWithPublicFunctionsInstance;
     let contractWithExternalFunctions: ContractWithExternalFunctionsInstance;
     let contractThatCallsPublicFunctions: ContractThatCallsPublicFunctionsInstance;
@@ -58,7 +79,7 @@ contract("public to external", (accounts) => {
       // functions
       const proxy = await FiatTokenProxy.new(
         contractWithPublicFunctions.address,
-        { from: accounts[0] }
+        { from }
       );
 
       // verify that calling public functions via the proxy works fine

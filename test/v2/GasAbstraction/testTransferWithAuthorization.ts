@@ -1,44 +1,84 @@
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import crypto from "crypto";
-import { FiatTokenV2Instance } from "../../../@types/generated";
+import { MockERC1271WalletInstance } from "../../../@types/generated";
 import {
   AuthorizationUsed,
   Transfer,
 } from "../../../@types/generated/FiatTokenV2";
-import { ACCOUNTS_AND_KEYS, MAX_UINT256 } from "../../helpers/constants";
+import {
+  ACCOUNTS_AND_KEYS,
+  HARDHAT_ACCOUNTS,
+  MAX_UINT256_HEX,
+} from "../../helpers/constants";
 import { expectRevert, hexStringFromBuffer } from "../../helpers";
 import {
   transferWithAuthorizationTypeHash,
   signTransferAuthorization,
   TestParams,
-  signApproveAuthorization,
+  WalletType,
+  prepareSignature,
 } from "./helpers";
+import { AnyFiatTokenV2Instance } from "../../../@types/AnyFiatTokenV2Instance";
 
 export function testTransferWithAuthorization({
   getFiatToken,
+  getERC1271Wallet,
   getDomainSeparator,
-  fiatTokenOwner,
-  accounts,
+  signerWalletType,
+  signatureBytesType,
 }: TestParams): void {
-  describe("transferWithAuthorization", () => {
-    let fiatToken: FiatTokenV2Instance;
-    let domainSeparator: string;
+  describe(`transferWithAuthorization with ${signerWalletType} wallet, ${signatureBytesType} signature interface`, async () => {
     const [alice, bob] = ACCOUNTS_AND_KEYS;
-    const charlie = accounts[1];
-    let nonce: string;
-
+    const charlie = HARDHAT_ACCOUNTS[1];
+    const nonce: string = hexStringFromBuffer(crypto.randomBytes(32));
     const initialBalance = 10e6;
     const transferParams = {
-      from: alice.address,
+      from: "",
       to: bob.address,
       value: 7e6,
       validAfter: 0,
-      validBefore: MAX_UINT256,
+      validBefore: MAX_UINT256_HEX,
+      nonce,
     };
+
+    let fiatTokenOwner: string;
+    let fiatToken: AnyFiatTokenV2Instance;
+    let aliceWallet: MockERC1271WalletInstance;
+    let domainSeparator: string;
+
+    before(async () => {
+      fiatTokenOwner = await getFiatToken().owner();
+    });
 
     beforeEach(async () => {
       fiatToken = getFiatToken();
+      aliceWallet = await getERC1271Wallet(alice.address);
       domainSeparator = getDomainSeparator();
-      nonce = hexStringFromBuffer(crypto.randomBytes(32));
+
+      // Initialize `from` address either as Alice's EOA address or Alice's wallet address
+      if (signerWalletType == WalletType.AA) {
+        transferParams.from = aliceWallet.address;
+      } else {
+        transferParams.from = alice.address;
+      }
+
       await fiatToken.configureMinter(fiatTokenOwner, 1000000e6, {
         from: fiatTokenOwner,
       });
@@ -57,7 +97,7 @@ export function testTransferWithAuthorization({
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create an authorization to transfer money from Alice to Bob and sign
       // with Alice's key
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -72,10 +112,8 @@ export function testTransferWithAuthorization({
       expect((await fiatToken.balanceOf(from)).toNumber()).to.equal(10e6);
       expect((await fiatToken.balanceOf(to)).toNumber()).to.equal(0);
 
-      // check that the authorization state is 0 = Unused
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(0);
+      // check that the authorization state is false
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(false);
 
       // a third-party, Charlie (not Alice) submits the signed authorization
       const result = await fiatToken.transferWithAuthorization(
@@ -85,9 +123,7 @@ export function testTransferWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        v,
-        r,
-        s,
+        ...prepareSignature(signature, signatureBytesType),
         { from: charlie }
       );
 
@@ -110,16 +146,14 @@ export function testTransferWithAuthorization({
       expect(log1.args[1]).to.equal(to);
       expect(log1.args[2].toNumber()).to.equal(value);
 
-      // check that the authorization state is now 1 = Used
-      expect(
-        (await fiatToken.authorizationState(from, nonce)).toNumber()
-      ).to.equal(1);
+      // check that the authorization state is now true
+      expect(await fiatToken.authorizationState(from, nonce)).to.equal(true);
     });
 
     it("reverts if the signature does not match given parameters", async () => {
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create a signed authorization
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -139,9 +173,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "invalid signature"
@@ -152,7 +184,7 @@ export function testTransferWithAuthorization({
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create an authorization to transfer money from Alice to Bob, but
       // sign with Bob's key instead of Alice's
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -173,9 +205,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "invalid signature"
@@ -184,10 +214,9 @@ export function testTransferWithAuthorization({
 
     it("reverts if the authorization is not yet valid", async () => {
       const { from, to, value, validBefore } = transferParams;
-      // create a signed authorization that won't be valid until 10 seconds
-      // later
-      const validAfter = Math.floor(Date.now() / 1000) + 10;
-      const { v, r, s } = signTransferAuthorization(
+      // create a signed authorization that won't be valid until 1 day later
+      const validAfter = Math.floor(Date.now() / 1000) + 86400;
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -207,9 +236,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "authorization is not yet valid"
@@ -220,7 +247,7 @@ export function testTransferWithAuthorization({
       // create a signed authorization that expires immediately
       const { from, to, value, validAfter } = transferParams;
       const validBefore = Math.floor(Date.now() / 1000);
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -240,9 +267,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "authorization is expired"
@@ -253,7 +278,7 @@ export function testTransferWithAuthorization({
       const { from, to, validAfter, validBefore } = transferParams;
       // create a signed authorization
       const value = 1e6;
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -272,9 +297,7 @@ export function testTransferWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        v,
-        r,
-        s,
+        ...prepareSignature(signature, signatureBytesType),
         { from: charlie }
       );
 
@@ -287,9 +310,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -318,9 +339,7 @@ export function testTransferWithAuthorization({
         validAfter,
         validBefore,
         nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
+        ...prepareSignature(authorization, signatureBytesType),
         { from: charlie }
       );
 
@@ -346,9 +365,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          authorization2.v,
-          authorization2.r,
-          authorization2.s,
+          ...prepareSignature(authorization2, signatureBytesType),
           { from: charlie }
         ),
         "authorization is used or canceled"
@@ -360,7 +377,7 @@ export function testTransferWithAuthorization({
       // create a signed authorization that attempts to transfer an amount
       // that exceeds the sender's balance
       const value = initialBalance + 1;
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -380,57 +397,17 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "transfer amount exceeds balance"
       );
     });
 
-    it("reverts if the authorization is not for a transfer", async () => {
-      const {
-        from: owner,
-        to: spender,
-        value,
-        validAfter,
-        validBefore,
-      } = transferParams;
-      // create a signed authorization for an approval (granting allowance)
-      const { v, r, s } = signApproveAuthorization(
-        owner,
-        spender,
-        value,
-        validAfter,
-        validBefore,
-        nonce,
-        domainSeparator,
-        alice.key
-      );
-
-      // try to submit the approval authorization
-      await expectRevert(
-        fiatToken.transferWithAuthorization(
-          owner,
-          spender,
-          value,
-          validAfter,
-          validBefore,
-          nonce,
-          v,
-          r,
-          s,
-          { from: charlie }
-        ),
-        "invalid signature"
-      );
-    });
-
     it("reverts if the contract is paused", async () => {
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create a signed authorization
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -453,9 +430,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         ),
         "paused"
@@ -465,7 +440,7 @@ export function testTransferWithAuthorization({
     it("reverts if the payer or the payee is blacklisted", async () => {
       const { from, to, value, validAfter, validBefore } = transferParams;
       // create a signed authorization
-      const { v, r, s } = signTransferAuthorization(
+      const signature = signTransferAuthorization(
         from,
         to,
         value,
@@ -487,9 +462,7 @@ export function testTransferWithAuthorization({
           validAfter,
           validBefore,
           nonce,
-          v,
-          r,
-          s,
+          ...prepareSignature(signature, signatureBytesType),
           { from: charlie }
         );
 

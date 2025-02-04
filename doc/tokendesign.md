@@ -1,6 +1,6 @@
-# CENTRE Fiat Token
+# Circle's FiatToken Design
 
-The CENTRE Fiat Token contract is an ERC-20 compatible token. It allows
+Circle's FiatToken contract is an ERC-20 compatible token. It allows
 minting/burning of tokens by multiple entities, pausing all activity, freezing
 of individual addresses, and a way to upgrade the contract so that bugs can be
 fixed or features added.
@@ -18,41 +18,44 @@ functionality:
 - `blacklister` - prevent all transfers to or from a particular address, and
   prevents that address from minting or burning
 - `owner` - re-assign any of the roles except for `admin`
-- `admin` - upgrade the contract, and re-assign itself
+- `admin` - manage the proxy-level functionalities such as switching the
+  implementation contract
+- `rescuer` - transfer any ERC-20 tokens that are locked up in the contract
 
-CENTRE will control the address of all roles except for minters, which will be
-controlled by the entities that CENTRE elects to make minters
+Circle will control the address of all roles.
 
 ## ERC-20
 
 The `FiatToken` implements the standard methods of the ERC-20 interface with
 some changes:
 
-- A blacklisted address will be unable to call `transfer`, `transferFrom`, or
-  `approve`, and will be unable to receive tokens.
+- A blacklisted address will be unable to call `transfer` or `transferFrom`, and
+  will be unable to receive tokens.
+  - `approve` was not allowed for blacklisted addresses in FiatToken versions
+    <2.2 but available in versions 2.2+. See ["Blacklisting"](#blacklisting)
+    section for more details.
 - `transfer`, `transferFrom`, and `approve` will fail if the contract has been
   paused.
 
 ## Issuing and Destroying tokens
 
-The Fiat Token allows multiple entities to create and destroy tokens. These
-entities will have to be members of CENTRE, and will be vetted by CENTRE before
-they are allowed to create new tokens. CENTRE will not mint any tokens itself,
-it will approve members to mint and burn tokens.
+The FiatToken contract allows multiple entities to create and destroy tokens.
+These entities will have to be members of Circle, and will be vetted by Circle
+before they are allowed to create new tokens.
 
-Each `minter` has a `mintingAllowance`, which CENTRE configures. The
-`mintingAllowance` is how many tokens that minter may issue, and as a `minter`
-issues tokens, its `mintingAllowance` declines. CENTRE will periodically reset
-the `mintingAllowance` as long as a `minter` remains in good standing with
-CENTRE and maintains adequate reserves for the tokens it has issued. The
-`mintingAllowance` is to limit the damage if any particular `minter` is
+Each `minter` has a `minterAllowance`, which Circle configures. The
+`minterAllowance` is how many tokens that minter may issue, and as a `minter`
+issues tokens, its `minterAllowance` declines. Circle will periodically reset
+the `minterAllowance` as long as a `minter` remains in good standing with Circle
+and maintains adequate reserves for the tokens it has issued. The
+`minterAllowance` is to limit the damage if any particular `minter` is
 compromised.
 
 ### Adding Minters
 
-CENTRE adds minters via the `configureMinter` method. When a minter is
-configured a `mintingAllowance` is specified, which is the number of tokens that
-address is allowed to mint. As a `minter` mints tokens, the `mintingAllowance`
+Circle adds minters via the `configureMinter` method. When a minter is
+configured a `minterAllowance` is specified, which is the number of tokens that
+address is allowed to mint. As a `minter` mints tokens, the `minterAllowance`
 will decline.
 
 - Only the `masterMinter` role may call configureMinter.
@@ -60,13 +63,13 @@ will decline.
 ### Resetting Minting Allowance
 
 The `minters` will need their allowance reset periodically to allow them to
-continue minting. When a `minter`'s allowance is low, CENTRE can make another
-call to `configureMinter` to reset the `mintingAllowance` to a higher value.
+continue minting. When a `minter`'s allowance is low, Circle can make another
+call to `configureMinter` to reset the `minterAllowance` to a higher value.
 
 ### Removing Minters
 
-CENTRE removes minters via the `removeMinter` method. This will remove the
-`minter` from the list of `minters` and set its `mintingAllowance` to 0. Once a
+Circle removes minters via the `removeMinter` method. This will remove the
+`minter` from the list of `minters` and set its `minterAllowance` to 0. Once a
 `minter` is removed it will no longer be able to mint or burn tokens.
 
 - Only the `masterMinter` role may call `removeMinter`.
@@ -76,7 +79,7 @@ CENTRE removes minters via the `removeMinter` method. This will remove the
 A `minter` mints tokens via the `mint` method. The `minter` specifies the
 `amount` of tokens to create, and a `_to` address which will own the newly
 created tokens. A `minter` may only mint an amount less than or equal to its
-`mintingAllowance`. The `mintingAllowance` will decrease by the amount of tokens
+`minterAllowance`. The `minterAllowance` will decrease by the amount of tokens
 minted, and the balance of the `_to` address and `totalSupply` will each
 increase by `amount`.
 
@@ -93,11 +96,11 @@ A `minter` burns tokens via the `burn` method. The `minter` specifies the
 `amount` of tokens to burn, and the `minter` must have a `balance` greater than
 or equal to the `amount`. Burning tokens is restricted to `minter` addresses to
 avoid accidental burning of tokens by end users. A `minter` with a
-`mintingAllowance` of 0 is allowed to burn tokens. A `minter` can only burn
+`minterAllowance` of 0 is allowed to burn tokens. A `minter` can only burn
 tokens which it owns. When a minter burns tokens, its balance and the
 totalSupply are reduced by `amount`.
 
-Burning tokens will not increase the mintingAllowance of the address doing the
+Burning tokens will not increase the minterAllowance of the address doing the
 burning.
 
 - Only a minter may call burn.
@@ -111,11 +114,19 @@ burning.
 ## Blacklisting
 
 Addresses can be blacklisted. A blacklisted address will be unable to transfer
-tokens, approve, mint, or burn tokens.
+tokens, mint, or burn tokens.
+
+In FiatToken versions <2.2, A blacklisted address is unable to call `approve`,
+`increaseAllowance`, `decreaseAllowance`, or authorize future pull payments
+using `permit`. Nor can it be authorized to pull payments from other addresses.
+This has been changed in v2.2 where a blacklisted address can perform the above
+functions. But they are still blocked from transferring the assets in any way.
+and therefore any operations on modifying the allowance of blacklisted addresses
+are considered meaningless.
 
 ### Adding a blacklisted address
 
-CENTRE blacklists an address via the `blacklist` method. The specified `account`
+Circle blacklists an address via the `blacklist` method. The specified `account`
 will be added to the blacklist.
 
 - Only the `blacklister` role may call `blacklist`.
@@ -123,7 +134,7 @@ will be added to the blacklist.
 
 ### Removing a blacklisted address
 
-CENTRE removes an address from the blacklist via the `unblacklist` method. The
+Circle removes an address from the blacklist via the `unblacklist` method. The
 specified `account` will be removed from the blacklist.
 
 - Only the `blacklister` role may call `unblacklist`.
@@ -136,11 +147,11 @@ serious key compromise. All transfers, minting, burning, and adding minters will
 be prevented while the contract is paused. Other functionality, such as
 modifying the blacklist, removing minters, changing roles, and upgrading will
 remain operational as those methods may be required to fix or mitigate the issue
-that caused CENTRE to pause the contract.
+that caused Circle to pause the contract.
 
 ### Pause
 
-CENTRE will pause the contract via the `pause` method. This method will set the
+Circle will pause the contract via the `pause` method. This method will set the
 paused flag to true.
 
 - Only the `pauser` role may call pause.
@@ -149,7 +160,7 @@ paused flag to true.
 
 ### Unpause
 
-CENTRE will unpause the contract via the `unpause` method. This method will set
+Circle will unpause the contract via the `unpause` method. This method will set
 the `paused` flag to false. All functionality will be restored when the contract
 is unpaused.
 
@@ -157,17 +168,44 @@ is unpaused.
 
 - Unpausing emits an `Unpause()` event
 
+## Meta transactions compatibility
+
+### ERC-2612
+
+The contract is compatible with
+[ERC-2612](https://eips.ethereum.org/EIPS/eip-2612). Users may update their
+ERC-20 allowances by signing a `permit` message and passing the signed message
+to a relayer who will execute the on-chain transaction, instead of submitting a
+transaction themselves.
+
+### ERC-3009
+
+The contract is compatible with
+[ERC-3009](https://eips.ethereum.org/EIPS/eip-3009). Users may transfer assets
+to another user by signing an EIP-3009 authorization and passing the
+authorization to a relayer who will execute the authorization on chain, instead
+of submitting a transaction themselves.
+
+### Signature Validation schemes
+
+The contract supports signature validation via:
+
+1. ECDSA signatures for Externally Owned Accounts (EOAs)
+2. [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271) for ERC-1271 compatible
+   Smart Contract Wallets
+
 ## Upgrading
 
-The Fiat Token uses the zeppelinos Unstructured-Storage Proxy pattern
-[https://docs.zeppelinos.org/docs/upgradeability_AdminUpgradeabilityProxy.html].
-[FiatTokenV1.sol](../contracts/FiatTokenV1.sol) is the implementation, the
-actual token will be a Proxy contract
-([FiatTokenProxy.sol](../contracts/FiatTokenProxy.sol)) which will forward all
-calls to `FiatToken` via delegatecall. This pattern allows CENTRE to upgrade the
-logic of any deployed tokens seamlessly.
+The FiatTokenProxy contract uses the zeppelinos Unstructured-Storage Proxy
+pattern
+[https://github.com/zeppelinos/zos-lib/blob/8a16ef3ad17ec7430e3a9d2b5e3f39b8204f8c8d/contracts/upgradeability/AdminUpgradeabilityProxy.sol].
+[FiatTokenV2_2.sol](../contracts/v2/FiatTokenV2_2.sol) is the implementation,
+the actual token will be a Proxy contract
+([FiatTokenProxy.sol](../contracts/v1/FiatTokenProxy.sol)) which will forward
+all calls to `FiatToken` via delegatecall. This pattern allows Circle to upgrade
+the logic of any deployed tokens seamlessly.
 
-- CENTRE will upgrade the token via a call to `upgradeTo` or `upgradeToAndCall`
+- Circle will upgrade the token via a call to `upgradeTo` or `upgradeToAndCall`
   if initialization is required for the new version.
 - Only the `admin` role may call `upgradeTo` or `upgradeToAndCall`.
 
@@ -200,3 +238,8 @@ reassign all roles (including itself) except for the `admin` role.
 
 - `transferOwnership` updates the `owner` role to a new address.
 - `transferOwnership` may only be called by the `owner` role.
+
+### Rescuer
+
+- `updateRescuer` updates the `rescuer` role to a new address.
+- `updateRescuer` may only be called by the `owner` role.

@@ -1,0 +1,42 @@
+# Copyright 2024 Circle Internet Group, Inc. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[profile.default]
+src = "contracts"
+out = "artifacts/foundry"
+cache_path = "cache/foundry"
+script = "scripts"
+optimizer_runs = 10000000
+libs = [
+    "lib",
+    "node_modules",
+]
+remappings = [
+    "forge-std/=lib/forge-std/src",
+    "@openzeppelin/=node_modules/@openzeppelin/",
+]
+fs_permissions = [
+    { access = "read-write", path = "blacklist.remote.json"},
+    { access = "read-write", path = "test.blacklist.remote.json"}
+] # https://book.getfoundry.sh/cheatcodes/fs
+extra-output-files = [
+    "bin",
+    "metadata"
+]
+
+[rpc_endpoints]
+testnet = "${TESTNET_RPC_URL}"
+mainnet = "${MAINNET_RPC_URL}"

@@ -1,22 +1,41 @@
-import { behavesLikeRescuable } from "../v1.1/Rescuable.behavior";
-import { FiatTokenV2Instance, RescuableInstance } from "../../@types/generated";
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { FiatTokenV2Instance } from "../../@types/generated";
 import { usesOriginalStorageSlotPositions } from "../helpers/storageSlots.behavior";
-import { hasSafeAllowance } from "./safeAllowance.behavior";
-import { hasGasAbstraction } from "./GasAbstraction/GasAbstraction.behavior";
-import { expectRevert } from "../helpers";
+import { linkLibraryToTokenContract } from "../helpers";
+import { HARDHAT_ACCOUNTS } from "../helpers/constants";
+import { behavesLikeFiatTokenV2 } from "./v2.behavior";
 
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 
-contract("FiatTokenV2", (accounts) => {
-  const fiatTokenOwner = accounts[9];
+describe("FiatTokenV2", () => {
   let fiatToken: FiatTokenV2Instance;
-  let domainSeparator: string;
-  let chainId: number;
+  const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
+
+  before(async () => {
+    await linkLibraryToTokenContract(FiatTokenV2);
+  });
 
   beforeEach(async () => {
     fiatToken = await FiatTokenV2.new();
     await fiatToken.initialize(
-      "USD Coin",
+      "USDC",
       "USDC",
       "USD",
       6,
@@ -25,55 +44,12 @@ contract("FiatTokenV2", (accounts) => {
       fiatTokenOwner,
       fiatTokenOwner
     );
-    await fiatToken.initializeV2("USD Coin", { from: fiatTokenOwner });
-
-    // hardcode chainId to be 1 due to ganache bug
-    // https://github.com/trufflesuite/ganache/issues/1643
-    // chainId = await web3.eth.getChainId();
-    chainId = 1;
-
-    domainSeparator = web3.utils.keccak256(
-      web3.eth.abi.encodeParameters(
-        ["bytes32", "bytes32", "bytes32", "uint256", "address"],
-        [
-          web3.utils.keccak256(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-          ),
-          web3.utils.keccak256("USD Coin"),
-          web3.utils.keccak256("2"),
-          chainId,
-          fiatToken.address,
-        ]
-      )
-    );
+    await fiatToken.initializeV2("USDC", { from: fiatTokenOwner });
   });
 
-  behavesLikeRescuable(() => fiatToken as RescuableInstance, accounts);
-
+  behavesLikeFiatTokenV2(2, () => fiatToken);
   usesOriginalStorageSlotPositions({
     Contract: FiatTokenV2,
     version: 2,
-    accounts,
-  });
-
-  it("has the expected domain separator", async () => {
-    expect(await fiatToken.DOMAIN_SEPARATOR()).to.equal(domainSeparator);
-  });
-
-  hasSafeAllowance(() => fiatToken, fiatTokenOwner, accounts);
-
-  hasGasAbstraction(
-    () => fiatToken,
-    () => domainSeparator,
-    fiatTokenOwner,
-    accounts
-  );
-
-  it("disallows calling initializeV2 twice", async () => {
-    // It was called once in beforeEach. Try to call again.
-    await expectRevert(
-      fiatToken.initializeV2("Not USD Coin", { from: fiatTokenOwner }),
-      "contract is already initialized"
-    );
   });
 });

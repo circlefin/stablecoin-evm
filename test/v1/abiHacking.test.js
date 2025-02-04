@@ -1,4 +1,21 @@
-const { Transaction } = require("ethereumjs-tx");
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const wrapTests = require("./helpers/wrapTests");
 const {
   expectRevert,
@@ -26,7 +43,7 @@ function mockStringAddressEncode(methodName, address) {
   return functionSignature(methodName) + version + encodeAddress(address);
 }
 
-function runTests(newToken, _accounts) {
+function runTests(newToken) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -39,20 +56,12 @@ function runTests(newToken, _accounts) {
   // sanity check for pausable
   it("abi004 FiatToken pause() is public", async () => {
     const badData = functionSignature("pause()");
-    const tx = new Transaction({
-      nonce: web3.utils.toHex(
-        await web3.eth.getTransactionCount(pauserAccount)
-      ),
-      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-      gasLimit: 100000,
-      to: token.address,
-      value: 0,
-      data: badData,
-    });
-    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
-    tx.sign(privateKey);
-    const raw = "0x" + tx.serialize().toString("hex");
-
+    const raw = await makeRawTransaction(
+      badData,
+      pauserAccount,
+      pauserAccountPrivateKey,
+      token.address
+    );
     await sendRawTransaction(raw);
     const customVars = [{ variable: "paused", expectedValue: true }];
     await checkVariables([token], [customVars]);
@@ -60,77 +69,45 @@ function runTests(newToken, _accounts) {
 
   it("abi040 Blacklistable constructor is not a function", async () => {
     const badData = functionSignature("Blacklistable()");
-    const tx = new Transaction({
-      nonce: web3.utils.toHex(
-        await web3.eth.getTransactionCount(pauserAccount)
-      ),
-      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-      gasLimit: 100000,
-      to: token.address,
-      value: 0,
-      data: badData,
-    });
-    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
-    tx.sign(privateKey);
-    const raw = "0x" + tx.serialize().toString("hex");
-
+    const raw = await makeRawTransaction(
+      badData,
+      pauserAccount,
+      pauserAccountPrivateKey,
+      token.address
+    );
     await expectRevert(sendRawTransaction(raw));
   });
 
   it("abi042 Ownable constructor is not a function", async () => {
     const badData = functionSignature("Ownable()");
-    const tx = new Transaction({
-      nonce: web3.utils.toHex(
-        await web3.eth.getTransactionCount(pauserAccount)
-      ),
-      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-      gasLimit: 100000,
-      to: token.address,
-      value: 0,
-      data: badData,
-    });
-    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
-    tx.sign(privateKey);
-    const raw = "0x" + tx.serialize().toString("hex");
-
+    const raw = await makeRawTransaction(
+      badData,
+      pauserAccount,
+      pauserAccountPrivateKey,
+      token.address
+    );
     await expectRevert(sendRawTransaction(raw));
   });
 
   it("abi005 Pausable constructor is not a function", async () => {
     const badData = functionSignature("Pausable()");
-    const tx = new Transaction({
-      nonce: web3.utils.toHex(
-        await web3.eth.getTransactionCount(pauserAccount)
-      ),
-      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-      gasLimit: 100000,
-      to: token.address,
-      value: 0,
-      data: badData,
-    });
-    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
-    tx.sign(privateKey);
-    const raw = "0x" + tx.serialize().toString("hex");
-
+    const raw = await makeRawTransaction(
+      badData,
+      pauserAccount,
+      pauserAccountPrivateKey,
+      token.address
+    );
     await expectRevert(sendRawTransaction(raw));
   });
 
   it("abi043 FiatTokenProxy constructor is not a function", async () => {
     const badData = functionSignature("FiatTokenProxy()");
-    const tx = new Transaction({
-      nonce: web3.utils.toHex(
-        await web3.eth.getTransactionCount(pauserAccount)
-      ),
-      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-      gasLimit: 100000,
-      to: token.address,
-      value: 0,
-      data: badData,
-    });
-    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
-    tx.sign(privateKey);
-    const raw = "0x" + tx.serialize().toString("hex");
-
+    const raw = await makeRawTransaction(
+      badData,
+      pauserAccount,
+      pauserAccountPrivateKey,
+      token.address
+    );
     await expectRevert(sendRawTransaction(raw));
   });
 
@@ -230,39 +207,23 @@ function runTests(newToken, _accounts) {
 
   it("abi041 FiatToken constructor is not a function", async () => {
     const badData = functionSignature("FiatToken()");
-    const tx = new Transaction({
-      nonce: web3.utils.toHex(
-        await web3.eth.getTransactionCount(pauserAccount)
-      ),
-      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-      gasLimit: 100000,
-      to: token.address,
-      value: 0,
-      data: badData,
-    });
-    const privateKey = Buffer.from(pauserAccountPrivateKey, "hex");
-    tx.sign(privateKey);
-    const raw = "0x" + tx.serialize().toString("hex");
-
+    const raw = await makeRawTransaction(
+      badData,
+      pauserAccount,
+      pauserAccountPrivateKey,
+      token.address
+    );
     await expectRevert(sendRawTransaction(raw));
   });
 
   it("abi025 setOwner is internal", async () => {
     const badData = msgData("setOwner(address)", pauserAccount);
-    const tx = new Transaction({
-      nonce: web3.utils.toHex(
-        await web3.eth.getTransactionCount(tokenOwnerAccount)
-      ),
-      gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-      gasLimit: 100000,
-      to: token.address,
-      value: 0,
-      data: badData,
-    });
-    const privateKey = Buffer.from(tokenOwnerPrivateKey, "hex");
-    tx.sign(privateKey);
-    const raw = "0x" + tx.serialize().toString("hex");
-
+    const raw = await makeRawTransaction(
+      badData,
+      tokenOwnerAccount,
+      tokenOwnerPrivateKey,
+      token.address
+    );
     await expectRevert(sendRawTransaction(raw));
   });
 

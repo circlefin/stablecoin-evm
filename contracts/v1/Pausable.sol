@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: MIT
  *
  * Copyright (c) 2016 Smart Contract Solutions, Inc.
- * Copyright (c) 2018-2020 CENTRE SECZ0
+ * Copyright (c) 2018-2020 CENTRE SECZ
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,8 @@ contract Pausable is Ownable {
     }
 
     /**
-     * @dev update the pauser role
+     * @notice Updates the pauser address.
+     * @param _newPauser The address of the new pauser.
      */
     function updatePauser(address _newPauser) external onlyOwner {
         require(

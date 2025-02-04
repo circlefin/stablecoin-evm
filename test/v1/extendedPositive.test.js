@@ -1,3 +1,21 @@
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const BN = require("bn.js");
 const wrapTests = require("./helpers/wrapTests");
 const {
@@ -10,13 +28,13 @@ const {
   minterAccount,
   pauserAccount,
   initializeTokenWithProxy,
-  UpgradedFiatToken,
+  deployUpgradedFiatToken,
   upgradeTo,
 } = require("./helpers/tokenTest");
 
 const amount = 100;
 
-function runTests(newToken, _accounts) {
+function runTests(newToken, version) {
   let proxy, token;
 
   beforeEach(async () => {
@@ -112,7 +130,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("ept008 should upgrade while paused", async () => {
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await deployUpgradedFiatToken(version);
     await token.pause({ from: pauserAccount });
     const tokenConfig = await upgradeTo(proxy, newRawToken);
     const newProxiedToken = tokenConfig.token;
@@ -248,7 +266,7 @@ function runTests(newToken, _accounts) {
 
   it("ept022 should upgrade when msg.sender blacklisted", async () => {
     await token.blacklist(upgraderAccount, { from: blacklisterAccount });
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await deployUpgradedFiatToken(version);
     const tokenConfig = await upgradeTo(proxy, newRawToken);
     const newProxiedToken = tokenConfig.token;
 
@@ -260,7 +278,7 @@ function runTests(newToken, _accounts) {
   });
 
   it("ept023 should upgrade to blacklisted address", async () => {
-    const newRawToken = await UpgradedFiatToken.new();
+    const newRawToken = await deployUpgradedFiatToken(version);
 
     await token.blacklist(newRawToken.address, { from: blacklisterAccount });
     const tokenConfig = await upgradeTo(proxy, newRawToken);

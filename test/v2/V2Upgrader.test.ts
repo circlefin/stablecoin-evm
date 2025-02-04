@@ -1,3 +1,21 @@
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import crypto from "crypto";
 import {
   FiatTokenV1Instance,
@@ -5,8 +23,16 @@ import {
   FiatTokenProxyInstance,
 } from "../../@types/generated";
 import { signTransferAuthorization } from "./GasAbstraction/helpers";
-import { MAX_UINT256, ACCOUNTS_AND_KEYS } from "../helpers/constants";
-import { hexStringFromBuffer, expectRevert } from "../helpers";
+import {
+  MAX_UINT256_HEX,
+  ACCOUNTS_AND_KEYS,
+  accounts,
+} from "../helpers/constants";
+import {
+  hexStringFromBuffer,
+  expectRevert,
+  linkLibraryToTokenContract,
+} from "../helpers";
 
 const FiatTokenProxy = artifacts.require("FiatTokenProxy");
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
@@ -14,22 +40,43 @@ const FiatTokenV1_1 = artifacts.require("FiatTokenV1_1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
 const V2Upgrader = artifacts.require("V2Upgrader");
 
-contract("V2Upgrader", (accounts) => {
+describe("V2Upgrader", () => {
   let fiatTokenProxy: FiatTokenProxyInstance;
   let proxyAsV1: FiatTokenV1Instance;
   let proxyAsV2: FiatTokenV2Instance;
   let v1Implementation: FiatTokenV1Instance;
   let v2Implementation: FiatTokenV2Instance;
-  let originalProxyAdmin: string;
-  const minter = accounts[9];
+  const {
+    minterAccount: minter,
+    masterMinterAccount,
+    pauserAccount,
+    blacklisterAccount,
+    tokenOwnerAccount,
+    proxyOwnerAccount: originalProxyAdmin,
+  } = accounts;
+
+  before(async () => {
+    await linkLibraryToTokenContract(FiatTokenV2);
+  });
 
   beforeEach(async () => {
-    fiatTokenProxy = await FiatTokenProxy.deployed();
+    v1Implementation = await FiatTokenV1.new();
+    v2Implementation = await FiatTokenV2.new();
+    fiatTokenProxy = await FiatTokenProxy.new(v1Implementation.address, {
+      from: originalProxyAdmin,
+    });
     proxyAsV1 = await FiatTokenV1.at(fiatTokenProxy.address);
+    await proxyAsV1.initialize(
+      "USD//C",
+      "USDC",
+      "USD",
+      6,
+      masterMinterAccount,
+      pauserAccount,
+      blacklisterAccount,
+      tokenOwnerAccount
+    );
     proxyAsV2 = await FiatTokenV2.at(fiatTokenProxy.address);
-    v1Implementation = await FiatTokenV1.deployed();
-    v2Implementation = await FiatTokenV2.deployed();
-    originalProxyAdmin = await fiatTokenProxy.admin();
 
     await proxyAsV1.configureMinter(minter, 2e5, {
       from: await proxyAsV1.masterMinter(),
@@ -41,7 +88,12 @@ contract("V2Upgrader", (accounts) => {
     it("upgrades, transfers proxy admin role to newProxyAdmin, runs tests, and self-destructs", async () => {
       // Run the test on the contracts deployed by Truffle to ensure the Truffle
       // migration is written correctly
-      const upgrader = await V2Upgrader.deployed();
+      const upgrader = await V2Upgrader.new(
+        fiatTokenProxy.address,
+        v2Implementation.address,
+        await fiatTokenProxy.admin(),
+        "USDC"
+      );
       const upgraderOwner = await upgrader.owner();
 
       expect(await upgrader.proxy()).to.equal(fiatTokenProxy.address);
@@ -50,9 +102,9 @@ contract("V2Upgrader", (accounts) => {
       );
       expect(await upgrader.helper()).not.to.be.empty;
       expect(await upgrader.newProxyAdmin()).to.equal(originalProxyAdmin);
-      expect(await upgrader.newName()).to.equal("USD Coin");
+      expect(await upgrader.newName()).to.equal("USDC");
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
@@ -72,7 +124,7 @@ contract("V2Upgrader", (accounts) => {
       );
 
       // Test that things work as expected
-      expect(await proxyAsV2.name()).to.equal("USD Coin");
+      expect(await proxyAsV2.name()).to.equal("USDC");
       expect((await proxyAsV2.balanceOf(upgrader.address)).toNumber()).to.equal(
         0
       );
@@ -94,7 +146,7 @@ contract("V2Upgrader", (accounts) => {
         minter,
         1e5,
         0,
-        MAX_UINT256,
+        MAX_UINT256_HEX,
         nonce,
         await proxyAsV2.DOMAIN_SEPARATOR(),
         user2.key // Signed with someone else's key
@@ -106,7 +158,7 @@ contract("V2Upgrader", (accounts) => {
           minter,
           1e5,
           0,
-          MAX_UINT256,
+          MAX_UINT256_HEX,
           nonce,
           invalidAuthorization.v,
           invalidAuthorization.r,
@@ -121,7 +173,7 @@ contract("V2Upgrader", (accounts) => {
         minter,
         1e5,
         0,
-        MAX_UINT256,
+        MAX_UINT256_HEX,
         nonce,
         await proxyAsV2.DOMAIN_SEPARATOR(),
         user.key
@@ -133,7 +185,7 @@ contract("V2Upgrader", (accounts) => {
         minter,
         1e5,
         0,
-        MAX_UINT256,
+        MAX_UINT256_HEX,
         nonce,
         validAuthorization.v,
         validAuthorization.r,
@@ -152,17 +204,17 @@ contract("V2Upgrader", (accounts) => {
         from: originalProxyAdmin,
       });
       const fiatTokenV1_1 = await FiatTokenV1_1.new();
-      const upgraderOwner = accounts[0];
+      const upgraderOwner = accounts.deployerAccount;
 
       const upgrader = await V2Upgrader.new(
         fiatTokenProxy.address,
         fiatTokenV1_1.address, // provide V1.1 implementation instead of V2
         originalProxyAdmin,
-        "USD Coin",
+        "USDC",
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract
@@ -188,16 +240,16 @@ contract("V2Upgrader", (accounts) => {
       fiatTokenProxy = await FiatTokenProxy.new(v1Implementation.address, {
         from: originalProxyAdmin,
       });
-      const upgraderOwner = accounts[0];
+      const upgraderOwner = accounts.deployerAccount;
       const upgrader = await V2Upgrader.new(
         fiatTokenProxy.address,
         v2Implementation.address,
         originalProxyAdmin,
-        "USD Coin",
+        "USDC",
         { from: upgraderOwner }
       );
 
-      // Transfer 0.2 USDC to the contract
+      // Transfer 0.2 FiatToken to the contract
       await proxyAsV1.transfer(upgrader.address, 2e5, { from: minter });
 
       // Transfer admin role to the contract

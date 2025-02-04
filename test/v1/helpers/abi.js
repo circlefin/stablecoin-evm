@@ -1,27 +1,46 @@
-const { Transaction } = require("ethereumjs-tx");
+/**
+ * Copyright 2023 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-async function makeRawTransaction(data, from, hexPrivateKey, contractAddress) {
-  const tx = new Transaction({
-    nonce: web3.utils.toHex(await web3.eth.getTransactionCount(from)),
+async function makeRawTransaction(
+  data,
+  fromAddress,
+  fromAddressPrivateKey,
+  toAddress,
+  gasLimit = 1000000
+) {
+  const wallet = web3.eth.accounts.wallet.add({
+    privateKey: fromAddressPrivateKey,
+    address: fromAddress,
+  });
+  const { rawTransaction } = await wallet.signTransaction({
+    from: fromAddress,
+    to: toAddress,
+    gas: gasLimit,
     gasPrice: web3.utils.toHex(web3.utils.toWei("20", "gwei")),
-    gasLimit: 1000000,
-    to: contractAddress,
     value: 0,
     data,
+    chainId: await web3.eth.getChainId(),
   });
-  const privateKey = Buffer.from(hexPrivateKey, "hex");
-  tx.sign(privateKey);
-  const raw = "0x" + tx.serialize().toString("hex");
-  return raw;
+  return rawTransaction;
 }
 
 function sendRawTransaction(raw) {
-  return new Promise((resolve, reject) => {
-    web3.eth.sendSignedTransaction(raw, (err, transactionHash) => {
-      if (err !== null) return reject(err);
-      resolve(transactionHash);
-    });
-  });
+  return web3.eth.sendSignedTransaction(raw);
 }
 
 function functionSignature(methodName) {
