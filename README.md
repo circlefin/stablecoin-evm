@@ -166,7 +166,7 @@ There are 2 main contracts - an implementation contract
 logic for FiatToken's functionalities, and a proxy contract
 ([`FiatTokenProxy.sol`](./contracts/v1/FiatTokenProxy.sol)) that redirects
 function calls to the implementation contract. This allows upgrading FiatToken's
-functionalities, as a new implementation contact can be deployed and the Proxy
+functionalities, as a new implementation contract can be deployed and the Proxy
 can be updated to point to it.
 
 ## FiatToken features
