@@ -11,5 +11,5 @@
     "contractAddress": "0xF1815bd50389c46847f0Bda824eC8da914045D14",
     "contractCreationTxHash": "0x0ea811eb9b7b819bf999a37b5077a4dd28c94eb229ae318c399884d9007fb79c"
   },
-  "rpcUrl": "https://lightnode-json-rpc-mainnet-story.grandvalleys.com"
+  "rpcUrl": "https://evm-rpc-story.j-node.net"
 }
