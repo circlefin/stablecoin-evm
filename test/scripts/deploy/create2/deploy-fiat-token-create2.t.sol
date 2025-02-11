@@ -65,11 +65,11 @@ contract DeployFiatTokenCreate2Test is TestUtils {
         );
         assertEq(
             address(proxy),
-            addressUtils.computeProxyAddress(factoryAddress)
+            addressUtils.computeProxyAddress(factoryAddress, tokenSymbol)
         );
         assertEq(
             address(masterMinter),
-            addressUtils.computeMasterMinterAddress(factoryAddress)
+            addressUtils.computeMasterMinterAddress(factoryAddress, tokenSymbol)
         );
     }
 
@@ -85,11 +85,11 @@ contract DeployFiatTokenCreate2Test is TestUtils {
 
         assertEq(
             address(proxy),
-            addressUtils.computeProxyAddress(factoryAddress)
+            addressUtils.computeProxyAddress(factoryAddress, tokenSymbol)
         );
         assertEq(
             address(masterMinter),
-            addressUtils.computeMasterMinterAddress(factoryAddress)
+            addressUtils.computeMasterMinterAddress(factoryAddress, tokenSymbol)
         );
     }
 }

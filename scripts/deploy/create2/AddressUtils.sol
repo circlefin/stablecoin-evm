@@ -24,30 +24,40 @@ import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import {
     ICreate2Factory
 } from "../../../contracts/interface/ICreate2Factory.sol";
+import { ScriptUtils } from "../ScriptUtils.sol";
 import { SignatureChecker } from "../../../contracts/util/SignatureChecker.sol";
 
 /**
  * @notice A utility contract that defines reuseable contract salt and address computation functions
  */
-contract AddressUtils {
+contract AddressUtils is ScriptUtils {
     /**
      * @dev Salt values for SignatureChecker, FiatTokenProxy, FiatTokenV2_2, and MasterMinter as defined as follows
-     * TODO(SE-1931): Define salt values based on token symbol and chain ID.
      */
-    function signatureCheckerSalt() public pure returns (bytes32 salt) {
-        return keccak256("SignatureChecker");
+    uint256 private chainId = getChainId();
+
+    function signatureCheckerSalt() public view returns (bytes32 salt) {
+        return keccak256(abi.encodePacked(chainId));
     }
 
-    function proxySalt() public pure returns (bytes32 salt) {
-        return keccak256("FiatTokenProxy");
+    function proxySalt(string memory tokenSymbol)
+        public
+        view
+        returns (bytes32 salt)
+    {
+        return keccak256(abi.encodePacked(chainId, tokenSymbol));
     }
 
-    function implSalt() public pure returns (bytes32 salt) {
-        return keccak256("FiatTokenV2_2");
+    function implSalt() public view returns (bytes32 salt) {
+        return keccak256(abi.encodePacked(chainId));
     }
 
-    function masterMinterSalt() public pure returns (bytes32 salt) {
-        return keccak256("MasterMinter");
+    function masterMinterSalt(string memory tokenSymbol)
+        public
+        view
+        returns (bytes32 salt)
+    {
+        return keccak256(abi.encodePacked(chainId, tokenSymbol));
     }
 
     /**
@@ -136,14 +146,14 @@ contract AddressUtils {
      * @notice Precomputes the address of the FiatTokenProxy contract
      * @param factory The factory address that would deploy FiatTokenProxy
      */
-    function computeProxyAddress(address factory)
+    function computeProxyAddress(address factory, string memory tokenSymbol)
         public
         view
         returns (address)
     {
         return
             ICreate2Factory(factory).computeAddress(
-                proxySalt(),
+                proxySalt(tokenSymbol),
                 keccak256(proxyCreationCode(factory))
             );
     }
@@ -152,14 +162,13 @@ contract AddressUtils {
      * @notice Precomputes the address of the MasterMinter contract
      * @param factory The factory address that would deploy MasterMinter
      */
-    function computeMasterMinterAddress(address factory)
-        public
-        view
-        returns (address)
-    {
+    function computeMasterMinterAddress(
+        address factory,
+        string memory tokenSymbol
+    ) public view returns (address) {
         return
             ICreate2Factory(factory).computeAddress(
-                masterMinterSalt(),
+                masterMinterSalt(tokenSymbol),
                 keccak256(masterMinterCreationCode(factory))
             );
     }

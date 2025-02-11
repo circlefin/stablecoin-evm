@@ -244,7 +244,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
             tokenSymbol,
             tokenCurrency,
             tokenDecimals,
-            computeMasterMinterAddress(factory),
+            computeMasterMinterAddress(factory, tokenSymbol),
             pauser,
             factory,
             factory
@@ -314,7 +314,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         address payable proxyAddress = payable(
             ICreate2Factory(factory).deployAndMultiCall(
                 0,
-                proxySalt(),
+                proxySalt(tokenSymbol),
                 proxyCreationCode(factory),
                 multiCallData
             )
@@ -360,7 +360,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         address payable masterMinterAddress = payable(
             ICreate2Factory(factory).deployAndMultiCall(
                 0,
-                masterMinterSalt(),
+                masterMinterSalt(tokenSymbol),
                 masterMinterCreationCode(factory),
                 multiCallData
             )

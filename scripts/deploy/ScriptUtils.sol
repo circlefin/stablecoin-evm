@@ -50,4 +50,16 @@ contract ScriptUtils is Script {
             bytes(a).length == bytes(b).length &&
             keccak256(bytes(a)) == keccak256(bytes(b));
     }
+
+    /**
+     * @dev Internal function to get the current chain id.
+     * @return The current chain id.
+     */
+    function getChainId() public view returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return chainId;
+    }
 }

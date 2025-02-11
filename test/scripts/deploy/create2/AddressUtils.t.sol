@@ -28,33 +28,41 @@ import "../../../../scripts/deploy/create2/AddressUtils.sol";
 contract AddressUtilsTest is Test {
     AddressUtils private addressUtils;
     address private factoryAddress;
+    uint256 private chainId;
+    string private tokenSymbol;
 
     function setUp() public {
+        tokenSymbol = "USDC";
         addressUtils = new AddressUtils();
         factoryAddress = address(new Create2Factory());
+        chainId = addressUtils.getChainId();
     }
 
     function test_signatureCheckerSaltReturnsExpectedResult() public {
-        bytes32 expectedSalt = keccak256("SignatureChecker");
+        bytes32 expectedSalt = keccak256(abi.encodePacked(chainId));
         bytes32 salt = addressUtils.signatureCheckerSalt();
         assertEq(salt, expectedSalt, "Salt for SignatureChecker is incorrect");
     }
 
     function test_proxySaltReturnsExpectedResult() public {
-        bytes32 expectedSalt = keccak256("FiatTokenProxy");
-        bytes32 salt = addressUtils.proxySalt();
+        bytes32 expectedSalt = keccak256(
+            abi.encodePacked(chainId, tokenSymbol)
+        );
+        bytes32 salt = addressUtils.proxySalt(tokenSymbol);
         assertEq(salt, expectedSalt, "Salt for FiatTokenProxy is incorrect");
     }
 
     function test_implSaltReturnsExpectedResult() public {
-        bytes32 expectedSalt = keccak256("FiatTokenV2_2");
+        bytes32 expectedSalt = keccak256(abi.encodePacked(chainId));
         bytes32 salt = addressUtils.implSalt();
         assertEq(salt, expectedSalt, "Salt for FiatTokenV2_2 is incorrect");
     }
 
     function test_masterMinterSaltReturnsExpectedResult() public {
-        bytes32 expectedSalt = keccak256("MasterMinter");
-        bytes32 salt = addressUtils.masterMinterSalt();
+        bytes32 expectedSalt = keccak256(
+            abi.encodePacked(chainId, tokenSymbol)
+        );
+        bytes32 salt = addressUtils.masterMinterSalt(tokenSymbol);
         assertEq(salt, expectedSalt, "Salt for MasterMinter is incorrect");
     }
 
@@ -141,11 +149,12 @@ contract AddressUtilsTest is Test {
     function test_computeProxyAddressReturnsExpectedResult() public {
         bytes memory proxyCode = addressUtils.proxyCreationCode(factoryAddress);
         address expectedAddress = computeExpectedAddress(
-            addressUtils.proxySalt(),
+            addressUtils.proxySalt(tokenSymbol),
             keccak256(proxyCode)
         );
         address computedAddress = addressUtils.computeProxyAddress(
-            factoryAddress
+            factoryAddress,
+            tokenSymbol
         );
         assertEq(
             computedAddress,
@@ -159,11 +168,12 @@ contract AddressUtilsTest is Test {
             factoryAddress
         );
         address expectedAddress = computeExpectedAddress(
-            addressUtils.masterMinterSalt(),
+            addressUtils.masterMinterSalt(tokenSymbol),
             keccak256(minterCode)
         );
         address computedAddress = addressUtils.computeMasterMinterAddress(
-            factoryAddress
+            factoryAddress,
+            tokenSymbol
         );
         assertEq(
             computedAddress,
