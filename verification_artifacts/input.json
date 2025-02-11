@@ -11,5 +11,5 @@
     "contractAddress": "0x46A8Eba2aCf7b5Bb37b5fe25fFb9D3023Af7A409",
     "contractCreationTxHash": "0x2e1c4a96d612c322abd111ba8a70d3c2159cd2b2bc0656fbdba2511a3b94b53d"
   },
-  "rpcUrl": "ws://20.41.116.207:8598"
+  "rpcUrl": "http://20.41.116.207:8588"
 }
