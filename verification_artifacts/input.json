@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xbF5899166AC476370B3117c9256B7fc45624f4eA",
+    "contractCreationTxHash": "0xcc9b72c6c04b13bb727260f2e1a4c77068b120ea6124f2f9bc68e61038b1aa4f"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xc0Ee2a47a5E94A468FB85df4992e66188347C994",
+    "contractCreationTxHash": "0x252d3537bc6539597bd3a247899fc8bdb088c8cdbd3ce44b3ddf1631279ae513"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x08EBA8ff53c6ee5d37A90eD4b5239f2F85e7B291",
+    "contractCreationTxHash": "0xd784dde837866ab0654212cf8e123dff41c843ca0318daf9894a9c585aca593a"
+  },
+  "rpcUrl": "https://evm-rpc.nibiru.fi"
+}
