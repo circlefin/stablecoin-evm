@@ -36,6 +36,7 @@ contract DeployFiatToken is Script, DeployImpl {
 
     address private impl;
     address private masterMinterOwner;
+    address private masterMinterAddress;
     address private proxyAdmin;
     address private owner;
     address private pauser;
@@ -60,6 +61,7 @@ contract DeployFiatToken is Script, DeployImpl {
         impl = vm.envOr("FIAT_TOKEN_IMPLEMENTATION_ADDRESS", address(0));
         proxyAdmin = vm.envAddress("PROXY_ADMIN_ADDRESS");
         masterMinterOwner = vm.envAddress("MASTER_MINTER_OWNER_ADDRESS");
+        masterMinterAddress = vm.envAddress("MASTER_MINTER_ADDRESS");
         owner = vm.envAddress("OWNER_ADDRESS");
 
         // Pauser and blacklister addresses can default to owner address
@@ -75,6 +77,7 @@ contract DeployFiatToken is Script, DeployImpl {
         console.log("FIAT_TOKEN_IMPLEMENTATION_ADDRESS: '%s'", impl);
         console.log("PROXY_ADMIN_ADDRESS: '%s'", proxyAdmin);
         console.log("MASTER_MINTER_OWNER_ADDRESS: '%s'", masterMinterOwner);
+        console.log("MASTER_MINTER_ADDRESS: '%s'", masterMinterAddress);
         console.log("OWNER_ADDRESS: '%s'", owner);
         console.log("PAUSER_ADDRESS: '%s'", pauser);
         console.log("BLACKLISTER_ADDRESS: '%s'", blacklister);
@@ -121,7 +124,7 @@ contract DeployFiatToken is Script, DeployImpl {
             tokenSymbol,
             tokenCurrency,
             tokenDecimals,
-            address(masterMinter),
+            masterMinterAddress,
             pauser,
             blacklister,
             owner
