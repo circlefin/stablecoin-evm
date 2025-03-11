@@ -24,7 +24,7 @@ type AlternativeArtifact = Map<string, ContractArtifact>;
 export enum ArtifactType {
   OPMainnet = "OPMainnet",
   ArbMainnet = "ArbMainnet",
-  BaseMainnet = "BaseMainnet"
+  BaseMainnet = "BaseMainnet",
 }
 
 const CACHED_ARTIFACTS_PATH = "./cached_artifacts/";
