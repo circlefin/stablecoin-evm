@@ -41,7 +41,7 @@ fi
 if ! command -v forge &> /dev/null || [ ! "$(forge -V | grep -Eo '\b\w{7}\b')" = $(echo $FOUNDRY_VERSION | cut -c '9-15') ]
 then
   echo "Installing foundry at $FOUNDRY_VERSION..."
-  foundryup --version $FOUNDRY_VERSION
+  foundryup --install $FOUNDRY_VERSION
 fi
 
 npm install -g dotenv-cli@7.3.0
