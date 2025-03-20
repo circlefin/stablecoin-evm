@@ -86,7 +86,7 @@ const baseMainnetFiatTokenV2_2RuntimeBytecode = readCachedArtifact(
   "baseMainnetFiatTokenV2_2RuntimeBytecode.bin"
 );
 
-const baseMainnetFiatTokenV2_2LCreationLinkReferences: LinkReferences = {
+const baseMainnetFiatTokenV2_2CreationLinkReferences: LinkReferences = {
   "contracts/util/SignatureChecker.sol": {
     SignatureChecker: [
       { start: 18494, length: 20 },
@@ -94,7 +94,7 @@ const baseMainnetFiatTokenV2_2LCreationLinkReferences: LinkReferences = {
     ],
   },
 };
-const baseMainnetFiatTokenV2_2LRuntimeLinkReferences: LinkReferences = {
+const baseMainnetFiatTokenV2_2RuntimeLinkReferences: LinkReferences = {
   "contracts/util/SignatureChecker.sol": {
     SignatureChecker: [
       { start: 18391, length: 20 },
@@ -118,8 +118,8 @@ const baseMainnetArtifacts: AlternativeArtifact = new Map([
     {
       creationBytecode: baseMainnetFiatTokenV2_2ContractCreationBytecode,
       runtimeBytecode: baseMainnetFiatTokenV2_2RuntimeBytecode,
-      creationLinkReferences: baseMainnetFiatTokenV2_2LCreationLinkReferences,
-      runtimeLinkReferences: baseMainnetFiatTokenV2_2LRuntimeLinkReferences,
+      creationLinkReferences: baseMainnetFiatTokenV2_2CreationLinkReferences,
+      runtimeLinkReferences: baseMainnetFiatTokenV2_2RuntimeLinkReferences,
     },
   ],
 ]);
