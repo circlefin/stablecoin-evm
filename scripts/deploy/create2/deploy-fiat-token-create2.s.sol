@@ -22,6 +22,7 @@ pragma experimental ABIEncoderV2;
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { AddressUtils } from "./AddressUtils.sol";
 import { ScriptUtils } from "../ScriptUtils.sol";
+import { Controller } from "../../../contracts/minting/Controller.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { Ownable } from "../../../contracts/v1/Ownable.sol";
 import { Blacklistable } from "../../../contracts/v1/Blacklistable.sol";
@@ -64,6 +65,9 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
     string private blacklistFileName;
     address[] private addressesToBlacklist;
 
+    address[] private minterControllers;
+    address[] private minters;
+    uint256[] private minterAllowances;
     address private deployer;
     address private factory;
 
@@ -94,6 +98,29 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
             "# of items in %s:",
             blacklistFileName,
             vm.toString(addressesToBlacklist.length)
+        );
+
+        string memory mintersJson = vm.readFile(
+            vm.envString("MINTERS_FILE_NAME")
+        );
+        minterControllers = vm.parseJsonAddressArray(
+            mintersJson,
+            ".minterControllers"
+        );
+        minters = vm.parseJsonAddressArray(mintersJson, ".minters");
+        minterAllowances = vm.parseJsonUintArray(
+            mintersJson,
+            ".minterAllowances"
+        );
+        require(
+            minterControllers.length == minters.length &&
+                minters.length == minterAllowances.length,
+            "Minter arrays must have equal"
+        );
+        console.log(
+            "# of items in %s:",
+            "minterControllers, minters and minterAllowances",
+            vm.toString(minterControllers.length)
         );
 
         console.log("CREATE2_FACTORY_CONTRACT_ADDRESS: '%s'", factory);
@@ -330,8 +357,10 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      * @notice Deploy new MasterMinter contract
      *
      * @dev This function multicalls the MasterMinter contract with the following transactions:
-     * 1. Set the minter manager to the provided implementation address
-     * 2. Rotate owner to the provided master minter owner address
+     * 1. Set the minter manager to the provided implementation address.
+     * 2. For each minter, configure the minter controller to be the factory address, set the minter allowance, then configure the provided minter controller for the minter.
+     * 3. Remove the factory address as a controller if minters are configured.
+     * 4. Rotate owner to the provided master minter owner address.
      *
      * @param proxyAddress The implementation address to upgrade to
      * @param deployer The address that will send the master minter deployment transaction
@@ -340,18 +369,55 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         internal
         returns (MasterMinter)
     {
+        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(proxyAddress);
+        uint256 decimals = proxyAsV2_2.decimals();
+
         bytes memory setMinterManager = abi.encodeWithSelector(
             MintController.setMinterManager.selector,
             proxyAddress
+        );
+        bytes memory removeController = abi.encodeWithSelector(
+            Controller.removeController.selector,
+            factory
         );
         bytes memory rotateOwner = abi.encodeWithSelector(
             Ownable.transferOwnership.selector,
             masterMinterOwner
         );
 
-        bytes[] memory multiCallData = new bytes[](2);
+        uint256 n = 1 + /* number of function calls prior to configuring minters */
+            minters.length *
+            3 + /* number of function calls for each minter */
+            ((minters.length > 0) ? 2 : 1); /* number of function calls after configuring minters (extra call to remove controller if minters are configured) */
+        bytes[] memory multiCallData = new bytes[](n);
         multiCallData[0] = setMinterManager;
-        multiCallData[1] = rotateOwner;
+
+        for (uint256 i = 0; i < minters.length; i++) {
+            bytes memory configureControllerWithFactory = abi
+                .encodeWithSelector(
+                Controller.configureController.selector,
+                factory,
+                minters[i]
+            );
+            bytes memory configureMinter = abi.encodeWithSelector(
+                MintController.configureMinter.selector,
+                minterAllowances[i] * 10**decimals
+            );
+            bytes memory configureController = abi.encodeWithSelector(
+                Controller.configureController.selector,
+                minterControllers[i],
+                minters[i]
+            );
+            uint256 callDataIndex = 1 + i * 3; // Each minter has 3 operations: configureControllerWithFactory, configureMinter, configureController.
+            multiCallData[callDataIndex] = configureControllerWithFactory;
+            multiCallData[callDataIndex + 1] = configureMinter;
+            multiCallData[callDataIndex + 2] = configureController;
+        }
+
+        if (minters.length > 0) {
+            multiCallData[n - 2] = removeController;
+        }
+        multiCallData[n - 1] = rotateOwner;
 
         // Start recording transactions
         vm.startBroadcast(deployer);
