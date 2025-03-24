@@ -105,6 +105,23 @@ contract TestUtils is Test {
         0xb6f5ec1A0a9cd1526536D3F0426c429529471F40
     ];
 
+    string
+        internal mintersFileName = "test/scripts/deploy/create2/testdata/test.minters.json";
+
+    address[] internal minterControllers = [
+        0x1234567890123456789012345678901234567890,
+        0x2345678901234567890123456789012345678901,
+        0x3456789012345678901234567890123456789012
+    ];
+
+    address[] internal minters = [
+        0x4567890123456789012345678901234567890123,
+        0x5678901234567890123456789012345678901234,
+        0x6789012345678901234567890123456789012345
+    ];
+
+    uint256[] internal minterAllowances = [60000000, 70000000, 80000000];
+
     function setUp() public virtual {
         vm.setEnv("TOKEN_NAME", tokenName);
         vm.setEnv("TOKEN_SYMBOL", tokenSymbol);
@@ -221,6 +238,7 @@ contract TestUtils is Test {
         );
 
         vm.setEnv("BLACKLIST_FILE_NAME", blacklistFileName);
+        vm.setEnv("MINTERS_FILE_NAME", mintersFileName);
 
         setUpCelo();
     }
@@ -290,6 +308,60 @@ contract TestUtils is Test {
     {
         assertEq(masterMinter.owner(), masterMinterOwner);
         assertEq(address(masterMinter.getMinterManager()), _proxy);
+    }
+
+    function validateMasterMinterWhenMintersConfigured(
+        MasterMinter masterMinter,
+        address _proxy
+    ) internal {
+        assertEq(masterMinter.owner(), masterMinterOwner);
+        assertEq(address(masterMinter.getMinterManager()), _proxy);
+
+        assertEq(masterMinter.getWorker(minterControllers[0]), minters[0]);
+        assertEq(masterMinter.getWorker(minterControllers[1]), minters[1]);
+        assertEq(masterMinter.getWorker(minterControllers[2]), minters[2]);
+
+        assertEq(
+            masterMinter.getWorker(
+                vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
+            ),
+            address(0)
+        );
+
+        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(_proxy);
+        assertEq(proxyAsV2_2.isMinter(minters[0]), true);
+        assertEq(proxyAsV2_2.isMinter(minters[1]), true);
+        assertEq(proxyAsV2_2.isMinter(minters[2]), true);
+        assertEq(proxyAsV2_2.minterAllowance(minters[0]), minterAllowances[0]);
+        assertEq(proxyAsV2_2.minterAllowance(minters[1]), minterAllowances[1]);
+        assertEq(proxyAsV2_2.minterAllowance(minters[2]), minterAllowances[2]);
+    }
+
+    function validateMasterMinterWhenMintersNotConfigured(
+        MasterMinter masterMinter,
+        address _proxy
+    ) internal {
+        assertEq(masterMinter.owner(), masterMinterOwner);
+        assertEq(address(masterMinter.getMinterManager()), _proxy);
+
+        assertEq(masterMinter.getWorker(minterControllers[0]), address(0));
+        assertEq(masterMinter.getWorker(minterControllers[1]), address(0));
+        assertEq(masterMinter.getWorker(minterControllers[2]), address(0));
+
+        assertEq(
+            masterMinter.getWorker(
+                vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
+            ),
+            address(0)
+        );
+
+        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(_proxy);
+        assertEq(proxyAsV2_2.isMinter(minters[0]), false);
+        assertEq(proxyAsV2_2.isMinter(minters[1]), false);
+        assertEq(proxyAsV2_2.isMinter(minters[2]), false);
+        assertEq(proxyAsV2_2.minterAllowance(minters[0]), 0);
+        assertEq(proxyAsV2_2.minterAllowance(minters[1]), 0);
+        assertEq(proxyAsV2_2.minterAllowance(minters[2]), 0);
     }
 
     function validateAddressesBlacklistedState(address proxy, bool blacklisted)

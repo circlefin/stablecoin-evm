@@ -57,6 +57,7 @@ contract DeployFiatTokenCreate2Test is TestUtils {
 
         validateImpl(v2_2);
         validateProxy(proxy, address(v2_2), address(masterMinter));
+        validateMasterMinterWhenMintersConfigured(masterMinter, address(proxy));
         validateAddressesBlacklistedState(address(proxy), true);
 
         assertEq(
@@ -81,8 +82,47 @@ contract DeployFiatTokenCreate2Test is TestUtils {
             .deploy(address(predeployedImpl));
 
         validateProxy(proxy, address(predeployedImpl), address(masterMinter));
+        validateMasterMinterWhenMintersConfigured(masterMinter, address(proxy));
         validateAddressesBlacklistedState(address(proxy), true);
 
+        assertEq(
+            address(proxy),
+            addressUtils.computeProxyAddress(factoryAddress, tokenSymbol)
+        );
+        assertEq(
+            address(masterMinter),
+            addressUtils.computeMasterMinterAddress(factoryAddress, tokenSymbol)
+        );
+    }
+
+    function test_deployFiatTokenWithMintersNotConfigured() public {
+        vm.setEnv(
+            "MINTERS_FILE_NAME",
+            "test/scripts/deploy/create2/testdata/test.empty.minters.json"
+        );
+
+        vm.prank(deployer);
+        deployScript = new DeployFiatTokenCreate2();
+        deployScript.setUp();
+
+        (
+            FiatTokenV2_2 v2_2,
+            MasterMinter masterMinter,
+            FiatTokenProxy proxy
+        ) = deployScript.run();
+
+        validateImpl(v2_2);
+        validateProxy(proxy, address(v2_2), address(masterMinter));
+        validateMasterMinterWhenMintersNotConfigured(
+            masterMinter,
+            address(proxy)
+        );
+        validateAddressesBlacklistedState(address(proxy), true);
+
+        assertEq(
+            address(v2_2),
+            addressUtils.computeImplAddress(factoryAddress)
+        );
         assertEq(
             address(proxy),
             addressUtils.computeProxyAddress(factoryAddress, tokenSymbol)

@@ -63,6 +63,11 @@ export SIGNATURE_CHECKER_ADDRESS=...
 
 ### Step 3: Generate Deployment Transactions for FiatTokenV2_2, FiatTokenProxy, and MasterMinter
 
+Minters can be configured by making a copy of `minters.example.json`, naming it
+`minters.json` and filling up the arrays with the corresponding values. If you
+do not need to configure minters, make a copy of the minters file and leave the
+arrays unfilled.
+
 Run the following command to generate deployment transactions for
 `FiatTokenV2_2`, `FiatTokenProxy`, and `MasterMinter`:
 
