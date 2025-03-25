@@ -77,12 +77,29 @@ const baseMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
   "baseMainnetFiatTokenProxyRuntimeBytecode.bin"
 );
 
+// Read from https://basescan.org/address/0x2d943e25e1859ed786afe4afb2b42e14efac691e#code
+const baseMainnetSignatureCheckerContractCreationBytecode = readCachedArtifact(
+  "baseMainnetSignatureCheckerContractCreationBytecode.bin"
+);
+const baseMainnetSignatureCheckerRuntimeBytecode = readCachedArtifact(
+  "baseMainnetSignatureCheckerRuntimeBytecode.bin"
+);
+
 const baseMainnetArtifacts: AlternativeArtifact = new Map([
   [
     "FiatTokenProxy",
     {
       creationBytecode: baseMainnetFiatTokenProxyContractCreationBytecode,
       runtimeBytecode: baseMainnetFiatTokenProxyRuntimeBytecode,
+      creationLinkReferences: {},
+      runtimeLinkReferences: {},
+    },
+  ],
+  [
+    "SignatureChecker",
+    {
+      creationBytecode: baseMainnetSignatureCheckerContractCreationBytecode,
+      runtimeBytecode: baseMainnetSignatureCheckerRuntimeBytecode,
       creationLinkReferences: {},
       runtimeLinkReferences: {},
     },
