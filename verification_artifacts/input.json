@@ -1,15 +1,15 @@
 {
   "SignatureChecker": {
-    "contractAddress": "0xb6dc6c8b71e88642cead3be1025565a9ee74d1c6",
-    "contractCreationTxHash": "0x22f1b8498ef98a1fb8d7f3c20d3803f01abfeaa2c4f7365435a0601e48bd79e4"
+    "contractAddress": "0x461c600c25b61f67f706cac216327b8b595f0c52",
+    "contractCreationTxHash": "0xfedc74b08bedd7d7af9d66b5248f5ebae19151462faad23b100fb11bb969e529"
   },
   "FiatTokenV2_2": {
-    "contractAddress": "0x8c4acd74ff4385f3b7911432fa6787aa14406f8b",
-    "contractCreationTxHash": "0x3e87a98f7b63da72ec6397d417682a70c7502e80c5a694003d354ae772de32ae"
+    "contractAddress": "0x3bcee7629fce3b54783be5e9305119a12bc2c770",
+    "contractCreationTxHash": "0xdedb08c3eb2ea2a32d6dd6ef4fdd1ff8b4eeb13fabf17f0ace5778c52daa15b9"
   },
   "FiatTokenProxy": {
-    "contractAddress": "0xa62ec33abd6d7ebdf8ec98ce874820517ae71e4d",
-    "contractCreationTxHash": "0x0f688e190cd9db21c00d492f18de2d973cac3e0ba78773f79f908303d6ede609"
+    "contractAddress": "0x4ee2c828599424ed143ce029d37da6933ac2edbd",
+    "contractCreationTxHash": "0xfce490dc7d7cbf9dc87aa58ef10ee888c4e19096dc33c4536454429c61966e88"
   },
   "rpcUrl": "https://rpc.hyperliquid.xyz/evm"
 }
