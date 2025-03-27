@@ -103,6 +103,14 @@ const baseMainnetFiatTokenV2_2RuntimeLinkReferences: LinkReferences = {
   },
 };
 
+// Read from https://basescan.org/address/0x2d943e25e1859ed786afe4afb2b42e14efac691e#code
+const baseMainnetSignatureCheckerContractCreationBytecode = readCachedArtifact(
+  "baseMainnetSignatureCheckerContractCreationBytecode.bin"
+);
+const baseMainnetSignatureCheckerRuntimeBytecode = readCachedArtifact(
+  "baseMainnetSignatureCheckerRuntimeBytecode.bin"
+);
+
 const baseMainnetArtifacts: AlternativeArtifact = new Map([
   [
     "FiatTokenProxy",
@@ -120,6 +128,15 @@ const baseMainnetArtifacts: AlternativeArtifact = new Map([
       runtimeBytecode: baseMainnetFiatTokenV2_2RuntimeBytecode,
       creationLinkReferences: baseMainnetFiatTokenV2_2CreationLinkReferences,
       runtimeLinkReferences: baseMainnetFiatTokenV2_2RuntimeLinkReferences,
+    },
+  ],
+  [
+    "SignatureChecker",
+    {
+      creationBytecode: baseMainnetSignatureCheckerContractCreationBytecode,
+      runtimeBytecode: baseMainnetSignatureCheckerRuntimeBytecode,
+      creationLinkReferences: {},
+      runtimeLinkReferences: {},
     },
   ],
 ]);
