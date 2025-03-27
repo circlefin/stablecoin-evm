@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { LinkReferences } from "hardhat/types";
 import { ContractArtifact } from "./verifyOnChainBytecode";
 import * as fs from "fs";
 
@@ -77,6 +78,31 @@ const baseMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
   "baseMainnetFiatTokenProxyRuntimeBytecode.bin"
 );
 
+// Read from https://basescan.org/address/0x2ce6311ddae708829bc0784c967b7d77d19fd779#code
+const baseMainnetFiatTokenV2_2ContractCreationBytecode = readCachedArtifact(
+  "baseMainnetFiatTokenV2_2ContractCreationBytecode.bin"
+);
+const baseMainnetFiatTokenV2_2RuntimeBytecode = readCachedArtifact(
+  "baseMainnetFiatTokenV2_2RuntimeBytecode.bin"
+);
+
+const baseMainnetFiatTokenV2_2CreationLinkReferences: LinkReferences = {
+  "contracts/util/SignatureChecker.sol": {
+    SignatureChecker: [
+      { start: 18494, length: 20 },
+      { start: 20209, length: 20 },
+    ],
+  },
+};
+const baseMainnetFiatTokenV2_2RuntimeLinkReferences: LinkReferences = {
+  "contracts/util/SignatureChecker.sol": {
+    SignatureChecker: [
+      { start: 18391, length: 20 },
+      { start: 20106, length: 20 },
+    ],
+  },
+};
+
 // Read from https://basescan.org/address/0x2d943e25e1859ed786afe4afb2b42e14efac691e#code
 const baseMainnetSignatureCheckerContractCreationBytecode = readCachedArtifact(
   "baseMainnetSignatureCheckerContractCreationBytecode.bin"
@@ -93,6 +119,15 @@ const baseMainnetArtifacts: AlternativeArtifact = new Map([
       runtimeBytecode: baseMainnetFiatTokenProxyRuntimeBytecode,
       creationLinkReferences: {},
       runtimeLinkReferences: {},
+    },
+  ],
+  [
+    "FiatTokenV2_2",
+    {
+      creationBytecode: baseMainnetFiatTokenV2_2ContractCreationBytecode,
+      runtimeBytecode: baseMainnetFiatTokenV2_2RuntimeBytecode,
+      creationLinkReferences: baseMainnetFiatTokenV2_2CreationLinkReferences,
+      runtimeLinkReferences: baseMainnetFiatTokenV2_2RuntimeLinkReferences,
     },
   ],
   [
