@@ -42,6 +42,7 @@
     "@nomicfoundation/hardhat-ethers": "3.0.4",
     "@nomicfoundation/hardhat-foundry": "1.1.1",
     "@nomicfoundation/hardhat-network-helpers": "1.0.8",
+    "@nomicfoundation/hardhat-verify": "^2.0.13",
     "@nomiclabs/hardhat-truffle5": "2.0.7",
     "@nomiclabs/hardhat-web3": "2.0.0",
     "@openzeppelin/contracts": "3.4.2",

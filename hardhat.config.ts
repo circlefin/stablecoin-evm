@@ -37,6 +37,7 @@ import "./scripts/hardhat/readValuesFromContract";
 import "./scripts/hardhat/validateAccountsToBlacklist";
 
 import "./scripts/hardhat/verifyOnChainBytecode";
+import "@nomicfoundation/hardhat-verify";
 
 dotenv.config();
 
@@ -70,6 +71,11 @@ const hardhatConfig: HardhatUserConfig = {
       url: process.env.MAINNET_RPC_URL || "",
       gasMultiplier,
     },
+    plumephoenix: {
+      url: "https://phoenix-rpc.plumenetwork.xyz",
+      gasMultiplier,
+      // apiUrl: " https://phoenix-explorer.plumenetwork.xyz/api/"
+    },
   },
   typechain: {
     outDir: "./@types/generated",
@@ -97,6 +103,25 @@ const hardhatConfig: HardhatUserConfig = {
   contractSizer: {
     strict: true,
     except: ["contracts/test", "scripts/", "test/"],
+  },
+  etherscan: {
+    apiKey: {
+      // Is not required by blockscout. Can be any non-empty string
+      plumephoenix: "abc",
+    },
+    customChains: [
+      {
+        network: "plumephoenix",
+        chainId: 98866,
+        urls: {
+          apiURL: "https://phoenix-explorer.plumenetwork.xyz/api",
+          browserURL: "https://phoenix-explorer.plumenetwork.xyz/",
+        },
+      },
+    ],
+  },
+  sourcify: {
+    enabled: false,
   },
 };
 
