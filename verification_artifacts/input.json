@@ -1,15 +1,15 @@
 {
   "SignatureChecker": {
-    "contractAddress": "0x8a2B28364102Bea189D99A475C494330Ef2bDD0B",
-    "contractCreationTxHash": "0x8ce455a53335e1413ed417cf5cf1a45efd08a5bc369e57a0801fcd9fc3b3742c"
+    "contractAddress": "0x12a272A581feE5577A5dFa371afEB4b2F3a8C2F8",
+    "contractCreationTxHash": "0xd1fe6b5d86ca9b589e994bed643fc416f7b32a58205c8961ebd25185d100f8fb"
   },
   "FiatTokenV2_2": {
-    "contractAddress": "0x0e81579B25C9c458A2030824B7fdBd0194900803",
-    "contractCreationTxHash": "0x4ec280528a8c9dd8639810598fa513354c0c17db376256d002583908bc295551"
+    "contractAddress": "0xC16977205c53Cd854136031BD2128F75D6ff63C9",
+    "contractCreationTxHash": "0x5a04988c189ecd4b4cb30e42dcd708cc023ebaeeb71d7f11a893f6c4ad9ab240"
   },
   "FiatTokenProxy": {
-    "contractAddress": "0x60219C44E146BAf36002eA73767820238Ebc1db6",
-    "contractCreationTxHash": "0x8ff5e74c2b67dcb1906ab4edb2b34a02e93d219d8b598f4182a6c6cbed54ee7f"
+    "contractAddress": "0xCc0587aeBDa397146cc828b445dB130a94486e74",
+    "contractCreationTxHash": "0xe86b909d1e5da39d5c9b9eb28f93a5d50b7cd5851c185977a71f14ac6027535a"
   },
   "rpcUrl": "https://rpc1.xinfin.network"
 }
