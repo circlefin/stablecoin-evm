@@ -37,4 +37,29 @@ contract ScriptUtils is Script {
         string memory json = vm.readFile(blacklistFileName);
         return vm.parseJsonAddressArray(json, "");
     }
+
+    /**
+     * @dev Returns true if the two strings are equal.
+     */
+    function stringsEqual(string memory a, string memory b)
+        internal
+        pure
+        returns (bool)
+    {
+        return
+            bytes(a).length == bytes(b).length &&
+            keccak256(bytes(a)) == keccak256(bytes(b));
+    }
+
+    /**
+     * @dev Internal function to get the current chain id.
+     * @return The current chain id.
+     */
+    function getChainId() public view returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return chainId;
+    }
 }

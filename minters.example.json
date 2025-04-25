@@ -1,0 +1,6 @@
+{
+  "_comment": "Set the mintController address, minter address, and minterAllowance in normal units (not subunits) for each minter.",
+  "minterControllers": [],
+  "minters": [],
+  "minterAllowances": []
+}

@@ -43,42 +43,22 @@ contract DeployFiatTokenTest is TestUtils {
     function test_deployFiatTokenWithEnvConfigured() public {
         (
             FiatTokenV2_2 v2_2,
-            MasterMinter masterMinter,
+            address masterMinter,
             FiatTokenProxy proxy
         ) = deployScript.run();
 
         validateImpl(v2_2);
-        validateMasterMinter(masterMinter, address(proxy));
-        validateProxy(proxy, address(v2_2), address(masterMinter));
+        validateProxy(proxy, address(v2_2), masterMinter);
     }
 
     function test_deployFiatTokenWithPredeployedImpl() public {
         vm.prank(deployer);
         FiatTokenV2_2 predeployedImpl = new FiatTokenV2_2();
 
-        (, MasterMinter masterMinter, FiatTokenProxy proxy) = deployScript
-            .deploy(address(predeployedImpl));
+        (, address masterMinter, FiatTokenProxy proxy) = deployScript.deploy(
+            address(predeployedImpl)
+        );
 
-        validateMasterMinter(masterMinter, address(proxy));
-        validateProxy(proxy, address(predeployedImpl), address(masterMinter));
-    }
-
-    function validateProxy(
-        FiatTokenProxy proxy,
-        address _impl,
-        address _masterMinter
-    ) internal {
-        assertEq(proxy.admin(), proxyAdmin);
-        assertEq(proxy.implementation(), _impl);
-
-        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
-        assertEq(proxyAsV2_2.name(), "USDC");
-        assertEq(proxyAsV2_2.symbol(), "USDC");
-        assertEq(proxyAsV2_2.currency(), "USD");
-        assert(proxyAsV2_2.decimals() == 6);
-        assertEq(proxyAsV2_2.owner(), owner);
-        assertEq(proxyAsV2_2.pauser(), pauser);
-        assertEq(proxyAsV2_2.blacklister(), blacklister);
-        assertEq(proxyAsV2_2.masterMinter(), _masterMinter);
+        validateProxy(proxy, address(predeployedImpl), masterMinter);
     }
 }
