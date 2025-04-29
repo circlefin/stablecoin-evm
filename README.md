@@ -117,6 +117,15 @@ To check the size of contracts in the repo, run the following command.
 $ yarn contract-size # Ignores tests
 ```
 
+The above commands use hardhat for testing. Hardhat is only used for testing
+.js/ts files. To test .t.sol files we need to use the following forge command.
+
+```sh
+$ forge test [-vvvv]
+```
+
+Adjust the number of v's to increase the verbosity of test logs.
+
 ## Deployment
 
 1. Create a copy of the file `.env.example`, and name it `.env`. Fill in

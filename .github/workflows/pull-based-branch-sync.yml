@@ -1,0 +1,193 @@
+name: Pull Based Branch Sync
+on:
+  workflow_call:
+    inputs:
+      source_repository_owner:
+        type: string
+        required: true
+      source_repository:
+        type: string
+        required: true
+      source_branch:
+        type: string
+        required: true
+      destination_branch:
+        type: string
+        required: true
+      team_reviewer:
+        description: "The slug of the team that will be requested for review"
+        type: string
+        required: true
+
+env:
+  SOURCE: ${{ inputs.source_repository_owner }}:${{ inputs.source_repository }}/${{ inputs.source_branch }}
+  FORK_REPOSITORY_OWNER: circle-github-action-bot
+  PR_HEAD_PREFIX: update-${{ inputs.destination_branch }}-to
+
+jobs:
+  auto_sync:
+    runs-on: small-spot
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Read secrets from AWS Secrets Manager into environment variables
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          parse-json-secrets: true
+          secret-ids: |
+            /ops/utilities/github-actions-bot/api-token
+            /ops/utilities/github-actions-bot/ssh-priv-key
+
+      - name: Import SSH key
+        uses: shimataro/ssh-key-action@v2.7.0
+        with:
+          key: "${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_SSH_PRIV_KEY }}"
+          name: id_rsa
+          known_hosts: "github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk="
+          if_key_exists: replace
+
+      - name: Create fork if not exists
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              await github.rest.repos.createFork({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
+
+      - name: Add & Fetch Remotes
+        run: |
+          git remote add source https://github.com/${{ inputs.source_repository_owner }}/${{ inputs.source_repository }}.git;
+          git remote add fork git@github.com:$FORK_REPOSITORY_OWNER/${{ github.event.repository.name }}.git;
+
+          git fetch origin;
+          git fetch source;
+          git fetch fork;
+
+          PR_HEAD_BRANCH=$PR_HEAD_PREFIX-$(git rev-parse source/${{ inputs.source_branch }})
+          echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> "$GITHUB_ENV";
+          echo "PR_HEAD=$FORK_REPOSITORY_OWNER:$PR_HEAD_BRANCH" >> "$GITHUB_ENV";
+
+      - name: Check for differences between the branches
+        id: check-for-branch-differences
+        run: |
+          if [ ! -z "$(git diff origin/${{ inputs.destination_branch }} source/${{ inputs.source_branch }})" ]; then
+            echo "has-diff=true" >> "$GITHUB_OUTPUT";
+          fi
+
+      - name: Check if pull request already exists
+        id: check-if-pr-exists
+        uses: actions/github-script@v7
+        if: ${{ steps.check-for-branch-differences.outputs.has-diff == 'true' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              const response = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: process.env.PR_HEAD,
+                base: "${{ inputs.destination_branch }}",
+                state: "open"
+              });
+              core.setOutput('has-open-pr', (response.data.length > 0).toString())
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
+
+      - name: Close outdated PRs
+        uses: actions/github-script@v7
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr == 'false' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              // GitHub's API doesn't support finding PRs with head branches that match
+              // some pattern. So we do this by listing out 50 PRs (should be sufficient)
+              // given a base, then do an in-memory filtering.
+              const response = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: "${{ inputs.destination_branch }}",
+                per_page: 50,
+                state: "open",
+              });
+              const regex = new RegExp(`^${process.env.FORK_REPOSITORY_OWNER}:${process.env.PR_HEAD_PREFIX}-\\w{40}$`)
+              const outdatedPRs = response.data.filter((pr) => !!pr.head.label.match(regex));
+
+              await Promise.all(
+                outdatedPRs.map(async (pr) => {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    body: "Closing this in favor of a newer PR",
+                  });
+
+                  await github.rest.pulls.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    state: "closed",
+                  });
+                })
+              );
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
+
+      - name: Create branch on the forked repository
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr == 'false' }}
+        run: |
+          echo "Checking out $SOURCE to $PR_HEAD_BRANCH...";
+          git checkout -b $PR_HEAD_BRANCH source/${{ inputs.source_branch }};
+
+          echo "Pushing updates to fork at $PR_HEAD...";
+          git push --force --set-upstream fork $PR_HEAD_BRANCH;
+
+      - name: Create pull request
+        uses: actions/github-script@v7
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr == 'false' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              const response = await github.rest.pulls.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[SYNC] Update \`${{ inputs.destination_branch }}\` branch with \`${process.env.SOURCE}\``,
+                head: process.env.PR_HEAD,
+                base: "${{ inputs.destination_branch }}"
+              });
+              core.exportVariable("PR_NUMBER", response.data.number);
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }
+
+      - name: Request for reviews
+        uses: actions/github-script@v7
+        if: ${{ steps.check-if-pr-exists.outputs.has-open-pr == 'false' }}
+        with:
+          github-token: ${{ env._OPS_UTILITIES_GITHUB_ACTIONS_BOT_API_TOKEN }}
+          script: |
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: process.env.PR_NUMBER,
+                team_reviewers: ['${{ inputs.team_reviewer }}']
+              });
+            } catch (e) {
+              core.error(JSON.stringify(e.response.data));
+              core.setFailed(`Error found: ${e.response.data.message}`);
+            }

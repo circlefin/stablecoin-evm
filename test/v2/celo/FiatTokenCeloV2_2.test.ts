@@ -20,12 +20,12 @@ import { usesOriginalStorageSlotPositions } from "../../helpers/storageSlots.beh
 
 import {
   expectRevert,
+  initializeOverloadedMethods,
   initializeToVersion,
   linkLibraryToTokenContract,
 } from "../../helpers";
 import { behavesLikeFiatTokenV2 } from "./../v2.behavior";
 import { behavesLikeFiatTokenV22 } from "./../v2_2.behavior";
-import { initializeOverloadedMethods } from "../FiatTokenV2_2.test";
 import { SignatureBytesType } from "../GasAbstraction/helpers";
 import {
   AnyFiatTokenV2Instance,
