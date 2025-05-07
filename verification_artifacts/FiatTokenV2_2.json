@@ -6,282 +6,280 @@
   "output": {
     "abi": [
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "owner",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": true,
             "internalType": "address",
             "name": "spender",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": false,
             "internalType": "uint256",
             "name": "value",
-            "type": "uint256",
-            "indexed": false
+            "type": "uint256"
           }
         ],
-        "type": "event",
         "name": "Approval",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "authorizer",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": true,
             "internalType": "bytes32",
             "name": "nonce",
-            "type": "bytes32",
-            "indexed": true
+            "type": "bytes32"
           }
         ],
-        "type": "event",
         "name": "AuthorizationCanceled",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "authorizer",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": true,
             "internalType": "bytes32",
             "name": "nonce",
-            "type": "bytes32",
-            "indexed": true
+            "type": "bytes32"
           }
         ],
-        "type": "event",
         "name": "AuthorizationUsed",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "_account",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "Blacklisted",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "newBlacklister",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "BlacklisterChanged",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "burner",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": false,
             "internalType": "uint256",
             "name": "amount",
-            "type": "uint256",
-            "indexed": false
+            "type": "uint256"
           }
         ],
-        "type": "event",
         "name": "Burn",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "newMasterMinter",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "MasterMinterChanged",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "minter",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": true,
             "internalType": "address",
             "name": "to",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": false,
             "internalType": "uint256",
             "name": "amount",
-            "type": "uint256",
-            "indexed": false
+            "type": "uint256"
           }
         ],
-        "type": "event",
         "name": "Mint",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "minter",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": false,
             "internalType": "uint256",
             "name": "minterAllowedAmount",
-            "type": "uint256",
-            "indexed": false
+            "type": "uint256"
           }
         ],
-        "type": "event",
         "name": "MinterConfigured",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "oldMinter",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "MinterRemoved",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": false,
             "internalType": "address",
             "name": "previousOwner",
-            "type": "address",
-            "indexed": false
+            "type": "address"
           },
           {
+            "indexed": false,
             "internalType": "address",
             "name": "newOwner",
-            "type": "address",
-            "indexed": false
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "OwnershipTransferred",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [],
-        "type": "event",
         "name": "Pause",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "newAddress",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "PauserChanged",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "newRescuer",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "RescuerChanged",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "from",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": true,
             "internalType": "address",
             "name": "to",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           },
           {
+            "indexed": false,
             "internalType": "uint256",
             "name": "value",
-            "type": "uint256",
-            "indexed": false
+            "type": "uint256"
           }
         ],
-        "type": "event",
         "name": "Transfer",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [
           {
+            "indexed": true,
             "internalType": "address",
             "name": "_account",
-            "type": "address",
-            "indexed": true
+            "type": "address"
           }
         ],
-        "type": "event",
         "name": "UnBlacklisted",
-        "anonymous": false
+        "type": "event"
       },
       {
+        "anonymous": false,
         "inputs": [],
-        "type": "event",
         "name": "Unpause",
-        "anonymous": false
+        "type": "event"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "CANCEL_AUTHORIZATION_TYPEHASH",
         "outputs": [
           {
@@ -289,12 +287,12 @@
             "name": "",
             "type": "bytes32"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "DOMAIN_SEPARATOR",
         "outputs": [
           {
@@ -302,12 +300,12 @@
             "name": "",
             "type": "bytes32"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "PERMIT_TYPEHASH",
         "outputs": [
           {
@@ -315,12 +313,12 @@
             "name": "",
             "type": "bytes32"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "RECEIVE_WITH_AUTHORIZATION_TYPEHASH",
         "outputs": [
           {
@@ -328,12 +326,12 @@
             "name": "",
             "type": "bytes32"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "TRANSFER_WITH_AUTHORIZATION_TYPEHASH",
         "outputs": [
           {
@@ -341,7 +339,9 @@
             "name": "",
             "type": "bytes32"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -356,8 +356,6 @@
             "type": "address"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "allowance",
         "outputs": [
           {
@@ -365,7 +363,9 @@
             "name": "",
             "type": "uint256"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -380,8 +380,6 @@
             "type": "uint256"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "approve",
         "outputs": [
           {
@@ -389,7 +387,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [
@@ -404,8 +404,6 @@
             "type": "bytes32"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "authorizationState",
         "outputs": [
           {
@@ -413,7 +411,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -423,8 +423,6 @@
             "type": "address"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "balanceOf",
         "outputs": [
           {
@@ -432,7 +430,9 @@
             "name": "",
             "type": "uint256"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -442,14 +442,13 @@
             "type": "address"
           }
         ],
+        "name": "blacklist",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "blacklist"
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "blacklister",
         "outputs": [
           {
@@ -457,7 +456,9 @@
             "name": "",
             "type": "address"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -467,9 +468,10 @@
             "type": "uint256"
           }
         ],
+        "name": "burn",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "burn"
+        "type": "function"
       },
       {
         "inputs": [
@@ -499,9 +501,10 @@
             "type": "bytes32"
           }
         ],
+        "name": "cancelAuthorization",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "cancelAuthorization"
+        "type": "function"
       },
       {
         "inputs": [
@@ -521,9 +524,10 @@
             "type": "bytes"
           }
         ],
+        "name": "cancelAuthorization",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "cancelAuthorization"
+        "type": "function"
       },
       {
         "inputs": [
@@ -538,8 +542,6 @@
             "type": "uint256"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "configureMinter",
         "outputs": [
           {
@@ -547,12 +549,12 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "currency",
         "outputs": [
           {
@@ -560,12 +562,12 @@
             "name": "",
             "type": "string"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "decimals",
         "outputs": [
           {
@@ -573,7 +575,9 @@
             "name": "",
             "type": "uint8"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -588,8 +592,6 @@
             "type": "uint256"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "decreaseAllowance",
         "outputs": [
           {
@@ -597,7 +599,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [
@@ -612,8 +616,6 @@
             "type": "uint256"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "increaseAllowance",
         "outputs": [
           {
@@ -621,7 +623,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [
@@ -666,9 +670,10 @@
             "type": "address"
           }
         ],
+        "name": "initialize",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "initialize"
+        "type": "function"
       },
       {
         "inputs": [
@@ -678,9 +683,10 @@
             "type": "string"
           }
         ],
+        "name": "initializeV2",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "initializeV2"
+        "type": "function"
       },
       {
         "inputs": [
@@ -690,9 +696,10 @@
             "type": "address"
           }
         ],
+        "name": "initializeV2_1",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "initializeV2_1"
+        "type": "function"
       },
       {
         "inputs": [
@@ -707,9 +714,10 @@
             "type": "string"
           }
         ],
+        "name": "initializeV2_2",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "initializeV2_2"
+        "type": "function"
       },
       {
         "inputs": [
@@ -719,8 +727,6 @@
             "type": "address"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "isBlacklisted",
         "outputs": [
           {
@@ -728,7 +734,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -738,8 +746,6 @@
             "type": "address"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "isMinter",
         "outputs": [
           {
@@ -747,12 +753,12 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "masterMinter",
         "outputs": [
           {
@@ -760,7 +766,9 @@
             "name": "",
             "type": "address"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -775,8 +783,6 @@
             "type": "uint256"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "mint",
         "outputs": [
           {
@@ -784,7 +790,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [
@@ -794,8 +802,6 @@
             "type": "address"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "minterAllowance",
         "outputs": [
           {
@@ -803,12 +809,12 @@
             "name": "",
             "type": "uint256"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "name",
         "outputs": [
           {
@@ -816,7 +822,9 @@
             "name": "",
             "type": "string"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -826,8 +834,6 @@
             "type": "address"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "nonces",
         "outputs": [
           {
@@ -835,12 +841,12 @@
             "name": "",
             "type": "uint256"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "owner",
         "outputs": [
           {
@@ -848,18 +854,19 @@
             "name": "",
             "type": "address"
           }
-        ]
-      },
-      {
-        "inputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "pause"
-      },
-      {
-        "inputs": [],
+        ],
         "stateMutability": "view",
-        "type": "function",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "pause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
         "name": "paused",
         "outputs": [
           {
@@ -867,12 +874,12 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "pauser",
         "outputs": [
           {
@@ -880,7 +887,9 @@
             "name": "",
             "type": "address"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -910,9 +919,10 @@
             "type": "bytes"
           }
         ],
+        "name": "permit",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "permit"
+        "type": "function"
       },
       {
         "inputs": [
@@ -952,9 +962,10 @@
             "type": "bytes32"
           }
         ],
+        "name": "permit",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "permit"
+        "type": "function"
       },
       {
         "inputs": [
@@ -994,9 +1005,10 @@
             "type": "bytes"
           }
         ],
+        "name": "receiveWithAuthorization",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "receiveWithAuthorization"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1046,9 +1058,10 @@
             "type": "bytes32"
           }
         ],
+        "name": "receiveWithAuthorization",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "receiveWithAuthorization"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1058,8 +1071,6 @@
             "type": "address"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "removeMinter",
         "outputs": [
           {
@@ -1067,7 +1078,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [
@@ -1087,14 +1100,13 @@
             "type": "uint256"
           }
         ],
+        "name": "rescueERC20",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "rescueERC20"
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "rescuer",
         "outputs": [
           {
@@ -1102,12 +1114,12 @@
             "name": "",
             "type": "address"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "symbol",
         "outputs": [
           {
@@ -1115,12 +1127,12 @@
             "name": "",
             "type": "string"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "view",
-        "type": "function",
         "name": "totalSupply",
         "outputs": [
           {
@@ -1128,7 +1140,9 @@
             "name": "",
             "type": "uint256"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       },
       {
         "inputs": [
@@ -1143,8 +1157,6 @@
             "type": "uint256"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "transfer",
         "outputs": [
           {
@@ -1152,7 +1164,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [
@@ -1172,8 +1186,6 @@
             "type": "uint256"
           }
         ],
-        "stateMutability": "nonpayable",
-        "type": "function",
         "name": "transferFrom",
         "outputs": [
           {
@@ -1181,7 +1193,9 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
         "inputs": [
@@ -1191,9 +1205,10 @@
             "type": "address"
           }
         ],
+        "name": "transferOwnership",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "transferOwnership"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1233,9 +1248,10 @@
             "type": "bytes"
           }
         ],
+        "name": "transferWithAuthorization",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "transferWithAuthorization"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1285,9 +1301,10 @@
             "type": "bytes32"
           }
         ],
+        "name": "transferWithAuthorization",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "transferWithAuthorization"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1297,15 +1314,17 @@
             "type": "address"
           }
         ],
+        "name": "unBlacklist",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "unBlacklist"
+        "type": "function"
       },
       {
         "inputs": [],
+        "name": "unpause",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "unpause"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1315,9 +1334,10 @@
             "type": "address"
           }
         ],
+        "name": "updateBlacklister",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "updateBlacklister"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1327,9 +1347,10 @@
             "type": "address"
           }
         ],
+        "name": "updateMasterMinter",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "updateMasterMinter"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1339,9 +1360,10 @@
             "type": "address"
           }
         ],
+        "name": "updatePauser",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "updatePauser"
+        "type": "function"
       },
       {
         "inputs": [
@@ -1351,14 +1373,13 @@
             "type": "address"
           }
         ],
+        "name": "updateRescuer",
+        "outputs": [],
         "stateMutability": "nonpayable",
-        "type": "function",
-        "name": "updateRescuer"
+        "type": "function"
       },
       {
         "inputs": [],
-        "stateMutability": "pure",
-        "type": "function",
         "name": "version",
         "outputs": [
           {
@@ -1366,7 +1387,9 @@
             "name": "",
             "type": "string"
           }
-        ]
+        ],
+        "stateMutability": "pure",
+        "type": "function"
       }
     ],
     "devdoc": {
@@ -1704,6 +1727,7 @@
           }
         }
       },
+      "title": "FiatToken V2.2",
       "version": 1
     },
     "userdoc": {
@@ -1827,215 +1851,217 @@
           "notice": "Version string for the EIP712 domain separator"
         }
       },
+      "notice": "ERC20 Token backed by fiat reserves, version 2.2",
       "version": 1
     }
   },
   "settings": {
-    "remappings": [
-      "@ensdomains/=node_modules/@ensdomains/",
-      "@openzeppelin/=node_modules/@openzeppelin/",
-      "@solidity-parser/=node_modules/prettier-plugin-solidity/node_modules/@solidity-parser/",
-      "ds-test/=lib/forge-std/lib/ds-test/src/",
-      "eth-gas-reporter/=node_modules/eth-gas-reporter/",
-      "forge-std/=lib/forge-std/src/",
-      "hardhat/=node_modules/hardhat/"
-    ],
+    "compilationTarget": {
+      "contracts/v2/FiatTokenV2_2.sol": "FiatTokenV2_2"
+    },
+    "evmVersion": "istanbul",
+    "libraries": {},
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
     "optimizer": {
       "enabled": true,
       "runs": 10000000
     },
-    "metadata": {
-      "bytecodeHash": "ipfs"
-    },
-    "compilationTarget": {
-      "contracts/v2/FiatTokenV2_2.sol": "FiatTokenV2_2"
-    },
-    "libraries": {}
+    "remappings": [
+      ":@ensdomains/=node_modules/@ensdomains/",
+      ":@openzeppelin/=node_modules/@openzeppelin/",
+      ":@solidity-parser/=node_modules/prettier-plugin-solidity/node_modules/@solidity-parser/",
+      ":ds-test/=lib/forge-std/lib/ds-test/src/",
+      ":eth-gas-reporter/=node_modules/eth-gas-reporter/",
+      ":forge-std/=lib/forge-std/src/",
+      ":hardhat/=node_modules/hardhat/"
+    ]
   },
   "sources": {
     "contracts/interface/IERC1271.sol": {
       "keccak256": "0x8755a3f5c92f746d1dff56c9389b5dfcba2630c7057b62da2531437871709f7e",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://a9aac28c347968ea5eaad87756f74be163411b5d55e338093c6c120d0b264616",
         "dweb:/ipfs/Qmf2mfJF6dDxoNXYfyp7BqGhctC3YjKYGpzNUmipDfqHDf"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/util/ECRecover.sol": {
       "keccak256": "0x7abfe3fc8384dbabe687b69f167653f9cfd9ffc89d954e852705ce3ba4379e0b",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://97891f5fa6e380ffc65f3f031a1efb300bdb63f510f1d20faf5bbb9586496033",
         "dweb:/ipfs/QmbnQKEe9FwCFpisyJJQPAvYNo57EuRNT1UsBQYVc26FJX"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/util/EIP712.sol": {
       "keccak256": "0x0bb667288d2164139244dcbe02eee3453dfcdbdd04017a6d6076ca8910be0d57",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://5cb904b9abf2a97fd864d483ae46c4868fd06e8f12a307e943b8d9c1f0b5a716",
         "dweb:/ipfs/QmV6tWPVfm4amdb6xy4nHKb5rwfxAxM13b1ojBQ7FSJBP5"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/util/MessageHashUtils.sol": {
       "keccak256": "0xc4b8586fc80806077670ac58d7cddd22708b0743a5d3507c4f64a01c40539bda",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://34b1e4db62aef82ae24bff074a4e333a6bbb0a0fe78be6064480526515048af4",
         "dweb:/ipfs/QmS1TrXywfD2YiBMidEQTeVK9whxXvuN4b9qZ5uGUMKirh"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/util/SignatureChecker.sol": {
       "keccak256": "0xdd897f22c2b24d14e6f6f5a0235664955fd70611e5e283dc5573aac8bfd7207f",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://fdcf4e52294e000226d216f5cdae3f4769d93ebcad22b540b2cb58141860114f",
         "dweb:/ipfs/QmR9BGSCJ8WtmX6wMM62uqQuhRSVSmkifJZVxWZLMREozp"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v1.1/FiatTokenV1_1.sol": {
       "keccak256": "0x074eb0ccfae05bae37aff36fdfb694250a8fd7b0178caef0635507ab1344b918",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://082ed1324bf6219acf0a01d5bea0f9e07f972c7f6df403c13e721c7bb46a3a67",
         "dweb:/ipfs/QmPu2XwF1hFxMexy1FAzHkE3LBt2NQ5YfoZycGZL4sQgTR"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v1.1/Rescuable.sol": {
       "keccak256": "0x79bb6ea6f45b58ad75c9c8cfe82825930cddc77d817607ddc61d3e1f78a74cfb",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://f6aa670e4d26932d143fd946077fc21c82c6e22ed66861faa42567b2684ecf01",
         "dweb:/ipfs/QmQmWkmXDoR7Z8fyxfrRg6gUZTvKAi6sPmgyX1Jj9d1mAq"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v1/AbstractFiatTokenV1.sol": {
       "keccak256": "0x3ff009bf7a01e2bf600d320b8be0921014606c0c9643990ab5b1acc7bb5b14e0",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://7180e208d2ac06b8927eac72644ab00e7d03d2d93a57e41380c299147cdc4ea9",
         "dweb:/ipfs/QmeNAWsejER9AuqeuLD6V42Pp1tGHYcXJ65LoAoP1EUrUs"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v1/Blacklistable.sol": {
       "keccak256": "0xd44b9f11d8fc1384f8261d4fd9c2fcd06893846d92605541d797c94e70e158d8",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://a184e8a647a516e23eac13d8743eece6f743424cda5034d8e8f8c05c75912181",
         "dweb:/ipfs/Qmec8QpCBFUvXfwMxGG3zZf7nfWjhkDUK2ch6k1N5DoZHu"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v1/FiatTokenV1.sol": {
       "keccak256": "0xe5e2f197479f0595180384277345ca09c12e26ce57c4c427f4c8013a08b4a4de",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://5680d3b32215c8ddfda2d1bd9770e5b5957fb931139f5434c22cf883a516fe0a",
         "dweb:/ipfs/Qmf8mLTfkfjbs97gWDHPJjMJGc6R44ok6WsCAkeaVQqpfh"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v1/Ownable.sol": {
       "keccak256": "0xdd51a06c4d6c38ef806c50463ade63123980334bf173c3301794e242228fc9e5",
+      "license": "MIT",
       "urls": [
         "bzz-raw://46632a7280a569d30da08ae6c0559295fa1dd6917ba458785ac1f50736474741",
         "dweb:/ipfs/QmYb5zXqzTHPaWegnn5NcmrbDHbVFYnpENXvtgjQxCrjMe"
-      ],
-      "license": "MIT"
+      ]
     },
     "contracts/v1/Pausable.sol": {
       "keccak256": "0xa1112323b001871746d971f9dd2c61d094ea856146071537dc9d92e18e8cc829",
+      "license": "MIT",
       "urls": [
         "bzz-raw://9ba61133c7e0f552222d0d3f05d0bba65f29e1db5242a50a3ec16b55aa0e7cc9",
         "dweb:/ipfs/QmZtJV2VVPp5Upi4siVuM1mYjfzHPfXY95XjepAo6MYVxc"
-      ],
-      "license": "MIT"
+      ]
     },
     "contracts/v2/AbstractFiatTokenV2.sol": {
       "keccak256": "0x1e9218de2ee11f0f1beabdadba445afcd849918490167bb1a4533d18ebe4d5b2",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://12b6fd3c3e51296d54361853f6003482b119e9fe1ca526702e2b060546cf96b3",
         "dweb:/ipfs/QmbqgLouA4mGQt1BDs5srEMyu8jCa84j7fPUp5duN3T1PU"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v2/EIP2612.sol": {
       "keccak256": "0x16f5b3c4bb47369c28c13ee2d3370aeea576339ee81518ccbf939b9baa612106",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://b6647ec12c93233b374854af468ea8b5d50b9c16fb3defc8421cf8bb4dd80179",
         "dweb:/ipfs/QmQVEq8vdYFxCtgJ9dNJWXd5VYDXLUiUrgsDL4fCXFUGxN"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v2/EIP3009.sol": {
       "keccak256": "0xc98927aa58d2f966468c15a22ef6527cf380292cacdc3457b8863b76507dfd94",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://965036cf068ff19ff247f8d82548966a5169c15d632af750f17f1f05259a89c8",
         "dweb:/ipfs/QmZo1sMGRpe2BPzdr6Vr1tRFqurkacWd5roD3YHwKMwFKP"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v2/EIP712Domain.sol": {
       "keccak256": "0x4e03896c8853f071048927ca14231a448e6867e16d2551231e1be72c796c838d",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://0dbca6649b894a93688f69908c7ff4bf557a0ceefeca00c82d6104cfdb902903",
         "dweb:/ipfs/QmbyQV5wHrXoC33RB6NpULYmRNd6oNd4tb72nyughJUAta"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v2/FiatTokenV2.sol": {
       "keccak256": "0xaa69bbb548a49984893ca49826fded938890c9fed3219c43a121f522957c1da5",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://3ad10dcef5d9610ca45ae2a8a4f977e16ad71d973fb4aa133b90374f3bd08f8e",
         "dweb:/ipfs/QmbB54frYGoyaHMF85NA1AKuWXM63A24QpwbKHsbyM17Cm"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v2/FiatTokenV2_1.sol": {
       "keccak256": "0x7f26b9a3033844a8540834382090cd0b4485a74f04daa1452342cfc14f1a959a",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://9c58788073f0c6602057a6854431b5cba485871a57553e65cc913d0bea8567ff",
         "dweb:/ipfs/Qmbis7mKgredEgMCNUB8ymkij6XeJ1svZQTjUiMejqnobN"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/v2/FiatTokenV2_2.sol": {
       "keccak256": "0xbdacdfd386a04adaf337f31dc2720e37dbb008d92b81c3cc98324efc855dce5d",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://28d70ffbeb499aedaeb47f98ed9e0d5bbed0e83dc22e9d745fc0433824b0d452",
         "dweb:/ipfs/Qmbt7B24ZpefvGsTt6a2aYgpDrbX6NCKNbHeTSctH3J7zg"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "node_modules/@openzeppelin/contracts/math/SafeMath.sol": {
       "keccak256": "0xcc78a17dd88fa5a2edc60c8489e2f405c0913b377216a5b26b35656b2d0dab52",
+      "license": "MIT",
       "urls": [
         "bzz-raw://526dc85e1f9b9b45830e202568d267d93dde7a4fcccf4ad7798dadcd92304d3c",
         "dweb:/ipfs/QmaoXMB972J3cSDLtBq3xBo4jLwqD2uzXTwujtSPqkYVhR"
-      ],
-      "license": "MIT"
+      ]
     },
     "node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
       "keccak256": "0x5f02220344881ce43204ae4a6281145a67bc52c2bb1290a791857df3d19d78f5",
+      "license": "MIT",
       "urls": [
         "bzz-raw://24427744bd3e6cb73c17010119af12a318289c0253a4d9acb8576c9fb3797b08",
         "dweb:/ipfs/QmTLDqpKRBuxGxRAmjgXt9AkXyACW3MtKzi7PYjm5iMfGC"
-      ],
-      "license": "MIT"
+      ]
     },
     "node_modules/@openzeppelin/contracts/token/ERC20/SafeERC20.sol": {
       "keccak256": "0xf12dfbe97e6276980b83d2830bb0eb75e0cf4f3e626c2471137f82158ae6a0fc",
+      "license": "MIT",
       "urls": [
         "bzz-raw://b3a849c2d95e85463909e5b5c920b13e7a11216ca14127085e16d22b9379d52a",
         "dweb:/ipfs/QmUg3CZDbCCcQdroEpexBy5ZFd5vD1UWijWQq9qHZjtJNQ"
-      ],
-      "license": "MIT"
+      ]
     },
     "node_modules/@openzeppelin/contracts/utils/Address.sol": {
       "keccak256": "0x28911e614500ae7c607a432a709d35da25f3bc5ddc8bd12b278b66358070c0ea",
+      "license": "MIT",
       "urls": [
         "bzz-raw://256c8c8af5eb072bc473226ab2b2187149b8fc04f5f4a4820db22527f5ce8e3c",
         "dweb:/ipfs/QmRvi5BhnL7Rxf85KrJhwM6RRhukm4tzoctRdgQEheNyiN"
-      ],
-      "license": "MIT"
+      ]
     }
   },
   "version": 1

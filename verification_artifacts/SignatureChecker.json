@@ -23,8 +23,6 @@
             "type": "bytes"
           }
         ],
-        "stateMutability": "view",
-        "type": "function",
         "name": "isValidSignatureNow",
         "outputs": [
           {
@@ -32,10 +30,13 @@
             "name": "",
             "type": "bool"
           }
-        ]
+        ],
+        "stateMutability": "view",
+        "type": "function"
       }
     ],
     "devdoc": {
+      "details": "Signature verification helper that can be used instead of `ECRecover.recover` to seamlessly support both ECDSA signatures from externally owned accounts (EOAs) as well as ERC1271 signatures from smart contract wallets. Adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/21bb89ef5bfc789b9333eb05e3ba2b7b284ac77c/contracts/utils/cryptography/SignatureChecker.sol",
       "kind": "dev",
       "methods": {
         "isValidSignatureNow(address,bytes32,bytes)": {
@@ -56,51 +57,52 @@
     }
   },
   "settings": {
-    "remappings": [
-      "@ensdomains/=node_modules/@ensdomains/",
-      "@openzeppelin/=node_modules/@openzeppelin/",
-      "@solidity-parser/=node_modules/prettier-plugin-solidity/node_modules/@solidity-parser/",
-      "ds-test/=lib/forge-std/lib/ds-test/src/",
-      "eth-gas-reporter/=node_modules/eth-gas-reporter/",
-      "forge-std/=lib/forge-std/src/",
-      "hardhat/=node_modules/hardhat/"
-    ],
+    "compilationTarget": {
+      "contracts/util/SignatureChecker.sol": "SignatureChecker"
+    },
+    "evmVersion": "istanbul",
+    "libraries": {},
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
     "optimizer": {
       "enabled": true,
       "runs": 10000000
     },
-    "metadata": {
-      "bytecodeHash": "ipfs"
-    },
-    "compilationTarget": {
-      "contracts/util/SignatureChecker.sol": "SignatureChecker"
-    },
-    "libraries": {}
+    "remappings": [
+      ":@ensdomains/=node_modules/@ensdomains/",
+      ":@openzeppelin/=node_modules/@openzeppelin/",
+      ":@solidity-parser/=node_modules/prettier-plugin-solidity/node_modules/@solidity-parser/",
+      ":ds-test/=lib/forge-std/lib/ds-test/src/",
+      ":eth-gas-reporter/=node_modules/eth-gas-reporter/",
+      ":forge-std/=lib/forge-std/src/",
+      ":hardhat/=node_modules/hardhat/"
+    ]
   },
   "sources": {
     "contracts/interface/IERC1271.sol": {
       "keccak256": "0x8755a3f5c92f746d1dff56c9389b5dfcba2630c7057b62da2531437871709f7e",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://a9aac28c347968ea5eaad87756f74be163411b5d55e338093c6c120d0b264616",
         "dweb:/ipfs/Qmf2mfJF6dDxoNXYfyp7BqGhctC3YjKYGpzNUmipDfqHDf"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/util/ECRecover.sol": {
       "keccak256": "0x7abfe3fc8384dbabe687b69f167653f9cfd9ffc89d954e852705ce3ba4379e0b",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://97891f5fa6e380ffc65f3f031a1efb300bdb63f510f1d20faf5bbb9586496033",
         "dweb:/ipfs/QmbnQKEe9FwCFpisyJJQPAvYNo57EuRNT1UsBQYVc26FJX"
-      ],
-      "license": "Apache-2.0"
+      ]
     },
     "contracts/util/SignatureChecker.sol": {
       "keccak256": "0xdd897f22c2b24d14e6f6f5a0235664955fd70611e5e283dc5573aac8bfd7207f",
+      "license": "Apache-2.0",
       "urls": [
         "bzz-raw://fdcf4e52294e000226d216f5cdae3f4769d93ebcad22b540b2cb58141860114f",
         "dweb:/ipfs/QmR9BGSCJ8WtmX6wMM62uqQuhRSVSmkifJZVxWZLMREozp"
-      ],
-      "license": "Apache-2.0"
+      ]
     }
   },
   "version": 1
