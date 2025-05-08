@@ -21,9 +21,6 @@ pragma solidity 0.6.12;
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
-import {
-    ICreate2Factory
-} from "../../../contracts/interface/ICreate2Factory.sol";
 import { ScriptUtils } from "../ScriptUtils.sol";
 import { SignatureChecker } from "../../../contracts/util/SignatureChecker.sol";
 
@@ -34,7 +31,7 @@ contract AddressUtils is ScriptUtils {
     /**
      * @dev Salt values for SignatureChecker, FiatTokenProxy, FiatTokenV2_2, and MasterMinter as defined as follows
      */
-    uint256 private chainId = getChainId();
+    uint256 private chainId = vm.envOr("CHAIN_ID", getChainId());
 
     function signatureCheckerSalt() public view returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId));
@@ -124,9 +121,10 @@ contract AddressUtils is ScriptUtils {
         returns (address)
     {
         return
-            ICreate2Factory(factory).computeAddress(
+            vm.computeCreate2Address(
                 signatureCheckerSalt(),
-                keccak256(type(SignatureChecker).creationCode)
+                keccak256(type(SignatureChecker).creationCode),
+                factory
             );
     }
 
@@ -136,9 +134,10 @@ contract AddressUtils is ScriptUtils {
      */
     function computeImplAddress(address factory) public view returns (address) {
         return
-            ICreate2Factory(factory).computeAddress(
+            vm.computeCreate2Address(
                 implSalt(),
-                keccak256(type(FiatTokenV2_2).creationCode)
+                keccak256(type(FiatTokenV2_2).creationCode),
+                factory
             );
     }
 
@@ -152,9 +151,10 @@ contract AddressUtils is ScriptUtils {
         returns (address)
     {
         return
-            ICreate2Factory(factory).computeAddress(
+            vm.computeCreate2Address(
                 proxySalt(tokenSymbol),
-                keccak256(proxyCreationCode(factory))
+                keccak256(proxyCreationCode(factory)),
+                factory
             );
     }
 
@@ -167,9 +167,10 @@ contract AddressUtils is ScriptUtils {
         string memory tokenSymbol
     ) public view returns (address) {
         return
-            ICreate2Factory(factory).computeAddress(
+            vm.computeCreate2Address(
                 masterMinterSalt(tokenSymbol),
-                keccak256(masterMinterCreationCode(factory))
+                keccak256(masterMinterCreationCode(factory)),
+                factory
             );
     }
 }
