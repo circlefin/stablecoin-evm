@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xb4484A64aD7dCcb4E8cc89e84FE02140E42cEfD1",
+    "contractCreationTxHash": "0x3081be526b36bcc7a7755ac36764981e2936b4bf6b192cf7c411a7012343dfaf"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x6408d91e853bfa11caa719a4578fe659dbd16005",
+    "contractCreationTxHash": "0x62367aa678e89757d524e143edfae51c31fadab72f38105e162668c43056f2de"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0xEe45ed3f6c675F319BB9de62991C1E78B484e0B8",
+    "contractCreationTxHash": "0x7a9d33eb5fecafde3de3d30353d6bb2ca21ffcd806514020bcadeeb171ec7b5c"
+  },
+  "rpcUrl": "https://rpc.glue.net/"
+}
