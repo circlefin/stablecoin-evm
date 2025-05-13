@@ -53,6 +53,17 @@ abstract contract AbstractV2Upgrader is Ownable {
     }
 
     /**
+     * @dev Throws if called by any account other than the owner or new proxy admin.
+     */
+    modifier onlyAdminOrOwner() {
+        require(
+            msg.sender == this.owner() || msg.sender == _newProxyAdmin,
+            "AbstractV2Upgrader: caller is not the owner or new proxy admin"
+        );
+        _;
+    }
+
+    /**
      * @notice The address of the FiatTokenProxy contract
      * @return Contract address
      */
@@ -102,7 +113,7 @@ abstract contract AbstractV2Upgrader is Ownable {
     /**
      * @notice Transfer proxy admin role to newProxyAdmin, and self-destruct
      */
-    function abortUpgrade() external onlyOwner {
+    function abortUpgrade() external onlyAdminOrOwner {
         // Transfer proxy admin role
         _proxy.changeAdmin(_newProxyAdmin);
 
