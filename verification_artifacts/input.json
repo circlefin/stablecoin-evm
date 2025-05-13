@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x40df78EF054B968477Bc09060FcB15A0f350c379",
+    "contractCreationTxHash": "0x9b32b7f9a13c5f8c96fb12425730ef56bc57bf38d79a1f3e86a7c42b6e60621d"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x448811d70486296d4e2B60E4258328957C94EaA7",
+    "contractCreationTxHash": "0x11f0dd950547187aed647e69dfa81fa05fcfc79711f4a05e0d385ea40c937d31"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x2777023E33B88CE622B15eCfA4ADa3cb5a9C545f",
+    "contractCreationTxHash": "0xe2a7d6d658cb9e8a90347938c04a481da0e9d2529f340e32624cf1c90d0c1aea"
+  },
+  "rpcUrl": "https://testnet.telos.net/evm"
+}
