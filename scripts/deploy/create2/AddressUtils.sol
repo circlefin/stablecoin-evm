@@ -31,13 +31,16 @@ contract AddressUtils is ScriptUtils {
     /**
      * @dev Salt values for SignatureChecker, FiatTokenProxy, FiatTokenV2_2, and MasterMinter as defined as follows
      */
-    uint256 private chainId = vm.envOr("CHAIN_ID", getChainId());
 
-    function signatureCheckerSalt() public view returns (bytes32 salt) {
+    function signatureCheckerSalt(uint256 chainId)
+        public
+        view
+        returns (bytes32 salt)
+    {
         return keccak256(abi.encodePacked(chainId));
     }
 
-    function proxySalt(string memory tokenSymbol)
+    function proxySalt(uint256 chainId, string memory tokenSymbol)
         public
         view
         returns (bytes32 salt)
@@ -45,11 +48,11 @@ contract AddressUtils is ScriptUtils {
         return keccak256(abi.encodePacked(chainId, tokenSymbol));
     }
 
-    function implSalt() public view returns (bytes32 salt) {
+    function implSalt(uint256 chainId) public view returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId));
     }
 
-    function masterMinterSalt(string memory tokenSymbol)
+    function masterMinterSalt(uint256 chainId, string memory tokenSymbol)
         public
         view
         returns (bytes32 salt)
@@ -113,16 +116,17 @@ contract AddressUtils is ScriptUtils {
 
     /**
      * @notice Precomputes the address of the SignatureChecker contract
+     * @param chainId The ID of the chain we're deploying on
      * @param factory The factory address that would deploy SignatureChecker
      */
-    function computeSignatureCheckerAddress(address factory)
+    function computeSignatureCheckerAddress(uint256 chainId, address factory)
         public
         view
         returns (address)
     {
         return
             vm.computeCreate2Address(
-                signatureCheckerSalt(),
+                signatureCheckerSalt(chainId),
                 keccak256(type(SignatureChecker).creationCode),
                 factory
             );
@@ -130,12 +134,17 @@ contract AddressUtils is ScriptUtils {
 
     /**
      * @notice Precomputes the address of the FiatTokenV2_2 contract
+     * @param chainId The ID of the chain we're deploying on
      * @param factory The factory address that would deploy FiatTokenV2_2
      */
-    function computeImplAddress(address factory) public view returns (address) {
+    function computeImplAddress(uint256 chainId, address factory)
+        public
+        view
+        returns (address)
+    {
         return
             vm.computeCreate2Address(
-                implSalt(),
+                implSalt(chainId),
                 keccak256(type(FiatTokenV2_2).creationCode),
                 factory
             );
@@ -143,16 +152,17 @@ contract AddressUtils is ScriptUtils {
 
     /**
      * @notice Precomputes the address of the FiatTokenProxy contract
+     * @param chainId The ID of the chain we're deploying on
      * @param factory The factory address that would deploy FiatTokenProxy
      */
-    function computeProxyAddress(address factory, string memory tokenSymbol)
-        public
-        view
-        returns (address)
-    {
+    function computeProxyAddress(
+        uint256 chainId,
+        address factory,
+        string memory tokenSymbol
+    ) public view returns (address) {
         return
             vm.computeCreate2Address(
-                proxySalt(tokenSymbol),
+                proxySalt(chainId, tokenSymbol),
                 keccak256(proxyCreationCode(factory)),
                 factory
             );
@@ -160,15 +170,17 @@ contract AddressUtils is ScriptUtils {
 
     /**
      * @notice Precomputes the address of the MasterMinter contract
+     * @param chainId The ID of the chain we're deploying on
      * @param factory The factory address that would deploy MasterMinter
      */
     function computeMasterMinterAddress(
+        uint256 chainId,
         address factory,
         string memory tokenSymbol
     ) public view returns (address) {
         return
             vm.computeCreate2Address(
-                masterMinterSalt(tokenSymbol),
+                masterMinterSalt(chainId, tokenSymbol),
                 keccak256(masterMinterCreationCode(factory)),
                 factory
             );

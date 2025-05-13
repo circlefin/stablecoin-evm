@@ -57,6 +57,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
     address private pauser;
     address private blacklister;
 
+    uint256 private chainId;
     string private tokenName;
     string private tokenSymbol;
     string private tokenCurrency;
@@ -78,6 +79,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         factory = vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS");
 
+        chainId = vm.envUint("CHAIN_ID");
         tokenName = vm.envString("TOKEN_NAME");
         tokenSymbol = vm.envString("TOKEN_SYMBOL");
         tokenCurrency = vm.envString("TOKEN_CURRENCY");
@@ -125,6 +127,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
 
         console.log("CREATE2_FACTORY_CONTRACT_ADDRESS: '%s'", factory);
         console.log("DEPLOYER_ADDRESS: '%s'", deployer);
+        console.log("CHAIN_ID: '%s'", chainId);
         console.log("TOKEN_NAME: '%s'", tokenName);
         console.log("TOKEN_SYMBOL: '%s'", tokenSymbol);
         console.log("TOKEN_CURRENCY: '%s'", tokenCurrency);
@@ -232,7 +235,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         address payable implAddress = payable(
             ICreate2Factory(factory).deployAndMultiCall(
                 0,
-                implSalt(),
+                implSalt(chainId),
                 implCreationCode(),
                 multiCallData
             )
@@ -271,7 +274,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
             tokenSymbol,
             tokenCurrency,
             tokenDecimals,
-            computeMasterMinterAddress(factory, tokenSymbol),
+            computeMasterMinterAddress(chainId, factory, tokenSymbol),
             pauser,
             factory,
             factory
@@ -341,7 +344,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         address payable proxyAddress = payable(
             ICreate2Factory(factory).deployAndMultiCall(
                 0,
-                proxySalt(tokenSymbol),
+                proxySalt(chainId, tokenSymbol),
                 proxyCreationCode(factory),
                 multiCallData
             )
@@ -426,7 +429,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         address payable masterMinterAddress = payable(
             ICreate2Factory(factory).deployAndMultiCall(
                 0,
-                masterMinterSalt(tokenSymbol),
+                masterMinterSalt(chainId, tokenSymbol),
                 masterMinterCreationCode(factory),
                 multiCallData
             )

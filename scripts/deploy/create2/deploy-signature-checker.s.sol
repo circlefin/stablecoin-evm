@@ -34,6 +34,8 @@ contract DeploySignatureChecker is Script, AddressUtils {
     address private deployer;
     address private factory;
 
+    uint256 private chainId;
+
     /**
      * @notice initialize variables from environment
      */
@@ -41,8 +43,11 @@ contract DeploySignatureChecker is Script, AddressUtils {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         factory = vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS");
 
+        chainId = vm.envUint("CHAIN_ID");
+
         console.log("DEPLOYER_ADDRESS: '%s'", deployer);
         console.log("CREATE2_FACTORY_CONTRACT_ADDRESS: '%s'", factory);
+        console.log("CHAIN_ID: '%s'", chainId);
     }
 
     /**
@@ -52,7 +57,7 @@ contract DeploySignatureChecker is Script, AddressUtils {
         vm.startBroadcast(deployer);
         address signatureCheckerAddress = ICreate2Factory(factory).deploy(
             0,
-            signatureCheckerSalt(),
+            signatureCheckerSalt(chainId),
             signatureCheckerCreationCode()
         );
         vm.stopBroadcast();

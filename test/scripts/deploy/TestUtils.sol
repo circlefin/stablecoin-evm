@@ -88,6 +88,7 @@ contract TestUtils is Test {
     address internal coldOwner = vm.addr(coldOwnerPrivateKey);
     address internal coldPauser = vm.addr(coldPauserPrivateKey);
 
+    uint256 internal chainId = 31337;
     uint8 internal decimals = 6;
     string internal tokenName = "USDC";
     string internal tokenSymbol = "USDC";
@@ -123,6 +124,7 @@ contract TestUtils is Test {
     uint256[] internal minterAllowances = [60000000, 70000000, 80000000];
 
     function setUp() public virtual {
+        vm.setEnv("CHAIN_ID", vm.toString(chainId));
         vm.setEnv("TOKEN_NAME", tokenName);
         vm.setEnv("TOKEN_SYMBOL", tokenSymbol);
         vm.setEnv("TOKEN_CURRENCY", tokenCurrency);

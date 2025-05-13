@@ -62,15 +62,23 @@ contract DeployFiatTokenCreate2Test is TestUtils {
 
         assertEq(
             address(v2_2),
-            addressUtils.computeImplAddress(factoryAddress)
+            addressUtils.computeImplAddress(chainId, factoryAddress)
         );
         assertEq(
             address(proxy),
-            addressUtils.computeProxyAddress(factoryAddress, tokenSymbol)
+            addressUtils.computeProxyAddress(
+                chainId,
+                factoryAddress,
+                tokenSymbol
+            )
         );
         assertEq(
             address(masterMinter),
-            addressUtils.computeMasterMinterAddress(factoryAddress, tokenSymbol)
+            addressUtils.computeMasterMinterAddress(
+                chainId,
+                factoryAddress,
+                tokenSymbol
+            )
         );
     }
 
@@ -87,11 +95,19 @@ contract DeployFiatTokenCreate2Test is TestUtils {
 
         assertEq(
             address(proxy),
-            addressUtils.computeProxyAddress(factoryAddress, tokenSymbol)
+            addressUtils.computeProxyAddress(
+                chainId,
+                factoryAddress,
+                tokenSymbol
+            )
         );
         assertEq(
             address(masterMinter),
-            addressUtils.computeMasterMinterAddress(factoryAddress, tokenSymbol)
+            addressUtils.computeMasterMinterAddress(
+                chainId,
+                factoryAddress,
+                tokenSymbol
+            )
         );
     }
 
@@ -121,15 +137,23 @@ contract DeployFiatTokenCreate2Test is TestUtils {
 
         assertEq(
             address(v2_2),
-            addressUtils.computeImplAddress(factoryAddress)
+            addressUtils.computeImplAddress(chainId, factoryAddress)
         );
         assertEq(
             address(proxy),
-            addressUtils.computeProxyAddress(factoryAddress, tokenSymbol)
+            addressUtils.computeProxyAddress(
+                chainId,
+                factoryAddress,
+                tokenSymbol
+            )
         );
         assertEq(
             address(masterMinter),
-            addressUtils.computeMasterMinterAddress(factoryAddress, tokenSymbol)
+            addressUtils.computeMasterMinterAddress(
+                chainId,
+                factoryAddress,
+                tokenSymbol
+            )
         );
     }
 }

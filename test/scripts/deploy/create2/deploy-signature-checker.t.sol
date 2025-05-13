@@ -49,7 +49,7 @@ contract DeploySignatureCheckerTest is TestUtils {
             "CREATE2_FACTORY_CONTRACT_ADDRESS"
         );
         address expectedSignatureCheckerAddress = new AddressUtils()
-            .computeSignatureCheckerAddress(factoryAddress);
+            .computeSignatureCheckerAddress(chainId, factoryAddress);
         address signatureCheckerAddress = deployScript.run();
 
         assertTrue(
