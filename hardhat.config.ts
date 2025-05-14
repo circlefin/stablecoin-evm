@@ -35,6 +35,8 @@ import "./scripts/hardhat/downloadBlacklistedAccounts";
 import "./scripts/hardhat/getContractCreationBlock";
 import "./scripts/hardhat/readValuesFromContract";
 import "./scripts/hardhat/validateAccountsToBlacklist";
+import "./scripts/hardhat/verifyFiatTokenState";
+import "./scripts/hardhat/verifyMasterMinterState";
 
 import "./scripts/hardhat/verifyOnChainBytecode";
 

@@ -68,6 +68,18 @@ Minters can be configured by making a copy of `minters.example.json`, naming it
 do not need to configure minters, make a copy of the minters file and leave the
 arrays unfilled.
 
+```sh
+cp minters.example.json minters.json
+```
+
+Blacklists can be configured by making a copy of `test.blacklist.remote.json`,
+naming it `blacklist.remote.json` and adding the blacklisted addresses to the
+array.
+
+```sh
+cp test.blacklist.remote.json blacklist.remote.json
+```
+
 Run the following command to generate deployment transactions for
 `FiatTokenV2_2`, `FiatTokenProxy`, and `MasterMinter`:
 
@@ -82,3 +94,65 @@ yarn forge:simulate scripts/deploy/create2/deploy-fiat-token-create2.s.sol \
 
 The generated JSON files will be available in the `broadcast` directory and can
 be used for signing.
+
+### Step 5: Verify FiatToken and MasterMinter Deployments
+
+After deploying the contracts, verify both deployments using the Hardhat
+verification tasks:
+
+#### Verify FiatToken State
+
+Run the following command to verify the FiatToken deployment:
+
+```sh
+yarn hardhat verifyFiatTokenState \
+  --proxy-address YOUR_PROXY_ADDRESS \
+  --deployment-tx-hash YOUR_DEPLOYMENT_TX_HASH
+```
+
+This verification will:
+
+1. **Check readonly states against your `.env` configuration:**
+
+   - Token metadata (name, symbol, currency, decimals)
+   - Contract roles (owner, pauser, blacklister, masterMinter, rescuer)
+   - Proxy admin and implementation addresses
+   - Initial total supply (by default, we should expect total supply to be zero
+     at deployment time)
+
+2. **Verify deployment events (in exact order):**
+   - `Upgraded` (with the new implementation address)
+   - `AdminChanged` (for proxy admin setup)
+   - `Blacklisted` (for each address in `blacklist.remote.json`)
+   - `BlacklisterChanged` (for setting the final blacklister)
+   - `OwnershipTransferred` (for transferring ownership to the final owner)
+
+#### Verify MasterMinter State
+
+Run the following command to verify the MasterMinter deployment:
+
+```sh
+yarn hardhat verifyMasterMinterState \
+  --master-minter-address YOUR_MASTER_MINTER_ADDRESS \
+  --deployment-tx-hash YOUR_DEPLOYMENT_TX_HASH
+```
+
+This verification will:
+
+1. **Check readonly states against your `.env` configuration:**
+
+   - Owner address (should match `MASTER_MINTER_OWNER_ADDRESS`)
+   - Minter manager address (should match `FIAT_TOKEN_PROXY_ADDRESS`)
+
+2. **Verify deployment events (in exact order):**
+   - `MinterManagerSet` for setting the proxy address
+   - For each minter in `minters.json`:
+     - `ControllerConfigured` (for factory setup)
+     - `MinterConfigured` (for setting allowance, possibly twice per minter)
+     - `ControllerConfigured` (for final controller setup)
+   - `ControllerRemoved` (for removing factory controller, if minters are
+     configured)
+   - `OwnershipTransferred` (for transferring ownership to the final owner)
+
+If any verification fails, the script will output detailed differences between
+expected and actual values to help diagnose the issue.
