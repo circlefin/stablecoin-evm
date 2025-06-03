@@ -114,7 +114,7 @@ contract DeployFiatTokenCreate2Test is TestUtils {
     function test_deployFiatTokenWithMintersNotConfigured() public {
         vm.setEnv(
             "MINTERS_FILE_NAME",
-            "test/scripts/deploy/create2/testdata/test.empty.minters.json"
+            "test/scripts/deploy/testdata/test.empty.minters.json"
         );
 
         vm.prank(deployer);

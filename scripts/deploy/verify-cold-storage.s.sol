@@ -21,6 +21,7 @@ pragma solidity 0.6.12;
 import "forge-std/console.sol";
 
 import { Script } from "forge-std/Script.sol";
+import { ScriptUtils } from "./ScriptUtils.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { MasterMinter } from "../../contracts/minting/MasterMinter.sol";
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
@@ -31,7 +32,7 @@ import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
  * @dev This can only be run on an active deployment of the proxy and
  * implementation
  */
-contract VerifyColdStorage is Script {
+contract VerifyColdStorage is Script, ScriptUtils {
     address payable proxyAddress;
     address private prodMinter;
     address private prodBurner;
@@ -44,8 +45,9 @@ contract VerifyColdStorage is Script {
     address private coldProxyAdminAddress;
     address private coldPauserAddress;
 
-    uint256 private prodMintAllowanceInNormalUnits;
-    uint256 private stgMintAllowanceInNormalUnits;
+    address[] private minterControllers;
+    address[] private minters;
+    uint256[] private minterAllowances;
     uint256 private decimals;
 
     FiatTokenProxy proxy;
@@ -57,10 +59,6 @@ contract VerifyColdStorage is Script {
      */
     function setUp() public {
         proxyAddress = payable(vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS"));
-        prodMinter = vm.envAddress("PROD_MINTER_ADDRESS");
-        prodBurner = vm.envAddress("PROD_BURNER_ADDRESS");
-        stgMinter = vm.envAddress("STG_MINTER_ADDRESS");
-        stgBurner = vm.envAddress("STG_BURNER_ADDRESS");
 
         blacklisterAddress = vm.envAddress("BLACKLISTER_ADDRESS");
 
@@ -73,27 +71,14 @@ contract VerifyColdStorage is Script {
         masterMinterContractAddress = vm.envAddress(
             "MASTER_MINTER_CONTRACT_ADDRESS"
         );
-        prodMintAllowanceInNormalUnits = vm.envUint(
-            "PROD_MINT_ALLOWANCE_IN_NORMAL_UNITS"
-        );
-        stgMintAllowanceInNormalUnits = vm.envUint(
-            "STG_MINT_ALLOWANCE_IN_NORMAL_UNITS"
-        );
+        (
+            minterControllers,
+            minters,
+            minterAllowances
+        ) = _loadMinterConfiguration(vm.envString("MINTERS_FILE_NAME"));
 
         console.log("Supplied params:");
         console.log("FIAT_TOKEN_PROXY_ADDRESS: '%s'", proxyAddress);
-        console.log("STG_MINTER_ADDRESS: '%s'", stgMinter);
-        console.log("STG_BURNER_ADDRESS: '%s'", stgBurner);
-        console.log(
-            "STG_MINT_ALLOWANCE_IN_NORMAL_UNITS: '%s'",
-            vm.toString(stgMintAllowanceInNormalUnits)
-        );
-        console.log("PROD_MINTER_ADDRESS: '%s'", prodMinter);
-        console.log("PROD_BURNER_ADDRESS: '%s'", prodBurner);
-        console.log(
-            "PROD_MINT_ALLOWANCE_IN_NORMAL_UNITS: '%s'",
-            vm.toString(prodMintAllowanceInNormalUnits)
-        );
         console.log("BLACKLISTER_ADDRESS: '%s'", blacklisterAddress);
         console.log(
             "MASTER_MINTER_CONTRACT_ADDRESS: '%s'",
@@ -159,45 +144,19 @@ contract VerifyColdStorage is Script {
         );
 
         console.log(
-            "\n>>>>>>> Validate the minter/burner allowances (in major units) are as expected: <<<<<<<"
+            "\n>>>>>>> Validate the minter allowances (in major units) are as expected: <<<<<<<"
         );
-
-        console.log(
-            "Prod Minter Allowance:  %s",
-            proxyAsV2_2.minterAllowance(prodMinter) / 10**decimals
-        );
-        require(
-            proxyAsV2_2.minterAllowance(prodMinter) / 10**decimals ==
-                prodMintAllowanceInNormalUnits,
-            "Prod minter allowance does not match config"
-        );
-
-        console.log(
-            "Prod Burner Allowance:  %s",
-            proxyAsV2_2.minterAllowance(prodBurner) / 10**decimals
-        );
-        require(
-            proxyAsV2_2.minterAllowance(prodBurner) == 0,
-            "Prod burner mint allowance should be 0"
-        );
-
-        console.log(
-            "Staging Minter Allowance:  %s",
-            proxyAsV2_2.minterAllowance(stgMinter) / 10**decimals
-        );
-        require(
-            proxyAsV2_2.minterAllowance(stgMinter) / 10**decimals ==
-                stgMintAllowanceInNormalUnits,
-            "Staging minter allowance does not match config"
-        );
-
-        console.log(
-            "Staging Burner Allowance:  %s",
-            proxyAsV2_2.minterAllowance(stgBurner) / 10**decimals
-        );
-        require(
-            proxyAsV2_2.minterAllowance(stgBurner) == 0,
-            "Staging burner mint allowance should be 0"
-        );
+        for (uint256 i = 0; i < minters.length; i++) {
+            console.log(
+                "Minter: %s, Allowance: %d",
+                minters[i],
+                proxyAsV2_2.minterAllowance(minters[i]) / 10**decimals
+            );
+            require(
+                proxyAsV2_2.minterAllowance(minters[i]) / 10**decimals ==
+                    minterAllowances[i],
+                "Minter allowance does not match config"
+            );
+        }
     }
 }

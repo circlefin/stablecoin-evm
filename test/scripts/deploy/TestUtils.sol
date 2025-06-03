@@ -107,7 +107,7 @@ contract TestUtils is Test {
     ];
 
     string
-        internal mintersFileName = "test/scripts/deploy/create2/testdata/test.minters.json";
+        internal mintersFileName = "test/scripts/deploy/testdata/test.minters.json";
 
     address[] internal minterControllers = [
         0x1234567890123456789012345678901234567890,
@@ -141,7 +141,6 @@ contract TestUtils is Test {
             "MASTER_MINTER_OWNER_PRIVATE_KEY",
             vm.toString(masterMinterOwnerPrivateKey)
         );
-        vm.setEnv("MINTER_ENV", "PROD");
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("OWNER_PRIVATE_KEY", vm.toString(ownerPrivateKey));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
@@ -149,36 +148,6 @@ contract TestUtils is Test {
         vm.setEnv(
             "BLACKLISTER_PRIVATE_KEY",
             vm.toString(blacklisterPrivateKey)
-        );
-        // hot minter/burner
-        vm.setEnv("PROD_MINTER_ADDRESS", vm.toString(prodMinter));
-        vm.setEnv("PROD_BURNER_ADDRESS", vm.toString(prodBurner));
-        vm.setEnv("STG_MINTER_ADDRESS", vm.toString(stgMinter));
-        vm.setEnv("STG_BURNER_ADDRESS", vm.toString(stgBurner));
-        // minter/burner controller addresses
-        vm.setEnv(
-            "PROD_MINTER_CONTROLLER_INCREMENTER_ADDRESS",
-            vm.toString(prodMinterControllerIncrementer)
-        );
-        vm.setEnv(
-            "PROD_MINTER_CONTROLLER_REMOVER_ADDRESS",
-            vm.toString(prodMinterControllerRemover)
-        );
-        vm.setEnv(
-            "PROD_BURNER_CONTROLLER_ADDRESS",
-            vm.toString(prodBurnerController)
-        );
-        vm.setEnv(
-            "STG_MINTER_CONTROLLER_INCREMENTER_ADDRESS",
-            vm.toString(stgMinterControllerIncrementer)
-        );
-        vm.setEnv(
-            "STG_MINTER_CONTROLLER_REMOVER_ADDRESS",
-            vm.toString(stgMinterControllerRemover)
-        );
-        vm.setEnv(
-            "STG_BURNER_CONTROLLER_ADDRESS",
-            vm.toString(stgBurnerController)
         );
         // cold storage addresses
         vm.setEnv(
@@ -188,15 +157,6 @@ contract TestUtils is Test {
         vm.setEnv("COLD_PROXY_ADMIN_ADDRESS", vm.toString(coldProxyAdmin));
         vm.setEnv("COLD_OWNER_ADDRESS", vm.toString(coldOwner));
         vm.setEnv("COLD_PAUSER_ADDRESS", vm.toString(coldPauser));
-
-        vm.setEnv(
-            "PROD_MINT_ALLOWANCE_IN_NORMAL_UNITS",
-            vm.toString(prodMintAllowanceUnits)
-        );
-        vm.setEnv(
-            "STG_MINT_ALLOWANCE_IN_NORMAL_UNITS",
-            vm.toString(stgMintAllowanceUnits)
-        );
 
         // Deploy an instance of proxy contract to configure contract address in env
         vm.prank(deployer);

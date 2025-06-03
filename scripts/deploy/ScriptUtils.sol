@@ -39,6 +39,40 @@ contract ScriptUtils is Script {
     }
 
     /**
+     * @notice Helper function that loads minter configuration from a JSON file
+     * @param  mintersFileName The name of the JSON file containing minter configuration
+     * @return minterControllers Array of minter controller addresses
+     * @return minters Array of minter addresses
+     * @return minterAllowances Array of minter allowances
+     */
+    function _loadMinterConfiguration(string memory mintersFileName)
+        internal
+        view
+        returns (
+            address[] memory minterControllers,
+            address[] memory minters,
+            uint256[] memory minterAllowances
+        )
+    {
+        string memory mintersJson = vm.readFile(mintersFileName);
+        minterControllers = vm.parseJsonAddressArray(
+            mintersJson,
+            ".minterControllers"
+        );
+        minters = vm.parseJsonAddressArray(mintersJson, ".minters");
+        minterAllowances = vm.parseJsonUintArray(
+            mintersJson,
+            ".minterAllowances"
+        );
+        require(
+            minterControllers.length == minters.length &&
+                minters.length == minterAllowances.length,
+            "Minter arrays must have equal length"
+        );
+        return (minterControllers, minters, minterAllowances);
+    }
+
+    /**
      * @dev Returns true if the two strings are equal.
      */
     function stringsEqual(string memory a, string memory b)
