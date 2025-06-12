@@ -97,14 +97,6 @@ contract ColdStorageTransfer is Script {
     function run() external {
         console.log(">>>>>>> Reassigning ownership to cold storage <<<<<<<");
 
-        // Migrate master minter on token to master minter contract.
-        vm.broadcast(ownerPrivateKey);
-        proxyAsV2_2.updateMasterMinter(masterMinterContractAddress);
-        console.log(
-            "Reassigned token master minter to the MasterMinter contract",
-            masterMinterContractAddress
-        );
-
         // Assign the pauser role to the cold pauser if not already done.
         if (proxyAsV2_2.pauser() != coldPauserAddress) {
             vm.broadcast(ownerPrivateKey);

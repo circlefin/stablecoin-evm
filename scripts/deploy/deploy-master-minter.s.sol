@@ -21,6 +21,7 @@ pragma solidity 0.6.12;
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
 import { MasterMinter } from "../../contracts/minting/MasterMinter.sol";
+import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
 
 /**
  * A utility script to deploy a standslone MasterMinter contract
@@ -28,7 +29,10 @@ import { MasterMinter } from "../../contracts/minting/MasterMinter.sol";
 contract DeployMasterMinter is Script {
     address payable private proxyContractAddress;
     address private masterMinterOwner;
+    uint256 private ownerPrivateKey;
     uint256 private deployerPrivateKey;
+
+    FiatTokenV2_2 proxyAsV2_2;
 
     /**
      * @notice initialize variables from environment
@@ -41,8 +45,12 @@ contract DeployMasterMinter is Script {
 
         deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
 
+        ownerPrivateKey = vm.envUint("OWNER_PRIVATE_KEY");
+
         console.log("FIAT_TOKEN_PROXY_ADDRESS: '%s'", proxyContractAddress);
         console.log("MASTER_MINTER_OWNER_ADDRESS: '%s'", masterMinterOwner);
+
+        proxyAsV2_2 = FiatTokenV2_2(proxyContractAddress);
     }
 
     /**
@@ -56,6 +64,17 @@ contract DeployMasterMinter is Script {
 
         // Change the master minter to be owned by the master minter owner
         masterMinter.transferOwnership(masterMinterOwner);
+
+        vm.stopBroadcast();
+
+        vm.startBroadcast(ownerPrivateKey);
+
+        // Update master minter on token to master minter contract.
+        proxyAsV2_2.updateMasterMinter(address(masterMinter));
+        console.log(
+            "Reassigned token master minter to the MasterMinter contract",
+            address(masterMinter)
+        );
 
         vm.stopBroadcast();
 

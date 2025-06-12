@@ -54,7 +54,6 @@ contract ColdStorageTransferTest is TestUtils {
         assertEq(proxyAsV2_2.blacklister(), blacklister);
         assertEq(proxyAsV2_2.owner(), owner);
         assertEq(proxyAsProxy.admin(), proxyAdmin);
-        assertEq(proxyAsV2_2.masterMinter(), masterMinterOwner);
         assertEq(masterMinter.owner(), masterMinterOwner);
         assertEq(proxyAsV2_2.pauser(), pauser);
     }
@@ -67,7 +66,6 @@ contract ColdStorageTransferTest is TestUtils {
         // all roles, except blacklister, are assigned to cold key addrs after running the cold storage script
         assertEq(proxyAsV2_2.owner(), coldOwner);
         assertEq(proxyAsProxy.admin(), coldProxyAdmin);
-        assertEq(proxyAsV2_2.masterMinter(), address(masterMinter));
         assertEq(masterMinter.owner(), coldMasterMinterOwner);
         assertEq(proxyAsV2_2.pauser(), coldPauser);
     }

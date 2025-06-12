@@ -102,23 +102,11 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
             vm.toString(addressesToBlacklist.length)
         );
 
-        string memory mintersJson = vm.readFile(
-            vm.envString("MINTERS_FILE_NAME")
-        );
-        minterControllers = vm.parseJsonAddressArray(
-            mintersJson,
-            ".minterControllers"
-        );
-        minters = vm.parseJsonAddressArray(mintersJson, ".minters");
-        minterAllowances = vm.parseJsonUintArray(
-            mintersJson,
-            ".minterAllowances"
-        );
-        require(
-            minterControllers.length == minters.length &&
-                minters.length == minterAllowances.length,
-            "Minter arrays must have equal"
-        );
+        (
+            minterControllers,
+            minters,
+            minterAllowances
+        ) = _loadMinterConfiguration(vm.envString("MINTERS_FILE_NAME"));
         console.log(
             "# of items in %s:",
             "minterControllers, minters and minterAllowances",
