@@ -36,10 +36,12 @@ extra-output-files = [
     "bin",
     "metadata"
 ]
+# libraries=["contracts/util/SignatureChecker.sol:SignatureChecker:0x08C49257767c1f92634A9cDbF0663Af0356a472A"]
 
 [rpc_endpoints]
 testnet = "${TESTNET_RPC_URL}"
 mainnet = "${MAINNET_RPC_URL}"
+
 
 [etherscan]
 chain_50 = { key = "${ETHERSCAN_KEY}", url = "https://api.xdcscan.com/api", chain = 50 }

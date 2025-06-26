@@ -4,13 +4,16 @@ export
 # fill the rpc url and etherscan api key
 # !need to  test the scripts and fix them on the next deployment
 d:
-	forge script scripts/deploy/deploy-fiat-token.s.sol --gas-estimate-multiplier $(GAS_MULTIPLIER) --rpc-url $(RPC_URL) -vvv
+	forge script scripts/deploy/deploy-fiat-token.s.sol --gas-estimate-multiplier $(GAS_MULTIPLIER) --rpc-url $(RPC_URL) -vvvv
 
 deploy-verify:
-	forge script scripts/deploy/deploy-fiat-token.s.sol -vv --gas-estimate-multiplier $(GAS_MULTIPLIER) --rpc-url $(RPC_URL) --etherscan-api-key $(ETHERSCAN_KEY) --verifier $(VERIFIER) --verify --verifier-url $(VERIFIER_URL) --broadcast --slow
+	forge script scripts/deploy/deploy-fiat-token.s.sol -vvvv --gas-estimate-multiplier $(GAS_MULTIPLIER) --rpc-url $(RPC_URL) --etherscan-api-key $(ETHERSCAN_KEY) --verifier $(VERIFIER) --verify --verifier-url $(VERIFIER_URL) --broadcast
 
 deploy:
-	forge script scripts/deploy/deploy-fiat-token.s.sol -vvvv --gas-estimate-multiplier $(GAS_MULTIPLIER) --rpc-url $(RPC_URL) --broadcast --slow
+	forge script scripts/deploy/deploy-fiat-token.s.sol -vvvv --rpc-url $(RPC_URL) --broadcast
+
+verify:
+	forge verify-contract --rpc-url $(RPC_URL) $(ADDRESS) contracts/v2/FiatTokenV2_2.sol:FiatTokenV2_2 --etherscan-api-key $(ETHERSCAN_KEY) --verifier-url $(VERIFIER_URL) --watch
 
 gen:
 	cat artifacts/foundry/SignatureChecker.sol/SignatureChecker.json | jq -jr '.rawMetadata' > verification_artifacts/SignatureChecker.json
