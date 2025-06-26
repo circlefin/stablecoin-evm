@@ -11,5 +11,5 @@
     "contractAddress": "0x29ee6138dd4c9815f46d34a4a1ed48f46758a402",
     "contractCreationTxHash": "0x768b9b249be2d2afefa87d415613d794e92bae4448ba74bda8556c62565379a8"
   },
-  "rpcUrl": ""
+  "rpcUrl": "https://rpc.botanixlabs.com"
 }
