@@ -21,7 +21,7 @@ runs:
     - name: Install Node
       uses: actions/setup-node@v4
       with:
-        node-version: "20.9.0"
+        node-version: "20.18.0"
 
     - name: Install Foundry
       uses: foundry-rs/foundry-toolchain@v1
