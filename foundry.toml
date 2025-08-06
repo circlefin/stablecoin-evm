@@ -46,3 +46,4 @@ mainnet = "${MAINNET_RPC_URL}"
 [etherscan]
 chain_50 = { key = "${ETHERSCAN_KEY}", url = "https://api.xdcscan.com/api", chain = 50 }
 chain_6900 = { key = "${ETHERSCAN_KEY}", url = "https://api.routescan.io/v2/network/mainnet/evm/6900/etherscan", chain = 6900 }
+chain_41923 = { key = "${ETHERSCAN_KEY}", url = "${VERIFIER_URL}", chain = 41923 }
