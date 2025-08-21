@@ -15,3 +15,5 @@
   - generate each contract artifact by doing `make gen`
   - open PR in circle repo
 - Upload the deployment to the drive
+- Run `yarn hardhat run scripts/verifyBridgedTokenBytecode.ts --network mainnet`
+  to ensure the deployment validation will work on circles repo
