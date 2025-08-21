@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x08c49257767c1f92634a9cdbf0663af0356a472a",
+    "contractCreationTxHash": "0xc42e92b0bfdff883c72d7aed9a2999af7b9dc96520f57015b715e8abb4729492"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xc7616b08ffec8b4ba47188bfd1a814316f3e3d79",
+    "contractCreationTxHash": "0x20d00e5a5d9dfddb3f239260cb95e5e9803ea7e897819a31d94d711c2427fe5d"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x28bec7e30e6faee657a03e19bf1128aad7632a00",
+    "contractCreationTxHash": "0x7f54a60a9dc7b8f7d07df58badebb8a361e04453c30f213b65c9dfd54ef8ac27"
+  },
+  "rpcUrl": "https://api.infra.mainnet.somnia.network"
+}
