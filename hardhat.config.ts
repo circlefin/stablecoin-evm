@@ -76,6 +76,13 @@ const hardhatConfig: HardhatUserConfig = {
       gasMultiplier,
       // apiUrl: " https://phoenix-explorer.plumenetwork.xyz/api/"
     },
+    somnia: {
+      url: "https://api.infra.mainnet.somnia.network/",
+      // url: "http://127.0.0.1:8545",
+
+      // accounts,
+      chainId: 5031,
+    },
   },
   typechain: {
     outDir: "./@types/generated",
@@ -108,6 +115,7 @@ const hardhatConfig: HardhatUserConfig = {
     apiKey: {
       // Is not required by blockscout. Can be any non-empty string
       plumephoenix: "abc",
+      somnia: "somnia",
     },
     customChains: [
       {
@@ -116,6 +124,15 @@ const hardhatConfig: HardhatUserConfig = {
         urls: {
           apiURL: "https://phoenix-explorer.plumenetwork.xyz/api",
           browserURL: "https://phoenix-explorer.plumenetwork.xyz/",
+        },
+      },
+      {
+        network: "somnia",
+        chainId: 5031,
+
+        urls: {
+          apiURL: "https://mainnet.somnia.w3us.site/api",
+          browserURL: "https://mainnet.somnia.w3us.site",
         },
       },
     ],

@@ -17,3 +17,11 @@
 - Upload the deployment to the drive
 - Run `yarn hardhat run scripts/verifyBridgedTokenBytecode.ts --network mainnet`
   to ensure the deployment validation will work on circles repo
+
+## Notes:
+
+If foundry not verifying properly try doing it with hh. Example for verifying
+the proxy in somnia with the implementation
+`0xa6f01ccc347f07256bec0dc7d1a3b62adc3f1a68`
+
+`npx hardhat verify --contract contracts/v1/FiatTokenProxy.sol:FiatTokenProxy --network somnia 0x28bec7e30e6faee657a03e19bf1128aad7632a00 0xa6f01ccc347f07256bec0dc7d1a3b62adc3f1a68 --force`
