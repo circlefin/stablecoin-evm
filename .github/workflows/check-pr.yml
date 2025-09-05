@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   post_run_hardhat_tests:
-    runs-on: ubuntu-latest
+    runs-on: small-spot
     steps:
       - name: Download test results
         uses: actions/download-artifact@v4

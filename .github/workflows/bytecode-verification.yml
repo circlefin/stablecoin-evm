@@ -22,7 +22,7 @@ on:
 
 jobs:
   bytecode-verification:
-    runs-on: ubuntu-latest
+    runs-on: large-spot
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4

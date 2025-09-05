@@ -29,7 +29,7 @@ env:
 
 jobs:
   run_ci_tests:
-    runs-on: ubuntu-latest
+    runs-on: large-spot
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
           ENABLE_GAS_REPORTER: true
 
   run_hardhat_tests:
-    runs-on: ubuntu-latest
+    runs-on: large-spot
     strategy:
       fail-fast: false
       matrix:
@@ -95,4 +95,3 @@ jobs:
       contents: read
     with:
       allow-reciprocal-licenses: false
-
