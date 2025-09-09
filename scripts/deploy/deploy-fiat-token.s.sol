@@ -18,6 +18,8 @@
 
 pragma solidity 0.6.12;
 
+import { ProxyAdmin } from "@openzeppelin/contracts/proxy/ProxyAdmin.sol";
+
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
 import { DeployImpl } from "./DeployImpl.sol";
@@ -96,21 +98,30 @@ contract DeployFiatToken is Script, DeployImpl {
     {
         vm.startBroadcast(deployerPrivateKey);
 
+        //! Step 1: Deploy Implementation Contract
         // If there is an existing implementation contract,
         // we can simply point the newly deployed proxy contract to it.
         // Otherwise, deploy the latest implementation contract code to the network.
         FiatTokenV2_2 fiatTokenV2_2 = getOrDeployImpl(_impl);
 
+        //! Step 2: Deploy ProxyAdmin
+        ProxyAdmin proxyAdminContract = new ProxyAdmin();
+        // set the proxyAdmin as the owner of the proxyAdmin contract
+        proxyAdminContract.transferOwnership(proxyAdmin);
+
+        //! Step 3: Deploy Proxy
         FiatTokenProxy proxy = new FiatTokenProxy(address(fiatTokenV2_2));
 
-        // Now that the proxy contract has been deployed, we can deploy the master minter.
-        MasterMinter masterMinter = new MasterMinter(address(proxy));
+        // ! we are setting the deployer as master minter, this will be changed to multisig/onesig later on the wiring in the Stargate V2 repo
+        // // Now that the proxy contract has been deployed, we can deploy the master minter.
+        // MasterMinter masterMinter = new MasterMinter(address(proxy));
 
-        // Change the master minter to be owned by the master minter owner
-        masterMinter.transferOwnership(masterMinterOwner);
+        // // Change the master minter to be owned by the master minter owner
+        // masterMinter.transferOwnership(masterMinterOwner);
 
         // Now that the master minter is set up, we can go back to setting up the proxy and
         // implementation contracts.
+        //! Step 4: Change admin of the proxy to the proxyAdmin
         // Need to change admin first, or the call to initialize won't work
         // since admin can only call methods in the proxy, and not forwarded methods
         proxy.changeAdmin(proxyAdmin);
@@ -141,7 +152,7 @@ contract DeployFiatToken is Script, DeployImpl {
 
         vm.stopBroadcast();
 
-        return (fiatTokenV2_2, masterMinter, proxy);
+        return (fiatTokenV2_2, MasterMinter(address(0)), proxy);
     }
 
     /**
