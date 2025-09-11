@@ -124,7 +124,7 @@ contract DeployFiatToken is Script, DeployImpl {
         //! Step 4: Change admin of the proxy to the proxyAdmin
         // Need to change admin first, or the call to initialize won't work
         // since admin can only call methods in the proxy, and not forwarded methods
-        proxy.changeAdmin(proxyAdmin);
+        proxy.changeAdmin(address(proxyAdminContract));
 
         // Do the initial (V1) initialization.
         // Note that this takes in the master minter contract's address as the master minter.
