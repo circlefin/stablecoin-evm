@@ -1,14 +1,14 @@
 {
   "name": "stablecoin-evm",
   "version": "1.0.0",
-  "description": "Circle's Stablecoin Smart Contracts on EVM-compatible blockchains",
+  "description": "Circle's Stablecoin Smart Contracts on EVM-compatible blockchains.",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "compile": "hardhat compile && forge build && ./flatten-generated-types.sh",
     "contract-size": "hardhat size-contracts",
-    "coverage": "hardhat coverage",
+    "coverage": "NODE_OPTIONS=--max-old-space-size=8192 hardhat coverage",
     "forge:simulate": "forge script -vv --gas-estimate-multiplier $(dotenv -p GAS_MULTIPLIER)",
     "forge:broadcast": "yarn forge:simulate --broadcast --slow",
     "forge:resume": "yarn forge:broadcast --resume",
@@ -17,13 +17,13 @@
     "fmt:base": "prettier './**/*.sol' './**/*.js' './**/*.ts' './**/*.json' './**/*.md'",
     "fmt:check": "yarn fmt:base --check",
     "fmt": "yarn fmt:base --write",
-    "gas-report": "hardhat test test/misc/gas.ts",
+    "gas-report": "NODE_OPTIONS=--max-old-space-size=8192 hardhat test test/misc/gas.ts",
     "lint": "eslint --ext '.js,.ts' './**/*.{j,t}s'",
     "postinstall": "bash setup.sh && husky install",
     "precommit": "yarn fmt && yarn static-check",
     "solhint": "solhint 'contracts/**/*.sol'",
     "static-check": "yarn hardhat typechain && yarn typecheck && yarn lint && yarn fmt:check && yarn solhint",
-    "test": "hardhat test",
+    "test": "NODE_OPTIONS=--max-old-space-size=8192 hardhat test",
     "typecheck": "tsc -p . --noEmit"
   },
   "repository": {
@@ -94,10 +94,13 @@
     "web3": "1.10.1"
   },
   "resolutions": {
-    "hardhat-gas-reporter/**/flat": "5.0.2"
+    "hardhat-gas-reporter/**/flat": "5.0.2",
+    "cipher-base": "1.0.7",
+    "sha.js": "2.4.12"
   },
   "engines": {
     "node": "20.18.0",
-    "yarn": "1.22.19"
-  }
+    "yarn": "1.x.x"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
