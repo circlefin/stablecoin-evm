@@ -106,9 +106,6 @@ contract TestUtils is Test {
         0xb6f5ec1A0a9cd1526536D3F0426c429529471F40
     ];
 
-    string
-        internal mintersFileName = "test/scripts/deploy/testdata/test.minters.json";
-
     address[] internal minterControllers = [
         0x1234567890123456789012345678901234567890,
         0x2345678901234567890123456789012345678901,
@@ -200,7 +197,6 @@ contract TestUtils is Test {
         );
 
         vm.setEnv("BLACKLIST_FILE_NAME", blacklistFileName);
-        vm.setEnv("MINTERS_FILE_NAME", mintersFileName);
 
         setUpCelo();
     }
@@ -335,5 +331,23 @@ contract TestUtils is Test {
                 blacklisted
             );
         }
+    }
+
+    function validateStandaloneMasterMinter(MasterMinter masterMinter)
+        internal
+    {
+        assertEq(masterMinter.owner(), masterMinterOwner);
+        assertEq(
+            masterMinter.getWorker(
+                vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
+            ),
+            address(0)
+        );
+
+        // Validate minter manager was set correctly to factory
+        assertEq(
+            address(masterMinter.getMinterManager()),
+            vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
+        );
     }
 }

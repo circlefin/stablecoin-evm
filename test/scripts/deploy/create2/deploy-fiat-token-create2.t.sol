@@ -39,6 +39,10 @@ contract DeployFiatTokenCreate2Test is TestUtils {
 
     function setUp() public override {
         TestUtils.setUp();
+        vm.setEnv(
+            "MINTERS_FILE_NAME",
+            "test/scripts/deploy/testdata/test.minters.json"
+        );
 
         vm.prank(deployer);
         deployScript = new DeployFiatTokenCreate2();

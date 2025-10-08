@@ -48,6 +48,10 @@ contract VerifyColdStorageTest is TestUtils {
 
     function setUp() public override {
         TestUtils.setUp();
+        vm.setEnv(
+            "MINTERS_FILE_NAME",
+            "test/scripts/deploy/testdata/test.minters.json"
+        );
 
         proxyAddress = payable(vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS"));
         masterMinterContractAddress = vm.envAddress(
