@@ -8,8 +8,8 @@
     "contractCreationTxHash": "0xa7a8497d444c4e3f5451e3b9f4da87d0052d10e02c4ed0d350373752b438b004"
   },
   "FiatTokenProxy": {
-    "contractAddress": "0x240579b5b01ea8b091cf8ebfe98d4b588643f9050847f1e0caab3a724f6e9c4a",
-    "contractCreationTxHash": "0x8a2b28364102bea189d99a475c494330ef2bdd0b"
+    "contractAddress":"0x8a2b28364102bea189d99a475c494330ef2bdd0b",
+    "contractCreationTxHash": "0x240579b5b01ea8b091cf8ebfe98d4b588643f9050847f1e0caab3a724f6e9c4a"
   },
   "rpcUrl": "https://rpc.camp.raas.gelato.cloud"
 }
