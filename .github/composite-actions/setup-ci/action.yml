@@ -24,7 +24,9 @@ runs:
         node-version: "20.18.0"
 
     - name: Install Foundry
-      uses: foundry-rs/foundry-toolchain@v1
+      uses: foundry-rs/foundry-toolchain@v1.5.0
+      with:
+        version: nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9
 
     - name: Update submodules
       run: git submodule update --init --recursive
