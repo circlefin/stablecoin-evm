@@ -1,0 +1,26 @@
+name: ABI Encode
+on:
+  push:
+    branches:
+      - master # Replace with your branch name
+
+jobs:
+  abi-encode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: ABI Encode
+        uses: blocklytics/abi-encoder-action@1.1.1
+        with:
+          contractPath: ./contracts/Dollar.sol # Replace with your contract path
+          arguments: '000000000000000000000000123456789abcdefABCDEF123456789ABCDEF123' # Replace with your constructor arguments
