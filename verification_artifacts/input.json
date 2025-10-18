@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xD34e23b4509fF894FA939DC29baC987b7A5465C0",
+    "contractCreationTxHash": "0x11ff97649688e4ae314a68a3f6a09aa95c06e3b659951cdb79d5627d5912fffb"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x67B302E35Aef5EEE8c32D934F5856869EF428330",
+    "contractCreationTxHash": "0x692ee9aebe5d69824fcbc32e1195bd35dbb70b641d747733172ced049999baf9"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x78adD880A697070c1e765Ac44D65323a0DcCE913",
+    "contractCreationTxHash": "0x1bcac9932134c15b4662dd02a7c154b605432b0bd33e8668a47e3474893d23bf"
+  },
+  "rpcUrl": "https://phoenix-rpc.plumenetwork.xyz"
+}
