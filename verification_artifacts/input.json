@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x2d93FbcE4CffC15DD385A80B3f4CC1D4E76C38b3",
+    "contractCreationTxHash": "0x2cd5f9be2f01426c730a77e416803111cf67a66138457841cfc1a499941c687d"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x4F5F42799d1E01662B629Ede265baEa223e9f9C7",
+    "contractCreationTxHash": "0x8ee941b4cc9070dbd9765896a13cd89ffab62c6fb7d62764e9ee4b51c7e7d774"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0xad11a8BEb98bbf61dbb1aa0F6d6F2ECD87b35afA",
+    "contractCreationTxHash": "0xc9ea93adb381487807827f96fafb1f47047317e5eb71d0a1934614d606dbd4f8"
+  },
+  "rpcUrl": "https://7e57304f.rpc.hemi.network/rpc"
+}
