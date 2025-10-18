@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xB1dEa6F81F015Aa4C52c9Ee95B63217cbc64F8B1",
+    "contractCreationTxHash": "0x94a7b3093f01ecaf48b5b121ff28e4abc414c791235e52d36410b69e3aed4f9d"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x9d27EdeB161023A7DE11E2eF2b443E32Cc23aBaf",
+    "contractCreationTxHash": "0x5c0ac34e39203c9c40c914f39361e4fd769d75c6408ea4fee294ec2c54b042dd"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x94DaD7d9f37C815Eb4dDC611E6460CC5F6617fA0",
+    "contractCreationTxHash": "0x6ce4f4127284d7d43f3823be2bfa20cd0f5790272fa8dd4bde51246f48109f0f"
+  },
+  "rpcUrl": "https://rpc.plume.org"
+}
