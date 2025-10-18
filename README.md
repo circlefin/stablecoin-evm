@@ -158,7 +158,7 @@ yarn forge:verify scripts/deploy/deploy-fiat-token.s.sol --rpc-url <testnet OR m
 
 ## Contracts
 
-The FiatToken contracts adheres to OpenZeppelin's
+The FiatToken contracts adhere to OpenZeppelin's
 [Proxy Upgrade Pattern](https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies)
 ([permalink](https://github.com/OpenZeppelin/openzeppelin-upgrades/blob/65cf285bd36af24570186ca6409341540c67238a/docs/modules/ROOT/pages/proxies.adoc#L1)).
 There are 2 main contracts - an implementation contract
@@ -203,14 +203,14 @@ controlled by the `blacklister` address.
 Tokens can be minted or burned on demand. The contract supports having multiple
 minters simultaneously. There is a `masterMinter` address which controls the
 list of minters and how much each is allowed to mint. The mint allowance is
-similar to the ERC20 allowance - as each minter mints new tokens their allowance
-decreases. When it gets too low they will need the allowance increased again by
+similar to the ERC20 allowance - as each minter mints new tokens, their allowance
+decreases. When it gets too low, they will need the allowance increased again by
 the `masterMinter`.
 
 ### Ownable
 
-The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`,
-or `masterMinter` addresses. The `owner` can not change the `proxyOwner`
+The contract has an Owner who can change the `owner`, `pauser`, `blacklister`
+and `masterMinter` addresses. The `owner` can not change the `proxyOwner`
 address.
 
 ### Bridge USDC Standard
