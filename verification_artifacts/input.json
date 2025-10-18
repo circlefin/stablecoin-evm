@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x0A06aC031bf6E3D7593c7566E49D28659a6381F4",
+    "contractCreationTxHash": "0x6ef4507184b9e8fa1e2fe1e4ba412d8681a6fdf9f751d623dca962e2debbcc0e"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x564770837Ef8bbF077cFe54E5f6106538c815B22",
+    "contractCreationTxHash": "0x21457dcbd0dc96cb1a85c780788030c8d5f81257dd64ef9ae747ed1318361048"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x12a272A581feE5577A5dFa371afEB4b2F3a8C2F8",
+    "contractCreationTxHash": "0x77922f42c5ed0139753c915c11d8002579c09842712ccbcaf60118bcda7d5719"
+  },
+  "rpcUrl": "https://rpc.berachain-apis.com"
+}
