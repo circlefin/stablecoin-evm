@@ -24,6 +24,7 @@ import { AddressUtils } from "./AddressUtils.sol";
 import { ScriptUtils } from "../ScriptUtils.sol";
 import { Ownable } from "../../../contracts/v1/Ownable.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
+import { MintController } from "../../../contracts/minting/MintController.sol";
 import {
     ICreate2Factory
 } from "../../../contracts/interface/ICreate2Factory.sol";
@@ -34,6 +35,7 @@ import {
  */
 contract DeployMasterMinterCreate2 is ScriptUtils, AddressUtils {
     address private masterMinterOwner;
+    address private fiatTokenAddress;
 
     uint256 private chainId;
     string private tokenSymbol;
@@ -51,12 +53,14 @@ contract DeployMasterMinterCreate2 is ScriptUtils, AddressUtils {
         chainId = vm.envUint("CHAIN_ID");
         tokenSymbol = vm.envString("TOKEN_SYMBOL");
 
+        fiatTokenAddress = vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS");
         masterMinterOwner = vm.envAddress("MASTER_MINTER_OWNER_ADDRESS");
 
         console.log("CREATE2_FACTORY_CONTRACT_ADDRESS: '%s'", factory);
         console.log("DEPLOYER_ADDRESS: '%s'", deployer);
         console.log("CHAIN_ID: '%s'", chainId);
         console.log("TOKEN_SYMBOL: '%s'", tokenSymbol);
+        console.log("FIAT_TOKEN_PROXY_ADDRESS: '%s'", fiatTokenAddress);
         console.log("MASTER_MINTER_OWNER_ADDRESS: '%s'", masterMinterOwner);
     }
 
@@ -81,13 +85,18 @@ contract DeployMasterMinterCreate2 is ScriptUtils, AddressUtils {
         internal
         returns (MasterMinter)
     {
+        bytes memory setMinterManager = abi.encodeWithSelector(
+            MintController.setMinterManager.selector,
+            fiatTokenAddress
+        );
         bytes memory rotateOwner = abi.encodeWithSelector(
             Ownable.transferOwnership.selector,
             masterMinterOwner
         );
 
-        bytes[] memory multiCallData = new bytes[](1);
-        multiCallData[0] = rotateOwner;
+        bytes[] memory multiCallData = new bytes[](2);
+        multiCallData[0] = setMinterManager;
+        multiCallData[1] = rotateOwner;
 
         // Start recording transactions
         vm.startBroadcast(deployer);

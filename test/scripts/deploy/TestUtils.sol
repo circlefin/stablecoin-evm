@@ -336,18 +336,17 @@ contract TestUtils is Test {
     function validateStandaloneMasterMinter(MasterMinter masterMinter)
         internal
     {
+        // Validate that the minter manager is correctly set to the fiat token proxy
+        assertEq(
+            address(masterMinter.getMinterManager()),
+            vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS")
+        );
         assertEq(masterMinter.owner(), masterMinterOwner);
         assertEq(
             masterMinter.getWorker(
                 vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
             ),
             address(0)
-        );
-
-        // Validate minter manager was set correctly to factory
-        assertEq(
-            address(masterMinter.getMinterManager()),
-            vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
         );
     }
 }
