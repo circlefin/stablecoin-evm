@@ -110,6 +110,17 @@ To run tests and generate test coverage, run:
 ```sh
 $ yarn coverage
 ```
+#### Foundry quick commands
+
+If you prefer using Foundry directly, you can run:
+
+```bash
+# Run the Forge test suite
+forge test
+
+# Run a single test file
+forge test --match-path test/FiatToken.t.sol
+```
 
 To check the size of contracts in the repo, run the following command.
 
