@@ -17,6 +17,28 @@
 # limitations under the License.
 
 set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
+# This script bootstraps the local development environment:
+# - installs npm dependencies,
+# - prepares git submodules (if any),
+# - runs initial type generation.
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+cd "$ROOT_DIR"
+
+echo "Installing npm/yarn dependencies..."
+yarn install
+
+echo "Preparing git submodules (if required)..."
+git submodule update --init --recursive
+
+echo "Generating initial TypeScript types..."
+yarn compile || true
+
+echo "Setup complete."
 
 # Refer to https://github.com/foundry-rs/foundry/tags for the list of Foundry versions.
 FOUNDRY_VERSION=nightly-f625d0fa7c51e65b4bf1e8f7931cd1c6e2e285e9
