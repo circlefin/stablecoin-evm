@@ -1,17 +1,26 @@
+# IDE
 .idea/
+
+# Environment files
 .env*
 !.env.example
+
+# OS artefacts
 **/.DS_Store
 
+# Build and cache artefacts
 artifacts/
 broadcast/
 cache/
 @types/generated/
 
+# Node.js dependencies
 node_modules/
 yarn-error.log
 
+# Coverage reports
 coverage/
 coverage.json
 
+# Blacklist fixtures
 blacklist.*.json
