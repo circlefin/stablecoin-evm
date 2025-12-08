@@ -15,8 +15,12 @@
   - generate each contract artifact by doing `make gen`
   - open PR in circle repo
 - Upload the deployment to the drive
-- Run `yarn hardhat run scripts/verifyBridgedTokenBytecode.ts --network mainnet`
-  to ensure the deployment validation will work on circles repo
+- Run `make verify-mainnet` this will run:
+  - `yarn hardhat run scripts/verifyBridgedTokenBytecode.ts --network mainnet`
+    -> Circle's deployment validation in the pipeline.
+  - `yarn hardhat run scripts/verifyProxySlotImplementation.ts --network mainnet`
+    -> Verifier to check implementation slot and implementation address to avoid
+    CPIMP attack.
 
 ## Notes:
 

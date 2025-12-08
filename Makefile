@@ -20,3 +20,7 @@ gen:
 	cat artifacts/foundry/FiatTokenProxy.sol/FiatTokenProxy.json | jq -jr '.rawMetadata' > verification_artifacts/FiatTokenProxy.json
 	cat artifacts/foundry/FiatTokenV2_2.sol/FiatTokenV2_2.json | jq -jr '.rawMetadata' > verification_artifacts/FiatTokenV2_2.json
 
+
+verify-mainnet:
+	yarn hardhat run scripts/verifyBridgedTokenBytecode.ts --network mainnet
+	yarn hardhat run scripts/verifyProxySlotImplementation.ts --network mainnet
