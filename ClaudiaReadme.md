@@ -29,3 +29,8 @@ the proxy in somnia with the implementation
 `0xa6f01ccc347f07256bec0dc7d1a3b62adc3f1a68`
 
 `npx hardhat verify --contract contracts/v1/FiatTokenProxy.sol:FiatTokenProxy --network somnia 0x28bec7e30e6faee657a03e19bf1128aad7632a00 0xa6f01ccc347f07256bec0dc7d1a3b62adc3f1a68 --force`
+
+## Possible Failures
+
+- Failed to get EIP-1559 fees -> Solution: add `--legacy` to the deployment
+  script in the makefile
