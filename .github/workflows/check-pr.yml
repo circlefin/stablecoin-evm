@@ -27,17 +27,17 @@ permissions:
 
 jobs:
   post_run_hardhat_tests:
-    runs-on: ubuntu-latest
+    runs-on: github-hosted-small
     steps:
       - name: Download test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: junit-report-*
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish combined test report
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
         with:
           check_name: upload_test_results
           job_summary: true
