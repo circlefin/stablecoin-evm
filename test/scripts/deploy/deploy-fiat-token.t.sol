@@ -20,9 +20,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
 import { TestUtils } from "./TestUtils.sol";
-import {
-    DeployFiatToken
-} from "../../../scripts/deploy/deploy-fiat-token.s.sol";
+import { DeployFiatToken } from "../../../scripts/deploy/deploy-fiat-token.s.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";

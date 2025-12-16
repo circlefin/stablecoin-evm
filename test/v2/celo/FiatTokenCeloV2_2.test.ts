@@ -149,9 +149,8 @@ describe("FiatTokenCeloV2_2", () => {
         { from: fiatTokenOwner }
       );
 
-      const log = updateFeeCallerEvent.logs[0] as Truffle.TransactionLog<
-        FeeCallerChanged
-      >;
+      const log = updateFeeCallerEvent
+        .logs[0] as Truffle.TransactionLog<FeeCallerChanged>;
       assert.strictEqual(log.event, "FeeCallerChanged");
       assert.strictEqual(log.args.newAddress, newFeeCaller);
     });

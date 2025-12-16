@@ -29,11 +29,9 @@ contract ScriptUtils is Script {
     /**
      * @notice helper function that loads local json
      */
-    function _loadAccountsToBlacklist(string memory blacklistFileName)
-        internal
-        view
-        returns (address[] memory)
-    {
+    function _loadAccountsToBlacklist(
+        string memory blacklistFileName
+    ) internal view returns (address[] memory) {
         string memory json = vm.readFile(blacklistFileName);
         return vm.parseJsonAddressArray(json, "");
     }
@@ -45,7 +43,9 @@ contract ScriptUtils is Script {
      * @return minters Array of minter addresses
      * @return minterAllowances Array of minter allowances
      */
-    function _loadMinterConfiguration(string memory mintersFileName)
+    function _loadMinterConfiguration(
+        string memory mintersFileName
+    )
         internal
         view
         returns (
@@ -75,11 +75,10 @@ contract ScriptUtils is Script {
     /**
      * @dev Returns true if the two strings are equal.
      */
-    function stringsEqual(string memory a, string memory b)
-        internal
-        pure
-        returns (bool)
-    {
+    function stringsEqual(
+        string memory a,
+        string memory b
+    ) internal pure returns (bool) {
         return
             bytes(a).length == bytes(b).length &&
             keccak256(bytes(a)) == keccak256(bytes(b));

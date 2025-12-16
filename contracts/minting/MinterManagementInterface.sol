@@ -28,9 +28,10 @@ interface MinterManagementInterface {
 
     function minterAllowance(address _minter) external view returns (uint256);
 
-    function configureMinter(address _minter, uint256 _minterAllowedAmount)
-        external
-        returns (bool);
+    function configureMinter(
+        address _minter,
+        uint256 _minterAllowedAmount
+    ) external returns (bool);
 
     function removeMinter(address _minter) external returns (bool);
 }

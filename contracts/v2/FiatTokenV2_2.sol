@@ -68,7 +68,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      * @dev Internal function to get the current chain id.
      * @return The current chain id.
      */
-    function _chainId() internal virtual view returns (uint256) {
+    function _chainId() internal view virtual returns (uint256) {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -79,7 +79,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
      * @inheritdoc EIP712Domain
      */
-    function _domainSeparator() internal override view returns (bytes32) {
+    function _domainSeparator() internal view override returns (bytes32) {
         return EIP712.makeDomainSeparator(name, "2", _chainId());
     }
 
@@ -193,10 +193,10 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      * @param _account         The address of the account.
      * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
      */
-    function _setBlacklistState(address _account, bool _shouldBlacklist)
-        internal
-        override
-    {
+    function _setBlacklistState(
+        address _account,
+        bool _shouldBlacklist
+    ) internal override {
         balanceAndBlacklistStates[_account] = _shouldBlacklist
             ? balanceAndBlacklistStates[_account] | (1 << 255)
             : _balanceOf(_account);
@@ -227,12 +227,9 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
      * @inheritdoc Blacklistable
      */
-    function _isBlacklisted(address _account)
-        internal
-        override
-        view
-        returns (bool)
-    {
+    function _isBlacklisted(
+        address _account
+    ) internal view override returns (bool) {
         return balanceAndBlacklistStates[_account] >> 255 == 1;
     }
 
@@ -244,24 +241,19 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      * @param _account  The address of the account.
      * @return          The fiat token balance of the account.
      */
-    function _balanceOf(address _account)
-        internal
-        override
-        view
-        returns (uint256)
-    {
+    function _balanceOf(
+        address _account
+    ) internal view override returns (uint256) {
         return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
     }
 
     /**
      * @inheritdoc FiatTokenV1
      */
-    function approve(address spender, uint256 value)
-        external
-        override
-        whenNotPaused
-        returns (bool)
-    {
+    function approve(
+        address spender,
+        uint256 value
+    ) external override whenNotPaused returns (bool) {
         _approve(msg.sender, spender, value);
         return true;
     }
@@ -284,12 +276,10 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
      * @inheritdoc FiatTokenV2
      */
-    function increaseAllowance(address spender, uint256 increment)
-        external
-        override
-        whenNotPaused
-        returns (bool)
-    {
+    function increaseAllowance(
+        address spender,
+        uint256 increment
+    ) external override whenNotPaused returns (bool) {
         _increaseAllowance(msg.sender, spender, increment);
         return true;
     }
@@ -297,12 +287,10 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
     /**
      * @inheritdoc FiatTokenV2
      */
-    function decreaseAllowance(address spender, uint256 decrement)
-        external
-        override
-        whenNotPaused
-        returns (bool)
-    {
+    function decreaseAllowance(
+        address spender,
+        uint256 decrement
+    ) external override whenNotPaused returns (bool) {
         _decreaseAllowance(msg.sender, spender, decrement);
         return true;
     }

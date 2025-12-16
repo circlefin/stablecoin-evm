@@ -58,8 +58,8 @@ interface ICreate2Factory {
      * @param bytecodeHash The keccak256 hash of the deployment bytecode.
      * @return addr The deterministic address
      */
-    function computeAddress(bytes32 salt, bytes32 bytecodeHash)
-        external
-        view
-        returns (address addr);
+    function computeAddress(
+        bytes32 salt,
+        bytes32 bytecodeHash
+    ) external view returns (address addr);
 }

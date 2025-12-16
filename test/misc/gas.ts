@@ -259,9 +259,9 @@ describe(`gas costs for version ${TARGET_VERSION}`, () => {
     // permit() is overloaded as of 2.2, so we need to specify which permit()
     // version to hit. In this case, the EOA version.
     if (Number(TARGET_VERSION) >= 2.2) {
-      (fiatToken as FiatTokenV2_2InstanceExtended).permit = (fiatToken as FiatTokenV2_2InstanceExtended).methods[
-        permitSignature
-      ];
+      (fiatToken as FiatTokenV2_2InstanceExtended).permit = (
+        fiatToken as FiatTokenV2_2InstanceExtended
+      ).methods[permitSignature];
     }
 
     const signature = signPermit(
@@ -298,9 +298,9 @@ describe(`gas costs for version ${TARGET_VERSION}`, () => {
     // permit() is overloaded as of 2.2, so we need to specify which permit()
     // version to hit. In this case, the EIP-1271 version.
     {
-      (fiatToken as FiatTokenV2_2InstanceExtended).permit = (fiatToken as FiatTokenV2_2InstanceExtended).methods[
-        permitSignatureV22
-      ];
+      (fiatToken as FiatTokenV2_2InstanceExtended).permit = (
+        fiatToken as FiatTokenV2_2InstanceExtended
+      ).methods[permitSignatureV22];
     }
 
     const signature = signPermit(

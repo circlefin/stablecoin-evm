@@ -232,7 +232,7 @@ export function initializeOverloadedMethods(
 }
 
 export async function linkLibraryToTokenContract<
-  T extends Truffle.ContractInstance
+  T extends Truffle.ContractInstance,
 >(tokenContract: Truffle.Contract<T>): Promise<void> {
   try {
     const signatureChecker = await SignatureChecker.new();

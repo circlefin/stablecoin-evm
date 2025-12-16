@@ -30,14 +30,10 @@ import { FiatTokenV1 } from "../../../contracts/v1/FiatTokenV1.sol";
 import { FiatTokenV2 } from "../../../contracts/v2/FiatTokenV2.sol";
 import { FiatTokenV2_1 } from "../../../contracts/v2/FiatTokenV2_1.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
-import {
-    AdminUpgradeabilityProxy
-} from "../../../contracts/upgradeability/AdminUpgradeabilityProxy.sol";
+import { AdminUpgradeabilityProxy } from "../../../contracts/upgradeability/AdminUpgradeabilityProxy.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { MintController } from "../../../contracts/minting/MintController.sol";
-import {
-    ICreate2Factory
-} from "../../../contracts/interface/ICreate2Factory.sol";
+import { ICreate2Factory } from "../../../contracts/interface/ICreate2Factory.sol";
 
 /**
  * A utility script to generate transactions that deploy fiat token contracts.
@@ -131,14 +127,9 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
     /**
      * @dev For testing only: splitting deploy logic into an internal function to expose for testing
      */
-    function _deploy(address _impl)
-        internal
-        returns (
-            FiatTokenV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function _deploy(
+        address _impl
+    ) internal returns (FiatTokenV2_2, MasterMinter, FiatTokenProxy) {
         FiatTokenV2_2 implementation;
         if (_impl == address(0)) {
             implementation = _deployAndInitializeImpl(deployer);
@@ -162,14 +153,9 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
     /**
      * @dev For testing only: Helper function that runs deploy script with a specific implementation address
      */
-    function deploy(address _impl)
-        external
-        returns (
-            FiatTokenV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function deploy(
+        address _impl
+    ) external returns (FiatTokenV2_2, MasterMinter, FiatTokenProxy) {
         return _deploy(_impl);
     }
 
@@ -181,10 +167,9 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      *
      * @param deployer The address that will send the FiatTokenV2_2 deployment transaction
      */
-    function _deployAndInitializeImpl(address deployer)
-        internal
-        returns (FiatTokenV2_2)
-    {
+    function _deployAndInitializeImpl(
+        address deployer
+    ) internal returns (FiatTokenV2_2) {
         bytes memory initializer = abi.encodeWithSelector(
             FiatTokenV1.initialize.selector,
             "",
@@ -251,10 +236,10 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      * @param _impl The implementation address to upgrade to
      * @param deployer The address that will send the proxy deployment transaction
      */
-    function _deployAndInitializeProxy(address _impl, address deployer)
-        internal
-        returns (FiatTokenProxy)
-    {
+    function _deployAndInitializeProxy(
+        address _impl,
+        address deployer
+    ) internal returns (FiatTokenProxy) {
         // Construct initializers
         bytes memory initializer = abi.encodeWithSelector(
             FiatTokenV1.initialize.selector,
@@ -303,7 +288,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
             owner
         );
 
-        uint256 n = 6 + /* number of function calls prior to blacklisting */
+        uint256 n = 6 /* number of function calls prior to blacklisting */ +
             addressesToBlacklist.length +
             2; /* number of function calls after blacklisting */
         bytes[] memory multiCallData = new bytes[](n);
@@ -356,10 +341,10 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      * @param proxyAddress The implementation address to upgrade to
      * @param deployer The address that will send the master minter deployment transaction
      */
-    function _deployMasterMinter(address proxyAddress, address deployer)
-        internal
-        returns (MasterMinter)
-    {
+    function _deployMasterMinter(
+        address proxyAddress,
+        address deployer
+    ) internal returns (MasterMinter) {
         FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(proxyAddress);
         uint256 decimals = proxyAsV2_2.decimals();
 
@@ -376,23 +361,25 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
             masterMinterOwner
         );
 
-        uint256 n = 1 + /* number of function calls prior to configuring minters */
-            minters.length *
-            3 + /* number of function calls for each minter */
-            ((minters.length > 0) ? 2 : 1); /* number of function calls after configuring minters (extra call to remove controller if minters are configured) */
+        uint256 n = 1 /* number of function calls prior to configuring minters */ +
+                minters.length *
+                3 /* number of function calls for each minter */ +
+                (
+                    (minters.length > 0) ? 2 : 1
+                ); /* number of function calls after configuring minters (extra call to remove controller if minters are configured) */
         bytes[] memory multiCallData = new bytes[](n);
         multiCallData[0] = setMinterManager;
 
         for (uint256 i = 0; i < minters.length; i++) {
             bytes memory configureControllerWithFactory = abi
                 .encodeWithSelector(
-                Controller.configureController.selector,
-                factory,
-                minters[i]
-            );
+                    Controller.configureController.selector,
+                    factory,
+                    minters[i]
+                );
             bytes memory configureMinter = abi.encodeWithSelector(
                 MintController.configureMinter.selector,
-                minterAllowances[i] * 10**decimals
+                minterAllowances[i] * 10 ** decimals
             );
             bytes memory configureController = abi.encodeWithSelector(
                 Controller.configureController.selector,
@@ -433,11 +420,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      */
     function run()
         external
-        returns (
-            FiatTokenV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
+        returns (FiatTokenV2_2, MasterMinter, FiatTokenProxy)
     {
         return _deploy(impl);
     }

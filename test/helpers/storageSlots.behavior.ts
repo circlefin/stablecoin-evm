@@ -33,7 +33,7 @@ export const STORAGE_SLOT_NUMBERS = {
 };
 
 export function usesOriginalStorageSlotPositions<
-  T extends Truffle.ContractInstance
+  T extends Truffle.ContractInstance,
 >({
   Contract,
   version,
@@ -44,10 +44,7 @@ export function usesOriginalStorageSlotPositions<
   describe("uses original storage slot positions", () => {
     const [name, symbol, currency, decimals] = ["USDC", "USDC", "USD", 6];
     const [mintAllowance, minted, transferred, allowance] = [
-      1000e6,
-      100e6,
-      30e6,
-      10e6,
+      1000e6, 100e6, 30e6, 10e6,
     ];
     const [mintedBN, transferredBN] = [minted, transferred].map(
       (v) => new BN(v, 10)

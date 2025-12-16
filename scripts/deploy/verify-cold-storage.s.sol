@@ -150,10 +150,10 @@ contract VerifyColdStorage is Script, ScriptUtils {
             console.log(
                 "Minter: %s, Allowance: %d",
                 minters[i],
-                proxyAsV2_2.minterAllowance(minters[i]) / 10**decimals
+                proxyAsV2_2.minterAllowance(minters[i]) / 10 ** decimals
             );
             require(
-                proxyAsV2_2.minterAllowance(minters[i]) / 10**decimals ==
+                proxyAsV2_2.minterAllowance(minters[i]) / 10 ** decimals ==
                     minterAllowances[i],
                 "Minter allowance does not match config"
             );

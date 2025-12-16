@@ -132,11 +132,9 @@ contract FiatTokenUtil {
      * @param packed Packed data (40 bytes)
      * @return Unpacked data (64 bytes)
      */
-    function _unpackAddresses(bytes memory packed)
-        private
-        pure
-        returns (bytes memory)
-    {
+    function _unpackAddresses(
+        bytes memory packed
+    ) private pure returns (bytes memory) {
         address addr1;
         address addr2;
         assembly {
@@ -150,10 +148,9 @@ contract FiatTokenUtil {
      * @dev Revert with reason string extracted from the return data
      * @param returnData    Return data from a call
      */
-    function _revertWithReasonFromReturnData(bytes memory returnData)
-        private
-        pure
-    {
+    function _revertWithReasonFromReturnData(
+        bytes memory returnData
+    ) private pure {
         // Return data will be at least 100 bytes if it contains the reason
         // string: Error(string) selector[4] + string offset[32] + string
         // length[32] + string data[32] = 100

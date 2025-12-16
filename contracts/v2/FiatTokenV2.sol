@@ -51,7 +51,10 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      * @param increment Amount of increase in allowance
      * @return True if successful
      */
-    function increaseAllowance(address spender, uint256 increment)
+    function increaseAllowance(
+        address spender,
+        uint256 increment
+    )
         external
         virtual
         whenNotPaused
@@ -69,7 +72,10 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      * @param decrement Amount of decrease in allowance
      * @return True if successful
      */
-    function decreaseAllowance(address spender, uint256 decrement)
+    function decreaseAllowance(
+        address spender,
+        uint256 decrement
+    )
         external
         virtual
         whenNotPaused

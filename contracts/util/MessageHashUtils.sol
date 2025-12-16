@@ -38,11 +38,10 @@ library MessageHashUtils {
      * @param structHash         Hashed EIP-712 data struct
      * @return digest            The keccak256 digest of an EIP-712 typed data
      */
-    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
-        internal
-        pure
-        returns (bytes32 digest)
-    {
+    function toTypedDataHash(
+        bytes32 domainSeparator,
+        bytes32 structHash
+    ) internal pure returns (bytes32 digest) {
         assembly {
             let ptr := mload(0x40)
             mstore(ptr, "\x19\x01")

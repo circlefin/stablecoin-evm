@@ -20,9 +20,7 @@ pragma solidity 0.6.12;
 import { FiatTokenV2_1 } from "../../../v2/FiatTokenV2_1.sol";
 import { V2UpgraderHelper } from "./V2UpgraderHelper.sol";
 import { V2_2UpgraderHelper } from "./V2_2UpgraderHelper.sol";
-import {
-    FiatTokenV2_2MetadataUpdateExtension
-} from "../../../v2/FiatTokenV2_2MetadataUpdateExtension.sol";
+import { FiatTokenV2_2MetadataUpdateExtension } from "../../../v2/FiatTokenV2_2MetadataUpdateExtension.sol";
 
 /**
  * @title MetadataUpdateUpgraderHelper
@@ -34,10 +32,9 @@ contract MetadataUpdateUpgraderHelper is V2_2UpgraderHelper {
      * @notice Constructor
      * @param fiatTokenProxy    Address of the FiatTokenProxy contract
      */
-    constructor(address fiatTokenProxy)
-        public
-        V2_2UpgraderHelper(fiatTokenProxy)
-    {}
+    constructor(
+        address fiatTokenProxy
+    ) public V2_2UpgraderHelper(fiatTokenProxy) {}
 
     /**
      * @notice Updates the token metadata (name, symbol, and currency)

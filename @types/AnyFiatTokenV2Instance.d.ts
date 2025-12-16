@@ -29,12 +29,10 @@ export interface V2_2ExtendedInterface {
 }
 
 export interface FiatTokenV2_2InstanceExtended
-  extends FiatTokenV2_2Instance,
-    V2_2ExtendedInterface {}
+  extends FiatTokenV2_2Instance, V2_2ExtendedInterface {}
 
 export interface FiatTokenCeloV2_2InstanceExtended
-  extends FiatTokenCeloV2_2Instance,
-    V2_2ExtendedInterface {
+  extends FiatTokenCeloV2_2Instance, V2_2ExtendedInterface {
   mint: typeof FiatTokenV2Instance.mint;
 }
 

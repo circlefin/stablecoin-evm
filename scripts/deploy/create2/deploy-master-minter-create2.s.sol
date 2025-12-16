@@ -25,9 +25,7 @@ import { ScriptUtils } from "../ScriptUtils.sol";
 import { Ownable } from "../../../contracts/v1/Ownable.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { MintController } from "../../../contracts/minting/MintController.sol";
-import {
-    ICreate2Factory
-} from "../../../contracts/interface/ICreate2Factory.sol";
+import { ICreate2Factory } from "../../../contracts/interface/ICreate2Factory.sol";
 
 /**
  * A utility script to generate transactions that deploy fiat token contracts.
@@ -81,10 +79,9 @@ contract DeployMasterMinterCreate2 is ScriptUtils, AddressUtils {
      *
      * @param deployer The address that will send the master minter deployment transaction
      */
-    function _deployMasterMinter(address deployer)
-        internal
-        returns (MasterMinter)
-    {
+    function _deployMasterMinter(
+        address deployer
+    ) internal returns (MasterMinter) {
         bytes memory setMinterManager = abi.encodeWithSelector(
             MintController.setMinterManager.selector,
             fiatTokenAddress

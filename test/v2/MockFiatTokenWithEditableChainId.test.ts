@@ -54,7 +54,8 @@ describe("MockFiatTokenWithEditableChainId", () => {
   describe("DOMAIN_SEPARATOR", () => {
     it("domain separator gets recalculated after chain ID changes", async () => {
       const chainId: number = (await fiatToken.chainId()).toNumber();
-      const originalDomainSeparator: string = await fiatToken.DOMAIN_SEPARATOR();
+      const originalDomainSeparator: string =
+        await fiatToken.DOMAIN_SEPARATOR();
       assert.equal(
         originalDomainSeparator,
         makeDomainSeparator(name, version, chainId, fiatToken.address)

@@ -73,10 +73,9 @@ contract DeployImplAndUpgrader is Script, DeployImpl, ScriptUtils {
     /**
      * @dev For testing only: splitting deploy logic into an internal function to expose for testing
      */
-    function _deploy(address _impl)
-        internal
-        returns (FiatTokenV2_2, V2_2Upgrader)
-    {
+    function _deploy(
+        address _impl
+    ) internal returns (FiatTokenV2_2, V2_2Upgrader) {
         vm.startBroadcast(deployerPrivateKey);
 
         FiatTokenV2_2 fiatTokenV2_2 = getOrDeployImpl(_impl);
@@ -96,10 +95,9 @@ contract DeployImplAndUpgrader is Script, DeployImpl, ScriptUtils {
     /**
      * @dev For testing only: Helper function that runs deploy script with a specific implementation address
      */
-    function deploy(address _impl)
-        external
-        returns (FiatTokenV2_2, V2_2Upgrader)
-    {
+    function deploy(
+        address _impl
+    ) external returns (FiatTokenV2_2, V2_2Upgrader) {
         return _deploy(_impl);
     }
 

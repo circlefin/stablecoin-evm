@@ -24,9 +24,7 @@ import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { Blacklistable } from "../../../contracts/v1/Blacklistable.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenCeloV2_2 } from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 import { Create2Factory } from "../../../contracts/test/Create2Factory.sol";
 
 // solhint-disable max-states-count
@@ -63,27 +61,20 @@ contract TestUtils is Test {
     address internal prodBurner = vm.addr(prodBurnerPrivateKey);
     address internal stgMinter = vm.addr(stgMinterPrivateKey);
     address internal stgBurner = vm.addr(stgBurnerPrivateKey);
-    address internal prodMinterControllerIncrementer = vm.addr(
-        prodMinterControllerIncrementerPrivateKey
-    );
-    address internal prodMinterControllerRemover = vm.addr(
-        prodMinterControllerRemoverPrivateKey
-    );
-    address internal prodBurnerController = vm.addr(
-        prodBurnerControllerPrivateKey
-    );
-    address internal stgMinterControllerIncrementer = vm.addr(
-        stgMinterControllerIncrementerPrivateKey
-    );
-    address internal stgMinterControllerRemover = vm.addr(
-        stgMinterControllerRemoverPrivateKey
-    );
-    address internal stgBurnerController = vm.addr(
-        stgBurnerControllerPrivateKey
-    );
-    address internal coldMasterMinterOwner = vm.addr(
-        coldMasterMinterOwnerPrivateKey
-    );
+    address internal prodMinterControllerIncrementer =
+        vm.addr(prodMinterControllerIncrementerPrivateKey);
+    address internal prodMinterControllerRemover =
+        vm.addr(prodMinterControllerRemoverPrivateKey);
+    address internal prodBurnerController =
+        vm.addr(prodBurnerControllerPrivateKey);
+    address internal stgMinterControllerIncrementer =
+        vm.addr(stgMinterControllerIncrementerPrivateKey);
+    address internal stgMinterControllerRemover =
+        vm.addr(stgMinterControllerRemoverPrivateKey);
+    address internal stgBurnerController =
+        vm.addr(stgBurnerControllerPrivateKey);
+    address internal coldMasterMinterOwner =
+        vm.addr(coldMasterMinterOwnerPrivateKey);
     address internal coldProxyAdmin = vm.addr(coldProxyAdminPrivateKey);
     address internal coldOwner = vm.addr(coldOwnerPrivateKey);
     address internal coldPauser = vm.addr(coldPauserPrivateKey);
@@ -261,9 +252,10 @@ contract TestUtils is Test {
         assertEq(impl.blacklister(), address(1));
     }
 
-    function validateMasterMinter(MasterMinter masterMinter, address _proxy)
-        internal
-    {
+    function validateMasterMinter(
+        MasterMinter masterMinter,
+        address _proxy
+    ) internal {
         assertEq(masterMinter.owner(), masterMinterOwner);
         assertEq(address(masterMinter.getMinterManager()), _proxy);
     }
@@ -322,9 +314,10 @@ contract TestUtils is Test {
         assertEq(proxyAsV2_2.minterAllowance(minters[2]), 0);
     }
 
-    function validateAddressesBlacklistedState(address proxy, bool blacklisted)
-        internal
-    {
+    function validateAddressesBlacklistedState(
+        address proxy,
+        bool blacklisted
+    ) internal {
         for (uint256 i = 0; i < accountsToBlacklist.length; i++) {
             assertEq(
                 Blacklistable(proxy).isBlacklisted(accountsToBlacklist[i]),
@@ -333,9 +326,9 @@ contract TestUtils is Test {
         }
     }
 
-    function validateStandaloneMasterMinter(MasterMinter masterMinter)
-        internal
-    {
+    function validateStandaloneMasterMinter(
+        MasterMinter masterMinter
+    ) internal {
         // Validate that the minter manager is correctly set to the fiat token proxy
         assertEq(
             address(masterMinter.getMinterManager()),

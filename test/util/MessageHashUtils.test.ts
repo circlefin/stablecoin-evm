@@ -28,7 +28,8 @@ const MessageHashUtils = artifacts.require("MessageHashUtilsTest");
 describe("MessageHashUtils", function () {
   context("toTypedDataHash", function () {
     it("returns the digest correctly", async function () {
-      const messageHashUtils: MessageHashUtilsTestInstance = await MessageHashUtils.new();
+      const messageHashUtils: MessageHashUtilsTestInstance =
+        await MessageHashUtils.new();
       const structhash: string = web3.utils.randomHex(32);
       const domainSeparator: string = makeDomainSeparator(
         "USDC",

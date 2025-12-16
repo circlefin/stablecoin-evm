@@ -20,14 +20,10 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
 import { TestUtils } from "./../TestUtils.sol";
-import {
-    DeployFiatTokenCelo
-} from "../../../../scripts/deploy/celo/deploy-fiat-token-celo.s.sol";
+import { DeployFiatTokenCelo } from "../../../../scripts/deploy/celo/deploy-fiat-token-celo.s.sol";
 import { MasterMinter } from "../../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../../contracts/v1/FiatTokenProxy.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenCeloV2_2 } from "../../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 
 // solhint-disable func-name-mixedcase
 

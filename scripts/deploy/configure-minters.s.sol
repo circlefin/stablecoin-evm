@@ -110,7 +110,7 @@ contract ConfigureMinters is Script, ScriptUtils {
                 minters[i]
             );
             masterMinterContract.configureMinter(
-                minterAllowances[i] * 10**decimals
+                minterAllowances[i] * 10 ** decimals
             );
             masterMinterContract.configureController(
                 minterControllers[i],
