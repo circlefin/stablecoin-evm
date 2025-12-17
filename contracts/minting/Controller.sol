@@ -67,10 +67,10 @@ contract Controller is Ownable {
      * _worker must not be a non-zero address. To disable a worker,
      * use removeController instead.
      */
-    function configureController(address _controller, address _worker)
-        public
-        onlyOwner
-    {
+    function configureController(
+        address _controller,
+        address _worker
+    ) public onlyOwner {
         require(
             _controller != address(0),
             "Controller must be a non-zero address"

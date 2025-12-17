@@ -100,11 +100,9 @@ abstract contract Blacklistable is Ownable {
      * @param _account The address to check.
      * @return true if the account is blacklisted, false otherwise.
      */
-    function _isBlacklisted(address _account)
-        internal
-        virtual
-        view
-        returns (bool);
+    function _isBlacklisted(
+        address _account
+    ) internal view virtual returns (bool);
 
     /**
      * @dev Helper method that blacklists an account.

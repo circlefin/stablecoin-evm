@@ -19,9 +19,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import { Test } from "forge-std/Test.sol";
-import {
-    FiatTokenV2_2MetadataUpdateExtension
-} from "../../contracts/v2/FiatTokenV2_2MetadataUpdateExtension.sol";
+import { FiatTokenV2_2MetadataUpdateExtension } from "../../contracts/v2/FiatTokenV2_2MetadataUpdateExtension.sol";
 
 contract FiatTokenV2_2MetadataExtensionTest is Test {
     FiatTokenV2_2MetadataUpdateExtension private metadataExtension;

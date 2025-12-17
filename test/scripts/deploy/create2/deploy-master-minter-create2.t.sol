@@ -20,12 +20,8 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
 import { TestUtils } from "../TestUtils.sol";
-import {
-    AddressUtils
-} from "../../../../scripts/deploy/create2/AddressUtils.sol";
-import {
-    DeployMasterMinterCreate2
-} from "../../../../scripts/deploy/create2/deploy-master-minter-create2.s.sol";
+import { AddressUtils } from "../../../../scripts/deploy/create2/AddressUtils.sol";
+import { DeployMasterMinterCreate2 } from "../../../../scripts/deploy/create2/deploy-master-minter-create2.s.sol";
 import { MasterMinter } from "../../../../contracts/minting/MasterMinter.sol";
 
 // solhint-disable func-name-mixedcase

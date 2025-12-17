@@ -83,9 +83,8 @@ describe("FiatTokenV2_2", () => {
     });
 
     it("should blacklist all accountsToBlacklist", async () => {
-      const [unblacklistedAccount, ...accountsToBlacklist] = generateAccounts(
-        10
-      );
+      const [unblacklistedAccount, ...accountsToBlacklist] =
+        generateAccounts(10);
 
       // Prepare a proxy that's tied to a V2_1 implementation so that we can blacklist
       // the account in _deprecatedBlacklisted first.

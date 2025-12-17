@@ -20,12 +20,8 @@ pragma solidity 0.6.12;
 
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
-import {
-    MetadataUpdateUpgraderHelper
-} from "./helpers/MetadataUpdateUpgraderHelper.sol";
-import {
-    FiatTokenV2_2MetadataUpdateExtension
-} from "../FiatTokenV2_2MetadataUpdateExtension.sol";
+import { MetadataUpdateUpgraderHelper } from "./helpers/MetadataUpdateUpgraderHelper.sol";
+import { FiatTokenV2_2MetadataUpdateExtension } from "../FiatTokenV2_2MetadataUpdateExtension.sol";
 import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
 
 /**

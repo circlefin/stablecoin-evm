@@ -31,29 +31,29 @@ contract MockFiatTokenWithEditableBalanceAndBlacklistStates is FiatTokenV2_2 {
      * @dev Allows the balanceAndBlacklistStates to be manipulated. This
      * enables us to properly test the ERC20 functionalities.
      */
-    function setBalanceAndBlacklistStates(address _account, uint256 _state)
-        external
-    {
+    function setBalanceAndBlacklistStates(
+        address _account,
+        uint256 _state
+    ) external {
         balanceAndBlacklistStates[_account] = _state;
     }
 
     /**
      * @dev Allows the balanceAndBlacklistStates to be read as plain values.
      */
-    function getBalanceAndBlacklistStates(address _account)
-        external
-        view
-        returns (uint256)
-    {
+    function getBalanceAndBlacklistStates(
+        address _account
+    ) external view returns (uint256) {
         return balanceAndBlacklistStates[_account];
     }
 
     /**
      * @dev Exposes the internal function for unit testing.
      */
-    function internal_setBlacklistState(address _account, bool _shouldBlacklist)
-        external
-    {
+    function internal_setBlacklistState(
+        address _account,
+        bool _shouldBlacklist
+    ) external {
         _setBlacklistState(_account, _shouldBlacklist);
     }
 
@@ -67,22 +67,18 @@ contract MockFiatTokenWithEditableBalanceAndBlacklistStates is FiatTokenV2_2 {
     /**
      * @dev Exposes the internal function for unit testing.
      */
-    function internal_isBlacklisted(address _account)
-        external
-        view
-        returns (bool)
-    {
+    function internal_isBlacklisted(
+        address _account
+    ) external view returns (bool) {
         return _isBlacklisted(_account);
     }
 
     /**
      * @dev Exposes the internal function for unit testing.
      */
-    function internal_balanceOf(address _account)
-        external
-        view
-        returns (uint256)
-    {
+    function internal_balanceOf(
+        address _account
+    ) external view returns (uint256) {
         return _balanceOf(_account);
     }
 }

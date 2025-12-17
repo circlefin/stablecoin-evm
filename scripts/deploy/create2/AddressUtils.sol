@@ -32,19 +32,16 @@ contract AddressUtils is ScriptUtils {
      * @dev Salt values for SignatureChecker, FiatTokenProxy, FiatTokenV2_2, and MasterMinter as defined as follows
      */
 
-    function signatureCheckerSalt(uint256 chainId)
-        public
-        view
-        returns (bytes32 salt)
-    {
+    function signatureCheckerSalt(
+        uint256 chainId
+    ) public view returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId));
     }
 
-    function proxySalt(uint256 chainId, string memory tokenSymbol)
-        public
-        view
-        returns (bytes32 salt)
-    {
+    function proxySalt(
+        uint256 chainId,
+        string memory tokenSymbol
+    ) public view returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId, tokenSymbol));
     }
 
@@ -52,11 +49,10 @@ contract AddressUtils is ScriptUtils {
         return keccak256(abi.encodePacked(chainId));
     }
 
-    function masterMinterSalt(uint256 chainId, string memory tokenSymbol)
-        public
-        view
-        returns (bytes32 salt)
-    {
+    function masterMinterSalt(
+        uint256 chainId,
+        string memory tokenSymbol
+    ) public view returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId, tokenSymbol));
     }
 
@@ -86,11 +82,9 @@ contract AddressUtils is ScriptUtils {
      * @notice Deterministic creation code for FiatTokenProxy, where initial implementation is set to the factory address
      * @param factory The factory address to set in the proxy
      */
-    function proxyCreationCode(address factory)
-        public
-        pure
-        returns (bytes memory creationCode)
-    {
+    function proxyCreationCode(
+        address factory
+    ) public pure returns (bytes memory creationCode) {
         return
             abi.encodePacked(
                 type(FiatTokenProxy).creationCode,
@@ -102,11 +96,9 @@ contract AddressUtils is ScriptUtils {
      * @notice Deterministic creation code for MasterMinter, where initial mint manager is set to the factory address
      * @param factory The factory address to set in
      */
-    function masterMinterCreationCode(address factory)
-        public
-        pure
-        returns (bytes memory creationCode)
-    {
+    function masterMinterCreationCode(
+        address factory
+    ) public pure returns (bytes memory creationCode) {
         return
             abi.encodePacked(
                 type(MasterMinter).creationCode,
@@ -119,11 +111,10 @@ contract AddressUtils is ScriptUtils {
      * @param chainId The ID of the chain we're deploying on
      * @param factory The factory address that would deploy SignatureChecker
      */
-    function computeSignatureCheckerAddress(uint256 chainId, address factory)
-        public
-        view
-        returns (address)
-    {
+    function computeSignatureCheckerAddress(
+        uint256 chainId,
+        address factory
+    ) public view returns (address) {
         return
             vm.computeCreate2Address(
                 signatureCheckerSalt(chainId),
@@ -137,11 +128,10 @@ contract AddressUtils is ScriptUtils {
      * @param chainId The ID of the chain we're deploying on
      * @param factory The factory address that would deploy FiatTokenV2_2
      */
-    function computeImplAddress(uint256 chainId, address factory)
-        public
-        view
-        returns (address)
-    {
+    function computeImplAddress(
+        uint256 chainId,
+        address factory
+    ) public view returns (address) {
         return
             vm.computeCreate2Address(
                 implSalt(chainId),

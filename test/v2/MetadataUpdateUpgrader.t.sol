@@ -19,17 +19,11 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import { Test } from "forge-std/Test.sol";
-import {
-    FiatTokenV2_2MetadataUpdateExtension
-} from "../../contracts/v2/FiatTokenV2_2MetadataUpdateExtension.sol";
+import { FiatTokenV2_2MetadataUpdateExtension } from "../../contracts/v2/FiatTokenV2_2MetadataUpdateExtension.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
-import {
-    MetadataUpdateUpgrader
-} from "../../contracts/v2/upgrader/MetadataUpdateUpgrader.sol";
-import {
-    UpgradeabilityProxy
-} from "../../contracts/upgradeability/UpgradeabilityProxy.sol";
+import { MetadataUpdateUpgrader } from "../../contracts/v2/upgrader/MetadataUpdateUpgrader.sol";
+import { UpgradeabilityProxy } from "../../contracts/upgradeability/UpgradeabilityProxy.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -320,11 +314,9 @@ contract MetadataUpdateUpgraderTest is Test {
     }
 
     // Helper function to get the code size of a contract
-    function getContractCodeSize(address addr)
-        internal
-        view
-        returns (uint256 size)
-    {
+    function getContractCodeSize(
+        address addr
+    ) internal view returns (uint256 size) {
         assembly {
             size := extcodesize(addr)
         }

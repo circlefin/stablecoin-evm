@@ -20,15 +20,9 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
 import { TestUtils } from "./TestUtils.sol";
-import {
-    ColdStorageTransfer
-} from "../../../scripts/deploy/cold-storage-transfer.s.sol";
-import {
-    VerifyColdStorage
-} from "../../../scripts/deploy/verify-cold-storage.s.sol";
-import {
-    ConfigureMinters
-} from "../../../scripts/deploy/configure-minters.s.sol";
+import { ColdStorageTransfer } from "../../../scripts/deploy/cold-storage-transfer.s.sol";
+import { VerifyColdStorage } from "../../../scripts/deploy/verify-cold-storage.s.sol";
+import { ConfigureMinters } from "../../../scripts/deploy/configure-minters.s.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";

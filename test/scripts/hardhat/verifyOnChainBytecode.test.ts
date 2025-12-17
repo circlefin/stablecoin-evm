@@ -60,7 +60,8 @@ describe("Verify on chain bytecode", () => {
         (await v22.getAddress()).slice(2),
       await hre.ethers.getSigner(HARDHAT_ACCOUNTS[0])
     );
-    opMainnetArtifactFiatTokenProxy = await opMainnetFiatTokenProxyFactory.deploy();
+    opMainnetArtifactFiatTokenProxy =
+      await opMainnetFiatTokenProxyFactory.deploy();
     await opMainnetArtifactFiatTokenProxy.waitForDeployment();
   });
 
@@ -264,8 +265,8 @@ describe("Verify on chain bytecode", () => {
           contractAddress: await opMainnetArtifactFiatTokenProxy.getAddress(),
           verificationType: BytecodeVerificationType.Full,
           artifactType: ArtifactType.OPMainnet,
-          contractCreationTxHash: opMainnetArtifactFiatTokenProxy.deploymentTransaction()
-            ?.hash,
+          contractCreationTxHash:
+            opMainnetArtifactFiatTokenProxy.deploymentTransaction()?.hash,
         },
         hre
       )

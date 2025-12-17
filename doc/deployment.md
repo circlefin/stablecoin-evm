@@ -91,7 +91,6 @@ available, but can only be called once per proxy.
 5. Verify the fields have been properly initialized. Verification should be
    performed independently by multiple people to make sure that the contract has
    been deployed correctly. The following fields should be verified:
-
    - `admin` is the expected address
    - `implementation` is the address of the implementation contract
    - `name`, `symbol`, `currency` and `decimals` are as expected

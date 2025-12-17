@@ -113,7 +113,6 @@ yarn hardhat verifyFiatTokenState \
 This verification will:
 
 1. **Check readonly states against your `.env` configuration:**
-
    - Token metadata (name, symbol, currency, decimals)
    - Contract roles (owner, pauser, blacklister, masterMinter, rescuer)
    - Proxy admin and implementation addresses
@@ -140,7 +139,6 @@ yarn hardhat verifyMasterMinterState \
 This verification will:
 
 1. **Check readonly states against your `.env` configuration:**
-
    - Owner address (should match `MASTER_MINTER_OWNER_ADDRESS`)
    - Minter manager address (should match `FIAT_TOKEN_PROXY_ADDRESS`)
 

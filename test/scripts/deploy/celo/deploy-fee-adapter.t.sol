@@ -20,24 +20,14 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
 import { TestUtils } from "./../TestUtils.sol";
-import {
-    DeployFiatToken
-} from "../../../../scripts/deploy/deploy-fiat-token.s.sol";
-import {
-    DeployFeeAdapter
-} from "../../../../scripts/deploy/celo/deploy-fee-adapter.s.sol";
+import { DeployFiatToken } from "../../../../scripts/deploy/deploy-fiat-token.s.sol";
+import { DeployFeeAdapter } from "../../../../scripts/deploy/celo/deploy-fee-adapter.s.sol";
 
 import { FiatTokenProxy } from "../../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../../contracts/v2/FiatTokenV2_2.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
-import {
-    FiatTokenFeeAdapterProxy
-} from "../../../../contracts/v2/celo/FiatTokenFeeAdapterProxy.sol";
-import {
-    FiatTokenFeeAdapterV1
-} from "../../../../contracts/v2/celo/FiatTokenFeeAdapterV1.sol";
+import { FiatTokenCeloV2_2 } from "../../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenFeeAdapterProxy } from "../../../../contracts/v2/celo/FiatTokenFeeAdapterProxy.sol";
+import { FiatTokenFeeAdapterV1 } from "../../../../contracts/v2/celo/FiatTokenFeeAdapterV1.sol";
 import { MasterMinter } from "../../../../contracts/minting/MasterMinter.sol";
 
 // solhint-disable func-name-mixedcase
@@ -69,9 +59,10 @@ contract DeployFeeAdapterTest is TestUtils {
         assert(impl.upscaleFactor() == 1000000000000);
     }
 
-    function validateProxy(FiatTokenFeeAdapterProxy proxy, address impl)
-        internal
-    {
+    function validateProxy(
+        FiatTokenFeeAdapterProxy proxy,
+        address impl
+    ) internal {
         assertEq(proxy.admin(), proxyAdmin);
         assertEq(proxy.implementation(), impl);
 

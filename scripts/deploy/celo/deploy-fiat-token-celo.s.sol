@@ -22,9 +22,7 @@ import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
 import { DeployImpl } from "../DeployImpl.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenCeloV2_2 } from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 
 /**
@@ -88,14 +86,9 @@ contract DeployFiatTokenCelo is Script, DeployImpl {
     /**
      * @dev For testing only: splitting deploy logic into an internal function to expose for testing
      */
-    function _deploy(address _impl)
-        internal
-        returns (
-            FiatTokenCeloV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function _deploy(
+        address _impl
+    ) internal returns (FiatTokenCeloV2_2, MasterMinter, FiatTokenProxy) {
         vm.startBroadcast(deployerPrivateKey);
 
         // If there is an existing implementation contract,
@@ -149,14 +142,9 @@ contract DeployFiatTokenCelo is Script, DeployImpl {
     /**
      * @dev For testing only: Helper function that runs deploy script with a specific implementation address
      */
-    function deploy(address _impl)
-        external
-        returns (
-            FiatTokenCeloV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function deploy(
+        address _impl
+    ) external returns (FiatTokenCeloV2_2, MasterMinter, FiatTokenProxy) {
         return _deploy(_impl);
     }
 
@@ -165,11 +153,7 @@ contract DeployFiatTokenCelo is Script, DeployImpl {
      */
     function run()
         external
-        returns (
-            FiatTokenCeloV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
+        returns (FiatTokenCeloV2_2, MasterMinter, FiatTokenProxy)
     {
         return _deploy(impl);
     }

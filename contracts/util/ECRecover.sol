@@ -73,11 +73,10 @@ library ECRecover {
      * @param signature Signature byte array associated with hash
      * @return Signer address
      */
-    function recover(bytes32 digest, bytes memory signature)
-        internal
-        pure
-        returns (address)
-    {
+    function recover(
+        bytes32 digest,
+        bytes memory signature
+    ) internal pure returns (address) {
         require(signature.length == 65, "ECRecover: invalid signature length");
 
         bytes32 r;

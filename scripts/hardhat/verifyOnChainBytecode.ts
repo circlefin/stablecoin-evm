@@ -351,10 +351,11 @@ async function getContractCreationBytecode(
   useTracesForCreationBytecode: boolean | undefined
 ): Promise<string> {
   if (useTracesForCreationBytecode) {
-    const transactionTraces: GethTransactionTrace = await hre.ethers.provider.send(
-      "debug_traceTransaction",
-      [contractCreationTxHash, { tracer: "callTracer" }]
-    );
+    const transactionTraces: GethTransactionTrace =
+      await hre.ethers.provider.send("debug_traceTransaction", [
+        contractCreationTxHash,
+        { tracer: "callTracer" },
+      ]);
     return extractBytecodeFromGethTraces(transactionTraces, contractAddress);
   }
   const transaction = await hre.ethers.provider.getTransaction(

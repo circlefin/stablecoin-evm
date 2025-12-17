@@ -83,14 +83,9 @@ contract DeployFiatToken is Script, DeployImpl {
     /**
      * @dev For testing only: splitting deploy logic into an internal function to expose for testing
      */
-    function _deploy(address _impl)
-        internal
-        returns (
-            FiatTokenV2_2,
-            address,
-            FiatTokenProxy
-        )
-    {
+    function _deploy(
+        address _impl
+    ) internal returns (FiatTokenV2_2, address, FiatTokenProxy) {
         vm.startBroadcast(deployerPrivateKey);
 
         // If there is an existing implementation contract,
@@ -139,28 +134,16 @@ contract DeployFiatToken is Script, DeployImpl {
     /**
      * @dev For testing only: Helper function that runs deploy script with a specific implementation address
      */
-    function deploy(address _impl)
-        external
-        returns (
-            FiatTokenV2_2,
-            address,
-            FiatTokenProxy
-        )
-    {
+    function deploy(
+        address _impl
+    ) external returns (FiatTokenV2_2, address, FiatTokenProxy) {
         return _deploy(_impl);
     }
 
     /**
      * @notice main function that will be run by forge
      */
-    function run()
-        external
-        returns (
-            FiatTokenV2_2,
-            address,
-            FiatTokenProxy
-        )
-    {
+    function run() external returns (FiatTokenV2_2, address, FiatTokenProxy) {
         return _deploy(impl);
     }
 }

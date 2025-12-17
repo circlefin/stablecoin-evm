@@ -20,9 +20,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
 
 import { TestUtils } from "./TestUtils.sol";
-import {
-    BlacklistSanctionsList
-} from "../../../scripts/deploy/blacklist-sanctions-list.s.sol";
+import { BlacklistSanctionsList } from "../../../scripts/deploy/blacklist-sanctions-list.s.sol";
 
 // solhint-disable func-name-mixedcase
 

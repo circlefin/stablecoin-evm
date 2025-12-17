@@ -32,10 +32,9 @@ contract V2_2UpgraderHelper is V2UpgraderHelper {
      * @notice Constructor
      * @param fiatTokenProxy    Address of the FiatTokenProxy contract
      */
-    constructor(address fiatTokenProxy)
-        public
-        V2UpgraderHelper(fiatTokenProxy)
-    {}
+    constructor(
+        address fiatTokenProxy
+    ) public V2UpgraderHelper(fiatTokenProxy) {}
 
     /**
      * @notice Call version()

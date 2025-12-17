@@ -21,12 +21,8 @@ pragma experimental ABIEncoderV2; // needed for compiling older solc versions: h
 
 import { TestUtils } from "../TestUtils.sol";
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
-import {
-    DeploySignatureChecker
-} from "../../../../scripts/deploy/create2/deploy-signature-checker.s.sol";
-import {
-    AddressUtils
-} from "../../../../scripts/deploy/create2/AddressUtils.sol";
+import { DeploySignatureChecker } from "../../../../scripts/deploy/create2/deploy-signature-checker.s.sol";
+import { AddressUtils } from "../../../../scripts/deploy/create2/AddressUtils.sol";
 
 // solhint-disable func-name-mixedcase
 

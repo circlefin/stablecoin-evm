@@ -19,9 +19,7 @@
 pragma solidity 0.6.12;
 
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenCeloV2_2 } from "../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 
 /**
  * @notice A utility contract that exposes a re-useable getOrDeployImpl function.
@@ -75,10 +73,9 @@ contract DeployImpl {
      * @param impl configured of the implementation contract, where address(0) represents a new instance should be deployed
      * @return FiatTokenCeloV2_2 newly deployed or loaded instance
      */
-    function getOrDeployImplCelo(address impl)
-        internal
-        returns (FiatTokenCeloV2_2)
-    {
+    function getOrDeployImplCelo(
+        address impl
+    ) internal returns (FiatTokenCeloV2_2) {
         FiatTokenCeloV2_2 fiatTokenCeloV2_2;
 
         if (impl == address(0)) {

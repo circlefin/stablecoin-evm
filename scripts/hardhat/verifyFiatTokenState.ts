@@ -140,9 +140,8 @@ async function verifyDeploymentEvents(
   deploymentTxHash: string
 ) {
   // Get the deployment transaction receipt
-  const receipt = await hre.ethers.provider.getTransactionReceipt(
-    deploymentTxHash
-  );
+  const receipt =
+    await hre.ethers.provider.getTransactionReceipt(deploymentTxHash);
   if (!receipt) {
     throw new Error(`Transaction receipt not found for ${deploymentTxHash}`);
   }

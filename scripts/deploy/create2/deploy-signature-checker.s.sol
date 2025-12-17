@@ -22,9 +22,7 @@ pragma experimental ABIEncoderV2;
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import "forge-std/Script.sol";
 import { AddressUtils } from "./AddressUtils.sol";
-import {
-    ICreate2Factory
-} from "../../../contracts/interface/ICreate2Factory.sol";
+import { ICreate2Factory } from "../../../contracts/interface/ICreate2Factory.sol";
 import { SignatureChecker } from "../../../contracts/util/SignatureChecker.sol";
 
 /**

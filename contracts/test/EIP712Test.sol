@@ -21,11 +21,10 @@ pragma solidity 0.6.12;
 import { EIP712 } from "../util/EIP712.sol";
 
 contract EIP712Test {
-    function makeDomainSeparator(string calldata name, string calldata version)
-        external
-        view
-        returns (bytes32)
-    {
+    function makeDomainSeparator(
+        string calldata name,
+        string calldata version
+    ) external view returns (bytes32) {
         return EIP712.makeDomainSeparator(name, version);
     }
 }

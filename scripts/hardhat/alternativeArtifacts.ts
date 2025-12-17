@@ -31,9 +31,8 @@ export enum ArtifactType {
 const CACHED_ARTIFACTS_PATH = "./cached_artifacts/";
 
 // Read from https://optimistic.etherscan.io/token/0x0b2c639c533813f4aa9d7837caf62653d097ff85#code
-export const opMainnetFiatTokenProxyContractCreationBytecode = readCachedArtifact(
-  "opMainnetFiatTokenProxyContractCreationBytecode.bin"
-);
+export const opMainnetFiatTokenProxyContractCreationBytecode =
+  readCachedArtifact("opMainnetFiatTokenProxyContractCreationBytecode.bin");
 const opMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
   "opMainnetFiatTokenProxyRuntimeBytecode.bin"
 );
@@ -51,9 +50,8 @@ const opMainnetArtifacts: AlternativeArtifact = new Map([
 ]);
 
 // Read from https://arbiscan.io/token/0xaf88d065e77c8cC2239327C5EDb3A432268e5831#code
-export const arbMainnetFiatTokenProxyContractCreationBytecode = readCachedArtifact(
-  "arbMainnetFiatTokenProxyContractCreationBytecode.bin"
-);
+export const arbMainnetFiatTokenProxyContractCreationBytecode =
+  readCachedArtifact("arbMainnetFiatTokenProxyContractCreationBytecode.bin");
 const arbMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
   "arbMainnetFiatTokenProxyRuntimeBytecode.bin"
 );
@@ -71,9 +69,8 @@ const arbMainnetArtifacts: AlternativeArtifact = new Map([
 ]);
 
 // Read from https://basescan.org/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913#code
-export const baseMainnetFiatTokenProxyContractCreationBytecode = readCachedArtifact(
-  "baseMainnetFiatTokenProxyContractCreationBytecode.bin"
-);
+export const baseMainnetFiatTokenProxyContractCreationBytecode =
+  readCachedArtifact("baseMainnetFiatTokenProxyContractCreationBytecode.bin");
 const baseMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
   "baseMainnetFiatTokenProxyRuntimeBytecode.bin"
 );
@@ -141,14 +138,12 @@ const baseMainnetArtifacts: AlternativeArtifact = new Map([
   ],
 ]);
 
-export const alternativeArtifacts: Map<
-  ArtifactType,
-  AlternativeArtifact
-> = new Map([
-  [ArtifactType.OPMainnet, opMainnetArtifacts],
-  [ArtifactType.ArbMainnet, arbMainnetArtifacts],
-  [ArtifactType.BaseMainnet, baseMainnetArtifacts],
-]);
+export const alternativeArtifacts: Map<ArtifactType, AlternativeArtifact> =
+  new Map([
+    [ArtifactType.OPMainnet, opMainnetArtifacts],
+    [ArtifactType.ArbMainnet, arbMainnetArtifacts],
+    [ArtifactType.BaseMainnet, baseMainnetArtifacts],
+  ]);
 
 function readCachedArtifact(filename: string): string {
   return (

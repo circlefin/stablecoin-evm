@@ -37,8 +37,8 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
      * so that the Celo variant of FiatToken can accommodate new state variables that may be
      * added in future FiatToken versions.
      */
-    bytes32
-        private constant FEE_CALLER_SLOT = 0xdca914aef3e4e19727959ebb1e70b58822e2c7b796d303902adc19513fcb4af5;
+    bytes32 private constant FEE_CALLER_SLOT =
+        0xdca914aef3e4e19727959ebb1e70b58822e2c7b796d303902adc19513fcb4af5;
 
     /**
      * @notice Returns the current fee caller address allowed on `debitGasFees` and `creditGasFees`.
@@ -82,8 +82,8 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
      * so that the Celo variant of FiatToken can accommodate new state variables that may be
      * added in future FiatToken versions.
      */
-    bytes32
-        private constant DEBITED_VALUE_SLOT = 0xd90dccaa76fe7208f2f477143b6adabfeb5d4a5136982894dfc51177fa8eda28;
+    bytes32 private constant DEBITED_VALUE_SLOT =
+        0xd90dccaa76fe7208f2f477143b6adabfeb5d4a5136982894dfc51177fa8eda28;
 
     function _debitedValue() internal view returns (uint256 value) {
         assembly {
@@ -100,13 +100,10 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
         );
     }
 
-    function debitGasFees(address from, uint256 value)
-        external
-        override
-        onlyFeeCaller
-        whenNotPaused
-        notBlacklisted(from)
-    {
+    function debitGasFees(
+        address from,
+        uint256 value
+    ) external override onlyFeeCaller whenNotPaused notBlacklisted(from) {
         require(
             _debitedValue() == 0,
             "FiatTokenCeloV2_2: Must fully credit before debit"

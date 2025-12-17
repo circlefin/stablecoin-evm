@@ -21,9 +21,7 @@ pragma experimental ABIEncoderV2;
 
 import "forge-std/Test.sol"; // solhint-disable no-global-import
 import { TestUtils } from "./TestUtils.sol";
-import {
-    ConfigureMinters
-} from "../../../scripts/deploy/configure-minters.s.sol";
+import { ConfigureMinters } from "../../../scripts/deploy/configure-minters.s.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 

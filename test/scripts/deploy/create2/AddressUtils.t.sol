@@ -186,11 +186,10 @@ contract AddressUtilsTest is Test {
         );
     }
 
-    function computeExpectedAddress(bytes32 salt, bytes32 bytecodeHash)
-        internal
-        view
-        returns (address)
-    {
+    function computeExpectedAddress(
+        bytes32 salt,
+        bytes32 bytecodeHash
+    ) internal view returns (address) {
         return
             address(
                 uint160(

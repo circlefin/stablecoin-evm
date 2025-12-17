@@ -12,12 +12,12 @@
   "tabWidth": 2,
   "trailingComma": "es5",
   "useTabs": false,
+  "plugins": ["prettier-plugin-solidity"],
   "overrides": [
     {
       "files": "*.sol",
       "options": {
-        "tabWidth": 4,
-        "explicitTypes": "always"
+        "tabWidth": 4
       }
     },
     {
