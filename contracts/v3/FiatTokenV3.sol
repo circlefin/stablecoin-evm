@@ -130,7 +130,10 @@ contract FiatTokenV1Flattened is
      * to the minterAllowance of the caller.
      * @return True if the operation was successful.
      */
-    function mint(address _to, uint256 _amount)
+    function mint(
+        address _to,
+        uint256 _amount
+    )
         external
         whenNotPaused
         onlyMinters
@@ -191,12 +194,10 @@ contract FiatTokenV1Flattened is
      * @param spender The spender's address.
      * @return The remaining allowance.
      */
-    function allowance(address owner, address spender)
-        external
-        override
-        view
-        returns (uint256)
-    {
+    function allowance(
+        address owner,
+        address spender
+    ) external view override returns (uint256) {
         return allowed[owner][spender];
     }
 
@@ -204,7 +205,7 @@ contract FiatTokenV1Flattened is
      * @notice Gets the totalSupply of the fiat token.
      * @return The totalSupply of the fiat token.
      */
-    function totalSupply() external override view returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return totalSupply_;
     }
 
@@ -213,12 +214,9 @@ contract FiatTokenV1Flattened is
      * @param account  The address to check.
      * @return balance The fiat token balance of the account.
      */
-    function balanceOf(address account)
-        external
-        override
-        view
-        returns (uint256)
-    {
+    function balanceOf(
+        address account
+    ) external view override returns (uint256) {
         return _balanceOf(account);
     }
 
@@ -228,7 +226,10 @@ contract FiatTokenV1Flattened is
      * @param value   The allowance amount.
      * @return True if the operation was successful.
      */
-    function approve(address spender, uint256 value)
+    function approve(
+        address spender,
+        uint256 value
+    )
         external
         virtual
         override
@@ -294,7 +295,10 @@ contract FiatTokenV1Flattened is
      * @param value Transfer amount.
      * @return True if the operation was successful.
      */
-    function transfer(address to, uint256 value)
+    function transfer(
+        address to,
+        uint256 value
+    )
         external
         override
         whenNotPaused
@@ -335,12 +339,10 @@ contract FiatTokenV1Flattened is
      * @param minterAllowedAmount The minting amount allowed for the minter.
      * @return True if the operation was successful.
      */
-    function configureMinter(address minter, uint256 minterAllowedAmount)
-        external
-        whenNotPaused
-        onlyMasterMinter
-        returns (bool)
-    {
+    function configureMinter(
+        address minter,
+        uint256 minterAllowedAmount
+    ) external whenNotPaused onlyMasterMinter returns (bool) {
         minters[minter] = true;
         minterAllowed[minter] = minterAllowedAmount;
         emit MinterConfigured(minter, minterAllowedAmount);
@@ -352,11 +354,9 @@ contract FiatTokenV1Flattened is
      * @param minter The address of the minter to remove.
      * @return True if the operation was successful.
      */
-    function removeMinter(address minter)
-        external
-        onlyMasterMinter
-        returns (bool)
-    {
+    function removeMinter(
+        address minter
+    ) external onlyMasterMinter returns (bool) {
         minters[minter] = false;
         minterAllowed[minter] = 0;
         emit MinterRemoved(minter);
@@ -369,12 +369,9 @@ contract FiatTokenV1Flattened is
      * should be less than or equal to the account's balance.
      * @param _amount the amount of tokens to be burned.
      */
-    function burn(uint256 _amount)
-        external
-        whenNotPaused
-        onlyMinters
-        notBlacklisted(msg.sender)
-    {
+    function burn(
+        uint256 _amount
+    ) external whenNotPaused onlyMinters notBlacklisted(msg.sender) {
         uint256 balance = _balanceOf(msg.sender);
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
@@ -417,10 +414,10 @@ contract FiatTokenV1Flattened is
      * @param _account         The address of the account.
      * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
      */
-    function _setBlacklistState(address _account, bool _shouldBlacklist)
-        internal
-        virtual
-    {
+    function _setBlacklistState(
+        address _account,
+        bool _shouldBlacklist
+    ) internal virtual {
         _deprecatedBlacklisted[_account] = _shouldBlacklist;
     }
 
@@ -436,13 +433,9 @@ contract FiatTokenV1Flattened is
     /**
      * @inheritdoc Blacklistable
      */
-    function _isBlacklisted(address _account)
-        internal
-        virtual
-        override
-        view
-        returns (bool)
-    {
+    function _isBlacklisted(
+        address _account
+    ) internal view virtual override returns (bool) {
         return _deprecatedBlacklisted[_account];
     }
 
@@ -451,12 +444,9 @@ contract FiatTokenV1Flattened is
      * @param _account  The address of the account.
      * @return          The fiat token balance of the account.
      */
-    function _balanceOf(address _account)
-        internal
-        virtual
-        view
-        returns (uint256)
-    {
+    function _balanceOf(
+        address _account
+    ) internal view virtual returns (uint256) {
         return balanceAndBlacklistStates[_account];
     }
 }
@@ -466,9 +456,7 @@ contract FiatTokenV1Flattened is
  * @title FiatTokenV1_1
  * @dev ERC20 Token backed by fiat reserves
  */
-contract FiatTokenV1_1Flattened is FiatTokenV1Flattened, Rescuable {
-
-}
+contract FiatTokenV1_1Flattened is FiatTokenV1Flattened, Rescuable {}
 
 // Copied from v2/FiatTokenV2.sol
 /**
@@ -499,7 +487,10 @@ contract FiatTokenV2Flattened is FiatTokenV1_1Flattened, EIP3009V3, EIP2612V3 {
      * @param increment Amount of increase in allowance
      * @return True if successful
      */
-    function increaseAllowance(address spender, uint256 increment)
+    function increaseAllowance(
+        address spender,
+        uint256 increment
+    )
         external
         virtual
         whenNotPaused
@@ -517,7 +508,10 @@ contract FiatTokenV2Flattened is FiatTokenV1_1Flattened, EIP3009V3, EIP2612V3 {
      * @param decrement Amount of decrease in allowance
      * @return True if successful
      */
-    function decreaseAllowance(address spender, uint256 decrement)
+    function decreaseAllowance(
+        address spender,
+        uint256 decrement
+    )
         external
         virtual
         whenNotPaused
@@ -714,7 +708,7 @@ contract FiatTokenV2_1Flattened is FiatTokenV2Flattened {
      * @notice Version string for the EIP712 domain separator
      * @return Version string
      */
-    function version() external virtual pure returns (string memory) {
+    function version() external pure virtual returns (string memory) {
         return "2";
     }
 }
@@ -761,7 +755,7 @@ contract FiatTokenV3 is FiatTokenV2_1Flattened {
      * @dev Internal function to get the current chain id.
      * @return The current chain id.
      */
-    function _chainId() internal virtual view returns (uint256) {
+    function _chainId() internal view virtual returns (uint256) {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -773,14 +767,14 @@ contract FiatTokenV3 is FiatTokenV2_1Flattened {
      * @notice Version string for the EIP712 domain separator
      * @return Version string
      */
-    function version() external override pure returns (string memory) {
+    function version() external pure override returns (string memory) {
         return "3";
     }
 
     /**
      * @inheritdoc EIP712Domain
      */
-    function _domainSeparator() internal override view returns (bytes32) {
+    function _domainSeparator() internal view override returns (bytes32) {
         return EIP712.makeDomainSeparator(name, "3", _chainId());
     }
 
@@ -894,10 +888,10 @@ contract FiatTokenV3 is FiatTokenV2_1Flattened {
      * @param _account         The address of the account.
      * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
      */
-    function _setBlacklistState(address _account, bool _shouldBlacklist)
-        internal
-        override
-    {
+    function _setBlacklistState(
+        address _account,
+        bool _shouldBlacklist
+    ) internal override {
         balanceAndBlacklistStates[_account] = _shouldBlacklist
             ? balanceAndBlacklistStates[_account] | (1 << 255)
             : _balanceOf(_account);
@@ -928,12 +922,9 @@ contract FiatTokenV3 is FiatTokenV2_1Flattened {
     /**
      * @inheritdoc Blacklistable
      */
-    function _isBlacklisted(address _account)
-        internal
-        override
-        view
-        returns (bool)
-    {
+    function _isBlacklisted(
+        address _account
+    ) internal view override returns (bool) {
         return balanceAndBlacklistStates[_account] >> 255 == 1;
     }
 
@@ -945,24 +936,19 @@ contract FiatTokenV3 is FiatTokenV2_1Flattened {
      * @param _account  The address of the account.
      * @return          The fiat token balance of the account.
      */
-    function _balanceOf(address _account)
-        internal
-        override
-        view
-        returns (uint256)
-    {
+    function _balanceOf(
+        address _account
+    ) internal view override returns (uint256) {
         return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
     }
 
     /**
      * @inheritdoc FiatTokenV1Flattened
      */
-    function approve(address spender, uint256 value)
-        external
-        override
-        whenNotPaused
-        returns (bool)
-    {
+    function approve(
+        address spender,
+        uint256 value
+    ) external override whenNotPaused returns (bool) {
         _approve(msg.sender, spender, value);
         return true;
     }
@@ -985,12 +971,10 @@ contract FiatTokenV3 is FiatTokenV2_1Flattened {
     /**
      * @inheritdoc FiatTokenV2Flattened
      */
-    function increaseAllowance(address spender, uint256 increment)
-        external
-        override
-        whenNotPaused
-        returns (bool)
-    {
+    function increaseAllowance(
+        address spender,
+        uint256 increment
+    ) external override whenNotPaused returns (bool) {
         _increaseAllowance(msg.sender, spender, increment);
         return true;
     }
@@ -998,12 +982,10 @@ contract FiatTokenV3 is FiatTokenV2_1Flattened {
     /**
      * @inheritdoc FiatTokenV2Flattened
      */
-    function decreaseAllowance(address spender, uint256 decrement)
-        external
-        override
-        whenNotPaused
-        returns (bool)
-    {
+    function decreaseAllowance(
+        address spender,
+        uint256 decrement
+    ) external override whenNotPaused returns (bool) {
         _decreaseAllowance(msg.sender, spender, decrement);
         return true;
     }

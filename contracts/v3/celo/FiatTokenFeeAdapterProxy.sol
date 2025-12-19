@@ -18,17 +18,14 @@
 
 pragma solidity 0.6.12;
 
-import {
-    AdminUpgradeabilityProxy
-} from "../../upgradeability/AdminUpgradeabilityProxy.sol";
+import { AdminUpgradeabilityProxy } from "../../upgradeability/AdminUpgradeabilityProxy.sol";
 
 /**
  * @title FiatTokenFeeAdapterProxyV3
  * @dev This contract proxies FiatTokenFeeAdapter calls and enables FiatTokenFeeAdapter upgrades.
  */
 contract FiatTokenFeeAdapterProxyV3 is AdminUpgradeabilityProxy {
-    constructor(address implementationContract)
-        public
-        AdminUpgradeabilityProxy(implementationContract)
-    {}
+    constructor(
+        address implementationContract
+    ) public AdminUpgradeabilityProxy(implementationContract) {}
 }

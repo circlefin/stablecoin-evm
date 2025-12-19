@@ -18,9 +18,7 @@
 
 pragma solidity 0.6.12;
 
-import {
-    IFiatTokenFeeAdapter
-} from "../../interface/celo/IFiatTokenFeeAdapter.sol";
+import { IFiatTokenFeeAdapter } from "../../interface/celo/IFiatTokenFeeAdapter.sol";
 import { ICeloGasToken } from "../../interface/celo/ICeloGasToken.sol";
 import { IDecimals } from "../../interface/celo/IDecimals.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
@@ -46,10 +44,10 @@ contract FiatTokenFeeAdapterV3 is IFiatTokenFeeAdapter {
         _;
     }
 
-    function initializeV1(address _adaptedToken, uint8 _adapterDecimals)
-        public
-        virtual
-    {
+    function initializeV1(
+        address _adaptedToken,
+        uint8 _adapterDecimals
+    ) public virtual {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 0);
 
@@ -65,7 +63,8 @@ contract FiatTokenFeeAdapterV3 is IFiatTokenFeeAdapter {
             _adapterDecimals - tokenDecimals < 78,
             "FiatTokenFeeAdapterV1: Digit difference too large"
         );
-        upscaleFactor = uint256(10)**uint256(_adapterDecimals - tokenDecimals);
+        upscaleFactor =
+            uint256(10) ** uint256(_adapterDecimals - tokenDecimals);
 
         adapterDecimals = _adapterDecimals;
         adaptedToken = ICeloGasToken(_adaptedToken);
@@ -73,20 +72,16 @@ contract FiatTokenFeeAdapterV3 is IFiatTokenFeeAdapter {
         _initializedVersion = 1;
     }
 
-    function balanceOf(address account)
-        external
-        override
-        view
-        returns (uint256)
-    {
+    function balanceOf(
+        address account
+    ) external view override returns (uint256) {
         return _upscale(adaptedToken.balanceOf(account));
     }
 
-    function debitGasFees(address from, uint256 value)
-        external
-        override
-        onlyCeloVm
-    {
+    function debitGasFees(
+        address from,
+        uint256 value
+    ) external override onlyCeloVm {
         require(
             _debitedValue == 0,
             "FiatTokenFeeAdapterV1: Must fully credit before debit"

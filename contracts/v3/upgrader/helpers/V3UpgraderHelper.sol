@@ -19,9 +19,7 @@
 pragma solidity 0.6.12;
 
 import { FiatTokenV2_2 } from "../../../v2/FiatTokenV2_2.sol";
-import {
-    V2_2UpgraderHelper
-} from "../../../v2/upgrader/helpers/V2_2UpgraderHelper.sol";
+import { V2_2UpgraderHelper } from "../../../v2/upgrader/helpers/V2_2UpgraderHelper.sol";
 
 /**
  * @title V3 Upgrader Helper
@@ -36,8 +34,7 @@ contract V3UpgraderHelper is V2_2UpgraderHelper {
      * @notice Constructor
      * @param fiatTokenProxy    Address of the FiatTokenProxy contract
      */
-    constructor(address fiatTokenProxy)
-        public
-        V2_2UpgraderHelper(fiatTokenProxy)
-    {}
+    constructor(
+        address fiatTokenProxy
+    ) public V2_2UpgraderHelper(fiatTokenProxy) {}
 }
