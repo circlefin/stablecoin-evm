@@ -48,6 +48,10 @@ contract SetUpConfigureMintersTest is TestUtils {
         masterMinterContractAddress = vm.envAddress(
             "MASTER_MINTER_CONTRACT_ADDRESS"
         );
+        vm.setEnv(
+            "MINTERS_FILE_NAME",
+            "test/scripts/deploy/testdata/test.minters.json"
+        );
 
         proxyAsV2_2 = FiatTokenV2_2(proxyAddress);
         vm.broadcast(ownerPrivateKey);
