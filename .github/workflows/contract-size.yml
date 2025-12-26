@@ -1,0 +1,27 @@
+name: Contract size check
+
+on:
+  pull_request:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/contract-size.yml"
+
+jobs:
+  size-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node & Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Compile contracts and check sizes
+        run: |
+          yarn compile
+          yarn contract-size
