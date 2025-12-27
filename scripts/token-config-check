@@ -1,0 +1,29 @@
+/* eslint-disable no-console */
+
+/**
+ * Validate token metadata configuration matches contract expectations.
+ *
+ * Usage: ts-node scripts/check_token_config.ts
+ */
+
+const TOKEN_NAME = process.env.TOKEN_NAME || "USDC";
+const TOKEN_SYMBOL = process.env.TOKEN_SYMBOL || "USDC";
+const TOKEN_DECIMALS = Number(process.env.TOKEN_DECIMALS || "6");
+
+function main() {
+  if (TOKEN_NAME.length > 32) {
+    console.error(`TOKEN_NAME too long: ${TOKEN_NAME}`);
+    process.exit(1);
+  }
+  if (TOKEN_SYMBOL.length > 8) {
+    console.error(`TOKEN_SYMBOL too long: ${TOKEN_SYMBOL}`);
+    process.exit(1);
+  }
+  if (TOKEN_DECIMALS <= 0 || TOKEN_DECIMALS > 18) {
+    console.error(`TOKEN_DECIMALS out of range: ${TOKEN_DECIMALS}`);
+    process.exit(1);
+  }
+  console.log("Token configuration looks valid.");
+}
+
+main();
