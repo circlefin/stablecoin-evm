@@ -1,0 +1,21 @@
+name: Slither analysis
+
+on:
+  pull_request:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/slither.yml"
+
+jobs:
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install slither-analyzer
+          yarn install
+      - name: Run Slither
+        run: slither .
