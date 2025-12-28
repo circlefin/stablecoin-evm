@@ -1,0 +1,10 @@
+# Gas optimisation tips
+
+When writing or reviewing stablecoin contracts, consider these techniques to reduce gas costs:
+
+- **Packing variables**: Place multiple `uint128` or `bool` variables in one storage slot.
+- **Minimise external calls**: Cache results of external calls when possible.
+- **Short-circuit logic**: Order require conditions from cheapest to most expensive.
+- **Use `constant`/`immutable`**: Variables known at compile time are cheaper to access.
+
+Always balance gas savings against code readability and security.
