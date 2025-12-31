@@ -24,6 +24,9 @@
     "solhint": "solhint 'contracts/**/*.sol'",
     "static-check": "yarn hardhat typechain && yarn typecheck && yarn lint && yarn fmt:check && yarn solhint",
     "test": "NODE_OPTIONS=--max-old-space-size=8192 hardhat test",
+    "test:injective": "mocha --require ts-node/register 'test/v2/injective/**/*.test.ts' --timeout 60000",
+    "test:injective:start": "./scripts/injective/start_network.sh",
+    "test:injective:stop": "./scripts/injective/stop_network.sh",
     "typecheck": "tsc -p . --noEmit"
   },
   "repository": {
@@ -38,6 +41,9 @@
   },
   "homepage": "https://github.com/circlefin/stablecoin-evm#readme",
   "devDependencies": {
+    "@cosmjs/proto-signing": "0.32.4",
+    "@cosmjs/stargate": "0.32.4",
+    "@injectivelabs/sdk-ts": "1.14.13",
     "@nomicfoundation/hardhat-chai-matchers": "2.0.2",
     "@nomicfoundation/hardhat-ethers": "3.0.4",
     "@nomicfoundation/hardhat-foundry": "1.1.1",

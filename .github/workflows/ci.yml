@@ -65,7 +65,7 @@ jobs:
           - grep: "FiatTokenV2:.*"
           - grep: "FiatTokenV2_1:.*"
           - grep: "FiatTokenV2_2:.*"
-          - grep: "FiatTokenV1:.*|FiatTokenV1_1:.*|FiatTokenV2:.*|FiatTokenV2_1:.*|FiatTokenV2_2:.*|gas costs"
+          - grep: "FiatTokenV1:.*|FiatTokenV1_1:.*|FiatTokenV2:.*|FiatTokenV2_1:.*|FiatTokenV2_2:.*|gas costs|Injective"
             invert: true
     steps:
       - name: Check out repository code
@@ -86,6 +86,24 @@ jobs:
         with:
           name: junit-report-${{ hashFiles('report/junit.xml') }}
           path: report/junit.xml
+
+  run_injective_integration_tests:
+    runs-on: large-dind-spot
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Setup CI Environment
+        uses: ./.github/composite-actions/setup-ci
+
+      - name: Start Injective localnet
+        run: ./scripts/injective/start_network.sh
+
+      - name: Run Injective integration tests
+        run: yarn test:injective
+
+      - name: Stop Injective localnet
+        run: ./scripts/injective/stop_network.sh
 
   scan:
     if: github.event_name == 'pull_request'
