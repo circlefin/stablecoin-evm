@@ -32,15 +32,13 @@ import { EIP2612 } from "./EIP2612.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @title FiatToken
- * @dev ERC20 Token backed by fiat reserves
+ * @title V1Storage
+ * @notice Storage layout for FiatToken V1
+ * @dev Defines the storage variables for the original FiatToken implementation.
+ * This contract uses a proxy pattern where storage layout must remain consistent
+ * across upgrades. New versions should not modify this layout.
  */
-contract FiatTokenV1Flattened is
-    AbstractFiatTokenV1,
-    Ownable,
-    Pausable,
-    Blacklistable
-{
+abstract contract V1Storage is Ownable, Pausable, Blacklistable {
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -52,11 +50,49 @@ contract FiatTokenV1Flattened is
     /// The first bit defines whether the address is blacklisted (1 if blacklisted, 0 otherwise).
     /// The last 255 bits define the balance for the address.
     mapping(address => uint256) internal balanceAndBlacklistStates;
-    mapping(address => mapping(address => uint256)) internal allowed;
-    uint256 internal totalSupply_ = 0;
-    mapping(address => bool) internal minters;
-    mapping(address => uint256) internal minterAllowed;
 
+    /// @dev Allowances for ERC20 transfers
+    mapping(address => mapping(address => uint256)) internal allowed;
+
+    /// @dev Total supply of tokens
+    uint256 internal totalSupply_ = 0;
+
+    /// @dev Mapping of addresses that are authorized minters
+    mapping(address => bool) internal minters;
+
+    /// @dev Mapping of minter addresses to their allowed mint amounts
+    mapping(address => uint256) internal minterAllowed;
+}
+
+/**
+ * @title V1_1Storage
+ * @notice Storage layout for FiatToken V1.1
+ * @dev Inherits Rescuable functionality for recovering tokens sent to the contract by mistake.
+ * This upgrade added the ability to rescue ERC20 tokens.
+ */
+abstract contract V1_1Storage is Rescuable {}
+
+/**
+ * @title V2Storage
+ * @notice Storage layout for FiatToken V2
+ * @dev Adds EIP-712, EIP-2612, and EIP-3009 support for gasless transactions and meta-transactions.
+ * This upgrade introduced permit functionality and transfer with authorization.
+ */
+abstract contract V2Storage is EIP712Domain, EIP3009, EIP2612 {
+    /// @dev Tracks the initialized version to support multiple initialization steps across upgrades
+    uint8 internal _initializedVersion;
+}
+
+/**
+ * @title FiatToken
+ * @dev ERC20 Token backed by fiat reserves
+ */
+contract FiatTokenV2_2 is
+    AbstractFiatTokenV1,
+    V1Storage,
+    V1_1Storage,
+    V2Storage
+{
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
     event MinterConfigured(address indexed minter, uint256 minterAllowedAmount);
@@ -216,28 +252,6 @@ contract FiatTokenV1Flattened is
         address account
     ) external view override returns (uint256) {
         return _balanceOf(account);
-    }
-
-    /**
-     * @notice Sets a fiat token allowance for a spender to spend on behalf of the caller.
-     * @param spender The spender's address.
-     * @param value   The allowance amount.
-     * @return True if the operation was successful.
-     */
-    function approve(
-        address spender,
-        uint256 value
-    )
-        external
-        virtual
-        override
-        whenNotPaused
-        notBlacklisted(msg.sender)
-        notBlacklisted(spender)
-        returns (bool)
-    {
-        _approve(msg.sender, spender, value);
-        return true;
     }
 
     /**
@@ -408,120 +422,6 @@ contract FiatTokenV1Flattened is
     }
 
     /**
-     * @dev Helper method that sets the blacklist state of an account.
-     * @param _account         The address of the account.
-     * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
-     */
-    function _setBlacklistState(
-        address _account,
-        bool _shouldBlacklist
-    ) internal virtual {
-        _deprecatedBlacklisted[_account] = _shouldBlacklist;
-    }
-
-    /**
-     * @dev Helper method that sets the balance of an account.
-     * @param _account The address of the account.
-     * @param _balance The new fiat token balance of the account.
-     */
-    function _setBalance(address _account, uint256 _balance) internal virtual {
-        balanceAndBlacklistStates[_account] = _balance;
-    }
-
-    /**
-     * @inheritdoc Blacklistable
-     */
-    function _isBlacklisted(
-        address _account
-    ) internal view virtual override returns (bool) {
-        return _deprecatedBlacklisted[_account];
-    }
-
-    /**
-     * @dev Helper method to obtain the balance of an account.
-     * @param _account  The address of the account.
-     * @return          The fiat token balance of the account.
-     */
-    function _balanceOf(
-        address _account
-    ) internal view virtual returns (uint256) {
-        return balanceAndBlacklistStates[_account];
-    }
-}
-
-// Copied from v1.1/FiatTokenV1_1.sol
-/**
- * @title FiatTokenV1_1
- * @dev ERC20 Token backed by fiat reserves
- */
-contract FiatTokenV1_1Flattened is FiatTokenV1Flattened, Rescuable {}
-
-// Copied from v2/FiatTokenV2.sol
-/**
- * @title FiatToken V2
- * @notice ERC20 Token backed by fiat reserves, version 2
- */
-contract FiatTokenV2Flattened is FiatTokenV1_1Flattened, EIP3009, EIP2612 {
-    uint8 internal _initializedVersion;
-
-    /**
-     * @notice Initialize v2
-     * @param newName   New token name
-     */
-    function initializeV2(string calldata newName) external {
-        // solhint-disable-next-line reason-string
-        require(initialized && _initializedVersion == 0);
-        name = newName;
-        _DEPRECATED_CACHED_DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(
-            newName,
-            "2"
-        );
-        _initializedVersion = 1;
-    }
-
-    /**
-     * @notice Increase the allowance by a given increment
-     * @param spender   Spender's address
-     * @param increment Amount of increase in allowance
-     * @return True if successful
-     */
-    function increaseAllowance(
-        address spender,
-        uint256 increment
-    )
-        external
-        virtual
-        whenNotPaused
-        notBlacklisted(msg.sender)
-        notBlacklisted(spender)
-        returns (bool)
-    {
-        _increaseAllowance(msg.sender, spender, increment);
-        return true;
-    }
-
-    /**
-     * @notice Decrease the allowance by a given decrement
-     * @param spender   Spender's address
-     * @param decrement Amount of decrease in allowance
-     * @return True if successful
-     */
-    function decreaseAllowance(
-        address spender,
-        uint256 decrement
-    )
-        external
-        virtual
-        whenNotPaused
-        notBlacklisted(msg.sender)
-        notBlacklisted(spender)
-        returns (bool)
-    {
-        _decreaseAllowance(msg.sender, spender, decrement);
-        return true;
-    }
-
-    /**
      * @notice Execute a transfer with a signed authorization
      * @param from          Payer's address (Authorizer)
      * @param to            Payee's address
@@ -615,34 +515,6 @@ contract FiatTokenV2Flattened is FiatTokenV1_1Flattened, EIP3009, EIP2612 {
     }
 
     /**
-     * @notice Update allowance with a signed permit
-     * @param owner       Token owner's address (Authorizer)
-     * @param spender     Spender's address
-     * @param value       Amount of allowance
-     * @param deadline    The time at which the signature expires (unix time), or max uint256 value to signal no expiration
-     * @param v           v of the signature
-     * @param r           r of the signature
-     * @param s           s of the signature
-     */
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    )
-        external
-        virtual
-        whenNotPaused
-        notBlacklisted(owner)
-        notBlacklisted(spender)
-    {
-        _permit(owner, spender, value, deadline, v, r, s);
-    }
-
-    /**
      * @dev Internal function to increase the allowance by a given increment
      * @param owner     Token owner's address
      * @param spender   Spender's address
@@ -669,15 +541,22 @@ contract FiatTokenV2Flattened is FiatTokenV1_1Flattened, EIP3009, EIP2612 {
     ) internal override {
         _approve(owner, spender, allowed[owner][spender] - decrement);
     }
-}
 
-// Copied from v2/FiatTokenV2_1.sol
+    /**
+     * @notice Initialize v2
+     * @param newName   New token name
+     */
+    function initializeV2(string calldata newName) external {
+        // solhint-disable-next-line reason-string
+        require(initialized && _initializedVersion == 0);
+        name = newName;
+        _DEPRECATED_CACHED_DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(
+            newName,
+            "2"
+        );
+        _initializedVersion = 1;
+    }
 
-/**
- * @title FiatToken V2.1
- * @notice ERC20 Token backed by fiat reserves, version 2.1
- */
-contract FiatTokenV2_1Flattened is FiatTokenV2Flattened {
     /**
      * @notice Initialize v2.1
      * @param lostAndFound  The address to which the locked funds are sent
@@ -696,22 +575,7 @@ contract FiatTokenV2_1Flattened is FiatTokenV2Flattened {
     }
 
     /**
-     * @notice Version string for the EIP712 domain separator
-     * @return Version string
-     */
-    function version() external pure virtual returns (string memory) {
-        return "2";
-    }
-}
-
-// Copied From v2/fiatTokenV2_2.sol
-/**
- * @title FiatToken V3
- * @notice ERC20 Token backed by fiat reserves, version 3
- */
-contract FiatTokenV2_2 is FiatTokenV2_1Flattened {
-    /**
-     * @notice Initialize v3
+     * @notice Initialize v2_2
      * @param accountsToBlacklist   A list of accounts to migrate from the old blacklist
      * @param newSymbol             New token symbol
      * data structure to the new blacklist data structure.
@@ -752,6 +616,14 @@ contract FiatTokenV2_2 is FiatTokenV2_1Flattened {
             chainId := chainid()
         }
         return chainId;
+    }
+
+    /**
+     * @notice Version string for the EIP712 domain separator
+     * @return Version string
+     */
+    function version() external pure returns (string memory) {
+        return "2";
     }
 
     /**
@@ -874,7 +746,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1Flattened {
     function _setBlacklistState(
         address _account,
         bool _shouldBlacklist
-    ) internal override {
+    ) internal {
         balanceAndBlacklistStates[_account] = _shouldBlacklist
             ? balanceAndBlacklistStates[_account] | (1 << 255)
             : _balanceOf(_account);
@@ -889,7 +761,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1Flattened {
      * @param _account The address of the account.
      * @param _balance The new fiat token balance of the account (max: (2^255 - 1)).
      */
-    function _setBalance(address _account, uint256 _balance) internal override {
+    function _setBalance(address _account, uint256 _balance) internal {
         require(
             _balance <= ((1 << 255) - 1),
             "FiatTokenV2_2: Balance exceeds (2^255 - 1)"
@@ -919,30 +791,34 @@ contract FiatTokenV2_2 is FiatTokenV2_1Flattened {
      * @param _account  The address of the account.
      * @return          The fiat token balance of the account.
      */
-    function _balanceOf(
-        address _account
-    ) internal view override returns (uint256) {
+    function _balanceOf(address _account) internal view returns (uint256) {
         return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
     }
 
     /**
-     * @inheritdoc FiatTokenV1Flattened
+     * @inheritdoc IERC20
+     * @notice Sets a fiat token allowance for a spender to spend on behalf of the caller.
+     * @param spender The spender's address.
+     * @param value   The allowance amount.
+     * @return True if the operation was successful.
      */
     function approve(
         address spender,
         uint256 value
-    )
-        external
-        override(FiatTokenV1Flattened, IERC20)
-        whenNotPaused
-        returns (bool)
-    {
+    ) external whenNotPaused returns (bool) {
         _approve(msg.sender, spender, value);
         return true;
     }
 
     /**
-     * @inheritdoc FiatTokenV2Flattened
+     * @notice Update allowance with a signed permit
+     * @param owner       Token owner's address (Authorizer)
+     * @param spender     Spender's address
+     * @param value       Amount of allowance
+     * @param deadline    The time at which the signature expires (unix time), or max uint256 value to signal no expiration
+     * @param v           v of the signature
+     * @param r           r of the signature
+     * @param s           s of the signature
      */
     function permit(
         address owner,
@@ -952,28 +828,34 @@ contract FiatTokenV2_2 is FiatTokenV2_1Flattened {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external override whenNotPaused {
+    ) external whenNotPaused {
         _permit(owner, spender, value, deadline, v, r, s);
     }
 
     /**
-     * @inheritdoc FiatTokenV2Flattened
+     * @notice Increase the allowance by a given increment
+     * @param spender   Spender's address
+     * @param increment Amount of increase in allowance
+     * @return True if successful
      */
     function increaseAllowance(
         address spender,
         uint256 increment
-    ) external override whenNotPaused returns (bool) {
+    ) external whenNotPaused returns (bool) {
         _increaseAllowance(msg.sender, spender, increment);
         return true;
     }
 
     /**
-     * @inheritdoc FiatTokenV2Flattened
+     * @notice Decrease the allowance by a given decrement
+     * @param spender   Spender's address
+     * @param decrement Amount of decrease in allowance
+     * @return True if successful
      */
     function decreaseAllowance(
         address spender,
         uint256 decrement
-    ) external override whenNotPaused returns (bool) {
+    ) external whenNotPaused returns (bool) {
         _decreaseAllowance(msg.sender, spender, decrement);
         return true;
     }
