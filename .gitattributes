@@ -1,1 +1,8 @@
 @types/generated/**/* linguist-generated=true
+* text=auto eol=lf
+
+# Mark Solidity files as text for Windows
+*.sol text
+*.js text
+*.ts text
+*.json text
