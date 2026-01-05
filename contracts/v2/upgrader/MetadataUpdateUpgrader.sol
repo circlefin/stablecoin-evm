@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
@@ -50,7 +50,14 @@ contract MetadataUpdateUpgrader is AbstractV2Upgrader {
         string memory newName,
         string memory newSymbol,
         string memory newCurrency
-    ) public AbstractV2Upgrader(proxy, proxy.implementation(), newProxyAdmin) {
+    )
+        public
+        AbstractV2Upgrader(
+            address(proxy),
+            proxy.implementation(),
+            newProxyAdmin
+        )
+    {
         // Sanity check input parameters are valid
         require(
             address(tempImplementation) != address(0),

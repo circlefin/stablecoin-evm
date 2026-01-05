@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0, Flattened variant (2026-01-02)
+
+- Upgraded `FiatTokenV2_2` to solidity version 0.8.24
+  - Enabled viaIR compiling
+  - Update OpenZeppelin to v5.4.0
+  - Removed safeMath
+  - Now → block.timestamp
+  - Address.isContract() → address.code.length > 0
+
 ## 2.2.0, Celo variant (2024-04-08)
 
 - Add `ICeloGasToken` and `IFiatTokenFeeAdapter` per Celo documentation

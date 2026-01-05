@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
 import { FiatTokenCeloV2_2 } from "../../contracts/v2/celo/FiatTokenCeloV2_2.sol";

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
@@ -316,10 +316,13 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
         uint256 validBefore
     ) private view {
         require(
-            now > validAfter,
+            block.timestamp > validAfter,
             "FiatTokenV2: authorization is not yet valid"
         );
-        require(now < validBefore, "FiatTokenV2: authorization is expired");
+        require(
+            block.timestamp < validBefore,
+            "FiatTokenV2: authorization is expired"
+        );
         _requireUnusedAuthorization(authorizer, nonce);
     }
 

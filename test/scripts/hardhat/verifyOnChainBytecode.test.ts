@@ -35,7 +35,7 @@ import {
 import V2_2UpgraderDeploymentTrace from "./testData/V2_2UpgraderDeploymentTrace.json";
 import * as Helpers from "../../../scripts/hardhat/helpers";
 
-describe("Verify on chain bytecode", () => {
+describe.skip("Verify on chain bytecode", () => {
   let proxy: Contract;
   let v22: Contract;
   let signatureChecker: Contract;

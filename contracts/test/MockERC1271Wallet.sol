@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { ECRecover } from "../util/ECRecover.sol";
 import { IERC1271 } from "../interface/IERC1271.sol";
@@ -27,7 +27,7 @@ import { IERC1271 } from "../interface/IERC1271.sol";
 contract MockERC1271Wallet is IERC1271 {
     address private _owner;
 
-    constructor(address owner) public {
+    constructor(address owner) {
         _owner = owner;
     }
 
@@ -71,7 +71,7 @@ contract MockERC1271WalletWithCustomValidation is IERC1271 {
     address private _owner;
     bool private _signatureValid;
 
-    constructor(address owner) public {
+    constructor(address owner) {
         _owner = owner;
     }
 

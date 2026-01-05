@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { Controller } from "./Controller.sol";
 import { MinterManagementInterface } from "./MinterManagementInterface.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -36,8 +35,6 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
  * Controller workers as minters.
  */
 contract MintController is Controller {
-    using SafeMath for uint256;
-
     /**
      * @dev MintController calls the minterManager to execute/record minter
      * management tasks, as well as to query the status of a minter address.
@@ -72,7 +69,7 @@ contract MintController is Controller {
      * @notice Initializes the minterManager.
      * @param _minterManager The address of the minterManager contract.
      */
-    constructor(address _minterManager) public {
+    constructor(address _minterManager) {
         minterManager = MinterManagementInterface(_minterManager);
     }
 
@@ -141,7 +138,7 @@ contract MintController is Controller {
         );
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
-        uint256 newAllowance = currentAllowance.add(_allowanceIncrement);
+        uint256 newAllowance = currentAllowance + _allowanceIncrement;
 
         emit MinterAllowanceIncremented(
             msg.sender,
@@ -178,7 +175,7 @@ contract MintController is Controller {
                 ? _allowanceDecrement
                 : currentAllowance
         );
-        uint256 newAllowance = currentAllowance.sub(actualAllowanceDecrement);
+        uint256 newAllowance = currentAllowance - actualAllowanceDecrement;
 
         emit MinterAllowanceDecremented(
             msg.sender,

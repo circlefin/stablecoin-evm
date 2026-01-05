@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { FiatTokenV2 } from "../FiatTokenV2.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
 import { V2UpgraderHelper } from "./helpers/V2UpgraderHelper.sol";
@@ -33,8 +32,6 @@ import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
  * @dev Read doc/v2_upgrade.md
  */
 contract V2Upgrader is AbstractV2Upgrader {
-    using SafeMath for uint256;
-
     string private _newName;
 
     /**
@@ -49,7 +46,14 @@ contract V2Upgrader is AbstractV2Upgrader {
         FiatTokenV2 implementation,
         address newProxyAdmin,
         string memory newName
-    ) public AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin) {
+    )
+        public
+        AbstractV2Upgrader(
+            address(proxy),
+            address(implementation),
+            newProxyAdmin
+        )
+    {
         _newName = newName;
         _helper = new V2UpgraderHelper(address(proxy));
     }
@@ -121,8 +125,8 @@ contract V2Upgrader is AbstractV2Upgrader {
         // Test transfer
         require(
             v2.transfer(msg.sender, 1e5) &&
-                v2.balanceOf(msg.sender) == callerBal.add(1e5) &&
-                v2.balanceOf(address(this)) == contractBal.sub(1e5),
+                v2.balanceOf(msg.sender) == callerBal + 1e5 &&
+                v2.balanceOf(address(this)) == contractBal - 1e5,
             "V2Upgrader: transfer test failed"
         );
 
@@ -132,8 +136,8 @@ contract V2Upgrader is AbstractV2Upgrader {
                 v2.allowance(address(this), address(v2Helper)) == 1e5 &&
                 v2Helper.transferFrom(address(this), msg.sender, 1e5) &&
                 v2.allowance(address(this), msg.sender) == 0 &&
-                v2.balanceOf(msg.sender) == callerBal.add(2e5) &&
-                v2.balanceOf(address(this)) == contractBal.sub(2e5),
+                v2.balanceOf(msg.sender) == callerBal + 2e5 &&
+                v2.balanceOf(address(this)) == contractBal - 2e5,
             "V2Upgrader: approve/transferFrom test failed"
         );
 

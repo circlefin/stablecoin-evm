@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 contract FiatTokenUtil {
     // (address,address,uint256,uint256,uint256,bytes32) = 20*2 + 32*4 = 168
@@ -36,7 +36,7 @@ contract FiatTokenUtil {
      * proxy's address should be provided, not the implementation address
      * @param fiatToken Address of the FiatToken contract
      */
-    constructor(address fiatToken) public {
+    constructor(address fiatToken) {
         _fiatToken = fiatToken;
     }
 

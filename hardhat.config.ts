@@ -49,8 +49,9 @@ const gasMultiplier = process.env.GAS_MULTIPLIER
 
 const hardhatConfig: HardhatUserConfig = {
   solidity: {
-    version: "0.6.12",
+    version: "0.8.24",
     settings: {
+      viaIR: true,
       optimizer: {
         enabled: true,
         runs: parseInt(process.env.OPTIMIZER_RUNS || "10000000"),

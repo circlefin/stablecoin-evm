@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { Ownable } from "../../../v1/Ownable.sol";
 
@@ -31,7 +31,7 @@ abstract contract AbstractUpgraderHelper is Ownable {
      * @notice Constructor
      * @param fiatTokenProxy    Address of the FiatTokenProxy contract
      */
-    constructor(address fiatTokenProxy) public Ownable() {
+    constructor(address fiatTokenProxy) Ownable() {
         _proxy = fiatTokenProxy;
     }
 
@@ -47,6 +47,6 @@ abstract contract AbstractUpgraderHelper is Ownable {
      * @notice Tear down the contract (self-destruct)
      */
     function tearDown() external onlyOwner {
-        selfdestruct(msg.sender);
+        selfdestruct(payable(msg.sender));
     }
 }

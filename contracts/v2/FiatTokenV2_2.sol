@@ -18,9 +18,8 @@
 
 // Copied from FiatTokenV1.sol
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { AbstractFiatTokenV1 } from "../v1/AbstractFiatTokenV1.sol";
 import { Ownable } from "../v1/Ownable.sol";
 import { Pausable } from "../v1/Pausable.sol";
@@ -30,6 +29,7 @@ import { EIP712Domain } from "../v2/EIP712Domain.sol"; // solhint-disable-line n
 import { EIP712 } from "../util/EIP712.sol";
 import { EIP3009 } from "./EIP3009.sol";
 import { EIP2612 } from "./EIP2612.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title FiatToken
@@ -41,8 +41,6 @@ contract FiatTokenV1Flattened is
     Pausable,
     Blacklistable
 {
-    using SafeMath for uint256;
-
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -150,9 +148,9 @@ contract FiatTokenV1Flattened is
             "FiatToken: mint amount exceeds minterAllowance"
         );
 
-        totalSupply_ = totalSupply_.add(_amount);
-        _setBalance(_to, _balanceOf(_to).add(_amount));
-        minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
+        totalSupply_ = totalSupply_ + _amount;
+        _setBalance(_to, _balanceOf(_to) + _amount);
+        minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
         return true;
@@ -285,7 +283,7 @@ contract FiatTokenV1Flattened is
             "ERC20: transfer amount exceeds allowance"
         );
         _transfer(from, to, value);
-        allowed[from][msg.sender] = allowed[from][msg.sender].sub(value);
+        allowed[from][msg.sender] = allowed[from][msg.sender] - value;
         return true;
     }
 
@@ -328,8 +326,8 @@ contract FiatTokenV1Flattened is
             "ERC20: transfer amount exceeds balance"
         );
 
-        _setBalance(from, _balanceOf(from).sub(value));
-        _setBalance(to, _balanceOf(to).add(value));
+        _setBalance(from, _balanceOf(from) - value);
+        _setBalance(to, _balanceOf(to) + value);
         emit Transfer(from, to, value);
     }
 
@@ -376,8 +374,8 @@ contract FiatTokenV1Flattened is
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
 
-        totalSupply_ = totalSupply_.sub(_amount);
-        _setBalance(msg.sender, balance.sub(_amount));
+        totalSupply_ = totalSupply_ - _amount;
+        _setBalance(msg.sender, balance - _amount);
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
     }
@@ -655,7 +653,7 @@ contract FiatTokenV2Flattened is FiatTokenV1_1Flattened, EIP3009, EIP2612 {
         address spender,
         uint256 increment
     ) internal override {
-        _approve(owner, spender, allowed[owner][spender].add(increment));
+        _approve(owner, spender, allowed[owner][spender] + increment);
     }
 
     /**
@@ -669,14 +667,7 @@ contract FiatTokenV2Flattened is FiatTokenV1_1Flattened, EIP3009, EIP2612 {
         address spender,
         uint256 decrement
     ) internal override {
-        _approve(
-            owner,
-            spender,
-            allowed[owner][spender].sub(
-                decrement,
-                "ERC20: decreased allowance below zero"
-            )
-        );
+        _approve(owner, spender, allowed[owner][spender] - decrement);
     }
 }
 
@@ -940,7 +931,12 @@ contract FiatTokenV2_2 is FiatTokenV2_1Flattened {
     function approve(
         address spender,
         uint256 value
-    ) external override whenNotPaused returns (bool) {
+    )
+        external
+        override(FiatTokenV1Flattened, IERC20)
+        whenNotPaused
+        returns (bool)
+    {
         _approve(msg.sender, spender, value);
         return true;
     }

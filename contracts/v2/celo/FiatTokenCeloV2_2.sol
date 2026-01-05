@@ -16,14 +16,12 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { ICeloGasToken } from "../../interface/celo/ICeloGasToken.sol";
 
 contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
-    using SafeMath for uint256;
     event FeeCallerChanged(address indexed newAddress);
 
     /**
@@ -91,7 +89,7 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
         }
     }
 
-    constructor() public {
+    constructor() {
         assert(
             DEBITED_VALUE_SLOT == keccak256("com.circle.fiattoken.celo.debit")
         );
@@ -136,7 +134,7 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
         notBlacklisted(feeRecipient)
         notBlacklisted(communityFund)
     {
-        uint256 creditValue = refund.add(tipTxFee).add(baseTxFee);
+        uint256 creditValue = refund + tipTxFee + baseTxFee;
 
         // Because the Celo VM follows 1) debit, 2) main execution, and
         // 3) credit atomically as part of a single on-chain transaction,
@@ -180,8 +178,8 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
             "ERC20: transfer amount exceeds balance"
         );
 
-        _setBalance(_from, _balanceOf(_from).sub(_value));
-        _setBalance(_to, _balanceOf(_to).add(_value));
+        _setBalance(_from, _balanceOf(_from) - _value);
+        _setBalance(_to, _balanceOf(_to) + _value);
         emit Transfer(_from, _to, _value);
     }
 }

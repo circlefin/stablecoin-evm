@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenV2_2 } from "./FiatTokenV2_2.sol";
 

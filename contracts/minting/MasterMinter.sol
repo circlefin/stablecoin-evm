@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { MintController } from "./MintController.sol";
 
@@ -27,5 +27,5 @@ import { MintController } from "./MintController.sol";
  * @dev MasterMinter inherits all its functionality from MintController.
  */
 contract MasterMinter is MintController {
-    constructor(address _minterManager) public MintController(_minterManager) {}
+    constructor(address _minterManager) MintController(_minterManager) {}
 }

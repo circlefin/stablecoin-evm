@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.24;
 
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { Create2 } from "@openzeppelin/contracts/utils/Create2.sol";

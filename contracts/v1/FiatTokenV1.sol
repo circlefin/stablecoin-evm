@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { AbstractFiatTokenV1 } from "./AbstractFiatTokenV1.sol";
 import { Ownable } from "./Ownable.sol";
 import { Pausable } from "./Pausable.sol";
@@ -29,8 +28,6 @@ import { Blacklistable } from "./Blacklistable.sol";
  * @dev ERC20 Token backed by fiat reserves
  */
 contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
-    using SafeMath for uint256;
-
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -138,9 +135,9 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
             "FiatToken: mint amount exceeds minterAllowance"
         );
 
-        totalSupply_ = totalSupply_.add(_amount);
-        _setBalance(_to, _balanceOf(_to).add(_amount));
-        minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
+        totalSupply_ = totalSupply_ + _amount;
+        _setBalance(_to, _balanceOf(_to) + _amount);
+        minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
         return true;
@@ -273,7 +270,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
             "ERC20: transfer amount exceeds allowance"
         );
         _transfer(from, to, value);
-        allowed[from][msg.sender] = allowed[from][msg.sender].sub(value);
+        allowed[from][msg.sender] = allowed[from][msg.sender] - value;
         return true;
     }
 
@@ -316,8 +313,8 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
             "ERC20: transfer amount exceeds balance"
         );
 
-        _setBalance(from, _balanceOf(from).sub(value));
-        _setBalance(to, _balanceOf(to).add(value));
+        _setBalance(from, _balanceOf(from) - value);
+        _setBalance(to, _balanceOf(to) + value);
         emit Transfer(from, to, value);
     }
 
@@ -364,8 +361,8 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
 
-        totalSupply_ = totalSupply_.sub(_amount);
-        _setBalance(msg.sender, balance.sub(_amount));
+        totalSupply_ = totalSupply_ - _amount;
+        _setBalance(msg.sender, balance - _amount);
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
     }

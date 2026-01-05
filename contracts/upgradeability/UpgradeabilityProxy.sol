@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { Proxy } from "./Proxy.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
@@ -49,7 +49,7 @@ contract UpgradeabilityProxy is Proxy {
      * @dev Contract constructor.
      * @param implementationContract Address of the initial implementation.
      */
-    constructor(address implementationContract) public {
+    constructor(address implementationContract) {
         assert(
             IMPLEMENTATION_SLOT ==
                 keccak256("org.zeppelinos.proxy.implementation")
@@ -84,7 +84,7 @@ contract UpgradeabilityProxy is Proxy {
      */
     function _setImplementation(address newImplementation) private {
         require(
-            Address.isContract(newImplementation),
+            newImplementation.code.length > 0,
             "Cannot set a proxy implementation to a non-contract address"
         );
 

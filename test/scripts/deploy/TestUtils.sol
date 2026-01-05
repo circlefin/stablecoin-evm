@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
+pragma solidity 0.8.24;
 
 import "forge-std/Test.sol"; // solhint-disable no-global-import
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";

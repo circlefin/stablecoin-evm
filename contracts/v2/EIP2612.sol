@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { AbstractFiatTokenV2 } from "./AbstractFiatTokenV2.sol";
 import { EIP712Domain } from "./EIP712Domain.sol";
@@ -82,7 +82,7 @@ abstract contract EIP2612 is AbstractFiatTokenV2, EIP712Domain {
         bytes memory signature
     ) internal {
         require(
-            deadline == type(uint256).max || deadline >= now,
+            deadline == type(uint256).max || deadline >= block.timestamp,
             "FiatTokenV2: permit is expired"
         );
 
