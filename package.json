@@ -7,6 +7,7 @@
   },
   "scripts": {
     "compile": "hardhat compile && forge build && ./flatten-generated-types.sh",
+    "compile:fast": "ENABLE_VIA_IR=false OPTIMIZER_RUNS=200 hardhat compile && forge build && ./flatten-generated-types.sh",
     "contract-size": "hardhat size-contracts",
     "coverage": "NODE_OPTIONS=--max-old-space-size=8192 hardhat coverage",
     "forge:simulate": "forge script -vv --gas-estimate-multiplier $(dotenv -p GAS_MULTIPLIER)",
@@ -22,8 +23,9 @@
     "postinstall": "bash setup.sh && husky install",
     "precommit": "yarn fmt && yarn static-check",
     "solhint": "solhint 'contracts/**/*.sol'",
-    "static-check": "yarn hardhat typechain && yarn typecheck && yarn lint && yarn fmt:check && yarn solhint",
+    "static-check": "ENABLE_VIA_IR=false OPTIMIZER_RUNS=200 yarn hardhat typechain && yarn typecheck && yarn lint && yarn fmt:check && yarn solhint",
     "test": "NODE_OPTIONS=--max-old-space-size=8192 hardhat test",
+    "test:fast": "yarn compile:fast && yarn test",
     "test:injective": "mocha --require ts-node/register 'test/v2/injective/**/*.test.ts' --timeout 60000",
     "test:injective:start": "./scripts/injective/start_network.sh",
     "test:injective:stop": "./scripts/injective/stop_network.sh",

@@ -51,7 +51,7 @@ const hardhatConfig: HardhatUserConfig = {
   solidity: {
     version: "0.8.24",
     settings: {
-      viaIR: true,
+      viaIR: process.env.ENABLE_VIA_IR !== "false",
       optimizer: {
         enabled: true,
         runs: parseInt(process.env.OPTIMIZER_RUNS || "10000000"),

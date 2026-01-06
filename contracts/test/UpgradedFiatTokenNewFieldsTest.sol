@@ -31,9 +31,9 @@ contract UpgradedFiatTokenNewFieldsTest is FiatTokenV1 {
     bool internal initializedV2;
 
     function initialize(
-        string calldata tokenName,
-        string calldata tokenSymbol,
-        string calldata tokenCurrency,
+        string memory tokenName,
+        string memory tokenSymbol,
+        string memory tokenCurrency,
         uint8 tokenDecimals,
         address newMasterMinter,
         address newPauser,
