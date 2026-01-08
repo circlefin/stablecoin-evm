@@ -22,7 +22,7 @@ docker rm -f injective-localnet 2>/dev/null || true
 docker-compose up -d injective-localnet
 
 echo "Waiting for Injective node to be ready..."
-MAX_ATTEMPTS=10
+MAX_ATTEMPTS=20
 ATTEMPT=0
 
 while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
