@@ -169,36 +169,27 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
     function _deployAndInitializeImpl(
         address deployer
     ) internal returns (FiatTokenV2_2) {
+        // For V2_2, use the new unified initialize function
+        FiatTokenV2_2.InitializeData memory initData = FiatTokenV2_2
+            .InitializeData({
+                tokenName: "",
+                tokenSymbol: "",
+                tokenCurrency: "",
+                tokenDecimals: 0,
+                newMasterMinter: THROWAWAY_ADDRESS,
+                newPauser: THROWAWAY_ADDRESS,
+                newBlacklister: THROWAWAY_ADDRESS,
+                newOwner: THROWAWAY_ADDRESS,
+                accountsToBlacklist: new address[](0)
+            });
+
         bytes memory initializer = abi.encodeWithSelector(
-            FiatTokenV1.initialize.selector,
-            "",
-            "",
-            "",
-            0,
-            THROWAWAY_ADDRESS,
-            THROWAWAY_ADDRESS,
-            THROWAWAY_ADDRESS,
-            THROWAWAY_ADDRESS
-        );
-        bytes memory initializerV2 = abi.encodeWithSelector(
-            FiatTokenV2.initializeV2.selector,
-            ""
-        );
-        bytes memory initializerV2_1 = abi.encodeWithSelector(
-            FiatTokenV2_1.initializeV2_1.selector,
-            THROWAWAY_ADDRESS
-        );
-        bytes memory initializerV2_2 = abi.encodeWithSelector(
-            FiatTokenV2_2.initializeV2_2.selector,
-            new address[](0), // initialize with an empty blacklist
-            ""
+            FiatTokenV2_2.initialize.selector,
+            initData
         );
 
-        bytes[] memory multiCallData = new bytes[](4);
+        bytes[] memory multiCallData = new bytes[](1);
         multiCallData[0] = initializer;
-        multiCallData[1] = initializerV2;
-        multiCallData[2] = initializerV2_1;
-        multiCallData[3] = initializerV2_2;
 
         // Start recording transactions
         vm.startBroadcast(deployer);
@@ -225,12 +216,9 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      * 1. Upgrade to the provided implementation address
      * 2. Rotate admin to the proxy admin, set in the environment
      * 3. Initialize the proxy with metadata fields, where master minter is set to the precomputed master minter contract address
-     * 4. Initialize the proxy with V2 metadata fields
-     * 5. Initialize the proxy with V2.1 metadata fields
-     * 6. Initialize the proxy with V2.2 metadata fields
-     * 7. Blacklist the addresses in the provided json file under BLACKLIST_FILE_NAME env
-     * 8. Rotate the blacklister to the provided blacklister address, set in the environment
-     * 9. Rotate the owner to the provided owner address, set in the environment
+     * 4. Initialize the proxy with metadata fields for v2.2
+     * 5. Rotate the blacklister to the provided blacklister address, set in the environment
+     * 6. Rotate the owner to the provided owner address, set in the environment
      *
      * @param _impl The implementation address to upgrade to
      * @param deployer The address that will send the proxy deployment transaction
@@ -239,30 +227,27 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         address _impl,
         address deployer
     ) internal returns (FiatTokenProxy) {
-        // Construct initializers
+        // For V2_2, use the new unified initialize function
+        FiatTokenV2_2.InitializeData memory initData = FiatTokenV2_2
+            .InitializeData({
+                tokenName: tokenName,
+                tokenSymbol: tokenSymbol,
+                tokenCurrency: tokenCurrency,
+                tokenDecimals: tokenDecimals,
+                newMasterMinter: computeMasterMinterAddress(
+                    chainId,
+                    factory,
+                    tokenSymbol
+                ),
+                newPauser: pauser,
+                newBlacklister: factory,
+                newOwner: factory,
+                accountsToBlacklist: addressesToBlacklist
+            });
+
         bytes memory initializer = abi.encodeWithSelector(
-            FiatTokenV1.initialize.selector,
-            tokenName,
-            tokenSymbol,
-            tokenCurrency,
-            tokenDecimals,
-            computeMasterMinterAddress(chainId, factory, tokenSymbol),
-            pauser,
-            factory,
-            factory
-        );
-        bytes memory initializerV2 = abi.encodeWithSelector(
-            FiatTokenV2.initializeV2.selector,
-            tokenName
-        );
-        bytes memory initializerV2_1 = abi.encodeWithSelector(
-            FiatTokenV2_1.initializeV2_1.selector,
-            owner
-        );
-        bytes memory initializerV2_2 = abi.encodeWithSelector(
-            FiatTokenV2_2.initializeV2_2.selector,
-            new address[](0),
-            tokenSymbol
+            FiatTokenV2_2.initialize.selector,
+            initData
         );
 
         // Construct upgrade data
@@ -287,27 +272,14 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
             owner
         );
 
-        uint256 n = 6 /* number of function calls prior to blacklisting */ +
-            addressesToBlacklist.length +
-            2; /* number of function calls after blacklisting */
-        bytes[] memory multiCallData = new bytes[](n);
+        // V2_2: Only need 6 calls total (upgrade, changeAdmin, initialize, initializeNext, updateBlacklister, transferOwnership)
+        // Blacklisting is now handled in the initialize function via accountsToBlacklist parameter
+        bytes[] memory multiCallData = new bytes[](5);
         multiCallData[0] = upgrade;
         multiCallData[1] = adminRotationData;
         multiCallData[2] = initializer;
-        multiCallData[3] = initializerV2;
-        multiCallData[4] = initializerV2_1;
-        multiCallData[5] = initializerV2_2;
-
-        for (uint256 i = 0; i < addressesToBlacklist.length; i++) {
-            bytes memory blacklistData = abi.encodeWithSelector(
-                Blacklistable.blacklist.selector,
-                addressesToBlacklist[i]
-            );
-            multiCallData[i + 6] = blacklistData;
-        }
-
-        multiCallData[n - 2] = blacklisterRotationData;
-        multiCallData[n - 1] = ownerRotationData;
+        multiCallData[3] = blacklisterRotationData;
+        multiCallData[4] = ownerRotationData;
 
         // Start recording transactions
         vm.startBroadcast(deployer);

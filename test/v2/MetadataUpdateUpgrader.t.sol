@@ -61,18 +61,18 @@ contract MetadataUpdateUpgraderTest is Test {
         vm.startPrank(fiatTokenOwner);
         {
             proxyAsV2_2.initialize(
-                "Bridged USDC",
-                "USDC.e",
-                "TST",
-                6,
-                masterMinter,
-                pauser,
-                blacklister,
-                fiatTokenOwner
+                FiatTokenV2_2.InitializeData({
+                    tokenName: "Bridged USDC",
+                    tokenSymbol: "USDC.e",
+                    tokenCurrency: "TST",
+                    tokenDecimals: 6,
+                    newMasterMinter: masterMinter,
+                    newPauser: pauser,
+                    newBlacklister: blacklister,
+                    newOwner: fiatTokenOwner,
+                    accountsToBlacklist: new address[](0)
+                })
             );
-            proxyAsV2_2.initializeV2("Bridged USDC");
-            proxyAsV2_2.initializeV2_1(address(0)); // lost and found address
-            proxyAsV2_2.initializeV2_2(new address[](0), "USDC.e");
         }
         vm.stopPrank();
 

@@ -82,7 +82,7 @@ describe("FiatTokenCeloV2_2", () => {
   });
 
   describe("initialized FiatTokenCeloV2_2 contract", async () => {
-    await fiatTokenCelo.initializeV2_2([], "CELOUSDC");
+    await fiatTokenCelo.initializeNext();
 
     behavesLikeFiatTokenV22(getFiatToken(SignatureBytesType.Unpacked));
     behavesLikeFiatTokenV2(2.2, getFiatToken(SignatureBytesType.Packed));

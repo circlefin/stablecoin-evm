@@ -18,7 +18,7 @@
 
 pragma solidity 0.8.24;
 
-import { FiatTokenV1 } from "../../../v1/FiatTokenV1.sol";
+import { FiatTokenV2_2 } from "../../../v2/FiatTokenV2_2.sol";
 import { AbstractUpgraderHelper } from "./AbstractUpgraderHelper.sol";
 
 /**
@@ -41,7 +41,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return name
      */
     function name() external view returns (string memory) {
-        return FiatTokenV1(_proxy).name();
+        return FiatTokenV2_2(_proxy).name();
     }
 
     /**
@@ -49,7 +49,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return symbol
      */
     function symbol() external view returns (string memory) {
-        return FiatTokenV1(_proxy).symbol();
+        return FiatTokenV2_2(_proxy).symbol();
     }
 
     /**
@@ -57,7 +57,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return decimals
      */
     function decimals() external view returns (uint8) {
-        return FiatTokenV1(_proxy).decimals();
+        return FiatTokenV2_2(_proxy).decimals();
     }
 
     /**
@@ -65,7 +65,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return currency
      */
     function currency() external view returns (string memory) {
-        return FiatTokenV1(_proxy).currency();
+        return FiatTokenV2_2(_proxy).currency();
     }
 
     /**
@@ -73,7 +73,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return masterMinter
      */
     function masterMinter() external view returns (address) {
-        return FiatTokenV1(_proxy).masterMinter();
+        return FiatTokenV2_2(_proxy).masterMinter();
     }
 
     /**
@@ -82,7 +82,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return owner
      */
     function fiatTokenOwner() external view returns (address) {
-        return FiatTokenV1(_proxy).owner();
+        return FiatTokenV2_2(_proxy).owner();
     }
 
     /**
@@ -90,7 +90,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return pauser
      */
     function pauser() external view returns (address) {
-        return FiatTokenV1(_proxy).pauser();
+        return FiatTokenV2_2(_proxy).pauser();
     }
 
     /**
@@ -98,7 +98,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return blacklister
      */
     function blacklister() external view returns (address) {
-        return FiatTokenV1(_proxy).blacklister();
+        return FiatTokenV2_2(_proxy).blacklister();
     }
 
     /**
@@ -107,7 +107,7 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
      * @return balance
      */
     function balanceOf(address account) external view returns (uint256) {
-        return FiatTokenV1(_proxy).balanceOf(account);
+        return FiatTokenV2_2(_proxy).balanceOf(account);
     }
 
     /**
@@ -122,6 +122,6 @@ contract V2UpgraderHelper is AbstractUpgraderHelper {
         address to,
         uint256 value
     ) external returns (bool) {
-        return FiatTokenV1(_proxy).transferFrom(from, to, value);
+        return FiatTokenV2_2(_proxy).transferFrom(from, to, value);
     }
 }

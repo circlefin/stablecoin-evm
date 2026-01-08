@@ -72,46 +72,67 @@ export function usesOriginalStorageSlotPositions<
       proxy = await FiatTokenProxy.new(fiatToken.address);
       await proxy.changeAdmin(proxyAdmin);
 
-      const proxyAsFiatTokenV1 = await FiatTokenV1.at(proxy.address);
-      await proxyAsFiatTokenV1.initialize(
-        name,
-        symbol,
-        currency,
-        decimals,
-        masterMinter,
-        pauser,
-        blacklister,
-        owner
-      );
+      let proxyAsFiatToken;
 
-      await proxyAsFiatTokenV1.configureMinter(minter, mintAllowance, {
-        from: masterMinter,
-      });
-      await proxyAsFiatTokenV1.mint(alice, minted, { from: minter });
-      await proxyAsFiatTokenV1.transfer(bob, transferred, { from: alice });
-      await proxyAsFiatTokenV1.approve(charlie, allowance, { from: alice });
-      await proxyAsFiatTokenV1.blacklist(bob, { from: blacklister });
-      await proxyAsFiatTokenV1.blacklist(charlie, { from: blacklister });
-      await proxyAsFiatTokenV1.pause({ from: pauser });
-
-      if (version >= 1.1) {
-        const proxyAsFiatTokenV1_1 = await FiatTokenV1_1.at(proxy.address);
-        await proxyAsFiatTokenV1_1.updateRescuer(rescuer, {
-          from: owner,
-        });
-      }
-      if (version >= 2) {
-        const proxyAsFiatTokenV2 = await FiatTokenV2.at(proxy.address);
-        await proxyAsFiatTokenV2.initializeV2(name);
-        domainSeparator = await proxyAsFiatTokenV2.DOMAIN_SEPARATOR();
-      }
-      if (version >= 2.1) {
-        const proxyAsFiatTokenV2_1 = await FiatTokenV2_1.at(proxy.address);
-        await proxyAsFiatTokenV2_1.initializeV2_1(lostAndFound);
-      }
       if (version >= 2.2) {
         const proxyAsFiatTokenV2_2 = await FiatTokenV2_2.at(proxy.address);
-        await proxyAsFiatTokenV2_2.initializeV2_2([], symbol);
+        await proxyAsFiatTokenV2_2.initialize({
+          tokenName: name,
+          tokenSymbol: symbol,
+          tokenCurrency: currency,
+          tokenDecimals: decimals,
+          newMasterMinter: masterMinter,
+          newPauser: pauser,
+          newBlacklister: blacklister,
+          newOwner: owner,
+          accountsToBlacklist: [],
+        });
+        proxyAsFiatToken = proxyAsFiatTokenV2_2;
+        await proxyAsFiatTokenV2_2.updateRescuer(rescuer, {
+          from: owner,
+        });
+        domainSeparator = await proxyAsFiatTokenV2_2.DOMAIN_SEPARATOR();
+      } else {
+        const proxyAsFiatTokenV1 = await FiatTokenV1.at(proxy.address);
+        await proxyAsFiatTokenV1.initialize(
+          name,
+          symbol,
+          currency,
+          decimals,
+          masterMinter,
+          pauser,
+          blacklister,
+          owner
+        );
+        proxyAsFiatToken = proxyAsFiatTokenV1;
+      }
+
+      await proxyAsFiatToken.configureMinter(minter, mintAllowance, {
+        from: masterMinter,
+      });
+      await proxyAsFiatToken.mint(alice, minted, { from: minter });
+      await proxyAsFiatToken.transfer(bob, transferred, { from: alice });
+      await proxyAsFiatToken.approve(charlie, allowance, { from: alice });
+      await proxyAsFiatToken.blacklist(bob, { from: blacklister });
+      await proxyAsFiatToken.blacklist(charlie, { from: blacklister });
+      await proxyAsFiatToken.pause({ from: pauser });
+
+      if (version < 2.2) {
+        if (version >= 1.1) {
+          const proxyAsFiatTokenV1_1 = await FiatTokenV1_1.at(proxy.address);
+          await proxyAsFiatTokenV1_1.updateRescuer(rescuer, {
+            from: owner,
+          });
+        }
+        if (version >= 2) {
+          const proxyAsFiatTokenV2 = await FiatTokenV2.at(proxy.address);
+          await proxyAsFiatTokenV2.initializeV2(name);
+          domainSeparator = await proxyAsFiatTokenV2.DOMAIN_SEPARATOR();
+        }
+        if (version >= 2.1) {
+          const proxyAsFiatTokenV2_1 = await FiatTokenV2_1.at(proxy.address);
+          await proxyAsFiatTokenV2_1.initializeV2_1(lostAndFound);
+        }
       }
     });
 
@@ -150,10 +171,18 @@ export function usesOriginalStorageSlotPositions<
       checkSlot(slots[7], [{ type: "string", value: currency }]);
 
       // slot 8 - masterMinter, initialized
-      checkSlot(slots[8], [
-        { type: "bool", value: true },
-        { type: "address", value: masterMinter },
-      ]); // initialized + masterMinter
+      // V2_2 new deployments don't set _deprecatedInitialized flag
+      if (version === 2.2) {
+        checkSlot(slots[8], [
+          { type: "bool", value: false },
+          { type: "address", value: masterMinter },
+        ]);
+      } else {
+        checkSlot(slots[8], [
+          { type: "bool", value: true },
+          { type: "address", value: masterMinter },
+        ]); // initialized + masterMinter
+      }
 
       // slot 9 - balanceAndBlacklistStates (mapping, slot is unused)
       checkSlot(slots[9], ZERO_BYTES32);
@@ -182,8 +211,12 @@ export function usesOriginalStorageSlotPositions<
       it("retains slot 15 for DOMAIN_SEPARATOR", async () => {
         const slot = await readSlot(proxy.address, 15);
 
-        // Cached domain separator is deprecated in v2.2. But we still need to ensure the storage slot is retained.
-        checkSlot(slot, domainSeparator);
+        // Cached domain separator is deprecated in v2.2. New V2_2 deployments don't set it.
+        if (version === 2.2) {
+          checkSlot(slot, ZERO_BYTES32);
+        } else {
+          checkSlot(slot, domainSeparator);
+        }
       });
     }
 

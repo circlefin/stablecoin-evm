@@ -163,6 +163,22 @@ export async function initializeToVersion(
   lostAndFound: string,
   accountsToBlacklist: string[] = []
 ): Promise<void> {
+  if (version >= "2.2") {
+    const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
+    await proxyAsV2_2.initialize({
+      tokenName: "USDC",
+      tokenSymbol: "USDCUSDC",
+      tokenCurrency: "USD",
+      tokenDecimals: 6,
+      newMasterMinter: fiatTokenOwner,
+      newPauser: fiatTokenOwner,
+      newBlacklister: fiatTokenOwner,
+      newOwner: fiatTokenOwner,
+      accountsToBlacklist: accountsToBlacklist,
+    });
+    return;
+  }
+
   const proxyAsV1 = await FiatTokenV1.at(proxyOrImplementation.address);
   await proxyAsV1.initialize(
     "USDC",
@@ -185,11 +201,6 @@ export async function initializeToVersion(
   if (version >= "2.1") {
     const proxyAsV2_1 = await FiatTokenV2_1.at(proxyOrImplementation.address);
     await proxyAsV2_1.initializeV2_1(lostAndFound);
-  }
-
-  if (version >= "2.2") {
-    const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
-    await proxyAsV2_2.initializeV2_2(accountsToBlacklist, "USDCUSDC");
   }
 }
 

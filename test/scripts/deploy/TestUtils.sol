@@ -161,18 +161,18 @@ contract TestUtils is Test {
         FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
 
         proxyAsV2_2.initialize(
-            tokenName,
-            tokenSymbol,
-            "USD",
-            decimals,
-            masterMinterOwner,
-            pauser,
-            blacklister,
-            vm.addr(ownerPrivateKey)
+            FiatTokenV2_2.InitializeData({
+                tokenName: tokenName,
+                tokenSymbol: tokenSymbol,
+                tokenCurrency: "USD",
+                tokenDecimals: decimals,
+                newMasterMinter: masterMinterOwner,
+                newPauser: pauser,
+                newBlacklister: blacklister,
+                newOwner: owner,
+                accountsToBlacklist: new address[](0)
+            })
         );
-        proxyAsV2_2.initializeV2(tokenName);
-        proxyAsV2_2.initializeV2_1(owner);
-        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
 
         vm.setEnv(
             "CREATE2_FACTORY_CONTRACT_ADDRESS",
@@ -202,18 +202,18 @@ contract TestUtils is Test {
         proxy.changeAdmin(proxyAdmin);
         // This is required since the FiatTokenFeeAdapter needs the decimals field.
         proxyAsV2_2.initialize(
-            tokenName,
-            tokenSymbol,
-            tokenCurrency,
-            decimals,
-            address(masterMinter),
-            pauser,
-            blacklister,
-            owner
+            FiatTokenV2_2.InitializeData({
+                tokenName: tokenName,
+                tokenSymbol: tokenSymbol,
+                tokenCurrency: tokenCurrency,
+                tokenDecimals: decimals,
+                newMasterMinter: address(masterMinter),
+                newPauser: pauser,
+                newBlacklister: blacklister,
+                newOwner: owner,
+                accountsToBlacklist: new address[](0)
+            })
         );
-        proxyAsV2_2.initializeV2(tokenName);
-        proxyAsV2_2.initializeV2_1(owner);
-        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
         vm.stopPrank();
 
         vm.setEnv("FIAT_TOKEN_CELO_PROXY_ADDRESS", vm.toString(address(proxy)));

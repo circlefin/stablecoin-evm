@@ -44,7 +44,7 @@ abstract contract V1Storage is Ownable, Pausable, Blacklistable {
     uint8 public decimals;
     string public currency;
     address public masterMinter;
-    bool internal initialized;
+    bool internal _deprecatedInitialized;
 
     /// @dev A mapping that stores the balance and blacklist states for a given address.
     /// The first bit defines whether the address is blacklisted (1 if blacklisted, 0 otherwise).
@@ -100,53 +100,107 @@ contract FiatTokenV2_2 is
     event MasterMinterChanged(address indexed newMasterMinter);
 
     /**
-     * @notice Initializes the fiat token contract.
-     * @param tokenName       The name of the fiat token.
-     * @param tokenSymbol     The symbol of the fiat token.
-     * @param tokenCurrency   The fiat currency that the token represents.
-     * @param tokenDecimals   The number of decimals that the token uses.
-     * @param newMasterMinter The masterMinter address for the fiat token.
-     * @param newPauser       The pauser address for the fiat token.
-     * @param newBlacklister  The blacklister address for the fiat token.
-     * @param newOwner        The owner of the fiat token.
+     * @notice Initialization parameters for FiatToken V2.2
+     * @dev This struct is used to pass all initialization parameters to the initialize function
+     * @param tokenName The name of the fiat token
+     * @param tokenSymbol The symbol of the fiat token
+     * @param tokenCurrency The fiat currency that the token represents
+     * @param tokenDecimals The number of decimals for the token
+     * @param newMasterMinter The address of the master minter
+     * @param newPauser The address of the pauser
+     * @param newBlacklister The address of the blacklister
+     * @param newOwner The owner address of the contract
+     * @param accountsToBlacklist Array of addresses to be blacklisted during initialization
      */
-    function initialize(
-        string memory tokenName,
-        string memory tokenSymbol,
-        string memory tokenCurrency,
-        uint8 tokenDecimals,
-        address newMasterMinter,
-        address newPauser,
-        address newBlacklister,
-        address newOwner
-    ) public {
-        require(!initialized, "FiatToken: contract is already initialized");
+    struct InitializeData {
+        string tokenName;
+        string tokenSymbol;
+        string tokenCurrency;
+        uint8 tokenDecimals;
+        address newMasterMinter;
+        address newPauser;
+        address newBlacklister;
+        address newOwner;
+        address[] accountsToBlacklist;
+    }
+
+    function initialize(InitializeData calldata data) external {
         require(
-            newMasterMinter != address(0),
+            _initializedVersion == 0,
+            "FiatToken: contract is already initialized"
+        );
+        require(
+            data.newMasterMinter != address(0),
             "FiatToken: new masterMinter is the zero address"
         );
         require(
-            newPauser != address(0),
+            data.newPauser != address(0),
             "FiatToken: new pauser is the zero address"
         );
         require(
-            newBlacklister != address(0),
+            data.newBlacklister != address(0),
             "FiatToken: new blacklister is the zero address"
         );
         require(
-            newOwner != address(0),
+            data.newOwner != address(0),
             "FiatToken: new owner is the zero address"
         );
 
-        name = tokenName;
-        symbol = tokenSymbol;
-        currency = tokenCurrency;
-        decimals = tokenDecimals;
-        masterMinter = newMasterMinter;
-        pauser = newPauser;
-        blacklister = newBlacklister;
-        setOwner(newOwner);
-        initialized = true;
+        name = data.tokenName;
+        symbol = data.tokenSymbol;
+        currency = data.tokenCurrency;
+        decimals = data.tokenDecimals;
+        masterMinter = data.newMasterMinter;
+        pauser = data.newPauser;
+        blacklister = data.newBlacklister;
+        setOwner(data.newOwner);
+
+        for (uint256 i = 0; i < data.accountsToBlacklist.length; i++) {
+            _blacklist(data.accountsToBlacklist[i]);
+        }
+        _blacklist(address(this));
+        _initializedVersion = 3;
+    }
+
+    /**
+     * @notice Initialize v2_2
+     * @param accountsToBlacklist   A list of accounts to migrate from the old blacklist
+     * @param newSymbol             New token symbol
+     * data structure to the new blacklist data structure.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function initializeV2_2(
+        address[] calldata accountsToBlacklist,
+        string calldata newSymbol
+    ) external {
+        // solhint-disable-next-line reason-string
+        require(_initializedVersion == 2);
+
+        // Update fiat token symbol
+        symbol = newSymbol;
+
+        // Add previously blacklisted accounts to the new blacklist data structure
+        // and remove them from the old blacklist data structure.
+        for (uint256 i = 0; i < accountsToBlacklist.length; ++i) {
+            require(
+                _deprecatedBlacklisted[accountsToBlacklist[i]],
+                "FiatTokenV2_2: Blacklisting previously unblacklisted account!"
+            );
+            _blacklist(accountsToBlacklist[i]);
+            delete _deprecatedBlacklisted[accountsToBlacklist[i]];
+        }
+        _blacklist(address(this));
+        delete _deprecatedBlacklisted[address(this)];
+
+        _initializedVersion = 3;
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function initializeNext() external view {
+        require(
+            _initializedVersion == 3,
+            "FiatToken: contract must be initialized to version 3"
+        );
     }
 
     /**
@@ -540,70 +594,6 @@ contract FiatTokenV2_2 is
         uint256 decrement
     ) internal override {
         _approve(owner, spender, allowed[owner][spender] - decrement);
-    }
-
-    /**
-     * @notice Initialize v2
-     * @param newName   New token name
-     */
-    function initializeV2(string calldata newName) external {
-        // solhint-disable-next-line reason-string
-        require(initialized && _initializedVersion == 0);
-        name = newName;
-        _DEPRECATED_CACHED_DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(
-            newName,
-            "2"
-        );
-        _initializedVersion = 1;
-    }
-
-    /**
-     * @notice Initialize v2.1
-     * @param lostAndFound  The address to which the locked funds are sent
-     */
-    function initializeV2_1(address lostAndFound) external {
-        // solhint-disable-next-line reason-string
-        require(_initializedVersion == 1);
-
-        uint256 lockedAmount = _balanceOf(address(this));
-        if (lockedAmount > 0) {
-            _transfer(address(this), lostAndFound, lockedAmount);
-        }
-        _blacklist(address(this));
-
-        _initializedVersion = 2;
-    }
-
-    /**
-     * @notice Initialize v2_2
-     * @param accountsToBlacklist   A list of accounts to migrate from the old blacklist
-     * @param newSymbol             New token symbol
-     * data structure to the new blacklist data structure.
-     */
-    function initializeV2_2(
-        address[] calldata accountsToBlacklist,
-        string calldata newSymbol
-    ) external {
-        // solhint-disable-next-line reason-string
-        require(_initializedVersion == 2);
-
-        // Update fiat token symbol
-        symbol = newSymbol;
-
-        // Add previously blacklisted accounts to the new blacklist data structure
-        // and remove them from the old blacklist data structure.
-        for (uint256 i = 0; i < accountsToBlacklist.length; i++) {
-            require(
-                _deprecatedBlacklisted[accountsToBlacklist[i]],
-                "FiatTokenV2_2: Blacklisting previously unblacklisted account!"
-            );
-            _blacklist(accountsToBlacklist[i]);
-            delete _deprecatedBlacklisted[accountsToBlacklist[i]];
-        }
-        _blacklist(address(this));
-        delete _deprecatedBlacklisted[address(this)];
-
-        _initializedVersion = 3;
     }
 
     /**

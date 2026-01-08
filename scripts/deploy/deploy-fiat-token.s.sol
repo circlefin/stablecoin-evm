@@ -104,28 +104,21 @@ contract DeployFiatToken is Script, DeployImpl {
         // The master minter contract's owner is a separate address.
         FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
         proxyAsV2_2.initialize(
-            tokenName,
-            tokenSymbol,
-            tokenCurrency,
-            tokenDecimals,
-            // setting this to the master minter owner for now
-            // to allow hot key setup before migrating to cold
-            // storage
-            masterMinterOwner,
-            pauser,
-            blacklister,
-            owner
+            FiatTokenV2_2.InitializeData({
+                tokenName: tokenName,
+                tokenSymbol: tokenSymbol,
+                tokenCurrency: tokenCurrency,
+                tokenDecimals: tokenDecimals,
+                // setting this to the master minter owner for now
+                // to allow hot key setup before migrating to cold
+                // storage
+                newMasterMinter: masterMinterOwner,
+                newPauser: pauser,
+                newBlacklister: blacklister,
+                newOwner: owner,
+                accountsToBlacklist: new address[](0)
+            })
         );
-
-        // Do the V2 initialization
-        proxyAsV2_2.initializeV2(tokenName);
-
-        // Do the V2_1 initialization
-        proxyAsV2_2.initializeV2_1(owner);
-
-        // Do the V2_2 initialization
-        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
-
         vm.stopBroadcast();
 
         return (fiatTokenV2_2, masterMinterOwner, proxy);

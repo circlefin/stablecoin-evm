@@ -27,7 +27,6 @@ const MockFiatTokenWithEditableChainId = artifacts.require(
 describe("MockFiatTokenWithEditableChainId", () => {
   const name = "USDC";
   const version = "2";
-  const [, , lostAndFound] = HARDHAT_ACCOUNTS;
   const fiatTokenOwner = HARDHAT_ACCOUNTS[9];
 
   let fiatToken: MockFiatTokenWithEditableChainIdInstance;
@@ -36,19 +35,18 @@ describe("MockFiatTokenWithEditableChainId", () => {
     await linkLibraryToTokenContract(MockFiatTokenWithEditableChainId);
     fiatToken = await MockFiatTokenWithEditableChainId.new();
 
-    await fiatToken.initialize(
-      name,
-      "USDC",
-      "USD",
-      6,
-      fiatTokenOwner,
-      fiatTokenOwner,
-      fiatTokenOwner,
-      fiatTokenOwner
-    );
-    await fiatToken.initializeV2("USDC", { from: fiatTokenOwner });
-    await fiatToken.initializeV2_1(lostAndFound);
-    await fiatToken.initializeV2_2([], "USDCUSDC");
+    await fiatToken.initialize({
+      tokenName: name,
+      tokenSymbol: "USDC",
+      tokenCurrency: "USD",
+      tokenDecimals: 6,
+      newMasterMinter: fiatTokenOwner,
+      newPauser: fiatTokenOwner,
+      newBlacklister: fiatTokenOwner,
+      newOwner: fiatTokenOwner,
+      accountsToBlacklist: [],
+    });
+    await fiatToken.initializeNext();
   });
 
   describe("DOMAIN_SEPARATOR", () => {
