@@ -108,9 +108,6 @@ export async function getDenomMetadata(denom: string): Promise<{
   };
 }
 
-/**
- * Query total supply of a specific denom from the bank module using ChainGrpcBankApi (read operation)
- */
 export async function getTotalSupply(denom: string): Promise<string> {
   const client = getBankClient();
   const supply = await client.fetchSupplyOf(denom);
@@ -121,9 +118,6 @@ export async function getTotalSupply(denom: string): Promise<string> {
 // Wrtie operations
 // =============================================================================
 
-/**
- * Send tokens using MsgBroadcasterWithPk (write operation)
- */
 export async function sendTokens(
   privateKey: PrivateKey,
   recipientAddress: string,
