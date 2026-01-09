@@ -16,7 +16,7 @@
 
 services:
   injective-localnet:
-    image: injectivelabs/injective-core:v1.16.5-usdc
+    image: injectivelabs/injective-core:v1.17.2-usdc
     container_name: injective-localnet
     ports:
       - "26657:26657" # Tendermint RPC
