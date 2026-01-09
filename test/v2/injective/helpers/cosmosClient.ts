@@ -100,16 +100,10 @@ export async function getDenomMetadata(denom: string): Promise<{
   const client = getBankClient();
   const metadata = await client.fetchDenomMetadata(denom);
 
-  // Find the highest exponent denom unit to get decimals (display unit)
-  const displayUnit = metadata.denomUnits.reduce(
-    (max, unit) => (unit.exponent > max.exponent ? unit : max),
-    metadata.denomUnits[0] || { exponent: 0 }
-  );
-
   return {
     name: metadata.name,
     symbol: metadata.symbol,
-    decimals: displayUnit?.exponent || 0,
+    decimals: metadata.denomUnits[0].exponent,
     description: metadata.description,
   };
 }
