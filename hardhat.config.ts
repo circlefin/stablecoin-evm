@@ -46,7 +46,7 @@ dotenv.config();
 
 // Exclude injective tests from hardhat test - they use ESM deps incompatible with ts-node.
 // Run injective tests separately via: yarn test:injective
-subtask(TASK_TEST_GET_TEST_FILES).setAction(async (args, hre, runSuper) => {
+subtask(TASK_TEST_GET_TEST_FILES).setAction(async (args, _hre, runSuper) => {
   const files: string[] = await runSuper(args);
   return files.filter((file) => !file.includes("/injective/"));
 });
