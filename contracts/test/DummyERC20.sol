@@ -25,7 +25,7 @@ contract DummyERC20 is ERC20 {
         string memory tokenName,
         string memory tokenSymbol,
         uint256 initialSupply
-    ) public ERC20(tokenName, tokenSymbol) {
+    ) ERC20(tokenName, tokenSymbol) {
         _mint(msg.sender, initialSupply);
     }
 }

@@ -8,6 +8,14 @@
   - Removed safeMath
   - Now → block.timestamp
   - Address.isContract() → address.code.length > 0
+- Flattened `FiatTokenV2_2` into a single contract file
+  - Consolidated all FiatToken functionality from V1, V1.1, V2, V2.1, and V2.2
+    while maintaining storage layout compatibility for proxy upgrades
+- Updated initialization interface
+  - `initialize(InitializeData)` - Single-step initialization for new
+    deployments
+  - `initializeV2_2(...)` - Unchanged upgader function
+  - `initializeNext()` - View-only stub for upgrade compatibility
 
 ## 2.2.0, Celo variant (2024-04-08)
 

@@ -164,10 +164,10 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      * @dev This function multicalls the implementation contract, to set all metadata values to dummy values.
      * This is done to ensure that the implementation contract is initialized and cannot be initialized again by other parties.
      *
-     * @param deployer The address that will send the FiatTokenV2_2 deployment transaction
+     * @param deployer_ The address that will send the FiatTokenV2_2 deployment transaction
      */
     function _deployAndInitializeImpl(
-        address deployer
+        address deployer_
     ) internal returns (FiatTokenV2_2) {
         // For V2_2, use the new unified initialize function
         FiatTokenV2_2.InitializeData memory initData = FiatTokenV2_2
@@ -192,7 +192,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         multiCallData[0] = initializer;
 
         // Start recording transactions
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(deployer_);
 
         // Deploy and multicall proxy
         address payable implAddress = payable(
@@ -221,11 +221,11 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      * 6. Rotate the owner to the provided owner address, set in the environment
      *
      * @param _impl The implementation address to upgrade to
-     * @param deployer The address that will send the proxy deployment transaction
+     * @param deployer_ The address that will send the proxy deployment transaction
      */
     function _deployAndInitializeProxy(
         address _impl,
-        address deployer
+        address deployer_
     ) internal returns (FiatTokenProxy) {
         // For V2_2, use the new unified initialize function
         FiatTokenV2_2.InitializeData memory initData = FiatTokenV2_2
@@ -282,7 +282,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         multiCallData[4] = ownerRotationData;
 
         // Start recording transactions
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(deployer_);
 
         // Deploy and multicall proxy
         address payable proxyAddress = payable(
@@ -310,11 +310,11 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
      * 4. Rotate owner to the provided master minter owner address.
      *
      * @param proxyAddress The implementation address to upgrade to
-     * @param deployer The address that will send the master minter deployment transaction
+     * @param deployer_ The address that will send the master minter deployment transaction
      */
     function _deployMasterMinter(
         address proxyAddress,
-        address deployer
+        address deployer_
     ) internal returns (MasterMinter) {
         FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(proxyAddress);
         uint256 decimals = proxyAsV2_2.decimals();
@@ -369,7 +369,7 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         multiCallData[n - 1] = rotateOwner;
 
         // Start recording transactions
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(deployer_);
 
         // Deploy and multicall proxy
         address payable masterMinterAddress = payable(
@@ -394,5 +394,32 @@ contract DeployFiatTokenCreate2 is ScriptUtils, AddressUtils {
         returns (FiatTokenV2_2, MasterMinter, FiatTokenProxy)
     {
         return _deploy(impl);
+    }
+
+    /**
+     * @dev For testing only: Helper function that runs deploy script with custom minters configuration
+     * @param _impl The implementation address (use address(0) to deploy a new one)
+     * @param _minterControllers Array of minter controller addresses
+     * @param _minters Array of minter addresses
+     * @param _minterAllowances Array of minter allowances
+     */
+    function deployWithMinters(
+        address _impl,
+        address[] memory _minterControllers,
+        address[] memory _minters,
+        uint256[] memory _minterAllowances
+    ) external returns (FiatTokenV2_2, MasterMinter, FiatTokenProxy) {
+        require(
+            _minterControllers.length == _minters.length &&
+                _minters.length == _minterAllowances.length,
+            "Minter arrays must have equal length"
+        );
+
+        // Override the minters configuration loaded from environment
+        minterControllers = _minterControllers;
+        minters = _minters;
+        minterAllowances = _minterAllowances;
+
+        return _deploy(_impl);
     }
 }

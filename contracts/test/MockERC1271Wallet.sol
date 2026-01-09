@@ -52,7 +52,7 @@ contract MockERC1271WalletReturningBytes32 is IERC1271 {
     function isValidSignature(
         bytes32,
         bytes memory
-    ) external view override returns (bytes4) {
+    ) external pure override returns (bytes4) {
         assembly {
             mstore(
                 0,

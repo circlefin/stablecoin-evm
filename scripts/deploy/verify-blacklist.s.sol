@@ -46,7 +46,7 @@ contract VerifyBlacklist is Script, ScriptUtils {
     /**
      * @notice main function that will be run by forge
      */
-    function run() external {
+    function run() external view {
         console.log(">>>>>>> Starting Blacklist Validation <<<<<<<");
 
         Blacklistable proxyAsBlacklistable = Blacklistable(proxyAddress);

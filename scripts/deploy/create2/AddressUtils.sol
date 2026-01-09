@@ -34,25 +34,25 @@ contract AddressUtils is ScriptUtils {
 
     function signatureCheckerSalt(
         uint256 chainId
-    ) public view returns (bytes32 salt) {
+    ) public pure returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId));
     }
 
     function proxySalt(
         uint256 chainId,
         string memory tokenSymbol
-    ) public view returns (bytes32 salt) {
+    ) public pure returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId, tokenSymbol));
     }
 
-    function implSalt(uint256 chainId) public view returns (bytes32 salt) {
+    function implSalt(uint256 chainId) public pure returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId));
     }
 
     function masterMinterSalt(
         uint256 chainId,
         string memory tokenSymbol
-    ) public view returns (bytes32 salt) {
+    ) public pure returns (bytes32 salt) {
         return keccak256(abi.encodePacked(chainId, tokenSymbol));
     }
 
@@ -114,7 +114,7 @@ contract AddressUtils is ScriptUtils {
     function computeSignatureCheckerAddress(
         uint256 chainId,
         address factory
-    ) public view returns (address) {
+    ) public pure returns (address) {
         return
             vm.computeCreate2Address(
                 signatureCheckerSalt(chainId),
@@ -131,7 +131,7 @@ contract AddressUtils is ScriptUtils {
     function computeImplAddress(
         uint256 chainId,
         address factory
-    ) public view returns (address) {
+    ) public pure returns (address) {
         return
             vm.computeCreate2Address(
                 implSalt(chainId),
@@ -149,7 +149,7 @@ contract AddressUtils is ScriptUtils {
         uint256 chainId,
         address factory,
         string memory tokenSymbol
-    ) public view returns (address) {
+    ) public pure returns (address) {
         return
             vm.computeCreate2Address(
                 proxySalt(chainId, tokenSymbol),
@@ -167,7 +167,7 @@ contract AddressUtils is ScriptUtils {
         uint256 chainId,
         address factory,
         string memory tokenSymbol
-    ) public view returns (address) {
+    ) public pure returns (address) {
         return
             vm.computeCreate2Address(
                 masterMinterSalt(chainId, tokenSymbol),

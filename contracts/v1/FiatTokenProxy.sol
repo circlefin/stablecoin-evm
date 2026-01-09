@@ -27,5 +27,5 @@ import { AdminUpgradeabilityProxy } from "../upgradeability/AdminUpgradeabilityP
 contract FiatTokenProxy is AdminUpgradeabilityProxy {
     constructor(
         address implementationContract
-    ) public AdminUpgradeabilityProxy(implementationContract) {}
+    ) AdminUpgradeabilityProxy(implementationContract) {}
 }

@@ -93,11 +93,15 @@ contract FiatTokenV2_2 is
     V1_1Storage,
     V2Storage
 {
+    // ============ Events ============
+
     event Mint(address indexed minter, address indexed to, uint256 amount);
     event Burn(address indexed burner, uint256 amount);
     event MinterConfigured(address indexed minter, uint256 minterAllowedAmount);
     event MinterRemoved(address indexed oldMinter);
     event MasterMinterChanged(address indexed newMasterMinter);
+
+    // ============ Structs ============
 
     /**
      * @notice Initialization parameters for FiatToken V2.2
@@ -123,6 +127,29 @@ contract FiatTokenV2_2 is
         address newOwner;
         address[] accountsToBlacklist;
     }
+
+    // ============ Modifiers ============
+
+    /**
+     * @dev Throws if called by any account other than a minter.
+     */
+    modifier onlyMinters() {
+        require(minters[msg.sender], "FiatToken: caller is not a minter");
+        _;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the masterMinter
+     */
+    modifier onlyMasterMinter() {
+        require(
+            msg.sender == masterMinter,
+            "FiatToken: caller is not the masterMinter"
+        );
+        _;
+    }
+
+    // ============ External Functions ============
 
     function initialize(InitializeData calldata data) external {
         require(
@@ -204,14 +231,6 @@ contract FiatTokenV2_2 is
     }
 
     /**
-     * @dev Throws if called by any account other than a minter.
-     */
-    modifier onlyMinters() {
-        require(minters[msg.sender], "FiatToken: caller is not a minter");
-        _;
-    }
-
-    /**
      * @notice Mints fiat tokens to an address.
      * @param _to The address that will receive the minted tokens.
      * @param _amount The amount of tokens to mint. Must be less than or equal
@@ -244,17 +263,6 @@ contract FiatTokenV2_2 is
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
         return true;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the masterMinter
-     */
-    modifier onlyMasterMinter() {
-        require(
-            msg.sender == masterMinter,
-            "FiatToken: caller is not the masterMinter"
-        );
-        _;
     }
 
     /**
@@ -307,6 +315,8 @@ contract FiatTokenV2_2 is
     ) external view override returns (uint256) {
         return _balanceOf(account);
     }
+
+    // ============ Internal Functions ============
 
     /**
      * @dev Internal function to set allowance.

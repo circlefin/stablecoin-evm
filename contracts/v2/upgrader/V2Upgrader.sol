@@ -39,13 +39,13 @@ contract V2Upgrader is AbstractV2Upgrader {
      * @param proxy             FiatTokenProxy contract
      * @param implementation    FiatTokenV2 implementation contract
      * @param newProxyAdmin     Grantee of proxy admin role after upgrade
-     * @param newName           New ERC20 name (e.g. "USD//C" -> "USDC")
+     * @param newName_           New ERC20 name (e.g. "USD//C" -> "USDC")
      */
     constructor(
         FiatTokenProxy proxy,
         FiatTokenV2 implementation,
         address newProxyAdmin,
-        string memory newName
+        string memory newName_
     )
         public
         AbstractV2Upgrader(
@@ -54,7 +54,7 @@ contract V2Upgrader is AbstractV2Upgrader {
             newProxyAdmin
         )
     {
-        _newName = newName;
+        _newName = newName_;
         _helper = new V2UpgraderHelper(address(proxy));
     }
 

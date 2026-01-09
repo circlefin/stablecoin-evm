@@ -111,20 +111,22 @@ contract DeployFiatTokenCreate2Test is TestUtils {
     }
 
     function test_deployFiatTokenWithMintersNotConfigured() public {
-        vm.setEnv(
-            "MINTERS_FILE_NAME",
-            "test/scripts/deploy/testdata/test.empty.minters.json"
-        );
-
-        vm.prank(deployer);
-        deployScript = new DeployFiatTokenCreate2();
-        deployScript.setUp();
+        // Use the new deployWithMinters function to pass empty minters configuration
+        // This avoids environment variable conflicts with other test contracts
+        address[] memory emptyMinterControllers = new address[](0);
+        address[] memory emptyMinters = new address[](0);
+        uint256[] memory emptyMinterAllowances = new uint256[](0);
 
         (
             FiatTokenV2_2 v2_2,
             MasterMinter masterMinter,
             FiatTokenProxy proxy
-        ) = deployScript.run();
+        ) = deployScript.deployWithMinters(
+                address(0),
+                emptyMinterControllers,
+                emptyMinters,
+                emptyMinterAllowances
+            );
 
         validateImpl(v2_2);
         validateProxy(proxy, address(v2_2), address(masterMinter));

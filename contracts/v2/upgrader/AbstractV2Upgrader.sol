@@ -35,18 +35,18 @@ abstract contract AbstractV2Upgrader is Ownable {
 
     /**
      * @notice Constructor
-     * @param proxy             FiatTokenProxy contract
-     * @param implementation    Address of the implementation contract
-     * @param newProxyAdmin     Grantee of proxy admin role after upgrade
+     * @param proxy_             FiatTokenProxy contract
+     * @param implementation_    Address of the implementation contract
+     * @param newProxyAdmin_     Grantee of proxy admin role after upgrade
      */
     constructor(
-        address proxy,
-        address implementation,
-        address newProxyAdmin
+        address proxy_,
+        address implementation_,
+        address newProxyAdmin_
     ) Ownable() {
-        _proxy = FiatTokenProxy(payable(proxy));
-        _implementation = implementation;
-        _newProxyAdmin = newProxyAdmin;
+        _proxy = FiatTokenProxy(payable(proxy_));
+        _implementation = implementation_;
+        _newProxyAdmin = newProxyAdmin_;
     }
 
     /**
