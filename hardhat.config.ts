@@ -19,6 +19,8 @@
 import dotenv from "dotenv";
 
 import type { HardhatUserConfig } from "hardhat/config";
+import { TASK_TEST_GET_TEST_FILES } from "hardhat/builtin-tasks/task-names";
+import { subtask } from "hardhat/config";
 
 // Hardhat extensions
 import "@nomicfoundation/hardhat-chai-matchers";
@@ -41,6 +43,13 @@ import "./scripts/hardhat/verifyMasterMinterState";
 import "./scripts/hardhat/verifyOnChainBytecode";
 
 dotenv.config();
+
+// Exclude injective tests from hardhat test - they use ESM deps incompatible with ts-node.
+// Run injective tests separately via: yarn test:injective
+subtask(TASK_TEST_GET_TEST_FILES).setAction(async (args, hre, runSuper) => {
+  const files: string[] = await runSuper(args);
+  return files.filter((file) => !file.includes("/injective/"));
+});
 
 // Defaults to 1.3 to be equivalent with Foundry
 const gasMultiplier = process.env.GAS_MULTIPLIER
