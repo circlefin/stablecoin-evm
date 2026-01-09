@@ -99,11 +99,15 @@ export async function getDenomMetadata(denom: string): Promise<{
 } | null> {
   const client = getBankClient();
   const metadata = await client.fetchDenomMetadata(denom);
+  const denomUnit = metadata.denomUnits.find((unit) => unit.denom === denom);
+  if (!denomUnit) {
+    throw new Error(`Denom unit not found for denom: ${denom}`);
+  }
 
   return {
     name: metadata.name,
     symbol: metadata.symbol,
-    decimals: metadata.denomUnits[0].exponent,
+    decimals: denomUnit.exponent,
     description: metadata.description,
   };
 }
