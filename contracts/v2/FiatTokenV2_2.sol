@@ -124,7 +124,7 @@ contract FiatTokenV2_2 is
         address[] accountsToBlacklist;
     }
 
-    function initialize(InitializeData calldata data) external {
+    function initialize(InitializeData calldata data) external virtual {
         require(
             _initializedVersion == 0,
             "FiatToken: contract is already initialized"
@@ -155,7 +155,7 @@ contract FiatTokenV2_2 is
         blacklister = data.newBlacklister;
         setOwner(data.newOwner);
 
-        for (uint256 i = 0; i < data.accountsToBlacklist.length; i++) {
+        for (uint256 i = 0; i < data.accountsToBlacklist.length; ++i) {
             _blacklist(data.accountsToBlacklist[i]);
         }
         _blacklist(address(this));

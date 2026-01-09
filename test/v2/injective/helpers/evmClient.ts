@@ -58,7 +58,6 @@ export interface FiatTokenInjectiveV2_2Contract {
     newOwner: string;
     accountsToBlacklist: string[];
   }): Promise<ethers.ContractTransactionResponse>;
-  initializeInjV2_2(): Promise<ethers.ContractTransactionResponse>;
   totalSupply(): Promise<bigint>;
   balanceOf(account: string): Promise<bigint>;
   name(): Promise<string>;
@@ -182,11 +181,6 @@ export async function setupFiatTokenInjectiveV2_2(): Promise<{
 
   const initTx = await fiatToken.initialize(initParams);
   await initTx.wait();
-
-  // Step 9: Call initializeInjV2_2 to register with Injective bank module
-  // This registers the proxy address with the bank module
-  const injInitTx = await fiatToken.initializeInjV2_2();
-  await injInitTx.wait();
 
   return {
     fiatToken,

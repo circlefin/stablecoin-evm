@@ -30,14 +30,45 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
     }
 
     /**
-     * @notice Initialize the bank module metadata
+     * @notice Initialize the contract and set the bank module metadata
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function initializeInjV2_2() external {
+    function initialize(InitializeData calldata data) external override {
         require(
-            _initializedVersion == 3,
-            "FiatTokenInjectiveV2_2: not initialized yet"
+            _initializedVersion == 0,
+            "FiatToken: contract is already initialized"
         );
+        require(
+            data.newMasterMinter != address(0),
+            "FiatToken: new masterMinter is the zero address"
+        );
+        require(
+            data.newPauser != address(0),
+            "FiatToken: new pauser is the zero address"
+        );
+        require(
+            data.newBlacklister != address(0),
+            "FiatToken: new blacklister is the zero address"
+        );
+        require(
+            data.newOwner != address(0),
+            "FiatToken: new owner is the zero address"
+        );
+
+        name = data.tokenName;
+        symbol = data.tokenSymbol;
+        currency = data.tokenCurrency;
+        decimals = data.tokenDecimals;
+        masterMinter = data.newMasterMinter;
+        pauser = data.newPauser;
+        blacklister = data.newBlacklister;
+        setOwner(data.newOwner);
+
+        for (uint256 i = 0; i < data.accountsToBlacklist.length; ++i) {
+            _blacklist(data.accountsToBlacklist[i]);
+        }
+        _blacklist(address(this));
+        _initializedVersion = 3;
+
         _bankPrecompile().setMetadata(name, symbol, decimals);
     }
 
