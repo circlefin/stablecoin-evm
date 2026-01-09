@@ -24,19 +24,19 @@ import {
   getErc20Denom,
   getDenomMetadata,
   getTotalSupply,
-} from "./helpers/client";
+} from "./helpers/cosmosClient";
 import { fundAccount, getFaucetBalance } from "./helpers/faucet";
 import {
   setupFiatTokenInjectiveV2_2,
   teardownEvmClient,
   FiatTokenInjectiveV2_2Contract,
-} from "./helpers/evm";
+} from "./helpers/evmClient";
 import { PrivateKey } from "@injectivelabs/sdk-ts";
 
 const INJ_DENOM = "inj";
 const FAUCET_AMOUNT = "100000000000000000000"; // 100 INJ
 
-describe("Injective Integration Tests", function () {
+describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
   before(async function () {
     const ready = await isNodeReady();
     if (!ready) {
