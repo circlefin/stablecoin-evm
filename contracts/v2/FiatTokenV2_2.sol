@@ -293,7 +293,7 @@ contract FiatTokenV2_2 is
      * @notice Gets the totalSupply of the fiat token.
      * @return The totalSupply of the fiat token.
      */
-    function totalSupply() external view override returns (uint256) {
+    function totalSupply() external view virtual override returns (uint256) {
         return totalSupply_;
     }
 
@@ -304,7 +304,7 @@ contract FiatTokenV2_2 is
      */
     function balanceOf(
         address account
-    ) external view override returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _balanceOf(account);
     }
 
