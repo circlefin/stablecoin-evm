@@ -20,15 +20,21 @@ import { expect } from "chai";
 import {
   isNodeReady,
   getBalance,
-  sendTokens,
-  teardown,
+  teardownCosmosClient,
+  getErc20Denom,
+  getDenomMetadata,
+  getTotalSupply,
 } from "./helpers/client";
 import { fundAccount, getFaucetBalance } from "./helpers/faucet";
+import {
+  setupFiatTokenInjectiveV2_2,
+  teardownEvmClient,
+  FiatTokenInjectiveV2_2Contract,
+} from "./helpers/evm";
 import { PrivateKey } from "@injectivelabs/sdk-ts";
 
 const INJ_DENOM = "inj";
 const FAUCET_AMOUNT = "100000000000000000000"; // 100 INJ
-const SEND_AMOUNT = "1000000000000000000"; // 1 INJ
 
 describe("Injective Integration Tests", function () {
   before(async function () {
@@ -39,7 +45,8 @@ describe("Injective Integration Tests", function () {
   });
 
   after(() => {
-    teardown();
+    teardownCosmosClient();
+    teardownEvmClient();
   });
 
   describe("Faucet Functionality", () => {
@@ -60,44 +67,63 @@ describe("Injective Integration Tests", function () {
     });
   });
 
-  describe("Native INJ Transfer", () => {
-    let senderKey: PrivateKey;
-    let senderAddress: string;
-    let recipientAddress: string;
+  describe("FiatTokenInjectiveV2_2 EVM Contract", () => {
+    let fiatToken: FiatTokenInjectiveV2_2Contract;
+    let proxyAddress: string;
+    let erc20Denom: string;
 
-    beforeEach(async () => {
-      senderKey = PrivateKey.generate().privateKey;
-      const recipientKey = PrivateKey.generate().privateKey;
+    before(async () => {
+      const deployment = await setupFiatTokenInjectiveV2_2();
 
-      senderAddress = senderKey.toBech32();
-      recipientAddress = recipientKey.toBech32();
-
-      await fundAccount(senderAddress);
+      fiatToken = deployment.fiatToken;
+      proxyAddress = deployment.proxyAddress;
+      erc20Denom = getErc20Denom(proxyAddress);
+      console.log("erc20Denom", erc20Denom);
     });
 
-    it("should send INJ from one account to another", async () => {
-      // Get initial balances
-      const initialRecipientBalance = await getBalance(
-        recipientAddress,
-        INJ_DENOM
-      );
-      expect(initialRecipientBalance).to.equal("0");
+    it("should have deployed fiat token", () => {
+      expect(proxyAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
+      expect(fiatToken).to.not.be.undefined;
+    });
 
-      // Send tokens
-      const result = await sendTokens(
-        senderKey,
-        recipientAddress,
-        SEND_AMOUNT,
-        INJ_DENOM
-      );
-      expect(result.code).to.equal(0);
+    describe("EVM Queries", () => {
+      it("should return totalSupply of 0 when no tokens minted", async () => {
+        const totalSupply = await fiatToken.totalSupply();
+        expect(totalSupply).to.equal(BigInt(0));
+      });
 
-      // Verify recipient received tokens
-      const finalRecipientBalance = await getBalance(
-        recipientAddress,
-        INJ_DENOM
-      );
-      expect(finalRecipientBalance).to.equal(SEND_AMOUNT);
+      it("should have correct token metadata", async () => {
+        const name = await fiatToken.name();
+        const symbol = await fiatToken.symbol();
+        const decimals = await fiatToken.decimals();
+
+        expect(name).to.equal("USDC");
+        expect(symbol).to.equal("USDC");
+        expect(decimals).to.equal(BigInt(6));
+      });
+    });
+
+    describe("Bank Module Queries", () => {
+      it("should have registered metadata in bank module", async () => {
+        const metadata = await getDenomMetadata(erc20Denom);
+
+        expect(metadata).to.not.be.null;
+        expect(metadata?.name).to.equal("USDC");
+        expect(metadata?.symbol).to.equal("USDC");
+        expect(metadata?.decimals).to.equal(6);
+      });
+
+      it("should return totalSupply of 0 from bank module when no tokens minted", async () => {
+        const totalSupply = await getTotalSupply(erc20Denom);
+        expect(totalSupply).to.equal("0");
+      });
+
+      it("should match EVM and bank module total supply", async () => {
+        const evmTotalSupply = await fiatToken.totalSupply();
+        const bankTotalSupply = await getTotalSupply(erc20Denom);
+
+        expect(bankTotalSupply).to.equal(evmTotalSupply.toString());
+      });
     });
   });
 });

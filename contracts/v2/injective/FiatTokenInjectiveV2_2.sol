@@ -22,7 +22,7 @@ import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { IBankModule } from "../../interface/injective/IBankModule.sol";
 
 contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
-    address constant bankPrecompileAddress =
+    address private constant bankPrecompileAddress =
         0x0000000000000000000000000000000000000064;
 
     function _bankPrecompile() internal pure returns (IBankModule) {

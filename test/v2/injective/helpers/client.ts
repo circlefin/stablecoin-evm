@@ -22,17 +22,17 @@ import {
   PrivateKey,
   MsgSend,
   MsgBroadcasterWithPk,
-  ChainRestBankApi,
+  ChainGrpcBankApi,
 } from "@injectivelabs/sdk-ts";
 
-const CHAIN_ID = "injective-1";
+// Injective SDK uses gRPC-web which works on the REST API port
+const GRPC_ENDPOINT =
+  process.env.INJECTIVE_GRPC_ENDPOINT || "http://localhost:10337";
 const TENDERMINT_RPC_ENDPOINT =
   process.env.INJECTIVE_RPC_ENDPOINT || "http://localhost:26657";
-const INJECTIVE_REST_ENDPOINT =
-  process.env.INJECTIVE_REST_ENDPOINT || "http://localhost:10337";
 
 let stargateClient: StargateClient | null;
-let bankApi: ChainRestBankApi | null;
+let bankClient: ChainGrpcBankApi | null;
 
 async function getStargateClient(): Promise<StargateClient> {
   if (!stargateClient) {
@@ -41,30 +41,39 @@ async function getStargateClient(): Promise<StargateClient> {
   return stargateClient;
 }
 
-function getBankApi(): ChainRestBankApi {
-  if (!bankApi) {
-    bankApi = new ChainRestBankApi(INJECTIVE_REST_ENDPOINT);
+function getBankClient(): ChainGrpcBankApi {
+  if (!bankClient) {
+    bankClient = new ChainGrpcBankApi(GRPC_ENDPOINT);
   }
-  return bankApi;
+  return bankClient;
 }
 
-export function teardown(): void {
-  if (stargateClient) {
-    stargateClient.disconnect();
-    stargateClient = null;
-  }
-  bankApi = null;
+export function teardownCosmosClient(): void {
+  bankClient = null;
+  stargateClient = null;
 }
 
 // =============================================================================
-// Read-only query functions
+// Helper functions
+// =============================================================================
+
+/**
+ * Get the bank module denom for an ERC-20 contract address
+ * Injective uses the format: erc20:<contract_address>
+ */
+export function getErc20Denom(contractAddress: string): string {
+  return `erc20:${contractAddress.toLowerCase()}`;
+}
+
+// =============================================================================
+// Read operations
 // =============================================================================
 
 export async function isNodeReady(): Promise<boolean> {
   try {
     const client = await getStargateClient();
-    const chainId = await client.getChainId();
-    return chainId === CHAIN_ID;
+    await client.getChainId();
+    return true;
   } catch {
     return false;
   }
@@ -74,24 +83,53 @@ export async function getBalance(
   address: string,
   denom: string
 ): Promise<string> {
-  try {
-    const response = await getBankApi().fetchBalance(address, denom);
-    return response.amount;
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.includes("balance was not found")
-    ) {
-      return "0";
-    }
-    throw error;
-  }
+  const client = getBankClient();
+  const balance = await client.fetchBalance({
+    accountAddress: address,
+    denom,
+  });
+  return balance.amount;
+}
+
+export async function getDenomMetadata(denom: string): Promise<{
+  name: string;
+  symbol: string;
+  decimals: number;
+  description: string;
+} | null> {
+  const client = getBankClient();
+  const metadata = await client.fetchDenomMetadata(denom);
+
+  // Find the highest exponent denom unit to get decimals (display unit)
+  const displayUnit = metadata.denomUnits.reduce(
+    (max, unit) => (unit.exponent > max.exponent ? unit : max),
+    metadata.denomUnits[0] || { exponent: 0 }
+  );
+
+  return {
+    name: metadata.name,
+    symbol: metadata.symbol,
+    decimals: displayUnit?.exponent || 0,
+    description: metadata.description,
+  };
+}
+
+/**
+ * Query total supply of a specific denom from the bank module using ChainGrpcBankApi (read operation)
+ */
+export async function getTotalSupply(denom: string): Promise<string> {
+  const client = getBankClient();
+  const supply = await client.fetchSupplyOf(denom);
+  return supply.amount;
 }
 
 // =============================================================================
-// Transaction functions
+// Wrtie operations
 // =============================================================================
 
+/**
+ * Send tokens using MsgBroadcasterWithPk (write operation)
+ */
 export async function sendTokens(
   privateKey: PrivateKey,
   recipientAddress: string,
