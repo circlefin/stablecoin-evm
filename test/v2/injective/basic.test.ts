@@ -78,7 +78,6 @@ describe("Injective Integration Tests", function () {
       fiatToken = deployment.fiatToken;
       proxyAddress = deployment.proxyAddress;
       erc20Denom = getErc20Denom(proxyAddress);
-      console.log("erc20Denom", erc20Denom);
     });
 
     it("should have deployed fiat token", () => {

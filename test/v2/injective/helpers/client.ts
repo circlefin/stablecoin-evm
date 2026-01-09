@@ -62,7 +62,7 @@ export function teardownCosmosClient(): void {
  * Injective uses the format: erc20:<contract_address>
  */
 export function getErc20Denom(contractAddress: string): string {
-  return `erc20:${contractAddress.toLowerCase()}`;
+  return `erc20:${contractAddress}`;
 }
 
 // =============================================================================

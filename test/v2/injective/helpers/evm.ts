@@ -187,7 +187,6 @@ export async function setupFiatTokenInjectiveV2_2(): Promise<{
   // This registers the proxy address with the bank module
   const injInitTx = await fiatToken.initializeInjV2_2();
   await injInitTx.wait();
-  console.log("injInitTx hash", injInitTx.hash);
 
   return {
     fiatToken,
