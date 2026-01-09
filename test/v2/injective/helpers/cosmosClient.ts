@@ -115,7 +115,7 @@ export async function getTotalSupply(denom: string): Promise<string> {
 }
 
 // =============================================================================
-// Wrtie operations
+// Write operations
 // =============================================================================
 
 export async function sendTokens(

@@ -20,7 +20,7 @@ pragma solidity 0.8.24;
 
 /**
  * @dev Interface of the Injective bank precompile for ERC-20 contracts
- * as defined at https://github.com/InjectiveLabs/solidity-contracts/blob/master/src/Bank.sol
+ * as defined at https://github.com/InjectiveLabs/solidity-contracts/blob/ec4a9032872c7cdabeeb63638723fe69e82726e1/src/Bank.sol
  */
 interface IBankModule {
     function mint(address, uint256) external payable returns (bool);
