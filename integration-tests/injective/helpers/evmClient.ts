@@ -18,9 +18,9 @@
 
 import { ethers } from "ethers";
 import { PrivateKey } from "@injectivelabs/sdk-ts";
-import signatureCheckerArtifact from "../../../../artifacts/hardhat/contracts/util/SignatureChecker.sol/SignatureChecker.json";
-import fiatTokenInjectiveArtifact from "../../../../artifacts/hardhat/contracts/v2/injective/FiatTokenInjectiveV2_2.sol/FiatTokenInjectiveV2_2.json";
-import fiatTokenProxyArtifact from "../../../../artifacts/hardhat/contracts/v1/FiatTokenProxy.sol/FiatTokenProxy.json";
+import signatureCheckerArtifact from "../../../artifacts/hardhat/contracts/util/SignatureChecker.sol/SignatureChecker.json";
+import fiatTokenInjectiveArtifact from "../../../artifacts/hardhat/contracts/v2/injective/FiatTokenInjectiveV2_2.sol/FiatTokenInjectiveV2_2.json";
+import fiatTokenProxyArtifact from "../../../artifacts/hardhat/contracts/v1/FiatTokenProxy.sol/FiatTokenProxy.json";
 import { fundAccount } from "./faucet";
 
 const EVM_RPC_ENDPOINT =

@@ -151,7 +151,7 @@ contract FiatTokenV2_2 is
 
     // ============ External Functions ============
 
-    function initialize(InitializeData calldata data) external {
+    function initialize(InitializeData calldata data) external virtual {
         require(
             _initializedVersion == 0,
             "FiatToken: contract is already initialized"

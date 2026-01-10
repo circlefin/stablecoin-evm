@@ -26,7 +26,7 @@
     "static-check": "ENABLE_VIA_IR=false OPTIMIZER_RUNS=200 yarn hardhat typechain && yarn typecheck && yarn lint && yarn fmt:check && yarn solhint",
     "test": "NODE_OPTIONS=--max-old-space-size=8192 hardhat test",
     "test:fast": "yarn compile:fast && yarn test",
-    "test:injective": "mocha --require tsx 'test/v2/injective/**/*.test.ts' --timeout 60000",
+    "test:injective": "mocha --require tsx 'integration-tests/injective/**/*.test.ts' --timeout 60000",
     "test:injective:start": "./scripts/injective/start_network.sh",
     "test:injective:stop": "./scripts/injective/stop_network.sh",
     "typecheck": "tsc -p . --noEmit"
