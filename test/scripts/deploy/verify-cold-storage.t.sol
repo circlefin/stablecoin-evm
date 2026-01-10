@@ -69,7 +69,7 @@ contract VerifyColdStorageTest is TestUtils {
         verifyColdStorageScript.setUp();
     }
 
-    function test_VerifyColdStoragePositiveTest() public {
+    function test_VerifyColdStoragePositiveTest() public view {
         // the verify script does not modify state, but it should run
         // without error after running the cold storage transfer script
         verifyColdStorageScript.run();

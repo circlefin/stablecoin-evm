@@ -64,7 +64,7 @@ contract AdminUpgradeabilityProxy is UpgradeabilityProxy {
      */
     constructor(
         address implementationContract
-    ) public UpgradeabilityProxy(implementationContract) {
+    ) UpgradeabilityProxy(implementationContract) {
         assert(ADMIN_SLOT == keccak256("org.zeppelinos.proxy.admin"));
 
         _setAdmin(msg.sender);

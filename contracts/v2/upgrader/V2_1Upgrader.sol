@@ -39,13 +39,13 @@ contract V2_1Upgrader is AbstractV2Upgrader {
      * @param proxy             FiatTokenProxy contract
      * @param implementation    FiatTokenV2_1 implementation contract
      * @param newProxyAdmin     Grantee of proxy admin role after upgrade
-     * @param lostAndFound      The address to which the locked funds are sent
+     * @param lostAndFound_      The address to which the locked funds are sent
      */
     constructor(
         FiatTokenProxy proxy,
         FiatTokenV2_1 implementation,
         address newProxyAdmin,
-        address lostAndFound
+        address lostAndFound_
     )
         public
         AbstractV2Upgrader(
@@ -54,7 +54,7 @@ contract V2_1Upgrader is AbstractV2Upgrader {
             newProxyAdmin
         )
     {
-        _lostAndFound = lostAndFound;
+        _lostAndFound = lostAndFound_;
         _helper = new V2UpgraderHelper(address(proxy));
     }
 

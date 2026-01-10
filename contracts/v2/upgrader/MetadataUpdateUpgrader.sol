@@ -37,19 +37,19 @@ contract MetadataUpdateUpgrader is AbstractV2Upgrader {
     /**
      * @notice Constructor
      * @param proxy               FiatTokenProxy contract
-     * @param tempImplementation  FiatTokenV2_2 implementation contract
+     * @param tempImplementation_  FiatTokenV2_2 implementation contract
      * @param newProxyAdmin       Grantee of proxy admin role after upgrade
-     * @param newName             New token name
-     * @param newSymbol           New token symbol
-     * @param newCurrency         New token currency
+     * @param newName_             New token name
+     * @param newSymbol_           New token symbol
+     * @param newCurrency_         New token currency
      */
     constructor(
         FiatTokenProxy proxy,
-        FiatTokenV2_2MetadataUpdateExtension tempImplementation,
+        FiatTokenV2_2MetadataUpdateExtension tempImplementation_,
         address newProxyAdmin,
-        string memory newName,
-        string memory newSymbol,
-        string memory newCurrency
+        string memory newName_,
+        string memory newSymbol_,
+        string memory newCurrency_
     )
         public
         AbstractV2Upgrader(
@@ -60,21 +60,21 @@ contract MetadataUpdateUpgrader is AbstractV2Upgrader {
     {
         // Sanity check input parameters are valid
         require(
-            address(tempImplementation) != address(0),
+            address(tempImplementation_) != address(0),
             "Temp implementation cannot be zero address"
         );
         require(
             newProxyAdmin != address(0),
             "New proxy admin cannot be zero address"
         );
-        require(bytes(newName).length > 0, "Name cannot be empty");
-        require(bytes(newSymbol).length > 0, "Symbol cannot be empty");
-        require(bytes(newCurrency).length > 0, "Currency cannot be empty");
+        require(bytes(newName_).length > 0, "Name cannot be empty");
+        require(bytes(newSymbol_).length > 0, "Symbol cannot be empty");
+        require(bytes(newCurrency_).length > 0, "Currency cannot be empty");
 
-        _tempImplementation = tempImplementation;
-        _newName = newName;
-        _newSymbol = newSymbol;
-        _newCurrency = newCurrency;
+        _tempImplementation = tempImplementation_;
+        _newName = newName_;
+        _newSymbol = newSymbol_;
+        _newCurrency = newCurrency_;
 
         _helper = new MetadataUpdateUpgraderHelper(address(proxy));
     }

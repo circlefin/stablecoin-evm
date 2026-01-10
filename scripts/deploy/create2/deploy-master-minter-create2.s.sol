@@ -76,10 +76,10 @@ contract DeployMasterMinterCreate2 is ScriptUtils, AddressUtils {
      * @dev This function uses `deployAndMultiCall` to deploy the MasterMinter contract
      * and then calls `transferOwnership` to set the owner to `masterMinterOwner` in a single transaction.
      *
-     * @param deployer The address that will send the master minter deployment transaction
+     * @param deployer_ The address that will send the master minter deployment transaction
      */
     function _deployMasterMinter(
-        address deployer
+        address deployer_
     ) internal returns (MasterMinter) {
         bytes memory setMinterManager = abi.encodeWithSelector(
             MintController.setMinterManager.selector,
@@ -95,7 +95,7 @@ contract DeployMasterMinterCreate2 is ScriptUtils, AddressUtils {
         multiCallData[1] = rotateOwner;
 
         // Start recording transactions
-        vm.startBroadcast(deployer);
+        vm.startBroadcast(deployer_);
 
         // Deploy and multicall proxy
         address payable masterMinterAddress = payable(

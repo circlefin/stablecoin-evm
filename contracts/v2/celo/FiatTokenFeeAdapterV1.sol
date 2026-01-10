@@ -92,12 +92,12 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         address refundRecipient,
         address feeRecipient,
         // solhint-disable-next-line no-unused-vars
-        address gatewayFeeRecipient,
+        address /* gatewayFeeRecipient */,
         address communityFund,
         uint256 refund,
         uint256 tipTxFee,
         // solhint-disable-next-line no-unused-vars
-        uint256 gatewayFee,
+        uint256 /* gatewayFee */,
         uint256 baseTxFee
     ) external override onlyCeloVm {
         if (_debitedValue == 0) {

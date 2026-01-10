@@ -35,9 +35,13 @@ fs_permissions = [
     { access = "read-write", path = "blacklist.remote.json"},
     { access = "read-write", path = "test.blacklist.remote.json"},
     { access = "read-write", path = "minters.json"},
-    { access = "read-write", path = "test/scripts/deploy/testdata/test.minters.json"},
-    { access = "read-write", path = "test/scripts/deploy/testdata/test.empty.minters.json"}
+    { access = "read-write", path = "test/scripts/deploy/testdata/test.minters.json"}
 ] # https://book.getfoundry.sh/cheatcodes/fs
+
+[profile.local]
+via_ir = false
+optimizer_runs = 200
+
 extra-output-files = [
     "bin",
     "metadata"

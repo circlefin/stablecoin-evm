@@ -52,7 +52,7 @@ contract DeployFeeAdapterTest is TestUtils {
         validateProxy(proxy, address(v1));
     }
 
-    function validateImpl(FiatTokenFeeAdapterV1 impl) internal {
+    function validateImpl(FiatTokenFeeAdapterV1 impl) internal view {
         assert(impl.adapterDecimals() == 18);
         assert(impl.tokenDecimals() == 6);
         assert(impl.upscaleFactor() == 1000000000000);

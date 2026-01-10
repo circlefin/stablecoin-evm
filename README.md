@@ -250,3 +250,6 @@ during local development.
 It is suggested to use `yarn compile:fast` locally to disable the viaIR and to
 speed up the compile. Production/github CI workflow should continue to use the
 `viaIR=true` option.
+
+Refer to the `Recommended local Configurations` on `.env.example` for
+recommended configs on local environments.
