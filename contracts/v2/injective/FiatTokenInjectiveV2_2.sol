@@ -75,10 +75,61 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
     function balanceOf(
         address account
     ) external view override returns (uint256) {
-        return _bankPrecompile().balanceOf(account, address(this));
+        return _balanceOf(account);
     }
 
     function totalSupply() external view override returns (uint256) {
         return _bankPrecompile().totalSupply(address(this));
+    }
+
+    function _balanceOf(
+        address _account
+    ) internal view override returns (uint256) {
+        return _bankPrecompile().balanceOf(address(this), _account);
+    }
+
+    /**
+     * @notice Mints fiat tokens to an address.
+     * @param _to The address that will receive the minted tokens.
+     * @param _amount The amount of tokens to mint. Must be less than or equal
+     * to the minterAllowance of the caller.
+     * @return True if the operation was successful.
+     */
+    function mint(
+        address _to,
+        uint256 _amount
+    )
+        external
+        override
+        whenNotPaused
+        onlyMinters
+        notBlacklisted(msg.sender)
+        notBlacklisted(_to)
+        returns (bool)
+    {
+        require(_to != address(0), "FiatToken: mint to the zero address");
+        require(_amount > 0, "FiatToken: mint amount not greater than 0");
+
+        uint256 mintingAllowedAmount = minterAllowed[msg.sender];
+        require(
+            _amount <= mintingAllowedAmount,
+            "FiatToken: mint amount exceeds minterAllowance"
+        );
+
+        // Balance validation - vanilla USDC's _setBalance validated the amount,
+        // so we should validate it here as well.
+        uint256 currentReceiverBalance = _balanceOf(_to);
+        require(
+            type(uint256).max - currentReceiverBalance >= _amount,
+            "FiatToken: Balance exceeds (2^256 - 1)"
+        );
+
+        // Delegate the actual mint and balance/total supply update to the bank precompile
+        _bankPrecompile().mint(_to, _amount);
+
+        minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
+        emit Mint(msg.sender, _to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;
     }
 }

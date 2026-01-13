@@ -114,6 +114,20 @@ export async function getTotalSupply(denom: string): Promise<string> {
   return supply.amount;
 }
 
+/**
+ * Get the bank module balance for an ERC-20 token
+ * @param injectiveAddress Bech32 Injective address (inj1...)
+ * @param contractAddress EVM contract address (0x...)
+ * @returns The token balance as a string
+ */
+export async function getErc20Balance(
+  injectiveAddress: string,
+  contractAddress: string
+): Promise<string> {
+  const denom = getErc20Denom(contractAddress);
+  return getBalance(injectiveAddress, denom);
+}
+
 // =============================================================================
 // Write operations
 // =============================================================================
