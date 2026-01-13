@@ -15,14 +15,15 @@ cd "$PROJECT_ROOT"
 
 # Clean up any existing container first
 echo "Cleaning up any existing container..."
-docker-compose down 2>/dev/null || true
+docker compose down 2>/dev/null || true
 docker rm -f injective-localnet 2>/dev/null || true
 
 # Start the localnet
-docker-compose up -d injective-localnet
+echo "Starting Injective localnet..."
+docker compose up -d injective-localnet
 
 echo "Waiting for Injective node to be ready..."
-MAX_ATTEMPTS=10
+MAX_ATTEMPTS=20
 ATTEMPT=0
 
 while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do

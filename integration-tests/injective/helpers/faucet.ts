@@ -17,7 +17,7 @@
  */
 
 import { PrivateKey } from "@injectivelabs/sdk-ts";
-import { sendTokens, getBalance } from "./client";
+import { sendTokens, getBalance } from "./cosmosClient";
 
 // Designate USER10 (signer5) as faucet account
 // https://github.com/InjectiveFoundation/injective-core/blob/master/setup.sh

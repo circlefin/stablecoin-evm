@@ -151,7 +151,7 @@ contract FiatTokenV2_2 is
 
     // ============ External Functions ============
 
-    function initialize(InitializeData calldata data) external {
+    function initialize(InitializeData calldata data) external virtual {
         require(
             _initializedVersion == 0,
             "FiatToken: contract is already initialized"
@@ -182,7 +182,7 @@ contract FiatTokenV2_2 is
         blacklister = data.newBlacklister;
         setOwner(data.newOwner);
 
-        for (uint256 i = 0; i < data.accountsToBlacklist.length; i++) {
+        for (uint256 i = 0; i < data.accountsToBlacklist.length; ++i) {
             _blacklist(data.accountsToBlacklist[i]);
         }
         _blacklist(address(this));
@@ -301,7 +301,7 @@ contract FiatTokenV2_2 is
      * @notice Gets the totalSupply of the fiat token.
      * @return The totalSupply of the fiat token.
      */
-    function totalSupply() external view override returns (uint256) {
+    function totalSupply() external view virtual override returns (uint256) {
         return totalSupply_;
     }
 
@@ -312,7 +312,7 @@ contract FiatTokenV2_2 is
      */
     function balanceOf(
         address account
-    ) external view override returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _balanceOf(account);
     }
 
