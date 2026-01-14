@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2.0, Injective variant (2026-01-14)
+
+- Add `IBankModule` interface per Injective documentation
+- Add `FiatTokenInjectiveV2_2` extending `FiatTokenV2_2` with Injective bank
+  precompile integration
+  - Override `initialize()` to set token metadata in the bank module via
+    `setMetadata(name, symbol, decimals)`
+  - Override `balanceOf()` and `totalSupply()` to read from the bank precompile
+  - Override `mint()` to delegate minting to the bank precompile
+
 ## 2.2.0, Flattened variant (2026-01-02)
 
 - Upgraded `FiatTokenV2_2` to solidity version 0.8.24

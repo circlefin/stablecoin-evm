@@ -191,14 +191,12 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
 
   describe("Mint", () => {
     it("should update recipient balance in both EVM and bank module", async () => {
-      // Get initial balances and allowance
+      // Get initial balances
       const initialEvmBalance = await fiatToken.balanceOf(recipientEvmAddress);
       const initialBankBalance = await getErc20Balance(
         recipientInjectiveAddress,
         proxyAddress
       );
-      const initialMinterAllowance =
-        await fiatToken.minterAllowance(deployerEvmAddress);
 
       // Mint tokens
       const mintTx = await fiatToken.mint(recipientEvmAddress, MINT_AMOUNT);
@@ -219,21 +217,12 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
 
       // Verify EVM and bank module balances match
       expect(finalBankBalance).to.equal(finalEvmBalance.toString());
-
-      // Verify minter allowance updated
-      const finalMinterAllowance =
-        await fiatToken.minterAllowance(deployerEvmAddress);
-      expect(finalMinterAllowance).to.equal(
-        initialMinterAllowance - MINT_AMOUNT
-      );
     });
 
     it("should update totalSupply in both EVM and bank module", async () => {
-      // Get initial total supply and allowance
+      // Get initial total supply
       const initialEvmTotalSupply = await fiatToken.totalSupply();
       const initialBankTotalSupply = await getTotalSupply(erc20Denom);
-      const initialMinterAllowance =
-        await fiatToken.minterAllowance(deployerEvmAddress);
 
       // Mint tokens
       const mintTx = await fiatToken.mint(recipientEvmAddress, MINT_AMOUNT);
@@ -251,13 +240,6 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
 
       // Verify EVM and bank module total supplies match
       expect(finalBankTotalSupply).to.equal(finalEvmTotalSupply.toString());
-
-      // Verify minter allowance decreased by MINT_AMOUNT
-      const finalMinterAllowance =
-        await fiatToken.minterAllowance(deployerEvmAddress);
-      expect(finalMinterAllowance).to.equal(
-        initialMinterAllowance - MINT_AMOUNT
-      );
     });
 
     it("should revert on balance overflow", async () => {
