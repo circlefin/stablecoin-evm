@@ -9,6 +9,7 @@
     `setMetadata(name, symbol, decimals)`
   - Override `balanceOf()` and `totalSupply()` to read from the bank precompile
   - Override `mint()` to delegate minting to the bank precompile
+  - Override `burn()` to delegate minting to the bank precompile
 
 ## 2.2.0, Flattened variant (2026-01-02)
 
