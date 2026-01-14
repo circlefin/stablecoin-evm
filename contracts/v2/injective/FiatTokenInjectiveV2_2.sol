@@ -69,7 +69,10 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
         _blacklist(address(this));
         _initializedVersion = 3;
 
-        _bankPrecompile().setMetadata(name, symbol, decimals);
+        require(
+            _bankPrecompile().setMetadata(name, symbol, decimals),
+            "IBankModule: setMetadata failed"
+        );
     }
 
     function balanceOf(
