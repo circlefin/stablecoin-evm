@@ -70,6 +70,10 @@ export interface FiatTokenInjectiveV2_2Contract {
   ): Promise<ethers.ContractTransactionResponse>;
   mint(to: string, amount: bigint): Promise<ethers.ContractTransactionResponse>;
   burn(amount: bigint): Promise<ethers.ContractTransactionResponse>;
+  transfer(
+    to: string,
+    amount: bigint
+  ): Promise<ethers.ContractTransactionResponse>;
   minterAllowance(minter: string): Promise<bigint>;
   isMinter(account: string): Promise<boolean>;
 }

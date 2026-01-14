@@ -147,4 +147,31 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
     }
+
+    /**
+     * @dev Internal function to process transfers.
+     * @param from  Payer's address.
+     * @param to    Payee's address.
+     * @param value Transfer amount.
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal override {
+        require(from != address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
+
+        // Validate balance using the bank precompile
+        uint256 fromBalance = _balanceOf(from);
+        require(value <= fromBalance, "ERC20: transfer amount exceeds balance");
+
+        // Perform the actual transfer via the bank precompile
+        require(
+            _bankPrecompile().transfer(from, to, value),
+            "IBankModule: transfer failed"
+        );
+
+        emit Transfer(from, to, value);
+    }
 }

@@ -40,6 +40,7 @@ const INJ_DENOM = "inj";
 const FAUCET_AMOUNT = "100000000000000000000"; // 100 INJ
 const MINT_AMOUNT = BigInt(1_000_000); // 1 USDC (6 decimals)
 const BURN_AMOUNT = BigInt(500_000); // 0.5 USDC (6 decimals)
+const TRANSFER_AMOUNT = BigInt(100_000); // 0.1 USDC (6 decimals)
 const MAX_UINT256 = BigInt(2) ** BigInt(256) - BigInt(1);
 
 describe("Faucet Functionality", function () {
@@ -408,6 +409,121 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
     // Unit test coverage: test/v1/misc.test.js
     // Integration test should verify bank module state updates correctly after unpause
     it.skip("should allow burn after contract is unpaused", async () => {
+      // TODO: [SE-4572]
+    });
+  });
+
+  describe("Transfer", () => {
+    let senderEvmAddress: string;
+    let senderInjectiveAddress: string;
+
+    before(async () => {
+      // Use deployer as sender and mint tokens to them
+      senderEvmAddress = deployerEvmAddress;
+      senderInjectiveAddress = deployerInjectiveAddress;
+
+      // Mint tokens to sender for transfer tests
+      const mintTx = await fiatToken.mint(
+        senderEvmAddress,
+        MINT_AMOUNT * BigInt(10)
+      );
+      await mintTx.wait();
+    });
+
+    it("should update sender and recipient balances in both EVM and bank module", async () => {
+      // Get initial balances
+      const initialSenderEvmBalance =
+        await fiatToken.balanceOf(senderEvmAddress);
+      const initialSenderBankBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const initialRecipientEvmBalance =
+        await fiatToken.balanceOf(recipientEvmAddress);
+      const initialRecipientBankBalance = await getErc20Balance(
+        recipientInjectiveAddress,
+        proxyAddress
+      );
+
+      // Get initial total supply to sanity check
+      const initialEvmTotalSupply = await fiatToken.totalSupply();
+      const initialBankTotalSupply = await getTotalSupply(erc20Denom);
+
+      // Transfer tokens
+      const transferTx = await fiatToken.transfer(
+        recipientEvmAddress,
+        TRANSFER_AMOUNT
+      );
+      await transferTx.wait();
+
+      // Verify sender EVM balance decreased
+      const finalSenderEvmBalance = await fiatToken.balanceOf(senderEvmAddress);
+      expect(finalSenderEvmBalance).to.equal(
+        initialSenderEvmBalance - TRANSFER_AMOUNT
+      );
+
+      // Verify sender bank balance decreased
+      const finalSenderBankBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      expect(finalSenderBankBalance).to.equal(
+        (BigInt(initialSenderBankBalance) - TRANSFER_AMOUNT).toString()
+      );
+
+      // Verify sender EVM and bank balances match
+      expect(finalSenderBankBalance).to.equal(finalSenderEvmBalance.toString());
+
+      // Verify recipient EVM balance increased
+      const finalRecipientEvmBalance =
+        await fiatToken.balanceOf(recipientEvmAddress);
+      expect(finalRecipientEvmBalance).to.equal(
+        initialRecipientEvmBalance + TRANSFER_AMOUNT
+      );
+
+      // Verify recipient bank balance increased
+      const finalRecipientBankBalance = await getErc20Balance(
+        recipientInjectiveAddress,
+        proxyAddress
+      );
+      expect(finalRecipientBankBalance).to.equal(
+        (BigInt(initialRecipientBankBalance) + TRANSFER_AMOUNT).toString()
+      );
+
+      // Verify recipient EVM and bank balances match
+      expect(finalRecipientBankBalance).to.equal(
+        finalRecipientEvmBalance.toString()
+      );
+
+      // Sanity check: total supply should remain unchanged
+      const finalEvmTotalSupply = await fiatToken.totalSupply();
+      expect(finalEvmTotalSupply).to.equal(initialEvmTotalSupply);
+
+      const finalBankTotalSupply = await getTotalSupply(erc20Denom);
+      expect(finalBankTotalSupply).to.equal(initialBankTotalSupply);
+    });
+
+    it.skip("should revert when sender is blacklisted", async () => {
+      // TODO: [SE-4572]
+    });
+
+    it.skip("should allow transfer after sender is unblacklisted", async () => {
+      // TODO: [SE-4572]
+    });
+
+    it.skip("should revert when recipient is blacklisted", async () => {
+      // TODO: [SE-4572]
+    });
+
+    it.skip("should allow transfer after recipient is unblacklisted", async () => {
+      // TODO: [SE-4572]
+    });
+
+    it.skip("should revert when contract is paused", async () => {
+      // TODO: [SE-4572]
+    });
+
+    it.skip("should allow transfer after contract is unpaused", async () => {
       // TODO: [SE-4572]
     });
   });

@@ -397,7 +397,7 @@ contract FiatTokenV2_2 is
         address from,
         address to,
         uint256 value
-    ) internal override {
+    ) internal virtual override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(
