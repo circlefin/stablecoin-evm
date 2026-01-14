@@ -139,7 +139,10 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
 
         // Delegate the actual burn and balance/total supply update to the bank precompile
-        _bankPrecompile().burn(msg.sender, _amount);
+        require(
+            _bankPrecompile().burn(msg.sender, _amount),
+            "IBankModule: burn failed"
+        );
 
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
