@@ -119,7 +119,7 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
         // Delegate the actual mint and balance/total supply update to the bank precompile
         require(
             _bankPrecompile().mint(_to, _amount),
-            "FiatToken: bank mint failed"
+            "IBankModule: mint failed"
         );
 
         minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
