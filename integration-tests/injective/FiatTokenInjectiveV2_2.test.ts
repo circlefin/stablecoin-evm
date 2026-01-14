@@ -296,7 +296,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       } catch (error: unknown) {
         if (error instanceof Error) {
           expect(error.message).to.include(
-            "FiatToken: Balance exceeds (2^256 - 1)"
+            `execution reverted: "integer overflow: precompile panic"`
           );
         } else {
           fail("Failed to assert error message");
