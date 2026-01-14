@@ -33,12 +33,13 @@ import {
   FiatTokenInjectiveV2_2Contract,
   getEvmWalletFromPrivateKey,
 } from "./helpers/evmClient";
-import { PrivateKey } from "@injectivelabs/sdk-ts";
+import { getInjectiveAddress, PrivateKey } from "@injectivelabs/sdk-ts";
 import { fail } from "assert";
 
 const INJ_DENOM = "inj";
 const FAUCET_AMOUNT = "100000000000000000000"; // 100 INJ
 const MINT_AMOUNT = BigInt(1_000_000); // 1 USDC (6 decimals)
+const BURN_AMOUNT = BigInt(500_000); // 0.5 USDC (6 decimals)
 const MAX_UINT256 = BigInt(2) ** BigInt(256) - BigInt(1);
 
 describe("Faucet Functionality", function () {
@@ -71,6 +72,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
   let proxyAddress: string;
   let erc20Denom: string;
   let deployerEvmAddress: string;
+  let deployerInjectiveAddress: string;
   let recipientEvmAddress: string;
   let recipientInjectiveAddress: string;
 
@@ -86,6 +88,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
     proxyAddress = deployment.proxyAddress;
     erc20Denom = getErc20Denom(proxyAddress);
     deployerEvmAddress = deployment.deployerEvmAddress;
+    deployerInjectiveAddress = getInjectiveAddress(deployerEvmAddress);
 
     // Configure deployer as minter with max allowance
     const configTx = await fiatToken.configureMinter(
@@ -307,6 +310,104 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
     });
 
     it.skip("should allow mint after contract is unpaused", async () => {
+      // TODO: [SE-4572]
+    });
+  });
+
+  describe("Burn", () => {
+    before(async () => {
+      // Configure minter allowance
+      const configTx = await fiatToken.configureMinter(
+        deployerEvmAddress,
+        MAX_UINT256
+      );
+      await configTx.wait();
+
+      // Mint tokens to the minter to prepare for burn
+      const mintTx = await fiatToken.mint(
+        deployerEvmAddress,
+        MINT_AMOUNT * BigInt(10)
+      );
+      await mintTx.wait();
+    });
+
+    it("should update minter balance in both EVM and bank module", async () => {
+      // Get initial balance
+      const initialEvmBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      const initialBankBalance = await getErc20Balance(
+        deployerInjectiveAddress,
+        proxyAddress
+      );
+
+      // Burn tokens
+      const burnTx = await fiatToken.burn(BURN_AMOUNT);
+      await burnTx.wait();
+
+      // Verify EVM balance decreased
+      const finalEvmBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      expect(finalEvmBalance).to.equal(initialEvmBalance - BURN_AMOUNT);
+
+      // Verify bank module balance decreased
+      const finalBankBalance = await getErc20Balance(
+        deployerInjectiveAddress,
+        proxyAddress
+      );
+      expect(finalBankBalance).to.equal(
+        (BigInt(initialBankBalance) - BURN_AMOUNT).toString()
+      );
+
+      // Verify EVM and bank module balances match
+      expect(finalBankBalance).to.equal(finalEvmBalance.toString());
+    });
+
+    it("should update totalSupply in both EVM and bank module", async () => {
+      // Get initial total supply
+      const initialEvmTotalSupply = await fiatToken.totalSupply();
+      const initialBankTotalSupply = await getTotalSupply(erc20Denom);
+
+      // Burn tokens
+      const burnTx = await fiatToken.burn(BURN_AMOUNT);
+      await burnTx.wait();
+
+      // Verify EVM total supply decreased
+      const finalEvmTotalSupply = await fiatToken.totalSupply();
+      expect(finalEvmTotalSupply).to.equal(initialEvmTotalSupply - BURN_AMOUNT);
+
+      // Verify bank module total supply decreased
+      const finalBankTotalSupply = await getTotalSupply(erc20Denom);
+      expect(finalBankTotalSupply).to.equal(
+        (BigInt(initialBankTotalSupply) - BURN_AMOUNT).toString()
+      );
+
+      // Verify EVM and bank module total supplies match
+      expect(finalBankTotalSupply).to.equal(finalEvmTotalSupply.toString());
+    });
+
+    // TODO: Blacklisted minter cannot burn
+    // Unit test coverage: test/v1/negative.test.js
+    // Integration test should verify bank module state is unchanged after revert
+    it.skip("should revert when minter is blacklisted", async () => {
+      // TODO: [SE-4572]
+    });
+
+    // TODO: Can burn after being unblacklisted
+    // Unit test coverage: test/v1/misc.test.js
+    // Integration test should verify bank module state updates correctly after unblacklist
+    it.skip("should allow burn after minter is unblacklisted", async () => {
+      // TODO: [SE-4572]
+    });
+
+    // TODO: Cannot burn when contract is paused
+    // Unit test coverage: test/v1/negative.test.js, test/v1/legacy.test.js
+    // Integration test should verify bank module state is unchanged after revert
+    it.skip("should revert when contract is paused", async () => {
+      // TODO: [SE-4572]
+    });
+
+    // TODO: Can burn after contract is unpaused
+    // Unit test coverage: test/v1/misc.test.js
+    // Integration test should verify bank module state updates correctly after unpause
+    it.skip("should allow burn after contract is unpaused", async () => {
       // TODO: [SE-4572]
     });
   });
