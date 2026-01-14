@@ -116,14 +116,6 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
             "FiatToken: mint amount exceeds minterAllowance"
         );
 
-        // Balance validation - vanilla USDC's _setBalance validated the amount,
-        // so we should validate it here as well.
-        uint256 currentReceiverBalance = _balanceOf(_to);
-        require(
-            type(uint256).max - currentReceiverBalance >= _amount,
-            "FiatToken: Balance exceeds (2^256 - 1)"
-        );
-
         // Delegate the actual mint and balance/total supply update to the bank precompile
         _bankPrecompile().mint(_to, _amount);
 
