@@ -397,7 +397,7 @@ contract FiatTokenV2_2 is
         address from,
         address to,
         uint256 value
-    ) internal override {
+    ) internal virtual override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(
@@ -448,7 +448,7 @@ contract FiatTokenV2_2 is
      */
     function burn(
         uint256 _amount
-    ) external whenNotPaused onlyMinters notBlacklisted(msg.sender) {
+    ) external virtual whenNotPaused onlyMinters notBlacklisted(msg.sender) {
         uint256 balance = _balanceOf(msg.sender);
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");

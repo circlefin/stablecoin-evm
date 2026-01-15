@@ -7,8 +7,10 @@
   precompile integration
   - Override `initialize()` to set token metadata in the bank module via
     `setMetadata(name, symbol, decimals)`
-  - Override `balanceOf()` and `totalSupply()` to read from the bank precompile
-  - Override `mint()` to delegate minting to the bank precompile
+  - Override `_balanceOf()` and `totalSupply()` to read from the bank precompile
+  - Override `mint()` and `burn()` to delegate token minting and burning to the
+    bank precompile
+  - Override `_transfer()` to delegate token transfer to the bank precompile
 
 ## 2.2.0, Flattened variant (2026-01-02)
 
