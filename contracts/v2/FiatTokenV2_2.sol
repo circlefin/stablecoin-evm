@@ -242,6 +242,7 @@ contract FiatTokenV2_2 is
         uint256 _amount
     )
         external
+        virtual
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -312,7 +313,7 @@ contract FiatTokenV2_2 is
      */
     function balanceOf(
         address account
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _balanceOf(account);
     }
 
@@ -791,7 +792,9 @@ contract FiatTokenV2_2 is
      * @param _account  The address of the account.
      * @return          The fiat token balance of the account.
      */
-    function _balanceOf(address _account) internal view returns (uint256) {
+    function _balanceOf(
+        address _account
+    ) internal view virtual returns (uint256) {
         return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
     }
 

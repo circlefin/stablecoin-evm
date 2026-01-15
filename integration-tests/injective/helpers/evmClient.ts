@@ -17,7 +17,7 @@
  */
 
 import { ethers } from "ethers";
-import { PrivateKey } from "@injectivelabs/sdk-ts";
+import { PrivateKey, getInjectiveAddress } from "@injectivelabs/sdk-ts";
 import signatureCheckerArtifact from "../../../artifacts/hardhat/contracts/util/SignatureChecker.sol/SignatureChecker.json";
 import fiatTokenInjectiveArtifact from "../../../artifacts/hardhat/contracts/v2/injective/FiatTokenInjectiveV2_2.sol/FiatTokenInjectiveV2_2.json";
 import fiatTokenProxyArtifact from "../../../artifacts/hardhat/contracts/v1/FiatTokenProxy.sol/FiatTokenProxy.json";
@@ -64,6 +64,13 @@ export interface FiatTokenInjectiveV2_2Contract {
   symbol(): Promise<string>;
   decimals(): Promise<bigint>;
   owner(): Promise<string>;
+  configureMinter(
+    minter: string,
+    minterAllowedAmount: bigint
+  ): Promise<ethers.ContractTransactionResponse>;
+  mint(to: string, amount: bigint): Promise<ethers.ContractTransactionResponse>;
+  minterAllowance(minter: string): Promise<bigint>;
+  isMinter(account: string): Promise<boolean>;
 }
 
 /**
@@ -154,12 +161,17 @@ export async function setupFiatTokenInjectiveV2_2(): Promise<{
   await proxy.waitForDeployment();
   const proxyAddress = await proxy.getAddress();
 
-  // Step 7: Change proxy admin (must be done before initialization)
+  // Step 7: Fund the proxy contract with INJ for denom creation fee
+  // Injective charges a fee when minting new ERC-20 tokens via the bank precompile
+  const proxyInjectiveAddress = getInjectiveAddress(proxyAddress);
+  await fundAccount(proxyInjectiveAddress);
+
+  // Step 8: Change proxy admin (must be done before initialization)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const changeAdminTx = await (proxy as any).changeAdmin(proxyAdminAddress);
   await changeAdminTx.wait();
 
-  // Step 8: Initialize through the proxy with USDC configuration
+  // Step 9: Initialize through the proxy with USDC configuration
   // Create a typed contract instance pointing to proxy but using implementation ABI
   const fiatToken = new ethers.Contract(
     proxyAddress,
