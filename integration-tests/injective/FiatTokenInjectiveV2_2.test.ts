@@ -317,18 +317,8 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
 
   describe("Burn", () => {
     before(async () => {
-      // Configure minter allowance
-      const configTx = await fiatToken.configureMinter(
-        deployerEvmAddress,
-        MAX_UINT256
-      );
-      await configTx.wait();
-
       // Mint tokens to the minter to prepare for burn
-      const mintTx = await fiatToken.mint(
-        deployerEvmAddress,
-        MINT_AMOUNT * BigInt(10)
-      );
+      const mintTx = await fiatToken.mint(deployerEvmAddress, MINT_AMOUNT);
       await mintTx.wait();
     });
 
@@ -384,30 +374,18 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       expect(finalBankTotalSupply).to.equal(finalEvmTotalSupply.toString());
     });
 
-    // TODO: Blacklisted minter cannot burn
-    // Unit test coverage: test/v1/negative.test.js
-    // Integration test should verify bank module state is unchanged after revert
     it.skip("should revert when minter is blacklisted", async () => {
       // TODO: [SE-4572]
     });
 
-    // TODO: Can burn after being unblacklisted
-    // Unit test coverage: test/v1/misc.test.js
-    // Integration test should verify bank module state updates correctly after unblacklist
     it.skip("should allow burn after minter is unblacklisted", async () => {
       // TODO: [SE-4572]
     });
 
-    // TODO: Cannot burn when contract is paused
-    // Unit test coverage: test/v1/negative.test.js, test/v1/legacy.test.js
-    // Integration test should verify bank module state is unchanged after revert
     it.skip("should revert when contract is paused", async () => {
       // TODO: [SE-4572]
     });
 
-    // TODO: Can burn after contract is unpaused
-    // Unit test coverage: test/v1/misc.test.js
-    // Integration test should verify bank module state updates correctly after unpause
     it.skip("should allow burn after contract is unpaused", async () => {
       // TODO: [SE-4572]
     });
@@ -423,10 +401,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       senderInjectiveAddress = deployerInjectiveAddress;
 
       // Mint tokens to sender for transfer tests
-      const mintTx = await fiatToken.mint(
-        senderEvmAddress,
-        MINT_AMOUNT * BigInt(10)
-      );
+      const mintTx = await fiatToken.mint(senderEvmAddress, MINT_AMOUNT);
       await mintTx.wait();
     });
 
