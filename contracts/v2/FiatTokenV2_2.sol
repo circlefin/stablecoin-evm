@@ -313,7 +313,7 @@ contract FiatTokenV2_2 is
      */
     function balanceOf(
         address account
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _balanceOf(account);
     }
 

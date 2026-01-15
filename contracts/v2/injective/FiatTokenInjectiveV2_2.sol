@@ -75,12 +75,6 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
         );
     }
 
-    function balanceOf(
-        address account
-    ) external view override returns (uint256) {
-        return _balanceOf(account);
-    }
-
     function totalSupply() external view override returns (uint256) {
         return _bankPrecompile().totalSupply(address(this));
     }
