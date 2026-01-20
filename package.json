@@ -7,7 +7,7 @@
   },
   "scripts": {
     "compile": "hardhat compile && forge build && ./flatten-generated-types.sh",
-    "compile:fast": "ENABLE_VIA_IR=false OPTIMIZER_RUNS=200 hardhat compile && FOUNDRY_PROFILE=local forge build && ./flatten-generated-types.sh",
+    "compile:fast": "ENABLE_VIA_IR=false OPTIMIZER_RUNS=200 hardhat compile && forge build && ./flatten-generated-types.sh",
     "contract-size": "hardhat size-contracts",
     "coverage": "NODE_OPTIONS=--max-old-space-size=8192 hardhat coverage",
     "forge:simulate": "forge script -vv --gas-estimate-multiplier $(dotenv -p GAS_MULTIPLIER)",
