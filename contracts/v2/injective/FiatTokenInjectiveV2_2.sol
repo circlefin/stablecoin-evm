@@ -86,66 +86,27 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
     }
 
     /**
-     * @notice Mints fiat tokens to an address.
+     * @dev Internal function to mint tokens via bank precompile.
      * @param _to The address that will receive the minted tokens.
-     * @param _amount The amount of tokens to mint. Must be less than or equal
-     * to the minterAllowance of the caller.
-     * @return True if the operation was successful.
+     * @param _amount The amount of tokens to mint.
      */
-    function mint(
-        address _to,
-        uint256 _amount
-    )
-        external
-        override
-        whenNotPaused
-        onlyMinters
-        notBlacklisted(msg.sender)
-        notBlacklisted(_to)
-        returns (bool)
-    {
-        require(_to != address(0), "FiatToken: mint to the zero address");
-        require(_amount > 0, "FiatToken: mint amount not greater than 0");
-
-        uint256 mintingAllowedAmount = minterAllowed[msg.sender];
-        require(
-            _amount <= mintingAllowedAmount,
-            "FiatToken: mint amount exceeds minterAllowance"
-        );
-
-        // Delegate the actual mint and balance/total supply update to the bank precompile
+    function _mint(address _to, uint256 _amount) internal override {
         require(
             _bankPrecompile().mint(_to, _amount),
             "IBankModule: mint failed"
         );
-
-        minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
-        emit Mint(msg.sender, _to, _amount);
-        emit Transfer(address(0), _to, _amount);
-        return true;
     }
 
     /**
-     * @notice Allows a minter to burn some of its own tokens.
-     * @dev The caller must be a minter, must not be blacklisted, and the amount to burn
-     * should be less than or equal to the account's balance.
-     * @param _amount the amount of tokens to be burned.
+     * @dev Internal function to burn tokens via bank precompile.
+     * @param _from The address to burn tokens from.
+     * @param _amount The amount of tokens to burn.
      */
-    function burn(
-        uint256 _amount
-    ) external override whenNotPaused onlyMinters notBlacklisted(msg.sender) {
-        uint256 balance = _balanceOf(msg.sender);
-        require(_amount > 0, "FiatToken: burn amount not greater than 0");
-        require(balance >= _amount, "FiatToken: burn amount exceeds balance");
-
-        // Delegate the actual burn and balance/total supply update to the bank precompile
+    function _burn(address _from, uint256 _amount) internal override {
         require(
-            _bankPrecompile().burn(msg.sender, _amount),
+            _bankPrecompile().burn(_from, _amount),
             "IBankModule: burn failed"
         );
-
-        emit Burn(msg.sender, _amount);
-        emit Transfer(msg.sender, address(0), _amount);
     }
 
     /**

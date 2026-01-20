@@ -242,7 +242,6 @@ contract FiatTokenV2_2 is
         uint256 _amount
     )
         external
-        virtual
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -258,8 +257,7 @@ contract FiatTokenV2_2 is
             "FiatToken: mint amount exceeds minterAllowance"
         );
 
-        totalSupply_ = totalSupply_ + _amount;
-        _setBalance(_to, _balanceOf(_to) + _amount);
+        _mint(_to, _amount);
         minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
@@ -317,25 +315,6 @@ contract FiatTokenV2_2 is
         return _balanceOf(account);
     }
 
-    // ============ Internal Functions ============
-
-    /**
-     * @dev Internal function to set allowance.
-     * @param owner     Token owner's address.
-     * @param spender   Spender's address.
-     * @param value     Allowance amount.
-     */
-    function _approve(
-        address owner,
-        address spender,
-        uint256 value
-    ) internal override {
-        require(owner != address(0), "ERC20: approve from the zero address");
-        require(spender != address(0), "ERC20: approve to the zero address");
-        allowed[owner][spender] = value;
-        emit Approval(owner, spender, value);
-    }
-
     /**
      * @notice Transfers tokens from an address to another by spending the caller's allowance.
      * @dev The caller must have some fiat token allowance on the payer's tokens.
@@ -388,29 +367,6 @@ contract FiatTokenV2_2 is
     }
 
     /**
-     * @dev Internal function to process transfers.
-     * @param from  Payer's address.
-     * @param to    Payee's address.
-     * @param value Transfer amount.
-     */
-    function _transfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual override {
-        require(from != address(0), "ERC20: transfer from the zero address");
-        require(to != address(0), "ERC20: transfer to the zero address");
-        require(
-            value <= _balanceOf(from),
-            "ERC20: transfer amount exceeds balance"
-        );
-
-        _setBalance(from, _balanceOf(from) - value);
-        _setBalance(to, _balanceOf(to) + value);
-        emit Transfer(from, to, value);
-    }
-
-    /**
      * @notice Adds or updates a new minter with a mint allowance.
      * @param minter The address of the minter.
      * @param minterAllowedAmount The minting amount allowed for the minter.
@@ -448,13 +404,12 @@ contract FiatTokenV2_2 is
      */
     function burn(
         uint256 _amount
-    ) external virtual whenNotPaused onlyMinters notBlacklisted(msg.sender) {
+    ) external whenNotPaused onlyMinters notBlacklisted(msg.sender) {
         uint256 balance = _balanceOf(msg.sender);
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
 
-        totalSupply_ = totalSupply_ - _amount;
-        _setBalance(msg.sender, balance - _amount);
+        _burn(msg.sender, _amount);
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
     }
@@ -470,20 +425,6 @@ contract FiatTokenV2_2 is
         );
         masterMinter = _newMasterMinter;
         emit MasterMinterChanged(masterMinter);
-    }
-
-    /**
-     * @inheritdoc Blacklistable
-     */
-    function _blacklist(address _account) internal override {
-        _setBlacklistState(_account, true);
-    }
-
-    /**
-     * @inheritdoc Blacklistable
-     */
-    function _unBlacklist(address _account) internal override {
-        _setBlacklistState(_account, false);
     }
 
     /**
@@ -580,58 +521,11 @@ contract FiatTokenV2_2 is
     }
 
     /**
-     * @dev Internal function to increase the allowance by a given increment
-     * @param owner     Token owner's address
-     * @param spender   Spender's address
-     * @param increment Amount of increase
-     */
-    function _increaseAllowance(
-        address owner,
-        address spender,
-        uint256 increment
-    ) internal override {
-        _approve(owner, spender, allowed[owner][spender] + increment);
-    }
-
-    /**
-     * @dev Internal function to decrease the allowance by a given decrement
-     * @param owner     Token owner's address
-     * @param spender   Spender's address
-     * @param decrement Amount of decrease
-     */
-    function _decreaseAllowance(
-        address owner,
-        address spender,
-        uint256 decrement
-    ) internal override {
-        _approve(owner, spender, allowed[owner][spender] - decrement);
-    }
-
-    /**
-     * @dev Internal function to get the current chain id.
-     * @return The current chain id.
-     */
-    function _chainId() internal view virtual returns (uint256) {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        return chainId;
-    }
-
-    /**
      * @notice Version string for the EIP712 domain separator
      * @return Version string
      */
     function version() external pure returns (string memory) {
         return "2";
-    }
-
-    /**
-     * @inheritdoc EIP712Domain
-     */
-    function _domainSeparator() internal view override returns (bytes32) {
-        return EIP712.makeDomainSeparator(name, "2", _chainId());
     }
 
     /**
@@ -734,71 +628,6 @@ contract FiatTokenV2_2 is
     }
 
     /**
-     * @dev Helper method that sets the blacklist state of an account on balanceAndBlacklistStates.
-     * If _shouldBlacklist is true, we apply a (1 << 255) bitmask with an OR operation on the
-     * account's balanceAndBlacklistState. This flips the high bit for the account to 1,
-     * indicating that the account is blacklisted.
-     *
-     * If _shouldBlacklist if false, we reset the account's balanceAndBlacklistStates to their
-     * balances. This clears the high bit for the account, indicating that the account is unblacklisted.
-     * @param _account         The address of the account.
-     * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
-     */
-    function _setBlacklistState(
-        address _account,
-        bool _shouldBlacklist
-    ) internal {
-        balanceAndBlacklistStates[_account] = _shouldBlacklist
-            ? balanceAndBlacklistStates[_account] | (1 << 255)
-            : _balanceOf(_account);
-    }
-
-    /**
-     * @dev Helper method that sets the balance of an account on balanceAndBlacklistStates.
-     * Since balances are stored in the last 255 bits of the balanceAndBlacklistStates value,
-     * we need to ensure that the updated balance does not exceed (2^255 - 1).
-     * Since blacklisted accounts' balances cannot be updated, the method will also
-     * revert if the account is blacklisted
-     * @param _account The address of the account.
-     * @param _balance The new fiat token balance of the account (max: (2^255 - 1)).
-     */
-    function _setBalance(address _account, uint256 _balance) internal {
-        require(
-            _balance <= ((1 << 255) - 1),
-            "FiatTokenV2_2: Balance exceeds (2^255 - 1)"
-        );
-        require(
-            !_isBlacklisted(_account),
-            "FiatTokenV2_2: Account is blacklisted"
-        );
-
-        balanceAndBlacklistStates[_account] = _balance;
-    }
-
-    /**
-     * @inheritdoc Blacklistable
-     */
-    function _isBlacklisted(
-        address _account
-    ) internal view override returns (bool) {
-        return balanceAndBlacklistStates[_account] >> 255 == 1;
-    }
-
-    /**
-     * @dev Helper method to obtain the balance of an account. Since balances
-     * are stored in the last 255 bits of the balanceAndBlacklistStates value,
-     * we apply a ((1 << 255) - 1) bit bitmask with an AND operation on the
-     * balanceAndBlacklistState to obtain the balance.
-     * @param _account  The address of the account.
-     * @return          The fiat token balance of the account.
-     */
-    function _balanceOf(
-        address _account
-    ) internal view virtual returns (uint256) {
-        return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
-    }
-
-    /**
      * @inheritdoc IERC20
      * @notice Sets a fiat token allowance for a spender to spend on behalf of the caller.
      * @param spender The spender's address.
@@ -861,5 +690,193 @@ contract FiatTokenV2_2 is
     ) external whenNotPaused returns (bool) {
         _decreaseAllowance(msg.sender, spender, decrement);
         return true;
+    }
+
+    // ============ Internal Functions ============
+
+    /**
+     * @dev Internal function to mint tokens.
+     * @param _to The address that will receive the minted tokens.
+     * @param _amount The amount of tokens to mint.
+     */
+    function _mint(address _to, uint256 _amount) internal virtual {
+        totalSupply_ = totalSupply_ + _amount;
+        _setBalance(_to, _balanceOf(_to) + _amount);
+    }
+
+    /**
+     * @dev Internal function to burn tokens.
+     * @param _from The address to burn tokens from.
+     * @param _amount The amount of tokens to burn.
+     */
+    function _burn(address _from, uint256 _amount) internal virtual {
+        totalSupply_ = totalSupply_ - _amount;
+        _setBalance(_from, _balanceOf(_from) - _amount);
+    }
+
+    /**
+     * @dev Internal function to process transfers.
+     * @param from  Payer's address.
+     * @param to    Payee's address.
+     * @param value Transfer amount.
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual override {
+        require(from != address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
+        require(
+            value <= _balanceOf(from),
+            "ERC20: transfer amount exceeds balance"
+        );
+
+        _setBalance(from, _balanceOf(from) - value);
+        _setBalance(to, _balanceOf(to) + value);
+        emit Transfer(from, to, value);
+    }
+
+    /**
+     * @dev Internal function to set allowance.
+     * @param owner     Token owner's address.
+     * @param spender   Spender's address.
+     * @param value     Allowance amount.
+     */
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal override {
+        require(owner != address(0), "ERC20: approve from the zero address");
+        require(spender != address(0), "ERC20: approve to the zero address");
+        allowed[owner][spender] = value;
+        emit Approval(owner, spender, value);
+    }
+
+    /**
+     * @dev Internal function to increase the allowance by a given increment
+     * @param owner     Token owner's address
+     * @param spender   Spender's address
+     * @param increment Amount of increase
+     */
+    function _increaseAllowance(
+        address owner,
+        address spender,
+        uint256 increment
+    ) internal override {
+        _approve(owner, spender, allowed[owner][spender] + increment);
+    }
+
+    /**
+     * @dev Internal function to decrease the allowance by a given decrement
+     * @param owner     Token owner's address
+     * @param spender   Spender's address
+     * @param decrement Amount of decrease
+     */
+    function _decreaseAllowance(
+        address owner,
+        address spender,
+        uint256 decrement
+    ) internal override {
+        _approve(owner, spender, allowed[owner][spender] - decrement);
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     */
+    function _blacklist(address _account) internal override {
+        _setBlacklistState(_account, true);
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     */
+    function _unBlacklist(address _account) internal override {
+        _setBlacklistState(_account, false);
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     */
+    function _isBlacklisted(
+        address _account
+    ) internal view override returns (bool) {
+        return balanceAndBlacklistStates[_account] >> 255 == 1;
+    }
+
+    /**
+     * @dev Helper method that sets the blacklist state of an account on balanceAndBlacklistStates.
+     * If _shouldBlacklist is true, we apply a (1 << 255) bitmask with an OR operation on the
+     * account's balanceAndBlacklistState. This flips the high bit for the account to 1,
+     * indicating that the account is blacklisted.
+     *
+     * If _shouldBlacklist if false, we reset the account's balanceAndBlacklistStates to their
+     * balances. This clears the high bit for the account, indicating that the account is unblacklisted.
+     * @param _account         The address of the account.
+     * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
+     */
+    function _setBlacklistState(
+        address _account,
+        bool _shouldBlacklist
+    ) internal {
+        balanceAndBlacklistStates[_account] = _shouldBlacklist
+            ? balanceAndBlacklistStates[_account] | (1 << 255)
+            : _balanceOf(_account);
+    }
+
+    /**
+     * @dev Helper method to obtain the balance of an account. Since balances
+     * are stored in the last 255 bits of the balanceAndBlacklistStates value,
+     * we apply a ((1 << 255) - 1) bit bitmask with an AND operation on the
+     * balanceAndBlacklistState to obtain the balance.
+     * @param _account  The address of the account.
+     * @return          The fiat token balance of the account.
+     */
+    function _balanceOf(
+        address _account
+    ) internal view virtual returns (uint256) {
+        return balanceAndBlacklistStates[_account] & ((1 << 255) - 1);
+    }
+
+    /**
+     * @dev Helper method that sets the balance of an account on balanceAndBlacklistStates.
+     * Since balances are stored in the last 255 bits of the balanceAndBlacklistStates value,
+     * we need to ensure that the updated balance does not exceed (2^255 - 1).
+     * Since blacklisted accounts' balances cannot be updated, the method will also
+     * revert if the account is blacklisted
+     * @param _account The address of the account.
+     * @param _balance The new fiat token balance of the account (max: (2^255 - 1)).
+     */
+    function _setBalance(address _account, uint256 _balance) internal {
+        require(
+            _balance <= ((1 << 255) - 1),
+            "FiatTokenV2_2: Balance exceeds (2^255 - 1)"
+        );
+        require(
+            !_isBlacklisted(_account),
+            "FiatTokenV2_2: Account is blacklisted"
+        );
+
+        balanceAndBlacklistStates[_account] = _balance;
+    }
+
+    /**
+     * @dev Internal function to get the current chain id.
+     * @return The current chain id.
+     */
+    function _chainId() internal view virtual returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return chainId;
+    }
+
+    /**
+     * @inheritdoc EIP712Domain
+     */
+    function _domainSeparator() internal view override returns (bytes32) {
+        return EIP712.makeDomainSeparator(name, "2", _chainId());
     }
 }
