@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload test results to artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: crcl-main/upload-artifacts-github-action@1
         with:
           name: junit-report-${{ hashFiles('report/junit.xml') }}
           path: report/junit.xml
