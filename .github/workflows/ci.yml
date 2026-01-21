@@ -86,6 +86,7 @@ jobs:
         with:
           name: junit-report-${{ hashFiles('report/junit.xml') }}
           path: report/junit.xml
+          bucket: circle-cicd-artifacts
 
   run_injective_integration_tests:
     runs-on: large-dind-spot
