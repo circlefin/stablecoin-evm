@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x3718bdf374ae98a936ed1010ba89eea8dcce855d",
+    "contractCreationTxHash": "0x4447bab4c70aba6a86d0dbcc811db9d91a54cd72ff59c3dcefa26cb4879cc381"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x1ca70eea34f0aff86b0826312b47afea6efdfb71",
+    "contractCreationTxHash": "0xfad537f880537404b8f6d4ad256d973ce6366b9a6b3102db48d3f5e8ce4cc117"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x7126c3fef4e6a680eee09fb039b2236f638384b0",
+    "contractCreationTxHash": "0xc207c882bb767cc32235e279d48c583ef49e65c70bf32a35247b969d1d2717f6"
+  },
+  "rpcUrl": "https://rpc.pharos.xyz"
+}
