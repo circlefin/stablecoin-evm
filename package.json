@@ -27,6 +27,7 @@
     "test": "NODE_OPTIONS=--max-old-space-size=8192 hardhat test",
     "test:fast": "yarn compile:fast && yarn test",
     "test:injective": "mocha --require tsx 'integration-tests/injective/**/*.test.ts' --timeout 60000",
+    "test:injective:fast": "yarn compile:fast && mocha --require tsx 'integration-tests/injective/**/*.test.ts' --timeout 60000",
     "test:injective:start": "./scripts/injective/start_network.sh",
     "test:injective:stop": "./scripts/injective/stop_network.sh",
     "typecheck": "tsc -p . --noEmit"

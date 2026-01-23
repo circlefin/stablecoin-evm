@@ -8,8 +8,8 @@
   - Override `initialize()` to set token metadata in the bank module via
     `setMetadata(name, symbol, decimals)`
   - Override `_balanceOf()` and `totalSupply()` to read from the bank precompile
-  - Override `mint()` and `burn()` to delegate token minting and burning to the
-    bank precompile
+  - Override `_mint()` and `_burn()` to delegate token minting and burning to
+    the bank precompile
   - Override `_transfer()` to delegate token transfer to the bank precompile
 
 ## 2.2.0, Flattened variant (2026-01-02)
@@ -23,6 +23,9 @@
 - Flattened `FiatTokenV2_2` into a single contract file
   - Consolidated all FiatToken functionality from V1, V1.1, V2, V2.1, and V2.2
     while maintaining storage layout compatibility for proxy upgrades
+- Refactored `mint` and `burn` for better extensibility
+  - Extracted internal `_mint()` and `_burn()` function to allow derived
+    contracts to override token minting logic
 - Updated initialization interface
   - `initialize(InitializeData)` - Single-step initialization for new
     deployments
