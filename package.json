@@ -54,6 +54,8 @@
     "@nomiclabs/hardhat-truffle5": "2.0.7",
     "@nomiclabs/hardhat-web3": "2.0.0",
     "@openzeppelin/contracts": "5.4.0",
+    "@protobuf-ts/plugin": "2.11.1",
+    "@protobuf-ts/protoc": "2.11.1",
     "@typechain/ethers-v6": "0.4.3",
     "@typechain/hardhat": "9.0.0",
     "@typechain/truffle-v5": "8.0.6",

@@ -22,6 +22,13 @@ import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { IBankModule } from "../../interface/injective/IBankModule.sol";
 
 contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
+    /**
+     * @notice Cosmos coin structure used by Injective permissions module
+     */
+    struct Coin {
+        uint256 amount;
+        string denom;
+    }
     address private constant BANK_PRECOMPILE_ADDRESS =
         0x0000000000000000000000000000000000000064;
 
@@ -134,5 +141,26 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
         );
 
         emit Transfer(from, to, value);
+    }
+
+    /**
+     * @notice Check if a transfer is restricted by permissions
+     * @dev Called by Injective permissions module to validate transfers
+     * This implements the permissions hook interface required by Injective
+     * @param from The sender's address
+     * @param to The receiver's address
+     * @param amount The coin amount being transferred
+     * @return isRestricted Always returns false - transfers are not restricted
+     * by this contract (blacklist checks are handled separately by FiatToken logic)
+     */
+    function isTransferRestricted(
+        address from,
+        address to,
+        Coin calldata amount
+    ) external pure returns (bool isRestricted) {
+        // Return false to indicate transfer is not restricted
+        // The FiatToken's own blacklist and pause logic is enforced separately
+        // via the standard ERC20 transfer flow
+        return false;
     }
 }
