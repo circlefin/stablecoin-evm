@@ -174,6 +174,7 @@ export async function setupFiatTokenInjectiveV2_2(): Promise<{
   // Step 8: Change proxy admin (must be done before initialization)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const changeAdminTx = await (proxy as any).changeAdmin(proxyAdminAddress);
+
   await changeAdminTx.wait();
 
   // Step 9: Initialize through the proxy with USDC configuration
