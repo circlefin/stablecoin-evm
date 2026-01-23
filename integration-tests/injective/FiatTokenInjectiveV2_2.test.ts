@@ -39,6 +39,7 @@ import {
   createNamespace,
   queryNamespace,
   updateNamespaceActors,
+  prepareUpdateActorRolesMessage,
   ROLE_IDS,
 } from "../../scripts/injective/namespaceClient";
 import { Network } from "@injectivelabs/networks";
@@ -747,11 +748,6 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           evmAddress: string;
           injectiveAddress: string;
         };
-        let newRoleManagersAdmin: {
-          privateKey: string;
-          evmAddress: string;
-          injectiveAddress: string;
-        };
 
         before(async () => {
           // Generate and fund new admin accounts for rotation
@@ -764,7 +760,6 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           newPolicyAdmin = await generateAndFundAccount();
           newContractHookAdmin = await generateAndFundAccount();
           newRolePermissionsAdmin = await generateAndFundAccount();
-          newRoleManagersAdmin = await generateAndFundAccount();
         });
 
         it("should rotate a single admin role", async () => {
@@ -800,13 +795,13 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
         });
 
         it("should rotate multiple admin roles simultaneously", async () => {
-          // Rotate all remaining admin roles (using namespace admin)
+          // Rotate contractHookAdmin and rolePermissionsAdmin (using namespace admin)
+          // Note: roleManagersAdmin cannot be rotated through updateNamespaceActors
           const txHash = await updateNamespaceActors(
             proxyAddress,
             {
               contractHookAdmin: newContractHookAdmin.evmAddress,
               rolePermissionsAdmin: newRolePermissionsAdmin.evmAddress,
-              roleManagersAdmin: newRoleManagersAdmin.evmAddress,
             },
             roleManagersAdminPrivateKey,
             Network.Local
@@ -822,6 +817,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
             (ar: { actor: string }) =>
               ar.actor === newContractHookAdmin.injectiveAddress
           );
+          expect(contractHookActor).to.exist;
           expect(contractHookActor?.roles).to.include(
             ROLE_NAMES.CONTRACT_HOOK_ADMIN
           );
@@ -830,30 +826,25 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
             (ar: { actor: string }) =>
               ar.actor === newRolePermissionsAdmin.injectiveAddress
           );
+          expect(rolePermissionsActor).to.exist;
           expect(rolePermissionsActor?.roles).to.include(
             ROLE_NAMES.ROLE_PERMISSIONS_ADMIN
           );
-
-          const roleManagersActor = namespace.actorRoles.find(
-            (ar: { actor: string }) =>
-              ar.actor === newRoleManagersAdmin.injectiveAddress
-          );
-          expect(roleManagersActor?.roles).to.include(
-            ROLE_NAMES.ROLE_MANAGERS_ADMIN
-          );
         });
 
-        it("should verify old admin (namespace admin) is completely removed from actorRoles", async () => {
+        it("should verify old admin has rotated roles removed but still has roleManagersAdmin", async () => {
           const namespace = await queryNamespace(proxyAddress, Network.Local);
 
-          // Old namespace admin should not have any actor roles anymore (all rotated)
+          // Old namespace admin should have rotated admin roles removed
+          // but still retain roleManagersAdmin (which cannot be rotated via updateNamespaceActors)
           const oldAdminActor = namespace.actorRoles.find(
             (ar: { actor: string }) =>
               ar.actor === roleManagersAdminInjectiveAddress
           );
 
-          // Either the actor doesn't exist or has no admin roles
+          expect(oldAdminActor).to.exist;
           if (oldAdminActor) {
+            // Rotated roles should be removed
             expect(oldAdminActor.roles).to.not.include(ROLE_NAMES.POLICY_ADMIN);
             expect(oldAdminActor.roles).to.not.include(
               ROLE_NAMES.CONTRACT_HOOK_ADMIN
@@ -861,7 +852,8 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
             expect(oldAdminActor.roles).to.not.include(
               ROLE_NAMES.ROLE_PERMISSIONS_ADMIN
             );
-            expect(oldAdminActor.roles).to.not.include(
+            // But roleManagersAdmin should still exist (cannot be rotated)
+            expect(oldAdminActor.roles).to.include(
               ROLE_NAMES.ROLE_MANAGERS_ADMIN
             );
           }
@@ -902,34 +894,6 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           }
         });
 
-        it("should verify new roleManagersAdmin actor has the role but not in managers list", async () => {
-          const namespace = await queryNamespace(proxyAddress, Network.Local);
-
-          // Verify newRoleManagersAdmin has the actor role
-          const newRoleManagerActor = namespace.actorRoles.find(
-            (ar: { actor: string }) =>
-              ar.actor === newRoleManagersAdmin.injectiveAddress
-          );
-          expect(newRoleManagerActor?.roles).to.include(
-            ROLE_NAMES.ROLE_MANAGERS_ADMIN
-          );
-
-          // But verify it's NOT in the roleManagers list
-          // (because updateNamespaceActors only updates actorRoles, not roleManagers)
-          const newRoleManagerInManagersList = namespace.roleManagers.some(
-            (rm: { manager: string }) =>
-              rm.manager === newRoleManagersAdmin.injectiveAddress
-          );
-          expect(newRoleManagerInManagersList).to.be.false;
-
-          // Verify namespace admin (original admin) is still in roleManagers list
-          const originalAdminInManagersList = namespace.roleManagers.some(
-            (rm: { manager: string }) =>
-              rm.manager === roleManagersAdminInjectiveAddress
-          );
-          expect(originalAdminInManagersList).to.be.true;
-        });
-
         it("should preserve other namespace fields when updating actors", async () => {
           const namespaceBefore = await queryNamespace(
             proxyAddress,
@@ -965,6 +929,103 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           expect(namespaceAfter.roleManagers.length).to.equal(
             namespaceBefore.roleManagers.length
           );
+        });
+
+        it("should not send new admin addresses to API during prepareUpdateActorRolesMessage", async () => {
+          // Create test accounts that don't exist on chain
+          const testNewPolicyAdmin = generateAddress();
+          const testNewContractHookAdmin = generateAddress();
+
+          // Intercept fetch calls to verify what's being sent to API
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const originalFetch = (global as any).fetch;
+          const fetchCalls: Array<{ url: string; body?: string }> = [];
+
+          try {
+            // Mock fetch to capture all API calls
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (global as any).fetch = async (url: string, options?: any) => {
+              const callInfo: { url: string; body?: string } = { url };
+              if (options?.body) {
+                callInfo.body =
+                  typeof options.body === "string"
+                    ? options.body
+                    : JSON.stringify(options.body);
+              }
+              fetchCalls.push(callInfo);
+
+              // Call original fetch
+              return originalFetch(url, options);
+            };
+
+            // Call prepareUpdateActorRolesMessage
+            const result = await prepareUpdateActorRolesMessage(
+              proxyAddress,
+              roleManagersAdminEvmAddress,
+              {
+                policyAdmin: testNewPolicyAdmin.evmAddress,
+                contractHookAdmin: testNewContractHookAdmin.evmAddress,
+              },
+              Network.Local
+            );
+
+            // Verify the message was prepared successfully
+            expect(result.msg).to.exist;
+            expect(result.denom).to.equal(erc20Denom);
+
+            // Verify fetch calls
+            expect(fetchCalls.length).to.be.greaterThan(0);
+
+            // Check each fetch call to ensure new admin addresses are NOT in the URL or body
+            for (const call of fetchCalls) {
+              // Check URL doesn't contain new admin addresses
+              expect(call.url).to.not.include(
+                testNewPolicyAdmin.evmAddress.toLowerCase()
+              );
+              expect(call.url).to.not.include(
+                testNewPolicyAdmin.injectiveAddress
+              );
+              expect(call.url).to.not.include(
+                testNewContractHookAdmin.evmAddress.toLowerCase()
+              );
+              expect(call.url).to.not.include(
+                testNewContractHookAdmin.injectiveAddress
+              );
+
+              // Check body doesn't contain new admin addresses (if body exists)
+              if (call.body) {
+                const bodyLower = call.body.toLowerCase();
+                expect(bodyLower).to.not.include(
+                  testNewPolicyAdmin.evmAddress.toLowerCase()
+                );
+                expect(bodyLower).to.not.include(
+                  testNewPolicyAdmin.injectiveAddress
+                );
+                expect(bodyLower).to.not.include(
+                  testNewContractHookAdmin.evmAddress.toLowerCase()
+                );
+                expect(bodyLower).to.not.include(
+                  testNewContractHookAdmin.injectiveAddress
+                );
+              }
+
+              // Verify that the URL contains the current role manager address or proxy address
+              // (This confirms we're querying current state, not sending new addresses)
+              const urlLower = call.url.toLowerCase();
+              const containsCurrentInfo =
+                urlLower.includes(proxyAddress.toLowerCase()) ||
+                urlLower.includes(erc20Denom.toLowerCase()) ||
+                urlLower.includes("namespace");
+              expect(
+                containsCurrentInfo,
+                `API call should query current namespace info: ${call.url}`
+              ).to.be.true;
+            }
+          } finally {
+            // Restore original fetch
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (global as any).fetch = originalFetch;
+          }
         });
       });
 
