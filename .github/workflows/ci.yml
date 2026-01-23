@@ -117,3 +117,10 @@ jobs:
       contents: read
     with:
       allow-reciprocal-licenses: false
+
+  check-pr:
+    uses: ./.github/workflows/check-pr.yml
+    permissions:
+      checks: write
+      contents: write
+      actions: read
