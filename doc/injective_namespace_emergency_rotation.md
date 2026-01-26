@@ -43,28 +43,39 @@ Creates an unsigned transaction JSON file for rotating admin roles.
 - Make sure we do not attempt to modify the role manager
 
 ```bash
-NETWORK=<network> \
-ROLE_MANAGER_ADMIN=<evm_address> \
-NEW_<ROLE>=<evm_address> \
-npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts <USDC_PROXY_ADDRESS>
+npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \
+  --network <network> \
+  --usdc-proxy <address> \
+  --role-manager-admin <address> \
+  --sequence <number> \
+  [--new-policy-admin <address>] \
+  [--new-contract-hook-admin <address>] \
+  [--new-role-permissions-admin <address>]
 ```
 
-**Environment Variables:**
+**Arguments:**
 
-- `NETWORK` - Network to use: `local`, `testnet`, or `mainnet` (required)
-- `ROLE_MANAGER_ADMIN` - Current role manager admin's EVM address (required)
-- `NEW_POLICY_ADMIN` - New policy admin's EVM address (optional)
-- `NEW_CONTRACT_HOOK_ADMIN` - New contract hook admin's EVM address (optional)
-- `NEW_ROLE_PERMISSIONS_ADMIN` - New role permissions admin's EVM address
+- `--network <network>` - Network to use: `local`, `testnet`, or `mainnet`
+  (required)
+- `--usdc-proxy <address>` - USDC proxy contract address (required)
+- `--role-manager-admin <address>` - Current role manager admin's EVM address
+  (required)
+- `--sequence <number>` - Current sequence number of the role manager admin
+  account (required)
+- `--new-policy-admin <address>` - New policy admin's EVM address (optional)
+- `--new-contract-hook-admin <address>` - New contract hook admin's EVM address
   (optional)
+- `--new-role-permissions-admin <address>` - New role permissions admin's EVM
+  address (optional)
 
 **Notes:**
 
 - Role managers CANNOT be rotated through this script
 - All addresses must be in EVM format (0x...)
-- At least one NEW\_\*\_ADMIN variable must be set
+- At least one `--new-*-admin` argument must be provided
 - Script fetches account number from network automatically
-- Sequence is always set to 0
+- **Sequence number must be provided explicitly** - This ensures the transaction
+  uses the correct nonce for the account
 
 ---
 
@@ -101,7 +112,7 @@ npx tsx scripts/injective/namespaceRotation/decodeTransaction.ts <signed_tx.json
   - Make sure we do not attempt to modify the role manager
 
 To retrieve the current namespace status, use
-`NETWORK=<network> npx tsx scripts/injective/queryNamespace.ts <proxy_address>`
+`npx tsx scripts/injective/queryNamespace.ts --network <network> --proxy <address>`
 
 ---
 

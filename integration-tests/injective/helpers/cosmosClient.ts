@@ -17,12 +17,13 @@
  */
 
 import { StargateClient } from "@cosmjs/stargate";
-import { Network } from "@injectivelabs/networks";
+import { Network, getNetworkEndpoints } from "@injectivelabs/networks";
 import {
   PrivateKey,
   MsgSend,
   MsgBroadcasterWithPk,
   ChainGrpcBankApi,
+  ChainGrpcAuthApi,
 } from "@injectivelabs/sdk-ts";
 
 // Injective SDK uses gRPC-web which works on the REST API port
@@ -33,6 +34,7 @@ const TENDERMINT_RPC_ENDPOINT =
 
 let stargateClient: StargateClient | null;
 let bankClient: ChainGrpcBankApi | null;
+let authClient: ChainGrpcAuthApi | null;
 
 async function getStargateClient(): Promise<StargateClient> {
   if (!stargateClient) {
@@ -48,9 +50,18 @@ function getBankClient(): ChainGrpcBankApi {
   return bankClient;
 }
 
+function getAuthClient(network: Network = Network.Local): ChainGrpcAuthApi {
+  if (!authClient) {
+    const endpoints = getNetworkEndpoints(network);
+    authClient = new ChainGrpcAuthApi(endpoints.grpc);
+  }
+  return authClient;
+}
+
 export function teardownCosmosClient(): void {
   bankClient = null;
   stargateClient = null;
+  authClient = null;
 }
 
 // =============================================================================
@@ -126,6 +137,38 @@ export async function getErc20Balance(
 ): Promise<string> {
   const denom = getErc20Denom(contractAddress);
   return getBalance(injectiveAddress, denom);
+}
+
+/**
+ * Fetch account information from the network using gRPC
+ *
+ * @param injectiveAddress - Injective address (inj1...)
+ * @param network - Injective network (default: Local)
+ * @returns Account number and chain ID
+ */
+export async function fetchAccountInfo(
+  injectiveAddress: string,
+  network: Network = Network.Local
+): Promise<{ accountNumber: number; chainId: string }> {
+  const authClient = getAuthClient(network);
+
+  // Create a dedicated StargateClient for this network
+  const endpoints = getNetworkEndpoints(network);
+  if (!endpoints.rpc) {
+    throw new Error(`No RPC endpoint configured for network: ${network}`);
+  }
+  const networkStargateClient = await StargateClient.connect(endpoints.rpc);
+
+  // Fetch account information using gRPC
+  const account = await authClient.fetchAccount(injectiveAddress);
+
+  // Fetch chain ID using StargateClient
+  const chainId = await networkStargateClient.getChainId();
+
+  return {
+    accountNumber: account.baseAccount.accountNumber,
+    chainId,
+  };
 }
 
 // =============================================================================

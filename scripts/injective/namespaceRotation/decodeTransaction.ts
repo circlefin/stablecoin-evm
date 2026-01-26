@@ -13,21 +13,7 @@
  */
 
 import * as fs from "fs";
-import * as bech32Lib from "bech32";
-import { ethers } from "ethers";
-
-/**
- * Convert Injective address (inj1...) to EVM address (0x...)
- */
-function injectiveToEvmAddress(injAddr: string): string {
-  try {
-    const decoded = bech32Lib.decode(injAddr);
-    const bytes = bech32Lib.fromWords(decoded.words);
-    return ethers.getAddress("0x" + Buffer.from(bytes).toString("hex"));
-  } catch (error) {
-    return "(invalid)";
-  }
-}
+import { injectiveToEvmAddress } from "../addressUtil";
 
 /**
  * Add EVM address conversions to objects containing Injective addresses

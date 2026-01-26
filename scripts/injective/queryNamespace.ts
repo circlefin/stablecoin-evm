@@ -4,16 +4,15 @@
  * Query Injective namespace for a USDC contract
  *
  * Usage:
- *   NETWORK=<network> npx tsx scripts/injective/queryNamespace.ts <proxy_address>
+ *   npx tsx scripts/injective/queryNamespace.ts --network <network> --proxy <address>
  *
  * Example:
- *   NETWORK=local npx tsx scripts/injective/queryNamespace.ts 0x4f557998871c3F4e1767FfAa74783695f1D5DB99
+ *   npx tsx scripts/injective/queryNamespace.ts --network local --proxy 0x4f557998871c3F4e1767FfAa74783695f1D5DB99
  */
 
 import { Network } from "@injectivelabs/networks";
 import { queryNamespace, PERMISSIONS } from "./namespaceClient";
-import * as bech32Lib from "bech32";
-import { ethers } from "ethers";
+import { injectiveToEvmAddress } from "./addressUtil";
 
 // Color codes for output
 const colors = {
@@ -26,32 +25,60 @@ const colors = {
   magenta: "\x1b[0;35m",
 };
 
-function injectiveToEvmAddress(injAddr: string): string {
-  try {
-    const decoded = bech32Lib.decode(injAddr);
-    const bytes = bech32Lib.fromWords(decoded.words);
-    return ethers.getAddress("0x" + Buffer.from(bytes).toString("hex"));
-  } catch (error) {
-    return "(invalid)";
+interface ParsedArgs {
+  network?: string;
+  proxy?: string;
+}
+
+function parseArgs(args: string[]): ParsedArgs {
+  const parsed: ParsedArgs = {};
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    const nextArg = args[i + 1];
+
+    switch (arg) {
+      case "--network":
+        parsed.network = nextArg;
+        i++;
+        break;
+      case "--proxy":
+        parsed.proxy = nextArg;
+        i++;
+        break;
+      default:
+        if (arg.startsWith("--")) {
+          console.error(`Unknown option: ${arg}`);
+          process.exit(1);
+        }
+    }
   }
+
+  return parsed;
 }
 
 async function main() {
-  const proxyAddress = process.argv[2] || process.env.USDC_PROXY_ADDRESS;
-  if (!proxyAddress) {
+  const args = process.argv.slice(2);
+  const parsed = parseArgs(args);
+
+  if (!parsed.network || !parsed.proxy) {
+    console.error("Error: Missing required arguments\n");
+    console.error("Usage:");
     console.error(
-      "Usage: NETWORK=<network> npx tsx scripts/injective/queryNamespace.ts <proxy_address>"
+      "  npx tsx scripts/injective/queryNamespace.ts --network <network> --proxy <address>"
     );
     console.error("\nExample:");
     console.error(
-      "  NETWORK=local npx tsx scripts/injective/queryNamespace.ts 0x4f557998871c3F4e1767FfAa74783695f1D5DB99"
+      "  npx tsx scripts/injective/queryNamespace.ts --network local --proxy 0x4f557998871c3F4e1767FfAa74783695f1D5DB99"
     );
     process.exit(1);
   }
 
-  const networkStr = process.env.NETWORK?.toLowerCase();
-  if (!networkStr || !["local", "testnet", "mainnet"].includes(networkStr)) {
-    console.error("Invalid NETWORK. Use: local, testnet, mainnet");
+  const networkStr = parsed.network.toLowerCase();
+  if (!["local", "testnet", "mainnet"].includes(networkStr)) {
+    console.error(
+      `Invalid network: ${networkStr}. Use: local, testnet, mainnet`
+    );
     process.exit(1);
   }
 
@@ -62,12 +89,12 @@ async function main() {
   };
 
   console.log(
-    `${colors.green}Querying namespace for contract: ${proxyAddress}${colors.reset}`
+    `${colors.green}Querying namespace for contract: ${parsed.proxy}${colors.reset}`
   );
   console.log(`Network: ${networkStr}`);
-  console.log(`Denom: erc20:${proxyAddress.toLowerCase()}\n`);
+  console.log(`Denom: erc20:${parsed.proxy.toLowerCase()}\n`);
 
-  const namespace = await queryNamespace(proxyAddress, networkMap[networkStr]);
+  const namespace = await queryNamespace(parsed.proxy, networkMap[networkStr]);
 
   // Display namespace information
   console.log(`${colors.cyan}${"=".repeat(60)}`);

@@ -18,7 +18,7 @@ yarn test:injective:start
 yarn test:injective
 
 # Query namespace information for a deployed USDC contract
-NETWORK=local npx tsx scripts/injective/queryNamespace.ts <proxy_address>
+npx tsx scripts/injective/queryNamespace.ts --network local --proxy <proxy_address>
 
 # Stop the localnet when done
 yarn test:injective:stop

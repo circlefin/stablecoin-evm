@@ -16,8 +16,13 @@
  * limitations under the License.
  */
 
-import { getInjectiveAddress } from "@injectivelabs/sdk-ts";
+import {
+  getInjectiveAddress,
+  Address,
+  PrivateKey,
+} from "@injectivelabs/sdk-ts";
 import { ethers } from "ethers";
+import * as bech32Lib from "bech32";
 
 /**
  * Validate if a string is a valid EVM address
@@ -31,22 +36,34 @@ export function isValidEvmAddress(address: string): boolean {
 
 /**
  * Validate if a string is a valid Injective address
+ * Uses Injective SDK's Address.fromBech32 for proper encoding validation
  *
  * @param address - Address to validate
  * @returns true if valid Injective address, false otherwise
  */
 export function isValidInjectiveAddress(address: string): boolean {
-  return /^inj1[a-z0-9]{38}$/.test(address);
+  try {
+    Address.fromBech32(address, "inj");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
  * Validate if a string is a valid private key
+ * Uses Injective SDK's PrivateKey.fromHex for proper encoding validation
  *
  * @param privateKey - Private key to validate
  * @returns true if valid private key format, false otherwise
  */
 export function isValidPrivateKey(privateKey: string): boolean {
-  return /^(0x)?[a-fA-F0-9]{64}$/.test(privateKey);
+  try {
+    PrivateKey.fromHex(privateKey.replace("0x", ""));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -126,4 +143,20 @@ export function validatePrivateKey(
  */
 export function normalizePrivateKey(privateKey: string): string {
   return privateKey.replace("0x", "");
+}
+
+/**
+ * Convert Injective address (inj1...) to EVM address (0x...)
+ *
+ * @param injAddr - Injective address (inj1...)
+ * @returns EVM address (0x...) or "(invalid)" if conversion fails
+ */
+export function injectiveToEvmAddress(injAddr: string): string {
+  try {
+    const decoded = bech32Lib.decode(injAddr);
+    const bytes = bech32Lib.fromWords(decoded.words);
+    return ethers.getAddress("0x" + Buffer.from(bytes).toString("hex"));
+  } catch (error) {
+    return "(invalid)";
+  }
 }

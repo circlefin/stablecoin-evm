@@ -377,45 +377,6 @@ export async function queryNamespace(
 }
 
 /**
- * Fetch account information from the network
- *
- * @param senderAddress - Sender's Injective address (inj1...)
- * @param network - Injective network (default: Local)
- * @returns Account number and chain ID
- */
-export async function fetchAccountInfo(
-  senderAddress: string,
-  network: Network = Network.Local
-): Promise<{ accountNumber: number; chainId: string }> {
-  const endpoints = getNetworkEndpoints(network);
-
-  // Fetch chain ID
-  const chainInfoResponse = await fetch(
-    `${endpoints.rest}/cosmos/base/tendermint/v1beta1/node_info`
-  );
-  if (!chainInfoResponse.ok) {
-    throw new Error(
-      `Failed to fetch chain info: ${chainInfoResponse.statusText}`
-    );
-  }
-  const chainInfo = await chainInfoResponse.json();
-  const chainId = chainInfo.default_node_info.network;
-
-  // Fetch account number
-  const accountResponse = await fetch(
-    `${endpoints.rest}/cosmos/auth/v1beta1/accounts/${senderAddress}`
-  );
-  if (!accountResponse.ok) {
-    throw new Error(`Failed to fetch account: ${accountResponse.statusText}`);
-  }
-  const accountData = await accountResponse.json();
-  const account = accountData.account.base_account || accountData.account;
-  const accountNumber = parseInt(account.account_number, 10);
-
-  return { accountNumber, chainId };
-}
-
-/**
  * Prepare unsigned MsgUpdateActorRoles message for namespace actor rotation
  *
  * @param usdcProxyAddress - USDC proxy EVM address (0x...)

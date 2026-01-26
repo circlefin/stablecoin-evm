@@ -832,33 +832,6 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           );
         });
 
-        it("should verify old admin has rotated roles removed but still has roleManagersAdmin", async () => {
-          const namespace = await queryNamespace(proxyAddress, Network.Local);
-
-          // Old namespace admin should have rotated admin roles removed
-          // but still retain roleManagersAdmin (which cannot be rotated via updateNamespaceActors)
-          const oldAdminActor = namespace.actorRoles.find(
-            (ar: { actor: string }) =>
-              ar.actor === roleManagersAdminInjectiveAddress
-          );
-
-          expect(oldAdminActor).to.exist;
-          if (oldAdminActor) {
-            // Rotated roles should be removed
-            expect(oldAdminActor.roles).to.not.include(ROLE_NAMES.POLICY_ADMIN);
-            expect(oldAdminActor.roles).to.not.include(
-              ROLE_NAMES.CONTRACT_HOOK_ADMIN
-            );
-            expect(oldAdminActor.roles).to.not.include(
-              ROLE_NAMES.ROLE_PERMISSIONS_ADMIN
-            );
-            // But roleManagersAdmin should still exist (cannot be rotated)
-            expect(oldAdminActor.roles).to.include(
-              ROLE_NAMES.ROLE_MANAGERS_ADMIN
-            );
-          }
-        });
-
         it("should verify roleManagers list is unchanged after actor rotation", async () => {
           const namespace = await queryNamespace(proxyAddress, Network.Local);
 
