@@ -17,10 +17,9 @@
  */
 
 import {
-  getInjectiveAddress,
-  getEthereumAddress,
   Address,
   PrivateKey,
+  getInjectiveAddress,
 } from "@injectivelabs/sdk-ts";
 import { ethers } from "ethers";
 
@@ -84,17 +83,6 @@ export function toInjectiveAddress(address: string, paramName: string): string {
 
   // Convert EVM address to Injective address
   return getInjectiveAddress(address);
-}
-
-/**
- * Convert Injective address (inj1...) to EVM address (0x...)
- *
- * @param injAddr - Injective address (inj1...)
- * @returns EVM address (0x...)
- * @throws Error if injAddr is not a valid Injective address
- */
-export function injectiveToEvmAddress(injAddr: string): string {
-  return getEthereumAddress(injAddr);
 }
 
 /**

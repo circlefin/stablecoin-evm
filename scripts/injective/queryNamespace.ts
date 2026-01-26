@@ -11,8 +11,8 @@
  */
 
 import { Network } from "@injectivelabs/networks";
+import { getEthereumAddress } from "@injectivelabs/sdk-ts";
 import { queryNamespace, PERMISSIONS } from "./namespaceClient";
-import { injectiveToEvmAddress } from "./addressUtil";
 
 // Color codes for output
 const colors = {
@@ -151,7 +151,7 @@ async function main() {
     console.log("(No actors assigned)");
   } else {
     namespace.actorRoles.forEach((ar: { actor: string; roles: string[] }) => {
-      const evmAddr = injectiveToEvmAddress(ar.actor);
+      const evmAddr = getEthereumAddress(ar.actor);
       console.log(
         `${colors.blue}Actor (Injective):${colors.reset} ${ar.actor}`
       );
@@ -173,7 +173,7 @@ async function main() {
   } else {
     namespace.roleManagers.forEach(
       (rm: { manager: string; roles: string[] }) => {
-        const evmAddr = injectiveToEvmAddress(rm.manager);
+        const evmAddr = getEthereumAddress(rm.manager);
         console.log(
           `${colors.blue}Manager (Injective):${colors.reset} ${rm.manager}`
         );

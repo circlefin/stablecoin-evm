@@ -13,7 +13,7 @@
  */
 
 import * as fs from "fs";
-import { injectiveToEvmAddress } from "../addressUtil";
+import { getEthereumAddress } from "@injectivelabs/sdk-ts";
 
 /**
  * Add EVM address conversions to objects containing Injective addresses
@@ -23,7 +23,7 @@ function addEvmConversions(obj: any): any {
   if (typeof obj === "string" && obj.startsWith("inj1")) {
     return {
       injective: obj,
-      evm: injectiveToEvmAddress(obj),
+      evm: getEthereumAddress(obj),
     };
   }
 
