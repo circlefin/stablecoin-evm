@@ -174,7 +174,7 @@ async function main() {
     console.log("\nNext steps:");
     console.log("1. Query namespace:");
     console.log(
-      `   NETWORK=${network} npx tsx scripts/injective/queryNamespace.ts ${process.env.USDC_PROXY_ADDRESS}`
+      `   npx tsx scripts/injective/queryNamespace.ts --network ${network} --proxy ${process.env.USDC_PROXY_ADDRESS}`
     );
     console.log("=".repeat(60) + "\n");
   } catch (error) {
@@ -190,7 +190,7 @@ async function main() {
         `\n${colors.yellow}Hint:${colors.reset} A namespace may already exist for this contract.`
       );
       console.log(
-        `Query it with: ${colors.cyan}NETWORK=${network} npx tsx scripts/injective/queryNamespace.ts ${process.env.USDC_PROXY_ADDRESS}${colors.reset}`
+        `Query it with: ${colors.cyan}npx tsx scripts/injective/queryNamespace.ts --network ${network} --proxy ${process.env.USDC_PROXY_ADDRESS}${colors.reset}`
       );
     }
 
