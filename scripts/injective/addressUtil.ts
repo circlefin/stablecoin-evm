@@ -18,11 +18,11 @@
 
 import {
   getInjectiveAddress,
+  getEthereumAddress,
   Address,
   PrivateKey,
 } from "@injectivelabs/sdk-ts";
 import { ethers } from "ethers";
-import * as bech32Lib from "bech32";
 
 /**
  * Validate if a string is a valid EVM address
@@ -87,6 +87,17 @@ export function toInjectiveAddress(address: string, paramName: string): string {
 }
 
 /**
+ * Convert Injective address (inj1...) to EVM address (0x...)
+ *
+ * @param injAddr - Injective address (inj1...)
+ * @returns EVM address (0x...)
+ * @throws Error if injAddr is not a valid Injective address
+ */
+export function injectiveToEvmAddress(injAddr: string): string {
+  return getEthereumAddress(injAddr);
+}
+
+/**
  * Get EVM address from a private key
  *
  * @param privateKey - Private key (with or without 0x prefix)
@@ -143,20 +154,4 @@ export function validatePrivateKey(
  */
 export function normalizePrivateKey(privateKey: string): string {
   return privateKey.replace("0x", "");
-}
-
-/**
- * Convert Injective address (inj1...) to EVM address (0x...)
- *
- * @param injAddr - Injective address (inj1...)
- * @returns EVM address (0x...) or "(invalid)" if conversion fails
- */
-export function injectiveToEvmAddress(injAddr: string): string {
-  try {
-    const decoded = bech32Lib.decode(injAddr);
-    const bytes = bech32Lib.fromWords(decoded.words);
-    return ethers.getAddress("0x" + Buffer.from(bytes).toString("hex"));
-  } catch (error) {
-    return "(invalid)";
-  }
 }
