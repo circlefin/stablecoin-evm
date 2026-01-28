@@ -27,6 +27,7 @@ import {
   getErc20Balance,
   getDenomMetadata,
   getTotalSupply,
+  sendTokens,
 } from "./helpers/cosmosClient";
 import { fundAccount, getFaucetBalance } from "./helpers/faucet";
 import {
@@ -385,28 +386,194 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       }
     });
 
-    it.skip("should revert when minter is blacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should revert when minter is blacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const initialTotalSupply = await fiatToken.totalSupply();
+
+      // Blacklist the minter (deployer)
+      const blacklistTx = await fiatToken.blacklist(deployerEvmAddress);
+      await blacklistTx.wait();
+
+      // Attempt to mint - should fail
+      try {
+        const mintTx = await fiatToken.mint(
+          testRecipient.evmAddress,
+          MINT_AMOUNT
+        );
+        await mintTx.wait();
+        expect.fail("Mint should have been reverted for blacklisted minter");
+      } catch (error) {
+        expect(error).to.exist;
+      }
+
+      // Verify no balance changes occurred
+      const finalRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const finalTotalSupply = await fiatToken.totalSupply();
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unblacklist minter for next test
+      const unblacklistTx = await fiatToken.unBlacklist(deployerEvmAddress);
+      await unblacklistTx.wait();
     });
 
-    it.skip("should allow mint after minter is unblacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should allow mint after minter is unblacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Explicitly blacklist THEN unblacklist minter to match test name
+      const blacklistTx = await fiatToken.blacklist(deployerEvmAddress);
+      await blacklistTx.wait();
+
+      const unblacklistTx = await fiatToken.unBlacklist(deployerEvmAddress);
+      await unblacklistTx.wait();
+
+      // Mint should now succeed
+      const initialBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const mintTx = await fiatToken.mint(
+        testRecipient.evmAddress,
+        MINT_AMOUNT
+      );
+      await mintTx.wait();
+
+      const finalBalance = await fiatToken.balanceOf(testRecipient.evmAddress);
+      expect(finalBalance).to.equal(initialBalance + MINT_AMOUNT);
     });
 
-    it.skip("should revert when recipient is blacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should revert when recipient is blacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const initialTotalSupply = await fiatToken.totalSupply();
+
+      // Blacklist the recipient
+      const blacklistTx = await fiatToken.blacklist(testRecipient.evmAddress);
+      await blacklistTx.wait();
+
+      // Attempt to mint - should fail
+      try {
+        const mintTx = await fiatToken.mint(
+          testRecipient.evmAddress,
+          MINT_AMOUNT
+        );
+        await mintTx.wait();
+        expect.fail("Mint should have been reverted for blacklisted recipient");
+      } catch (error) {
+        expect(error).to.exist;
+      }
+
+      // Verify no balance changes occurred
+      const finalRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const finalTotalSupply = await fiatToken.totalSupply();
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
     });
 
-    it.skip("should allow mint to recipient after recipient is unblacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should allow mint to recipient after recipient is unblacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Explicitly blacklist THEN unblacklist to match test name
+      const blacklistTx = await fiatToken.blacklist(testRecipient.evmAddress);
+      await blacklistTx.wait();
+
+      const unblacklistTx = await fiatToken.unBlacklist(
+        testRecipient.evmAddress
+      );
+      await unblacklistTx.wait();
+
+      // Mint should now succeed
+      const initialBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const mintTx = await fiatToken.mint(
+        testRecipient.evmAddress,
+        MINT_AMOUNT
+      );
+      await mintTx.wait();
+
+      const finalBalance = await fiatToken.balanceOf(testRecipient.evmAddress);
+      expect(finalBalance).to.equal(initialBalance + MINT_AMOUNT);
     });
 
-    it.skip("should revert when contract is paused", async () => {
-      // TODO: [SE-4572]
+    it("should revert when contract is paused", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const initialTotalSupply = await fiatToken.totalSupply();
+
+      // Pause the contract
+      const pauseTx = await fiatToken.pause();
+      await pauseTx.wait();
+
+      // Attempt to mint - should fail
+      try {
+        const mintTx = await fiatToken.mint(
+          testRecipient.evmAddress,
+          MINT_AMOUNT
+        );
+        await mintTx.wait();
+        expect.fail("Mint should have been reverted when contract is paused");
+      } catch (error) {
+        expect(error).to.exist;
+      }
+
+      // Verify no balance changes occurred
+      const finalRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const finalTotalSupply = await fiatToken.totalSupply();
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unpause for next test
+      const unpauseTx = await fiatToken.unpause();
+      await unpauseTx.wait();
     });
 
-    it.skip("should allow mint after contract is unpaused", async () => {
-      // TODO: [SE-4572]
+    it("should allow mint after contract is unpaused", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Explicitly pause THEN unpause to match test name
+      const pauseTx = await fiatToken.pause();
+      await pauseTx.wait();
+
+      const unpauseTx = await fiatToken.unpause();
+      await unpauseTx.wait();
+
+      // Mint should now succeed
+      const initialBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const mintTx = await fiatToken.mint(
+        testRecipient.evmAddress,
+        MINT_AMOUNT
+      );
+      await mintTx.wait();
+
+      const finalBalance = await fiatToken.balanceOf(testRecipient.evmAddress);
+      expect(finalBalance).to.equal(initialBalance + MINT_AMOUNT);
     });
   });
 
@@ -469,29 +636,117 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       expect(finalBankTotalSupply).to.equal(finalEvmTotalSupply.toString());
     });
 
-    it.skip("should revert when minter is blacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should revert when minter is blacklisted", async () => {
+      // Get initial balances
+      const initialMinterBalance =
+        await fiatToken.balanceOf(deployerEvmAddress);
+      const initialTotalSupply = await fiatToken.totalSupply();
+
+      // Blacklist the minter (deployer)
+      const blacklistTx = await fiatToken.blacklist(deployerEvmAddress);
+      await blacklistTx.wait();
+
+      // Attempt to burn - should fail
+      try {
+        const burnTx = await fiatToken.burn(BURN_AMOUNT);
+        await burnTx.wait();
+        expect.fail("Burn should have been reverted for blacklisted minter");
+      } catch (error) {
+        expect(error).to.exist;
+      }
+
+      // Verify no balance changes occurred
+      const finalMinterBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      const finalTotalSupply = await fiatToken.totalSupply();
+      expect(finalMinterBalance).to.equal(initialMinterBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unblacklist minter for next test
+      const unblacklistTx = await fiatToken.unBlacklist(deployerEvmAddress);
+      await unblacklistTx.wait();
     });
 
-    it.skip("should allow burn after minter is unblacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should allow burn after minter is unblacklisted", async () => {
+      // Explicitly blacklist THEN unblacklist minter to match test name
+      const blacklistTx = await fiatToken.blacklist(deployerEvmAddress);
+      await blacklistTx.wait();
+
+      const unblacklistTx = await fiatToken.unBlacklist(deployerEvmAddress);
+      await unblacklistTx.wait();
+
+      // Mint tokens first to ensure sufficient balance for burn
+      const mintTx = await fiatToken.mint(deployerEvmAddress, MINT_AMOUNT);
+      await mintTx.wait();
+
+      // Burn should now succeed
+      const initialBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      const burnTx = await fiatToken.burn(BURN_AMOUNT);
+      await burnTx.wait();
+
+      const finalBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      expect(finalBalance).to.equal(initialBalance - BURN_AMOUNT);
     });
 
-    it.skip("should revert when contract is paused", async () => {
-      // TODO: [SE-4572]
+    it("should revert when contract is paused", async () => {
+      // Get initial balances
+      const initialMinterBalance =
+        await fiatToken.balanceOf(deployerEvmAddress);
+      const initialTotalSupply = await fiatToken.totalSupply();
+
+      // Pause the contract
+      const pauseTx = await fiatToken.pause();
+      await pauseTx.wait();
+
+      // Attempt to burn - should fail
+      try {
+        const burnTx = await fiatToken.burn(BURN_AMOUNT);
+        await burnTx.wait();
+        expect.fail("Burn should have been reverted when contract is paused");
+      } catch (error) {
+        expect(error).to.exist;
+      }
+
+      // Verify no balance changes occurred
+      const finalMinterBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      const finalTotalSupply = await fiatToken.totalSupply();
+      expect(finalMinterBalance).to.equal(initialMinterBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unpause for next test
+      const unpauseTx = await fiatToken.unpause();
+      await unpauseTx.wait();
     });
 
-    it.skip("should allow burn after contract is unpaused", async () => {
-      // TODO: [SE-4572]
+    it("should allow burn after contract is unpaused", async () => {
+      // Explicitly pause THEN unpause to match test name
+      const pauseTx = await fiatToken.pause();
+      await pauseTx.wait();
+
+      const unpauseTx = await fiatToken.unpause();
+      await unpauseTx.wait();
+
+      // Mint tokens first to ensure sufficient balance for burn
+      const mintTx = await fiatToken.mint(deployerEvmAddress, MINT_AMOUNT);
+      await mintTx.wait();
+
+      // Burn should now succeed
+      const initialBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      const burnTx = await fiatToken.burn(BURN_AMOUNT);
+      await burnTx.wait();
+
+      const finalBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      expect(finalBalance).to.equal(initialBalance - BURN_AMOUNT);
     });
   });
 
   describe("Transfer", () => {
+    let senderPrivateKey: string;
     let senderEvmAddress: string;
     let senderInjectiveAddress: string;
 
     before(async () => {
       // Use deployer as sender (already has minter role configured)
+      senderPrivateKey = deployerPrivateKey;
       senderEvmAddress = deployerEvmAddress;
       senderInjectiveAddress = deployerInjectiveAddress;
 
@@ -576,28 +831,417 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       expect(finalBankTotalSupply).to.equal(initialBankTotalSupply);
     });
 
-    it.skip("should revert when sender is blacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should revert transfer via EVM layer when sender is blacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialSenderBalance = await fiatToken.balanceOf(senderEvmAddress);
+      const initialRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const initialTotalSupply = await fiatToken.totalSupply();
+
+      // Blacklist the sender
+      const blacklistTx = await fiatToken.blacklist(senderEvmAddress);
+      await blacklistTx.wait();
+
+      // Attempt EVM layer transfer (should be blocked)
+      try {
+        const transferTx = await fiatToken.transfer(
+          testRecipient.evmAddress,
+          TRANSFER_AMOUNT
+        );
+        await transferTx.wait();
+        expect.fail(
+          "EVM transfer should have been reverted for blacklisted sender"
+        );
+      } catch (error) {
+        expect(error).to.exist;
+      }
+
+      // Verify no balance changes occurred
+      const finalSenderBalance = await fiatToken.balanceOf(senderEvmAddress);
+      const finalRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const finalTotalSupply = await fiatToken.totalSupply();
+      expect(finalSenderBalance).to.equal(initialSenderBalance);
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unblacklist sender for next test
+      const unblacklistTx = await fiatToken.unBlacklist(senderEvmAddress);
+      await unblacklistTx.wait();
     });
 
-    it.skip("should allow transfer after sender is unblacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should revert transfer via Cosmos layer when sender is blacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const initialRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const initialTotalSupply = await getTotalSupply(erc20Denom);
+
+      // Blacklist the sender
+      const blacklistTx = await fiatToken.blacklist(senderEvmAddress);
+      await blacklistTx.wait();
+
+      // Attempt Cosmos layer transfer (should be blocked by isTransferRestricted)
+      try {
+        const senderKey = PrivateKey.fromHex(
+          senderPrivateKey.replace("0x", "")
+        );
+        await sendTokens(
+          senderKey,
+          testRecipient.injectiveAddress,
+          TRANSFER_AMOUNT.toString(),
+          erc20Denom
+        );
+        expect.fail("Transfer should have been restricted");
+      } catch (error) {
+        expect(error).to.exist;
+        // Cosmos layer should reject the transfer
+      }
+
+      // Verify no balance changes occurred
+      const finalSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const finalRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const finalTotalSupply = await getTotalSupply(erc20Denom);
+      expect(finalSenderBalance).to.equal(initialSenderBalance);
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unblacklist sender for next test
+      const unblacklistTx = await fiatToken.unBlacklist(senderEvmAddress);
+      await unblacklistTx.wait();
     });
 
-    it.skip("should revert when recipient is blacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should allow transfer via Cosmos layer after sender is unblacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Explicitly blacklist THEN unblacklist sender to match test name
+      const blacklistTx = await fiatToken.blacklist(senderEvmAddress);
+      await blacklistTx.wait();
+
+      const unblacklistTx = await fiatToken.unBlacklist(senderEvmAddress);
+      await unblacklistTx.wait();
+
+      // Transfer should now succeed
+      const initialBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+
+      const senderKey = PrivateKey.fromHex(senderPrivateKey.replace("0x", ""));
+      await sendTokens(
+        senderKey,
+        testRecipient.injectiveAddress,
+        TRANSFER_AMOUNT.toString(),
+        erc20Denom
+      );
+
+      const finalBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      expect(BigInt(finalBalance)).to.equal(
+        BigInt(initialBalance) + TRANSFER_AMOUNT
+      );
     });
 
-    it.skip("should allow transfer after recipient is unblacklisted", async () => {
-      // TODO: [SE-4572]
+    it("should revert transfer via EVM layer when recipient is blacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialSenderBalance = await fiatToken.balanceOf(senderEvmAddress);
+      const initialRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const initialTotalSupply = await fiatToken.totalSupply();
+
+      // Blacklist the recipient
+      const blacklistTx = await fiatToken.blacklist(testRecipient.evmAddress);
+      await blacklistTx.wait();
+
+      // Attempt EVM layer transfer (should be blocked)
+      try {
+        const transferTx = await fiatToken.transfer(
+          testRecipient.evmAddress,
+          TRANSFER_AMOUNT
+        );
+        await transferTx.wait();
+        expect.fail(
+          "EVM transfer should have been reverted for blacklisted recipient"
+        );
+      } catch (error) {
+        expect(error).to.exist;
+      }
+
+      // Verify no balance changes occurred
+      const finalSenderBalance = await fiatToken.balanceOf(senderEvmAddress);
+      const finalRecipientBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const finalTotalSupply = await fiatToken.totalSupply();
+      expect(finalSenderBalance).to.equal(initialSenderBalance);
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
     });
 
-    it.skip("should revert when contract is paused", async () => {
-      // TODO: [SE-4572]
+    it("should revert transfer via Cosmos layer when recipient is blacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const initialRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const initialTotalSupply = await getTotalSupply(erc20Denom);
+
+      // Blacklist the recipient
+      const blacklistTx = await fiatToken.blacklist(testRecipient.evmAddress);
+      await blacklistTx.wait();
+
+      // Attempt Cosmos layer transfer (should be blocked by isTransferRestricted)
+      try {
+        const senderKey = PrivateKey.fromHex(
+          senderPrivateKey.replace("0x", "")
+        );
+        await sendTokens(
+          senderKey,
+          testRecipient.injectiveAddress,
+          TRANSFER_AMOUNT.toString(),
+          erc20Denom
+        );
+        expect.fail("Transfer should have been restricted");
+      } catch (error) {
+        expect(error).to.exist;
+        // Cosmos layer should reject the transfer
+      }
+
+      // Verify no balance changes occurred
+      const finalSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const finalRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const finalTotalSupply = await getTotalSupply(erc20Denom);
+      expect(finalSenderBalance).to.equal(initialSenderBalance);
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
     });
 
-    it.skip("should allow transfer after contract is unpaused", async () => {
-      // TODO: [SE-4572]
+    it("should allow transfer via Cosmos layer after recipient is unblacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Explicitly blacklist THEN unblacklist recipient to match test name
+      const blacklistTx = await fiatToken.blacklist(testRecipient.evmAddress);
+      await blacklistTx.wait();
+
+      const unblacklistTx = await fiatToken.unBlacklist(
+        testRecipient.evmAddress
+      );
+      await unblacklistTx.wait();
+
+      // Transfer should now succeed
+      const initialBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+
+      const senderKey = PrivateKey.fromHex(senderPrivateKey.replace("0x", ""));
+      await sendTokens(
+        senderKey,
+        testRecipient.injectiveAddress,
+        TRANSFER_AMOUNT.toString(),
+        erc20Denom
+      );
+
+      const finalBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      expect(BigInt(finalBalance)).to.equal(
+        BigInt(initialBalance) + TRANSFER_AMOUNT
+      );
+    });
+
+    it("should revert transfer via Cosmos layer when both sender and recipient are blacklisted", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const initialRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const initialTotalSupply = await getTotalSupply(erc20Denom);
+
+      // Blacklist both sender and recipient
+      const blacklistSenderTx = await fiatToken.blacklist(senderEvmAddress);
+      await blacklistSenderTx.wait();
+
+      const blacklistRecipientTx = await fiatToken.blacklist(
+        testRecipient.evmAddress
+      );
+      await blacklistRecipientTx.wait();
+
+      // Attempt Cosmos layer transfer (should be blocked by isTransferRestricted)
+      try {
+        const senderKey = PrivateKey.fromHex(
+          senderPrivateKey.replace("0x", "")
+        );
+        await sendTokens(
+          senderKey,
+          testRecipient.injectiveAddress,
+          TRANSFER_AMOUNT.toString(),
+          erc20Denom
+        );
+        expect.fail(
+          "Transfer should have been restricted when both parties are blacklisted"
+        );
+      } catch (error) {
+        expect(error).to.exist;
+        // Cosmos layer should reject the transfer
+      }
+
+      // Verify no balance changes occurred
+      const finalSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const finalRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const finalTotalSupply = await getTotalSupply(erc20Denom);
+      expect(finalSenderBalance).to.equal(initialSenderBalance);
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unblacklist sender for next test
+      const unblacklistSenderTx = await fiatToken.unBlacklist(senderEvmAddress);
+      await unblacklistSenderTx.wait();
+
+      // No need to unblacklist recipient - fresh address used
+    });
+
+    it("should revert transfer via Cosmos layer when contract is paused", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Get initial balances
+      const initialSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const initialRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const initialTotalSupply = await getTotalSupply(erc20Denom);
+
+      // Pause the contract
+      const pauseTx = await fiatToken.pause();
+      await pauseTx.wait();
+
+      // Attempt Cosmos layer transfer (should be blocked by isTransferRestricted)
+      try {
+        const senderKey = PrivateKey.fromHex(
+          senderPrivateKey.replace("0x", "")
+        );
+        await sendTokens(
+          senderKey,
+          testRecipient.injectiveAddress,
+          TRANSFER_AMOUNT.toString(),
+          erc20Denom
+        );
+        expect.fail("Transfer should have been restricted");
+      } catch (error) {
+        expect(error).to.exist;
+        // Cosmos layer should reject the transfer
+      }
+
+      // Verify no balance changes occurred
+      const finalSenderBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      const finalRecipientBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      const finalTotalSupply = await getTotalSupply(erc20Denom);
+      expect(finalSenderBalance).to.equal(initialSenderBalance);
+      expect(finalRecipientBalance).to.equal(initialRecipientBalance);
+      expect(finalTotalSupply).to.equal(initialTotalSupply);
+
+      // Unpause for next test
+      const unpauseTx = await fiatToken.unpause();
+      await unpauseTx.wait();
+    });
+
+    it("should allow transfer via Cosmos layer after contract is unpaused", async () => {
+      // Generate fresh recipient for this test
+      const testRecipient = generateAddress();
+
+      // Explicitly pause THEN unpause to match test name
+      const pauseTx = await fiatToken.pause();
+      await pauseTx.wait();
+
+      const unpauseTx = await fiatToken.unpause();
+      await unpauseTx.wait();
+
+      // Transfer should now succeed
+      const initialBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+
+      const senderKey = PrivateKey.fromHex(senderPrivateKey.replace("0x", ""));
+      await sendTokens(
+        senderKey,
+        testRecipient.injectiveAddress,
+        TRANSFER_AMOUNT.toString(),
+        erc20Denom
+      );
+
+      const finalBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      expect(BigInt(finalBalance)).to.equal(
+        BigInt(initialBalance) + TRANSFER_AMOUNT
+      );
     });
 
     describe("Namespace Management", () => {

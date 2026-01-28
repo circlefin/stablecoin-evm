@@ -147,20 +147,22 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
      * @notice Check if a transfer is restricted by permissions
      * @dev Called by Injective permissions module to validate transfers
      * This implements the permissions hook interface required by Injective
+     * Checks if contract is paused or if either sender or receiver is blacklisted
      * @param from The sender's address
      * @param to The receiver's address
-     * @param amount The coin amount being transferred
-     * @return isRestricted Always returns false - transfers are not restricted
-     * by this contract (blacklist checks are handled separately by FiatToken logic)
+     * @return isRestricted True if transfer should be blocked
      */
     function isTransferRestricted(
         address from,
         address to,
-        Coin calldata amount
-    ) external pure returns (bool isRestricted) {
-        // Return false to indicate transfer is not restricted
-        // The FiatToken's own blacklist and pause logic is enforced separately
-        // via the standard ERC20 transfer flow
+        Coin calldata /* amount */
+    ) external view returns (bool isRestricted) {
+        if (paused) {
+            return true;
+        }
+        if (_isBlacklisted(from) || _isBlacklisted(to)) {
+            return true;
+        }
         return false;
     }
 }

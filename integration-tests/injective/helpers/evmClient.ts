@@ -76,6 +76,11 @@ export interface FiatTokenInjectiveV2_2Contract {
   ): Promise<ethers.ContractTransactionResponse>;
   minterAllowance(minter: string): Promise<bigint>;
   isMinter(account: string): Promise<boolean>;
+  blacklist(account: string): Promise<ethers.ContractTransactionResponse>;
+  unBlacklist(account: string): Promise<ethers.ContractTransactionResponse>;
+  isBlacklisted(account: string): Promise<boolean>;
+  pause(): Promise<ethers.ContractTransactionResponse>;
+  unpause(): Promise<ethers.ContractTransactionResponse>;
 }
 
 /**
