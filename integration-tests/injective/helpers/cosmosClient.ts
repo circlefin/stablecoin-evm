@@ -153,11 +153,18 @@ export async function fetchAccountInfo(
   const authClient = getAuthClient(network);
 
   // Create a dedicated StargateClient for this network
-  const endpoints = getNetworkEndpoints(network);
-  if (!endpoints.rpc) {
-    throw new Error(`No RPC endpoint configured for network: ${network}`);
+  // For local network, use the hardcoded endpoint; for others, use SDK endpoints
+  let rpcEndpoint: string;
+  if (network === Network.Local) {
+    rpcEndpoint = TENDERMINT_RPC_ENDPOINT;
+  } else {
+    const endpoints = getNetworkEndpoints(network);
+    if (!endpoints.rpc) {
+      throw new Error(`No RPC endpoint configured for network: ${network}`);
+    }
+    rpcEndpoint = endpoints.rpc;
   }
-  const networkStargateClient = await StargateClient.connect(endpoints.rpc);
+  const networkStargateClient = await StargateClient.connect(rpcEndpoint);
 
   // Fetch account information using gRPC
   const account = await authClient.fetchAccount(injectiveAddress);

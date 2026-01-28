@@ -47,9 +47,9 @@ import { Network } from "@injectivelabs/networks";
 
 const INJ_DENOM = "inj";
 const FAUCET_AMOUNT = "100000000000000000000"; // 100 INJ
-const MINT_AMOUNT = BigInt(1_000_000); // 1 USDC (6 decimals)
-const BURN_AMOUNT = BigInt(500_000); // 0.5 USDC (6 decimals)
-const TRANSFER_AMOUNT = BigInt(100_000); // 0.1 USDC (6 decimals)
+const MINT_AMOUNT = BigInt(1_000_000); // 1 (6 decimals)
+const BURN_AMOUNT = BigInt(500_000); // 0.5 (6 decimals)
+const TRANSFER_AMOUNT = BigInt(100_000); // 0.1 (6 decimals)
 const MAX_UINT256 = BigInt(2) ** BigInt(256) - BigInt(1);
 
 // Role name constants for use throughout tests
@@ -122,14 +122,10 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
   let recipientInjectiveAddress: string;
   // Dedicated admin addresses for namespace (separate from deployer/minter)
   // Each role has a different address to ensure they don't get grouped together
-  let policyAdminEvmAddress: string;
   let policyAdminInjectiveAddress: string;
-  let contractHookAdminEvmAddress: string;
   let contractHookAdminInjectiveAddress: string;
-  let rolePermissionsAdminEvmAddress: string;
   let rolePermissionsAdminInjectiveAddress: string;
   let roleManagersAdminPrivateKey: string;
-  let roleManagersAdminEvmAddress: string;
   let roleManagersAdminInjectiveAddress: string;
 
   before(async function () {
@@ -163,24 +159,20 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
     // Generate four different admin addresses for namespace roles
     // This ensures each role has a unique address and they don't get grouped together
     const policyAdmin = generateAddress();
-    policyAdminEvmAddress = policyAdmin.evmAddress;
     policyAdminInjectiveAddress = policyAdmin.injectiveAddress;
     await fundAccount(policyAdminInjectiveAddress);
 
     const contractHookAdmin = generateAddress();
-    contractHookAdminEvmAddress = contractHookAdmin.evmAddress;
     contractHookAdminInjectiveAddress = contractHookAdmin.injectiveAddress;
     await fundAccount(contractHookAdminInjectiveAddress);
 
     const rolePermissionsAdmin = generateAddress();
-    rolePermissionsAdminEvmAddress = rolePermissionsAdmin.evmAddress;
     rolePermissionsAdminInjectiveAddress =
       rolePermissionsAdmin.injectiveAddress;
     await fundAccount(rolePermissionsAdminInjectiveAddress);
 
     const roleManagersAdmin = generateAddress();
     roleManagersAdminPrivateKey = roleManagersAdmin.privateKey;
-    roleManagersAdminEvmAddress = roleManagersAdmin.evmAddress;
     roleManagersAdminInjectiveAddress = roleManagersAdmin.injectiveAddress;
     await fundAccount(roleManagersAdminInjectiveAddress);
 
@@ -188,11 +180,11 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
     // Assign each admin role to a different address
     try {
       await createNamespace({
-        usdcProxyAddress: proxyAddress,
-        policyAdmin: policyAdminEvmAddress,
-        contractHookAdmin: contractHookAdminEvmAddress,
-        rolePermissionsAdmin: rolePermissionsAdminEvmAddress,
-        roleManagersAdmin: roleManagersAdminEvmAddress,
+        fiatTokenProxyAddress: proxyAddress,
+        policyAdmin: policyAdminInjectiveAddress,
+        contractHookAdmin: contractHookAdminInjectiveAddress,
+        rolePermissionsAdmin: rolePermissionsAdminInjectiveAddress,
+        roleManagersAdmin: roleManagersAdminInjectiveAddress,
         signerPrivateKey: deployerPrivateKey, // Must be deployer (token admin)
         network: Network.Local,
         useRestApi: true, // Use REST API for broadcasting
@@ -1329,11 +1321,11 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
         // Try to create namespace with exact same parameters as in before() hook
         try {
           await createNamespace({
-            usdcProxyAddress: proxyAddress,
-            policyAdmin: policyAdminEvmAddress,
-            contractHookAdmin: contractHookAdminEvmAddress,
-            rolePermissionsAdmin: rolePermissionsAdminEvmAddress,
-            roleManagersAdmin: roleManagersAdminEvmAddress,
+            fiatTokenProxyAddress: proxyAddress,
+            policyAdmin: policyAdminInjectiveAddress,
+            contractHookAdmin: contractHookAdminInjectiveAddress,
+            rolePermissionsAdmin: rolePermissionsAdminInjectiveAddress,
+            roleManagersAdmin: roleManagersAdminInjectiveAddress,
             signerPrivateKey: deployerPrivateKey,
             network: Network.Local,
             useRestApi: true,
@@ -1411,7 +1403,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           const txHash = await updateNamespaceActors(
             proxyAddress,
             {
-              policyAdmin: newPolicyAdmin.evmAddress,
+              policyAdmin: newPolicyAdmin.injectiveAddress,
             },
             roleManagersAdminPrivateKey,
             Network.Local
@@ -1444,8 +1436,8 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           const txHash = await updateNamespaceActors(
             proxyAddress,
             {
-              contractHookAdmin: newContractHookAdmin.evmAddress,
-              rolePermissionsAdmin: newRolePermissionsAdmin.evmAddress,
+              contractHookAdmin: newContractHookAdmin.injectiveAddress,
+              rolePermissionsAdmin: newRolePermissionsAdmin.injectiveAddress,
             },
             roleManagersAdminPrivateKey,
             Network.Local
@@ -1524,7 +1516,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           await updateNamespaceActors(
             proxyAddress,
             {
-              contractHookAdmin: testAccount.evmAddress,
+              contractHookAdmin: testAccount.injectiveAddress,
             },
             roleManagersAdminPrivateKey, // Use namespace admin who is in roleManagers list
             Network.Local
@@ -1578,10 +1570,10 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
             // Call prepareUpdateActorRolesMessage
             const result = await prepareUpdateActorRolesMessage(
               proxyAddress,
-              roleManagersAdminEvmAddress,
+              roleManagersAdminInjectiveAddress,
               {
-                policyAdmin: testNewPolicyAdmin.evmAddress,
-                contractHookAdmin: testNewContractHookAdmin.evmAddress,
+                policyAdmin: testNewPolicyAdmin.injectiveAddress,
+                contractHookAdmin: testNewContractHookAdmin.injectiveAddress,
               },
               Network.Local
             );
@@ -1647,12 +1639,10 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       });
 
       describe("Address Validation", () => {
-        const injectiveAddress = "inj1wzvhjux9rqfdcwspp37srdgwp5tac7wgplgfd7";
-
-        it("should reject invalid usdcProxyAddress in createNamespace", async () => {
+        it("should reject invalid fiatTokenProxyAddress in createNamespace", async () => {
           try {
             await createNamespace({
-              usdcProxyAddress: "invalid-address",
+              fiatTokenProxyAddress: "invalid-address",
               policyAdmin: deployerEvmAddress,
               contractHookAdmin: deployerEvmAddress,
               rolePermissionsAdmin: deployerEvmAddress,
@@ -1664,19 +1654,19 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           } catch (error) {
             expect(error instanceof Error).to.be.true;
             expect((error as Error).message).to.include(
-              "Invalid EVM address for usdcProxyAddress"
+              "Invalid EVM address for fiatTokenProxyAddress"
             );
           }
         });
 
-        it("should reject Injective address for policyAdmin in createNamespace", async () => {
+        it("should reject EVM address for policyAdmin in createNamespace", async () => {
           try {
             await createNamespace({
-              usdcProxyAddress: proxyAddress,
-              policyAdmin: injectiveAddress,
-              contractHookAdmin: deployerEvmAddress,
-              rolePermissionsAdmin: deployerEvmAddress,
-              roleManagersAdmin: deployerEvmAddress,
+              fiatTokenProxyAddress: proxyAddress,
+              policyAdmin: deployerEvmAddress,
+              contractHookAdmin: deployerInjectiveAddress,
+              rolePermissionsAdmin: deployerInjectiveAddress,
+              roleManagersAdmin: deployerInjectiveAddress,
               signerPrivateKey: deployerPrivateKey,
               network: Network.Local,
             });
@@ -1684,20 +1674,20 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           } catch (error) {
             expect(error instanceof Error).to.be.true;
             expect((error as Error).message).to.include(
-              "Invalid EVM address for policyAdmin"
+              "Invalid Injective address for policyAdmin"
             );
-            expect((error as Error).message).to.include(injectiveAddress);
+            expect((error as Error).message).to.include(deployerEvmAddress);
           }
         });
 
         it("should reject invalid contractHookAdmin address", async () => {
           try {
             await createNamespace({
-              usdcProxyAddress: proxyAddress,
-              policyAdmin: deployerEvmAddress,
+              fiatTokenProxyAddress: proxyAddress,
+              policyAdmin: deployerInjectiveAddress,
               contractHookAdmin: "0xINVALID",
-              rolePermissionsAdmin: deployerEvmAddress,
-              roleManagersAdmin: deployerEvmAddress,
+              rolePermissionsAdmin: deployerInjectiveAddress,
+              roleManagersAdmin: deployerInjectiveAddress,
               signerPrivateKey: deployerPrivateKey,
               network: Network.Local,
             });
@@ -1705,7 +1695,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           } catch (error) {
             expect(error instanceof Error).to.be.true;
             expect((error as Error).message).to.include(
-              "Invalid EVM address for contractHookAdmin"
+              "Invalid Injective address for contractHookAdmin"
             );
           }
         });
@@ -1713,11 +1703,11 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
         it("should reject invalid private key", async () => {
           try {
             await createNamespace({
-              usdcProxyAddress: proxyAddress,
-              policyAdmin: deployerEvmAddress,
-              contractHookAdmin: deployerEvmAddress,
-              rolePermissionsAdmin: deployerEvmAddress,
-              roleManagersAdmin: deployerEvmAddress,
+              fiatTokenProxyAddress: proxyAddress,
+              policyAdmin: deployerInjectiveAddress,
+              contractHookAdmin: deployerInjectiveAddress,
+              rolePermissionsAdmin: deployerInjectiveAddress,
+              roleManagersAdmin: deployerInjectiveAddress,
               signerPrivateKey: "invalid-key",
               network: Network.Local,
             });
@@ -1735,7 +1725,7 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
           } catch (error) {
             expect(error instanceof Error).to.be.true;
             expect((error as Error).message).to.include(
-              "Invalid EVM address for usdcProxyAddress"
+              "Invalid EVM address for fiatTokenProxyAddress"
             );
           }
         });
@@ -1755,11 +1745,11 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
 
           try {
             await createNamespace({
-              usdcProxyAddress: randomProxyAddress,
-              policyAdmin: policyAdminEvmAddress,
-              contractHookAdmin: contractHookAdminEvmAddress,
-              rolePermissionsAdmin: rolePermissionsAdminEvmAddress,
-              roleManagersAdmin: roleManagersAdminEvmAddress,
+              fiatTokenProxyAddress: randomProxyAddress,
+              policyAdmin: policyAdminInjectiveAddress,
+              contractHookAdmin: contractHookAdminInjectiveAddress,
+              rolePermissionsAdmin: rolePermissionsAdminInjectiveAddress,
+              roleManagersAdmin: roleManagersAdminInjectiveAddress,
               signerPrivateKey: unauthorized.privateKey, // Unauthorized signer
               network: Network.Local,
               useRestApi: true,

@@ -41,11 +41,11 @@ import { getNetworkEndpoints, Network } from "@injectivelabs/networks";
 import { MsgCreateNamespaceWrapper as MsgCreateNamespace } from "./proto/namespaceWrapper";
 import { getErc20Denom } from "../../integration-tests/injective/helpers/cosmosClient";
 import {
-  toInjectiveAddress,
   validateEvmAddress,
   validatePrivateKey,
-  getEvmAddressFromPrivateKey,
+  getInjectiveAddressFromPrivateKey,
   normalizePrivateKey,
+  validateInjectiveAddress,
 } from "./addressUtil";
 
 // Expected role IDs for FiatToken namespace
@@ -82,7 +82,7 @@ export const PERMISSIONS = {
  * Configuration for creating a new Injective namespace
  */
 export interface NamespaceConfig {
-  usdcProxyAddress: string;
+  fiatTokenProxyAddress: string;
   policyAdmin: string;
   contractHookAdmin: string;
   rolePermissionsAdmin: string;
@@ -114,23 +114,18 @@ export interface NamespaceResponse {
 export async function createNamespace(
   config: NamespaceConfig
 ): Promise<string> {
-  // Validate usdcProxyAddress is a valid EVM address
-  validateEvmAddress(config.usdcProxyAddress, "usdcProxyAddress");
+  // Validate fiatTokenProxyAddress is a valid EVM address
+  validateEvmAddress(config.fiatTokenProxyAddress, "fiatTokenProxyAddress");
 
-  // Convert admin addresses to Injective format (only accepts EVM addresses)
-  const policyAdmin = toInjectiveAddress(config.policyAdmin, "policyAdmin");
-  const contractHookAdmin = toInjectiveAddress(
-    config.contractHookAdmin,
-    "contractHookAdmin"
-  );
-  const rolePermissionsAdmin = toInjectiveAddress(
-    config.rolePermissionsAdmin,
-    "rolePermissionsAdmin"
-  );
-  const roleManagersAdmin = toInjectiveAddress(
-    config.roleManagersAdmin,
-    "roleManagersAdmin"
-  );
+  //
+  const policyAdmin = config.policyAdmin;
+  const contractHookAdmin = config.contractHookAdmin;
+  const rolePermissionsAdmin = config.rolePermissionsAdmin;
+  const roleManagersAdmin = config.roleManagersAdmin;
+  validateInjectiveAddress(policyAdmin, "policyAdmin");
+  validateInjectiveAddress(contractHookAdmin, "contractHookAdmin");
+  validateInjectiveAddress(rolePermissionsAdmin, "rolePermissionsAdmin");
+  validateInjectiveAddress(roleManagersAdmin, "roleManagersAdmin");
 
   // Validate private key format
   validatePrivateKey(config.signerPrivateKey, "signerPrivateKey");
@@ -139,7 +134,7 @@ export async function createNamespace(
 
   // The denom format is "erc20:<EVM_ADDRESS>"
   // For ERC20 tokens, contractHook must be empty string
-  const denom = getErc20Denom(config.usdcProxyAddress);
+  const denom = getErc20Denom(config.fiatTokenProxyAddress);
 
   // Get signer's Injective address
   const signerKey = PrivateKey.fromHex(
@@ -159,7 +154,7 @@ export async function createNamespace(
   const namespace = {
     denom: denom,
     wasmHook: "", // Empty for ERC20 tokens (was contractHook in SDK)
-    evmHook: config.usdcProxyAddress,
+    evmHook: config.fiatTokenProxyAddress,
     rolePermissions: [
       { name: "EVERYONE", roleId: 0, permissions: PERMISSIONS.EVERYONE },
       {
@@ -292,7 +287,7 @@ async function broadcastTxViaRestApi(
   });
 
   // Sign the transaction
-  const signature = await signerKey.sign(Buffer.from(signBytes));
+  const signature = await signerKey.sign(new Uint8Array(signBytes));
   txRaw.signatures = [signature];
 
   // Broadcast via REST API
@@ -309,20 +304,20 @@ async function broadcastTxViaRestApi(
 /**
  * Query Injective namespace by denom
  *
- * @param usdcProxyAddress - USDC proxy EVM address (0x...)
+ * @param fiatTokenProxyAddress - Fiat token proxy EVM address (0x...)
  * @param network - Injective network (default: Local)
  * @param useRestApi - Use REST API instead of gRPC (default: false)
  * @returns Namespace configuration
  */
 export async function queryNamespace(
-  usdcProxyAddress: string,
+  fiatTokenProxyAddress: string,
   network: Network = Network.Local,
   useRestApi = false
 ): Promise<NamespaceResponse> {
-  // Validate usdcProxyAddress is a valid EVM address
-  validateEvmAddress(usdcProxyAddress, "usdcProxyAddress");
+  // Validate fiatTokenProxyAddress is a valid EVM address
+  validateEvmAddress(fiatTokenProxyAddress, "fiatTokenProxyAddress");
 
-  const denom = getErc20Denom(usdcProxyAddress);
+  const denom = getErc20Denom(fiatTokenProxyAddress);
   const endpoints = getNetworkEndpoints(network);
 
   if (useRestApi) {
@@ -379,15 +374,15 @@ export async function queryNamespace(
 /**
  * Prepare unsigned MsgUpdateActorRoles message for namespace actor rotation
  *
- * @param usdcProxyAddress - USDC proxy EVM address (0x...)
- * @param senderEvmAddress - Sender's EVM address (role manager admin)
+ * @param fiatTokenProxyAddress - Fiat token proxy EVM address (0x...)
+ * @param senderAddress - Sender's Injective address (role manager admin)
  * @param newAdmins - Object with optional new admin addresses for each role (EVM format)
  * @param network - Injective network (default: Local)
  * @returns MsgUpdateActorRoles instance with role changes
  */
 export async function prepareUpdateActorRolesMessage(
-  usdcProxyAddress: string,
-  senderEvmAddress: string,
+  fiatTokenProxyAddress: string,
+  senderAddress: string,
   newAdmins: {
     policyAdmin?: string;
     contractHookAdmin?: string;
@@ -399,37 +394,30 @@ export async function prepareUpdateActorRolesMessage(
   denom: string;
   senderAddress: string;
 }> {
-  // Validate usdcProxyAddress is a valid EVM address
-  validateEvmAddress(usdcProxyAddress, "usdcProxyAddress");
+  // Validate fiatTokenProxyAddress is a valid EVM address
+  validateEvmAddress(fiatTokenProxyAddress, "fiatTokenProxyAddress");
 
   // Validate sender address
-  validateEvmAddress(senderEvmAddress, "senderEvmAddress");
+  validateInjectiveAddress(senderAddress, "senderAddress");
 
-  // Convert admin addresses to Injective format (only accepts EVM addresses)
-  const convertedAdmins = {
-    policyAdmin: newAdmins.policyAdmin
-      ? toInjectiveAddress(newAdmins.policyAdmin, "policyAdmin")
-      : undefined,
-    contractHookAdmin: newAdmins.contractHookAdmin
-      ? toInjectiveAddress(newAdmins.contractHookAdmin, "contractHookAdmin")
-      : undefined,
-    rolePermissionsAdmin: newAdmins.rolePermissionsAdmin
-      ? toInjectiveAddress(
-          newAdmins.rolePermissionsAdmin,
-          "rolePermissionsAdmin"
-        )
-      : undefined,
-  };
+  const policyAdmin = newAdmins.policyAdmin;
+  const contractHookAdmin = newAdmins.contractHookAdmin;
+  const rolePermissionsAdmin = newAdmins.rolePermissionsAdmin;
+  if (policyAdmin) {
+    validateInjectiveAddress(policyAdmin, "policyAdmin");
+  }
+  if (contractHookAdmin) {
+    validateInjectiveAddress(contractHookAdmin, "contractHookAdmin");
+  }
+  if (rolePermissionsAdmin) {
+    validateInjectiveAddress(rolePermissionsAdmin, "rolePermissionsAdmin");
+  }
 
-  const denom = getErc20Denom(usdcProxyAddress);
-  const senderAddress = toInjectiveAddress(
-    senderEvmAddress,
-    "senderEvmAddress"
-  );
+  const denom = getErc20Denom(fiatTokenProxyAddress);
 
   // Get current namespace to determine which actors to revoke
   const currentNamespace = await queryNamespace(
-    usdcProxyAddress,
+    fiatTokenProxyAddress,
     network,
     true
   );
@@ -465,9 +453,9 @@ export async function prepareUpdateActorRolesMessage(
 
   // Process each admin role if provided (using converted addresses)
   // Note: roleManagersAdmin cannot be rotated through this function
-  processRole("policyAdmin", convertedAdmins.policyAdmin);
-  processRole("contractHookAdmin", convertedAdmins.contractHookAdmin);
-  processRole("rolePermissionsAdmin", convertedAdmins.rolePermissionsAdmin);
+  processRole("policyAdmin", policyAdmin);
+  processRole("contractHookAdmin", contractHookAdmin);
+  processRole("rolePermissionsAdmin", rolePermissionsAdmin);
 
   // Create MsgUpdateActorRoles using the SDK
   const msg = MsgUpdateActorRoles.fromJSON({
@@ -490,14 +478,14 @@ export async function prepareUpdateActorRolesMessage(
  * Note: This function does NOT support rotating roleManagersAdmin.
  * Role managers must be rotated through a different process.
  *
- * @param usdcProxyAddress - USDC proxy EVM address (0x...)
+ * @param fiatTokenProxyAddress - Fiat token proxy EVM address (0x...)
  * @param newAdmins - Object with optional new admin addresses for each role (EVM format)
  * @param signerPrivateKey - Private key of an account with roleManagersAdmin permission
  * @param network - Injective network (default: Local)
  * @returns Transaction hash
  */
 export async function updateNamespaceActors(
-  usdcProxyAddress: string,
+  fiatTokenProxyAddress: string,
   newAdmins: {
     policyAdmin?: string;
     contractHookAdmin?: string;
@@ -510,12 +498,13 @@ export async function updateNamespaceActors(
   validatePrivateKey(signerPrivateKey, "signerPrivateKey");
 
   // Get signer's EVM address from private key
-  const signerEvmAddress = getEvmAddressFromPrivateKey(signerPrivateKey);
+  const signerInjectiveAddress =
+    getInjectiveAddressFromPrivateKey(signerPrivateKey);
 
   // Prepare the message using the new function
   const { msg } = await prepareUpdateActorRolesMessage(
-    usdcProxyAddress,
-    signerEvmAddress,
+    fiatTokenProxyAddress,
+    signerInjectiveAddress,
     newAdmins,
     network
   );

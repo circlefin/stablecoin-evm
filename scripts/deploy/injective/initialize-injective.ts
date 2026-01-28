@@ -16,11 +16,41 @@
  * limitations under the License.
  */
 
+/**
+ *
+ * Initialize the implementation and proxy contracts using the TypeScript helper
+ * script. This is required because `FiatTokenInjectiveV2_2.initialize()` calls the
+ * Injective bank precompile which doesn't exist in Foundry's simulation
+ * environment.
+ *
+ * Usage:
+ * npx tsx scripts/deploy/injective/initialize-injective.ts --network=<local,testnet,mainnet>
+ *
+ * Required environment variables (all must be set in .env):
+ * - DEPLOYER_PRIVATE_KEY
+ * - OWNER_ADDRESS
+ * - PAUSER_ADDRESS
+ * - BLACKLISTER_ADDRESS
+ * - TOKEN_NAME
+ * - TOKEN_SYMBOL
+ * - TOKEN_CURRENCY
+ * - TOKEN_DECIMALS
+ * - FIAT_TOKEN_IMPLEMENTATION_ADDRESS
+ * - FIAT_TOKEN_PROXY_ADDRESS
+ * - MASTER_MINTER_CONTRACT_ADDRESS
+ * - RPC_URL
+ * - BLACKLIST_FILE_NAME
+ *
+ * See .env.example for details.
+ */
+
 import { ethers } from "ethers";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as path from "path";
 import fiatTokenInjectiveArtifact from "../../../artifacts/hardhat/contracts/v2/injective/FiatTokenInjectiveV2_2.sol/FiatTokenInjectiveV2_2.json";
+import { parseNetworkArgs } from "../../injective/utils";
+import { Network } from "@injectivelabs/networks";
 
 // Load environment variables
 dotenv.config();
@@ -91,10 +121,19 @@ function loadBlacklist(fileName: string | undefined): string[] {
   }
 }
 
-function loadEnvConfig(network: "testnet" | "mainnet"): InitializeConfig {
-  const rpcUrlKey =
-    network === "testnet" ? "TESTNET_RPC_URL" : "MAINNET_RPC_URL";
-  const rpcUrl = process.env[rpcUrlKey];
+function loadEnvConfig(network: Network): InitializeConfig {
+  const rpcUrl = (() => {
+    switch (network) {
+      case Network.Local:
+        return "http://localhost:8545";
+      case Network.Testnet:
+        return process.env.TESTNET_RPC_URL;
+      case Network.Mainnet:
+        return process.env.MAINNET_RPC_URL;
+      default:
+        throw new Error(`Unsupported network: ${network}`);
+    }
+  })();
 
   // Required variables
   const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY;
@@ -254,21 +293,7 @@ async function initializeProxy(
 
 async function main() {
   const args = process.argv.slice(2);
-  const networkArg = args.find((arg) => arg.startsWith("--network="));
-
-  if (!networkArg) {
-    console.error(
-      "Usage: tsx initialize-injective.ts --network=<testnet|mainnet>"
-    );
-    process.exit(1);
-  }
-
-  const network = networkArg.split("=")[1] as "testnet" | "mainnet";
-
-  if (network !== "testnet" && network !== "mainnet") {
-    console.error("Network must be 'testnet' or 'mainnet'");
-    process.exit(1);
-  }
+  const network = parseNetworkArgs(args);
 
   console.log(`\n${"=".repeat(60)}`);
   console.log(

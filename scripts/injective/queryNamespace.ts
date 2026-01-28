@@ -1,100 +1,61 @@
 #!/usr/bin/env tsx
-
 /**
- * Query Injective namespace for a USDC contract
+ * Copyright 2026 Circle Internet Group, Inc. All rights reserved.
  *
- * Usage:
- *   npx tsx scripts/injective/queryNamespace.ts --network <network> --proxy <address>
+ * SPDX-License-Identifier: Apache-2.0
  *
- * Example:
- *   npx tsx scripts/injective/queryNamespace.ts --network local --proxy 0x4f557998871c3F4e1767FfAa74783695f1D5DB99
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import { Network } from "@injectivelabs/networks";
+/**
+ * Query Injective namespace for a Fiat Token contract
+ *
+ * Usage:
+ *   npx tsx scripts/injective/queryNamespace.ts --network=<local,testnet,mainnet>
+ *
+ * Required environment variables (all must be set in .env):
+ * - FIAT_TOKEN_PROXY_ADDRESS
+ *
+ * See .env.example for details.
+ */
+
+import * as dotenv from "dotenv";
 import { getEthereumAddress } from "@injectivelabs/sdk-ts";
 import { queryNamespace, PERMISSIONS } from "./namespaceClient";
+import { colors, parseNetworkArgs, validateEnvVariables } from "./utils";
 
-// Color codes for output
-const colors = {
-  reset: "\x1b[0m",
-  red: "\x1b[0;31m",
-  green: "\x1b[0;32m",
-  yellow: "\x1b[1;33m",
-  cyan: "\x1b[0;36m",
-  blue: "\x1b[0;34m",
-  magenta: "\x1b[0;35m",
-};
+// Load .env file with override
+dotenv.config({ override: true });
 
-interface ParsedArgs {
-  network?: string;
-  proxy?: string;
-}
+// ==================================================
+// Parse CLI Arguments & Validate Environment Variables
+// ==================================================
 
-function parseArgs(args: string[]): ParsedArgs {
-  const parsed: ParsedArgs = {};
+const network = parseNetworkArgs(process.argv.slice(2));
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    const nextArg = args[i + 1];
+validateEnvVariables(["FIAT_TOKEN_PROXY_ADDRESS"]);
 
-    switch (arg) {
-      case "--network":
-        parsed.network = nextArg;
-        i++;
-        break;
-      case "--proxy":
-        parsed.proxy = nextArg;
-        i++;
-        break;
-      default:
-        if (arg.startsWith("--")) {
-          console.error(`Unknown option: ${arg}`);
-          process.exit(1);
-        }
-    }
-  }
-
-  return parsed;
-}
+// These are guaranteed to exist after validation above
+const proxyAddress = process.env.FIAT_TOKEN_PROXY_ADDRESS as string;
 
 async function main() {
-  const args = process.argv.slice(2);
-  const parsed = parseArgs(args);
-
-  if (!parsed.network || !parsed.proxy) {
-    console.error("Error: Missing required arguments\n");
-    console.error("Usage:");
-    console.error(
-      "  npx tsx scripts/injective/queryNamespace.ts --network <network> --proxy <address>"
-    );
-    console.error("\nExample:");
-    console.error(
-      "  npx tsx scripts/injective/queryNamespace.ts --network local --proxy 0x4f557998871c3F4e1767FfAa74783695f1D5DB99"
-    );
-    process.exit(1);
-  }
-
-  const networkStr = parsed.network.toLowerCase();
-  if (!["local", "testnet", "mainnet"].includes(networkStr)) {
-    console.error(
-      `Invalid network: ${networkStr}. Use: local, testnet, mainnet`
-    );
-    process.exit(1);
-  }
-
-  const networkMap: Record<string, Network> = {
-    local: Network.Local,
-    testnet: Network.Testnet,
-    mainnet: Network.Mainnet,
-  };
-
   console.log(
-    `${colors.green}Querying namespace for contract: ${parsed.proxy}${colors.reset}`
+    `${colors.green}Querying namespace for contract: ${proxyAddress}${colors.reset}`
   );
-  console.log(`Network: ${networkStr}`);
-  console.log(`Denom: erc20:${parsed.proxy.toLowerCase()}\n`);
+  console.log(`Network: ${network.toString()}`);
+  console.log(`Denom: erc20:${proxyAddress.toLowerCase()}\n`);
 
-  const namespace = await queryNamespace(parsed.proxy, networkMap[networkStr]);
+  const namespace = await queryNamespace(proxyAddress, network);
 
   // Display namespace information
   console.log(`${colors.cyan}${"=".repeat(60)}`);

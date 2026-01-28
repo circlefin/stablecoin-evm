@@ -6,20 +6,20 @@
  * Usage:
  *   npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \
  *     --network <network> \
- *     --usdc-proxy <address> \
- *     --role-manager-admin <address> \
+ *     --fiat-token-proxy <EVM address> \
+ *     --role-manager-admin <Cosmos Bech32 address> \
  *     --sequence <number> \
- *     [--new-policy-admin <address>] \
- *     [--new-contract-hook-admin <address>] \
- *     [--new-role-permissions-admin <address>]
+ *     [--new-policy-admin <Cosmos Bech32 address>] \
+ *     [--new-contract-hook-admin <Cosmos Bech32 address>] \
+ *     [--new-role-permissions-admin <Cosmos Bech32 address>]
  *
  * Example:
  *   npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \
  *     --network local \
- *     --usdc-proxy Ox... \
- *     --role-manager-admin 0x... \
+ *     --fiat-token-proxy Ox... \
+ *     --role-manager-admin inj1... \
  *     --sequence 0 \
- *     --new-policy-admin 0x...
+ *     --new-policy-admin inj1...
  */
 
 import * as fs from "fs";
@@ -27,10 +27,11 @@ import { ethers } from "ethers";
 import { Network } from "@injectivelabs/networks";
 import { prepareUpdateActorRolesMessage } from "../namespaceClient";
 import { fetchAccountInfo } from "../../../integration-tests/injective/helpers/cosmosClient";
+import { isValidInjectiveAddress } from "../addressUtil";
 
 interface ParsedArgs {
   network?: string;
-  usdcProxy?: string;
+  fiatTokenProxy?: string;
   roleManagerAdmin?: string;
   sequence?: string;
   newPolicyAdmin?: string;
@@ -50,8 +51,8 @@ function parseArgs(args: string[]): ParsedArgs {
         parsed.network = nextArg;
         i++;
         break;
-      case "--usdc-proxy":
-        parsed.usdcProxy = nextArg;
+      case "--fiat-token-proxy":
+        parsed.fiatTokenProxy = nextArg;
         i++;
         break;
       case "--role-manager-admin":
@@ -91,7 +92,7 @@ function printUsage() {
     "  npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \\"
   );
   console.error("    --network <network> \\");
-  console.error("    --usdc-proxy <address> \\");
+  console.error("    --fiat-token-proxy <address> \\");
   console.error("    --role-manager-admin <address> \\");
   console.error("    --sequence <number> \\");
   console.error("    [--new-policy-admin <address>] \\");
@@ -103,34 +104,22 @@ function printUsage() {
     "  npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \\"
   );
   console.error("    --network local \\");
-  console.error(
-    "    --usdc-proxy 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 \\"
-  );
-  console.error(
-    "    --role-manager-admin 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \\"
-  );
+  console.error("    --fiat-token-proxy Ox... \\");
+  console.error("    --role-manager-admin inj1... \\");
   console.error("    --sequence 0 \\");
-  console.error(
-    "    --new-policy-admin 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc"
-  );
+  console.error("    --new-policy-admin inj1... \\");
   console.error("\n  # Rotate multiple admins");
   console.error(
     "  npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \\"
   );
   console.error("    --network local \\");
-  console.error(
-    "    --usdc-proxy 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 \\"
-  );
-  console.error(
-    "    --role-manager-admin 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 \\"
-  );
+  console.error("    --fiat-token-proxy Ox... \\");
+  console.error("    --role-manager-admin inj1... \\");
   console.error("    --sequence 5 \\");
-  console.error(
-    "    --new-policy-admin 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc \\"
-  );
-  console.error("    --new-contract-hook-admin 0x123456789ABCDEF...");
+  console.error("    --new-policy-admin inj1... \\");
+  console.error("    --new-contract-hook-admin inj1...");
   console.error("\nNote: Role managers CANNOT be rotated through this script.");
-  console.error("Note: All addresses must be EVM format (0x...).");
+  console.error("Note: All addresses must be Cosmos Bech32 format (inj1...).");
   console.error(
     "Note: --sequence is required and must match the current sequence number of the role manager admin account."
   );
@@ -143,7 +132,7 @@ async function main() {
   // Validate required arguments
   if (
     !parsed.network ||
-    !parsed.usdcProxy ||
+    !parsed.fiatTokenProxy ||
     !parsed.roleManagerAdmin ||
     !parsed.sequence
   ) {
@@ -161,16 +150,18 @@ async function main() {
     process.exit(1);
   }
 
-  // Validate USDC proxy address
-  if (!ethers.isAddress(parsed.usdcProxy)) {
-    console.error(`Invalid EVM address for --usdc-proxy: ${parsed.usdcProxy}`);
+  // Validate FiatToken proxy address
+  if (!ethers.isAddress(parsed.fiatTokenProxy)) {
+    console.error(
+      `Invalid EVM address for --fiat-token-proxy: ${parsed.fiatTokenProxy}`
+    );
     process.exit(1);
   }
 
   // Validate role manager admin address
-  if (!ethers.isAddress(parsed.roleManagerAdmin)) {
+  if (!isValidInjectiveAddress(parsed.roleManagerAdmin)) {
     console.error(
-      `Invalid EVM address for --role-manager-admin: ${parsed.roleManagerAdmin}`
+      `Invalid Cosmos Bech32 address for --role-manager-admin: ${parsed.roleManagerAdmin}`
     );
     process.exit(1);
   }
@@ -189,27 +180,30 @@ async function main() {
   }
 
   // Validate new admin addresses if provided
-  if (parsed.newPolicyAdmin && !ethers.isAddress(parsed.newPolicyAdmin)) {
+  if (
+    parsed.newPolicyAdmin &&
+    !isValidInjectiveAddress(parsed.newPolicyAdmin)
+  ) {
     console.error(
-      `Invalid EVM address for --new-policy-admin: ${parsed.newPolicyAdmin}`
+      `Invalid Cosmos Bech32 address for --new-policy-admin: ${parsed.newPolicyAdmin}`
     );
     process.exit(1);
   }
   if (
     parsed.newContractHookAdmin &&
-    !ethers.isAddress(parsed.newContractHookAdmin)
+    !isValidInjectiveAddress(parsed.newContractHookAdmin)
   ) {
     console.error(
-      `Invalid EVM address for --new-contract-hook-admin: ${parsed.newContractHookAdmin}`
+      `Invalid Cosmos Bech32 address for --new-contract-hook-admin: ${parsed.newContractHookAdmin}`
     );
     process.exit(1);
   }
   if (
     parsed.newRolePermissionsAdmin &&
-    !ethers.isAddress(parsed.newRolePermissionsAdmin)
+    !isValidInjectiveAddress(parsed.newRolePermissionsAdmin)
   ) {
     console.error(
-      `Invalid EVM address for --new-role-permissions-admin: ${parsed.newRolePermissionsAdmin}`
+      `Invalid Cosmos Bech32 address for --new-role-permissions-admin: ${parsed.newRolePermissionsAdmin}`
     );
     process.exit(1);
   }
@@ -222,11 +216,11 @@ async function main() {
   const network = networkMap[networkStr];
 
   console.log(`Network: ${networkStr}`);
-  console.log(`USDC Proxy: ${parsed.usdcProxy}`);
+  console.log(`FiatToken Proxy: ${parsed.fiatTokenProxy}`);
 
   // Prepare the message using shared function
   const { msg, denom, senderAddress } = await prepareUpdateActorRolesMessage(
-    parsed.usdcProxy,
+    parsed.fiatTokenProxy,
     parsed.roleManagerAdmin,
     {
       policyAdmin: parsed.newPolicyAdmin,
@@ -236,8 +230,7 @@ async function main() {
     network
   );
 
-  console.log(`Sender (Injective): ${senderAddress}`);
-  console.log(`Sender (EVM): ${parsed.roleManagerAdmin}`);
+  console.log(`Role manager admin (sender): ${senderAddress}`);
 
   // Validate and parse sequence number
   const parsedSeq = parseInt(parsed.sequence as string, 10);
@@ -276,7 +269,7 @@ async function main() {
     sequence: sequence,
     message: messageJson,
     metadata: {
-      usdcProxyAddress: parsed.usdcProxy,
+      fiatTokenProxyAddress: parsed.fiatTokenProxy,
       denom: denom,
       timestamp: new Date().toISOString(),
       description: "Update namespace actor roles",

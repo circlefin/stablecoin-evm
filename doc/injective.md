@@ -1,14 +1,21 @@
-# Injective Integration Tests
+# Injective
+
+## Integration tests
 
 Integration tests for USDC on Injective blockchain using a local Injective node.
 
-## Prerequisites
+### Prerequisites
 
 - Docker and Docker Compose installed
 - Node.js 20.18.0
 - Yarn
 
-## Running Tests Locally
+### Docker Image
+
+Using `injectivelabs/injective-core:v1.17.2-usdc` which includes USDC-specific
+features.
+
+### Running Tests Locally
 
 ```bash
 # Start the Injective localnet
@@ -17,53 +24,56 @@ yarn test:injective:start
 # Run all tests
 yarn test:injective
 
-# Query namespace information for a deployed USDC contract
-npx tsx scripts/injective/queryNamespace.ts --network local --proxy <proxy_address>
-
 # Stop the localnet when done
 yarn test:injective:stop
 ```
 
-## Docker Image
+## Deployment
 
-Using `injectivelabs/injective-core:v1.16.5-usdc` which includes USDC-specific
-features.
+`FiatTokenInjectiveV2_2`'s deployment process differs from the base
+`FiatTokenV2_2` [deployment process](./../README.md) because Injective requires
+calling the bank precompile during initialization, which is not supported in
+Foundry's simulation environment. Follow the steps below.
 
-## Deployment procedure
+### 1. Deploy contracts
 
-### 1. Deploy
+Deploy the implementation, proxy, and master minter contracts using the
+Injective-specific deployment script. Note that this script does NOT initialize
+the contracts.
 
-Use `scripts/deploy/deploy-fiat-token.s.sol` to deploy injective contracts.
-
-### 2. Namespace configuration
-
-**Step 1: Export New Admin Addresses**
-
-WARNING: the namespace must be created before transferring the contract owner to
-cold storage address.
-
-Copy the `.env.injective.example` to `.env` file. Make sure the four namespace
-admin addresses are set to cold storage EVM addresses.
-
-**Step 2: Create namespace**
-
-WARNING: It's important to verify the address configuration is correct before
-creating the namespace. Once the role manager position is set to the cold
-storage address, the contract owner won't be able to modify the namespace.
-
-```bash
-# Create the namespace
-npx tsx scripts/injective/createNamespace.ts <proxy_address>
+```sh
+yarn forge:broadcast scripts/deploy/injective/deploy-fiat-token-injective.s.sol --rpc-url <testnet OR mainnet>
 ```
 
-**Step 3: Verify namespace is configured correctly**
+### 2. Initialize contracts
 
-### 3. Transfer EVM contract admin to cold storage\*\*
+Initialize the implementation and proxy contracts using the TypeScript helper
+script. This is required because `FiatTokenInjectiveV2_2.initialize()` calls the
+Injective bank precompile which doesn't exist in Foundry's simulation
+environment.
 
-IMPORTANT: do not transfer the contract before the namespace configuration is
-finished. Similar to other EVM contracts, use `cold-storage-transfer.s.sol`.
+```sh
+npx tsx scripts/deploy/injective/initialize-injective.ts --network=<testnet OR mainnet>
+```
 
-**What gets transferred:**
+### 3. Create namespace
 
-- **EVM Contracts:** Owner, Proxy Admin, Master Minter Owner (use separate
-  process)
+The namespace must be created by the contract owner. In `.env`, ensure the four
+namespace admin addresses and `FIAT_TOKEN_PROXY_ADDRESS` are set. Then create
+the namespace:
+
+```sh
+npx tsx scripts/injective/createNamespace.ts --network=<testnet OR mainnet>
+```
+
+Verify the namespace is configured correctly:
+
+```sh
+npx tsx scripts/injective/queryNamespace.ts --network=<testnet OR mainnet>
+```
+
+### 4. Fund the proxy contract
+
+The proxy contract needs native INJ tokens to pay for the denom creation fee
+during the first mint. Since EVM contract cannot accept INJ, we can convert the
+proxy address to Cosmos format and send 1 INJ via Cosmos interface.

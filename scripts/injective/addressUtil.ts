@@ -92,7 +92,7 @@ export function toInjectiveAddress(address: string, paramName: string): string {
  * @returns EVM address (0x...)
  * @throws Error if private key is invalid
  */
-export function getEvmAddressFromPrivateKey(privateKey: string): string {
+export function getInjectiveAddressFromPrivateKey(privateKey: string): string {
   if (!isValidPrivateKey(privateKey)) {
     throw new Error(
       `Invalid private key format: ${privateKey}. Must be 64 hex characters with optional 0x prefix`
@@ -100,7 +100,7 @@ export function getEvmAddressFromPrivateKey(privateKey: string): string {
   }
 
   const wallet = new ethers.Wallet(privateKey);
-  return wallet.address;
+  return getInjectiveAddress(wallet.address);
 }
 
 /**
@@ -113,6 +113,22 @@ export function getEvmAddressFromPrivateKey(privateKey: string): string {
 export function validateEvmAddress(address: string, paramName: string): void {
   if (!isValidEvmAddress(address)) {
     throw new Error(`Invalid EVM address for ${paramName}: ${address}`);
+  }
+}
+
+/**
+ * Validate an Injective address and throw if invalid
+ *
+ * @param address - Injective address to validate
+ * @param paramName - Parameter name for error messages
+ * @throws Error if address is not a valid Injective address
+ */
+export function validateInjectiveAddress(
+  address: string,
+  paramName: string
+): void {
+  if (!isValidInjectiveAddress(address)) {
+    throw new Error(`Invalid Injective address for ${paramName}: ${address}`);
   }
 }
 

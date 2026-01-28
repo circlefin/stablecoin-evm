@@ -1,14 +1,30 @@
 #!/usr/bin/env tsx
+/**
+ * Copyright 2026 Circle Internet Group, Inc. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /**
- * Create Injective namespace for an existing USDC contract
+ * Create Injective namespace for an existing Fiat Token contract
  *
  * Usage:
- *   npx tsx scripts/injective/createNamespace.ts
+ *   npx tsx scripts/injective/createNamespace.ts --network=<local,testnet,mainnet>
  *
  * Required environment variables (all must be set in .env):
- * - NETWORK (local, testnet, or mainnet)
- * - USDC_PROXY_ADDRESS
+ * - FIAT_TOKEN_PROXY_ADDRESS
  * - POLICY_ADMIN_INJ
  * - CONTRACT_HOOK_ADMIN_INJ
  * - ROLE_PERMISSIONS_ADMIN_INJ
@@ -20,43 +36,30 @@
 
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
-import { Network } from "@injectivelabs/networks";
 import { PrivateKey } from "@injectivelabs/sdk-ts";
 import { createNamespace } from "./namespaceClient";
 import { fundAccount } from "../../integration-tests/injective/helpers/faucet";
 import { getErc20Denom } from "../../integration-tests/injective/helpers/cosmosClient";
+import {
+  colors,
+  parseNetworkArgs,
+  printError,
+  printInfo,
+  printStep,
+  validateEnvVariables,
+} from "./utils";
 
 // Load .env file with override
 dotenv.config({ override: true });
 
-// Color codes for output
-const colors = {
-  reset: "\x1b[0m",
-  red: "\x1b[0;31m",
-  green: "\x1b[0;32m",
-  yellow: "\x1b[1;33m",
-  cyan: "\x1b[0;36m",
-};
-
-function printInfo(message: string): void {
-  console.log(`${colors.green}[INFO]${colors.reset} ${message}`);
-}
-
-function printError(message: string): void {
-  console.log(`${colors.red}[ERROR]${colors.reset} ${message}`);
-}
-
-function printStep(message: string): void {
-  console.log(`\n${colors.cyan}[STEP]${colors.reset} ${message}`);
-}
-
 // ==================================================
-// Validate Required Environment Variables
+// Parse CLI Arguments & Validate Environment Variables
 // ==================================================
+
+const network = parseNetworkArgs(process.argv.slice(2));
 
 const REQUIRED_VARS = [
-  "NETWORK",
-  "USDC_PROXY_ADDRESS",
+  "FIAT_TOKEN_PROXY_ADDRESS",
   "POLICY_ADMIN_INJ",
   "CONTRACT_HOOK_ADMIN_INJ",
   "ROLE_PERMISSIONS_ADMIN_INJ",
@@ -64,42 +67,11 @@ const REQUIRED_VARS = [
   "OWNER_PRIVATE_KEY",
 ];
 
-printInfo("Validating required environment variables...");
-
-const missingVars: string[] = [];
-for (const varName of REQUIRED_VARS) {
-  if (!process.env[varName]) {
-    missingVars.push(varName);
-  }
-}
-
-if (missingVars.length > 0) {
-  printError("Missing required environment variables:");
-  missingVars.forEach((v) => console.log(`  - ${v}`));
-  console.log(
-    "\nPlease set these variables in your .env file (see .env.example)"
-  );
-  process.exit(1);
-}
-
-// Validate network value
-const validNetworks = ["local", "testnet", "mainnet"];
-const network = process.env.NETWORK?.toLowerCase();
-if (!network || !validNetworks.includes(network)) {
-  printError(`Invalid NETWORK value: ${network || "(empty)"}`);
-  console.log(`\nSupported networks: ${validNetworks.join(", ")}`);
-  process.exit(1);
-}
-
-const networkMap: Record<string, Network> = {
-  local: Network.Local,
-  testnet: Network.Testnet,
-  mainnet: Network.Mainnet,
-};
+validateEnvVariables(REQUIRED_VARS);
 
 printInfo("Configuration validated ✓");
-printInfo(`Network: ${network}`);
-printInfo(`USDC Proxy: ${process.env.USDC_PROXY_ADDRESS}`);
+printInfo(`Network: ${network.toString()}`);
+printInfo(`Fiat Token Proxy: ${process.env.FIAT_TOKEN_PROXY_ADDRESS}`);
 
 // ==================================================
 // Main Flow
@@ -109,7 +81,7 @@ async function main() {
   /* eslint-disable @typescript-eslint/no-non-null-assertion */
   try {
     // Fund owner account if on localnet and has no balance
-    if (network === "local") {
+    if (network.toString() === "local") {
       printStep("Checking owner account balance...");
 
       const ownerKey = PrivateKey.fromHex(
@@ -137,13 +109,13 @@ async function main() {
     printStep("Creating Injective namespace...");
 
     const txHash = await createNamespace({
-      usdcProxyAddress: process.env.USDC_PROXY_ADDRESS!,
+      fiatTokenProxyAddress: process.env.FIAT_TOKEN_PROXY_ADDRESS!,
       policyAdmin: process.env.POLICY_ADMIN_INJ!,
       contractHookAdmin: process.env.CONTRACT_HOOK_ADMIN_INJ!,
       rolePermissionsAdmin: process.env.ROLE_PERMISSIONS_ADMIN_INJ!,
       roleManagersAdmin: process.env.ROLE_MANAGERS_ADMIN_INJ!,
       signerPrivateKey: process.env.OWNER_PRIVATE_KEY!,
-      network: networkMap[network!],
+      network,
       useRestApi: true, // Use REST API to have explicit gas control
     });
 
@@ -152,12 +124,14 @@ async function main() {
     // ==================================================
     // SUCCESS!
     // ==================================================
-    const denom = getErc20Denom(process.env.USDC_PROXY_ADDRESS!);
+    const denom = getErc20Denom(process.env.FIAT_TOKEN_PROXY_ADDRESS!);
     console.log("\n" + "=".repeat(60));
     console.log("        🎉 NAMESPACE CREATED! 🎉");
     console.log("=".repeat(60));
-    console.log(`\nNetwork:              ${network}`);
-    console.log(`USDC Proxy:           ${process.env.USDC_PROXY_ADDRESS}`);
+    console.log(`\nNetwork:              ${network.toString()}`);
+    console.log(
+      `USDC Proxy:           ${process.env.FIAT_TOKEN_PROXY_ADDRESS}`
+    );
     console.log(`Denom:                ${denom}`);
     console.log(`Transaction Hash:     ${txHash}`);
     console.log("\nAdmins configured:");
@@ -174,7 +148,7 @@ async function main() {
     console.log("\nNext steps:");
     console.log("1. Query namespace:");
     console.log(
-      `   npx tsx scripts/injective/queryNamespace.ts --network ${network} --proxy ${process.env.USDC_PROXY_ADDRESS}`
+      `   npx tsx scripts/injective/queryNamespace.ts --network=${network.toString()}`
     );
     console.log("=".repeat(60) + "\n");
   } catch (error) {
@@ -190,7 +164,7 @@ async function main() {
         `\n${colors.yellow}Hint:${colors.reset} A namespace may already exist for this contract.`
       );
       console.log(
-        `Query it with: ${colors.cyan}npx tsx scripts/injective/queryNamespace.ts --network ${network} --proxy ${process.env.USDC_PROXY_ADDRESS}${colors.reset}`
+        `Query it with: ${colors.cyan}npx tsx scripts/injective/queryNamespace.ts --network=${network.toString()}${colors.reset}`
       );
     }
 
