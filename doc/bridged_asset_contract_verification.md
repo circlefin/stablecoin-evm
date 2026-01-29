@@ -31,7 +31,7 @@ verification.
 Open a new terminal window and run the following command:
 
 ```sh
-git clone git@github.com:circlefin/stablecoin-evm-private.git "stablecoin-evm-private" && \
+git clone git@github.com:crcl-main/stablecoin-evm-private.git "stablecoin-evm-private" && \
 cd "stablecoin-evm-private" && \
 nvm use && \
 yarn install && \

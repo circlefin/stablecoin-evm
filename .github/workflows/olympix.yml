@@ -8,5 +8,5 @@ on:
 
 jobs:
   run_olympix:
-    if: ${{ github.repository_owner == 'circlefin' }}
-    uses: circlefin/security-seceng-templates/.github/workflows/olympix_scan_yarn.yml@v1
+    if: ${{ github.repository_owner == 'crcl-main' }}
+    uses: crcl-main/security-seceng-templates/.github/workflows/olympix_scan_yarn.yml@v1

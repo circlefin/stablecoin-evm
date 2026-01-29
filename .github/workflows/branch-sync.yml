@@ -8,18 +8,19 @@ on:
 jobs:
   master_branch:
     uses: ./.github/workflows/pull-based-branch-sync.yml
-    if: ${{ github.repository_owner == 'circlefin' }}
+    if: ${{ github.repository_owner == 'crcl-main' }}
     with:
       source_repository_owner: circlefin
       source_repository: stablecoin-evm
       source_branch: master
       destination_branch: master
       team_reviewer: engineering-centre-tokens-approvers
+      sync_to_circlefin: true
   deploy_branch:
     uses: ./.github/workflows/pull-based-branch-sync.yml
-    if: ${{ github.repository_owner == 'circlefin' }}
+    if: ${{ github.repository_owner == 'crcl-main' }}
     with:
-      source_repository_owner: circlefin
+      source_repository_owner: crcl-main
       source_repository: stablecoin-evm-private
       source_branch: master
       destination_branch: deploy

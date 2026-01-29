@@ -1,0 +1,14 @@
+name: Sync Commits to Mirror Repository
+
+on:
+  push:
+
+jobs:
+  sync-to-mirror:
+    uses: crcl-main/github-shared-pipelines/.github/workflows/commit-sync.yaml@audit-sync
+    if: ${{ github.repository_owner == 'crcl-main' }}
+    with:
+      source_repo: 'crcl-main/stablecoin-evm-private'
+      target_repo: 'circle-readonly/stablecoin-evm-private'
+      target_branch: ${{ github.ref_name }}
+      commit_sha: ${{ github.sha }}
