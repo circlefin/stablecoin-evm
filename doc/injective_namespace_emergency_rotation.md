@@ -45,7 +45,7 @@ Creates an unsigned transaction JSON file for rotating admin roles.
 ```bash
 npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \
   --network <network> \
-  --usdc-proxy <address> \
+  --fiat-token-proxy <address> \
   --role-manager-admin <address> \
   --sequence <number> \
   [--new-policy-admin <address>] \
@@ -57,21 +57,23 @@ npx tsx scripts/injective/namespaceRotation/generateUnsignedTransaction.ts \
 
 - `--network <network>` - Network to use: `local`, `testnet`, or `mainnet`
   (required)
-- `--usdc-proxy <address>` - USDC proxy contract address (required)
-- `--role-manager-admin <address>` - Current role manager admin's EVM address
-  (required)
+- `--fiat-token-proxy <address>` - FiatToken proxy contract address (required)
+- `--role-manager-admin <address>` - Current role manager admin's Injective
+  address (required)
 - `--sequence <number>` - Current sequence number of the role manager admin
   account (required)
-- `--new-policy-admin <address>` - New policy admin's EVM address (optional)
-- `--new-contract-hook-admin <address>` - New contract hook admin's EVM address
+- `--new-policy-admin <address>` - New policy admin's Injective address
   (optional)
-- `--new-role-permissions-admin <address>` - New role permissions admin's EVM
+- `--new-contract-hook-admin <address>` - New contract hook admin's Injective
   address (optional)
+- `--new-role-permissions-admin <address>` - New role permissions admin's
+  Injective address (optional)
 
 **Notes:**
 
 - Role managers CANNOT be rotated through this script
-- All addresses must be in EVM format (0x...)
+- FiatTokenProxy address must be in EVM format (0x...)
+- All other addresses must be in Injective format (inj1...)
 - At least one `--new-*-admin` argument must be provided
 - Script fetches account number from network automatically
 - **Sequence number must be provided explicitly** - This ensures the transaction
