@@ -15,3 +15,12 @@ coverage/
 coverage.json
 
 blacklist.*.json
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
