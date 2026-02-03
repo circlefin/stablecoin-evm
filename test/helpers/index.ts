@@ -27,10 +27,12 @@ import {
   FiatTokenV2_2Instance,
   FiatTokenV2Instance,
   FiatTokenCeloV2_2Instance,
+  FiatTokenInjectiveV2_2Instance,
 } from "../../@types/generated";
 import _ from "lodash";
 import {
   FiatTokenCeloV2_2InstanceExtended,
+  FiatTokenInjectiveV2_2InstanceExtended,
   FiatTokenV2_2InstanceExtended,
 } from "../../@types/AnyFiatTokenV2Instance";
 import {
@@ -157,7 +159,8 @@ export async function initializeToVersion(
     | FiatTokenV2Instance
     | FiatTokenV2_1Instance
     | FiatTokenV2_2Instance
-    | FiatTokenCeloV2_2Instance,
+    | FiatTokenCeloV2_2Instance
+    | FiatTokenInjectiveV2_2Instance,
   version: "1" | "1.1" | "2" | "2.1" | "2.2",
   fiatTokenOwner: string,
   lostAndFound: string,
@@ -220,7 +223,10 @@ export async function initializeToVersion(
  * here we re-assign the overloaded method definition to the method name shorthand.
  */
 export function initializeOverloadedMethods(
-  fiatToken: FiatTokenV2_2InstanceExtended | FiatTokenCeloV2_2InstanceExtended,
+  fiatToken:
+    | FiatTokenV2_2InstanceExtended
+    | FiatTokenCeloV2_2InstanceExtended
+    | FiatTokenInjectiveV2_2InstanceExtended,
   signatureBytesType: SignatureBytesType
 ): void {
   if (signatureBytesType == SignatureBytesType.Unpacked) {

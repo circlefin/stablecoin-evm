@@ -246,7 +246,8 @@ export function testTransferWithAuthorization({
     it("reverts if the authorization is expired", async () => {
       // create a signed authorization that expires immediately
       const { from, to, value, validAfter } = transferParams;
-      const validBefore = Math.floor(Date.now() / 1000);
+      // -200 to accomodate the diff of block timestamp and local time
+      const validBefore = Math.floor(Date.now() / 1000) - 200;
       const signature = signTransferAuthorization(
         from,
         to,

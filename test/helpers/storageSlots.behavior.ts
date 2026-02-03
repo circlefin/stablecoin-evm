@@ -41,6 +41,8 @@ export function usesOriginalStorageSlotPositions<
   Contract: Truffle.Contract<T>;
   version: 1 | 1.1 | 2 | 2.1 | 2.2;
 }): void {
+  // Check if this is FiatTokenInjectiveV2_2
+  const isInjective = Contract.contractName === "FiatTokenInjectiveV2_2";
   describe("uses original storage slot positions", () => {
     const [name, symbol, currency, decimals] = ["USDC", "USDC", "USD", 6];
     const [mintAllowance, minted, transferred, allowance] = [
@@ -191,7 +193,12 @@ export function usesOriginalStorageSlotPositions<
       checkSlot(slots[10], ZERO_BYTES32);
 
       // slot 11 - totalSupply
-      checkSlot(slots[11], [{ type: "uint256", value: minted }]);
+      // For Injective, totalSupply is read from bank precompile, so slot 11 should be empty
+      if (isInjective) {
+        checkSlot(slots[11], ZERO_BYTES32);
+      } else {
+        checkSlot(slots[11], [{ type: "uint256", value: minted }]);
+      }
 
       // slot 12 - minters (mapping, slot is unused)
       checkSlot(slots[12], ZERO_BYTES32);
@@ -253,7 +260,11 @@ export function usesOriginalStorageSlotPositions<
       }
     });
 
-    it("retains original storage slots for balanceAndBlacklistStates mapping", async () => {
+    it("retains original storage slots for balanceAndBlacklistStates mapping", async function () {
+      if (isInjective) {
+        this.skip();
+      }
+
       // balanceAndBlacklistStates[alice] - not blacklisted, has balance
       let slot = await readSlot(
         proxy.address,
@@ -284,6 +295,41 @@ export function usesOriginalStorageSlotPositions<
       );
       expectedValue = version >= 2.2 ? POW_2_255_BN : new BN(0);
       checkSlot(slot, [{ type: "uint256", value: expectedValue }]);
+    });
+
+    it("retains blacklist bit (2^255) in balanceAndBlacklistStates mapping for Injective", async function () {
+      if (!isInjective) {
+        this.skip();
+      }
+
+      // For Injective: balances are stored in bank precompile, but blacklist bit (2^255) is still in storage
+
+      // balanceAndBlacklistStates[alice] - not blacklisted
+      let slot = await readSlot(
+        proxy.address,
+        addressMappingSlot(
+          alice,
+          STORAGE_SLOT_NUMBERS.balanceAndBlacklistStates
+        )
+      );
+      checkBlacklistBit(slot, false, "Alice");
+
+      // balanceAndBlacklistStates[bob] - blacklisted
+      slot = await readSlot(
+        proxy.address,
+        addressMappingSlot(bob, STORAGE_SLOT_NUMBERS.balanceAndBlacklistStates)
+      );
+      checkBlacklistBit(slot, true, "Bob");
+
+      // balanceAndBlacklistStates[charlie] - blacklisted
+      slot = await readSlot(
+        proxy.address,
+        addressMappingSlot(
+          charlie,
+          STORAGE_SLOT_NUMBERS.balanceAndBlacklistStates
+        )
+      );
+      checkBlacklistBit(slot, true, "Charlie");
     });
 
     it("retains original storage slots for allowed mapping", async () => {
@@ -399,4 +445,23 @@ function address2MappingSlot(addr: string, addr2: string, pos: number): string {
   return web3.utils.keccak256(
     "0x" + encodeAddress(addr2) + addressMappingSlot(addr, pos).slice(2)
   );
+}
+
+function checkBlacklistBit(
+  slot: string,
+  shouldBeBlacklisted: boolean,
+  accountName: string
+) {
+  const value = new BN(slot.replace(/^0x/, ""), 16);
+  if (shouldBeBlacklisted) {
+    expect(value.gte(POW_2_255_BN)).to.equal(
+      true,
+      `${accountName} should be blacklisted (2^255 bit set)`
+    );
+  } else {
+    expect(value.lt(POW_2_255_BN)).to.equal(
+      true,
+      `${accountName} should not be blacklisted`
+    );
+  }
 }

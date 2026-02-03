@@ -65,7 +65,8 @@ jobs:
           - grep: "FiatTokenV2:.*"
           - grep: "FiatTokenV2_1:.*"
           - grep: "FiatTokenV2_2:.*"
-          - grep: "FiatTokenV1:.*|FiatTokenV1_1:.*|FiatTokenV2:.*|FiatTokenV2_1:.*|FiatTokenV2_2:.*|gas costs|Injective"
+          - grep: "FiatTokenInjectiveV2_2:.*"
+          - grep: "FiatTokenV1:.*|FiatTokenV1_1:.*|FiatTokenV2:.*|FiatTokenV2_1:.*|FiatTokenV2_2:.*|FiatTokenInjectiveV2_2:.*|gas costs"
             invert: true
     steps:
       - name: Check out repository code
