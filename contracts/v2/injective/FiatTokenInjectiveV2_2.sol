@@ -19,6 +19,7 @@
 pragma solidity 0.8.24;
 
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
+import { Blacklistable } from "../../v1/Blacklistable.sol";
 import { IBankModule } from "../../interface/injective/IBankModule.sol";
 
 contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
@@ -90,6 +91,22 @@ contract FiatTokenInjectiveV2_2 is FiatTokenV2_2 {
         address _account
     ) internal view override returns (uint256) {
         return _bankPrecompile().balanceOf(address(this), _account);
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     * @dev Override so only the blacklist bit is written to EVM storage.
+     */
+    function _blacklist(address _account) internal override {
+        balanceAndBlacklistStates[_account] = 1 << 255;
+    }
+
+    /**
+     * @inheritdoc Blacklistable
+     * @dev Override so only the blacklist bit is written to EVM storage.
+     */
+    function _unBlacklist(address _account) internal override {
+        balanceAndBlacklistStates[_account] = 0;
     }
 
     /**

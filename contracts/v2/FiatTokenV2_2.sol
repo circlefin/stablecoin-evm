@@ -785,14 +785,14 @@ contract FiatTokenV2_2 is
     /**
      * @inheritdoc Blacklistable
      */
-    function _blacklist(address _account) internal override {
+    function _blacklist(address _account) internal virtual override {
         _setBlacklistState(_account, true);
     }
 
     /**
      * @inheritdoc Blacklistable
      */
-    function _unBlacklist(address _account) internal override {
+    function _unBlacklist(address _account) internal virtual override {
         _setBlacklistState(_account, false);
     }
 

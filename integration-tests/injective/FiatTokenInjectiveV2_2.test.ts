@@ -35,6 +35,7 @@ import {
   teardownEvmClient,
   FiatTokenInjectiveV2_2Contract,
   getEvmWalletFromPrivateKey,
+  getJsonRpcProvider,
 } from "./helpers/evmClient";
 import {
   createNamespace,
@@ -44,6 +45,7 @@ import {
   ROLE_IDS,
 } from "../../scripts/injective/namespaceClient";
 import { Network } from "@injectivelabs/networks";
+import { ethers } from "ethers";
 
 const INJ_DENOM = "inj";
 const FAUCET_AMOUNT = "100000000000000000000"; // 100 INJ
@@ -85,6 +87,26 @@ function generateAddress(): {
   const evmAddress = wallet.address;
   const injectiveAddress = getInjectiveAddress(evmAddress);
   return { privateKey, evmAddress, injectiveAddress };
+}
+
+const BALANCE_AND_BLACKLIST_STATES_SLOT = 9;
+
+/**
+ * Read the raw balanceAndBlacklistStates storage slot for an account.
+ * Slot = keccak256(abi.encode(account, 9))
+ */
+async function readBalanceAndBlacklistSlot(
+  contractAddress: string,
+  account: string
+): Promise<bigint> {
+  const slot = ethers.keccak256(
+    ethers.AbiCoder.defaultAbiCoder().encode(
+      ["address", "uint256"],
+      [account, BALANCE_AND_BLACKLIST_STATES_SLOT]
+    )
+  );
+  const value = await getJsonRpcProvider().getStorage(contractAddress, slot);
+  return BigInt(value);
 }
 
 describe("Faucet Functionality", function () {
@@ -504,6 +526,57 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       expect(finalBalance).to.equal(initialBalance + MINT_AMOUNT);
     });
 
+    it("should not write balance to EVM storage when unblacklisted", async () => {
+      const testRecipient = generateAddress();
+
+      // Mint initial tokens
+      const mintTx1 = await fiatToken.mint(
+        testRecipient.evmAddress,
+        MINT_AMOUNT
+      );
+      await mintTx1.wait();
+
+      // Blacklist then unblacklist
+      const blacklistTx = await fiatToken.blacklist(testRecipient.evmAddress);
+      await blacklistTx.wait();
+      const unblacklistTx = await fiatToken.unBlacklist(
+        testRecipient.evmAddress
+      );
+      await unblacklistTx.wait();
+
+      // Verify storage slot is zero (no balance written)
+      const storageValue = await readBalanceAndBlacklistSlot(
+        proxyAddress,
+        testRecipient.evmAddress
+      );
+      expect(storageValue).to.equal(BigInt(0));
+
+      // Mint additional tokens after unblacklist
+      const mintTx2 = await fiatToken.mint(
+        testRecipient.evmAddress,
+        MINT_AMOUNT
+      );
+      await mintTx2.wait();
+
+      // Verify EVM balance reflects both mints
+      const evmBalance = await fiatToken.balanceOf(testRecipient.evmAddress);
+      expect(evmBalance).to.equal(MINT_AMOUNT * BigInt(2));
+
+      // Verify bank module balance matches EVM balance
+      const bankBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      expect(bankBalance).to.equal(evmBalance.toString());
+
+      // Verify storage slot is still zero after mint
+      const storageValueAfterMint = await readBalanceAndBlacklistSlot(
+        proxyAddress,
+        testRecipient.evmAddress
+      );
+      expect(storageValueAfterMint).to.equal(BigInt(0));
+    });
+
     it("should revert when contract is paused", async () => {
       // Generate fresh recipient for this test
       const testRecipient = generateAddress();
@@ -677,6 +750,49 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
 
       const finalBalance = await fiatToken.balanceOf(deployerEvmAddress);
       expect(finalBalance).to.equal(initialBalance - BURN_AMOUNT);
+    });
+
+    it("should not write balance to EVM storage when unblacklisted", async () => {
+      // Mint tokens to deployer
+      const mintTx = await fiatToken.mint(deployerEvmAddress, MINT_AMOUNT);
+      await mintTx.wait();
+
+      const balanceBefore = await fiatToken.balanceOf(deployerEvmAddress);
+
+      // Blacklist / unblacklist deployer
+      const blacklistTx = await fiatToken.blacklist(deployerEvmAddress);
+      await blacklistTx.wait();
+      const unblacklistTx = await fiatToken.unBlacklist(deployerEvmAddress);
+      await unblacklistTx.wait();
+
+      // Verify storage slot is zero after unblacklist (no balance written)
+      const storageValueAfterUnblacklist = await readBalanceAndBlacklistSlot(
+        proxyAddress,
+        deployerEvmAddress
+      );
+      expect(storageValueAfterUnblacklist).to.equal(BigInt(0));
+
+      // Burn after unblacklist
+      const burnTx = await fiatToken.burn(BURN_AMOUNT);
+      await burnTx.wait();
+
+      // Verify EVM balance reflects the burn
+      const evmBalance = await fiatToken.balanceOf(deployerEvmAddress);
+      expect(evmBalance).to.equal(balanceBefore - BURN_AMOUNT);
+
+      // Verify bank module balance matches EVM balance
+      const bankBalance = await getErc20Balance(
+        deployerInjectiveAddress,
+        proxyAddress
+      );
+      expect(bankBalance).to.equal(evmBalance.toString());
+
+      // Verify storage slot is still zero after burn
+      const storageValueAfterBurn = await readBalanceAndBlacklistSlot(
+        proxyAddress,
+        deployerEvmAddress
+      );
+      expect(storageValueAfterBurn).to.equal(BigInt(0));
     });
 
     it("should revert when contract is paused", async () => {
@@ -954,6 +1070,70 @@ describe("FiatTokenInjectiveV2_2 Integration Tests", function () {
       expect(BigInt(finalBalance)).to.equal(
         BigInt(initialBalance) + TRANSFER_AMOUNT
       );
+    });
+
+    it("should not write balance to EVM storage when unblacklisted", async () => {
+      const testRecipient = generateAddress();
+
+      // Blacklist / unblacklist sender
+      const blacklistTx = await fiatToken.blacklist(senderEvmAddress);
+      await blacklistTx.wait();
+      const unblacklistTx = await fiatToken.unBlacklist(senderEvmAddress);
+      await unblacklistTx.wait();
+
+      // Verify storage slot is zero after unblacklist (no balance written)
+      const senderStorageAfterUnblacklist = await readBalanceAndBlacklistSlot(
+        proxyAddress,
+        senderEvmAddress
+      );
+      expect(senderStorageAfterUnblacklist).to.equal(BigInt(0));
+
+      // Transfer after unblacklist via Cosmos layer
+      const initialSenderEvmBalance =
+        await fiatToken.balanceOf(senderEvmAddress);
+      const senderKey = PrivateKey.fromHex(senderPrivateKey.replace("0x", ""));
+      await sendTokens(
+        senderKey,
+        testRecipient.injectiveAddress,
+        TRANSFER_AMOUNT.toString(),
+        erc20Denom
+      );
+
+      // Verify sender EVM and bank balances match
+      const senderEvmBalance = await fiatToken.balanceOf(senderEvmAddress);
+      const senderBankBalance = await getErc20Balance(
+        senderInjectiveAddress,
+        proxyAddress
+      );
+      expect(senderBankBalance).to.equal(senderEvmBalance.toString());
+      expect(senderEvmBalance).to.equal(
+        initialSenderEvmBalance - TRANSFER_AMOUNT
+      );
+
+      // Verify recipient EVM and bank balances match
+      const recipientEvmBalance = await fiatToken.balanceOf(
+        testRecipient.evmAddress
+      );
+      const recipientBankBalance = await getErc20Balance(
+        testRecipient.injectiveAddress,
+        proxyAddress
+      );
+      expect(recipientBankBalance).to.equal(recipientEvmBalance.toString());
+      expect(recipientEvmBalance).to.equal(TRANSFER_AMOUNT);
+
+      // Verify sender storage slot is still zero after transfer
+      const senderStorageAfterTransfer = await readBalanceAndBlacklistSlot(
+        proxyAddress,
+        senderEvmAddress
+      );
+      expect(senderStorageAfterTransfer).to.equal(BigInt(0));
+
+      // Verify recipient storage slot is zero (new account, balance only in bank module)
+      const recipientStorageAfterTransfer = await readBalanceAndBlacklistSlot(
+        proxyAddress,
+        testRecipient.evmAddress
+      );
+      expect(recipientStorageAfterTransfer).to.equal(BigInt(0));
     });
 
     it("should revert transfer via EVM layer when recipient is blacklisted", async () => {
