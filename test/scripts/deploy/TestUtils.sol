@@ -68,6 +68,8 @@ contract TestUtils is Test {
             "MASTER_MINTER_OWNER_ADDRESS",
             vm.toString(masterMinterOwner)
         );
+
+        vm.setEnv("MASTER_MINTER_ADDRESS", vm.toString(owner));
         vm.setEnv("OWNER_ADDRESS", vm.toString(owner));
         vm.setEnv("PAUSER_ADDRESS", vm.toString(pauser));
         vm.setEnv("BLACKLISTER_ADDRESS", vm.toString(blacklister));
@@ -149,7 +151,8 @@ contract TestUtils is Test {
     function validateMasterMinter(MasterMinter masterMinter, address _proxy)
         internal
     {
-        assertEq(masterMinter.owner(), masterMinterOwner);
-        assertEq(address(masterMinter.getMinterManager()), _proxy);
+        // ! do nothing because we are not deploying the master minter
+        // assertEq(masterMinter.owner(), masterMinterOwner);
+        // assertEq(address(masterMinter.getMinterManager()), _proxy);
     }
 }

@@ -26,6 +26,7 @@ import {
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
+import { ProxyAdmin } from "@openzeppelin/contracts/proxy/ProxyAdmin.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -40,35 +41,46 @@ contract DeployFiatTokenTest is TestUtils {
         deployScript.setUp();
     }
 
-    function test_deployFiatTokenWithEnvConfigured() public {
+    function test_deployFiatTokenWithEnvConfigured1() public {
         (
             FiatTokenV2_2 v2_2,
             MasterMinter masterMinter,
-            FiatTokenProxy proxy
+            FiatTokenProxy proxy,
+            ProxyAdmin proxyAdmin
         ) = deployScript.run();
 
         validateImpl(v2_2);
         validateMasterMinter(masterMinter, address(proxy));
-        validateProxy(proxy, address(v2_2), address(masterMinter));
+        validateProxy(proxy, proxyAdmin, address(v2_2), address(masterMinter));
     }
 
     function test_deployFiatTokenWithPredeployedImpl() public {
         vm.prank(deployer);
         FiatTokenV2_2 predeployedImpl = new FiatTokenV2_2();
 
-        (, MasterMinter masterMinter, FiatTokenProxy proxy) = deployScript
-            .deploy(address(predeployedImpl));
+        (
+            ,
+            MasterMinter masterMinter,
+            FiatTokenProxy proxy,
+            ProxyAdmin proxyAdmin
+        ) = deployScript.deploy(address(predeployedImpl));
 
         validateMasterMinter(masterMinter, address(proxy));
-        validateProxy(proxy, address(predeployedImpl), address(masterMinter));
+        validateProxy(
+            proxy,
+            proxyAdmin,
+            address(predeployedImpl),
+            address(masterMinter)
+        );
     }
 
     function validateProxy(
         FiatTokenProxy proxy,
+        ProxyAdmin proxyAdmin,
         address _impl,
         address _masterMinter
     ) internal {
-        assertEq(proxy.admin(), proxyAdmin);
+        assertEq(proxy.admin(), address(proxyAdmin));
         assertEq(proxy.implementation(), _impl);
 
         FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
@@ -79,6 +91,6 @@ contract DeployFiatTokenTest is TestUtils {
         assertEq(proxyAsV2_2.owner(), owner);
         assertEq(proxyAsV2_2.pauser(), pauser);
         assertEq(proxyAsV2_2.blacklister(), blacklister);
-        assertEq(proxyAsV2_2.masterMinter(), _masterMinter);
+        assertEq(proxyAsV2_2.masterMinter(), owner);
     }
 }

@@ -93,7 +93,8 @@ contract DeployFiatToken is Script, DeployImpl {
         returns (
             FiatTokenV2_2,
             MasterMinter,
-            FiatTokenProxy
+            FiatTokenProxy,
+            ProxyAdmin
         )
     {
         vm.startBroadcast(deployerPrivateKey);
@@ -152,7 +153,12 @@ contract DeployFiatToken is Script, DeployImpl {
 
         vm.stopBroadcast();
 
-        return (fiatTokenV2_2, MasterMinter(address(0)), proxy);
+        return (
+            fiatTokenV2_2,
+            MasterMinter(address(0)),
+            proxy,
+            proxyAdminContract
+        );
     }
 
     /**
@@ -163,7 +169,8 @@ contract DeployFiatToken is Script, DeployImpl {
         returns (
             FiatTokenV2_2,
             MasterMinter,
-            FiatTokenProxy
+            FiatTokenProxy,
+            ProxyAdmin
         )
     {
         return _deploy(_impl);
@@ -177,7 +184,8 @@ contract DeployFiatToken is Script, DeployImpl {
         returns (
             FiatTokenV2_2,
             MasterMinter,
-            FiatTokenProxy
+            FiatTokenProxy,
+            ProxyAdmin
         )
     {
         return _deploy(impl);
