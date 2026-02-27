@@ -1,6 +1,7 @@
 .idea/
 .env*
 !.env.example
+!.env.stargate.example
 **/.DS_Store
 
 artifacts/
