@@ -12,8 +12,7 @@ Integration tests for USDC on Injective blockchain using a local Injective node.
 
 ### Docker Image
 
-Using `injectivelabs/injective-core:v1.17.2-usdc` which includes USDC-specific
-features.
+Using `injectivelabs/injective-core` which includes USDC-specific features.
 
 ### Running Tests Locally
 
