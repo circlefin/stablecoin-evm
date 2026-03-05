@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xF1815bd50389c46847f0Bda824eC8da914045D14",
+    "contractCreationTxHash": "0x79f42af0da5143a4b61d7876a79b92f752be323dba2a662c357a1212b07321a5"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x824D8FcDC36E81618377D140BEC12c3B7E4e4cbA",
+    "contractCreationTxHash": "0xc2567bf089734a80546bd560d100d9ce95b201f78cbdabfdfe47e132cb6cfe08"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0xDF7108f8B10F9b9eC1aba01CCa057268cbf86B6c",
+    "contractCreationTxHash": "0xca35d4cecf0252b0c4d5faeb17460436757341bf3e200c9f319dee287d201d88"
+  },
+  "rpcUrl": "https://horizen.calderachain.xyz/http"
+}

@@ -71,17 +71,159 @@ const hardhatConfig: HardhatUserConfig = {
       url: process.env.MAINNET_RPC_URL || "",
       gasMultiplier,
     },
+    abstract: {
+      url:
+        process.env.RPC_URL_ABSTRACT_MAINNET || "https://api.mainnet.abs.xyz",
+      gasMultiplier,
+    },
+    ape: {
+      url: process.env.RPC_URL_APE_MAINNET || "https://apechain.drpc.org",
+      gasMultiplier,
+    },
+    apexfusionnexus: {
+      url:
+        process.env.RPC_URL_APEXFUSIONNEXUS_MAINNET ||
+        "https://rpc.nexus.mainnet.apexfusion.org",
+      gasMultiplier,
+    },
+    bera: {
+      url: process.env.RPC_URL_BERA_MAINNET || "https://rpc.berachain-apis.com",
+      gasMultiplier,
+    },
+    botanix: {
+      url: process.env.RPC_URL_BOTANIX_MAINNET || "https://rpc.botanixlabs.com",
+      gasMultiplier,
+    },
+    camp: {
+      url:
+        process.env.RPC_URL_CAMP_MAINNET ||
+        "https://rpc.camp.raas.gelato.cloud",
+      gasMultiplier,
+    },
+    cronos: {
+      url: process.env.RPC_URL_CRONOS_MAINNET || "https://rpc.stable.xyz",
+      gasMultiplier,
+    },
+    degen: {
+      url: process.env.RPC_URL_DEGEN_MAINNET || "https://rpc.degen.tips",
+      gasMultiplier,
+    },
+    doma: {
+      url: process.env.RPC_URL_DOMA_MAINNET || "https://doma.drpc.org",
+      gasMultiplier,
+    },
+    edu: {
+      url:
+        process.env.RPC_URL_EDU_MAINNET ||
+        "https://rpc.edu-chain.raas.gelato.cloud",
+      gasMultiplier,
+    },
+    flow: {
+      url:
+        process.env.RPC_URL_FLOW_MAINNET ||
+        "https://mainnet.evm.nodes.onflow.org",
+      gasMultiplier,
+    },
+    fuse: {
+      url: process.env.RPC_URL_FUSE_MAINNET || "https://rpc.fuse.io",
+      gasMultiplier,
+    },
+    gatelayer: {
+      url:
+        process.env.RPC_URL_GATELAYER_MAINNET ||
+        "https://gatelayer-mainnet.gatenode.cc",
+      gasMultiplier,
+    },
+    glue: {
+      url: process.env.RPC_URL_GLUE_MAINNET || "https://rpc.glue.net",
+      gasMultiplier,
+    },
+    goat: {
+      url: process.env.RPC_URL_GOAT_MAINNET || "https://rpc.goat.network",
+      gasMultiplier,
+    },
+    hemi: {
+      url:
+        process.env.RPC_URL_HEMI_MAINNET ||
+        "https://7e57304f.rpc.hemi.network/rpc",
+      gasMultiplier,
+    },
+    horizen: {
+      url:
+        process.env.RPC_URL_HORIZEN_MAINNET ||
+        "https://horizen.calderachain.xyz/http",
+      gasMultiplier,
+    },
+    ink: {
+      url: process.env.RPC_URL_INK_MAINNET || "https://rpc-gel.inkonchain.com",
+      gasMultiplier,
+    },
+    islander: {
+      url:
+        process.env.RPC_URL_ISLANDER_MAINNET ||
+        "https://evm-rpc-vana.josephtran.xyz",
+      gasMultiplier,
+    },
+    moca: {
+      url: process.env.RPC_URL_MOCA_MAINNET || "https://rpc.mocachain.org",
+      gasMultiplier,
+    },
+    nibiru: {
+      url: process.env.RPC_URL_NIBIRU_MAINNET || "https://evm-rpc.nibiru.fi",
+      gasMultiplier,
+    },
+    og: {
+      url: process.env.RPC_URL_OG_MAINNET || "https://evmrpc.0g.ai",
+      gasMultiplier,
+    },
+    orderly: {
+      url: process.env.RPC_URL_ORDERLY_MAINNET || "https://rpc.orderly.network",
+      gasMultiplier,
+    },
+    peaq: {
+      url: process.env.RPC_URL_PEAQ_MAINNET || "https://evm.peaq.network",
+      gasMultiplier,
+    },
     plumephoenix: {
       url: "https://phoenix-rpc.plumenetwork.xyz",
       gasMultiplier,
-      // apiUrl: " https://phoenix-explorer.plumenetwork.xyz/api/"
+    },
+    redbelly: {
+      url:
+        process.env.RPC_URL_REDBELLY_MAINNET ||
+        "https://governors.mainnet.redbelly.network",
+      gasMultiplier,
+    },
+    rootstock: {
+      url:
+        process.env.RPC_URL_ROOTSTOCK_MAINNET || "https://public-node.rsk.co",
+      gasMultiplier,
     },
     somnia: {
       url: "https://api.infra.mainnet.somnia.network/",
-      // url: "http://127.0.0.1:8545",
-
-      // accounts,
       chainId: 5031,
+    },
+    stable: {
+      url: process.env.RPC_URL_STABLE_MAINNET || "https://rpc.stable.xyz",
+      gasMultiplier,
+    },
+    story: {
+      url: process.env.RPC_URL_STORY_MAINNET || "https://mainnet.storyrpc.io",
+      gasMultiplier,
+    },
+    superposition: {
+      url:
+        process.env.RPC_URL_SUPERPOSITION_MAINNET ||
+        "https://rpc.superposition.so",
+      gasMultiplier,
+    },
+    telos: {
+      url: process.env.RPC_URL_TELOS_MAINNET || "https://rpc.telos.net",
+      gasMultiplier,
+    },
+    xdc: {
+      url: process.env.RPC_URL_XDC_MAINNET || "https://rpc1.xinfin.network",
+      gasMultiplier,
     },
   },
   typechain: {

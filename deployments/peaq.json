@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x674843c06ff83502ddb4d37c2e09c01cda38cbc8",
+    "contractCreationTxHash": "0x0afc9bd46c1b9663699f9f772e5745364215d03b981f3cfdcbe22f866e6d8498"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xbab93b7ad7fe8692a878b95a8e689423437cc500",
+    "contractCreationTxHash": "0x19ebbbf58efcb365a74ad6081153967ef85f6e8769df82343e0ec8b13505143b"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0xbbA60da06c2c5424f03f7434542280FCAd453d10",
+    "contractCreationTxHash": "0xc91bbe4d7c0e4202b445beb23c03b01b433b21d9381d356159df1840d1a4b960"
+  },
+  "rpcUrl": "https://peaq.api.onfinality.io/public"
+}

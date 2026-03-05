@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x9895D81bB462A195b4922ED7De0e3ACD007c32CB",
+    "contractCreationTxHash": "0x17c0b678c3652fe07c8999a5bf9b2cb2dadceb0db6fd1a2329063e21283c2b1f"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x0cEb237E109eE22374a567c6b09F373C73FA4cBb",
+    "contractCreationTxHash": "0xd0b1e639cbddc5cb8cd059905b915b0b0102060a132cb82be67be3d8e9f2fa7b"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x12a272A581feE5577A5dFa371afEB4b2F3a8C2F8",
+    "contractCreationTxHash": "0xc8a3ed86f6611d7584e53d00b9133fad0b203445ab4c6731c01d059c651864a0"
+  },
+  "rpcUrl": "https://rpc.edu-chain.raas.gelato.cloud"
+}

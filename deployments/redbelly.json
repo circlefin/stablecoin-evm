@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xAD81f03e1D31DcC1f6CC8c2C15B83113D7d5283B",
+    "contractCreationTxHash": "0x3e84f70df7af034ed146339c162b9a1f9c036136e9bde860941c7998af7f8643"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x534D6EB0e0F55F521Ad54aFc7fA780Ad1Cb6B40a",
+    "contractCreationTxHash": "0x3ee900f08007a9e677d36f87e5687010b6f1d1b4bdb0793eb64f6bdc91244ea7"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0xE08DED898D7782B085cD240d7B234063696765aD",
+    "contractCreationTxHash": "0x11b74836e9815ff70d94815a8bd216e5bfd3e0fbd605c4b8f070ff9e4299ec4d"
+  },
+  "rpcUrl": "https://governors.mainnet.redbelly.network"
+}
