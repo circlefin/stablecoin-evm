@@ -27,8 +27,10 @@ libs = [
     "lib",
     "node_modules",
 ]
+auto_detect_remappings = false
 remappings = [
-    "forge-std/=lib/forge-std/src",
+    "forge-std/=lib/forge-std/src/",
+    "ds-test/=lib/forge-std/lib/ds-test/src/",
     "@openzeppelin/=node_modules/@openzeppelin/",
 ]
 fs_permissions = [

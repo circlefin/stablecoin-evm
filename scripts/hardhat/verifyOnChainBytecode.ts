@@ -247,17 +247,24 @@ export async function verifyOnChainBytecode(
   }
 
   // ==== Replace embedded address in library contracts
-  // Library contract bytecode changes at deploy time. The contract address is embedded after the first push instruction
+  // In Solidity <0.8.20, library bytecode embeds the deployed address after the
+  // first PUSH20 (0x73) instruction for call protection:
+  //   0x73<20-byte address>30...
+  // In Solidity >=0.8.20 with viaIR, libraries use the ADDRESS opcode instead,
+  // so no address substitution is needed.
   // https://docs.soliditylang.org/en/develop/contracts.html#call-protection-for-libraries
   if (isLibrary) {
-    // Replace bytecode (4, 44) with contract address
-    const firstInstructionLength = 4;
-    expectedRuntimeBytecode =
-      expectedRuntimeBytecode.slice(0, firstInstructionLength) +
-      contractAddress.toLowerCase().slice(2) +
-      expectedRuntimeBytecode.slice(
-        firstInstructionLength + contractAddress.slice(2).length
-      );
+    const hasEmbeddedAddress = expectedRuntimeBytecode.startsWith("0x73");
+    if (hasEmbeddedAddress) {
+      // Replace bytecode (4, 44) with contract address
+      const firstInstructionLength = 4;
+      expectedRuntimeBytecode =
+        expectedRuntimeBytecode.slice(0, firstInstructionLength) +
+        contractAddress.toLowerCase().slice(2) +
+        expectedRuntimeBytecode.slice(
+          firstInstructionLength + contractAddress.slice(2).length
+        );
+    }
   }
 
   // ==== For contracts that use external libraries, replace embedded library address with locally compiled bytecode with actual library addresses from user input.
