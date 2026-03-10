@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 /**
  * @dev Interface of the ERC1271 standard signature validation method for
@@ -29,8 +29,8 @@ interface IERC1271 {
      * @param signature     Signature byte array associated with the provided data hash
      * @return magicValue   bytes4 magic value 0x1626ba7e when function passes
      */
-    function isValidSignature(bytes32 hash, bytes memory signature)
-        external
-        view
-        returns (bytes4 magicValue);
+    function isValidSignature(
+        bytes32 hash,
+        bytes memory signature
+    ) external view returns (bytes4 magicValue);
 }

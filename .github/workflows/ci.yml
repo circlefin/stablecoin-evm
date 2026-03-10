@@ -29,7 +29,7 @@ env:
 
 jobs:
   run_ci_tests:
-    runs-on: ubuntu-latest
+    runs-on: large-spot
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
           ENABLE_GAS_REPORTER: true
 
   run_hardhat_tests:
-    runs-on: ubuntu-latest
+    runs-on: large-spot
     strategy:
       fail-fast: false
       matrix:
@@ -65,7 +65,8 @@ jobs:
           - grep: "FiatTokenV2:.*"
           - grep: "FiatTokenV2_1:.*"
           - grep: "FiatTokenV2_2:.*"
-          - grep: "FiatTokenV1:.*|FiatTokenV1_1:.*|FiatTokenV2:.*|FiatTokenV2_1:.*|FiatTokenV2_2:.*|gas costs"
+          - grep: "FiatTokenInjectiveV2_2:.*"
+          - grep: "FiatTokenV1:.*|FiatTokenV1_1:.*|FiatTokenV2:.*|FiatTokenV2_1:.*|FiatTokenV2_2:.*|FiatTokenInjectiveV2_2:.*|gas costs"
             invert: true
     steps:
       - name: Check out repository code
@@ -82,10 +83,32 @@ jobs:
 
       - name: Upload test results to artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: crcl-main/upload-artifacts-github-action@1
         with:
           name: junit-report-${{ hashFiles('report/junit.xml') }}
           path: report/junit.xml
+          bucket: circle-cicd-artifacts
+
+  run_injective_integration_tests:
+    runs-on: large-dind-spot
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Setup CI Environment
+        uses: ./.github/composite-actions/setup-ci
+
+      - name: Compile contracts
+        run: yarn compile
+
+      - name: Start Injective localnet
+        run: ./scripts/injective/start_network.sh
+
+      - name: Run Injective integration tests
+        run: yarn test:injective
+
+      - name: Stop Injective localnet
+        run: ./scripts/injective/stop_network.sh
 
   scan:
     if: github.event_name == 'pull_request'
@@ -96,3 +119,10 @@ jobs:
     with:
       allow-reciprocal-licenses: false
 
+  check-pr:
+    needs: [run_hardhat_tests, run_injective_integration_tests]
+    uses: ./.github/workflows/check-pr.yml
+    permissions:
+      checks: write
+      contents: write
+      actions: read

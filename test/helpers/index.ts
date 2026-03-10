@@ -27,8 +27,25 @@ import {
   FiatTokenV2_2Instance,
   FiatTokenV2Instance,
   FiatTokenCeloV2_2Instance,
+  FiatTokenInjectiveV2_2Instance,
 } from "../../@types/generated";
 import _ from "lodash";
+import {
+  FiatTokenCeloV2_2InstanceExtended,
+  FiatTokenInjectiveV2_2InstanceExtended,
+  FiatTokenV2_2InstanceExtended,
+} from "../../@types/AnyFiatTokenV2Instance";
+import {
+  cancelAuthorizationSignature,
+  cancelAuthorizationSignatureV22,
+  permitSignature,
+  permitSignatureV22,
+  receiveWithAuthorizationSignature,
+  receiveWithAuthorizationSignatureV22,
+  SignatureBytesType,
+  transferWithAuthorizationSignature,
+  transferWithAuthorizationSignatureV22,
+} from "../v2/GasAbstraction/helpers";
 
 const FiatTokenV1 = artifacts.require("FiatTokenV1");
 const FiatTokenV2 = artifacts.require("FiatTokenV2");
@@ -142,12 +159,29 @@ export async function initializeToVersion(
     | FiatTokenV2Instance
     | FiatTokenV2_1Instance
     | FiatTokenV2_2Instance
-    | FiatTokenCeloV2_2Instance,
+    | FiatTokenCeloV2_2Instance
+    | FiatTokenInjectiveV2_2Instance,
   version: "1" | "1.1" | "2" | "2.1" | "2.2",
   fiatTokenOwner: string,
   lostAndFound: string,
   accountsToBlacklist: string[] = []
 ): Promise<void> {
+  if (version >= "2.2") {
+    const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
+    await proxyAsV2_2.initialize({
+      tokenName: "USDC",
+      tokenSymbol: "USDCUSDC",
+      tokenCurrency: "USD",
+      tokenDecimals: 6,
+      newMasterMinter: fiatTokenOwner,
+      newPauser: fiatTokenOwner,
+      newBlacklister: fiatTokenOwner,
+      newOwner: fiatTokenOwner,
+      accountsToBlacklist: accountsToBlacklist,
+    });
+    return;
+  }
+
   const proxyAsV1 = await FiatTokenV1.at(proxyOrImplementation.address);
   await proxyAsV1.initialize(
     "USDC",
@@ -171,15 +205,51 @@ export async function initializeToVersion(
     const proxyAsV2_1 = await FiatTokenV2_1.at(proxyOrImplementation.address);
     await proxyAsV2_1.initializeV2_1(lostAndFound);
   }
+}
 
-  if (version >= "2.2") {
-    const proxyAsV2_2 = await FiatTokenV2_2.at(proxyOrImplementation.address);
-    await proxyAsV2_2.initializeV2_2(accountsToBlacklist, "USDCUSDC");
+/**
+ * With v2.2 we introduce overloaded functions for `permit`,
+ * `transferWithAuthorization`, `receiveWithAuthorization`,
+ * and `cancelAuthorization`.
+ *
+ * Since function overloading isn't supported by Javascript,
+ * the typechain library generates type interfaces for overloaded functions differently.
+ * For instance, we can no longer access the `permit` function with
+ * `fiattoken.permit`. Instead, we need to need to use the full function signature e.g.
+ * `fiattoken.methods["permit(address,address,uint256,uint256,uint8,bytes32,bytes32)"]` OR
+ * `fiattoken.methods["permit(address,address,uint256,uint256,bytes)"]` (v22 interface).
+ *
+ * To preserve type-coherence and reuse test suites written for v2 & v2.1 contracts,
+ * here we re-assign the overloaded method definition to the method name shorthand.
+ */
+export function initializeOverloadedMethods(
+  fiatToken:
+    | FiatTokenV2_2InstanceExtended
+    | FiatTokenCeloV2_2InstanceExtended
+    | FiatTokenInjectiveV2_2InstanceExtended,
+  signatureBytesType: SignatureBytesType
+): void {
+  if (signatureBytesType == SignatureBytesType.Unpacked) {
+    fiatToken.permit = fiatToken.methods[permitSignature];
+    fiatToken.transferWithAuthorization =
+      fiatToken.methods[transferWithAuthorizationSignature];
+    fiatToken.receiveWithAuthorization =
+      fiatToken.methods[receiveWithAuthorizationSignature];
+    fiatToken.cancelAuthorization =
+      fiatToken.methods[cancelAuthorizationSignature];
+  } else {
+    fiatToken.permit = fiatToken.methods[permitSignatureV22];
+    fiatToken.transferWithAuthorization =
+      fiatToken.methods[transferWithAuthorizationSignatureV22];
+    fiatToken.receiveWithAuthorization =
+      fiatToken.methods[receiveWithAuthorizationSignatureV22];
+    fiatToken.cancelAuthorization =
+      fiatToken.methods[cancelAuthorizationSignatureV22];
   }
 }
 
 export async function linkLibraryToTokenContract<
-  T extends Truffle.ContractInstance
+  T extends Truffle.ContractInstance,
 >(tokenContract: Truffle.Contract<T>): Promise<void> {
   try {
     const signatureChecker = await SignatureChecker.new();

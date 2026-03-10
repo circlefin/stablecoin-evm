@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 /**
  * @title EIP712
@@ -54,11 +54,10 @@ library EIP712 {
      * @param version   Contract version
      * @return Domain separator
      */
-    function makeDomainSeparator(string memory name, string memory version)
-        internal
-        view
-        returns (bytes32)
-    {
+    function makeDomainSeparator(
+        string memory name,
+        string memory version
+    ) internal view returns (bytes32) {
         uint256 chainId;
         assembly {
             chainId := chainid()

@@ -17,19 +17,17 @@ available, but can only be called once per proxy.
    roles and trying to use it as a token or pass it off as a real Circle token.
 
    ```js
-   initialize(
-     "",
-     "",
-     "",
-     0,
-     THROWAWAY_ADDRESS,
-     THROWAWAY_ADDRESS,
-     THROWAWAY_ADDRESS,
-     THROWAWAY_ADDRESS
-   );
-   initializeV2("");
-   initializeV2_1(THROWAWAY_ADDRESS);
-   initializeV2_2([], "");
+   initialize({
+     tokenName: "",
+     tokenSymbol: "",
+     tokenCurrency: "",
+     tokenDecimals: 0,
+     newMasterMinter: THROWAWAY_ADDRESS,
+     newPauser: THROWAWAY_ADDRESS,
+     newBlacklister: THROWAWAY_ADDRESS,
+     newOwner: THROWAWAY_ADDRESS,
+     accountsToBlacklist: [],
+   });
    ```
 
 3. Verify that all fields in the FiatToken have been initialized correctly and
@@ -73,25 +71,22 @@ available, but can only be called once per proxy.
    here are important, especially for the roles that will control the contract.
 
    ```js
-   initialize(
-     tokenName,
-     tokenSymbol,
-     tokenCurrency,
-     tokenDecimals,
-     masterMinterAddress,
-     pauserAddress,
-     blacklisterAddress,
-     ownerAddress
-   );
-   initializeV2(newTokenName);
-   initializeV2_1(lostAndFoundAddress);
-   initializeV2_2(accountsToBlacklist, newTokenSymbol);
+   initialize({
+     tokenName: tokenName,
+     tokenSymbol: tokenSymbol,
+     tokenCurrency: tokenCurrency,
+     tokenDecimals: tokenDecimals,
+     newMasterMinter: masterMinterAddress,
+     newPauser: pauserAddress,
+     newBlacklister: blacklisterAddress,
+     newOwner: ownerAddress,
+     accountsToBlacklist: accountsToBlacklist,
+   });
    ```
 
 5. Verify the fields have been properly initialized. Verification should be
    performed independently by multiple people to make sure that the contract has
    been deployed correctly. The following fields should be verified:
-
    - `admin` is the expected address
    - `implementation` is the address of the implementation contract
    - `name`, `symbol`, `currency` and `decimals` are as expected

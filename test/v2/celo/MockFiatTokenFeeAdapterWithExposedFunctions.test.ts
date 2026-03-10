@@ -88,7 +88,7 @@ describe("MockFiatTokenFeeAdapterWithExposedFunctions", () => {
     it("should revert upscaling when overflowed", async () => {
       await expectRevert(
         feeAdapter.internal_upscale(MAX_UINT256_BN),
-        "SafeMath: multiplication overflow"
+        "panic code 0x11" // Arithmetic overflow in Solidity 0.8+
       );
     });
   });

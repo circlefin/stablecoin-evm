@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -25,7 +25,7 @@ contract DummyERC20 is ERC20 {
         string memory tokenName,
         string memory tokenSymbol,
         uint256 initialSupply
-    ) public ERC20(tokenName, tokenSymbol) {
+    ) ERC20(tokenName, tokenSymbol) {
         _mint(msg.sender, initialSupply);
     }
 }

@@ -98,7 +98,6 @@ the third-party team should:
 1. Build the [FiatToken contracts](../README.md#contracts) from source. To
    ensure bytecode parity, the Solidity compiler configuration used should match
    the following settings:
-
    - Solidity version: 0.6.12
    - Optimizer runs: 10000000 (Partners should attempt to use the same number of
      optimizer runs, but may choose to reduce it if there are technical

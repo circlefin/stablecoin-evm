@@ -20,12 +20,12 @@ import { usesOriginalStorageSlotPositions } from "../../helpers/storageSlots.beh
 
 import {
   expectRevert,
+  initializeOverloadedMethods,
   initializeToVersion,
   linkLibraryToTokenContract,
 } from "../../helpers";
 import { behavesLikeFiatTokenV2 } from "./../v2.behavior";
 import { behavesLikeFiatTokenV22 } from "./../v2_2.behavior";
-import { initializeOverloadedMethods } from "../FiatTokenV2_2.test";
 import { SignatureBytesType } from "../GasAbstraction/helpers";
 import {
   AnyFiatTokenV2Instance,
@@ -82,7 +82,7 @@ describe("FiatTokenCeloV2_2", () => {
   });
 
   describe("initialized FiatTokenCeloV2_2 contract", async () => {
-    await fiatTokenCelo.initializeV2_2([], "CELOUSDC");
+    await fiatTokenCelo.initializeNext();
 
     behavesLikeFiatTokenV22(getFiatToken(SignatureBytesType.Unpacked));
     behavesLikeFiatTokenV2(2.2, getFiatToken(SignatureBytesType.Packed));
@@ -149,9 +149,8 @@ describe("FiatTokenCeloV2_2", () => {
         { from: fiatTokenOwner }
       );
 
-      const log = updateFeeCallerEvent.logs[0] as Truffle.TransactionLog<
-        FeeCallerChanged
-      >;
+      const log = updateFeeCallerEvent
+        .logs[0] as Truffle.TransactionLog<FeeCallerChanged>;
       assert.strictEqual(log.event, "FeeCallerChanged");
       assert.strictEqual(log.args.newAddress, newFeeCaller);
     });

@@ -41,3 +41,8 @@ pkg:npm/web3-providers-ipc@1.10.1
 pkg:npm/web3-providers-ws@1.10.1
 pkg:npm/web3-shh@1.10.1
 pkg:npm/web3-utils@1.10.1
+pkg:npm/google-protobuf
+pkg:npm/protobufjs
+pkg:npm/bignumber.js
+pkg:npm/@pkgjs/parseargs@0.11.0
+pkg:npm/@protobuf-ts/runtime@2.11.1

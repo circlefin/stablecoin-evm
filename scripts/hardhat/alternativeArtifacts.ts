@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { LinkReferences } from "hardhat/types";
 import { ContractArtifact } from "./verifyOnChainBytecode";
 import * as fs from "fs";
 
@@ -23,14 +24,15 @@ type AlternativeArtifact = Map<string, ContractArtifact>;
 
 export enum ArtifactType {
   OPMainnet = "OPMainnet",
+  ArbMainnet = "ArbMainnet",
+  BaseMainnet = "BaseMainnet",
 }
 
 const CACHED_ARTIFACTS_PATH = "./cached_artifacts/";
 
 // Read from https://optimistic.etherscan.io/token/0x0b2c639c533813f4aa9d7837caf62653d097ff85#code
-export const opMainnetFiatTokenProxyContractCreationBytecode = readCachedArtifact(
-  "opMainnetFiatTokenProxyContractCreationBytecode.bin"
-);
+export const opMainnetFiatTokenProxyContractCreationBytecode =
+  readCachedArtifact("opMainnetFiatTokenProxyContractCreationBytecode.bin");
 const opMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
   "opMainnetFiatTokenProxyRuntimeBytecode.bin"
 );
@@ -47,10 +49,101 @@ const opMainnetArtifacts: AlternativeArtifact = new Map([
   ],
 ]);
 
-export const alternativeArtifacts: Map<
-  ArtifactType,
-  AlternativeArtifact
-> = new Map([[ArtifactType.OPMainnet, opMainnetArtifacts]]);
+// Read from https://arbiscan.io/token/0xaf88d065e77c8cC2239327C5EDb3A432268e5831#code
+export const arbMainnetFiatTokenProxyContractCreationBytecode =
+  readCachedArtifact("arbMainnetFiatTokenProxyContractCreationBytecode.bin");
+const arbMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
+  "arbMainnetFiatTokenProxyRuntimeBytecode.bin"
+);
+
+const arbMainnetArtifacts: AlternativeArtifact = new Map([
+  [
+    "FiatTokenProxy",
+    {
+      creationBytecode: arbMainnetFiatTokenProxyContractCreationBytecode,
+      runtimeBytecode: arbMainnetFiatTokenProxyRuntimeBytecode,
+      creationLinkReferences: {},
+      runtimeLinkReferences: {},
+    },
+  ],
+]);
+
+// Read from https://basescan.org/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913#code
+export const baseMainnetFiatTokenProxyContractCreationBytecode =
+  readCachedArtifact("baseMainnetFiatTokenProxyContractCreationBytecode.bin");
+const baseMainnetFiatTokenProxyRuntimeBytecode = readCachedArtifact(
+  "baseMainnetFiatTokenProxyRuntimeBytecode.bin"
+);
+
+// Read from https://basescan.org/address/0x2ce6311ddae708829bc0784c967b7d77d19fd779#code
+const baseMainnetFiatTokenV2_2ContractCreationBytecode = readCachedArtifact(
+  "baseMainnetFiatTokenV2_2ContractCreationBytecode.bin"
+);
+const baseMainnetFiatTokenV2_2RuntimeBytecode = readCachedArtifact(
+  "baseMainnetFiatTokenV2_2RuntimeBytecode.bin"
+);
+
+const baseMainnetFiatTokenV2_2CreationLinkReferences: LinkReferences = {
+  "contracts/util/SignatureChecker.sol": {
+    SignatureChecker: [
+      { start: 18494, length: 20 },
+      { start: 20209, length: 20 },
+    ],
+  },
+};
+const baseMainnetFiatTokenV2_2RuntimeLinkReferences: LinkReferences = {
+  "contracts/util/SignatureChecker.sol": {
+    SignatureChecker: [
+      { start: 18391, length: 20 },
+      { start: 20106, length: 20 },
+    ],
+  },
+};
+
+// Read from https://basescan.org/address/0x2d943e25e1859ed786afe4afb2b42e14efac691e#code
+const baseMainnetSignatureCheckerContractCreationBytecode = readCachedArtifact(
+  "baseMainnetSignatureCheckerContractCreationBytecode.bin"
+);
+const baseMainnetSignatureCheckerRuntimeBytecode = readCachedArtifact(
+  "baseMainnetSignatureCheckerRuntimeBytecode.bin"
+);
+
+const baseMainnetArtifacts: AlternativeArtifact = new Map([
+  [
+    "FiatTokenProxy",
+    {
+      creationBytecode: baseMainnetFiatTokenProxyContractCreationBytecode,
+      runtimeBytecode: baseMainnetFiatTokenProxyRuntimeBytecode,
+      creationLinkReferences: {},
+      runtimeLinkReferences: {},
+    },
+  ],
+  [
+    "FiatTokenV2_2",
+    {
+      creationBytecode: baseMainnetFiatTokenV2_2ContractCreationBytecode,
+      runtimeBytecode: baseMainnetFiatTokenV2_2RuntimeBytecode,
+      creationLinkReferences: baseMainnetFiatTokenV2_2CreationLinkReferences,
+      runtimeLinkReferences: baseMainnetFiatTokenV2_2RuntimeLinkReferences,
+    },
+  ],
+  [
+    "SignatureChecker",
+    {
+      creationBytecode: baseMainnetSignatureCheckerContractCreationBytecode,
+      runtimeBytecode: baseMainnetSignatureCheckerRuntimeBytecode,
+      creationLinkReferences: {},
+      runtimeLinkReferences: {},
+    },
+  ],
+]);
+
+export const alternativeArtifacts: Map<ArtifactType, AlternativeArtifact> =
+  new Map([
+    [ArtifactType.OPMainnet, opMainnetArtifacts],
+    [ArtifactType.ArbMainnet, arbMainnetArtifacts],
+    [ArtifactType.BaseMainnet, baseMainnetArtifacts],
+  ]);
 
 function readCachedArtifact(filename: string): string {
   return (

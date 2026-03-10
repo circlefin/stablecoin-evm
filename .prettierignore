@@ -17,4 +17,7 @@ verification_artifacts/
 
 blacklist.*.json
 
+# Auto-generated protobuf files
+scripts/injective/proto/namespace_pb.ts
+
 LICENSE

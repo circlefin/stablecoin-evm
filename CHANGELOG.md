@@ -1,5 +1,37 @@
 # Changelog
 
+## 2.2.0, Injective variant (2026-01-14)
+
+- Add `IBankModule` interface per Injective documentation
+- Add `FiatTokenInjectiveV2_2` extending `FiatTokenV2_2` with Injective bank
+  precompile integration
+  - Override `initialize()` to set token metadata in the bank module via
+    `setMetadata(name, symbol, decimals)`
+  - Override `_balanceOf()` and `totalSupply()` to read from the bank precompile
+  - Override `_mint()` and `_burn()` to delegate token minting and burning to
+    the bank precompile
+  - Override `_transfer()` to delegate token transfer to the bank precompile
+
+## 2.2.0, Flattened variant (2026-01-02)
+
+- Upgraded `FiatTokenV2_2` to solidity version 0.8.24
+  - Enabled viaIR compiling
+  - Update OpenZeppelin to v5.4.0
+  - Removed safeMath
+  - Now → block.timestamp
+  - Address.isContract() → address.code.length > 0
+- Flattened `FiatTokenV2_2` into a single contract file
+  - Consolidated all FiatToken functionality from V1, V1.1, V2, V2.1, and V2.2
+    while maintaining storage layout compatibility for proxy upgrades
+- Refactored `mint` and `burn` for better extensibility
+  - Extracted internal `_mint()` and `_burn()` function to allow derived
+    contracts to override token minting logic
+- Updated initialization interface
+  - `initialize(InitializeData)` - Single-step initialization for new
+    deployments
+  - `initializeV2_2(...)` - Unchanged upgader function
+  - `initializeNext()` - View-only stub for upgrade compatibility
+
 ## 2.2.0, Celo variant (2024-04-08)
 
 - Add `ICeloGasToken` and `IFiatTokenFeeAdapter` per Celo documentation

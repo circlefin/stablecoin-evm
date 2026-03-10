@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
@@ -83,14 +83,9 @@ contract DeployFiatToken is Script, DeployImpl {
     /**
      * @dev For testing only: splitting deploy logic into an internal function to expose for testing
      */
-    function _deploy(address _impl)
-        internal
-        returns (
-            FiatTokenV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function _deploy(
+        address _impl
+    ) internal returns (FiatTokenV2_2, address, FiatTokenProxy) {
         vm.startBroadcast(deployerPrivateKey);
 
         // If there is an existing implementation contract,
@@ -100,14 +95,6 @@ contract DeployFiatToken is Script, DeployImpl {
 
         FiatTokenProxy proxy = new FiatTokenProxy(address(fiatTokenV2_2));
 
-        // Now that the proxy contract has been deployed, we can deploy the master minter.
-        MasterMinter masterMinter = new MasterMinter(address(proxy));
-
-        // Change the master minter to be owned by the master minter owner
-        masterMinter.transferOwnership(masterMinterOwner);
-
-        // Now that the master minter is set up, we can go back to setting up the proxy and
-        // implementation contracts.
         // Need to change admin first, or the call to initialize won't work
         // since admin can only call methods in the proxy, and not forwarded methods
         proxy.changeAdmin(proxyAdmin);
@@ -117,55 +104,39 @@ contract DeployFiatToken is Script, DeployImpl {
         // The master minter contract's owner is a separate address.
         FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
         proxyAsV2_2.initialize(
-            tokenName,
-            tokenSymbol,
-            tokenCurrency,
-            tokenDecimals,
-            address(masterMinter),
-            pauser,
-            blacklister,
-            owner
+            FiatTokenV2_2.InitializeData({
+                tokenName: tokenName,
+                tokenSymbol: tokenSymbol,
+                tokenCurrency: tokenCurrency,
+                tokenDecimals: tokenDecimals,
+                // setting this to the master minter owner for now
+                // to allow hot key setup before migrating to cold
+                // storage
+                newMasterMinter: masterMinterOwner,
+                newPauser: pauser,
+                newBlacklister: blacklister,
+                newOwner: owner,
+                accountsToBlacklist: new address[](0)
+            })
         );
-
-        // Do the V2 initialization
-        proxyAsV2_2.initializeV2(tokenName);
-
-        // Do the V2_1 initialization
-        proxyAsV2_2.initializeV2_1(owner);
-
-        // Do the V2_2 initialization
-        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
-
         vm.stopBroadcast();
 
-        return (fiatTokenV2_2, masterMinter, proxy);
+        return (fiatTokenV2_2, masterMinterOwner, proxy);
     }
 
     /**
      * @dev For testing only: Helper function that runs deploy script with a specific implementation address
      */
-    function deploy(address _impl)
-        external
-        returns (
-            FiatTokenV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function deploy(
+        address _impl
+    ) external returns (FiatTokenV2_2, address, FiatTokenProxy) {
         return _deploy(_impl);
     }
 
     /**
      * @notice main function that will be run by forge
      */
-    function run()
-        external
-        returns (
-            FiatTokenV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function run() external returns (FiatTokenV2_2, address, FiatTokenProxy) {
         return _deploy(impl);
     }
 }

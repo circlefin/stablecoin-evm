@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenV2_2 } from "../v2/FiatTokenV2_2.sol";
 
@@ -31,9 +31,9 @@ contract UpgradedFiatTokenV2_2NewFieldsTest is FiatTokenV2_2 {
     bool internal initializedV2;
 
     function initialize(
-        string calldata tokenName,
-        string calldata tokenSymbol,
-        string calldata tokenCurrency,
+        string memory tokenName,
+        string memory tokenSymbol,
+        string memory tokenCurrency,
         uint8 tokenDecimals,
         address newMasterMinter,
         address newPauser,
@@ -43,15 +43,19 @@ contract UpgradedFiatTokenV2_2NewFieldsTest is FiatTokenV2_2 {
         address _newAddress,
         uint256 _newUint
     ) external {
-        super.initialize(
-            tokenName,
-            tokenSymbol,
-            tokenCurrency,
-            tokenDecimals,
-            newMasterMinter,
-            newPauser,
-            newBlacklister,
-            newOwner
+        address[] memory emptyBlacklist = new address[](0);
+        this.initialize(
+            FiatTokenV2_2.InitializeData({
+                tokenName: tokenName,
+                tokenSymbol: tokenSymbol,
+                tokenCurrency: tokenCurrency,
+                tokenDecimals: tokenDecimals,
+                newMasterMinter: newMasterMinter,
+                newPauser: newPauser,
+                newBlacklister: newBlacklister,
+                newOwner: newOwner,
+                accountsToBlacklist: emptyBlacklist
+            })
         );
         initV2(_newBool, _newAddress, _newUint);
     }

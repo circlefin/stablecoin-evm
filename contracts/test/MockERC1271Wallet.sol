@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { ECRecover } from "../util/ECRecover.sol";
 import { IERC1271 } from "../interface/IERC1271.sol";
@@ -27,16 +27,14 @@ import { IERC1271 } from "../interface/IERC1271.sol";
 contract MockERC1271Wallet is IERC1271 {
     address private _owner;
 
-    constructor(address owner) public {
+    constructor(address owner) {
         _owner = owner;
     }
 
-    function isValidSignature(bytes32 hash, bytes memory signature)
-        external
-        override
-        view
-        returns (bytes4 magicValue)
-    {
+    function isValidSignature(
+        bytes32 hash,
+        bytes memory signature
+    ) external view override returns (bytes4 magicValue) {
         address recovered = ECRecover.recover(hash, signature);
         return
             recovered == _owner
@@ -51,12 +49,10 @@ contract MockERC1271Wallet is IERC1271 {
  * Adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/874c2d3c02ec1bce6af9a30bc828d3fe2079136b/contracts/mocks/ERC1271WalletMock.sol
  */
 contract MockERC1271WalletReturningBytes32 is IERC1271 {
-    function isValidSignature(bytes32, bytes memory)
-        external
-        override
-        view
-        returns (bytes4)
-    {
+    function isValidSignature(
+        bytes32,
+        bytes memory
+    ) external pure override returns (bytes4) {
         assembly {
             mstore(
                 0,
@@ -75,7 +71,7 @@ contract MockERC1271WalletWithCustomValidation is IERC1271 {
     address private _owner;
     bool private _signatureValid;
 
-    constructor(address owner) public {
+    constructor(address owner) {
         _owner = owner;
     }
 
@@ -83,12 +79,10 @@ contract MockERC1271WalletWithCustomValidation is IERC1271 {
         _signatureValid = signatureValid;
     }
 
-    function isValidSignature(bytes32, bytes memory)
-        external
-        override
-        view
-        returns (bytes4 magicValue)
-    {
+    function isValidSignature(
+        bytes32,
+        bytes memory
+    ) external view override returns (bytes4 magicValue) {
         return _signatureValid ? IERC1271.isValidSignature.selector : bytes4(0);
     }
 }
@@ -104,10 +98,10 @@ contract MockStateModifyingERC1271Wallet {
         return _evoked;
     }
 
-    function isValidSignature(bytes32, bytes memory)
-        external
-        returns (bytes4 magicValue)
-    {
+    function isValidSignature(
+        bytes32,
+        bytes memory
+    ) external returns (bytes4 magicValue) {
         _evoked = true;
         return IERC1271.isValidSignature.selector;
     }

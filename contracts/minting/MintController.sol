@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { Controller } from "./Controller.sol";
 import { MinterManagementInterface } from "./MinterManagementInterface.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -36,8 +35,6 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
  * Controller workers as minters.
  */
 contract MintController is Controller {
-    using SafeMath for uint256;
-
     /**
      * @dev MintController calls the minterManager to execute/record minter
      * management tasks, as well as to query the status of a minter address.
@@ -72,7 +69,7 @@ contract MintController is Controller {
      * @notice Initializes the minterManager.
      * @param _minterManager The address of the minterManager contract.
      */
-    constructor(address _minterManager) public {
+    constructor(address _minterManager) {
         minterManager = MinterManagementInterface(_minterManager);
     }
 
@@ -113,11 +110,9 @@ contract MintController is Controller {
      * @notice Enables the minter and sets its allowance.
      * @param _newAllowance New allowance to be set for minter.
      */
-    function configureMinter(uint256 _newAllowance)
-        public
-        onlyController
-        returns (bool)
-    {
+    function configureMinter(
+        uint256 _newAllowance
+    ) public onlyController returns (bool) {
         address minter = controllers[msg.sender];
         emit MinterConfigured(msg.sender, minter, _newAllowance);
         return internal_setMinterAllowance(minter, _newAllowance);
@@ -129,11 +124,9 @@ contract MintController is Controller {
      * @dev An minter is considered active if minterManager.isMinter(minter)
      * returns true.
      */
-    function incrementMinterAllowance(uint256 _allowanceIncrement)
-        public
-        onlyController
-        returns (bool)
-    {
+    function incrementMinterAllowance(
+        uint256 _allowanceIncrement
+    ) public onlyController returns (bool) {
         require(
             _allowanceIncrement > 0,
             "Allowance increment must be greater than 0"
@@ -145,7 +138,7 @@ contract MintController is Controller {
         );
 
         uint256 currentAllowance = minterManager.minterAllowance(minter);
-        uint256 newAllowance = currentAllowance.add(_allowanceIncrement);
+        uint256 newAllowance = currentAllowance + _allowanceIncrement;
 
         emit MinterAllowanceIncremented(
             msg.sender,
@@ -163,11 +156,9 @@ contract MintController is Controller {
      * decrementMinterAllowance() transaction to a minter and not worry
      * about it being used to undo a removeMinter() transaction.
      */
-    function decrementMinterAllowance(uint256 _allowanceDecrement)
-        public
-        onlyController
-        returns (bool)
-    {
+    function decrementMinterAllowance(
+        uint256 _allowanceDecrement
+    ) public onlyController returns (bool) {
         require(
             _allowanceDecrement > 0,
             "Allowance decrement must be greater than 0"
@@ -184,7 +175,7 @@ contract MintController is Controller {
                 ? _allowanceDecrement
                 : currentAllowance
         );
-        uint256 newAllowance = currentAllowance.sub(actualAllowanceDecrement);
+        uint256 newAllowance = currentAllowance - actualAllowanceDecrement;
 
         emit MinterAllowanceDecremented(
             msg.sender,
@@ -204,10 +195,10 @@ contract MintController is Controller {
      * @param _minter Minter to set new allowance of.
      * @param _newAllowance New allowance to be set for minter.
      */
-    function internal_setMinterAllowance(address _minter, uint256 _newAllowance)
-        internal
-        returns (bool)
-    {
+    function internal_setMinterAllowance(
+        address _minter,
+        uint256 _newAllowance
+    ) internal returns (bool) {
         return minterManager.configureMinter(_minter, _newAllowance);
     }
 }

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenV1_1 } from "../v1.1/FiatTokenV1_1.sol";
 import { EIP712 } from "../util/EIP712.sol";
@@ -51,7 +51,10 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      * @param increment Amount of increase in allowance
      * @return True if successful
      */
-    function increaseAllowance(address spender, uint256 increment)
+    function increaseAllowance(
+        address spender,
+        uint256 increment
+    )
         external
         virtual
         whenNotPaused
@@ -69,7 +72,10 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      * @param decrement Amount of decrease in allowance
      * @return True if successful
      */
-    function decreaseAllowance(address spender, uint256 decrement)
+    function decreaseAllowance(
+        address spender,
+        uint256 decrement
+    )
         external
         virtual
         whenNotPaused
@@ -213,7 +219,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         address spender,
         uint256 increment
     ) internal override {
-        _approve(owner, spender, allowed[owner][spender].add(increment));
+        _approve(owner, spender, allowed[owner][spender] + increment);
     }
 
     /**
@@ -227,13 +233,6 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         address spender,
         uint256 decrement
     ) internal override {
-        _approve(
-            owner,
-            spender,
-            allowed[owner][spender].sub(
-                decrement,
-                "ERC20: decreased allowance below zero"
-            )
-        );
+        _approve(owner, spender, allowed[owner][spender] - decrement);
     }
 }
