@@ -2238,11 +2238,11 @@
     eslint-visitor-keys "^3.3.0"
 
 "@typescript/vfs@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@typescript/vfs/-/vfs-1.6.2.tgz#e66883c5a8dcc5d2794dfa05c8f9749d767219f8"
-  integrity sha512-hoBwJwcbKHmvd2QVebiytN1aELvpk9B74B4L1mFm/XT1Q/VOYAWl2vQ9AWRFtQq8zmz6enTpfTV8WRc4ATjW/g==
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/@typescript/vfs/-/vfs-1.6.4.tgz#7543a3bd961727eb51c8bdafc3ed5e0fb5f56dff"
+  integrity sha512-PJFXFS4ZJKiJ9Qiuix6Dz/OwEIqHD7Dme1UwZhTK11vR+5dqW2ACbdndWQexBzCx+CPuMe5WBYQWCsFyGlQLlQ==
   dependencies:
-    debug "^4.1.1"
+    debug "^4.4.3"
 
 "@ungap/structured-clone@^1.2.0":
   version "1.3.0"
@@ -3632,7 +3632,7 @@ debug@^3.2.7:
   dependencies:
     ms "^2.1.1"
 
-debug@^4.3.2, debug@^4.3.5:
+debug@^4.3.2, debug@^4.3.5, debug@^4.4.3:
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.4.3.tgz#c6ae432d9bd9662582fce08709b038c58e9e3d6a"
   integrity sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==

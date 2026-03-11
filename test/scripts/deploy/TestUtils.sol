@@ -24,8 +24,6 @@ import { Blacklistable } from "../../../contracts/v1/Blacklistable.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 import { FiatTokenCeloV2_2 } from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
-import { Create2Factory } from "../../../contracts/test/Create2Factory.sol";
-
 // solhint-disable max-states-count
 
 contract TestUtils is Test {
@@ -146,9 +144,6 @@ contract TestUtils is Test {
         vm.setEnv("COLD_PAUSER_ADDRESS", vm.toString(coldPauser));
 
         // Deploy an instance of proxy contract to configure contract address in env
-        vm.prank(deployer);
-        Create2Factory factory = new Create2Factory();
-
         FiatTokenV2_2 v2_2 = new FiatTokenV2_2();
 
         vm.prank(proxyAdmin);
@@ -172,11 +167,6 @@ contract TestUtils is Test {
                 newOwner: owner,
                 accountsToBlacklist: new address[](0)
             })
-        );
-
-        vm.setEnv(
-            "CREATE2_FACTORY_CONTRACT_ADDRESS",
-            vm.toString(address(factory))
         );
 
         vm.setEnv("FIAT_TOKEN_PROXY_ADDRESS", vm.toString(address(proxy)));
@@ -259,60 +249,6 @@ contract TestUtils is Test {
         assertEq(address(masterMinter.getMinterManager()), _proxy);
     }
 
-    function validateMasterMinterWhenMintersConfigured(
-        MasterMinter masterMinter,
-        address _proxy
-    ) internal {
-        assertEq(masterMinter.owner(), masterMinterOwner);
-        assertEq(address(masterMinter.getMinterManager()), _proxy);
-
-        assertEq(masterMinter.getWorker(minterControllers[0]), minters[0]);
-        assertEq(masterMinter.getWorker(minterControllers[1]), minters[1]);
-        assertEq(masterMinter.getWorker(minterControllers[2]), minters[2]);
-
-        assertEq(
-            masterMinter.getWorker(
-                vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
-            ),
-            address(0)
-        );
-
-        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(_proxy);
-        assertEq(proxyAsV2_2.isMinter(minters[0]), true);
-        assertEq(proxyAsV2_2.isMinter(minters[1]), true);
-        assertEq(proxyAsV2_2.isMinter(minters[2]), true);
-        assertEq(proxyAsV2_2.minterAllowance(minters[0]), minterAllowances[0]);
-        assertEq(proxyAsV2_2.minterAllowance(minters[1]), minterAllowances[1]);
-        assertEq(proxyAsV2_2.minterAllowance(minters[2]), minterAllowances[2]);
-    }
-
-    function validateMasterMinterWhenMintersNotConfigured(
-        MasterMinter masterMinter,
-        address _proxy
-    ) internal {
-        assertEq(masterMinter.owner(), masterMinterOwner);
-        assertEq(address(masterMinter.getMinterManager()), _proxy);
-
-        assertEq(masterMinter.getWorker(minterControllers[0]), address(0));
-        assertEq(masterMinter.getWorker(minterControllers[1]), address(0));
-        assertEq(masterMinter.getWorker(minterControllers[2]), address(0));
-
-        assertEq(
-            masterMinter.getWorker(
-                vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
-            ),
-            address(0)
-        );
-
-        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(_proxy);
-        assertEq(proxyAsV2_2.isMinter(minters[0]), false);
-        assertEq(proxyAsV2_2.isMinter(minters[1]), false);
-        assertEq(proxyAsV2_2.isMinter(minters[2]), false);
-        assertEq(proxyAsV2_2.minterAllowance(minters[0]), 0);
-        assertEq(proxyAsV2_2.minterAllowance(minters[1]), 0);
-        assertEq(proxyAsV2_2.minterAllowance(minters[2]), 0);
-    }
-
     function validateAddressesBlacklistedState(
         address proxy,
         bool blacklisted
@@ -323,22 +259,5 @@ contract TestUtils is Test {
                 blacklisted
             );
         }
-    }
-
-    function validateStandaloneMasterMinter(
-        MasterMinter masterMinter
-    ) internal {
-        // Validate that the minter manager is correctly set to the fiat token proxy
-        assertEq(
-            address(masterMinter.getMinterManager()),
-            vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS")
-        );
-        assertEq(masterMinter.owner(), masterMinterOwner);
-        assertEq(
-            masterMinter.getWorker(
-                vm.envAddress("CREATE2_FACTORY_CONTRACT_ADDRESS")
-            ),
-            address(0)
-        );
     }
 }

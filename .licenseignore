@@ -46,3 +46,4 @@ pkg:npm/protobufjs
 pkg:npm/bignumber.js
 pkg:npm/@pkgjs/parseargs@0.11.0
 pkg:npm/@protobuf-ts/runtime@2.11.1
+pkg:npm/%40bufbuild/protobuf
