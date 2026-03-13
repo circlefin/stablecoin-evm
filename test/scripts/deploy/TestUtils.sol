@@ -33,20 +33,20 @@ contract TestUtils is Test {
     uint256 internal ownerPrivateKey = 4;
     uint256 internal pauserPrivateKey = 5;
     uint256 internal blacklisterPrivateKey = 6;
-    uint256 internal prodMinterPrivateKey = 7;
-    uint256 internal prodBurnerPrivateKey = 8;
-    uint256 internal stgMinterPrivateKey = 9;
-    uint256 internal stgBurnerPrivateKey = 10;
-    uint256 internal prodMinterControllerIncrementerPrivateKey = 11;
-    uint256 internal prodMinterControllerRemoverPrivateKey = 12;
-    uint256 internal prodBurnerControllerPrivateKey = 13;
-    uint256 internal stgMinterControllerIncrementerPrivateKey = 14;
-    uint256 internal stgMinterControllerRemoverPrivateKey = 15;
-    uint256 internal stgBurnerControllerPrivateKey = 16;
-    uint256 internal coldMasterMinterOwnerPrivateKey = 17;
-    uint256 internal coldProxyAdminPrivateKey = 18;
-    uint256 internal coldOwnerPrivateKey = 19;
-    uint256 internal coldPauserPrivateKey = 20;
+    uint256 internal minter1PrivateKey = 7;
+    uint256 internal burner1PrivateKey = 8;
+    uint256 internal minter2PrivateKey = 9;
+    uint256 internal burner2PrivateKey = 10;
+    uint256 internal minterControllerIncrementer1PrivateKey = 11;
+    uint256 internal minterControllerRemover1PrivateKey = 12;
+    uint256 internal burnerController1PrivateKey = 13;
+    uint256 internal minterControllerIncrementer2PrivateKey = 14;
+    uint256 internal minterControllerRemover2PrivateKey = 15;
+    uint256 internal burnerController2PrivateKey = 16;
+    uint256 internal altMasterMinterOwnerPrivateKey = 17;
+    uint256 internal altProxyAdminPrivateKey = 18;
+    uint256 internal altOwnerPrivateKey = 19;
+    uint256 internal altPauserPrivateKey = 20;
 
     address internal deployer = vm.addr(deployerPrivateKey);
     address internal proxyAdmin = vm.addr(proxyAdminPrivateKey);
@@ -54,27 +54,27 @@ contract TestUtils is Test {
     address internal owner = vm.addr(ownerPrivateKey);
     address internal pauser = vm.addr(pauserPrivateKey);
     address internal blacklister = vm.addr(blacklisterPrivateKey);
-    address internal prodMinter = vm.addr(prodMinterPrivateKey);
-    address internal prodBurner = vm.addr(prodBurnerPrivateKey);
-    address internal stgMinter = vm.addr(stgMinterPrivateKey);
-    address internal stgBurner = vm.addr(stgBurnerPrivateKey);
-    address internal prodMinterControllerIncrementer =
-        vm.addr(prodMinterControllerIncrementerPrivateKey);
-    address internal prodMinterControllerRemover =
-        vm.addr(prodMinterControllerRemoverPrivateKey);
-    address internal prodBurnerController =
-        vm.addr(prodBurnerControllerPrivateKey);
-    address internal stgMinterControllerIncrementer =
-        vm.addr(stgMinterControllerIncrementerPrivateKey);
-    address internal stgMinterControllerRemover =
-        vm.addr(stgMinterControllerRemoverPrivateKey);
-    address internal stgBurnerController =
-        vm.addr(stgBurnerControllerPrivateKey);
-    address internal coldMasterMinterOwner =
-        vm.addr(coldMasterMinterOwnerPrivateKey);
-    address internal coldProxyAdmin = vm.addr(coldProxyAdminPrivateKey);
-    address internal coldOwner = vm.addr(coldOwnerPrivateKey);
-    address internal coldPauser = vm.addr(coldPauserPrivateKey);
+    address internal minter1 = vm.addr(minter1PrivateKey);
+    address internal burner1 = vm.addr(burner1PrivateKey);
+    address internal minter2 = vm.addr(minter2PrivateKey);
+    address internal burner2 = vm.addr(burner2PrivateKey);
+    address internal minterControllerIncrementer1 =
+        vm.addr(minterControllerIncrementer1PrivateKey);
+    address internal minterControllerRemover1 =
+        vm.addr(minterControllerRemover1PrivateKey);
+    address internal burnerController1 =
+        vm.addr(burnerController1PrivateKey);
+    address internal minterControllerIncrementer2 =
+        vm.addr(minterControllerIncrementer2PrivateKey);
+    address internal minterControllerRemover2 =
+        vm.addr(minterControllerRemover2PrivateKey);
+    address internal burnerController2 =
+        vm.addr(burnerController2PrivateKey);
+    address internal altMasterMinterOwner =
+        vm.addr(altMasterMinterOwnerPrivateKey);
+    address internal altProxyAdmin = vm.addr(altProxyAdminPrivateKey);
+    address internal altOwner = vm.addr(altOwnerPrivateKey);
+    address internal altPauser = vm.addr(altPauserPrivateKey);
 
     uint256 internal chainId = 31337;
     uint8 internal decimals = 6;
@@ -82,10 +82,10 @@ contract TestUtils is Test {
     string internal tokenSymbol = "USDC";
     string internal tokenCurrency = "USD";
 
-    uint256 internal prodMintAllowanceUnits = 25000000;
-    uint256 internal prodMintAllowance = 25000000000000;
-    uint256 internal stgMintAllowanceUnits = 25000;
-    uint256 internal stgMintAllowance = 25000000000;
+    uint256 internal mintAllowanceUnits1 = 1000000;
+    uint256 internal mintAllowance1 = 1000000000000;
+    uint256 internal mintAllowanceUnits2 = 1000;
+    uint256 internal mintAllowance2 = 1000000000;
 
     string internal blacklistFileName = "test.blacklist.remote.json";
 
@@ -134,14 +134,13 @@ contract TestUtils is Test {
             "BLACKLISTER_PRIVATE_KEY",
             vm.toString(blacklisterPrivateKey)
         );
-        // cold storage addresses
         vm.setEnv(
-            "COLD_MASTER_MINTER_OWNER_ADDRESS",
-            vm.toString(coldMasterMinterOwner)
+            "ALT_MASTER_MINTER_OWNER_ADDRESS",
+            vm.toString(altMasterMinterOwner)
         );
-        vm.setEnv("COLD_PROXY_ADMIN_ADDRESS", vm.toString(coldProxyAdmin));
-        vm.setEnv("COLD_OWNER_ADDRESS", vm.toString(coldOwner));
-        vm.setEnv("COLD_PAUSER_ADDRESS", vm.toString(coldPauser));
+        vm.setEnv("ALT_PROXY_ADMIN_ADDRESS", vm.toString(altProxyAdmin));
+        vm.setEnv("ALT_OWNER_ADDRESS", vm.toString(altOwner));
+        vm.setEnv("ALT_PAUSER_ADDRESS", vm.toString(altPauser));
 
         // Deploy an instance of proxy contract to configure contract address in env
         FiatTokenV2_2 v2_2 = new FiatTokenV2_2();
