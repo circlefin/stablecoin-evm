@@ -10,10 +10,6 @@ Integration tests for USDC on Injective blockchain using a local Injective node.
 - Node.js 20.18.0
 - Yarn
 
-### Docker Image
-
-Using `injectivelabs/injective-core` which includes USDC-specific features.
-
 ### Running Tests Locally
 
 ```bash

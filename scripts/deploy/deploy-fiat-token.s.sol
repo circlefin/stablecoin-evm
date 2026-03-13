@@ -109,9 +109,6 @@ contract DeployFiatToken is Script, DeployImpl {
                 tokenSymbol: tokenSymbol,
                 tokenCurrency: tokenCurrency,
                 tokenDecimals: tokenDecimals,
-                // setting this to the master minter owner for now
-                // to allow hot key setup before migrating to cold
-                // storage
                 newMasterMinter: masterMinterOwner,
                 newPauser: pauser,
                 newBlacklister: blacklister,
