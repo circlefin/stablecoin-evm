@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { Ownable } from "../v1/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Rescuable is Ownable {
     using SafeERC20 for IERC20;
@@ -41,7 +41,9 @@ contract Rescuable is Ownable {
      * @notice Revert if called by any account other than the rescuer.
      */
     modifier onlyRescuer() {
-        require(msg.sender == _rescuer, "Rescuable: caller is not the rescuer");
+        if (msg.sender != _rescuer) {
+            revert("Rescuable: caller is not the rescuer");
+        }
         _;
     }
 
@@ -64,10 +66,9 @@ contract Rescuable is Ownable {
      * @param newRescuer The address of the new rescuer.
      */
     function updateRescuer(address newRescuer) external onlyOwner {
-        require(
-            newRescuer != address(0),
-            "Rescuable: new rescuer is the zero address"
-        );
+        if (newRescuer == address(0)) {
+            revert("Rescuable: new rescuer is the zero address");
+        }
         _rescuer = newRescuer;
         emit RescuerChanged(newRescuer);
     }

@@ -135,7 +135,8 @@ describe("V2_2Upgrader", () => {
 
   describe("accountsToBlacklist", () => {
     it("should return the correct list of addresses", async () => {
-      const actualAccountsToBlacklist = await v2_2Upgrader.accountsToBlacklist();
+      const actualAccountsToBlacklist =
+        await v2_2Upgrader.accountsToBlacklist();
       expect(actualAccountsToBlacklist.map(toLower)).to.deep.equal(
         accountsToBlacklist.map(toLower)
       );

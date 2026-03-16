@@ -16,15 +16,14 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
 import { DeployImpl } from "../DeployImpl.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
+import { FiatTokenCeloV2_2 } from "../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 
 /**
@@ -88,14 +87,9 @@ contract DeployFiatTokenCelo is Script, DeployImpl {
     /**
      * @dev For testing only: splitting deploy logic into an internal function to expose for testing
      */
-    function _deploy(address _impl)
-        internal
-        returns (
-            FiatTokenCeloV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function _deploy(
+        address _impl
+    ) internal returns (FiatTokenCeloV2_2, MasterMinter, FiatTokenProxy) {
         vm.startBroadcast(deployerPrivateKey);
 
         // If there is an existing implementation contract,
@@ -122,25 +116,18 @@ contract DeployFiatTokenCelo is Script, DeployImpl {
         // The master minter contract's owner is a separate address.
         FiatTokenCeloV2_2 proxyAsV2_2 = FiatTokenCeloV2_2(address(proxy));
         proxyAsV2_2.initialize(
-            tokenName,
-            tokenSymbol,
-            tokenCurrency,
-            tokenDecimals,
-            address(masterMinter),
-            pauser,
-            blacklister,
-            owner
+            FiatTokenV2_2.InitializeData({
+                tokenName: tokenName,
+                tokenSymbol: tokenSymbol,
+                tokenCurrency: tokenCurrency,
+                tokenDecimals: tokenDecimals,
+                newMasterMinter: address(masterMinter),
+                newPauser: pauser,
+                newBlacklister: blacklister,
+                newOwner: owner,
+                accountsToBlacklist: new address[](0)
+            })
         );
-
-        // Do the V2 initialization
-        proxyAsV2_2.initializeV2(tokenName);
-
-        // Do the V2_1 initialization
-        proxyAsV2_2.initializeV2_1(lostAndFound);
-
-        // Do the V2_2 initialization
-        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
-
         vm.stopBroadcast();
 
         return (fiatTokenCeloV2_2, masterMinter, proxy);
@@ -149,14 +136,9 @@ contract DeployFiatTokenCelo is Script, DeployImpl {
     /**
      * @dev For testing only: Helper function that runs deploy script with a specific implementation address
      */
-    function deploy(address _impl)
-        external
-        returns (
-            FiatTokenCeloV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
-    {
+    function deploy(
+        address _impl
+    ) external returns (FiatTokenCeloV2_2, MasterMinter, FiatTokenProxy) {
         return _deploy(_impl);
     }
 
@@ -165,11 +147,7 @@ contract DeployFiatTokenCelo is Script, DeployImpl {
      */
     function run()
         external
-        returns (
-            FiatTokenCeloV2_2,
-            MasterMinter,
-            FiatTokenProxy
-        )
+        returns (FiatTokenCeloV2_2, MasterMinter, FiatTokenProxy)
     {
         return _deploy(impl);
     }

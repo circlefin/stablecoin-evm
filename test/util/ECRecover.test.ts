@@ -59,7 +59,7 @@ describe("ECRecover", () => {
           digest,
           packSig({ v: 27, r: ZERO_BYTES32, s: ZERO_BYTES32 })
         ),
-        "invalid signature"
+        "ECRecover: invalid signature"
       );
     });
 
@@ -132,7 +132,7 @@ describe("ECRecover", () => {
 
       await expectRevert(
         ecRecover.recover(digest, compactSig),
-        "invalid signature length"
+        "ECRecover: invalid signature length"
       );
     });
   });

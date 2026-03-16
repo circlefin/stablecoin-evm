@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { FiatTokenV2_1 } from "../FiatTokenV2_1.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
 import { V2UpgraderHelper } from "./helpers/V2UpgraderHelper.sol";
@@ -33,8 +32,6 @@ import { AbstractV2Upgrader } from "./AbstractV2Upgrader.sol";
  * @dev Read doc/v2.1_upgrade.md
  */
 contract V2_1Upgrader is AbstractV2Upgrader {
-    using SafeMath for uint256;
-
     address private _lostAndFound;
 
     /**
@@ -42,15 +39,22 @@ contract V2_1Upgrader is AbstractV2Upgrader {
      * @param proxy             FiatTokenProxy contract
      * @param implementation    FiatTokenV2_1 implementation contract
      * @param newProxyAdmin     Grantee of proxy admin role after upgrade
-     * @param lostAndFound      The address to which the locked funds are sent
+     * @param lostAndFound_      The address to which the locked funds are sent
      */
     constructor(
         FiatTokenProxy proxy,
         FiatTokenV2_1 implementation,
         address newProxyAdmin,
-        address lostAndFound
-    ) public AbstractV2Upgrader(proxy, address(implementation), newProxyAdmin) {
-        _lostAndFound = lostAndFound;
+        address lostAndFound_
+    )
+        public
+        AbstractV2Upgrader(
+            address(proxy),
+            address(implementation),
+            newProxyAdmin
+        )
+    {
+        _lostAndFound = lostAndFound_;
         _helper = new V2UpgraderHelper(address(proxy));
     }
 
@@ -124,8 +128,8 @@ contract V2_1Upgrader is AbstractV2Upgrader {
         // Test transfer
         require(
             v2_1.transfer(msg.sender, 1e5) &&
-                v2_1.balanceOf(msg.sender) == callerBal.add(1e5) &&
-                v2_1.balanceOf(address(this)) == contractBal.sub(1e5),
+                v2_1.balanceOf(msg.sender) == callerBal + 1e5 &&
+                v2_1.balanceOf(address(this)) == contractBal - 1e5,
             "V2_1Upgrader: transfer test failed"
         );
 
@@ -135,8 +139,8 @@ contract V2_1Upgrader is AbstractV2Upgrader {
                 v2_1.allowance(address(this), address(v2_1Helper)) == 1e5 &&
                 v2_1Helper.transferFrom(address(this), msg.sender, 1e5) &&
                 v2_1.allowance(address(this), msg.sender) == 0 &&
-                v2_1.balanceOf(msg.sender) == callerBal.add(2e5) &&
-                v2_1.balanceOf(address(this)) == contractBal.sub(2e5),
+                v2_1.balanceOf(msg.sender) == callerBal + 2e5 &&
+                v2_1.balanceOf(address(this)) == contractBal - 2e5,
             "V2_1Upgrader: approve/transferFrom test failed"
         );
 

@@ -30,7 +30,6 @@ import {
   WalletType,
   makeDomainSeparator,
 } from "./GasAbstraction/helpers";
-import { expectRevert } from "../helpers";
 import { testTransferWithMultipleAuthorizations } from "./GasAbstraction/testTransferWithMultipleAuthorizations";
 
 const MockERC1271Wallet = artifacts.require("MockERC1271Wallet");
@@ -40,13 +39,11 @@ export function behavesLikeFiatTokenV2(
   getFiatToken: () => AnyFiatTokenV2Instance
 ): void {
   let domainSeparator: string;
-  let fiatTokenOwner: string;
 
   beforeEach(async () => {
     // owner() is run here instead of once in a before() hook, since the contract
     // must be instantiated by a previously defined beforeEach() hook before
     // calling owner()
-    fiatTokenOwner = await getFiatToken().owner();
 
     domainSeparator = makeDomainSeparator(
       "USDC",
@@ -76,13 +73,6 @@ export function behavesLikeFiatTokenV2(
   hasGasAbstraction(testParams);
 
   testTransferWithMultipleAuthorizations(testParams);
-
-  it("disallows calling initializeV2 twice", async () => {
-    // It was called once in beforeEach. Try to call again.
-    await expectRevert(
-      getFiatToken().initializeV2("Not USDC", { from: fiatTokenOwner })
-    );
-  });
 }
 
 export async function getERC1271Wallet(

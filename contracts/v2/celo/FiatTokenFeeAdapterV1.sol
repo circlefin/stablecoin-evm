@@ -16,18 +16,13 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import {
-    IFiatTokenFeeAdapter
-} from "../../interface/celo/IFiatTokenFeeAdapter.sol";
+import { IFiatTokenFeeAdapter } from "../../interface/celo/IFiatTokenFeeAdapter.sol";
 import { ICeloGasToken } from "../../interface/celo/ICeloGasToken.sol";
 import { IDecimals } from "../../interface/celo/IDecimals.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
-    using SafeMath for uint256;
-
     ICeloGasToken public adaptedToken;
 
     uint8 internal _initializedVersion;
@@ -46,10 +41,10 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         _;
     }
 
-    function initializeV1(address _adaptedToken, uint8 _adapterDecimals)
-        public
-        virtual
-    {
+    function initializeV1(
+        address _adaptedToken,
+        uint8 _adapterDecimals
+    ) public virtual {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 0);
 
@@ -65,7 +60,8 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
             _adapterDecimals - tokenDecimals < 78,
             "FiatTokenFeeAdapterV1: Digit difference too large"
         );
-        upscaleFactor = uint256(10)**uint256(_adapterDecimals - tokenDecimals);
+        upscaleFactor =
+            uint256(10) ** uint256(_adapterDecimals - tokenDecimals);
 
         adapterDecimals = _adapterDecimals;
         adaptedToken = ICeloGasToken(_adaptedToken);
@@ -73,20 +69,16 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         _initializedVersion = 1;
     }
 
-    function balanceOf(address account)
-        external
-        override
-        view
-        returns (uint256)
-    {
+    function balanceOf(
+        address account
+    ) external view override returns (uint256) {
         return _upscale(adaptedToken.balanceOf(account));
     }
 
-    function debitGasFees(address from, uint256 value)
-        external
-        override
-        onlyCeloVm
-    {
+    function debitGasFees(
+        address from,
+        uint256 value
+    ) external override onlyCeloVm {
         require(
             _debitedValue == 0,
             "FiatTokenFeeAdapterV1: Must fully credit before debit"
@@ -100,12 +92,12 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         address refundRecipient,
         address feeRecipient,
         // solhint-disable-next-line no-unused-vars
-        address gatewayFeeRecipient,
+        address /* gatewayFeeRecipient */,
         address communityFund,
         uint256 refund,
         uint256 tipTxFee,
         // solhint-disable-next-line no-unused-vars
-        uint256 gatewayFee,
+        uint256 /* gatewayFee */,
         uint256 baseTxFee
     ) external override onlyCeloVm {
         if (_debitedValue == 0) {
@@ -119,9 +111,9 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         uint256 refundScaled = _downscale(refund);
         uint256 tipTxFeeScaled = _downscale(tipTxFee);
         uint256 baseTxFeeScaled = _downscale(baseTxFee);
-        uint256 creditValueScaled = refundScaled.add(tipTxFeeScaled).add(
-            baseTxFeeScaled
-        );
+        uint256 creditValueScaled = refundScaled +
+            tipTxFeeScaled +
+            baseTxFeeScaled;
 
         require(
             creditValueScaled <= _debitedValue,
@@ -129,13 +121,13 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         );
 
         // When downscaling, data can be lost, leading to inaccurate sums.
-        uint256 roundingError = _debitedValue.sub(creditValueScaled);
+        uint256 roundingError = _debitedValue - creditValueScaled;
         if (roundingError > 0) {
             // In this case, allocate the remainder to the community fund (base fee).
             // Instead of allocating to the validator (tipTxFee), we do this to prevent
             // the risk of actors gaming the scaling system (even if the actual difference
             // is expected to be very small).
-            baseTxFeeScaled = baseTxFeeScaled.add(roundingError);
+            baseTxFeeScaled = baseTxFeeScaled + roundingError;
         }
 
         adaptedToken.creditGasFees(
@@ -158,7 +150,7 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
      * @dev The caller is responsible for preconditions, as uint256 does not provide decimals.
      */
     function _upscale(uint256 value) internal view returns (uint256) {
-        return value.mul(upscaleFactor);
+        return value * upscaleFactor;
     }
 
     /**
@@ -168,6 +160,6 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
      * This downscaling will round down on the division operator.
      */
     function _downscale(uint256 value) internal view returns (uint256) {
-        return value.div(upscaleFactor);
+        return value / upscaleFactor;
     }
 }

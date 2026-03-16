@@ -16,19 +16,21 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
+pragma solidity 0.8.24;
 
 import { TestUtils } from "./TestUtils.sol";
-import {
-    DeployMasterMinter
-} from "../../../scripts/deploy/deploy-master-minter.s.sol";
+import { DeployMasterMinter } from "../../../scripts/deploy/deploy-master-minter.s.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
+import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
 
 // solhint-disable func-name-mixedcase
 
 contract DeployMasterMinterTest is TestUtils {
     DeployMasterMinter internal deployScript;
+
+    address proxyAddress;
+
+    FiatTokenV2_2 proxyAsV2_2;
 
     function setUp() public override {
         TestUtils.setUp();
@@ -36,6 +38,10 @@ contract DeployMasterMinterTest is TestUtils {
         vm.prank(deployer);
         deployScript = new DeployMasterMinter();
         deployScript.setUp();
+
+        proxyAddress = vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS");
+
+        proxyAsV2_2 = FiatTokenV2_2(proxyAddress);
     }
 
     function test_deployMasterMinter() public {
@@ -45,5 +51,6 @@ contract DeployMasterMinterTest is TestUtils {
             masterMinter,
             vm.envAddress("FIAT_TOKEN_PROXY_ADDRESS")
         );
+        assertEq(proxyAsV2_2.masterMinter(), address(masterMinter));
     }
 }
