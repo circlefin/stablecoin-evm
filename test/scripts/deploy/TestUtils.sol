@@ -62,14 +62,12 @@ contract TestUtils is Test {
         vm.addr(minterControllerIncrementer1PrivateKey);
     address internal minterControllerRemover1 =
         vm.addr(minterControllerRemover1PrivateKey);
-    address internal burnerController1 =
-        vm.addr(burnerController1PrivateKey);
+    address internal burnerController1 = vm.addr(burnerController1PrivateKey);
     address internal minterControllerIncrementer2 =
         vm.addr(minterControllerIncrementer2PrivateKey);
     address internal minterControllerRemover2 =
         vm.addr(minterControllerRemover2PrivateKey);
-    address internal burnerController2 =
-        vm.addr(burnerController2PrivateKey);
+    address internal burnerController2 = vm.addr(burnerController2PrivateKey);
     address internal altMasterMinterOwner =
         vm.addr(altMasterMinterOwnerPrivateKey);
     address internal altProxyAdmin = vm.addr(altProxyAdminPrivateKey);
