@@ -28,8 +28,13 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.label.name == 'needs_coverage' }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        with:
+          egress-policy: audit
+
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
 
       - name: Setup CI Environment
         uses: ./.github/composite-actions/setup-ci
@@ -42,7 +47,7 @@ jobs:
 
       - name: Report coverage to PR
         id: report-coverage
-        uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
+        uses: sidx1024/report-nyc-coverage-github-action@8adfb1be4a23deee7b1eaf0dc3000317eedaeab5 # v1.2.7
         with:
           coverage_file: "coverage/coverage-summary.json"
           base_coverage_file: ""
@@ -54,7 +59,7 @@ jobs:
           fromJSON(steps.report-coverage.outputs.total_branches_coverage_percent_raw) < 98 ||
           fromJSON(steps.report-coverage.outputs.total_statements_coverage_percent_raw) < 100 ||
           fromJSON(steps.report-coverage.outputs.total_functions_coverage_percent_raw) < 100
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
             core.setFailed('Test coverage is under the threshold')
