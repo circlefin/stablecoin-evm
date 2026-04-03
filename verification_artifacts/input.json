@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x6D205337F45D6850c3c3006e28d5b52c8a432c35",
+    "contractCreationTxHash": "0x6bb7c92b4e493c5a0fff87f90ea2cdeef3d8c17f308be023465c4fea9ef507dc"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xd9492653457A69E9f4987DB43D7fa0112E620Cb4",
+    "contractCreationTxHash": "0xe8c4bbf7520297207b73437ff51083150b30c49e6a3bc373846a0388a0135356"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x3022b87ac063DE95b1570F46f5e470F8B53112D8",
+    "contractCreationTxHash": "0x0cc140d95fd3271a21d2926206008ef9a4cfddab55907d9dbb4487352b716b81"
+  },
+  "rpcUrl": "https://rpc.goat.network"
+}
