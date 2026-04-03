@@ -29,10 +29,10 @@ env:
 
 jobs:
   run_ci_tests:
-    runs-on: ubuntu-latest
+    runs-on: github-hosted-small
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup CI Environment
         uses: ./.github/composite-actions/setup-ci
@@ -55,7 +55,7 @@ jobs:
           ENABLE_GAS_REPORTER: true
 
   run_hardhat_tests:
-    runs-on: ubuntu-latest
+    runs-on: github-hosted-small
     strategy:
       fail-fast: false
       matrix:
@@ -69,7 +69,7 @@ jobs:
             invert: true
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup CI Environment
         uses: ./.github/composite-actions/setup-ci
@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload test results to artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: junit-report-${{ hashFiles('report/junit.xml') }}
           path: report/junit.xml
