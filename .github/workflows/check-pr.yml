@@ -21,15 +21,23 @@ on:
 jobs:
   post_run_hardhat_tests:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: block
+          policy: global-allowed-endpoints-policy
+
       - name: Download test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           bucket: circle-cicd-artifacts
           pattern: junit-report-*
 
       - name: Publish combined test report
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4.3.1
         with:
           check_name: upload_test_results
           job_summary: true
