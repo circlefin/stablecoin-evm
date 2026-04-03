@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x6c1794805e376209d2bd1df72d807ce635a225d4",
+    "contractCreationTxHash": "0x52b73102976667762905c806c3bb34a48bb2b3b3515bb67086f2d88f256a70a3"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xeb8D0a2766214F85fc9C07e38d141e8DC54555Ff",
+    "contractCreationTxHash": "0x803097dda2d52459ae0166a464616f448f03e88528f0c8d76c9b47fc4fdfb3a0"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x85889c8c714505E0c94b30fcfcF64fE3Ac8FCb20",
+    "contractCreationTxHash": "0x016563171db18ea5bd72966537d4b8a1a838e3bff6a17eb4ea331ffc9e2ce360"
+  },
+  "rpcUrl": "https://skale-base.skalenodes.com/v1/base"
+}
