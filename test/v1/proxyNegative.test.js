@@ -114,7 +114,7 @@ function runTests(newToken, version) {
     await checkVariables([token], [customVars]);
   });
 
-  it("nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken", async () => {
+  it("nut008 should fail to update proxy storage if state-changing function called directly in FiatToken", async () => {
     await rawToken.initialize(
       name,
       symbol,
