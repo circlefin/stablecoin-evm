@@ -1,0 +1,18 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x94EF1071B70958c77e8a84E88F2ab2e8B453d5E6",
+    "contractCreationTxHash": "0x1f91b27e07ec9e89b83e459a29a861b44eee05b2aa2303fc80593984a8536853",
+    "verificationType": "full"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x8B1484d57abBE239bB280661377363b03c89CaEa",
+    "contractCreationTxHash": "0x7d5832d5d5f48f426cb4b2114abd75229c3697ee05ba0fd124a59aeaa6e14ed1",
+    "verificationType": "full"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x9cb8142aEBBcdc60AF7c97Af897A67A8f3CA71C2",
+    "contractCreationTxHash": "0xc78a1c138fbea77a3218e03f1b4c281633ebb7c0ac2d53390a022800a64f034d",
+    "verificationType": "full"
+  },
+  "rpcUrl": "https://rpc.adifoundation.ai"
+}
