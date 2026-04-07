@@ -6,8 +6,7 @@
   },
   "FiatTokenV2_2": {
     "contractAddress": "0x8B1484d57abBE239bB280661377363b03c89CaEa",
-    "contractCreationTxHash": "0x7d5832d5d5f48f426cb4b2114abd75229c3697ee05ba0fd124a59aeaa6e14ed1",
-    "verificationType": "full"
+    "contractCreationTxHash": "0x7d5832d5d5f48f426cb4b2114abd75229c3697ee05ba0fd124a59aeaa6e14ed1"
   },
   "FiatTokenProxy": {
     "contractAddress": "0x9cb8142aEBBcdc60AF7c97Af897A67A8f3CA71C2",
