@@ -45,7 +45,7 @@
     "@nomiclabs/hardhat-truffle5": "2.0.7",
     "@nomiclabs/hardhat-web3": "2.0.0",
     "@openzeppelin/contracts": "3.4.2",
-    "@typechain/ethers-v6": "0.5.1",
+    "@typechain/ethers-v6": "0.4.3",
     "@typechain/hardhat": "9.0.0",
     "@typechain/truffle-v5": "8.0.6",
     "@types/chai": "4.3.5",
@@ -89,7 +89,7 @@
     "solhint": "3.4.1",
     "solidity-coverage": "0.8.9",
     "ts-node": "10.9.1",
-    "typechain": "8.3.2",
+    "typechain": "8.3.1",
     "typescript": "5.1.6",
     "web3": "1.10.1"
   },
