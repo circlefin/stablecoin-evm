@@ -317,7 +317,7 @@ abstract contract EIP3009 is AbstractFiatTokenV2, EIP712Domain {
         uint256 validBefore
     ) private view {
         require(
-            now > validAfter,
+            now >= validAfter,
             "FiatTokenV2: authorization is not yet valid"
         );
         require(now < validBefore, "FiatTokenV2: authorization is expired");
