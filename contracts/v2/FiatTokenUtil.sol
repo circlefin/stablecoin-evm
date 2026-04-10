@@ -140,8 +140,11 @@ contract FiatTokenUtil {
         address addr1;
         address addr2;
         assembly {
-            addr1 := mload(add(packed, 20))
-            addr2 := mload(add(packed, 40))
+            // Account for 32-byte length prefix in memory
+            // First address starts at offset 32 (after length field)
+            addr1 := mload(add(packed, 32))
+            // Second address starts at offset 52 (32 + 20 bytes of first address)
+            addr2 := mload(add(packed, 52))
         }
         return abi.encode(addr1, addr2);
     }
