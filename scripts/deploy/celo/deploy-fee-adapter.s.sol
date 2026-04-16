@@ -16,16 +16,12 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
-import {
-    FiatTokenFeeAdapterProxy
-} from "../../../contracts/v2/celo/FiatTokenFeeAdapterProxy.sol";
-import {
-    FiatTokenFeeAdapterV1
-} from "../../../contracts/v2/celo/FiatTokenFeeAdapterV1.sol";
+import { FiatTokenFeeAdapterProxy } from "../../../contracts/v2/celo/FiatTokenFeeAdapterProxy.sol";
+import { FiatTokenFeeAdapterV1 } from "../../../contracts/v2/celo/FiatTokenFeeAdapterV1.sol";
 
 /**
  * A utility script to directly deploy Celo-specific fee adapter contract with the latest implementation.

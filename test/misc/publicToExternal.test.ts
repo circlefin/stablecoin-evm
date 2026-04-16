@@ -45,7 +45,8 @@ describe("public to external", () => {
     beforeEach(async () => {
       contractWithPublicFunctions = await ContractWithPublicFunctions.new();
       contractWithExternalFunctions = await ContractWithExternalFunctions.new();
-      contractThatCallsPublicFunctions = await ContractThatCallsPublicFunctions.new();
+      contractThatCallsPublicFunctions =
+        await ContractThatCallsPublicFunctions.new();
     });
 
     it("does not affect existing contracts' ability to call", async () => {

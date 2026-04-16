@@ -16,7 +16,14 @@
 
 name: Check PR
 on:
-  workflow_call:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  checks: write
+  contents: write
+  actions: read
 
 jobs:
   post_run_hardhat_tests:
@@ -25,8 +32,9 @@ jobs:
       - name: Download test results
         uses: actions/download-artifact@v4
         with:
-          bucket: circle-cicd-artifacts
           pattern: junit-report-*
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish combined test report
         uses: mikepenz/action-junit-report@v4
@@ -34,9 +42,9 @@ jobs:
           check_name: upload_test_results
           job_summary: true
           detailed_summary: true
-          commit: ${{ github.event.pull_request.head.sha || github.sha }}
-          report_paths: "./junit-report-*/report/junit.xml"
+          commit: ${{ github.event.workflow_run.head_sha }}
+          report_paths: "./junit-report-*/junit.xml"
 
   release-sbom:
-    if: github.event_name == 'push'
+    if: github.event.workflow_run.event == 'push'
     uses: circlefin/circle-public-github-workflows/.github/workflows/attach-release-assets.yaml@v1

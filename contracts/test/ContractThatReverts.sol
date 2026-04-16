@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 // solhint-disable no-unused-vars
 // solhint-disable no-complex-fallback
@@ -25,8 +25,8 @@ pragma solidity 0.6.12;
 contract ContractThatReverts {
     string private _reason;
 
-    function setReason(string calldata reason) external {
-        _reason = reason;
+    function setReason(string calldata reason_) external {
+        _reason = reason_;
     }
 
     function reason() external view returns (string memory) {

@@ -35,10 +35,7 @@ import "./scripts/hardhat/downloadBlacklistedAccounts";
 import "./scripts/hardhat/getContractCreationBlock";
 import "./scripts/hardhat/readValuesFromContract";
 import "./scripts/hardhat/validateAccountsToBlacklist";
-
 import "./scripts/hardhat/verifyOnChainBytecode";
-
-import "./scripts/hardhat/deployNativeFiatTokenImplTask";
 
 dotenv.config();
 
@@ -47,15 +44,11 @@ const gasMultiplier = process.env.GAS_MULTIPLIER
   ? parseFloat(process.env.GAS_MULTIPLIER) / 100
   : 1.3;
 
-const hardhatConfig: HardhatUserConfig & {
-  // Extend HardhatUserConfig to include gasReporter configuration
-  gasReporter: {
-    enabled: boolean;
-  };
-} = {
+const hardhatConfig: HardhatUserConfig = {
   solidity: {
-    version: "0.6.12",
+    version: "0.8.24",
     settings: {
+      viaIR: process.env.ENABLE_VIA_IR !== "false",
       optimizer: {
         enabled: true,
         runs: parseInt(process.env.OPTIMIZER_RUNS || "10000000"),
@@ -68,9 +61,7 @@ const hardhatConfig: HardhatUserConfig & {
   },
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {
-      chainId: 31337,
-    },
+    hardhat: {},
     testnet: {
       url: process.env.TESTNET_RPC_URL || "",
       gasMultiplier,
@@ -105,7 +96,7 @@ const hardhatConfig: HardhatUserConfig & {
   },
   contractSizer: {
     strict: true,
-    except: ["contracts/test", "scripts/", "test/", "^contracts/mocks/"],
+    except: ["contracts/test", "scripts/", "test/"],
   },
 };
 

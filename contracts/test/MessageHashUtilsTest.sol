@@ -16,16 +16,15 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { MessageHashUtils } from "../util/MessageHashUtils.sol";
 
 contract MessageHashUtilsTest {
-    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
-        external
-        pure
-        returns (bytes32 digest)
-    {
+    function toTypedDataHash(
+        bytes32 domainSeparator,
+        bytes32 structHash
+    ) external pure returns (bytes32 digest) {
         return MessageHashUtils.toTypedDataHash(domainSeparator, structHash);
     }
 }

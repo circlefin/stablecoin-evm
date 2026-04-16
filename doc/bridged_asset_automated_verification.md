@@ -25,18 +25,15 @@ contract, all at once.
 
 1. Fill in the `input.json` file that you created. For each contract, the
    required fields are:
-
    - `contractAddress`
    - `contractCreationTxHash`
 
    You must also provide a standard EVM-compatible node URL in the field:
-
    - `rpcUrl`
 
    There are additional optional parameters for each contract that should only
    be used if a contract cannot be verified using the required parameters alone.
    The purpose of each optional parameter is described below::
-
    - `verificationType`: by default, the verification type will be "partial".
      This means that the metadata hash at the end of the runtime bytecode will
      be verified separately via the metadata files generated below.
@@ -60,7 +57,6 @@ contract, all at once.
 
 2. Follow the steps [here](./metadata_extraction.md) to extract metadata for
    each of the following contracts:
-
    1. extract FiatTokenV2_2 metadata to
       `verification_artifacts/FiatTokenV2_2.json`
    2. extract FiatTokenProxy metadata to

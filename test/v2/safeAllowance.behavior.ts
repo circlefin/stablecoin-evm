@@ -81,7 +81,7 @@ export function hasSafeAllowance(
           fiatToken.increaseAllowance(bob, MAX_UINT256_HEX, {
             from: alice,
           }),
-          "addition overflow"
+          "panic code 0x11" // Arithmetic overflow in Solidity 0.8+
         );
       });
 
@@ -191,7 +191,7 @@ export function hasSafeAllowance(
           fiatToken.decreaseAllowance(bob, 10e6 + 1, {
             from: alice,
           }),
-          "decreased allowance below zero"
+          "panic code 0x11" // Arithmetic underflow in Solidity 0.8+
         );
       });
 
@@ -203,7 +203,7 @@ export function hasSafeAllowance(
           fiatToken.decreaseAllowance(bob, MAX_UINT256_HEX, {
             from: alice,
           }),
-          "decreased allowance below zero"
+          "panic code 0x11" // Arithmetic underflow in Solidity 0.8+
         );
       });
 

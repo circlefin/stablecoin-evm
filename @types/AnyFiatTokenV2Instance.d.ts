@@ -20,44 +20,29 @@ import { FiatTokenV2Instance } from "./generated/FiatTokenV2";
 import { FiatTokenV2_1Instance } from "./generated/FiatTokenV2_1";
 import { FiatTokenV2_2Instance } from "./generated/FiatTokenV2_2";
 import { FiatTokenCeloV2_2Instance } from "./generated/FiatTokenCeloV2_2";
-import { NativeFiatTokenV2_2Instance } from "./generated/NativeFiatTokenV2_2";
-import { MockNativeFiatTokenWithExposedFunctionsInstance } from "./generated/MockNativeFiatTokenWithExposedFunctions";
-export interface FiatTokenV2_2InstanceExtended extends FiatTokenV2_2Instance {
+import { FiatTokenInjectiveV2_2Instance } from "./generated/FiatTokenInjectiveV2_2";
+
+export interface V2_2ExtendedInterface {
   permit?: typeof FiatTokenV2Instance.permit;
   transferWithAuthorization?: typeof FiatTokenV2Instance.transferWithAuthorization;
   receiveWithAuthorization?: typeof FiatTokenV2Instance.receiveWithAuthorization;
   cancelAuthorization?: typeof FiatTokenV2Instance.cancelAuthorization;
 }
 
+export interface FiatTokenV2_2InstanceExtended
+  extends FiatTokenV2_2Instance, V2_2ExtendedInterface {}
+
 export interface FiatTokenCeloV2_2InstanceExtended
-  extends FiatTokenCeloV2_2Instance {
-  permit?: typeof FiatTokenV2Instance.permit;
-  transferWithAuthorization?: typeof FiatTokenV2Instance.transferWithAuthorization;
-  receiveWithAuthorization?: typeof FiatTokenV2Instance.receiveWithAuthorization;
-  cancelAuthorization?: typeof FiatTokenV2Instance.cancelAuthorization;
+  extends FiatTokenCeloV2_2Instance, V2_2ExtendedInterface {
   mint: typeof FiatTokenV2Instance.mint;
 }
 
-export interface NativeFiatTokenV2_2InstanceExtended
-  extends NativeFiatTokenV2_2Instance {
-  permit?: typeof FiatTokenV2Instance.permit;
-  transferWithAuthorization?: typeof FiatTokenV2Instance.transferWithAuthorization;
-  receiveWithAuthorization?: typeof FiatTokenV2Instance.receiveWithAuthorization;
-  cancelAuthorization?: typeof FiatTokenV2Instance.cancelAuthorization;
-}
-
-export interface MockNativeFiatTokenWithExposedFunctionsInstanceExtended
-  extends MockNativeFiatTokenWithExposedFunctionsInstance {
-  permit?: typeof FiatTokenV2Instance.permit;
-  transferWithAuthorization?: typeof FiatTokenV2Instance.transferWithAuthorization;
-  receiveWithAuthorization?: typeof FiatTokenV2Instance.receiveWithAuthorization;
-  cancelAuthorization?: typeof FiatTokenV2Instance.cancelAuthorization;
-}
+export interface FiatTokenInjectiveV2_2InstanceExtended
+  extends FiatTokenInjectiveV2_2Instance, V2_2ExtendedInterface {}
 
 export type AnyFiatTokenV2Instance =
   | FiatTokenV2Instance
   | FiatTokenV2_1Instance
   | FiatTokenV2_2InstanceExtended
   | FiatTokenCeloV2_2InstanceExtended
-  | NativeFiatTokenV2_2InstanceExtended
-  | MockNativeFiatTokenWithExposedFunctionsInstanceExtended;
+  | FiatTokenInjectiveV2_2InstanceExtended;
