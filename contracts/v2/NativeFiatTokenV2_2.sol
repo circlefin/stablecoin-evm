@@ -16,16 +16,12 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+// TODO: Verify NativeFiatToken behavior with flattened FiatTokenV2_2
+pragma solidity 0.8.24;
 
 import { FiatTokenV2_2 } from "./FiatTokenV2_2.sol";
-import {
-    INativeCoinAuthority
-} from "../interface/NativeFiatToken/INativeCoinAuthority.sol";
-import {
-    INativeCoinControl
-} from "../interface/NativeFiatToken/INativeCoinControl.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { INativeCoinAuthority } from "../interface/NativeFiatToken/INativeCoinAuthority.sol";
+import { INativeCoinControl } from "../interface/NativeFiatToken/INativeCoinControl.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -40,22 +36,17 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
  * 5. Uses the native balance from the account as the source of truth for token balances
  */
 contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
-    using SafeMath for uint256;
-
     /// @dev Interface to the Native Coin Authority
-    INativeCoinAuthority
-        public constant NATIVE_COIN_AUTHORITY = INativeCoinAuthority(
-        0x1800000000000000000000000000000000000000
-    );
+    INativeCoinAuthority public constant NATIVE_COIN_AUTHORITY =
+        INativeCoinAuthority(0x1800000000000000000000000000000000000000);
 
     /// @dev Interface to the Native Coin Control
-    INativeCoinControl public constant NATIVE_COIN_CONTROL = INativeCoinControl(
-        0x1800000000000000000000000000000000000001
-    );
+    INativeCoinControl public constant NATIVE_COIN_CONTROL =
+        INativeCoinControl(0x1800000000000000000000000000000000000001);
 
     /// @dev The factor of decimals conversion
     // E.g. for a 6-decimal token, factor = 10**12 = 1e12
-    uint256 public constant DECIMALS_SCALING_FACTOR = 10**12;
+    uint256 public constant DECIMALS_SCALING_FACTOR = 10 ** 12;
 
     /**
      * @notice Transfers tokens from an address to another by spending the caller's allowance.
@@ -81,7 +72,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
             value <= allowed[from][msg.sender],
             "ERC20: transfer amount exceeds allowance"
         );
-        allowed[from][msg.sender] = allowed[from][msg.sender].sub(value);
+        allowed[from][msg.sender] = allowed[from][msg.sender] - value;
         _transfer(from, to, value);
         return true;
     }
@@ -92,13 +83,10 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * @param value Transfer amount.
      * @return True if the operation was successful.
      */
-    function transfer(address to, uint256 value)
-        external
-        virtual
-        override
-        whenNotPaused
-        returns (bool)
-    {
+    function transfer(
+        address to,
+        uint256 value
+    ) external virtual override whenNotPaused returns (bool) {
         _transfer(msg.sender, to, value);
         return true;
     }
@@ -145,13 +133,9 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * @param _account  The address of the account.
      * @return The converted balance in sourceDecimals.
      */
-    function _balanceOf(address _account)
-        internal
-        virtual
-        override
-        view
-        returns (uint256)
-    {
+    function _balanceOf(
+        address _account
+    ) internal view virtual override returns (uint256) {
         uint256 nativeBalance = _account.balance;
         return _from18Decimals(nativeBalance, DECIMALS_SCALING_FACTOR);
     }
@@ -169,7 +153,10 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * 5. Updates minter's remaining allowance
      * 6. Emits Mint and Transfer events
      */
-    function mint(address _to, uint256 _amount)
+    function mint(
+        address _to,
+        uint256 _amount
+    )
         external
         virtual
         override
@@ -212,13 +199,9 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * 3. Delegates the actual burning to NATIVE_COIN_AUTHORITY
      * 4. Emits standard Burn and Transfer events
      */
-    function burn(uint256 _amount)
-        external
-        virtual
-        override
-        onlyMinters
-        whenNotPaused
-    {
+    function burn(
+        uint256 _amount
+    ) external virtual override onlyMinters whenNotPaused {
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         uint256 amountIn18Decimals = _to18Decimals(
             _amount,
@@ -245,7 +228,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * to fetch the native supply (in 18 decimals), then converts it down
      * to 6 decimals before returning. Supply is not tracked internally.
      */
-    function totalSupply() external virtual override view returns (uint256) {
+    function totalSupply() external view virtual override returns (uint256) {
         uint256 nativeSupply = NATIVE_COIN_AUTHORITY.totalSupply();
         return _from18Decimals(nativeSupply, DECIMALS_SCALING_FACTOR);
     }
@@ -258,13 +241,9 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * @param _account  The address to check.
      * @return True if the account is blacklisted, false otherwise.
      */
-    function _isBlacklisted(address _account)
-        internal
-        virtual
-        override
-        view
-        returns (bool)
-    {
+    function _isBlacklisted(
+        address _account
+    ) internal view virtual override returns (bool) {
         return NATIVE_COIN_CONTROL.isBlocklisted(_account);
     }
 
@@ -273,11 +252,10 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * @param _account         The address of the account.
      * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
      */
-    function _setBlacklistState(address _account, bool _shouldBlacklist)
-        internal
-        virtual
-        override
-    {
+    function _setBlacklistState(
+        address _account,
+        bool _shouldBlacklist
+    ) internal virtual override {
         if (_shouldBlacklist) {
             require(
                 _account != this.owner(),
@@ -433,12 +411,11 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * @param factor The factor of decimals conversion
      * @return The amount in 18 decimals
      */
-    function _to18Decimals(uint256 amount, uint256 factor)
-        internal
-        pure
-        returns (uint256)
-    {
-        return amount.mul(factor);
+    function _to18Decimals(
+        uint256 amount,
+        uint256 factor
+    ) internal pure returns (uint256) {
+        return amount * factor;
     }
 
     /**
@@ -449,11 +426,10 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
      * @dev Division truncates the fractional part (rounds down) by design.
      * This precision loss is expected and intentional.
      */
-    function _from18Decimals(uint256 amount, uint256 factor)
-        internal
-        pure
-        returns (uint256)
-    {
-        return amount.div(factor);
+    function _from18Decimals(
+        uint256 amount,
+        uint256 factor
+    ) internal pure returns (uint256) {
+        return amount / factor;
     }
 }

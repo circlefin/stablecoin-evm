@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { console } from "forge-std/console.sol";
 import { Script } from "forge-std/Script.sol";
-import {
-    NativeFiatTokenV2_2
-} from "../../contracts/v2/NativeFiatTokenV2_2.sol";
+import { NativeFiatTokenV2_2 } from "../../contracts/v2/NativeFiatTokenV2_2.sol";
 
 /**
  * @notice Script to deploy NativeFiatTokenV2_2 implementation

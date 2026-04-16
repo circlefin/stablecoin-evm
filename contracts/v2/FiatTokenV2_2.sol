@@ -242,6 +242,7 @@ contract FiatTokenV2_2 is
         uint256 _amount
     )
         external
+        virtual
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -329,6 +330,7 @@ contract FiatTokenV2_2 is
         uint256 value
     )
         external
+        virtual
         override
         whenNotPaused
         notBlacklisted(msg.sender)
@@ -356,6 +358,7 @@ contract FiatTokenV2_2 is
         uint256 value
     )
         external
+        virtual
         override
         whenNotPaused
         notBlacklisted(msg.sender)
@@ -404,7 +407,7 @@ contract FiatTokenV2_2 is
      */
     function burn(
         uint256 _amount
-    ) external whenNotPaused onlyMinters notBlacklisted(msg.sender) {
+    ) external virtual whenNotPaused onlyMinters notBlacklisted(msg.sender) {
         uint256 balance = _balanceOf(msg.sender);
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
@@ -449,7 +452,7 @@ contract FiatTokenV2_2 is
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _transferWithAuthorization(
             from,
             to,
@@ -487,7 +490,7 @@ contract FiatTokenV2_2 is
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _receiveWithAuthorization(
             from,
             to,
@@ -566,7 +569,7 @@ contract FiatTokenV2_2 is
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _transferWithAuthorization(
             from,
             to,
@@ -599,7 +602,7 @@ contract FiatTokenV2_2 is
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _receiveWithAuthorization(
             from,
             to,
@@ -801,7 +804,7 @@ contract FiatTokenV2_2 is
      */
     function _isBlacklisted(
         address _account
-    ) internal view override returns (bool) {
+    ) internal view virtual override returns (bool) {
         return balanceAndBlacklistStates[_account] >> 255 == 1;
     }
 
@@ -819,7 +822,7 @@ contract FiatTokenV2_2 is
     function _setBlacklistState(
         address _account,
         bool _shouldBlacklist
-    ) internal {
+    ) internal virtual {
         balanceAndBlacklistStates[_account] = _shouldBlacklist
             ? balanceAndBlacklistStates[_account] | (1 << 255)
             : _balanceOf(_account);

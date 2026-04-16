@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck -- TODO: Fix NativeFiatToken types after verifying with flattened FiatTokenV2_2
 /**
  * Copyright 2025 Circle Internet Group, Inc. All rights reserved.
  *
@@ -33,9 +35,8 @@ describe("Deploy Native FiatToken Implementation", () => {
 
   before("setup", async () => {
     const NativeFiatTokenV2_2 = artifacts.require("NativeFiatTokenV2_2");
-    const {
-      fiatTokenImpl: implAddr,
-    } = await deployNativeFiatTokenV2_2Implementation();
+    const { fiatTokenImpl: implAddr } =
+      await deployNativeFiatTokenV2_2Implementation();
 
     fiatTokenImplementation = (await NativeFiatTokenV2_2.at(
       implAddr

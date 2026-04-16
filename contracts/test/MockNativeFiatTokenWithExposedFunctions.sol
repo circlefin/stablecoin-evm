@@ -16,30 +16,22 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { NativeFiatTokenV2_2 } from "../v2/NativeFiatTokenV2_2.sol";
-import {
-    MockNativeCoinAuthority
-} from "./NativeFiatToken/MockNativeCoinAuthority.sol";
-import {
-    MockNativeCoinControl
-} from "./NativeFiatToken/MockNativeCoinControl.sol";
+import { MockNativeCoinAuthority } from "./NativeFiatToken/MockNativeCoinAuthority.sol";
+import { MockNativeCoinControl } from "./NativeFiatToken/MockNativeCoinControl.sol";
 
 /**
  * @title MockNativeFiatTokenWithExposedFunctions
  * @dev A mock contract that extends NativeFiatTokenV2_2 and exposes its internal functions for testing
  */
 contract MockNativeFiatTokenWithExposedFunctions is NativeFiatTokenV2_2 {
-    MockNativeCoinAuthority
-        private constant MOCK_AUTHORITY = MockNativeCoinAuthority(
-        0x1800000000000000000000000000000000000000
-    );
+    MockNativeCoinAuthority private constant MOCK_AUTHORITY =
+        MockNativeCoinAuthority(0x1800000000000000000000000000000000000000);
 
-    MockNativeCoinControl
-        private constant MOCK_COIN_CONTROL = MockNativeCoinControl(
-        0x1800000000000000000000000000000000000001
-    );
+    MockNativeCoinControl private constant MOCK_COIN_CONTROL =
+        MockNativeCoinControl(0x1800000000000000000000000000000000000001);
 
     /**
      * @dev Exposes the internal to18Decimals function for testing
@@ -47,11 +39,10 @@ contract MockNativeFiatTokenWithExposedFunctions is NativeFiatTokenV2_2 {
      * @param factor The factor of decimals conversion
      * @return The amount in 18 decimals
      */
-    function exposedTo18Decimals(uint256 amount, uint256 factor)
-        external
-        pure
-        returns (uint256)
-    {
+    function exposedTo18Decimals(
+        uint256 amount,
+        uint256 factor
+    ) external pure returns (uint256) {
         return _to18Decimals(amount, factor);
     }
 
@@ -61,11 +52,10 @@ contract MockNativeFiatTokenWithExposedFunctions is NativeFiatTokenV2_2 {
      * @param factor The factor of decimals conversion
      * @return The amount in source decimals
      */
-    function exposedFrom18Decimals(uint256 amount, uint256 factor)
-        external
-        pure
-        returns (uint256)
-    {
+    function exposedFrom18Decimals(
+        uint256 amount,
+        uint256 factor
+    ) external pure returns (uint256) {
         return _from18Decimals(amount, factor);
     }
 
@@ -77,13 +67,9 @@ contract MockNativeFiatTokenWithExposedFunctions is NativeFiatTokenV2_2 {
      * @param _account  The address of the account.
      * @return The converted balance in sourceDecimals.
      */
-    function _balanceOf(address _account)
-        internal
-        virtual
-        override
-        view
-        returns (uint256)
-    {
+    function _balanceOf(
+        address _account
+    ) internal view virtual override returns (uint256) {
         return
             _from18Decimals(
                 MOCK_AUTHORITY.balanceOf(_account),

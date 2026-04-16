@@ -16,11 +16,9 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import {
-    INativeCoinControl
-} from "../../interface/NativeFiatToken/INativeCoinControl.sol";
+import { INativeCoinControl } from "../../interface/NativeFiatToken/INativeCoinControl.sol";
 
 /**
  * @title MockNativeCoinControl
@@ -114,12 +112,9 @@ contract MockNativeCoinControl is INativeCoinControl {
      * @param account The address to check
      * @return True if the address is blocklisted, false otherwise
      */
-    function isBlocklisted(address account)
-        external
-        override
-        view
-        returns (bool)
-    {
+    function isBlocklisted(
+        address account
+    ) external view override returns (bool) {
         return _blocklisted[account];
     }
 }

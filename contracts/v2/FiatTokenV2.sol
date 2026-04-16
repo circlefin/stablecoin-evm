@@ -109,7 +109,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _transferWithAuthorization(
             from,
             to,
@@ -147,7 +147,7 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _receiveWithAuthorization(
             from,
             to,

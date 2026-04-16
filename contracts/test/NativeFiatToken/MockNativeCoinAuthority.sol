@@ -16,15 +16,10 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import {
-    INativeCoinAuthority
-} from "../../interface/NativeFiatToken/INativeCoinAuthority.sol";
-import {
-    INativeCoinControl
-} from "../../interface/NativeFiatToken/INativeCoinControl.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { INativeCoinAuthority } from "../../interface/NativeFiatToken/INativeCoinAuthority.sol";
+import { INativeCoinControl } from "../../interface/NativeFiatToken/INativeCoinControl.sol";
 
 /**
  * @title MockNativeCoinAuthority
@@ -32,8 +27,6 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
  * Simulates the Go precompile functionality to enable testing without a real precompile.
  */
 contract MockNativeCoinAuthority is INativeCoinAuthority {
-    using SafeMath for uint256;
-
     // Track balances internally for testing
     mapping(address => uint256) private _balances;
     uint256 private _totalSupply;
@@ -70,7 +63,7 @@ contract MockNativeCoinAuthority is INativeCoinAuthority {
         uint256 amount
     );
 
-    constructor(address blocklistAddress) public {
+    constructor(address blocklistAddress) {
         BLOCKLIST_ADDRESS = blocklistAddress;
     }
 
@@ -98,11 +91,10 @@ contract MockNativeCoinAuthority is INativeCoinAuthority {
      * @param amount The amount of native coins to burn.
      * @return success True if the burn operation was successful.
      */
-    function burn(address from, uint256 amount)
-        external
-        override
-        returns (bool success)
-    {
+    function burn(
+        address from,
+        uint256 amount
+    ) external override returns (bool success) {
         // Track operation details
         lastCaller = msg.sender;
         lastFrom = from;
@@ -136,8 +128,8 @@ contract MockNativeCoinAuthority is INativeCoinAuthority {
         }
 
         // Perform the burn
-        _balances[from] = _balances[from].sub(amount);
-        _totalSupply = _totalSupply.sub(amount);
+        _balances[from] = _balances[from] - amount;
+        _totalSupply = _totalSupply - amount;
 
         // Emit event like the precompile would
         emit NativeCoinBurned(msg.sender, from, amount);
@@ -151,11 +143,10 @@ contract MockNativeCoinAuthority is INativeCoinAuthority {
      * @param amount The amount of native coins to mint.
      * @return success True if the mint operation was successful.
      */
-    function mint(address to, uint256 amount)
-        external
-        override
-        returns (bool success)
-    {
+    function mint(
+        address to,
+        uint256 amount
+    ) external override returns (bool success) {
         // Track operation details
         lastCaller = msg.sender;
         lastTo = to;
@@ -183,8 +174,8 @@ contract MockNativeCoinAuthority is INativeCoinAuthority {
         }
 
         // Perform the mint
-        _balances[to] = _balances[to].add(amount);
-        _totalSupply = _totalSupply.add(amount);
+        _balances[to] = _balances[to] + amount;
+        _totalSupply = _totalSupply + amount;
 
         // Emit event like the precompile would
         emit NativeCoinMinted(msg.sender, to, amount);
@@ -241,8 +232,8 @@ contract MockNativeCoinAuthority is INativeCoinAuthority {
         }
 
         // Perform the transfer
-        _balances[from] = _balances[from].sub(amount);
-        _balances[to] = _balances[to].add(amount);
+        _balances[from] = _balances[from] - amount;
+        _balances[to] = _balances[to] + amount;
 
         // Emit event like the precompile would
         emit NativeCoinTransferred(from, to, amount);
@@ -254,7 +245,7 @@ contract MockNativeCoinAuthority is INativeCoinAuthority {
      * @notice Gets the total supply of native coins in circulation.
      * @return The total amount of native coins currently in circulation.
      */
-    function totalSupply() external override view returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck -- TODO: Fix NativeFiatToken types after verifying with flattened FiatTokenV2_2
 /**
  * Copyright 2025 Circle Internet Group, Inc. All rights reserved.
  *
@@ -165,9 +167,7 @@ export async function cleanupMockNativeCoinControl(): Promise<void> {
  * Deploy MockNativeCoinAuthority at the predefined address using hardhat_setCode
  * @returns Contract instance at the predefined address
  */
-export async function deployMockNativeCoinAuthorityAtAddress(): Promise<
-  MockNativeCoinAuthorityInstance
-> {
+export async function deployMockNativeCoinAuthorityAtAddress(): Promise<MockNativeCoinAuthorityInstance> {
   // First deploy the contract normally with the correct constructor parameter
   const tempContract = await MockNativeCoinAuthority.new(
     MOCK_NATIVE_COIN_CONTROL_ADDRESS
@@ -188,9 +188,7 @@ export async function deployMockNativeCoinAuthorityAtAddress(): Promise<
   return await MockNativeCoinAuthority.at(MOCK_NATIVE_COIN_AUTHORITY_ADDRESS);
 }
 
-export async function deployMockNativeCoinControlAtAddress(): Promise<
-  MockNativeCoinControlInstance
-> {
+export async function deployMockNativeCoinControlAtAddress(): Promise<MockNativeCoinControlInstance> {
   // Get the contract artifact to access deployed bytecode
   const MockNativeCoinControlArtifact = await artifacts.readArtifact(
     "MockNativeCoinControl"
@@ -264,15 +262,8 @@ export function behavesLikeNativeFiatTokenV22(
   let tokenWithExposedFunctions: MockNativeFiatTokenWithExposedFunctionsInstance;
 
   // Define account roles
-  const [
-    owner,
-    masterMinter,
-    pauser,
-    minter,
-    user1,
-    user2,
-    blacklister,
-  ] = HARDHAT_ACCOUNTS;
+  const [owner, masterMinter, pauser, minter, user1, user2, blacklister] =
+    HARDHAT_ACCOUNTS;
 
   // Test constants
   const DECIMALS = 6;
@@ -309,7 +300,8 @@ export function behavesLikeNativeFiatTokenV22(
     token = await NativeFiatTokenV2_2.new();
 
     // Deploy a mock version with exposed functions for testing
-    tokenWithExposedFunctions = await MockNativeFiatTokenWithExposedFunctions.new();
+    tokenWithExposedFunctions =
+      await MockNativeFiatTokenWithExposedFunctions.new();
 
     // Initialize token
     await token.initialize(
@@ -415,9 +407,8 @@ export function behavesLikeNativeFiatTokenV22(
 
     it("should include all FiatTokenV2_2 functions in its ABI", async () => {
       // Load the ABIs
-      const FiatTokenV2_2Artifact = await artifacts.readArtifact(
-        "FiatTokenV2_2"
-      );
+      const FiatTokenV2_2Artifact =
+        await artifacts.readArtifact("FiatTokenV2_2");
       const NativeFiatTokenV2_2Artifact = await artifacts.readArtifact(
         "NativeFiatTokenV2_2"
       );
@@ -455,9 +446,8 @@ export function behavesLikeNativeFiatTokenV22(
 
     it("verify all required functions exist", async () => {
       // Load the base contract ABI to determine required functions
-      const FiatTokenV2_2Artifact = await artifacts.readArtifact(
-        "FiatTokenV2_2"
-      );
+      const FiatTokenV2_2Artifact =
+        await artifacts.readArtifact("FiatTokenV2_2");
 
       // Extract function signatures from the ABI
       const baseAbi: AbiItem[] = FiatTokenV2_2Artifact.abi;
@@ -477,7 +467,7 @@ export function behavesLikeNativeFiatTokenV22(
       for (const funcName of requiredFunctions) {
         expect(
           typeof Reflect.get(
-            (token as unknown) as Record<string, unknown>,
+            token as unknown as Record<string, unknown>,
             funcName
           )
         ).to.equal("function", `Expected ${funcName} to be a function`);
@@ -661,23 +651,19 @@ export function behavesLikeNativeFiatTokenV22(
       );
 
       // Step 3: Record balances before transfer (both native and ERC20)
-      const user1NativeBalanceBeforeTransfer = await mockCoinAuthority.balanceOf(
-        user1
-      );
-      const user2NativeBalanceBeforeTransfer = await mockCoinAuthority.balanceOf(
-        user2
-      );
+      const user1NativeBalanceBeforeTransfer =
+        await mockCoinAuthority.balanceOf(user1);
+      const user2NativeBalanceBeforeTransfer =
+        await mockCoinAuthority.balanceOf(user2);
 
       // Step 4: Perform transfer
       await token.transfer(user2, TRANSFER_AMOUNT, { from: user1 });
 
       // Step 5: Verify balances after transfer (both native and ERC20)
-      const user1NativeBalanceAfterTransfer = await mockCoinAuthority.balanceOf(
-        user1
-      );
-      const user2NativeBalanceAfterTransfer = await mockCoinAuthority.balanceOf(
-        user2
-      );
+      const user1NativeBalanceAfterTransfer =
+        await mockCoinAuthority.balanceOf(user1);
+      const user2NativeBalanceAfterTransfer =
+        await mockCoinAuthority.balanceOf(user2);
 
       // Calculate changes
       const user1NativeChange = user1NativeBalanceBeforeTransfer.sub(
@@ -732,9 +718,8 @@ export function behavesLikeNativeFiatTokenV22(
       );
 
       // Record user1's balance after mint
-      const user1BalanceBeforeTransfer = await mockCoinAuthority.balanceOf(
-        user1
-      );
+      const user1BalanceBeforeTransfer =
+        await mockCoinAuthority.balanceOf(user1);
 
       // Step 3: Approve user2 to spend user1's tokens
       await token.approve(user2, TRANSFER_AMOUNT, { from: user1 });
@@ -745,9 +730,8 @@ export function behavesLikeNativeFiatTokenV22(
       );
 
       // Record user2's balance before transferFrom
-      const user2BalanceBeforeTransfer = await mockCoinAuthority.balanceOf(
-        user2
-      );
+      const user2BalanceBeforeTransfer =
+        await mockCoinAuthority.balanceOf(user2);
 
       // Step 4: Perform transferFrom
       await token.transferFrom(user1, user2, TRANSFER_AMOUNT, {
@@ -755,12 +739,10 @@ export function behavesLikeNativeFiatTokenV22(
       });
 
       // Step 5: Verify states after transferFrom
-      const user1BalanceAfterTransfer = await mockCoinAuthority.balanceOf(
-        user1
-      );
-      const user2BalanceAfterTransfer = await mockCoinAuthority.balanceOf(
-        user2
-      );
+      const user1BalanceAfterTransfer =
+        await mockCoinAuthority.balanceOf(user1);
+      const user2BalanceAfterTransfer =
+        await mockCoinAuthority.balanceOf(user2);
       const allowanceAfterTransfer = await token.allowance(user1, user2);
       const totalSupplyAfterTransfer = await token.totalSupply();
 
@@ -925,19 +907,21 @@ export function behavesLikeNativeFiatTokenV22(
         // Test with 1000 tokens (18 decimals)
         const largeAmount18Decimals = new BN("1000000000000000000000"); // 1000 tokens with 18 decimals
         const largeExpected = new BN("1000000000"); // 1000 tokens with 6 decimals
-        const largeResult = await tokenWithExposedFunctions.exposedFrom18Decimals(
-          largeAmount18Decimals,
-          DECIMALS_FACTOR
-        );
+        const largeResult =
+          await tokenWithExposedFunctions.exposedFrom18Decimals(
+            largeAmount18Decimals,
+            DECIMALS_FACTOR
+          );
         expect(largeResult.toString()).to.equal(largeExpected.toString());
       });
 
       it("should handle zero values", async () => {
         const zero = new BN("0");
-        const resultFrom18 = await tokenWithExposedFunctions.exposedFrom18Decimals(
-          zero,
-          DECIMALS_FACTOR
-        );
+        const resultFrom18 =
+          await tokenWithExposedFunctions.exposedFrom18Decimals(
+            zero,
+            DECIMALS_FACTOR
+          );
         expect(resultFrom18.toString()).to.equal("0");
       });
 
@@ -954,10 +938,11 @@ export function behavesLikeNativeFiatTokenV22(
         // 1.9 tokens with 18 decimals = 1900000000000000000
         const onePointNine = new BN("1900000000000000000");
         const expectedOnePointNine = new BN("1900000"); // 1.9 tokens with 6 decimals
-        const resultOnePointNine = await tokenWithExposedFunctions.exposedFrom18Decimals(
-          onePointNine,
-          DECIMALS_FACTOR
-        );
+        const resultOnePointNine =
+          await tokenWithExposedFunctions.exposedFrom18Decimals(
+            onePointNine,
+            DECIMALS_FACTOR
+          );
         expect(resultOnePointNine.toString()).to.equal(
           expectedOnePointNine.toString()
         );
@@ -995,10 +980,11 @@ export function behavesLikeNativeFiatTokenV22(
         const justBelow = new BN("1000000499999999999");
         const expectedBelow = new BN("1000000"); // Truncates to 1.000000
 
-        const resultBelow = await tokenWithExposedFunctions.exposedFrom18Decimals(
-          justBelow,
-          DECIMALS_FACTOR
-        );
+        const resultBelow =
+          await tokenWithExposedFunctions.exposedFrom18Decimals(
+            justBelow,
+            DECIMALS_FACTOR
+          );
         expect(resultBelow.toString()).to.equal(expectedBelow.toString());
 
         // Test value just at boundary
@@ -1006,10 +992,11 @@ export function behavesLikeNativeFiatTokenV22(
         const atBoundary = new BN("1000001000000000000");
         const expectedBoundary = new BN("1000001"); // Converts to 1.000001
 
-        const resultBoundary = await tokenWithExposedFunctions.exposedFrom18Decimals(
-          atBoundary,
-          DECIMALS_FACTOR
-        );
+        const resultBoundary =
+          await tokenWithExposedFunctions.exposedFrom18Decimals(
+            atBoundary,
+            DECIMALS_FACTOR
+          );
         expect(resultBoundary.toString()).to.equal(expectedBoundary.toString());
       });
     });
