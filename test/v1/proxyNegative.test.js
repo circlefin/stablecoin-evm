@@ -34,6 +34,7 @@ const {
   minterAccount,
   pauserAccount,
   proxyOwnerAccount,
+  initializeRawToken,
   initializeTokenWithProxy,
   encodeCall,
   FiatTokenV1,
@@ -87,11 +88,8 @@ function runTests(newToken, version) {
 
   it("nut005 should fail to initialize contract twice", async () => {
     await expectRevert(
-      token.initialize(
-        name,
-        symbol,
-        currency,
-        decimals,
+      initializeRawToken(
+        token,
         masterMinterAccount,
         pauserAccount,
         blacklisterAccount,
@@ -115,11 +113,8 @@ function runTests(newToken, version) {
   });
 
   it("nut008 shoud fail to update proxy storage if state-changing function called directly in FiatToken", async () => {
-    await rawToken.initialize(
-      name,
-      symbol,
-      currency,
-      decimals,
+    await initializeRawToken(
+      rawToken,
       masterMinterAccount,
       pauserAccount,
       blacklisterAccount,

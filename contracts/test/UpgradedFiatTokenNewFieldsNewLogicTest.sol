@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenV1 } from "../v1/FiatTokenV1.sol";
 
@@ -31,9 +31,9 @@ contract UpgradedFiatTokenNewFieldsNewLogicTest is FiatTokenV1 {
     bool internal initializedV2;
 
     function initialize(
-        string calldata tokenName,
-        string calldata tokenSymbol,
-        string calldata tokenCurrency,
+        string memory tokenName,
+        string memory tokenSymbol,
+        string memory tokenCurrency,
         uint8 tokenDecimals,
         address newMasterMinter,
         address newPauser,

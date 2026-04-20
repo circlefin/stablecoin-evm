@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenFeeAdapterV1 } from "../../v2/celo/FiatTokenFeeAdapterV1.sol";
 

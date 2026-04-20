@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { FiatTokenV2_2 } from "../v2/FiatTokenV2_2.sol";
 
@@ -37,7 +37,7 @@ contract MockFiatTokenWithEditableChainId is FiatTokenV2_2 {
     /**
      * @return uint256 the interal chain ID previous set with user input
      */
-    function _chainId() internal override view returns (uint256) {
+    function _chainId() internal view override returns (uint256) {
         return _internalChainId;
     }
 

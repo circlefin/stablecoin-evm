@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 /**
  * @dev Signature message hash utilities for producing digests to be consumed by {ECDSA} recovery or signing.
@@ -38,11 +38,10 @@ library MessageHashUtils {
      * @param structHash         Hashed EIP-712 data struct
      * @return digest            The keccak256 digest of an EIP-712 typed data
      */
-    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
-        internal
-        pure
-        returns (bytes32 digest)
-    {
+    function toTypedDataHash(
+        bytes32 domainSeparator,
+        bytes32 structHash
+    ) internal pure returns (bytes32 digest) {
         assembly {
             let ptr := mload(0x40)
             mstore(ptr, "\x19\x01")

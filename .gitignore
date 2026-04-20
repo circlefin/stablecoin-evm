@@ -15,3 +15,5 @@ coverage/
 coverage.json
 
 blacklist.*.json
+minters.json
+

@@ -731,7 +731,12 @@ function runTests(newToken, version) {
     );
   });
 
-  it("ms045 initialized should be in slot 8, byte 21", async () => {
+  it("ms045 initialized should be in slot 8, byte 21", async function () {
+    if (version === 2.2) {
+      // V2_2 uses new initialize() that doesn't set _deprecatedInitialized
+      this.skip();
+      return;
+    }
     const initialized = await getInitializedV1(token);
     assert.strictEqual("0x01", initialized);
   });

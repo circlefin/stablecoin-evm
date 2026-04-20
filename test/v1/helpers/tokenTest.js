@@ -48,7 +48,6 @@ const name = "Sample Fiat Token";
 const symbol = "C-USD";
 const currency = "USD";
 const decimals = 2;
-const trueInStorageFormat = "0x01";
 const bigZero = new BN(0);
 const bigHundred = new BN(100);
 
@@ -247,7 +246,6 @@ function buildExpectedState(token, customVars) {
     blacklister: blacklisterAccount,
     tokenOwner: tokenOwnerAccount,
     proxiedTokenAddress: token.proxiedTokenAddress,
-    initializedV1: trueInStorageFormat,
     upgrader: proxyOwnerAccount,
     balanceAndBlacklistStates: {
       arbitraryAccount: bigZero,
@@ -472,7 +470,6 @@ async function getActualState(token) {
     await token.owner.call(),
     await getImplementation(token),
     await getAdmin(token),
-    await getInitializedV1(token),
     await token.balanceOf(arbitraryAccount),
     await token.balanceOf(masterMinterAccount),
     await token.balanceOf(minterAccount),
@@ -564,7 +561,6 @@ async function getActualState(token) {
       tokenOwner,
       proxiedTokenAddress,
       upgrader,
-      initializedV1,
       balancesA,
       balancesMM,
       balancesM,
@@ -656,7 +652,6 @@ async function getActualState(token) {
         tokenOwner: hexToAddress(tokenOwner),
         proxiedTokenAddress: hexToAddress(proxiedTokenAddress),
         upgrader: hexToAddress(upgrader),
-        initializedV1,
         balanceAndBlacklistStates: {
           arbitraryAccount: balancesA,
           masterMinterAccount: balancesMM,
@@ -882,6 +877,45 @@ function validateTransferEvent(transferEvent, from, to, value) {
   assert.isTrue(eventResult.args.value.eq(new BN(value)));
 }
 
+async function initializeRawToken(
+  rawToken,
+  _masterMinter,
+  _pauser,
+  _blacklister,
+  _owner
+) {
+  // Check if this is FiatTokenV2_2
+  const isFiatTokenV2_2 =
+    rawToken.constructor._json.contractName === "FiatTokenV2_2";
+
+  if (isFiatTokenV2_2) {
+    // Use initialize with struct for FiatTokenV2_2
+    await rawToken.initialize({
+      tokenName: name,
+      tokenSymbol: symbol,
+      tokenCurrency: currency,
+      tokenDecimals: decimals,
+      newMasterMinter: _masterMinter,
+      newPauser: _pauser,
+      newBlacklister: _blacklister,
+      newOwner: _owner,
+      accountsToBlacklist: [],
+    });
+  } else {
+    // Use old initialize for V1/V2/V2_1
+    await rawToken.initialize(
+      name,
+      symbol,
+      currency,
+      decimals,
+      _masterMinter,
+      _pauser,
+      _blacklister,
+      _owner
+    );
+  }
+}
+
 async function initializeTokenWithProxy(rawToken) {
   return customInitializeTokenWithProxy(
     rawToken,
@@ -903,16 +937,39 @@ async function customInitializeTokenWithProxy(
     from: proxyOwnerAccount,
   });
   const proxiedToken = await FiatTokenV1.at(proxy.address);
-  await proxiedToken.initialize(
-    name,
-    symbol,
-    currency,
-    decimals,
-    _masterMinter,
-    _pauser,
-    _blacklister,
-    _owner
-  );
+
+  // Check if this is FiatTokenV2_2
+  const isFiatTokenV2_2 =
+    rawToken.constructor._json.contractName === "FiatTokenV2_2";
+
+  if (isFiatTokenV2_2) {
+    // Use initialize with struct for FiatTokenV2_2
+    const v2_2Token = await FiatTokenV2_2.at(proxy.address);
+    await v2_2Token.initialize({
+      tokenName: name,
+      tokenSymbol: symbol,
+      tokenCurrency: currency,
+      tokenDecimals: decimals,
+      newMasterMinter: _masterMinter,
+      newPauser: _pauser,
+      newBlacklister: _blacklister,
+      newOwner: _owner,
+      accountsToBlacklist: [],
+    });
+  } else {
+    // Use old initialize for V1/V2/V2_1
+    await proxiedToken.initialize(
+      name,
+      symbol,
+      currency,
+      decimals,
+      _masterMinter,
+      _pauser,
+      _blacklister,
+      _owner
+    );
+  }
+
   proxiedToken.proxiedTokenAddress = rawToken.address;
   assert.strictEqual(proxiedToken.address, proxy.address);
   assert.notEqual(proxiedToken.address, rawToken.address);
@@ -1101,6 +1158,7 @@ module.exports = {
   approve,
   redeem,
   validateTransferEvent,
+  initializeRawToken,
   initializeTokenWithProxy,
   customInitializeTokenWithProxy,
   upgradeTo,

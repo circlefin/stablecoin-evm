@@ -1,0 +1,88 @@
+syntax = "proto3";
+package injective.permissions.v1beta1;
+
+option go_package = "github.com/InjectiveLabs/injective-core/injective-chain/modules/permissions/types";
+
+// Namespace defines a permissions namespace
+message Namespace {
+  // The tokenfactory denom to which this namespace applies to
+  string denom = 1;
+  // The address of cosmwasm contract to apply code-based restrictions
+  string wasm_hook = 2;
+
+  // permissions for each role
+  repeated Role role_permissions = 3;
+  // roles for each actor
+  repeated ActorRoles actor_roles = 4;
+  // managers for each role
+  repeated RoleManager role_managers = 5;
+  // status for each policy
+  repeated PolicyStatus policy_statuses = 6;
+  // capabilities for each manager for each policy
+  repeated PolicyManagerCapability policy_manager_capabilities = 7;
+
+  // The address of the EVM contract to map code-based permissions
+  string evm_hook = 8;
+}
+
+// Role defines permissions for a specific role
+message Role {
+  // Role name
+  string name = 1;
+  // Role ID
+  uint32 role_id = 2;
+  // Permission bitmap
+  uint32 permissions = 3;
+}
+
+// ActorRoles defines roles for an actor
+message ActorRoles {
+  // The actor name
+  string actor = 1;
+  // The roles for the actor
+  repeated string roles = 2;
+}
+
+// RoleManager defines which roles a manager can manage
+message RoleManager {
+  // The manager address
+  string manager = 1;
+  // The roles this manager can manage
+  repeated string roles = 2;
+}
+
+// PolicyStatus defines the status of a policy action
+message PolicyStatus {
+  // The action permission bit
+  uint32 action = 1;
+  // Whether the action is disabled
+  bool is_disabled = 2;
+  // Whether the action is sealed (permanently locked)
+  bool is_sealed = 3;
+}
+
+// PolicyManagerCapability defines manager capabilities for policies
+message PolicyManagerCapability {
+  // The manager address
+  string manager = 1;
+  // The policy action
+  uint32 action = 2;
+  // Whether manager can enable/disable
+  bool can_toggle = 3;
+  // Whether manager can seal
+  bool can_seal = 4;
+}
+
+// MsgCreateNamespace is the message to create a new namespace
+message MsgCreateNamespace {
+  // The sender's Injective address
+  string sender = 1;
+  // The namespace information
+  Namespace namespace = 2;
+}
+
+// QueryNamespaceResponse is the response for querying a namespace
+message QueryNamespaceResponse {
+  // The namespace information
+  Namespace namespace = 1;
+}

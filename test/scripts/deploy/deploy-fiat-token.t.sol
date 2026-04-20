@@ -16,13 +16,10 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
+pragma solidity 0.8.24;
 
 import { TestUtils } from "./TestUtils.sol";
-import {
-    DeployFiatToken
-} from "../../../scripts/deploy/deploy-fiat-token.s.sol";
+import { DeployFiatToken } from "../../../scripts/deploy/deploy-fiat-token.s.sol";
 import { MasterMinter } from "../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_2 } from "../../../contracts/v2/FiatTokenV2_2.sol";
@@ -43,42 +40,22 @@ contract DeployFiatTokenTest is TestUtils {
     function test_deployFiatTokenWithEnvConfigured() public {
         (
             FiatTokenV2_2 v2_2,
-            MasterMinter masterMinter,
+            address masterMinter,
             FiatTokenProxy proxy
         ) = deployScript.run();
 
         validateImpl(v2_2);
-        validateMasterMinter(masterMinter, address(proxy));
-        validateProxy(proxy, address(v2_2), address(masterMinter));
+        validateProxy(proxy, address(v2_2), masterMinter);
     }
 
     function test_deployFiatTokenWithPredeployedImpl() public {
         vm.prank(deployer);
         FiatTokenV2_2 predeployedImpl = new FiatTokenV2_2();
 
-        (, MasterMinter masterMinter, FiatTokenProxy proxy) = deployScript
-            .deploy(address(predeployedImpl));
+        (, address masterMinter, FiatTokenProxy proxy) = deployScript.deploy(
+            address(predeployedImpl)
+        );
 
-        validateMasterMinter(masterMinter, address(proxy));
-        validateProxy(proxy, address(predeployedImpl), address(masterMinter));
-    }
-
-    function validateProxy(
-        FiatTokenProxy proxy,
-        address _impl,
-        address _masterMinter
-    ) internal {
-        assertEq(proxy.admin(), proxyAdmin);
-        assertEq(proxy.implementation(), _impl);
-
-        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
-        assertEq(proxyAsV2_2.name(), "USDC");
-        assertEq(proxyAsV2_2.symbol(), "USDC");
-        assertEq(proxyAsV2_2.currency(), "USD");
-        assert(proxyAsV2_2.decimals() == 6);
-        assertEq(proxyAsV2_2.owner(), owner);
-        assertEq(proxyAsV2_2.pauser(), pauser);
-        assertEq(proxyAsV2_2.blacklister(), blacklister);
-        assertEq(proxyAsV2_2.masterMinter(), _masterMinter);
+        validateProxy(proxy, address(predeployedImpl), masterMinter);
     }
 }

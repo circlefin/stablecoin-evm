@@ -35,7 +35,6 @@ import "./scripts/hardhat/downloadBlacklistedAccounts";
 import "./scripts/hardhat/getContractCreationBlock";
 import "./scripts/hardhat/readValuesFromContract";
 import "./scripts/hardhat/validateAccountsToBlacklist";
-
 import "./scripts/hardhat/verifyOnChainBytecode";
 
 dotenv.config();
@@ -47,8 +46,9 @@ const gasMultiplier = process.env.GAS_MULTIPLIER
 
 const hardhatConfig: HardhatUserConfig = {
   solidity: {
-    version: "0.6.12",
+    version: "0.8.24",
     settings: {
+      viaIR: process.env.ENABLE_VIA_IR !== "false",
       optimizer: {
         enabled: true,
         runs: parseInt(process.env.OPTIMIZER_RUNS || "10000000"),
