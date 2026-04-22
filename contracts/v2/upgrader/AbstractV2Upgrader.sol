@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "../../v1/Ownable.sol";
 import { FiatTokenProxy } from "../../v1/FiatTokenProxy.sol";
@@ -29,8 +28,6 @@ import { AbstractUpgraderHelper } from "./helpers/AbstractUpgraderHelper.sol";
  * for any V2+ Upgrader contracts.
  */
 abstract contract AbstractV2Upgrader is Ownable {
-    using SafeMath for uint256;
-
     FiatTokenProxy internal _proxy;
     address internal _implementation;
     address internal _newProxyAdmin;
@@ -38,18 +35,29 @@ abstract contract AbstractV2Upgrader is Ownable {
 
     /**
      * @notice Constructor
-     * @param proxy             FiatTokenProxy contract
-     * @param implementation    Address of the implementation contract
-     * @param newProxyAdmin     Grantee of proxy admin role after upgrade
+     * @param proxy_             FiatTokenProxy contract
+     * @param implementation_    Address of the implementation contract
+     * @param newProxyAdmin_     Grantee of proxy admin role after upgrade
      */
     constructor(
-        FiatTokenProxy proxy,
-        address implementation,
-        address newProxyAdmin
-    ) public Ownable() {
-        _proxy = proxy;
-        _implementation = implementation;
-        _newProxyAdmin = newProxyAdmin;
+        address proxy_,
+        address implementation_,
+        address newProxyAdmin_
+    ) Ownable() {
+        _proxy = FiatTokenProxy(payable(proxy_));
+        _implementation = implementation_;
+        _newProxyAdmin = newProxyAdmin_;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner or new proxy admin.
+     */
+    modifier onlyAdminOrOwner() {
+        require(
+            msg.sender == this.owner() || msg.sender == _newProxyAdmin,
+            "AbstractV2Upgrader: caller is not the owner or new proxy admin"
+        );
+        _;
     }
 
     /**
@@ -102,7 +110,7 @@ abstract contract AbstractV2Upgrader is Ownable {
     /**
      * @notice Transfer proxy admin role to newProxyAdmin, and self-destruct
      */
-    function abortUpgrade() external onlyOwner {
+    function abortUpgrade() external onlyAdminOrOwner {
         // Transfer proxy admin role
         _proxy.changeAdmin(_newProxyAdmin);
 
@@ -115,6 +123,6 @@ abstract contract AbstractV2Upgrader is Ownable {
      */
     function tearDown() internal {
         _helper.tearDown();
-        selfdestruct(msg.sender);
+        selfdestruct(payable(msg.sender));
     }
 }

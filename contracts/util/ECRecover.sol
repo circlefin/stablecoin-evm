@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 /**
  * @title ECRecover
@@ -61,7 +61,9 @@ library ECRecover {
 
         // If the signature is valid (and not malleable), return the signer address
         address signer = ecrecover(digest, v, r, s);
-        require(signer != address(0), "ECRecover: invalid signature");
+        if (signer == address(0)) {
+            revert("ECRecover: invalid signature");
+        }
 
         return signer;
     }
@@ -73,12 +75,13 @@ library ECRecover {
      * @param signature Signature byte array associated with hash
      * @return Signer address
      */
-    function recover(bytes32 digest, bytes memory signature)
-        internal
-        pure
-        returns (address)
-    {
-        require(signature.length == 65, "ECRecover: invalid signature length");
+    function recover(
+        bytes32 digest,
+        bytes memory signature
+    ) internal pure returns (address) {
+        if (signature.length != 65) {
+            revert("ECRecover: invalid signature length");
+        }
 
         bytes32 r;
         bytes32 s;

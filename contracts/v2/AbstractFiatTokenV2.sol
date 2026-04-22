@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
 import { AbstractFiatTokenV1 } from "../v1/AbstractFiatTokenV1.sol";
 

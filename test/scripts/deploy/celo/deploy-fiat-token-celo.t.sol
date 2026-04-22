@@ -16,18 +16,13 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2; // needed for compiling older solc versions: https://github.com/foundry-rs/foundry/issues/4376
+pragma solidity 0.8.24;
 
 import { TestUtils } from "./../TestUtils.sol";
-import {
-    DeployFiatTokenCelo
-} from "../../../../scripts/deploy/celo/deploy-fiat-token-celo.s.sol";
+import { DeployFiatTokenCelo } from "../../../../scripts/deploy/celo/deploy-fiat-token-celo.s.sol";
 import { MasterMinter } from "../../../../contracts/minting/MasterMinter.sol";
 import { FiatTokenProxy } from "../../../../contracts/v1/FiatTokenProxy.sol";
-import {
-    FiatTokenCeloV2_2
-} from "../../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
+import { FiatTokenCeloV2_2 } from "../../../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -63,24 +58,5 @@ contract DeployFiatTokenCeloTest is TestUtils {
 
         validateMasterMinter(masterMinter, address(proxy));
         validateProxy(proxy, address(predeployedImpl), address(masterMinter));
-    }
-
-    function validateProxy(
-        FiatTokenProxy proxy,
-        address _impl,
-        address _masterMinter
-    ) internal {
-        assertEq(proxy.admin(), proxyAdmin);
-        assertEq(proxy.implementation(), _impl);
-
-        FiatTokenCeloV2_2 proxyAsV2_2 = FiatTokenCeloV2_2(address(proxy));
-        assertEq(proxyAsV2_2.name(), "USDC");
-        assertEq(proxyAsV2_2.symbol(), "USDC");
-        assertEq(proxyAsV2_2.currency(), "USD");
-        assert(proxyAsV2_2.decimals() == 6);
-        assertEq(proxyAsV2_2.owner(), owner);
-        assertEq(proxyAsV2_2.pauser(), pauser);
-        assertEq(proxyAsV2_2.blacklister(), blacklister);
-        assertEq(proxyAsV2_2.masterMinter(), _masterMinter);
     }
 }

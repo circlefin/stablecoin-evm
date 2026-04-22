@@ -16,14 +16,12 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.24;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { FiatTokenV2_2 } from "../FiatTokenV2_2.sol";
 import { ICeloGasToken } from "../../interface/celo/ICeloGasToken.sol";
 
 contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
-    using SafeMath for uint256;
     event FeeCallerChanged(address indexed newAddress);
 
     /**
@@ -37,8 +35,8 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
      * so that the Celo variant of FiatToken can accommodate new state variables that may be
      * added in future FiatToken versions.
      */
-    bytes32
-        private constant FEE_CALLER_SLOT = 0xdca914aef3e4e19727959ebb1e70b58822e2c7b796d303902adc19513fcb4af5;
+    bytes32 private constant FEE_CALLER_SLOT =
+        0xdca914aef3e4e19727959ebb1e70b58822e2c7b796d303902adc19513fcb4af5;
 
     /**
      * @notice Returns the current fee caller address allowed on `debitGasFees` and `creditGasFees`.
@@ -82,8 +80,8 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
      * so that the Celo variant of FiatToken can accommodate new state variables that may be
      * added in future FiatToken versions.
      */
-    bytes32
-        private constant DEBITED_VALUE_SLOT = 0xd90dccaa76fe7208f2f477143b6adabfeb5d4a5136982894dfc51177fa8eda28;
+    bytes32 private constant DEBITED_VALUE_SLOT =
+        0xd90dccaa76fe7208f2f477143b6adabfeb5d4a5136982894dfc51177fa8eda28;
 
     function _debitedValue() internal view returns (uint256 value) {
         assembly {
@@ -91,7 +89,7 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
         }
     }
 
-    constructor() public {
+    constructor() {
         assert(
             DEBITED_VALUE_SLOT == keccak256("com.circle.fiattoken.celo.debit")
         );
@@ -100,13 +98,10 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
         );
     }
 
-    function debitGasFees(address from, uint256 value)
-        external
-        override
-        onlyFeeCaller
-        whenNotPaused
-        notBlacklisted(from)
-    {
+    function debitGasFees(
+        address from,
+        uint256 value
+    ) external override onlyFeeCaller whenNotPaused notBlacklisted(from) {
         require(
             _debitedValue() == 0,
             "FiatTokenCeloV2_2: Must fully credit before debit"
@@ -123,12 +118,12 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
         address from,
         address feeRecipient,
         // solhint-disable-next-line no-unused-vars
-        address gatewayFeeRecipient,
+        address /* gatewayFeeRecipient */,
         address communityFund,
         uint256 refund,
         uint256 tipTxFee,
         // solhint-disable-next-line no-unused-vars
-        uint256 gatewayFee,
+        uint256 /* gatewayFee */,
         uint256 baseTxFee
     )
         external
@@ -139,7 +134,7 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
         notBlacklisted(feeRecipient)
         notBlacklisted(communityFund)
     {
-        uint256 creditValue = refund.add(tipTxFee).add(baseTxFee);
+        uint256 creditValue = refund + tipTxFee + baseTxFee;
 
         // Because the Celo VM follows 1) debit, 2) main execution, and
         // 3) credit atomically as part of a single on-chain transaction,
@@ -183,8 +178,8 @@ contract FiatTokenCeloV2_2 is FiatTokenV2_2, ICeloGasToken {
             "ERC20: transfer amount exceeds balance"
         );
 
-        _setBalance(_from, _balanceOf(_from).sub(_value));
-        _setBalance(_to, _balanceOf(_to).add(_value));
+        _setBalance(_from, _balanceOf(_from) - _value);
+        _setBalance(_to, _balanceOf(_to) + _value);
         emit Transfer(_from, _to, _value);
     }
 }

@@ -29,7 +29,9 @@ by the [Hardhat](https://hardhat.org/) framework.
   - [Blacklist](#blacklist)
   - [Minting/Burning](#mintingburning)
   - [Ownable](#ownable)
+  - [Bridge USDC Standard](#bridge-usdc-standard)
 - [Additional Documentations](#additional-documentations)
+- [Solidity 0.8 upgrade impact on compiling speed](#solidity-08-upgrade-impact-on-compiling-speed)
 
 ## Setup
 
@@ -59,7 +61,7 @@ We recommend using VSCode for the project here with these
 Types are automatically generated as a part of contract compilation:
 
 ```sh
-$ yarn compile
+$ yarn compile:fast
 ```
 
 To generate typing without re-compiling, run
@@ -116,6 +118,15 @@ To check the size of contracts in the repo, run the following command.
 ```sh
 $ yarn contract-size # Ignores tests
 ```
+
+The above commands use hardhat for testing. Hardhat is only used for testing
+.js/ts files. To test .t.sol files we need to use the following forge command.
+
+```sh
+$ forge test [-vvvv]
+```
+
+Adjust the number of v's to increase the verbosity of test logs.
 
 ## Deployment
 
@@ -227,3 +238,18 @@ guide rather than the general README.
 - [Preparing an upgrade](./doc/upgrade.md)
 - [Upgrading from v2.1 to v2.2](./doc/v2.2_upgrade.md)
 - [Celo FiatToken extension](./doc/celo.md)
+- [Injective FiatToken extension](./doc/injective.md)
+
+## Solidity 0.8 upgrade impact on compiling speed
+
+The Solidity 0.8 upgrade introduced the `viaIR` (Intermediate Representation)
+compilation option, which significantly reduces contract size through advanced
+optimizations. However, this comes at the cost of much slower compilation times
+during local development.
+
+It is suggested to use `yarn compile:fast` locally to disable the viaIR and to
+speed up the compile. Production/github CI workflow should continue to use the
+`viaIR=true` option.
+
+Refer to the `Recommended local Configurations` on `.env.example` for
+recommended configs on local environments.

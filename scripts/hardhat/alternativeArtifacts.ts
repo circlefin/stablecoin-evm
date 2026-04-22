@@ -28,6 +28,7 @@ export enum ArtifactType {
 const CACHED_ARTIFACTS_PATH = "./cached_artifacts/";
 
 // Read from https://optimistic.etherscan.io/token/0x0b2c639c533813f4aa9d7837caf62653d097ff85#code
+// prettier-ignore
 export const opMainnetFiatTokenProxyContractCreationBytecode = readCachedArtifact(
   "opMainnetFiatTokenProxyContractCreationBytecode.bin"
 );
@@ -47,10 +48,8 @@ const opMainnetArtifacts: AlternativeArtifact = new Map([
   ],
 ]);
 
-export const alternativeArtifacts: Map<
-  ArtifactType,
-  AlternativeArtifact
-> = new Map([[ArtifactType.OPMainnet, opMainnetArtifacts]]);
+export const alternativeArtifacts: Map<ArtifactType, AlternativeArtifact> =
+  new Map([[ArtifactType.OPMainnet, opMainnetArtifacts]]);
 
 function readCachedArtifact(filename: string): string {
   return (

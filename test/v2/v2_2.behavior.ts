@@ -48,6 +48,7 @@ export function behavesLikeFiatTokenV22(
   let fiatTokenOwner: string;
   let domainSeparator: string;
   let fiatToken: FiatTokenV2_2InstanceExtended;
+  let isInjective: boolean;
 
   before(async () => {
     fiatTokenOwner = await getFiatToken().owner();
@@ -83,12 +84,18 @@ export function behavesLikeFiatTokenV22(
   });
 
   // Additional negative test cases.
+  // Skip for Injective: balances are stored in the bank precompile which supports full uint256 range
   describe("will trigger exceeded 2^255 balance error", () => {
     const incrementAmount = 1000;
     const recipient = arbitraryAccount;
     const errorMessage = "FiatTokenV2_2: Balance exceeds (2^255 - 1)";
 
-    beforeEach(async () => {
+    beforeEach(async function () {
+      // Check if this is the Injective version
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const contractName = (getFiatToken().constructor as any).contractName;
+      isInjective = contractName === "FiatTokenInjectiveV2_2";
+
       const recipientInitialBalance = POW_2_255_BN.sub(new BN(incrementAmount));
       await fiatToken.configureMinter(minter, POW_2_255_BN, {
         from: fiatTokenOwner,
@@ -100,14 +107,16 @@ export function behavesLikeFiatTokenV22(
         .to.be.true;
     });
 
-    it("should fail to mint to recipient if balance will exceed 2^255", async () => {
+    it("should fail to mint to recipient if balance will exceed 2^255", async function () {
+      if (isInjective) this.skip();
       await expectRevert(
         fiatToken.mint(recipient, incrementAmount, { from: minter }),
         errorMessage
       );
     });
 
-    it("should fail to transfer to recipient if balance will exceed 2^255", async () => {
+    it("should fail to transfer to recipient if balance will exceed 2^255", async function () {
+      if (isInjective) this.skip();
       await fiatToken.mint(minter, incrementAmount, { from: minter });
       await expectRevert(
         fiatToken.transfer(recipient, incrementAmount, { from: minter }),
@@ -115,7 +124,8 @@ export function behavesLikeFiatTokenV22(
       );
     });
 
-    it("should fail call transferFrom to recipient if balance will exceed 2^255", async () => {
+    it("should fail call transferFrom to recipient if balance will exceed 2^255", async function () {
+      if (isInjective) this.skip();
       await fiatToken.mint(minter, incrementAmount, { from: minter });
       await fiatToken.approve(arbitraryAccount, incrementAmount, {
         from: minter,
@@ -144,7 +154,8 @@ export function behavesLikeFiatTokenV22(
         });
       });
 
-      it("should fail to call transferWithAuthorization to recipient if balance will exceed 2^255", async () => {
+      it("should fail to call transferWithAuthorization to recipient if balance will exceed 2^255", async function () {
+        if (isInjective) this.skip();
         const signature = signTransferAuthorization(
           from,
           to,
@@ -171,7 +182,8 @@ export function behavesLikeFiatTokenV22(
         );
       });
 
-      it("should fail to call receiveWithAuthorization to recipient if balance will exceed 2^255", async () => {
+      it("should fail to call receiveWithAuthorization to recipient if balance will exceed 2^255", async function () {
+        if (isInjective) this.skip();
         const signature = signReceiveAuthorization(
           from,
           to,

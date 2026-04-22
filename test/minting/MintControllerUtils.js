@@ -83,7 +83,8 @@ async function initializeTokenWithProxyAndMintController(
 }
 
 module.exports = {
-  initializeTokenWithProxyAndMintController: initializeTokenWithProxyAndMintController,
+  initializeTokenWithProxyAndMintController:
+    initializeTokenWithProxyAndMintController,
   checkMintControllerState: checkMintControllerState,
   MintControllerState: MintControllerState,
 };

@@ -60,7 +60,7 @@ describe("MockFiatTokenCeloWithExposedFunctions", () => {
     "FiatTokenCeloV2_2: Must fully credit before debit";
   const creditInvariantError =
     "FiatTokenCeloV2_2: Either no debit or mismatched debit";
-  const additionOverflowError = "SafeMath: addition overflow";
+  const additionOverflowError = "panic code 0x11"; // Arithmetic overflow in Solidity 0.8+
   const transferFromZeroError = "ERC20: transfer from the zero address";
 
   let fiatToken: MockFiatTokenCeloWithExposedFunctionsInstance;
