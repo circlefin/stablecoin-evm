@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.2.0, Introduce NativeFiatToken variant (2026-03-13)
+
+- Introduce NativeFiatTokenV2_2 Solidity implementation.
+- Add comprehensive test coverage for NativeFiatToken (unit + integration as
+  applicable).
+- Add precompile interface definitions required by NativeFiatToken:
+  INativeCoinControl & INativeCoinAuthority
+- Add deployment script for NativeFiatToken.
+- Mark selected functions in FiatTokenV1, FiatTokenV2, and FiatTokenV2_2 as
+  virtual to enable NativeFiatToken overrides (no functional behavior changes
+  intended beyond extensibility).
+
 ## 2.2.0, Celo variant (2024-04-08)
 
 - Add `ICeloGasToken` and `IFiatTokenFeeAdapter` per Celo documentation

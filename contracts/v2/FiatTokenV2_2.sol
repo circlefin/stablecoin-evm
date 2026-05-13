@@ -121,7 +121,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _transferWithAuthorization(
             from,
             to,
@@ -154,7 +154,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external whenNotPaused notBlacklisted(from) notBlacklisted(to) {
+    ) external virtual whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _receiveWithAuthorization(
             from,
             to,
@@ -195,6 +195,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      */
     function _setBlacklistState(address _account, bool _shouldBlacklist)
         internal
+        virtual
         override
     {
         balanceAndBlacklistStates[_account] = _shouldBlacklist
@@ -229,6 +230,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      */
     function _isBlacklisted(address _account)
         internal
+        virtual
         override
         view
         returns (bool)
@@ -246,6 +248,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      */
     function _balanceOf(address _account)
         internal
+        virtual
         override
         view
         returns (uint256)

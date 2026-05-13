@@ -120,6 +120,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      */
     function mint(address _to, uint256 _amount)
         external
+        virtual
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -192,7 +193,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @notice Gets the totalSupply of the fiat token.
      * @return The totalSupply of the fiat token.
      */
-    function totalSupply() external override view returns (uint256) {
+    function totalSupply() external virtual override view returns (uint256) {
         return totalSupply_;
     }
 
@@ -260,6 +261,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         uint256 value
     )
         external
+        virtual
         override
         whenNotPaused
         notBlacklisted(msg.sender)
@@ -284,6 +286,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      */
     function transfer(address to, uint256 value)
         external
+        virtual
         override
         whenNotPaused
         notBlacklisted(msg.sender)
@@ -304,7 +307,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         address from,
         address to,
         uint256 value
-    ) internal override {
+    ) internal virtual override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(
@@ -359,6 +362,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      */
     function burn(uint256 _amount)
         external
+        virtual
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
