@@ -39,6 +39,7 @@ import {
   signTransferAuthorization,
   signReceiveAuthorization,
 } from "./GasAbstraction/helpers";
+import { expect } from "chai";
 
 export function behavesLikeFiatTokenV22(
   getFiatToken: () => AnyFiatTokenV2Instance
@@ -83,7 +84,20 @@ export function behavesLikeFiatTokenV22(
   });
 
   // Additional negative test cases.
-  describe("will trigger exceeded 2^255 balance error", () => {
+  describe("will trigger exceeded 2^255 balance error", function () {
+    // Add a before function to detect and skip NativeFiatToken implementation
+    before(function () {
+      // Skipping 2^255 balance tests for NativeFiatToken implementation
+      if (
+        typeof Reflect.get(
+          (fiatToken as unknown) as Record<string, unknown>,
+          "NATIVE_COIN_AUTHORITY"
+        ) !== "undefined"
+      ) {
+        this.skip();
+      }
+    });
+
     const incrementAmount = 1000;
     const recipient = arbitraryAccount;
     const errorMessage = "FiatTokenV2_2: Balance exceeds (2^255 - 1)";

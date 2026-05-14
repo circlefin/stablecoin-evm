@@ -38,6 +38,8 @@ import "./scripts/hardhat/validateAccountsToBlacklist";
 
 import "./scripts/hardhat/verifyOnChainBytecode";
 
+import "./scripts/hardhat/deployNativeFiatTokenImplTask";
+
 dotenv.config();
 
 // Defaults to 1.3 to be equivalent with Foundry
@@ -45,7 +47,12 @@ const gasMultiplier = process.env.GAS_MULTIPLIER
   ? parseFloat(process.env.GAS_MULTIPLIER) / 100
   : 1.3;
 
-const hardhatConfig: HardhatUserConfig = {
+const hardhatConfig: HardhatUserConfig & {
+  // Extend HardhatUserConfig to include gasReporter configuration
+  gasReporter: {
+    enabled: boolean;
+  };
+} = {
   solidity: {
     version: "0.6.12",
     settings: {
@@ -61,7 +68,9 @@ const hardhatConfig: HardhatUserConfig = {
   },
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {},
+    hardhat: {
+      chainId: 31337,
+    },
     testnet: {
       url: process.env.TESTNET_RPC_URL || "",
       gasMultiplier,
@@ -96,7 +105,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   contractSizer: {
     strict: true,
-    except: ["contracts/test", "scripts/", "test/"],
+    except: ["contracts/test", "scripts/", "test/", "^contracts/mocks/"],
   },
 };
 
