@@ -33,7 +33,6 @@ import { validateOptimizerRuns } from "./hardhat/helpers";
 type ContractInput = {
   contractAddress: string;
   contractCreationTxHash: string;
-  metadataFilePath: string;
   verificationType?: BytecodeVerificationType;
   artifactType?: ArtifactType;
   useTracesForCreationBytecode?: boolean;

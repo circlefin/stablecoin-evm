@@ -1,27 +1,28 @@
-# Bridged Asset Automated Verification
+# Bytecode Verification
 
-This documentation is a step-by-step guide on using the automated workflow for
-bytecode verification for bridged token deployments. It also includes some
-common mistakes that have caused unsuccessful verification, and how to fix them.
+This guide explains how to verify that a USDC deployment's on-chain bytecode
+matches Circle's reference implementation in this repository.
+
+## Prerequisites
+
+Set up the repository by following the instructions in the
+[README](../README.md). All steps in this guide assume the repository is fully
+set up.
 
 ## Setup
 
-1. Clone the latest version of Circle's repo and set it up as instructed
-   [here](../README.md).
+Copy the [template](../verification_artifacts/input.template.json) by running
+the following command:
 
-2. Copy the [template](../verification_artifacts/input.template.json) by running
-   the following command
-
-   ```sh
-   $ cp verification_artifacts/input.template.json verification_artifacts/input.json
-   ```
+```sh
+cp verification_artifacts/input.template.json verification_artifacts/input.json
+```
 
 ## Providing Input
 
-Please follow the instructions below on filling the file. It is required to
-provide the input for the latest FiatToken implementation contract
-(FiatTokenV2_2 as of writing), FiatTokenProxy, and the SignatureChecker library
-contract, all at once.
+Fill in `verification_artifacts/input.json` with details for the latest
+FiatToken implementation contract (FiatTokenV2_2 as of writing), FiatTokenProxy,
+and the SignatureChecker library contract.
 
 1. Fill in the `input.json` file that you created. For each contract, the
    required fields are:
@@ -35,7 +36,7 @@ contract, all at once.
 
    There are additional optional parameters for each contract that should only
    be used if a contract cannot be verified using the required parameters alone.
-   The purpose of each optional parameter is described below::
+   The purpose of each optional parameter is described below:
 
    - `verificationType`: by default, the verification type will be "partial".
      This means that the metadata hash at the end of the runtime bytecode will
@@ -53,7 +54,7 @@ contract, all at once.
    - `artifactType`: a string to indicate what artifact to use for verification
      if the contract deployment does not match the current artifacts in the
      repo. The options for this value can be found in
-     [alternativeArtficacts.ts](../scripts/hardhat/alternativeArtifacts.ts).
+     [alternativeArtifacts.ts](../scripts/hardhat/alternativeArtifacts.ts).
    - `optimizerRuns`: an integer indicating the number of optimizer runs
      specified when compiling the contract. This is only necessary to include if
      your value does not match the one in [foundry.toml](../foundry.toml).
@@ -82,16 +83,17 @@ contract, all at once.
 
    Note that the namings are strictly enforced by the verification script.
 
-## Steps for Verification
+## Running Verification
 
-1. Create a PR to Circle's public repo with the title prefixed with "**[B2N]**."
-2. Inform your point of contact at Circle that you have made a PR and wait for
-   an approval from Circle to run the GitHub action.
-3. Automated bytecode verification will run once the PR is checked and the
-   workflow is approved. From there, you can verify your results by seeing the
-   Checks section on the PR page. If verification fails, you may request for
-   another verification by submitting another commit to the same PR.
-4. Inform your point of contact at Circle once verification has succeeded.
+Compile the contracts and run the verification script locally:
+
+```sh
+yarn compile
+yarn hardhat run scripts/verifyMainnetTokenBytecode.ts --network mainnet
+```
+
+The script will print a comparison result for each contract. It exits with a
+non-zero code if any verification fails.
 
 ## Common Issues
 
