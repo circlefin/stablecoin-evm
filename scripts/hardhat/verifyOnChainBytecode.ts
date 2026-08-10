@@ -373,6 +373,17 @@ export function extractBytecodeFromGethTraces(
   traces: GethTransactionTrace,
   targetContract: string
 ): string {
+  const bytecode = findCreationBytecode(traces, targetContract);
+  if (bytecode === undefined) {
+    throw new Error("Contract creation trace not found");
+  }
+  return bytecode;
+}
+
+function findCreationBytecode(
+  traces: GethTransactionTrace,
+  targetContract: string
+): string | undefined {
   if (
     traces.to.toLowerCase() === targetContract.toLowerCase() &&
     (traces.type === "CREATE" || traces.type === "CREATE2")
@@ -381,10 +392,13 @@ export function extractBytecodeFromGethTraces(
   }
   if (traces.calls) {
     for (const call of traces.calls) {
-      return extractBytecodeFromGethTraces(call, targetContract);
+      const found = findCreationBytecode(call, targetContract);
+      if (found !== undefined) {
+        return found;
+      }
     }
   }
-  throw new Error("Contract creation trace not found");
+  return undefined;
 }
 
 /**
