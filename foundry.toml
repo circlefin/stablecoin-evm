@@ -37,6 +37,11 @@ extra-output-files = [
     "metadata"
 ]
 
+# Libraries for linking deployed contracts
+libraries = [
+    "contracts/util/SignatureChecker.sol:SignatureChecker:0x518e55b099E7fc78Cc59b45fe40a1B23C65dFd5B"
+]
+
 [rpc_endpoints]
 testnet = "${TESTNET_RPC_URL}"
 mainnet = "${MAINNET_RPC_URL}"
