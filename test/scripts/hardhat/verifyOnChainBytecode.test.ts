@@ -292,6 +292,41 @@ describe("Verify on chain bytecode", () => {
       )
     ).to.deep.equal(expectedCreationBytecode);
   });
+  it("throws when the target creation trace is not the first child call (regression for DFS truncation bug)", () => {
+    const targetContract = "0x4b2194b42ef7f4a41ba4ca3df6d1e140dc9972b2";
+    const unrelatedContract = "0x1111111111111111111111111111111111111a";
+
+    const trace = {
+      from: "0x0000000000000000000000000000000000000f",
+      to: "0x9999fa87f5a1d1c64e7c709838b92006ab0cc1ad",
+      gas: "0x0",
+      gasUsed: "0x0",
+      input: "0x00",
+      type: "CREATE",
+      calls: [
+        {
+          from: "0x9999fa87f5a1d1c64e7c709838b92006ab0cc1ad",
+          to: unrelatedContract,
+          gas: "0x0",
+          gasUsed: "0x0",
+          input: "0x60006000",
+          type: "CREATE",
+        },
+        {
+          from: "0x9999fa87f5a1d1c64e7c709838b92006ab0cc1ad",
+          to: targetContract,
+          gas: "0x0",
+          gasUsed: "0x0",
+          input: "0x60016001",
+          type: "CREATE2",
+        },
+      ],
+    };
+
+    expect(extractBytecodeFromGethTraces(trace, targetContract)).to.equal(
+      trace.calls[1].input
+    );
+  });
 });
 
 async function prepareMetadata(
