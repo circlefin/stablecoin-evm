@@ -308,7 +308,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external virtual override whenNotPaused {
+    ) external virtual override whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _transferWithAuthorization(
             from,
             to,
@@ -341,7 +341,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external virtual override whenNotPaused {
+    ) external virtual override whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _receiveWithAuthorization(
             from,
             to,
@@ -375,7 +375,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual override whenNotPaused {
+    ) external virtual override whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _transferWithAuthorization(
             from,
             to,
@@ -413,7 +413,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual override whenNotPaused {
+    ) external virtual override whenNotPaused notBlacklisted(from) notBlacklisted(to) {
         _receiveWithAuthorization(
             from,
             to,
