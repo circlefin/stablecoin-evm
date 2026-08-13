@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x02fA48eec28933c0ee4D96c5eE624563b0E12910",
+    "contractCreationTxHash": "0x3bec8854a827976e78b4b09be9f2f2e703f8da5f62f66899f63516ba661a0ac4"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x743c3672810b41176b2740A1c9A946869715E863",
+    "contractCreationTxHash": "0x9a3a8960d974498b68f16555f77aa575e2dd1b6cd6074578959654c1afabd01b"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x16c21f1b75E7c2E814750ACc5296285B7aaa132C",
+    "contractCreationTxHash": "0x227d9b21281b2059ce6082eaebb372c56d1ec74b6556b1e7d4beb49d48845b8f"
+  },
+  "rpcUrl": "https://api.zan.top/public/jovay-testnet"
+}
