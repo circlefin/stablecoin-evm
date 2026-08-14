@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x5ec5c2939aa1987cd1c1198e1653cf4566b0eba5",
+    "contractCreationTxHash": "0x824cb87c8caceee2b2f18a0b483568d5a359366480855bc6714b21f6d2463dc1"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xfb27464282cc835149fbac4ff3d81c7bb3281ea5",
+    "contractCreationTxHash": "0x1ac92e9f57194f2f84586412bad68f967a8f135e05e1f3afa46d3d65334770ef"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0xadc348e5d997205448e35fd276a08bb4fef28876",
+    "contractCreationTxHash": "0x3f7dda3b997ccf04254d7e3bb60b5595c80c047d8c9406a82b4557f2b0f01e9e"
+  },
+  "rpcUrl": "https://rpc-mainnet-pandasea-rl.cogitus.io/ext/bc/2gYSmRb7tjS4wb5FHFx8NBhwQgARWEdr8MGVC7v8UWJJFkEpTj/rpc"
+}
