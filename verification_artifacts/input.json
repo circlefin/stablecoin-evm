@@ -1,0 +1,18 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xD99628bD77EfAe2DA7d8adA524BAa0d2FB28A1ca",
+    "contractCreationTxHash": "0x2849eb500fbba6fa7653d4f621896698dc57a65cdcb6a8c5c84cbf51a4c4f499",
+    "verificationType": "full"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x2BDCDA0d8a5D9015908E52b53C282902147dB63e",
+    "contractCreationTxHash": "0xe53dcce8dea7d2690edb4a2133a91d5e3ad853300b3ac75826896c0021a443c9",
+    "verificationType": "full"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x028447684F3fFb6d27042D6c3Da7B088332c6576",
+    "contractCreationTxHash": "0xbb351846a192b416fdf71d5da611159908901d0ec0d2d003778ffcb65532645d",
+    "verificationType": "full"
+  },
+  "rpcUrl": "https://mainnet-1.rpc.banelabs.org"
+}

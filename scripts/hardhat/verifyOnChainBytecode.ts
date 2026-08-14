@@ -250,14 +250,19 @@ export async function verifyOnChainBytecode(
   // Library contract bytecode changes at deploy time. The contract address is embedded after the first push instruction
   // https://docs.soliditylang.org/en/develop/contracts.html#call-protection-for-libraries
   if (isLibrary) {
-    // Replace bytecode (4, 44) with contract address
-    const firstInstructionLength = 4;
+    // Forge v1.5+ prefixes artifact bytecode strings with "0x". Strip the
+    // prefix, substitute the embedded PUSH20 address on the raw hex body,
+    // then re-add the prefix so the comparison with on-chain bytecode
+    // (0x-prefixed) stays aligned. The PUSH20 opcode (0x73) is at body byte 0,
+    // followed by the 20-byte embedded address placeholder.
+    const prefix = expectedRuntimeBytecode.startsWith("0x") ? "0x" : "";
+    const body = prefix ? expectedRuntimeBytecode.slice(2) : expectedRuntimeBytecode;
+    const address = contractAddress.toLowerCase().slice(2);
     expectedRuntimeBytecode =
-      expectedRuntimeBytecode.slice(0, firstInstructionLength) +
-      contractAddress.toLowerCase().slice(2) +
-      expectedRuntimeBytecode.slice(
-        firstInstructionLength + contractAddress.slice(2).length
-      );
+      prefix +
+      body.slice(0, 2) +
+      address +
+      body.slice(2 + address.length);
   }
 
   // ==== For contracts that use external libraries, replace embedded library address with locally compiled bytecode with actual library addresses from user input.
