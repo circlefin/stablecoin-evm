@@ -28,6 +28,7 @@ remappings = [
     "forge-std/=lib/forge-std/src",
     "@openzeppelin/=node_modules/@openzeppelin/",
 ]
+auto_detect_remappings = false
 fs_permissions = [
     { access = "read-write", path = "blacklist.remote.json"},
     { access = "read-write", path = "test.blacklist.remote.json"}
@@ -37,10 +38,6 @@ extra-output-files = [
     "metadata"
 ]
 
-# Libraries for linking deployed contracts
-libraries = [
-    "contracts/util/SignatureChecker.sol:SignatureChecker:0x518e55b099E7fc78Cc59b45fe40a1B23C65dFd5B"
-]
 
 [rpc_endpoints]
 testnet = "${TESTNET_RPC_URL}"

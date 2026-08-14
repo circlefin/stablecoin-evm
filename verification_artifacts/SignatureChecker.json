@@ -72,7 +72,7 @@
     },
     "evmVersion": "istanbul",
     "libraries": {
-      "SignatureChecker": "0x65edc00881f492ca0efc1f78f4ce9c50ccbaf9a3"
+      "SignatureChecker": "0xD99628bD77EfAe2DA7d8adA524BAa0d2FB28A1ca"
     }
   },
   "sources": {
