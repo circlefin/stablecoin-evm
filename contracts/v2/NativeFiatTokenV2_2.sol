@@ -75,6 +75,8 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         override
         whenNotPaused
         notBlacklisted(msg.sender)
+        notBlacklisted(from)
+        notBlacklisted(to)
         returns (bool)
     {
         require(
@@ -97,6 +99,8 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         virtual
         override
         whenNotPaused
+        notBlacklisted(msg.sender)
+        notBlacklisted(to)
         returns (bool)
     {
         _transfer(msg.sender, to, value);
