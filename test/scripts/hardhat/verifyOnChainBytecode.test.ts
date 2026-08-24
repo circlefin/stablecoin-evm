@@ -115,6 +115,29 @@ describe("Verify on chain bytecode", () => {
     ).to.be.true;
   });
 
+  it("will execute the expected forge command when optimizerRuns is zero", async () => {
+    const results = await verifyOnChainBytecode(
+      {
+        contractName: "FiatTokenProxy",
+        contractAddress: await opMainnetArtifactFiatTokenProxy.getAddress(),
+        verificationType: BytecodeVerificationType.Partial,
+        artifactType: ArtifactType.OPMainnet,
+        optimizerRuns: 0,
+      },
+      hre
+    );
+
+    expect(results).to.deep.equal([
+      { type: BytecodeInputType.RuntimeBytecodePartial, equal: true },
+    ]);
+
+    expect(
+      execSyncWrapperStub.calledOnceWithExactly(
+        "forge build --optimizer-runs 0"
+      )
+    ).to.be.true;
+  });
+
   it("Can detect mismatched metadata input", async () => {
     const results = await verifyOnChainBytecode(
       {

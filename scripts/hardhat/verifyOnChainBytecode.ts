@@ -197,7 +197,7 @@ export async function verifyOnChainBytecode(
   }: TaskArguments,
   hre: HardhatRuntimeEnvironment
 ): Promise<BytecodeComparisonResult[]> {
-  if (optimizerRuns) {
+  if (optimizerRuns !== undefined) {
     validateOptimizerRuns(optimizerRuns);
     execSyncWrapper(`forge build --optimizer-runs ${optimizerRuns}`);
   }
