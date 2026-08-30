@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x9001dbe4D68d36ab87923A2a9Dfb0c745fd25001",
+    "contractCreationTxHash": "0xbd3e7fcbbee02a517a50b6fc03a4881ff4368b17c75df69ab52c761d13f9c0ec"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x40461291347e1eCbb09499F3371D3f17f10d7159",
+    "contractCreationTxHash": "0x12cb2229c9f64292836d798f26e6cdc26db6ce0adc2c231d1fbba82bed29fd63"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x74c9f2b00581F1B11AA7ff05aa9F608B7389De67",
+    "contractCreationTxHash": "0x9dfce4205f7d4e8cfd2fb0994efe4113702bc9c485e18954a439760e2fc41259"
+  },
+  "rpcUrl": "https://rootstock-mainnet.public.blastapi.io"
+}
