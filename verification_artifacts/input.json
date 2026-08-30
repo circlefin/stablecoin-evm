@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x7d3bC4460265e49c23fa611a8686503661D2B358",
+    "contractCreationTxHash": "0x8f3073a5344fb9f71ec339c38afb86db01c06ad13540c7fe3e65372e351d096a"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xc40ED99c3a392ca42FB813D82dfE245dEeE1Ed1b",
+    "contractCreationTxHash": "0x26a249d9bae323717cab36b632e79b5dbf13eba309d73a91d6a8fbc6073d4b77"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x3b952c8C9C44e8Fe201e2b26F6B2200203214cfF",
+    "contractCreationTxHash": "0xd914bb1326b540ecff934707164a887c0b7bc12ce0ce7868aaa7f232b88d4509"
+  },
+  "rpcUrl": "https://zircuit1-mainnet.p2pify.com"
+}
