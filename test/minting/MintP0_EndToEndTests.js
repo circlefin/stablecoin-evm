@@ -470,7 +470,7 @@ async function run_MINT_tests(newToken, MintControllerArtifact) {
     );
   });
 
-  it("ete013 Change minter manager, configure a minter, then change back and make sure changes DID NOT propogate", async function () {
+  it("ete013 Change minter manager, configure a minter, then change back and make sure changes DID NOT propagate", async function () {
     await mintController.configureController(
       Accounts.arbitraryAccount,
       Accounts.minterAccount,
