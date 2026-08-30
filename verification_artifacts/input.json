@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xBE574b6219C6D985d08712e90C21A88fd55f1ae8",
+    "contractCreationTxHash": "0xedbaf8faf5fc5589e4638868633d64e5983669350872580aa1f68094ca7c3915"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x99e799CBD972362a84145D98498Db4430A66a734",
+    "contractCreationTxHash": "0x61cde52a38f3f83c816d3152a238000c5f886e6f6a380a4f24d1eada6f3ae596"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0xc6Bc407706B7140EE8Eef2f86F9504651b63e7f9",
+    "contractCreationTxHash": "0x4971b90987de46e6f7c3a7d86a8795071e70062f908e2a00e6eb8c129527cb40"
+  },
+  "rpcUrl": "https://rpc.fuse.io"
+}
