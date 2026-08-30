@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x8228407F8bc38790997616B18AF8773016270558",
+    "contractCreationTxHash": "0x8e34c794a24eb67b97f046d132e0313c43eadb6000ddfc7ecebcdafd704dc651"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x9d1421d5813f6ba074880472D5775e820e18Fd7A",
+    "contractCreationTxHash": "0xd490fa7965cd47a65bfc44531258aa731c65425baf008e4e177fb4eb24f200ba"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x28d03e97e68Fb138a2318A2627806dfAF9972755",
+    "contractCreationTxHash": "0x54bff7ea25916e91f32ebc9830c0a7f50890172ff94f5710967b2d3e3e058a0e"
+  },
+  "rpcUrl": "https://rpc.testnet.citrea.xyz"
+}
