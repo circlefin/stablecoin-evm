@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x57F7EC852481d6465808208efF97dD1F5dFFB81E",
+    "contractCreationTxHash": "0xf3479040e3c7698a24fdd754dd1e63fb81d78e7f56b7fdeb184551c4418947c1"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x623bAA3704C6D3677e4b9F82c4A232c7e07b7dB4",
+    "contractCreationTxHash": "0xce02a7099e2b99571b6f78c99d83b9e6871da64b67c55bb72a9a95746900ea6f"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x6c030c5CC283F791B26816f325b9C632d964F8A1",
+    "contractCreationTxHash": "0x70424de0e3b0537e134385989814ff5b479aa393d36d21c63eab4a2a7cdd4b32"
+  },
+  "rpcUrl": "https://rpc.superposition.so"
+}
