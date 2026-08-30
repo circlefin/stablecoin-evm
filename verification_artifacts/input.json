@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x2d7E4F08FF352d2FD79466bE36b6401c4463CfA9",
+    "contractCreationTxHash": "0x02c93b83752ce8141261607621e81465c93939749137c2cdb37d3b332454d922"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x64541cE2aa06194D59c4D130435792c1f178f750",
+    "contractCreationTxHash": "0x562e428f17ef0909d47a26ef0b8a2d58406671f2a4b086d1de34459d6253b4d2"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x8712796136Ac8e0EEeC123251ef93702f265aa80",
+    "contractCreationTxHash": "0x375b591f8b204f78d726edc583fc5de4a0f9f65e4e33620db9d933c81f03cb44"
+  },
+  "rpcUrl": "https://rpc.nerochain.io"
+}
