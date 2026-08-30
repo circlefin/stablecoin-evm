@@ -1,0 +1,15 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0x9895D81bB462A195b4922ED7De0e3ACD007c32CB",
+    "contractCreationTxHash": "0x82aeb2e163a3067e7c3e18a4fe7c098dc9c25391b82d88af47cf9953451b5407"
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0x0cEb237E109eE22374a567c6b09F373C73FA4cBb",
+    "contractCreationTxHash": "0x183e173d6849fb87d840d19823236126fd4556ca3eae0844c5b2c5fb7334f254"
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x8a2B28364102Bea189D99A475C494330Ef2bDD0B",
+    "contractCreationTxHash": "0xc3a3d5d0ceb70da647d8e3dace0c57245f7c032080400babbd11862dc0ffd125"
+  },
+  "rpcUrl": "https://rpc.nexus.mainnet.apexfusion.org"
+}
