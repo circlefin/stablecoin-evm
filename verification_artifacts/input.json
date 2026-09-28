@@ -1,0 +1,18 @@
+{
+  "SignatureChecker": {
+    "contractAddress": "0xFe6f85f6111DB61D04de45bd2c9E0EA56F309e4e",
+    "contractCreationTxHash": "0x424d5535b785ef4457749f4d7e4be053e2659fe34f8bd7f2d942d5cd6ec0d0ef",
+    "useTracesForCreationBytecode": true
+  },
+  "FiatTokenV2_2": {
+    "contractAddress": "0xc4092FcAFB2D2B6367b25E2e2e2d8F306402bcBE",
+    "contractCreationTxHash": "0xebaa9f540122bfe6181db247c392902e6bd4fa16648101f5af6e74dee6a316ea",
+    "useTracesForCreationBytecode": true
+  },
+  "FiatTokenProxy": {
+    "contractAddress": "0x979c024b381E25a093b8B4CEb06e74B8140664ff",
+    "contractCreationTxHash": "0xf7857cc3f0c7a129d40f7044d5fe1d418fc6edcf45cc0962a21d2eee686965fe",
+    "useTracesForCreationBytecode": true
+  },
+  "rpcUrl": "https://mainnet-rpc.gravity.xyz"
+}
