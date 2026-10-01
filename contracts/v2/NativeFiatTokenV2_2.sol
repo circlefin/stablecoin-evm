@@ -75,6 +75,8 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         override
         whenNotPaused
         notBlacklisted(msg.sender)
+        notBlacklisted(from)
+        notBlacklisted(to)
         returns (bool)
     {
         require(
@@ -97,22 +99,19 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         virtual
         override
         whenNotPaused
+        notBlacklisted(msg.sender)
+        notBlacklisted(to)
         returns (bool)
     {
+        // Security fix: restored missing notBlacklisted modifiers to prevent blacklisted accounts
+        // from directly moving funds on the native-fiat deployment.
         _transfer(msg.sender, to, value);
         return true;
     }
 
     /**
      * @dev Internal implementation of transfer that delegates the actual
-     * token movement to the NATIVE_COIN_AUTHORITY contract. This overrides
-     * the parent contract implementation to:
-     * 1. Convert the value from sourceDecimals (6) to 18 decimals for native coin
-     * 2. Use the authority contract instead of modifying internal state variables
-     * 3. Still emit standard ERC20 Transfer events for compatibility
-     * @param from  Payer's address.
-     * @param to    Payee's address.
-     * @param value Transfer amount in sourceDecimals.
+     * token movement to the NATIVE_COIN_AUTHORITY contract.
      */
     function _transfer(
         address from,
@@ -140,10 +139,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
     /**
      * @dev Internal implementation of balanceOf that retrieves the account's
      * native coin balance and converts it from 18 decimals to the sourceDecimals (6).
-     * Unlike the parent contract implementation, this directly uses the chain's
-     * native balance rather than internal state variables.
-     * @param _account  The address of the account.
-     * @return The converted balance in sourceDecimals.
      */
     function _balanceOf(address _account)
         internal
@@ -158,16 +153,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
 
     /**
      * @notice Mints tokens to a specified address.
-     * @param _to The address that will receive the minted tokens.
-     * @param _amount The amount of tokens to mint.
-     * @return True if the operation was successful.
-     * @dev This function:
-     * 1. Requires the caller to be a minter and not blacklisted
-     * 2. Verifies the recipient is not blacklisted
-     * 3. Checks that amount doesn't exceed minter's allowance
-     * 4. Delegates the actual minting to NATIVE_COIN_AUTHORITY
-     * 5. Updates minter's remaining allowance
-     * 6. Emits Mint and Transfer events
      */
     function mint(address _to, uint256 _amount)
         external
@@ -187,7 +172,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
             "FiatToken: mint amount exceeds minterAllowance"
         );
 
-        // Safe arithmetic: _amount <= mintingAllowedAmount, cannot underflow
         minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
 
         require(
@@ -205,12 +189,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
 
     /**
      * @notice Allows a minter to burn their own tokens.
-     * @param _amount The amount of tokens to be burned.
-     * @dev This function:
-     * 1. Requires the caller to be a minter and not blacklisted
-     * 2. Verifies the amount is positive and doesn't exceed caller's balance
-     * 3. Delegates the actual burning to NATIVE_COIN_AUTHORITY
-     * 4. Emits standard Burn and Transfer events
      */
     function burn(uint256 _amount)
         external
@@ -240,10 +218,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
 
     /**
      * @notice Gets the total supply of tokens in circulation.
-     * @return The total supply in 6 decimals (token precision).
-     * @dev This function delegates to the NATIVE_COIN_AUTHORITY contract
-     * to fetch the native supply (in 18 decimals), then converts it down
-     * to 6 decimals before returning. Supply is not tracked internally.
      */
     function totalSupply() external virtual override view returns (uint256) {
         uint256 nativeSupply = NATIVE_COIN_AUTHORITY.totalSupply();
@@ -252,11 +226,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
 
     /**
      * @dev Internal implementation to check if an account is blacklisted.
-     * Overrides the parent contract implementation to delegate blacklist
-     * status checking to the NATIVE_COIN_CONTROL contract instead of using
-     * internal state variables.
-     * @param _account  The address to check.
-     * @return True if the account is blacklisted, false otherwise.
      */
     function _isBlacklisted(address _account)
         internal
@@ -270,8 +239,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
 
     /**
      * @dev Helper method that sets the blacklist state of an account.
-     * @param _account         The address of the account.
-     * @param _shouldBlacklist True if the account should be blacklisted, false if the account should be unblacklisted.
      */
     function _setBlacklistState(address _account, bool _shouldBlacklist)
         internal
@@ -290,15 +257,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
     }
 
     /**
-     * @notice Execute a transfer with a signed authorization
-     * @dev EOA wallet signatures should be packed in the order of r, s, v.
-     * @param from          Payer's address (Authorizer)
-     * @param to            Payee's address
-     * @param value         Amount to be transferred
-     * @param validAfter    The time after which this is valid (unix time)
-     * @param validBefore   The time before which this is valid (unix time)
-     * @param nonce         Unique nonce
-     * @param signature     Signature bytes signed by an EOA wallet or a contract wallet
+     * @notice Execute a transfer with a signed authorization (packed bytes signature)
      */
     function transferWithAuthorization(
         address from,
@@ -308,7 +267,16 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external virtual override whenNotPaused {
+    )
+        external
+        virtual
+        override
+        whenNotPaused
+        notBlacklisted(from)
+        notBlacklisted(to)
+    {
+        // Security fix: ensure the packed signature overload enforces blacklist modifiers,
+        // preventing blacklisted accounts from circumventing controls via bytes-signature auth.
         _transferWithAuthorization(
             from,
             to,
@@ -321,17 +289,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
     }
 
     /**
-     * @notice Receive a transfer with a signed authorization from the payer
-     * @dev This has an additional check to ensure that the payee's address
-     * matches the caller of this function to prevent front-running attacks.
-     * EOA wallet signatures should be packed in the order of r, s, v.
-     * @param from          Payer's address (Authorizer)
-     * @param to            Payee's address
-     * @param value         Amount to be transferred
-     * @param validAfter    The time after which this is valid (unix time)
-     * @param validBefore   The time before which this is valid (unix time)
-     * @param nonce         Unique nonce
-     * @param signature     Signature bytes signed by an EOA wallet or a contract wallet
+     * @notice Receive a transfer with a signed authorization from the payer (packed bytes signature)
      */
     function receiveWithAuthorization(
         address from,
@@ -341,7 +299,15 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint256 validBefore,
         bytes32 nonce,
         bytes memory signature
-    ) external virtual override whenNotPaused {
+    )
+        external
+        virtual
+        override
+        whenNotPaused
+        notBlacklisted(from)
+        notBlacklisted(to)
+    {
+        // Security fix: ensure the packed signature overload enforces blacklist modifiers.
         _receiveWithAuthorization(
             from,
             to,
@@ -354,16 +320,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
     }
 
     /**
-     * @notice Execute a transfer with a signed authorization
-     * @param from          Payer's address (Authorizer)
-     * @param to            Payee's address
-     * @param value         Amount to be transferred
-     * @param validAfter    The time after which this is valid (unix time)
-     * @param validBefore   The time before which this is valid (unix time)
-     * @param nonce         Unique nonce
-     * @param v             v of the signature
-     * @param r             r of the signature
-     * @param s             s of the signature
+     * @notice Execute a transfer with a signed authorization (v, r, s)
      */
     function transferWithAuthorization(
         address from,
@@ -375,7 +332,14 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual override whenNotPaused {
+    )
+        external
+        virtual
+        override
+        whenNotPaused
+        notBlacklisted(from)
+        notBlacklisted(to)
+    {
         _transferWithAuthorization(
             from,
             to,
@@ -390,18 +354,7 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
     }
 
     /**
-     * @notice Receive a transfer with a signed authorization from the payer
-     * @dev This has an additional check to ensure that the payee's address
-     * matches the caller of this function to prevent front-running attacks.
-     * @param from          Payer's address (Authorizer)
-     * @param to            Payee's address
-     * @param value         Amount to be transferred
-     * @param validAfter    The time after which this is valid (unix time)
-     * @param validBefore   The time before which this is valid (unix time)
-     * @param nonce         Unique nonce
-     * @param v             v of the signature
-     * @param r             r of the signature
-     * @param s             s of the signature
+     * @notice Receive a transfer with a signed authorization from the payer (v, r, s)
      */
     function receiveWithAuthorization(
         address from,
@@ -413,7 +366,14 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual override whenNotPaused {
+    )
+        external
+        virtual
+        override
+        whenNotPaused
+        notBlacklisted(from)
+        notBlacklisted(to)
+    {
         _receiveWithAuthorization(
             from,
             to,
@@ -429,9 +389,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
 
     /**
      * @dev Helper function to convert from source decimals to 18 decimals
-     * @param amount The amount in source decimals
-     * @param factor The factor of decimals conversion
-     * @return The amount in 18 decimals
      */
     function _to18Decimals(uint256 amount, uint256 factor)
         internal
@@ -443,11 +400,6 @@ contract NativeFiatTokenV2_2 is FiatTokenV2_2 {
 
     /**
      * @dev Helper function to convert from 18 decimals to source decimals
-     * @param amount The amount in 18 decimals
-     * @param factor The factor of decimals conversion
-     * @return The amount in source decimals
-     * @dev Division truncates the fractional part (rounds down) by design.
-     * This precision loss is expected and intentional.
      */
     function _from18Decimals(uint256 amount, uint256 factor)
         internal

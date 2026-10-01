@@ -88,6 +88,14 @@ contract UpgradeabilityProxy is Proxy {
             "Cannot set a proxy implementation to a non-contract address"
         );
 
+        // NOTE: no `proxiableUUID()` check is performed here, deliberately. This is a zeppelinos-style
+        // *transparent* admin proxy (see the contract-level comment: forked from zeppelinos/zos-lib),
+        // not a UUPS proxy, and no implementation in this repository exposes `proxiableUUID()`. Adding
+        // the OpenZeppelin UUPS assertion would make every legitimate upgrade revert. The intended
+        // hardening for this pattern is an off-chain storage-layout compatibility check against the
+        // target implementation before each upgrade, performed as part of the release process rather
+        // than on-chain.
+
         bytes32 slot = IMPLEMENTATION_SLOT;
 
         assembly {
