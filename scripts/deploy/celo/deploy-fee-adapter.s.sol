@@ -62,7 +62,7 @@ contract DeployFeeAdapter is Script {
             "FIAT_TOKEN_CELO_PROXY_ADDRESS: '%s'",
             fiatTokenProxyAddress
         );
-        console.log("FEE_ADAPTER_DECIMALS: '%s'", feeAdapterDecimals);
+        console.log("FEE_ADAPTER_DECIMALS: '%s'", uint256(feeAdapterDecimals));
     }
 
     /**
