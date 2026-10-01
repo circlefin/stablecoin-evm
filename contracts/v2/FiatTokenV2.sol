@@ -34,9 +34,10 @@ contract FiatTokenV2 is FiatTokenV1_1, EIP3009, EIP2612 {
      * @notice Initialize v2
      * @param newName   New token name
      */
-    function initializeV2(string calldata newName) external {
-        // solhint-disable-next-line reason-string
-        require(initialized && _initializedVersion == 0);
+    function initializeV2(string calldata newName) external onlyOwner {
+        // Security fix: enforce onlyOwner access control and strict version sequencing
+        // to prevent unauthorized caller from setting token name and corrupting the domain separator.
+        require(initialized && _initializedVersion == 0, "FiatTokenV2: cannot initialize over a previous version");
         name = newName;
         _DEPRECATED_CACHED_DOMAIN_SEPARATOR = EIP712.makeDomainSeparator(
             newName,

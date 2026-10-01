@@ -36,14 +36,14 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      * @notice Initialize v2.2
      * @param accountsToBlacklist   A list of accounts to migrate from the old blacklist
      * @param newSymbol             New token symbol
-     * data structure to the new blacklist data structure.
      */
     function initializeV2_2(
         address[] calldata accountsToBlacklist,
         string calldata newSymbol
-    ) external {
-        // solhint-disable-next-line reason-string
-        require(_initializedVersion == 2);
+    ) external onlyOwner {
+        // Security fix: added onlyOwner access control and strict version sequencing
+        // to prevent front-running attacks that alter token symbol and freeze user funds.
+        require(_initializedVersion == 2, "FiatTokenV2_2: cannot initialize over a previous version");
 
         // Update fiat token symbol
         symbol = newSymbol;
