@@ -18,6 +18,8 @@
 
 pragma solidity 0.6.12;
 
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+
 contract FiatTokenUtil {
     // (address,address,uint256,uint256,uint256,bytes32) = 20*2 + 32*4 = 168
     uint256 private constant _TRANSFER_PARAM_SIZE = 168;
@@ -37,6 +39,10 @@ contract FiatTokenUtil {
      * @param fiatToken Address of the FiatToken contract
      */
     constructor(address fiatToken) public {
+        require(
+            Address.isContract(fiatToken),
+            "FiatTokenUtil: target is not a contract"
+        );
         _fiatToken = fiatToken;
     }
 
