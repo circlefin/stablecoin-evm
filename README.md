@@ -213,12 +213,6 @@ The contract has an Owner, who can change the `owner`, `pauser`, `blacklister`,
 or `masterMinter` addresses. The `owner` can not change the `proxyOwner`
 address.
 
-### Bridge USDC Standard
-
-Deploying bridged USDC involves additional requirements. For detailed guidance,
-please refer to the [Bridged USDC Standard](./doc/bridged_USDC_standard.md)
-guide rather than the general README.
-
 ## Additional Documentations
 
 - [FiatToken design](./doc/tokendesign.md)
@@ -227,3 +221,4 @@ guide rather than the general README.
 - [Preparing an upgrade](./doc/upgrade.md)
 - [Upgrading from v2.1 to v2.2](./doc/v2.2_upgrade.md)
 - [Celo FiatToken extension](./doc/celo.md)
+- [Bytecode verification](./doc/bytecode_verification.md)
