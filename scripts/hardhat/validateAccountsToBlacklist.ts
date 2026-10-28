@@ -27,7 +27,7 @@ import { ethers } from "ethers";
 
 type TaskArguments = {
   proxyAddress?: string;
-  v2_2UpgraderAddress?: string;
+  upgraderAddress?: string;
   datasourceFilepath?: string;
 };
 
@@ -59,7 +59,7 @@ task(
   .setAction(taskAction);
 
 async function taskAction(
-  { proxyAddress, v2_2UpgraderAddress, datasourceFilepath }: TaskArguments,
+  { proxyAddress, upgraderAddress, datasourceFilepath }: TaskArguments,
   hre: HardhatRuntimeEnvironment
 ) {
   console.log("Validation started");
@@ -84,11 +84,11 @@ async function taskAction(
   }
 
   // ==== Local state == Upgrader state
-  if (v2_2UpgraderAddress) {
+  if (upgraderAddress) {
     console.log("\nComparing local state with deployed V2_2Upgrader...");
     const v2_2Upgrader = await hre.ethers.getContractAt(
       "V2_2Upgrader",
-      v2_2UpgraderAddress
+      upgraderAddress
     );
     const accountsFromUpgrader = await v2_2Upgrader.accountsToBlacklist();
     console.log(

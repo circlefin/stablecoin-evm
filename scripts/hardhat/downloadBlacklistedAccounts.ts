@@ -86,10 +86,7 @@ async function taskAction(
 
     // Sleep for a bit to avoid blasting the RPC.
     await sleep(SLEEP_MS);
-  } while (
-    toBlockNumber <= latestBlockNumber &&
-    fromBlockNumber < toBlockNumber
-  );
+  } while (fromBlockNumber <= latestBlockNumber);
 }
 
 /**
